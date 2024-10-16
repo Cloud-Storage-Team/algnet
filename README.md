@@ -5,3 +5,7 @@
 Студент: Артем Выгузов
 
 [1] V. Addanki, O. Michel and S. Schmid, “PowerTCP: Pushing the performance limits of datacenter networks” (2022)
+
+Проект 1: Моделирование перегрузки сети в дата-центре на C++
+
+Студент: Иван Шаныгин
