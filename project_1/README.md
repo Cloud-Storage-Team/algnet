@@ -21,19 +21,15 @@ Run program:
 
 ```cpp
 int main() {
-    std::uint32_t number_of_servers = 3;
-
     // Create simulator
-    NetworkSimulator simulator(number_of_servers);
-
-    // Vector with distances from sending servers to receiving server
-    std::vector<std::uint32_t> distances_to_receiver = {10, 4, 20};
+    // {10, 4, 20} -- distances (in μs) from senders to receiver
+    NetworkSimulator simulator({10, 4, 20});
 
     // Start simulation
-    simulator.StartSimulation(distances_to_receiver);
+    simulator.StartSimulation();
 
     // Print information about simulator's configuration
-    simulator.PrintConfiguration();
+    std::cout << simulator;
 }
 ```
 
