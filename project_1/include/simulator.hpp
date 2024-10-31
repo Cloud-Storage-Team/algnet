@@ -10,28 +10,24 @@ class NetworkSimulator {
 private:
     std::uint32_t bandwidth = 52428800;
     std::uint32_t data_transmission_frequency_bytes = 52428800;
-    std::uint32_t data_transmission_frequency_packages = 51200;
-    std::uint32_t package_size = 1024;
-
-    // Number of sending servers
-    std::uint32_t servers_number;
+    std::uint32_t data_transmission_frequency_packets = 51200;
+    std::uint32_t packet_size = 1024;
 
     // Contains all sending servers 
     std::vector<ServerSender> servers{};
     ServerBase server_receiver{};
 
-    // Sorts packages by travel time
-    std::priority_queue<PackageHeader> packages{};
-    std::queue<PackageHeader> sliding_window{};
+    // Sorts packets by travel time
+    std::priority_queue<PacketHeader> packets{};
     
     // Contains all events 
     std::vector<Event> events{};
 
 public:
+
     explicit NetworkSimulator(const std::vector<std::uint32_t>&);
     ~NetworkSimulator() = default;
 
-    void AddServer(std::uint32_t);
     void StartSimulation();
 
     // New ID = last given ID + 1

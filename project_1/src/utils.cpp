@@ -1,50 +1,44 @@
 #include "utils.hpp"
 
-std::uint64_t GetCurrentTimeInMicroseconds() {
-    return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-}
-
 ServerBase::ServerBase(std::uint32_t id) : id(id) { }
 
 std::uint32_t ServerBase::GetID() const {
     return id;
 }
 
-ServerSender::ServerSender(std::uint32_t id, std::uint32_t distance_ms) : ServerBase(id), distance_μs(distance_ms) { }
+ServerSender::ServerSender(std::uint32_t id, std::uint32_t distance_us) 
+    : ServerBase(id), distance_us(distance_us) { }                                   
 
 std::uint32_t ServerSender::GetDistance() const {
-    return distance_μs;
+    return distance_us;
 }
 
-PackageHeader::PackageHeader(std::uint64_t sender_id, std::uint64_t receiver_id, std::uint64_t time, std::uint32_t index)
-    : sender_id(sender_id), receiver_id(receiver_id), sending_time(time), package_index(index) { }
+PacketHeader::PacketHeader(std::uint64_t sender_id, std::uint64_t receiver_id, std::uint64_t time, std::uint32_t index, std::uint32_t trip_time)
+    : sender_id(sender_id), receiver_id(receiver_id), sending_time(time), packet_index(index), approx_trip_time(trip_time) { }
 
-void PackageHeader::SetRTT(std::uint32_t rtt) {
-    RTT = rtt;
+std::uint32_t PacketHeader::GetApproxTripTime() const {
+    return approx_trip_time;
 }
 
-std::uint32_t PackageHeader::GetRTT() const {
-    return RTT;
-}
-
-std::uint64_t PackageHeader::GetSendingTime() const {
+std::uint64_t PacketHeader::GetSendingTime() const {
     return sending_time;
 }
 
-std::uint32_t PackageHeader::GetPackageIndex() const {
-    return package_index;
+std::uint32_t PacketHeader::GetPacketIndex() const {
+    return packet_index;
 }
 
-std::uint64_t PackageHeader::GetSenderID() const {
+std::uint64_t PacketHeader::GetSenderID() const {
     return sender_id;
 }
 
-bool PackageHeader::operator<(const PackageHeader &other) const {
-    return RTT < other.GetRTT();
+// The shorter the approx_trip_time, the faster the packet will delivered
+bool PacketHeader::operator<(const PacketHeader &other) const {
+    return approx_trip_time > other.GetApproxTripTime();
 }
 
-Event::Event(std::uint64_t id, ServerBase& initiator, event_type type, std::uint32_t packages_number)
-    : id(id), server_initiator(initiator), type(type), packages_number(packages_number) { }
+Event::Event(std::uint64_t id, ServerBase& initiator, event_type type, std::uint32_t packets_number)
+    : id(id), server_initiator(initiator), type(type), packets_number(packets_number) { }
 
 std::uint32_t Event::GetID() const {
     return id;
@@ -54,7 +48,7 @@ std::ostream& operator<<(std::ostream& out, const Event& event) {
     out << "[EVENT] ID: " << event.id
         << ". Initiator ID: " << event.server_initiator.GetID()
         << ". Type: " << (event.type == 0 ? "SEND_DATA" : "ACKNOWLEDGEMENT") 
-        << ". Number of packages: " << event.packages_number << ".\n";
+        << ". Number of packets: " << event.packets_number << ".\n";
     
     return out;
 }
