@@ -9,25 +9,39 @@ NetworkSimulator::NetworkSimulator(const std::vector<std::uint32_t>& distances_t
 }
 
 void NetworkSimulator::StartSimulation() {
-    std::uint32_t test_packets_number = 5;
-
-    // Each server send 5 packets
+    // Each server send cwnd_size packets
     for (ServerSender& server: servers) {
         // Create event
-        events.emplace_back(GenerateNewID(events), server, SEND_DATA, test_packets_number);
+        events.emplace_back(server, SEND_DATA, server.GetCWNDSize());
 
         // Create packets, add them to priority_queue
-        for (std::uint32_t i = 0; i < test_packets_number; ++i) {
-            std::uint32_t current_time_us = 0;
-            current_time_us += server.GetDistance();
-            packets.emplace(server.GetID(), server_receiver.GetID(), current_time_us, i, server.GetDistance());
+        for (std::uint32_t i = 0; i < server.GetCWNDSize(); ++i) {
+            // Calculate estimated delivering time of the packet
+            std::uint32_t estimated_delivering_time = server.GetCurrentTime() + server.GetDistance();
+            // Add packet to the priority_queue
+            packets.emplace(server.GetID(), server_receiver.GetID(), server.GetCurrentTime(), i, estimated_delivering_time);
+            
+            // Update server time
+            server.IncreaseCurrentTime(server.GetDistance());
         }
         std::cout << events.back();
     }
 
     // Create acknowledgements
     while (!packets.empty()) {
-        events.emplace_back(GenerateNewID(events), server_receiver, ACKNOWLEDGEMENT, 1);
+        // Add ACK event
+        events.emplace_back(server_receiver, ACKNOWLEDGEMENT, 1);
+        
+        // Index of server sender in vector
+        std::uint32_t sending_server_index = packets.top().GetSenderID() - 1;
+        
+        // Send an ACK
+        servers[sending_server_index].AddACK(PacketHeader(0, 
+                                                          packets.top().GetSenderID(), 
+                                                          packets.top().GetEstimatedDeliveryTime(),
+                                                          0, 
+                                                          packets.top().GetEstimatedDeliveryTime() + servers[sending_server_index].GetDistance()));
+
         std::cout << events.back();
         packets.pop();
     }
