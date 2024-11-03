@@ -1,6 +1,6 @@
 #include "utils.hpp"
 
-#include <stdexcept>
+#include <algorithm>
 
 TransmissionUnit::TransmissionUnit(std::uint64_t time)
     : estimated_delivery_time(time) { }
@@ -43,12 +43,8 @@ std::uint32_t ServerSender::GetCurrentTime() const {
 }
 
 void ServerSender::UpdateCurrentTime(std::uint32_t new_time) {
-    if (new_time > current_time_us) {
-        current_time_us = new_time;
-    }
-    else {
-        throw std::runtime_error("Incorrect value of last packet sending time.");
-    }
+    // Situation when new_time is less than current_time_is is possible
+    current_time_us = std::max<std::uint32_t>(current_time_us, new_time);
 }
 
 void ServerSender::IncreaseCurrentTime(std::uint32_t time_step) {
@@ -73,8 +69,9 @@ bool ServerSender::HandleACKs() {
     if (ACKs.empty()) {
         return false;
     }
-    cwnd_size_in_packets = std::min(static_cast<float>(cwnd_size_in_packets + ACKs.size()),
-                                    static_cast<float>(max_transmission_rate_packets));
+    cwnd_size_in_packets = std::min<std::uint32_t>(cwnd_size_in_packets + ACKs.size(), max_transmission_rate_packets);
+    // Sender's current time is the delivery time of the last AKC
+    UpdateCurrentTime(ACKs.back().GetEstimatedDeliveryTime());
     ACKs.clear();
     return true;
 }

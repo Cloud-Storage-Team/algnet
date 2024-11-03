@@ -5,6 +5,7 @@
 #include <vector>
 #include <cstdint>
 #include <queue>
+#include <chrono>
 
 class NetworkSimulator {
 private:
@@ -31,7 +32,7 @@ public:
     explicit NetworkSimulator(const std::vector<std::uint32_t>&);
     ~NetworkSimulator() = default;
 
-    void StartSimulation();
+    void StartSimulation(std::uint32_t);
 
     // New ID = last given ID + 1
     template<typename T>

@@ -29,18 +29,19 @@ void NetworkSimulator::PacketsSending(bool is_first_iteration) {
             // Update server time
             server.IncreaseCurrentTime(server.GetDistance());
         }
-        std::cout << events.back();
     }
 }
 
 void NetworkSimulator::PacketsReceiving() {
     std::uint32_t received_data_kb = 0;
+    std::uint32_t received_packets = 0;
     // Create acknowledgements
     while (!packets.empty()) {
         if (received_data_kb >= bandwidth) {
             break;
         }
-
+        ++received_packets;
+        received_data_kb += packet_size;
         // Add ACK event
         events.emplace_back(server_receiver, ACKNOWLEDGEMENT, 1);
 
@@ -51,21 +52,25 @@ void NetworkSimulator::PacketsReceiving() {
         servers[sending_server_index].AddACK(ACK(packets.top().GetSenderID(),
                                                  packets.top().GetEstimatedDeliveryTime() + servers[sending_server_index].GetDistance()));
 
-        std::cout << events.back();
-        received_data_kb += packet_size;
         packets.pop();
     }
 }
 
-void NetworkSimulator::StartSimulation() {
+void NetworkSimulator::StartSimulation(std::uint32_t simulation_time_sec) {
     bool is_first_iteration = true;
+    auto start_time = std::chrono::steady_clock::now();
+    std::uint32_t i = 1;
 
-    // Servers send packets
-    PacketsSending(is_first_iteration);
-    // Server-receiver receives packets and sends ACKs
-    PacketsReceiving();
+    while (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - start_time).count() < simulation_time_sec) {
+        // Servers send packets
+        PacketsSending(is_first_iteration);
+        // Server-receiver receives packets and sends ACKs
+        PacketsReceiving();
 
-    is_first_iteration = false;
+        // Print queue size (overhead)
+        std::cout << i++ << ": " << packets.size() << std::endl;
+        is_first_iteration = false;
+    }
 }
 
 std::ostream& operator<<(std::ostream& out, const NetworkSimulator& simulator) {
