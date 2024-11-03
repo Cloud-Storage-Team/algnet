@@ -21,15 +21,24 @@ Run program:
 
 ```cpp
 int main() {
-    // Create simulator
-    // {10, 4, 20} -- distances (in μs) from senders to receiver
-    NetworkSimulator simulator({10, 4, 20});
+    std::uint32_t simulation_time_sec = 1;
+    std::vector<std::uint32_t> distances_to_receiver_us = {10, 4, 20};
 
-    // Start simulation
-    simulator.StartSimulation();
+    // Create simulator with vector of distances from senders to receiver
+    NetworkSimulator simulator(distances_to_receiver_us);
+
+    // Start simulation with duration simulation_time_sec
+    simulator.StartSimulation(simulation_time_sec);
 
     // Print information about simulator's configuration
     std::cout << simulator;
 }
 ```
 
+### Data
+
+Data stored in `data` directory
+
+### Data visualization
+
+Jupyter notebook with Python code for data visualization stored in `data_visualization` directory.
