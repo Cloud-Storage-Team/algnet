@@ -2,14 +2,29 @@
 
 #include <stdexcept>
 
-ServerBase::ServerBase(std::uint32_t id) : id(id) { }
+TransmissionUnit::TransmissionUnit(std::uint64_t time)
+    : estimated_delivery_time(time) { }
+
+ACK::ACK(std::uint64_t receiver_id, std::uint64_t time)
+    : TransmissionUnit(time), receiver_id(receiver_id) { }
+
+std::uint64_t ACK::GetEstimatedDeliveryTime() const {
+    return estimated_delivery_time;
+}
+
+std::uint64_t ACK::GetReceiverID() const {
+    return receiver_id;
+}
+
+ServerBase::ServerBase(std::uint32_t id)
+    : id(id) { }
 
 std::uint32_t ServerBase::GetID() const {
     return id;
 }
 
 ServerSender::ServerSender(std::uint32_t id, std::uint32_t distance_us) 
-    : ServerBase(id), distance_us(distance_us), cwnd(CWND()) { }                                   
+    : ServerBase(id), distance_us(distance_us) { }
 
 std::uint32_t ServerSender::GetDistance() const {
     return distance_us;
@@ -20,7 +35,7 @@ std::uint32_t ServerSender::GetACKsNumber() const {
 }
 
 std::uint32_t ServerSender::GetCWNDSize() const {
-    return cwnd.GetSize();
+    return cwnd_size_in_packets;
 }
 
 std::uint32_t ServerSender::GetCurrentTime() const {
@@ -41,11 +56,11 @@ void ServerSender::IncreaseCurrentTime(std::uint32_t time_step) {
 }
 
 void ServerSender::IncreaseCWNDSize() {
-    cwnd.IncreaseSize();
+    ++cwnd_size_in_packets;
 }
 
-void ServerSender::AddACK(const PacketHeader& packet) {
-    ACKs.push_back(packet);
+void ServerSender::AddACK(const ACK& ack) {
+    ACKs.push_back(ack);
 }
 
 void ServerSender::printACKs() const {
@@ -54,8 +69,18 @@ void ServerSender::printACKs() const {
     }
 }
 
-PacketHeader::PacketHeader(std::uint64_t sender_id, std::uint64_t receiver_id, std::uint64_t time, std::uint32_t index, std::uint32_t trip_time)
-    : sender_id(sender_id), receiver_id(receiver_id), sending_time(time), packet_index(index), estimated_delivery_time(trip_time) { }
+bool ServerSender::HandleACKs() {
+    if (ACKs.empty()) {
+        return false;
+    }
+    cwnd_size_in_packets = std::min(static_cast<float>(cwnd_size_in_packets + ACKs.size()),
+                                    static_cast<float>(max_transmission_rate_packets));
+    ACKs.clear();
+    return true;
+}
+
+PacketHeader::PacketHeader(std::uint64_t sender_id, std::uint64_t time, std::uint32_t trip_time)
+    : TransmissionUnit(trip_time), sender_id(sender_id), sending_time(time) { }
 
 std::uint32_t PacketHeader::GetEstimatedDeliveryTime() const {
     return estimated_delivery_time;
@@ -63,10 +88,6 @@ std::uint32_t PacketHeader::GetEstimatedDeliveryTime() const {
 
 std::uint64_t PacketHeader::GetSendingTime() const {
     return sending_time;
-}
-
-std::uint32_t PacketHeader::GetPacketIndex() const {
-    return packet_index;
 }
 
 std::uint64_t PacketHeader::GetSenderID() const {
@@ -78,29 +99,17 @@ bool PacketHeader::operator<(const PacketHeader &other) const {
     return estimated_delivery_time > other.GetEstimatedDeliveryTime();
 }
 
-Event::Event(ServerBase& initiator, event_type type, std::uint32_t packets_number)
-    : server_initiator(initiator), type(type), packets_number(packets_number) { }
+Event::Event(ServerBase& initiator, event_type type, std::uint32_t units_number)
+    : server_initiator(initiator), type(type), units_number(units_number) { }
 
 std::ostream& operator<<(std::ostream& out, const Event& event) {
-    out << "[EVENT] ID: "
-        << ". Initiator ID: " << event.server_initiator.GetID()
-        << ". Type: " << (event.type == 0 ? "SEND_DATA" : "ACKNOWLEDGEMENT") 
-        << ". Number of packets: " << event.packets_number << ".\n";
-    
-    return out;
-}
-
-void CWND::IncreaseSize() {
-    if (size_in_packets * 2 < ssthresh) {
-        // Slow start
-        size_in_packets *= 2;
+    out << "Initiator ID: " << event.server_initiator.GetID();
+    if (!event.type) {
+        out << ". Type: SEND_DATA"
+            << ". Number of packets: " << event.units_number << ".\n";
     }
     else {
-        // ssthresh reached, increase size by one packet
-        size_in_packets++;
+        out << ". Type: ACKNOWLEDGEMENT.\n";
     }
-}
-
-std::uint32_t CWND::GetSize() const {
-    return size_in_packets;
+    return out;
 }

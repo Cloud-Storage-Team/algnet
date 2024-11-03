@@ -23,6 +23,9 @@ private:
     // Contains all events 
     std::vector<Event> events{};
 
+    void PacketsSending(bool);
+    void PacketsReceiving();
+
 public:
 
     explicit NetworkSimulator(const std::vector<std::uint32_t>&);

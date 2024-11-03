@@ -9,38 +9,38 @@ enum event_type: std::uint8_t {
     ACKNOWLEDGEMENT,
 };
 
+struct TransmissionUnit {
+protected:
+    std::uint64_t estimated_delivery_time;
+public:
+    explicit TransmissionUnit(std::uint64_t);
+};
+
+// Type for acknowledgement
+struct ACK : TransmissionUnit {
+private:
+    std::uint64_t receiver_id;
+public:
+    ACK(std::uint64_t, std::uint64_t);
+
+    std::uint64_t GetReceiverID() const;
+    std::uint64_t GetEstimatedDeliveryTime() const;
+};
+
 // Type for packet
-struct PacketHeader {
+struct PacketHeader : TransmissionUnit {
 private:
     std::uint64_t sender_id;
-    std::uint64_t receiver_id;
     std::uint64_t sending_time;
-    std::uint32_t packet_index;
-    std::uint32_t estimated_delivery_time;
 public:
     PacketHeader() = default;
-    PacketHeader(std::uint64_t, std::uint64_t, std::uint64_t, std::uint32_t, std::uint32_t);
+    PacketHeader(std::uint64_t, std::uint64_t, std::uint32_t);
 
     std::uint32_t GetEstimatedDeliveryTime() const;
     std::uint64_t GetSendingTime() const;
-    std::uint32_t GetPacketIndex() const;
     std::uint64_t GetSenderID() const;
 
     bool operator<(const PacketHeader& other) const;
-};
-
-// Type for congestion window
-struct CWND {
-private:
-    std::uint32_t size_in_packets = 8;
-
-    // Slow-start threshold in packets
-    std::uint32_t ssthresh = 1024;
-public:
-    CWND() = default;
-
-    std::uint32_t GetSize() const;
-    void IncreaseSize();
 };
 
 // Type for server receiver, contains only ID
@@ -50,7 +50,6 @@ protected:
 public:
     ServerBase(std::uint32_t);
     ServerBase() = default;
-    ~ServerBase() = default;
 
     std::uint32_t GetID() const;
 };
@@ -60,13 +59,13 @@ struct ServerSender : ServerBase {
 private:
     std::uint32_t distance_us;
     std::uint32_t current_time_us = 0;
-    CWND cwnd;
+    std::uint32_t cwnd_size_in_packets = 1;
+    std::uint32_t max_transmission_rate_packets = 51200;
 
-    std::vector<PacketHeader> ACKs{};
+    std::vector<ACK> ACKs{};
 public:
     ServerSender(std::uint32_t, std::uint32_t);
     ServerSender() = default;
-    ~ServerSender() = default;
 
     std::uint32_t GetDistance() const;
     std::uint32_t GetACKsNumber() const;
@@ -75,8 +74,9 @@ public:
     void UpdateCurrentTime(std::uint32_t);
     void IncreaseCurrentTime(std::uint32_t);
     void IncreaseCWNDSize();
-    void AddACK(const PacketHeader&);
 
+    void AddACK(const ACK&);
+    bool HandleACKs();
     void printACKs() const;
 };
 
@@ -86,8 +86,8 @@ private:
     ServerBase& server_initiator;
     event_type type;
 
-    // number of sending packets
-    std::uint32_t packets_number;  
+    // number of sending units
+    std::uint32_t units_number;
 public:
     Event(ServerBase&, event_type, std::uint32_t);
     ~Event() = default;
