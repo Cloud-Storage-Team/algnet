@@ -3,6 +3,8 @@ project(datacenter_overloading)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(datacenter_overloading src/main.cpp src/simulator.cpp src/utils.cpp)
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+
+add_executable(datacenter_overloading ${SOURCES})
 
 target_include_directories(datacenter_overloading PUBLIC include)

@@ -2,7 +2,7 @@
 
 NetworkSimulator::NetworkSimulator(const std::vector<std::uint32_t>& distances_to_receiver) {
     for (std::uint32_t distance: distances_to_receiver) {
-        servers.emplace_back(GenerateNewID(servers), distance);
+        servers.emplace_back(GenerateNewID(servers), distance, packets);
     }
     std::uint32_t server_receiver_id = 0;
     server_receiver = ServerBase(server_receiver_id);
@@ -18,30 +18,21 @@ void NetworkSimulator::PacketsSending(bool is_first_iteration) {
         }
         // Create event
         events.emplace_back(server, SEND_DATA, server.GetCWNDSize());
-
-        // Create packets, add them to priority_queue
-        for (std::uint32_t i = 0; i < server.GetCWNDSize(); ++i) {
-            // Calculate estimated delivering time of the packet
-            std::uint32_t estimated_delivering_time = server.GetCurrentTime() + server.GetDistance();
-            // Add packet to the priority_queue
-            packets.emplace(server.GetID(), server.GetCurrentTime(), estimated_delivering_time);
-
-            // Update server time
-            server.IncreaseCurrentTime(server.GetDistance());
-        }
+        // Send packets
+        server.SendPackets();
     }
 }
 
 void NetworkSimulator::PacketsReceiving() {
-    std::uint32_t received_data_kb = 0;
+    std::uint64_t received_data_kb = 0;
     std::uint32_t received_packets = 0;
     // Create acknowledgements
     while (!packets.empty()) {
-        if (received_data_kb >= bandwidth) {
+        if (received_data_kb >= bandwidth_bytes) {
             break;
         }
         ++received_packets;
-        received_data_kb += packet_size;
+        received_data_kb += packet_size_bytes;
         // Add ACK event
         events.emplace_back(server_receiver, ACKNOWLEDGEMENT, 1);
 
@@ -59,7 +50,7 @@ void NetworkSimulator::PacketsReceiving() {
 void NetworkSimulator::StartSimulation(std::uint32_t simulation_time_sec) {
     bool is_first_iteration = true;
     auto start_time = std::chrono::steady_clock::now();
-    std::uint32_t i = 1;
+    std::uint32_t iteration = 0;
 
     while (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - start_time).count() < simulation_time_sec) {
         // Servers send packets
@@ -67,17 +58,25 @@ void NetworkSimulator::StartSimulation(std::uint32_t simulation_time_sec) {
         // Server-receiver receives packets and sends ACKs
         PacketsReceiving();
 
-        // Print queue size (overhead)
-        std::cout << i++ << ": " << packets.size() << std::endl;
+        
+        // Calculate mean CWND size in packets
+        std::uint64_t cwnd_sizes_sum = 0;
+        for (const auto& server: servers) {
+            cwnd_sizes_sum += server.GetCWNDSize();
+        }
+        std::uint64_t mean_cwnd_size = cwnd_sizes_sum / servers.size();
+
+        // Print queue size and mean CWND size
+        std::cout << iteration++ << " " << packets.size() << " " << mean_cwnd_size << std::endl;
         is_first_iteration = false;
     }
 }
 
 std::ostream& operator<<(std::ostream& out, const NetworkSimulator& simulator) {
     out << "==========Network simulator configuration==========\n"
-        << "Bandwidth: " << simulator.bandwidth << " bytes.\n"
+        << "Bandwidth: " << simulator.bandwidth_bytes << " bytes.\n"
         << "Data transmission frequency: " << simulator.data_transmission_frequency_bytes << " bytes.\n"
-        << "Packet size: " << simulator.packet_size << " bytes.\n"
+        << "Packet size: " << simulator.packet_size_bytes << " bytes.\n"
         << "Server receiver ID: " << simulator.server_receiver.GetID() << ".\n"
         << "Sending servers:\n";
     for (auto& server: simulator.servers) {

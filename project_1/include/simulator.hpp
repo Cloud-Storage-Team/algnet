@@ -1,6 +1,8 @@
 #pragma once
 
-#include "utils.hpp"
+#include "server.hpp"
+#include "event.hpp"
+#include "packet.hpp"
 
 #include <vector>
 #include <cstdint>
@@ -9,10 +11,10 @@
 
 class NetworkSimulator {
 private:
-    std::uint32_t bandwidth = 52428800;
-    std::uint32_t data_transmission_frequency_bytes = 52428800;
-    std::uint32_t data_transmission_frequency_packets = 51200;
-    std::uint32_t packet_size = 1024;
+    std::uint64_t bandwidth_bytes = 6'250'000'000;
+    std::uint64_t data_transmission_frequency_bytes = 6'250'000'000;
+    std::uint64_t data_transmission_frequency_packets = 6'250'000;
+    std::uint32_t packet_size_bytes = 1024;
 
     // Contains all sending servers 
     std::vector<ServerSender> servers{};
