@@ -28,13 +28,13 @@ std::uint32_t ServerSender::GetCurrentTime() const {
     return current_time_us;
 }
 
-void ServerSender::UpdateCurrentTime(std::uint32_t new_time) {
-    // Situation when new_time is less than current_time_is is possible
-    current_time_us = std::max<std::uint32_t>(current_time_us, new_time);
+void ServerSender::UpdateCurrentTime(std::uint32_t new_time_us) {
+    // Situation when new_time is less than current_time_us is possible
+    current_time_us = std::max<std::uint32_t>(current_time_us, new_time_us);
 }
 
-void ServerSender::IncreaseCurrentTime(std::uint32_t time_step) {
-    current_time_us += time_step;
+void ServerSender::IncreaseCurrentTime(std::uint32_t delta_time_us) {
+    current_time_us += delta_time_us;
 }
 
 void ServerSender::IncreaseCWNDSize() {
@@ -56,7 +56,7 @@ bool ServerSender::HandleACKs() {
         return false;
     }
     cwnd_size_in_packets = std::min<std::uint32_t>(cwnd_size_in_packets + ACKs.size(), max_transmission_rate_packets);
-    // Sender's current time is the delivery time of the last AKC
+    // Sender's current time is the delivery time of the last ACK
     UpdateCurrentTime(ACKs.back().GetEstimatedDeliveryTime());
     ACKs.clear();
     return true;

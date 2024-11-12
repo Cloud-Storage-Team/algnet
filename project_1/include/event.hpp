@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <iostream>
 
-enum event_type: std::uint8_t {
+enum class event_type: std::uint8_t {
     SEND_DATA,
     ACKNOWLEDGEMENT,
 };
@@ -19,7 +19,7 @@ private:
     // number of sending units
     std::uint32_t units_number;
 public:
-    Event(ServerBase&, event_type, std::uint32_t);
+    Event(ServerBase& initiator, event_type type, std::uint32_t units_number);
     ~Event() = default;
 
     friend std::ostream& operator<<(std::ostream& out, const Event& event);

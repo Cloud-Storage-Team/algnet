@@ -11,7 +11,7 @@ struct ServerBase {
 protected:
     std::uint64_t id;
 public:
-    ServerBase(std::uint32_t);
+    ServerBase(std::uint32_t id);
     ServerBase() = default;
 
     std::uint32_t GetID() const;
@@ -28,18 +28,18 @@ private:
     std::priority_queue<PacketHeader>& packet_queue;
     std::vector<ACK> ACKs{};
 public:
-    ServerSender(std::uint32_t, std::uint32_t, std::priority_queue<PacketHeader>&);
+    ServerSender(std::uint32_t id, std::uint32_t distance_us, std::priority_queue<PacketHeader>& queue);
     ServerSender() = default;
 
     std::uint32_t GetDistance() const;
     std::uint32_t GetACKsNumber() const;
     std::uint32_t GetCWNDSize() const;
     std::uint32_t GetCurrentTime() const;
-    void UpdateCurrentTime(std::uint32_t);
-    void IncreaseCurrentTime(std::uint32_t);
+    void UpdateCurrentTime(std::uint32_t new_time_us);
+    void IncreaseCurrentTime(std::uint32_t delta_time_us);
     void IncreaseCWNDSize();
 
-    void AddACK(const ACK&);
+    void AddACK(const ACK& ack);
     bool HandleACKs();
     void printACKs() const;
 

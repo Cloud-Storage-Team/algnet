@@ -26,15 +26,15 @@ private:
     // Contains all events 
     std::vector<Event> events{};
 
-    void PacketsSending(bool);
+    void PacketsSending(bool is_first_iteration);
     void PacketsReceiving();
 
 public:
 
-    explicit NetworkSimulator(const std::vector<std::uint32_t>&);
+    explicit NetworkSimulator(const std::vector<std::uint32_t>& distances_to_receiver);
     ~NetworkSimulator() = default;
 
-    void StartSimulation(std::uint32_t);
+    void StartSimulation(std::uint32_t simulation_time_sec);
 
     // New ID = last given ID + 1
     template<typename T>
