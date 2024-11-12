@@ -17,7 +17,7 @@ void NetworkSimulator::PacketsSending(bool is_first_iteration) {
             continue;
         }
         // Create event
-        events.emplace_back(server, SEND_DATA, server.GetCWNDSize());
+        events.emplace_back(server, event_type::SEND_DATA, server.GetCWNDSize());
         // Send packets
         server.SendPackets();
     }
@@ -34,7 +34,7 @@ void NetworkSimulator::PacketsReceiving() {
         ++received_packets;
         received_data_kb += packet_size_bytes;
         // Add ACK event
-        events.emplace_back(server_receiver, ACKNOWLEDGEMENT, 1);
+        events.emplace_back(server_receiver, event_type::ACKNOWLEDGEMENT, 1);
 
         // Index of server-sender in vector
         std::uint32_t sending_server_index = packets.top().GetSenderID() - 1;

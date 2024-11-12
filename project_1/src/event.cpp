@@ -5,7 +5,7 @@ Event::Event(ServerBase& initiator, event_type type, std::uint32_t units_number)
 
 std::ostream& operator<<(std::ostream& out, const Event& event) {
     out << "Initiator ID: " << event.server_initiator.GetID();
-    if (!event.type) {
+    if (event.type == event_type::SEND_DATA) {
         out << ". Type: SEND_DATA"
             << ". Number of packets: " << event.units_number << ".\n";
     }
