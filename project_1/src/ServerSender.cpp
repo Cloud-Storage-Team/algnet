@@ -1,16 +1,9 @@
-#include "server.hpp"
+#include "ServerSender.hpp"
 
 #include <iostream>
 
-ServerBase::ServerBase(std::uint32_t id)
-    : id(id) { }
-
-std::uint32_t ServerBase::GetID() const {
-    return id;
-}
-
-ServerSender::ServerSender(std::uint32_t id, std::uint32_t distance_us, std::priority_queue<PacketHeader>& queue) 
-    : ServerBase(id), distance_us(distance_us), packet_queue(queue) { }
+ServerSender::ServerSender(std::uint64_t id, std::uint32_t distance_us)
+        : ServerBase(id), distance_us(distance_us) { }
 
 std::uint32_t ServerSender::GetDistance() const {
     return distance_us;
@@ -62,7 +55,7 @@ bool ServerSender::HandleACKs() {
     return true;
 }
 
-void ServerSender::SendPackets() {
+void ServerSender::SendPackets(std::priority_queue<PacketHeader>& packet_queue) {
     // Create packets, add them to priority_queue
     for (std::uint32_t i = 0; i < cwnd_size_in_packets; ++i) {
         // Calculate estimated delivering time of the packet

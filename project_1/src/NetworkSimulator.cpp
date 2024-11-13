@@ -1,10 +1,10 @@
-#include "simulator.hpp"
+#include "NetworkSimulator.hpp"
 
 NetworkSimulator::NetworkSimulator(const std::vector<std::uint32_t>& distances_to_receiver) {
     for (std::uint32_t distance: distances_to_receiver) {
-        servers.emplace_back(GenerateNewID(servers), distance, packets);
+        servers.emplace_back(++last_given_server_id, distance);
     }
-    std::uint32_t server_receiver_id = 0;
+    std::uint64_t server_receiver_id = 0;
     server_receiver = ServerBase(server_receiver_id);
 }
 
@@ -19,20 +19,18 @@ void NetworkSimulator::PacketsSending(bool is_first_iteration) {
         // Create event
         events.emplace_back(server, event_type::SEND_DATA, server.GetCWNDSize());
         // Send packets
-        server.SendPackets();
+        server.SendPackets(packets);
     }
 }
 
 void NetworkSimulator::PacketsReceiving() {
-    std::uint64_t received_data_kb = 0;
-    std::uint32_t received_packets = 0;
+    std::uint64_t received_data_bytes = 0;
     // Create acknowledgements
     while (!packets.empty()) {
-        if (received_data_kb >= bandwidth_bytes) {
+        if (received_data_bytes >= bandwidth_bytes) {
             break;
         }
-        ++received_packets;
-        received_data_kb += packet_size_bytes;
+        received_data_bytes += packet_size_bytes;
         // Add ACK event
         events.emplace_back(server_receiver, event_type::ACKNOWLEDGEMENT, 1);
 

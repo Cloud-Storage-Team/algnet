@@ -1,4 +1,4 @@
-#include "simulator.hpp"
+#include "NetworkSimulator.hpp"
 
 #include <iostream>
 
