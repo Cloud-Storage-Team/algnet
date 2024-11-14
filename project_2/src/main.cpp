@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     
     std::shared_ptr<ServerBase> receiver(new ExpressPassReciever(senders_ids, NetworkSimulator::GenerateNewID(), ExpressPass::default_inter_credit_gap_ns));
     std::shared_ptr<NetworkSwitch> n_switch(new ExpressPassSwitch(ExpressPass::default_credit_rate_limit_ns));
-    NetworkSimulator simulator(senders, receiver, n_switch, 100000000);
+    NetworkSimulator simulator(senders, receiver, n_switch, 1000000000);
 
     simulator.StartSimulation();
 }

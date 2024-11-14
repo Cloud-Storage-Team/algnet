@@ -10,7 +10,7 @@ NetworkSimulator::NetworkSimulator(std::vector<std::shared_ptr<ServerBase>>& sen
     std::shared_ptr<RoutingNetworkElement> routing_receiver = std::dynamic_pointer_cast<RoutingNetworkElement>(receiver);
     std::shared_ptr<RoutingNetworkElement> routing_switch = std::dynamic_pointer_cast<RoutingNetworkElement>(n_switch);
     auto recv_switch_conn = AddNewConnection(routing_receiver, routing_switch, 5);
-    std::cout << links.back() << " " << recv_switch_conn.reversed_link << std::endl;
+    // std::cout << links.back() << " " << recv_switch_conn.reversed_link << std::endl;
     routing_switch->AddNewRout(receiver->GetID(), recv_switch_conn.reversed_link);
 
     for (std::shared_ptr<ServerBase> sender : senders) {
