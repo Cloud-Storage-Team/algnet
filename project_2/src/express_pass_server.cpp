@@ -37,22 +37,22 @@ void ExpressPassReciever::ReceivePacket(std::uint64_t current_time_ns, PacketHea
     }
     std::uint64_t sender_id = packet.GetSourceID();
     // TODO: process it more correctly (maybe need to pass simulation limits)
-    if (packet.GetSendingTime() <= 100000000) {
+    // if (packet.GetSendingTime() <= 100000000) {
         amount_of_data_from_sender[sender_id] += 1;
-    }
+    // }
 
     // TODO: process it more correctly (maybe need to pass simulation limits)
-    if (current_time_ns > 100000000) {
-        std::vector<std::pair<std::uint64_t, std::uint32_t>> result;
-        for (auto& sender_and_data: amount_of_data_from_sender) {
-            result.push_back(sender_and_data);
-        }
-        std::sort(result.begin(), result.end());
-        for (auto& sender_and_data: result) {
-            std::cout << "Sender id: "<< sender_and_data.first << ", Amount: " << sender_and_data.second << std::endl;
-        }
-        std::cout << std::endl;
-    }
+    // if (current_time_ns > 100000000) {
+    //     std::vector<std::pair<std::uint64_t, std::uint32_t>> result;
+    //     for (auto& sender_and_data: amount_of_data_from_sender) {
+    //         result.push_back(sender_and_data);
+    //     }
+    //     std::sort(result.begin(), result.end());
+    //     for (auto& sender_and_data: result) {
+    //         std::cout << "Sender id: "<< sender_and_data.first << ", Amount: " << sender_and_data.second << std::endl;
+    //     }
+    //     std::cout << std::endl;
+    // }
 }
 
 ExpressPassSender::ExpressPassSender(std::uint64_t id, std::uint64_t process_time_ns, std::uint8_t max_credit_bucket_size) {
