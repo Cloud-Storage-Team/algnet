@@ -7,3 +7,5 @@ file(GLOB SOURCES src/*.cpp)
 add_executable(express_pass ${SOURCES})
 
 target_include_directories(express_pass PUBLIC include)
+
+add_subdirectory(tests)
