@@ -10,6 +10,9 @@ private:
         NumberInfo(int n, int c = 0) : number(n), usageCount(c) {}
 
         bool operator<(const NumberInfo& other) const {
+            if (usageCount == other.usageCount) {
+                return number < other.number;
+            }
             return usageCount < other.usageCount; 
         }
     };

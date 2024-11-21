@@ -10,6 +10,7 @@ int NumberManager::getNumber() {
     NumberInfo numberInfo = *numbers.begin();
     numbers.erase(numberInfo);
     numbers.insert(NumberInfo(numberInfo.number, numberInfo.usageCount + 1));
+    
     return numberInfo.number;
 }
 

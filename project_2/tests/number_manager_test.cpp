@@ -1,5 +1,6 @@
 #include "number_manager.hpp"
 #include <gtest/gtest.h>
+#include <set>
 
 class NumberManagerTest : public ::testing::Test {
 protected:
@@ -15,18 +16,21 @@ protected:
 };
 
 TEST_F(NumberManagerTest, GiveNumber) {
-    EXPECT_EQ(numberManager->giveNumber(), 0);
-    EXPECT_EQ(numberManager->giveNumber(), 1); 
-    EXPECT_EQ(numberManager->giveNumber(), 2);
-}
+    std::set<int> numbers;
 
-TEST_F(NumberManagerTest, UsageCountIncrements) {
-    numberManager->giveNumber(); 
-
-    numberManager->returnNumber(0);
+    for(int i = 0; i<100; ++i){
+       ASSERT_EQ(numberManager->getNumber(),i%5);
+    }
     
-    EXPECT_EQ(numberManager->giveNumber(), 0);
 }
+
+TEST_F(NumberManagerTest, SameGetNumberAfterReturn) {
+   int number = numberManager->getNumber(); 
+   numberManager->returnNumber(number);
+   ASSERT_EQ(number, numberManager->getNumber());
+}
+
+//TODO more tests
 
 
 
