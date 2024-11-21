@@ -1,7 +1,7 @@
 #include "PacketHeader.hpp"
 
-PacketHeader::PacketHeader(std::uint64_t sender_id, std::uint64_t sending_time_us, std::uint32_t delivery_time_us)
-        : TransmissionUnit(delivery_time_us), sender_id(sender_id), sending_time(sending_time_us) { }
+PacketHeader::PacketHeader(std::uint64_t sender_id, std::uint64_t sending_time_ns, std::uint64_t delivery_time_ns)
+    : TransmissionUnit(delivery_time_ns), sender_id(sender_id), sending_time(sending_time_ns) { }
 
 std::uint64_t PacketHeader::GetSendingTime() const {
     return sending_time;

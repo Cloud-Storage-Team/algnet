@@ -3,12 +3,12 @@
 #include <iostream>
 
 int main(int argc, char* argv[]) {
-    std::uint32_t simulation_time_sec = 30;
-    std::vector<std::uint32_t> distances_to_receiver_us = {10, 4, 20};
+    std::uint32_t simulation_iterations = 25;
+    std::vector<std::uint32_t> data_rates_gbps = {1, 5, 3};
 
-    NetworkSimulator simulator(distances_to_receiver_us);
+    NetworkSimulator simulator(data_rates_gbps);
 
-    simulator.StartSimulation(simulation_time_sec);
+    simulator.StartSimulation(simulation_iterations);
 
     std::cout << simulator;
 }

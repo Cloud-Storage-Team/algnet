@@ -25,38 +25,38 @@ void NetworkSimulator::PacketsSending(bool is_first_iteration) {
 
 void NetworkSimulator::PacketsReceiving() {
     std::uint64_t received_data_bytes = 0;
+
     // Create acknowledgements
     while (!packets.empty()) {
-        if (received_data_bytes >= bandwidth_bytes) {
+        if (received_data_bytes >= NetworkSimulator::bandwidth_bytes) {
             break;
         }
-        received_data_bytes += packet_size_bytes;
+        received_data_bytes += NetworkSimulator::packet_size_bytes;
         // Add ACK event
         events.emplace_back(server_receiver, event_type::ACKNOWLEDGEMENT, 1);
 
         // Index of server-sender in vector
-        std::uint32_t sending_server_index = packets.top().GetSenderID() - 1;
+        std::uint32_t sending_server_id = packets.top().GetSenderID() - 1;
 
         // Send an ACK
-        servers[sending_server_index].AddACK(ACK(packets.top().GetSenderID(),
-                                                 packets.top().GetEstimatedDeliveryTime() + servers[sending_server_index].GetDistance()));
+        std::uint64_t ack_estimated_delivery_time_ns = packets.top().GetEstimatedDeliveryTime() +
+                                                       servers[sending_server_id].GetPacketTransmissionTime();
+        servers[sending_server_id].AddACK(ACK(packets.top().GetSenderID(), ack_estimated_delivery_time_ns));
 
         packets.pop();
     }
 }
 
-void NetworkSimulator::StartSimulation(std::uint32_t simulation_time_sec) {
+void NetworkSimulator::StartSimulation(std::uint32_t simulation_iterations) {
     bool is_first_iteration = true;
-    auto start_time = std::chrono::steady_clock::now();
-    std::uint32_t iteration = 0;
 
-    while (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - start_time).count() < simulation_time_sec) {
+    for (std::uint32_t i = 0; i < simulation_iterations; ++i) {
         // Servers send packets
         PacketsSending(is_first_iteration);
         // Server-receiver receives packets and sends ACKs
         PacketsReceiving();
 
-        
+
         // Calculate mean CWND size in packets
         std::uint64_t cwnd_sizes_sum = 0;
         for (const auto& server: servers) {
@@ -65,21 +65,21 @@ void NetworkSimulator::StartSimulation(std::uint32_t simulation_time_sec) {
         std::uint64_t mean_cwnd_size = cwnd_sizes_sum / servers.size();
 
         // Print queue size and mean CWND size
-        std::cout << iteration++ << " " << packets.size() << " " << mean_cwnd_size << std::endl;
+        std::cout << i << " " << packets.size() << " " << mean_cwnd_size << std::endl;
         is_first_iteration = false;
     }
 }
 
 std::ostream& operator<<(std::ostream& out, const NetworkSimulator& simulator) {
     out << "==========Network simulator configuration==========\n"
-        << "Bandwidth: " << simulator.bandwidth_bytes << " bytes.\n"
-        << "Data transmission frequency: " << simulator.data_transmission_frequency_bytes << " bytes.\n"
-        << "Packet size: " << simulator.packet_size_bytes << " bytes.\n"
+        << "Bandwidth: " << NetworkSimulator::bandwidth_bytes << " bytes.\n"
+        << "Max data transmission frequency: " << NetworkSimulator::max_data_rate_bytes << " bytes.\n"
+        << "Packet size: " << NetworkSimulator::packet_size_bytes << " bytes.\n"
         << "Server receiver ID: " << simulator.server_receiver.GetID() << ".\n"
         << "Sending servers:\n";
     for (auto& server: simulator.servers) {
-        out << "ID: " << server.GetID() << ". \tDistance to receiver: " << server.GetDistance()
-            << " us. \tCWND size: " << server.GetCWNDSize() << " packets.\n";
+        out << "ID: " << server.GetID() << ". \tData rate: " << server.GetDataRate()
+            << " Gbps. \tCWND size: " << server.GetCWNDSize() << " packets.\n";
     }
 
     return out;

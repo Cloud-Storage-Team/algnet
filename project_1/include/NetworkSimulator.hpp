@@ -11,18 +11,17 @@
 
 class NetworkSimulator {
 public:
-    explicit NetworkSimulator(const std::vector<std::uint32_t>& distances_to_receiver);
+    explicit NetworkSimulator(const std::vector<std::uint32_t>& data_rates_gbps);
     ~NetworkSimulator() = default;
 
-    void StartSimulation(std::uint32_t simulation_time_sec);
+    void StartSimulation(std::uint32_t simulation_iterations);
 
     friend std::ostream& operator<<(std::ostream& out, const NetworkSimulator& simulator);
-private:
-    const std::uint64_t bandwidth_bytes = 6'250'000'000;
-    const std::uint64_t data_transmission_frequency_bytes = 6'250'000'000;
-    const std::uint64_t data_transmission_frequency_packets = 6'250'000;
-    const std::uint32_t packet_size_bytes = 1024;
 
+    static const std::uint32_t packet_size_bytes = 1024;
+    static const std::uint64_t bandwidth_bytes = 6'250'000'000;
+    static const std::uint64_t max_data_rate_bytes = 6'250'000'000;
+private:
     // New ID = last given ID + 1
     std::uint64_t last_given_server_id = 0;
 

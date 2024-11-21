@@ -13,7 +13,7 @@ struct ServerBase {
     ServerBase() = default;
     virtual ~ServerBase() = default;
 
-    std::uint32_t GetID() const;
+    std::uint64_t GetID() const;
 protected:
     std::uint64_t id;
 };

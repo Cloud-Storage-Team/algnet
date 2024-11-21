@@ -4,7 +4,7 @@
 
 // Type for packet
 struct PacketHeader : TransmissionUnit {
-    PacketHeader(std::uint64_t sender_id, std::uint64_t sending_time_us, std::uint32_t delivery_time_us);
+    PacketHeader(std::uint64_t sender_id, std::uint64_t sending_time_ns, std::uint64_t delivery_time_ns);
     PacketHeader() = default;
     std::uint64_t GetSendingTime() const;
     std::uint64_t GetSenderID() const;

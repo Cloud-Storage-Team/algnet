@@ -4,7 +4,7 @@
 
 // Base struct for ACK, PacketHeader.
 struct TransmissionUnit {
-    explicit TransmissionUnit(std::uint64_t delivery_time_us);
+    explicit TransmissionUnit(std::uint64_t delivery_time_ns);
     std::uint64_t GetEstimatedDeliveryTime() const;
 protected:
     std::uint64_t estimated_delivery_time;
