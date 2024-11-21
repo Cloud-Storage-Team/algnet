@@ -1,0 +1,28 @@
+name: C++ CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: sudo apt-get install -y cmake g++ libgtest-dev
+
+    - name: Build the project
+      run: |
+        cd project_2
+        mkdir build
+        cd build
+        cmake ..
+        make
+
+    - name: Run tests
+      run: |
+        cd project_2
+        cd build/tests
+        ./runTests
