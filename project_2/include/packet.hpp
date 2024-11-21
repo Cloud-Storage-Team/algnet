@@ -16,6 +16,11 @@ private:
     // 2 bit - initializing connection or not
     std::uint8_t flags = 0;
 public:
+
+    std::uint32_t qAssignment; //TODO insert in flags variable?
+    bool counterInc;           //TODO insert in flags variable?
+    std::uint32_t upstreamQ;   //TODO insert in flags variable?
+
     PacketHeader() = default;
     PacketHeader(std::uint64_t source_id, std::uint64_t destination_id, std::uint64_t sending_time, std::uint32_t packet_index, std::uint32_t size);
 
