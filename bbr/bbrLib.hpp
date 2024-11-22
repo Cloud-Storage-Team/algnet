@@ -6,12 +6,12 @@ const int BBR_STARTUP = 0;
 const int BBR_DRAIN = 1;
 const int BBR_NORMAL = 2;
 const int BBR_PROBE_BW = 3;
-const int BBR_CHECK = 4;
+const int BBR_PROBE_BW_CHECK = 4;
 const int BBR_PROBE_RTT = 5;
 struct userData
 {
     //last_rtt
-    //min_rtt
+    //minRtt
     //...
 };
 
@@ -19,14 +19,16 @@ struct userData
 class bbr{
 private:
     int state = 0;  // Текущее состояние BBR
-    double bw_estimate;         // Оценка пропускной способности (BtlBw)
-    int min_rtt;       // Минимальная задержка (RTprop)
-    int last_rtt;      // Последняя измеренная RTT      
-    int min_rtt; 
+    double bwEstimate;         // Оценка пропускной способности (BtlBw)
+    double bw_max; 
+    double cwndCoefficient = 1;
+    int lastRtt;
+    int minRtt = 10000000; 
     int tick = 1;
     int updateTick;  
-    int packetCount = 1;
-    int maxPacketCount;
+    int cwnd = 1;
+    int maxcwnd;
+    int lastCwnd;
 public:
     bbr(/* args */);
     ~bbr();
@@ -58,6 +60,8 @@ public:
     проверяем изменения rtt паралельно очищая очередь.
     Добавить больше состояний чем было
     */
-   void probeRtt()
+   void probeRtt();
+
+   void probeBWCheck();
 };
 
