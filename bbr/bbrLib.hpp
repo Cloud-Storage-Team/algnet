@@ -6,8 +6,9 @@ const int BBR_STARTUP = 0;
 const int BBR_DRAIN = 1;
 const int BBR_NORMAL = 2;
 const int BBR_PROBE_BW = 3;
-const int BBR_PROBE_BW_CHECK = 4;
-const int BBR_PROBE_RTT = 5;
+const int BBR_CHECK_DOWN_SPEED = 4;
+const int BBR_PROBE_BW_CHECK = 5;
+const int BBR_PROBE_RTT = 6;
 
 
 
@@ -37,9 +38,9 @@ public:
     void drain();
 
     void normal();
+    
+    void checkDownSpeed();
 
-    void upPacketInDrain();
-   
     void probeBW();
     
     void probeRtt();

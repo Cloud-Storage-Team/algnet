@@ -21,6 +21,9 @@ void bbr::stateMachine(){
         case BBR_NORMAL:
             this->normal();
             break;
+        case BBR_CHECK_DOWN_SPEED:
+            this->checkDownSpeed();
+            break;
         case BBR_PROBE_BW:
             this->probeBW();
             break;
@@ -60,9 +63,20 @@ void bbr::normal(){
     tick %= 10;
     cwndCoefficient = 1;
     if(tick == 0){
-        state = BBR_PROBE_BW;
+        state = BBR_CHECK_DOWN_SPEED;
     }
 }
+
+void bbr::checkDownSpeed(){
+    if(cwnd < maxcwnd){
+        if(cwnd > bwEstimate * minRtt || minRtt * 1.05 < lastRtt){
+            state = BBR_CHECK_DOWN_SPEED;
+            cwnd = cwnd * 0.96;
+        }else{
+            state = BBR_PROBE_BW_CHECK;
+        }
+    }
+};
 
 void bbr::probeBW(){
     lastCwnd = cwnd;
