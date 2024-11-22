@@ -8,18 +8,13 @@ const int BBR_NORMAL = 2;
 const int BBR_PROBE_BW = 3;
 const int BBR_PROBE_BW_CHECK = 4;
 const int BBR_PROBE_RTT = 5;
-struct userData
-{
-    //last_rtt
-    //minRtt
-    //...
-};
+
 
 
 class bbr{
 private:
-    int state = 0;  // Текущее состояние BBR
-    double bwEstimate;         // Оценка пропускной способности (BtlBw)
+    int state = 0; 
+    double bwEstimate;         
     double bw_max; 
     double cwndCoefficient = 1;
     int lastRtt;
@@ -38,30 +33,17 @@ public:
     void stateMachine();
 
     void startup();
-    /*
-    Работает с увеличением по экспоненте пока не дойдёт до ограничения пропускного канала.
-    */
+    
     void drain();
 
     void normal();
 
     void upPacketInDrain();
-    /*
-    Очищение всех очередей на сервере.
-    */
+   
     void probeBW();
     
-    /*
-    измеряем текущую пропускную способность
-    Состояний нужно больше тк сначала увеличиваем количество пакетов потом уменьшаем.
-    */
+    void probeRtt();
 
-    /*
-    проверяем изменения rtt паралельно очищая очередь.
-    Добавить больше состояний чем было
-    */
-   void probeRtt();
-
-   void probeBWCheck();
+    void probeBWCheck();
 };
 

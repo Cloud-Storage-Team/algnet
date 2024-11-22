@@ -1,12 +1,6 @@
 #include "bbrLib.hpp"
 #include <math.h>
-/*
-TODO:
-Написать make файл???
-подумать над хранилищем.
-lastbw, lastRtt
 
-*/
 
 int bbr::getCountPackage(int lastbw, int lastRtt){
     minRtt = std::min(minRtt, lastRtt);
@@ -30,8 +24,8 @@ void bbr::stateMachine(){
         case BBR_PROBE_BW:
             this->probeBW();
             break;
-        case BBR_PROBE_BW:
-            this->probeBW();
+        case BBR_PROBE_BW_CHECK:
+            this->probeBWCheck();
             break;
         case BBR_PROBE_RTT:
             this->probeRtt();
@@ -54,9 +48,10 @@ void bbr::startup(){
         state = BBR_DRAIN;
     }
 };
+
 void bbr::drain(){
     cwnd = std::max(cwnd / 2.0, bwEstimate * minRtt);
-    cwndCoefficient = 0,5;
+    cwndCoefficient = 0.5;
     state = BBR_NORMAL;
 };
 
@@ -82,12 +77,12 @@ void bbr::probeBWCheck(){
             state = BBR_NORMAL;
             cwnd = lastCwnd;
         }else{    
-            state = BBR_PROBE_BW_CHECK;
+            state = BBR_PROBE_BW;
         }
     }
 };
 
 void bbr::probeRtt(){
-        cwndCoefficient = 0,5;
-        state = BBR_NORMAL;
-   }
+    cwndCoefficient = 0.5;
+    state = BBR_NORMAL;
+}
