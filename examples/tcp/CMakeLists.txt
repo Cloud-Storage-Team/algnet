@@ -41,6 +41,19 @@ build_example(
 )
 
 build_example(
+  NAME tcp-bbr-v2-example
+  SOURCE_FILES tcp-bbr-v2-example.cc
+  LIBRARIES_TO_LINK
+    ${libpoint-to-point}
+    ${libinternet}
+    ${libapplications}
+    ${libtraffic-control}
+    ${libnetwork}
+    ${libinternet-apps}
+    ${libflow-monitor}
+)
+
+build_example(
   NAME tcp-bulk-send
   SOURCE_FILES tcp-bulk-send.cc
   LIBRARIES_TO_LINK
