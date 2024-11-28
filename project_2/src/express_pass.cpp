@@ -1,11 +1,7 @@
 #include "express_pass.hpp"
 
 std::uint64_t ExpressPass::getRandomJitter() const {
-    // TODO: move to class fields
-    std::random_device dev;
-    std::mt19937 eng(dev());
-    std::uniform_int_distribution<std::mt19937::result_type> jitter(min_jitter, max_jitter);
-    return jitter(eng);
+    return static_cast<uint64_t>(default_min_jitter + (rand() % (default_max_jitter + 1)));
 }
 
 PacketHeader ExpressPass::GetCredit(std::uint64_t sending_time, std::uint64_t source_id, std::uint64_t destination_id, std::uint64_t size) const {

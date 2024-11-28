@@ -13,7 +13,7 @@ Link::Link(std::shared_ptr<NetworkElement>& source, std::shared_ptr<NetworkEleme
     last_process_time_ns(last_process_time_ns)
     {}
 
-std::shared_ptr<NetworkElement> Link::GetNextElement(std::uint64_t destination_id = 0) {
+std::shared_ptr<NetworkElement> Link::GetNextElement(std::uint64_t destination_id) {
     return destination;
 }
 

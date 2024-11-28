@@ -45,12 +45,6 @@ void PacketHeader::SetFlag(std::uint8_t bit, std::uint8_t value) {
 }
 
 bool PacketHeader::operator<(const PacketHeader& other) const {
-    if (this->sending_time > other.sending_time) {
-        return true;
-    } 
-    else if (this->sending_time == other.sending_time && 
-             this->destination_id > other.destination_id) {
-        return true;
-    }
-    return false;
+    return (this->sending_time > other.sending_time) || 
+           (this->sending_time == other.sending_time && this->destination_id > other.destination_id);
 }

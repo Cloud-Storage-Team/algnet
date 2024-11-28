@@ -5,15 +5,26 @@
 #include "packet.hpp"
 #include "utils.hpp"
 
-//Switch abstraction
+/**
+ * @brief Switch abstraction
+ * 
+ */
 class NetworkSwitch: public RoutingNetworkElement {
 protected:
     // TODO: add id (may be useful for more complicated topologies)
     // Packet queue inside switch
-    std::priority_queue<PacketHeader> buffer{};
-    std::uint8_t max_buffer_size = 64;
+    std::queue<PacketHeader> buffer{};
+    std::uint64_t max_buffer_size_bit = 81920;
+    std::uint64_t current_buffer_size_bit = 0;
     
 public:
+    /**
+     * @brief creates bottle neck in network and process packets
+     * 
+     * @param current_time_ns 
+     * @param packet 
+     * @param packets_wrapped 
+     */
     virtual void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, PriorityQueueWrapper& packets_wrapped) override = 0;
     virtual ~NetworkSwitch() {}
 };

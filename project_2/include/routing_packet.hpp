@@ -8,7 +8,10 @@
 
 class NetworkElement;
 
-// Stores packet and next network element in rout
+/**
+ * @brief Stores packet and next network element in route
+ * 
+ */
 class RoutingPacket {
 private:
     PacketHeader packet;

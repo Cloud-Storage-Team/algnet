@@ -3,7 +3,10 @@
 #include <cstdint>
 #include <ostream>
 
-// Network packet abstraction
+/**
+ * @brief Network packet abstraction
+ * 
+ */
 class PacketHeader {
 private:
     std::uint64_t source_id;
@@ -17,6 +20,15 @@ private:
     std::uint8_t flags = 0;
 public:
     PacketHeader() = default;
+    /**
+     * @brief Construct a new Packet Header object
+     * 
+     * @param source_id packet source
+     * @param destination_id packet destination
+     * @param sending_time time of sending packet 
+     * @param packet_index unique packet identifier (within network element, that generated it)
+     * @param size packet size
+     */
     PacketHeader(std::uint64_t source_id, std::uint64_t destination_id, std::uint64_t sending_time, std::uint32_t packet_index, std::uint32_t size);
 
     std::uint32_t GetPackageIndex() const;
