@@ -15,7 +15,7 @@ jobs:
 
     - name: Build the project
       run: |
-        cd project_2
+        cd project_9
         mkdir build
         cd build
         cmake ..
@@ -23,6 +23,6 @@ jobs:
 
     - name: Run tests
       run: |
-        cd project_2
+        cd project_9
         cd build/tests
         ./runTests
