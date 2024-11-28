@@ -1,0 +1,80 @@
+\doxysection{Network\+Simulator Class Reference}
+\label{class_network_simulator}\index{NetworkSimulator@{NetworkSimulator}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\textbf{ Network\+Simulator} (std\+::vector$<$ std\+::shared\+\_\+ptr$<$ \textbf{ Server\+Base} $>$ $>$ \&senders, std\+::shared\+\_\+ptr$<$ \textbf{ Server\+Base} $>$ receiver, std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Switch} $>$ n\+\_\+switch, std\+::uint64\+\_\+t simulation\+\_\+duration\+\_\+ns)
+\begin{DoxyCompactList}\small\item\em Construct a new Network Simulator. \end{DoxyCompactList}\item 
+\label{class_network_simulator_ab6e72d4a5ecc9ab0343bf02810431444} 
+void {\bfseries Start\+Simulation} ()
+\begin{DoxyCompactList}\small\item\em Starts the simulation. \end{DoxyCompactList}\item 
+bool \textbf{ Set\+Current\+Time} (std\+::uint64\+\_\+t possible\+\_\+new\+\_\+time)
+\begin{DoxyCompactList}\small\item\em Sets current\+\_\+time\+\_\+ns. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static std\+::uint64\+\_\+t \textbf{ Generate\+New\+ID} ()
+\begin{DoxyCompactList}\small\item\em generates New ID = last given ID + 1 \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\index{NetworkSimulator@{NetworkSimulator}!NetworkSimulator@{NetworkSimulator}}
+\index{NetworkSimulator@{NetworkSimulator}!NetworkSimulator@{NetworkSimulator}}
+\doxysubsubsection{NetworkSimulator()}
+{\footnotesize\ttfamily \label{class_network_simulator_a0c136e0d56a7f9104033308ef311418e} 
+Network\+Simulator\+::\+Network\+Simulator (\begin{DoxyParamCaption}\item[{std\+::vector$<$ std\+::shared\+\_\+ptr$<$ \textbf{ Server\+Base} $>$ $>$ \&}]{senders}{, }\item[{std\+::shared\+\_\+ptr$<$ \textbf{ Server\+Base} $>$}]{receiver}{, }\item[{std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Switch} $>$}]{n\+\_\+switch}{, }\item[{std\+::uint64\+\_\+t}]{simulation\+\_\+duration\+\_\+ns}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+
+
+Construct a new Network Simulator. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em senders} & list of hosts that send data packets \\
+\hline
+{\em receiver} & host which wants to receive data from senders \\
+\hline
+{\em n\+\_\+switch} & switch between receiver and senders (represents bottle neck) \\
+\hline
+{\em simulation\+\_\+duration\+\_\+ns} & time of running the simulation in ns \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\index{NetworkSimulator@{NetworkSimulator}!GenerateNewID@{GenerateNewID}}
+\index{GenerateNewID@{GenerateNewID}!NetworkSimulator@{NetworkSimulator}}
+\doxysubsubsection{GenerateNewID()}
+{\footnotesize\ttfamily \label{class_network_simulator_a68f0ac4d9dfbfa7c1feaed242262e130} 
+static std\+::uint64\+\_\+t Network\+Simulator\+::\+Generate\+New\+ID (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+generates New ID = last given ID + 1 
+
+\begin{DoxyReturn}{Returns}
+std\+::uint64\+\_\+t 
+\end{DoxyReturn}
+\index{NetworkSimulator@{NetworkSimulator}!SetCurrentTime@{SetCurrentTime}}
+\index{SetCurrentTime@{SetCurrentTime}!NetworkSimulator@{NetworkSimulator}}
+\doxysubsubsection{SetCurrentTime()}
+{\footnotesize\ttfamily \label{class_network_simulator_ab8a53990e725a6ffbf295d1681bcb73e} 
+bool Network\+Simulator\+::\+Set\+Current\+Time (\begin{DoxyParamCaption}\item[{std\+::uint64\+\_\+t}]{possible\+\_\+new\+\_\+time}{}\end{DoxyParamCaption})}
+
+
+
+Sets current\+\_\+time\+\_\+ns. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em possible\+\_\+new\+\_\+time} & the time you want to set \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if current\+\_\+time is $<$= simulation\+\_\+duration 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Hometasks/4\+\_\+course/\+Huawei\+Project/algnet/project\+\_\+2/include/simulator.\+hpp\end{DoxyCompactItemize}

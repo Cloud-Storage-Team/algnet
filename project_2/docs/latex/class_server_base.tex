@@ -1,0 +1,134 @@
+\doxysection{Server\+Base Class Reference}
+\label{class_server_base}\index{ServerBase@{ServerBase}}
+
+
+Host abstraction.  
+
+
+
+
+{\ttfamily \#include $<$server.\+hpp$>$}
+
+Inheritance diagram for Server\+Base\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{class_server_base}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\label{class_server_base_a19c5348c5f78290d9608dd5f98d112cf} 
+{\bfseries Server\+Base} (std\+::uint64\+\_\+t \textbf{ id})
+\item 
+\label{class_server_base_aec0d19a3a0d665b01715b063e653099d} 
+std\+::uint64\+\_\+t {\bfseries Get\+ID} () const
+\item 
+virtual std\+::uint64\+\_\+t \textbf{ Send\+Packets} (std\+::uint64\+\_\+t current\+\_\+time\+\_\+ns, \textbf{ Priority\+Queue\+Wrapper} \&packets\+\_\+wrapped)=0
+\begin{DoxyCompactList}\small\item\em Generates new packets from host. \end{DoxyCompactList}\item 
+virtual std\+::string \textbf{ To\+String} () const =0
+\begin{DoxyCompactList}\small\item\em Returns some statistics, calculated by host. \end{DoxyCompactList}\item 
+virtual void \textbf{ Receive\+Packet} (std\+::uint64\+\_\+t current\+\_\+time\+\_\+ns, \textbf{ Packet\+Header} \&packet, \textbf{ Priority\+Queue\+Wrapper} \&packets\+\_\+wrapped) override=0
+\begin{DoxyCompactList}\small\item\em Processes the obtained packet (basically adds processing time to packet\textquotesingle{}s sending time) \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \textbf{ Routing\+Network\+Element}}
+\begin{DoxyCompactItemize}
+\item 
+\textbf{ Routing\+Network\+Element} (const std\+::unordered\+\_\+map$<$ std\+::uint64\+\_\+t, std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ $>$ \&routing\+\_\+table)
+\begin{DoxyCompactList}\small\item\em Construct a new Routing Network Element. \end{DoxyCompactList}\item 
+void \textbf{ Add\+New\+Route} (std\+::uint64\+\_\+t destination\+\_\+id, std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ \&link)
+\begin{DoxyCompactList}\small\item\em Creates new record in routing table. \end{DoxyCompactList}\item 
+std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ \textbf{ Get\+Next\+Element} (std\+::uint64\+\_\+t destination\+\_\+id) override final
+\begin{DoxyCompactList}\small\item\em get next element in route \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \textbf{ Network\+Element}}
+\doxysubsubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\label{class_server_base_a2c3306a852a979d1b8c3db23c12157c3} 
+std\+::uint64\+\_\+t {\bfseries id}
+\begin{DoxyCompactList}\small\item\em Host id (should be given ONLY by Simulator\+::\+Generate\+New\+ID) \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes inherited from \textbf{ Routing\+Network\+Element}}
+\begin{DoxyCompactItemize}
+\item 
+std\+::unordered\+\_\+map$<$ std\+::uint64\+\_\+t, std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ $>$ {\bfseries routing\+\_\+table} \{\}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Host abstraction. 
+
+\doxysubsection{Member Function Documentation}
+\index{ServerBase@{ServerBase}!ReceivePacket@{ReceivePacket}}
+\index{ReceivePacket@{ReceivePacket}!ServerBase@{ServerBase}}
+\doxysubsubsection{ReceivePacket()}
+{\footnotesize\ttfamily \label{class_server_base_a9f7653b806638de4dd480b0c5edd4219} 
+virtual void Server\+Base\+::\+Receive\+Packet (\begin{DoxyParamCaption}\item[{std\+::uint64\+\_\+t}]{current\+\_\+time\+\_\+ns}{, }\item[{\textbf{ Packet\+Header} \&}]{packet}{, }\item[{\textbf{ Priority\+Queue\+Wrapper} \&}]{packets\+\_\+wrapped}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [pure virtual]}}
+
+
+
+Processes the obtained packet (basically adds processing time to packet\textquotesingle{}s sending time) 
+
+
+\begin{DoxyParams}{Parameters}
+{\em current\+\_\+time\+\_\+ns} & time of obtaining packet on element \\
+\hline
+{\em packet} & obtained packet \\
+\hline
+{\em packets\+\_\+wrapped} & required for returning updated packet or new packet to simulation queue \\
+\hline
+\end{DoxyParams}
+
+
+Implements \textbf{ Routing\+Network\+Element} \doxyref{}{p.}{class_routing_network_element_ac16d5a3d088ed1f465a4efc2fe77a18b}.
+
+
+
+Implemented in \textbf{ Express\+Pass\+Receiver} \doxyref{}{p.}{class_express_pass_receiver_a987a50723017563b3ad9bcd42f5ec064}, and \textbf{ Express\+Pass\+Sender} \doxyref{}{p.}{class_express_pass_sender_a7ad5ecbbda7b2f126be6b901f30e48b1}.
+
+\index{ServerBase@{ServerBase}!SendPackets@{SendPackets}}
+\index{SendPackets@{SendPackets}!ServerBase@{ServerBase}}
+\doxysubsubsection{SendPackets()}
+{\footnotesize\ttfamily \label{class_server_base_a6895cac6ce59f6aa3f5335ca8cea1c78} 
+virtual std\+::uint64\+\_\+t Server\+Base\+::\+Send\+Packets (\begin{DoxyParamCaption}\item[{std\+::uint64\+\_\+t}]{current\+\_\+time\+\_\+ns}{, }\item[{\textbf{ Priority\+Queue\+Wrapper} \&}]{packets\+\_\+wrapped}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Generates new packets from host. 
+
+Method is invoked by simulator if\+: 1) there is no packets in simulation queue 2) current time of simulation reached next\+\_\+ask
+
+
+\begin{DoxyParams}{Parameters}
+{\em current\+\_\+time\+\_\+ns} & time in system of getting request to send new packets \\
+\hline
+{\em packets\+\_\+wrapped} & required for pushing packets back to simulation queue \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+std\+::uint64\+\_\+t next time when simulator should ask for new packets 
+\end{DoxyReturn}
+
+
+Implemented in \textbf{ Express\+Pass\+Receiver} \doxyref{}{p.}{class_express_pass_receiver_ab7de0dbfcb1d019f5260ceeabe227964}, and \textbf{ Express\+Pass\+Sender} \doxyref{}{p.}{class_express_pass_sender_a112e1859527e477ffbc47e70813e41e4}.
+
+\index{ServerBase@{ServerBase}!ToString@{ToString}}
+\index{ToString@{ToString}!ServerBase@{ServerBase}}
+\doxysubsubsection{ToString()}
+{\footnotesize\ttfamily \label{class_server_base_a59178a2aa298f693b72a724e4ea776c8} 
+virtual std\+::string Server\+Base\+::\+To\+String (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Returns some statistics, calculated by host. 
+
+\begin{DoxyReturn}{Returns}
+std\+::string 
+\end{DoxyReturn}
+
+
+Implemented in \textbf{ Express\+Pass\+Receiver} \doxyref{}{p.}{class_express_pass_receiver_a6cc56825d2838b65de9b97664805c299}, and \textbf{ Express\+Pass\+Sender} \doxyref{}{p.}{class_express_pass_sender_af476ac034df07fe63d8d60b617f87eb4}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Hometasks/4\+\_\+course/\+Huawei\+Project/algnet/project\+\_\+2/include/server.\+hpp\end{DoxyCompactItemize}

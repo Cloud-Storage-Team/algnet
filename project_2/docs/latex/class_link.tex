@@ -1,0 +1,122 @@
+\doxysection{Link Class Reference}
+\label{class_link}\index{Link@{Link}}
+
+
+Network link abstraction.  
+
+
+
+
+{\ttfamily \#include $<$link.\+hpp$>$}
+
+Inheritance diagram for Link\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_link}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\textbf{ Link} (std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ \&source, std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ \&destination, std\+::uint64\+\_\+t speed, std\+::uint64\+\_\+t last\+\_\+process\+\_\+time\+\_\+ns=0)
+\begin{DoxyCompactList}\small\item\em Construct a new \doxyref{Link}{p.}{class_link} object. \end{DoxyCompactList}\item 
+std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ \textbf{ Get\+Next\+Element} (std\+::uint64\+\_\+t destination\+\_\+id=0) override final
+\begin{DoxyCompactList}\small\item\em Returns receiver of packets passed by link. \end{DoxyCompactList}\item 
+void \textbf{ Receive\+Packet} (std\+::uint64\+\_\+t current\+\_\+time\+\_\+ns, \textbf{ Packet\+Header} \&packet, \textbf{ Priority\+Queue\+Wrapper} \&packets\+\_\+wrapped) override final
+\begin{DoxyCompactList}\small\item\em Updates last\+\_\+process\+\_\+time\+\_\+ns, sets new sending\+\_\+time for packet and puts packet back to queue. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \textbf{ Network\+Element}}
+\doxysubsubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\label{class_link_a45c69a54c3f6c83e3b57a405b3f6601f} 
+std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ {\bfseries source}
+\item 
+\label{class_link_abb5d5a46eb519e918861946879629609} 
+std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ {\bfseries destination}
+\item 
+\label{class_link_a71772d6b1083c5f186a173f1cd3f237b} 
+std\+::uint64\+\_\+t {\bfseries speed}
+\item 
+\label{class_link_aba7c15a0a94554b142d65b23d128dbf6} 
+std\+::uint64\+\_\+t {\bfseries last\+\_\+process\+\_\+time\+\_\+ns}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Network link abstraction. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\index{Link@{Link}!Link@{Link}}
+\index{Link@{Link}!Link@{Link}}
+\doxysubsubsection{Link()}
+{\footnotesize\ttfamily \label{class_link_a07cd7e1a8397c1bdaf5c62350c552c89} 
+Link\+::\+Link (\begin{DoxyParamCaption}\item[{std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ \&}]{source}{, }\item[{std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ \&}]{destination}{, }\item[{std\+::uint64\+\_\+t}]{speed}{, }\item[{std\+::uint64\+\_\+t}]{last\+\_\+process\+\_\+time\+\_\+ns}{ = {\ttfamily 0}}\end{DoxyParamCaption})}
+
+
+
+Construct a new \doxyref{Link}{p.}{class_link} object. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em source} & network element which sends packets \\
+\hline
+{\em destination} & network element which receives packets \\
+\hline
+{\em speed} & the speed of pushing packets into the link \\
+\hline
+{\em last\+\_\+process\+\_\+time\+\_\+ns} & time, when last packet was sent to destination \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\index{Link@{Link}!GetNextElement@{GetNextElement}}
+\index{GetNextElement@{GetNextElement}!Link@{Link}}
+\doxysubsubsection{GetNextElement()}
+{\footnotesize\ttfamily \label{class_link_a1fb0fba4668b06e3f0fbe4a0ab116fbb} 
+std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ Link\+::\+Get\+Next\+Element (\begin{DoxyParamCaption}\item[{std\+::uint64\+\_\+t}]{destination\+\_\+id}{ = {\ttfamily 0}}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [final]}, {\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Returns receiver of packets passed by link. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em destination\+\_\+id} & packet destination id (is not used by link, because it does not have routing table) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+std\+::shared\+\_\+ptr$<$\+Network\+Element$>$ packets receiver connected to link 
+\end{DoxyReturn}
+
+
+Implements \textbf{ Network\+Element} \doxyref{}{p.}{class_network_element_a094d5ebc640efb71e1e615cd5a2f8c61}.
+
+\index{Link@{Link}!ReceivePacket@{ReceivePacket}}
+\index{ReceivePacket@{ReceivePacket}!Link@{Link}}
+\doxysubsubsection{ReceivePacket()}
+{\footnotesize\ttfamily \label{class_link_a228c66fd9f681b2bc9a4cce14525200b} 
+void Link\+::\+Receive\+Packet (\begin{DoxyParamCaption}\item[{std\+::uint64\+\_\+t}]{current\+\_\+time\+\_\+ns}{, }\item[{\textbf{ Packet\+Header} \&}]{packet}{, }\item[{\textbf{ Priority\+Queue\+Wrapper} \&}]{packets\+\_\+wrapped}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [final]}, {\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Updates last\+\_\+process\+\_\+time\+\_\+ns, sets new sending\+\_\+time for packet and puts packet back to queue. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em current\+\_\+time\+\_\+ns} & time of receiving packet by link \\
+\hline
+{\em packet} & packet, received by link \\
+\hline
+{\em packets\+\_\+wrapped} & queue of packets, where packet should be pushed after processing \\
+\hline
+\end{DoxyParams}
+
+
+Implements \textbf{ Network\+Element} \doxyref{}{p.}{class_network_element_aa6a78622f5faaaab9be6a6e85db290ef}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Hometasks/4\+\_\+course/\+Huawei\+Project/algnet/project\+\_\+2/include/\textbf{ link.\+hpp}\end{DoxyCompactItemize}

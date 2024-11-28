@@ -1,0 +1,83 @@
+\doxysection{Packet\+Header Class Reference}
+\label{class_packet_header}\index{PacketHeader@{PacketHeader}}
+
+
+Network packet abstraction.  
+
+
+
+
+{\ttfamily \#include $<$packet.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\textbf{ Packet\+Header} (std\+::uint64\+\_\+t source\+\_\+id, std\+::uint64\+\_\+t destination\+\_\+id, std\+::uint64\+\_\+t sending\+\_\+time, std\+::uint32\+\_\+t packet\+\_\+index, std\+::uint32\+\_\+t size)
+\begin{DoxyCompactList}\small\item\em Construct a new Packet Header object. \end{DoxyCompactList}\item 
+\label{class_packet_header_a6d93166e4757aba3e0d96b7cc0dbab45} 
+std\+::uint32\+\_\+t {\bfseries Get\+Package\+Index} () const
+\item 
+\label{class_packet_header_a05c875ed7f054bee4d2ef5cb4625d427} 
+std\+::uint64\+\_\+t {\bfseries Get\+Destination\+ID} () const
+\item 
+\label{class_packet_header_a0b9d8e3c9f1e4f00ea9380558b1a58b3} 
+std\+::uint64\+\_\+t {\bfseries Get\+Sending\+Time} () const
+\item 
+\label{class_packet_header_a07e0a21bff3fe6d16a9fe22bef77146e} 
+std\+::uint64\+\_\+t {\bfseries Get\+Source\+ID} () const
+\item 
+\label{class_packet_header_a5f30744e2985fac3b486816e2dc1a08e} 
+std\+::uint32\+\_\+t {\bfseries Get\+Size} () const
+\item 
+\label{class_packet_header_aa5b85a8504b70eacf7f3250b0f2b07ca} 
+std\+::uint8\+\_\+t {\bfseries Get\+Flag} (std\+::uint8\+\_\+t bit) const
+\item 
+\label{class_packet_header_ae62c135fbc821de6263a143f9ea47f66} 
+void {\bfseries Set\+Sending\+Time} (std\+::uint64\+\_\+t time)
+\item 
+\label{class_packet_header_a7b7f51a5a4fffb6cb9cce3b2300d6c62} 
+void {\bfseries Set\+Flag} (std\+::uint8\+\_\+t bit, std\+::uint8\+\_\+t value)
+\item 
+\label{class_packet_header_a1033a80782f25c13921623b6f4ce8de0} 
+bool {\bfseries operator$<$} (const \textbf{ Packet\+Header} \&other) const
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\label{class_packet_header_a4d3c1a73281c5c4a5094d29f859ec6ec} 
+std\+::ostream \& {\bfseries operator$<$$<$} (std\+::ostream \&outs, const \textbf{ Packet\+Header} \&packet)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Network packet abstraction. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\index{PacketHeader@{PacketHeader}!PacketHeader@{PacketHeader}}
+\index{PacketHeader@{PacketHeader}!PacketHeader@{PacketHeader}}
+\doxysubsubsection{PacketHeader()}
+{\footnotesize\ttfamily \label{class_packet_header_af94454868065ebaa158f410b883614a8} 
+Packet\+Header\+::\+Packet\+Header (\begin{DoxyParamCaption}\item[{std\+::uint64\+\_\+t}]{source\+\_\+id}{, }\item[{std\+::uint64\+\_\+t}]{destination\+\_\+id}{, }\item[{std\+::uint64\+\_\+t}]{sending\+\_\+time}{, }\item[{std\+::uint32\+\_\+t}]{packet\+\_\+index}{, }\item[{std\+::uint32\+\_\+t}]{size}{}\end{DoxyParamCaption})}
+
+
+
+Construct a new Packet Header object. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em source\+\_\+id} & packet source \\
+\hline
+{\em destination\+\_\+id} & packet destination \\
+\hline
+{\em sending\+\_\+time} & time of sending packet \\
+\hline
+{\em packet\+\_\+index} & unique packet identifier (within network element, that generated it) \\
+\hline
+{\em size} & packet size \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Hometasks/4\+\_\+course/\+Huawei\+Project/algnet/project\+\_\+2/include/packet.\+hpp\end{DoxyCompactItemize}

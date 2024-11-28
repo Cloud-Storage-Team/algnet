@@ -1,0 +1,87 @@
+\doxysection{Network\+Switch Class Reference}
+\label{class_network_switch}\index{NetworkSwitch@{NetworkSwitch}}
+
+
+Switch abstraction.  
+
+
+
+
+{\ttfamily \#include $<$switch.\+hpp$>$}
+
+Inheritance diagram for Network\+Switch\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{class_network_switch}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \textbf{ Receive\+Packet} (std\+::uint64\+\_\+t current\+\_\+time\+\_\+ns, \textbf{ Packet\+Header} \&packet, \textbf{ Priority\+Queue\+Wrapper} \&packets\+\_\+wrapped) override=0
+\begin{DoxyCompactList}\small\item\em creates bottle neck in network and process packets \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \textbf{ Routing\+Network\+Element}}
+\begin{DoxyCompactItemize}
+\item 
+\textbf{ Routing\+Network\+Element} (const std\+::unordered\+\_\+map$<$ std\+::uint64\+\_\+t, std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ $>$ \&routing\+\_\+table)
+\begin{DoxyCompactList}\small\item\em Construct a new Routing Network Element. \end{DoxyCompactList}\item 
+void \textbf{ Add\+New\+Route} (std\+::uint64\+\_\+t destination\+\_\+id, std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ \&link)
+\begin{DoxyCompactList}\small\item\em Creates new record in routing table. \end{DoxyCompactList}\item 
+std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ \textbf{ Get\+Next\+Element} (std\+::uint64\+\_\+t destination\+\_\+id) override final
+\begin{DoxyCompactList}\small\item\em get next element in route \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \textbf{ Network\+Element}}
+\doxysubsubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\label{class_network_switch_a757b0d5a120ffe6ab3e0ec737c5867f5} 
+std\+::queue$<$ \textbf{ Packet\+Header} $>$ {\bfseries buffer} \{\}
+\item 
+\label{class_network_switch_a4cbbd3b5510db9b403be57a5dde2f77e} 
+std\+::uint64\+\_\+t {\bfseries max\+\_\+buffer\+\_\+size\+\_\+bit} = 81920
+\item 
+\label{class_network_switch_a4885fb6498fd3153665e3758a03366fb} 
+std\+::uint64\+\_\+t {\bfseries current\+\_\+buffer\+\_\+size\+\_\+bit} = 0
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes inherited from \textbf{ Routing\+Network\+Element}}
+\begin{DoxyCompactItemize}
+\item 
+std\+::unordered\+\_\+map$<$ std\+::uint64\+\_\+t, std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ $>$ {\bfseries routing\+\_\+table} \{\}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Switch abstraction. 
+
+\doxysubsection{Member Function Documentation}
+\index{NetworkSwitch@{NetworkSwitch}!ReceivePacket@{ReceivePacket}}
+\index{ReceivePacket@{ReceivePacket}!NetworkSwitch@{NetworkSwitch}}
+\doxysubsubsection{ReceivePacket()}
+{\footnotesize\ttfamily \label{class_network_switch_ab3466e839f4811a8debdd539d9156820} 
+virtual void Network\+Switch\+::\+Receive\+Packet (\begin{DoxyParamCaption}\item[{std\+::uint64\+\_\+t}]{current\+\_\+time\+\_\+ns}{, }\item[{\textbf{ Packet\+Header} \&}]{packet}{, }\item[{\textbf{ Priority\+Queue\+Wrapper} \&}]{packets\+\_\+wrapped}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [pure virtual]}}
+
+
+
+creates bottle neck in network and process packets 
+
+
+\begin{DoxyParams}{Parameters}
+{\em current\+\_\+time\+\_\+ns} & \\
+\hline
+{\em packet} & \\
+\hline
+{\em packets\+\_\+wrapped} & \\
+\hline
+\end{DoxyParams}
+
+
+Implements \textbf{ Routing\+Network\+Element} \doxyref{}{p.}{class_routing_network_element_ac16d5a3d088ed1f465a4efc2fe77a18b}.
+
+
+
+Implemented in \textbf{ Express\+Pass\+Switch} \doxyref{}{p.}{class_express_pass_switch_a8ba3f4730ae53447b8d2276baf18fa7c}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Hometasks/4\+\_\+course/\+Huawei\+Project/algnet/project\+\_\+2/include/switch.\+hpp\end{DoxyCompactItemize}

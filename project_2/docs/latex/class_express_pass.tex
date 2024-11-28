@@ -1,0 +1,46 @@
+\doxysection{Express\+Pass Class Reference}
+\label{class_express_pass}\index{ExpressPass@{ExpressPass}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\label{class_express_pass_a515694ec6e8b1feac510c74624cbdebd} 
+std\+::uint64\+\_\+t {\bfseries get\+Random\+Jitter} () const
+\item 
+\label{class_express_pass_ae2a4b3d619e895897140e303edc5a566} 
+\textbf{ Packet\+Header} {\bfseries Get\+Credit} (std\+::uint64\+\_\+t sending\+\_\+time, std\+::uint64\+\_\+t source, std\+::uint64\+\_\+t destination, std\+::uint64\+\_\+t size=min\+\_\+packet\+\_\+size) const
+\item 
+\label{class_express_pass_a471c7d8163705d0d64fd46d381983f9f} 
+\textbf{ Packet\+Header} {\bfseries Get\+Handshake\+Packet} (std\+::uint64\+\_\+t sending\+\_\+time, std\+::uint64\+\_\+t source, std\+::uint64\+\_\+t destination, std\+::uint64\+\_\+t size=min\+\_\+packet\+\_\+size) const
+\item 
+\label{class_express_pass_a808135ee3723f43693a3a41e135d8ae7} 
+\textbf{ Packet\+Header} {\bfseries Get\+Data\+Packet} (std\+::uint64\+\_\+t sending\+\_\+time, std\+::uint64\+\_\+t source, std\+::uint64\+\_\+t destination, std\+::uint64\+\_\+t size=default\+\_\+data\+\_\+size) const
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\label{class_express_pass_a0deee3b8e6c9b736bff35093c50aeea3} 
+static const std\+::uint64\+\_\+t {\bfseries min\+\_\+packet\+\_\+size} = 84 $\ast$ 8
+\item 
+\label{class_express_pass_a391ee5587058aea77e5371746acc78e2} 
+static const std\+::uint64\+\_\+t {\bfseries default\+\_\+data\+\_\+size} = 1024 $\ast$ 8
+\item 
+\label{class_express_pass_a5acf507745725844b7d0435c81376810} 
+static const std\+::uint64\+\_\+t {\bfseries target\+\_\+link\+\_\+speed} = 50
+\item 
+\label{class_express_pass_afcba3ef21a0bba0cd19b706048aefb0e} 
+static const std\+::uint64\+\_\+t {\bfseries default\+\_\+credit\+\_\+rate\+\_\+limit\+\_\+ns} = (default\+\_\+data\+\_\+size + target\+\_\+link\+\_\+speed -\/ 1) / target\+\_\+link\+\_\+speed
+\item 
+\label{class_express_pass_a4403f36f7782d04ee3134a0a9504b7dc} 
+static const std\+::uint64\+\_\+t {\bfseries default\+\_\+inter\+\_\+credit\+\_\+gap\+\_\+ns} = 200 $\ast$ (min\+\_\+packet\+\_\+size + default\+\_\+data\+\_\+size + target\+\_\+link\+\_\+speed -\/ 1) / target\+\_\+link\+\_\+speed
+\item 
+\label{class_express_pass_ab79fa09114b38ffdf4a676453d926845} 
+static const std\+::uint64\+\_\+t {\bfseries default\+\_\+min\+\_\+jitter} = (default\+\_\+inter\+\_\+credit\+\_\+gap\+\_\+ns + 99) / 100
+\item 
+\label{class_express_pass_ab5d3c650aced98b6a4bfc71d31a45d21} 
+static const std\+::uint64\+\_\+t {\bfseries default\+\_\+max\+\_\+jitter} = default\+\_\+min\+\_\+jitter $\ast$ 8
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Hometasks/4\+\_\+course/\+Huawei\+Project/algnet/project\+\_\+2/include/express\+\_\+pass.\+hpp\end{DoxyCompactItemize}

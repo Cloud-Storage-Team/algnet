@@ -1,0 +1,130 @@
+\doxysection{Routing\+Network\+Element Class Reference}
+\label{class_routing_network_element}\index{RoutingNetworkElement@{RoutingNetworkElement}}
+
+
+Abstract network element that has routing table (switch, host, etc.)  
+
+
+
+
+{\ttfamily \#include $<$network\+\_\+element.\+hpp$>$}
+
+Inheritance diagram for Routing\+Network\+Element\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{class_routing_network_element}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\textbf{ Routing\+Network\+Element} (const std\+::unordered\+\_\+map$<$ std\+::uint64\+\_\+t, std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ $>$ \&routing\+\_\+table)
+\begin{DoxyCompactList}\small\item\em Construct a new Routing Network Element. \end{DoxyCompactList}\item 
+void \textbf{ Add\+New\+Route} (std\+::uint64\+\_\+t destination\+\_\+id, std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ \&link)
+\begin{DoxyCompactList}\small\item\em Creates new record in routing table. \end{DoxyCompactList}\item 
+std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ \textbf{ Get\+Next\+Element} (std\+::uint64\+\_\+t destination\+\_\+id) override final
+\begin{DoxyCompactList}\small\item\em get next element in route \end{DoxyCompactList}\item 
+virtual void \textbf{ Receive\+Packet} (std\+::uint64\+\_\+t current\+\_\+time\+\_\+ns, \textbf{ Packet\+Header} \&packet, \textbf{ Priority\+Queue\+Wrapper} \&packets\+\_\+wrapped)=0
+\begin{DoxyCompactList}\small\item\em Processes the obtained packet (basically adds processing time to packet\textquotesingle{}s sending time) \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \textbf{ Network\+Element}}
+\doxysubsubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\label{class_routing_network_element_af26829e23edc56b4f064841aab9ab8f0} 
+std\+::unordered\+\_\+map$<$ std\+::uint64\+\_\+t, std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ $>$ {\bfseries routing\+\_\+table} \{\}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Abstract network element that has routing table (switch, host, etc.) 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\index{RoutingNetworkElement@{RoutingNetworkElement}!RoutingNetworkElement@{RoutingNetworkElement}}
+\index{RoutingNetworkElement@{RoutingNetworkElement}!RoutingNetworkElement@{RoutingNetworkElement}}
+\doxysubsubsection{RoutingNetworkElement()}
+{\footnotesize\ttfamily \label{class_routing_network_element_a3121eaaba707e71cc20b2b03327ddb40} 
+Routing\+Network\+Element\+::\+Routing\+Network\+Element (\begin{DoxyParamCaption}\item[{const std\+::unordered\+\_\+map$<$ std\+::uint64\+\_\+t, std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ $>$ \&}]{routing\+\_\+table}{}\end{DoxyParamCaption})}
+
+
+
+Construct a new Routing Network Element. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em routing\+\_\+table} & routing table if exists at the moment of creation element \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\index{RoutingNetworkElement@{RoutingNetworkElement}!AddNewRoute@{AddNewRoute}}
+\index{AddNewRoute@{AddNewRoute}!RoutingNetworkElement@{RoutingNetworkElement}}
+\doxysubsubsection{AddNewRoute()}
+{\footnotesize\ttfamily \label{class_routing_network_element_a39c4bdbf32735d1b233ad9aaca75b1cc} 
+void Routing\+Network\+Element\+::\+Add\+New\+Route (\begin{DoxyParamCaption}\item[{std\+::uint64\+\_\+t}]{destination\+\_\+id}{, }\item[{std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ \&}]{link}{}\end{DoxyParamCaption})}
+
+
+
+Creates new record in routing table. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em destination\+\_\+id} & key for routing table \\
+\hline
+{\em link} & value for routing table \\
+\hline
+\end{DoxyParams}
+\index{RoutingNetworkElement@{RoutingNetworkElement}!GetNextElement@{GetNextElement}}
+\index{GetNextElement@{GetNextElement}!RoutingNetworkElement@{RoutingNetworkElement}}
+\doxysubsubsection{GetNextElement()}
+{\footnotesize\ttfamily \label{class_routing_network_element_ae8c309adc30cd29c7a314aafd39a52d0} 
+std\+::shared\+\_\+ptr$<$ \textbf{ Network\+Element} $>$ Routing\+Network\+Element\+::\+Get\+Next\+Element (\begin{DoxyParamCaption}\item[{std\+::uint64\+\_\+t}]{destination\+\_\+id}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [final]}, {\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+get next element in route 
+
+
+\begin{DoxyParams}{Parameters}
+{\em destination\+\_\+id} & used by routing table to define next element in route \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+std\+::shared\+\_\+ptr$<$\+Network\+Element$>$ next element in route 
+\end{DoxyReturn}
+
+
+Implements \textbf{ Network\+Element} \doxyref{}{p.}{class_network_element_a094d5ebc640efb71e1e615cd5a2f8c61}.
+
+\index{RoutingNetworkElement@{RoutingNetworkElement}!ReceivePacket@{ReceivePacket}}
+\index{ReceivePacket@{ReceivePacket}!RoutingNetworkElement@{RoutingNetworkElement}}
+\doxysubsubsection{ReceivePacket()}
+{\footnotesize\ttfamily \label{class_routing_network_element_ac16d5a3d088ed1f465a4efc2fe77a18b} 
+virtual void Routing\+Network\+Element\+::\+Receive\+Packet (\begin{DoxyParamCaption}\item[{std\+::uint64\+\_\+t}]{current\+\_\+time\+\_\+ns}{, }\item[{\textbf{ Packet\+Header} \&}]{packet}{, }\item[{\textbf{ Priority\+Queue\+Wrapper} \&}]{packets\+\_\+wrapped}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Processes the obtained packet (basically adds processing time to packet\textquotesingle{}s sending time) 
+
+
+\begin{DoxyParams}{Parameters}
+{\em current\+\_\+time\+\_\+ns} & time of obtaining packet on element \\
+\hline
+{\em packet} & obtained packet \\
+\hline
+{\em packets\+\_\+wrapped} & required for returning updated packet or new packet to simulation queue \\
+\hline
+\end{DoxyParams}
+
+
+Implements \textbf{ Network\+Element} \doxyref{}{p.}{class_network_element_aa6a78622f5faaaab9be6a6e85db290ef}.
+
+
+
+Implemented in \textbf{ Express\+Pass\+Receiver} \doxyref{}{p.}{class_express_pass_receiver_a987a50723017563b3ad9bcd42f5ec064}, \textbf{ Express\+Pass\+Sender} \doxyref{}{p.}{class_express_pass_sender_a7ad5ecbbda7b2f126be6b901f30e48b1}, \textbf{ Express\+Pass\+Switch} \doxyref{}{p.}{class_express_pass_switch_a8ba3f4730ae53447b8d2276baf18fa7c}, \textbf{ Network\+Switch} \doxyref{}{p.}{class_network_switch_ab3466e839f4811a8debdd539d9156820}, and \textbf{ Server\+Base} \doxyref{}{p.}{class_server_base_a9f7653b806638de4dd480b0c5edd4219}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Hometasks/4\+\_\+course/\+Huawei\+Project/algnet/project\+\_\+2/include/network\+\_\+element.\+hpp\end{DoxyCompactItemize}

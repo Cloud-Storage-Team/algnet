@@ -1,0 +1,25 @@
+\doxysection{switch.\+hpp}
+\label{switch_8hpp_source}\index{C:/Hometasks/4\_course/HuaweiProject/algnet/project\_2/include/switch.hpp@{C:/Hometasks/4\_course/HuaweiProject/algnet/project\_2/include/switch.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <queue>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}packet.hpp"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}utils.hpp"{}}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00012\ \textcolor{keyword}{class\ }NetworkSwitch:\ \textcolor{keyword}{public}\ RoutingNetworkElement\ \{}
+\DoxyCodeLine{00013\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00014\ \ \ \ \ \textcolor{comment}{//\ TODO:\ add\ id\ (may\ be\ useful\ for\ more\ complicated\ topologies)}}
+\DoxyCodeLine{00015\ \ \ \ \ \textcolor{comment}{//\ Packet\ queue\ inside\ switch}}
+\DoxyCodeLine{00016\ \ \ \ \ std::queue<PacketHeader>\ buffer\{\};}
+\DoxyCodeLine{00017\ \ \ \ \ std::uint64\_t\ max\_buffer\_size\_bit\ =\ 81920;}
+\DoxyCodeLine{00018\ \ \ \ \ std::uint64\_t\ current\_buffer\_size\_bit\ =\ 0;}
+\DoxyCodeLine{00019\ \ \ \ \ }
+\DoxyCodeLine{00020\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00028\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ ReceivePacket(std::uint64\_t\ current\_time\_ns,\ PacketHeader\&\ packet,\ PriorityQueueWrapper\&\ packets\_wrapped)\ \textcolor{keyword}{override}\ =\ 0;}
+\DoxyCodeLine{00029\ \ \ \ \ \textcolor{keyword}{virtual}\ \string~NetworkSwitch()\ \{\}}
+\DoxyCodeLine{00030\ \};}
+
+\end{DoxyCode}

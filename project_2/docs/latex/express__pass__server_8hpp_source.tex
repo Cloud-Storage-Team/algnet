@@ -1,0 +1,46 @@
+\doxysection{express\+\_\+pass\+\_\+server.\+hpp}
+\label{express__pass__server_8hpp_source}\index{C:/Hometasks/4\_course/HuaweiProject/algnet/project\_2/include/express\_pass\_server.hpp@{C:/Hometasks/4\_course/HuaweiProject/algnet/project\_2/include/express\_pass\_server.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <sstream>}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}server.hpp"{}}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{keyword}{class\ }ExpressPassReceiver:\ \textcolor{keyword}{public}\ ServerBase\ \{}
+\DoxyCodeLine{00008\ \ \ \ \ \textcolor{comment}{//\ Add\ some\ fields\ for\ calculating\ statistics}}
+\DoxyCodeLine{00009\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00010\ \ \ \ \ std::vector<std::uint64\_t>\ senders\_ids;}
+\DoxyCodeLine{00011\ \ \ \ \ std::unordered\_map<std::uint64\_t,\ std::uint64\_t>\ ids\_to\_sending\_time\{\};}
+\DoxyCodeLine{00012\ \ \ \ \ std::unordered\_map<std::uint64\_t,\ std::uint32\_t>\ amount\_of\_data\_from\_sender\{\};}
+\DoxyCodeLine{00013\ \ \ \ \ std::uint64\_t\ inter\_credit\_gap;}
+\DoxyCodeLine{00014\ \ \ \ \ std::uint64\_t\ simulation\_duration;}
+\DoxyCodeLine{00015\ \ \ \ \ ExpressPass\ congestion\_control;}
+\DoxyCodeLine{00016\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00017\ \ \ \ \ \textcolor{keyword}{explicit}\ ExpressPassReceiver(std::vector<std::uint64\_t>\ senders\_ids,\ std::uint64\_t\ \textcolor{keywordtype}{id},\ std::uint64\_t\ simulation\_duration,\ std::uint64\_t\ inter\_credit\_gap);}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \ \ \ \ std::uint64\_t\ SendPackets(std::uint64\_t\ current\_time\_ns,\ PriorityQueueWrapper\&\ packets\_wrapped)\ \textcolor{keyword}{override}\ \textcolor{keyword}{final};}
+\DoxyCodeLine{00020\ \ \ \ \ std::string\ ToString()\ const\ override\ final;}
+\DoxyCodeLine{00021\ \ \ \ \ \textcolor{keywordtype}{void}\ ReceivePacket(std::uint64\_t\ current\_time\_ns,\ PacketHeader\&\ packet,\ PriorityQueueWrapper\&\ packets\_wrapped)\ override\ final;}
+\DoxyCodeLine{00022\ \};}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ class\ ExpressPassSender:\ public\ ServerBase\ \{}
+\DoxyCodeLine{00025\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00026\ \ \ \ \ \textcolor{comment}{//\ currently\ unused}}
+\DoxyCodeLine{00027\ \ \ \ \ std::vector<PacketHeader>\ credit\_bucket;}
+\DoxyCodeLine{00028\ \ \ \ \ std::uint8\_t\ max\_credit\_bucket\_size\ =\ 4;}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \ \ \ \ std::uint64\_t\ process\_time\_ns;}
+\DoxyCodeLine{00031\ \ \ \ \ ExpressPass\ congestion\_control;}
+\DoxyCodeLine{00032\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00033\ \ \ \ \ \textcolor{keyword}{explicit}\ ExpressPassSender(std::uint64\_t\ \textcolor{keywordtype}{id},\ std::uint64\_t\ process\_time\_ns\ =\ 10,\ std::uint8\_t\ max\_credit\_bucket\_size\ =\ 4);}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \ \ \ \ std::uint64\_t\ SendPackets(std::uint64\_t\ current\_time\_ns,\ PriorityQueueWrapper\&\ packets\_wrapped)\ \textcolor{keyword}{override}\ \textcolor{keyword}{final};}
+\DoxyCodeLine{00036\ \ \ \ \ std::string\ ToString()\ const\ override\ final\ \{}
+\DoxyCodeLine{00037\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}"{}};}
+\DoxyCodeLine{00038\ \ \ \ \ \};}
+\DoxyCodeLine{00039\ \ \ \ \ \textcolor{keywordtype}{void}\ ReceivePacket(std::uint64\_t\ current\_time\_ns,\ PacketHeader\&\ packet,\ PriorityQueueWrapper\&\ packets\_wrapped)\ \textcolor{keyword}{override}\ \textcolor{keyword}{final};}
+\DoxyCodeLine{00040\ \};}
+
+\end{DoxyCode}
