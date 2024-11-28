@@ -1,24 +1,26 @@
 #pragma once
 
-#include "packet.hpp"
-#include "network_element.hpp"
-
 #include <cstdint>
 #include <memory>
+
+#include "network_element.hpp"
+#include "packet.hpp"
 
 class NetworkElement;
 
 // Stores packet and next network element in rout
 class RoutingPacket {
-private:
+  private:
     PacketHeader packet;
     std::shared_ptr<NetworkElement> next_network_element;
-public:
+
+  public:
     RoutingPacket() = default;
-    RoutingPacket(PacketHeader& packet, std::shared_ptr<NetworkElement> next_network_element);
+    RoutingPacket(PacketHeader &packet,
+                  std::shared_ptr<NetworkElement> next_network_element);
 
     PacketHeader GetPacket() const;
     std::shared_ptr<NetworkElement> GetNext() const;
 
-    bool operator<(const RoutingPacket& other) const;
+    bool operator<(const RoutingPacket &other) const;
 };

@@ -5,7 +5,7 @@
 
 // Network packet abstraction
 class PacketHeader {
-private:
+  private:
     std::uint64_t source_id;
     std::uint64_t destination_id;
     std::uint64_t sending_time;
@@ -15,14 +15,16 @@ private:
     // 0 bit - is credit packet
     // 2 bit - initializing connection or not
     std::uint8_t flags = 0;
-public:
 
-    std::uint32_t qAssignment; //TODO insert in flags variable?
-    bool counterInc;           //TODO insert in flags variable?
-    std::uint32_t upstreamQ;   //TODO insert in flags variable?
+  public:
+    std::uint32_t qAssignment;  // TODO insert in flags variable?
+    bool counterInc;            // TODO insert in flags variable?
+    std::uint32_t upstreamQ;    // TODO insert in flags variable?
 
     PacketHeader() = default;
-    PacketHeader(std::uint64_t source_id, std::uint64_t destination_id, std::uint64_t sending_time, std::uint32_t packet_index, std::uint32_t size);
+    PacketHeader(std::uint64_t source_id, std::uint64_t destination_id,
+                 std::uint64_t sending_time, std::uint32_t packet_index,
+                 std::uint32_t size);
 
     std::uint32_t GetPackageIndex() const;
     std::uint64_t GetDestinationID() const;
@@ -34,16 +36,19 @@ public:
     void SetSendingTime(std::uint64_t time);
     void SetFlag(std::uint8_t bit, std::uint8_t value);
 
-    bool operator<(const PacketHeader& other) const;
+    bool operator<(const PacketHeader &other) const;
 
-    friend std::ostream& operator<<(std::ostream& outs, const PacketHeader & packet) {
+    friend std::ostream &operator<<(std::ostream &outs,
+                                    const PacketHeader &packet) {
         outs << "PacketHeader("
              << "Source ID: " << packet.source_id << ", "
              << "Destination ID: " << packet.destination_id << ", "
-             << "Sending Time: " << packet.sending_time << ", "
-            //  << "Packet Index: " << packet.packet_index << ", "
-             << "Size: " << packet.size << ", "
-            //  << "Flags: " << static_cast<int>(packet.flags)
+             << "Sending Time: " << packet.sending_time
+             << ", "
+             //  << "Packet Index: " << packet.packet_index << ", "
+             << "Size: " << packet.size
+             << ", "
+             //  << "Flags: " << static_cast<int>(packet.flags)
              << ")";
         return outs;
     }

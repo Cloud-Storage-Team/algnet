@@ -1,12 +1,14 @@
 #include "packet.hpp"
+
 #include <string>
 
-PacketHeader::PacketHeader(std::uint64_t source_id, std::uint64_t destination_id, std::uint64_t sending_time, std::uint32_t packet_index, std::uint32_t size):
-    source_id(source_id),
-    destination_id(destination_id),
-    sending_time(sending_time),
-    packet_index(packet_index),
-    size(size) {}
+PacketHeader::PacketHeader(std::uint64_t source_id,
+                           std::uint64_t destination_id,
+                           std::uint64_t sending_time,
+                           std::uint32_t packet_index, std::uint32_t size)
+    : source_id(source_id), destination_id(destination_id),
+      sending_time(sending_time), packet_index(packet_index), size(size) {
+}
 
 std::uint32_t PacketHeader::GetPackageIndex() const {
     return packet_index;
@@ -44,12 +46,11 @@ void PacketHeader::SetFlag(std::uint8_t bit, std::uint8_t value) {
     }
 }
 
-bool PacketHeader::operator<(const PacketHeader& other) const {
+bool PacketHeader::operator<(const PacketHeader &other) const {
     if (this->sending_time > other.sending_time) {
         return true;
-    } 
-    else if (this->sending_time == other.sending_time && 
-             this->destination_id > other.destination_id) {
+    } else if (this->sending_time == other.sending_time &&
+               this->destination_id > other.destination_id) {
         return true;
     }
     return false;
