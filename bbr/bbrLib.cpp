@@ -2,6 +2,13 @@
 #include <math.h>
 
 
+bbr::bbr(double downPackageCoefficient, double upPackageCoefficient, int maxcwnd):
+    downPackageCoefficient(downPackageCoefficient), 
+    upPackageCoefficient(upPackageCoefficient),
+    maxcwnd(maxcwnd){
+    
+}
+
 int bbr::getCountPackage(int lastbw, int lastRtt){
     minRtt = std::min(minRtt, lastRtt);
     this->lastRtt = lastRtt;
@@ -12,25 +19,25 @@ int bbr::getCountPackage(int lastbw, int lastRtt){
 
 void bbr::stateMachine(){
     switch (this->state){
-        case BBR_STARTUP:
+        case stage::BBR_STARTUP:
             this->startup();
             break;
-        case BBR_DRAIN:
+        case stage::BBR_DRAIN:
             this->drain();
             break;
-        case BBR_NORMAL:
+        case stage::BBR_NORMAL:
             this->normal();
             break;
-        case BBR_CHECK_DOWN_SPEED:
+        case stage::BBR_CHECK_DOWN_SPEED:
             this->checkDownSpeed();
             break;
-        case BBR_PROBE_BW:
+        case stage::BBR_PROBE_BW:
             this->probeBW();
             break;
-        case BBR_PROBE_BW_CHECK:
+        case stage::BBR_PROBE_BW_CHECK:
             this->probeBWCheck();
             break;
-        case BBR_PROBE_RTT:
+        case stage::BBR_PROBE_RTT:
             this->probeRtt();
             break;
         default:
@@ -41,21 +48,22 @@ void bbr::stateMachine(){
 void bbr::startup(){
     if(cwnd < maxcwnd){
         if(cwnd > bwEstimate * minRtt || minRtt * 1.05 < lastRtt){
-            state = BBR_DRAIN;
-        }else{
-            cwnd *= 2;
+            state = stage::BBR_DRAIN;
+            return;
         }
+        cwnd *= 2;
+        
     }
     if(cwnd >= maxcwnd){
         cwnd = maxcwnd;
-        state = BBR_DRAIN;
+        state = stage::BBR_DRAIN;
     }
 };
 
 void bbr::drain(){
     cwnd = std::max(cwnd / 2.0, bwEstimate * minRtt);
     cwndCoefficient = 0.5;
-    state = BBR_NORMAL;
+    state = stage::BBR_NORMAL;
 };
 
 void bbr::normal(){
@@ -63,40 +71,40 @@ void bbr::normal(){
     tick %= 10;
     cwndCoefficient = 1;
     if(tick == 0){
-        state = BBR_CHECK_DOWN_SPEED;
+        state = stage::BBR_CHECK_DOWN_SPEED;
     }
 }
 
 void bbr::checkDownSpeed(){
     if(cwnd < maxcwnd){
         if(cwnd > bwEstimate * minRtt || minRtt * 1.05 < lastRtt){
-            state = BBR_CHECK_DOWN_SPEED;
-            cwnd = cwnd * 0.96;
+            state = stage::BBR_CHECK_DOWN_SPEED;
+            cwnd = cwnd * this->downPackageCoefficient;
         }else{
-            state = BBR_PROBE_BW_CHECK;
+            state = stage::BBR_PROBE_BW_CHECK;
         }
     }
 };
 
 void bbr::probeBW(){
     lastCwnd = cwnd;
-    cwnd *= 1.02;
-    state = BBR_PROBE_BW_CHECK;
+    cwnd *= this->upPackageCoefficient;
+    state = stage::BBR_PROBE_BW_CHECK;
     
 };
 
 void bbr::probeBWCheck(){
     if(cwnd < maxcwnd){
         if(cwnd > bwEstimate * minRtt || minRtt * 1.05 < lastRtt){
-            state = BBR_NORMAL;
+            state = stage::BBR_NORMAL;
             cwnd = lastCwnd;
         }else{    
-            state = BBR_PROBE_BW;
+            state = stage::BBR_PROBE_BW;
         }
     }
 };
 
 void bbr::probeRtt(){
     cwndCoefficient = 0.5;
-    state = BBR_NORMAL;
+    state = stage::BBR_NORMAL;
 }

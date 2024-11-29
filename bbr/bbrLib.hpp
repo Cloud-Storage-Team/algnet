@@ -2,22 +2,28 @@
 #include <chrono>
 #include <algorithm>
 
-const int BBR_STARTUP = 0;
-const int BBR_DRAIN = 1;
-const int BBR_NORMAL = 2;
-const int BBR_PROBE_BW = 3;
-const int BBR_CHECK_DOWN_SPEED = 4;
-const int BBR_PROBE_BW_CHECK = 5;
-const int BBR_PROBE_RTT = 6;
+
+enum class stage{
+    BBR_STARTUP,
+    BBR_DRAIN,
+    BBR_NORMAL, 
+    BBR_PROBE_BW,
+    BBR_CHECK_DOWN_SPEED,
+    BBR_PROBE_BW_CHECK,
+    BBR_PROBE_RTT
+};
+
 
 
 
 class bbr{
 private:
-    int state = 0; 
+    stage state = stage::BBR_STARTUP; 
     double bwEstimate;         
-    double bw_max; 
+    double bwMax; 
     double cwndCoefficient = 1;
+    double downPackageCoefficient;
+    double upPackageCoefficient;
     int lastRtt;
     int minRtt = 10000000; 
     int tick = 1;
@@ -26,11 +32,11 @@ private:
     int maxcwnd;
     int lastCwnd;
 public:
-    bbr(/* args */);
+    bbr(double downPackageCoefficient, double upPackageCoefficient, int maxcwnd);
     ~bbr();
 
     int getCountPackage(int uId, int lastRtt);
-
+private:
     void stateMachine();
 
     void startup();
