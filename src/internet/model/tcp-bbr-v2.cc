@@ -46,7 +46,7 @@ TcpBbrV2::GetTypeId()
                           MakeUintegerChecker<uint32_t>())
             .AddAttribute("RttWindowLength",
                           "Length of RTT windowed filter",
-                          TimeValue(Seconds(10)),
+                          TimeValue(Seconds(5)),
                           MakeTimeAccessor(&TcpBbrV2::m_minRttFilterLen),
                           MakeTimeChecker())
             .AddAttribute("ProbeRttDuration",
@@ -103,6 +103,7 @@ TcpBbrV2::TcpBbrV2(const TcpBbrV2& sock)
       m_probeRtPropStamp(sock.m_probeRtPropStamp),
       m_probeRttDoneStamp(sock.m_probeRttDoneStamp),
       m_probeRttRoundDone(sock.m_probeRttRoundDone),
+      m_probeRttCwndGain(sock.m_probeRttCwndGain),
       m_packetConservation(sock.m_packetConservation),
       m_priorCwnd(sock.m_priorCwnd),
       m_idleRestart(sock.m_idleRestart),
@@ -418,7 +419,7 @@ TcpBbrV2::HandleProbeRTT(Ptr<TcpSocketState> tcb)
     uint32_t totalBytes = m_delivered + tcb->m_bytesInFlight.Get();
     m_appLimited = (totalBytes > 0 ? totalBytes : 1);
 
-    if (m_probeRttDoneStamp == Seconds(0) && tcb->m_bytesInFlight <= m_minPipeCwnd)
+    if (m_probeRttDoneStamp == Seconds(0) && tcb->m_bytesInFlight <= ProbeRTTCwnd(tcb))
     {
         m_probeRttDoneStamp = Simulator::Now() + m_probeRttDuration;
         m_probeRttRoundDone = false;
@@ -560,8 +561,20 @@ TcpBbrV2::ModulateCwndForProbeRTT(Ptr<TcpSocketState> tcb)
     NS_LOG_FUNCTION(this << tcb);
     if (m_state == BbrMode_t::BBR_PROBE_RTT)
     {
-        tcb->m_cWnd = std::min(tcb->m_cWnd.Get(), m_minPipeCwnd);
+        tcb->m_cWnd = std::min(tcb->m_cWnd.Get(), ProbeRTTCwnd(tcb));
     }
+}
+
+uint32_t
+TcpBbrV2::ProbeRTTCwnd(Ptr<TcpSocketState> tcb)
+{
+    NS_LOG_FUNCTION(this << tcb);
+
+    if (m_probeRttCwndGain == 0)
+    {
+        return m_minPipeCwnd;
+    }
+    return std::max(m_minPipeCwnd, GetBDP(tcb, m_probeRttCwndGain));
 }
 
 void
@@ -677,6 +690,19 @@ TcpBbrV2::GetCwndGain()
 {
     NS_LOG_FUNCTION(this);
     return m_cWndGain;
+}
+
+uint32_t
+TcpBbrV2::GetBDP(Ptr<TcpSocketState> tcb, double gain)
+{
+    NS_LOG_FUNCTION(this << tcb << gain);
+    if (m_minRtt == Time::Max())
+    {
+        return tcb->m_initialCWnd * tcb->m_segmentSize;
+    }
+
+    double estimatedBdp = m_maxBwFilter.GetBest() * m_minRtt / 8.0;
+    return estimatedBdp * gain;
 }
 
 double

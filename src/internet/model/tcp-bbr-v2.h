@@ -174,6 +174,14 @@ class TcpBbrV2 : public TcpCongestionOps
     uint32_t GetBbrState();
 
     /**
+     * \brief Calculate bdp based on min RTT and the estimated bottleneck bandwidth.
+     * \param tcb the socket state.
+     * \param gain cwnd gain.
+     * \return reutrns calculated bdp.
+     */
+    uint32_t GetBDP(Ptr<TcpSocketState> tcb, double gain);
+
+    /**
      * \brief Gets current pacing gain.
      * \return returns current pacing gain.
      */
@@ -243,6 +251,13 @@ class TcpBbrV2 : public TcpCongestionOps
      * \return true if congestion window is updated in CA_RECOVERY.
      */
     bool ModulateCwndForRecovery(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
+
+    /**
+     * \brief Returns the cwnd for PROBE_RTT mode
+     * \param tcb the socket state.
+     * \return the cwnd for PROBE_RTT mode
+     */
+    uint32_t ProbeRTTCwnd(Ptr<TcpSocketState> tcb);
 
     /**
      * \brief Helper to restore the last-known good congestion window
@@ -356,6 +371,7 @@ class TcpBbrV2 : public TcpCongestionOps
         Seconds(0)}; //!< The wall clock time at which the current BBR.RTProp sample was obtained.
     Time m_probeRttDoneStamp{Seconds(0)}; //!< Time to exit from BBR_PROBE_RTT state
     bool m_probeRttRoundDone{false};      //!< True when it is time to exit BBR_PROBE_RTT
+    double m_probeRttCwndGain{0.5};       //!< Cwnd to BDP proportion in PROBE_RTT mode scaled by BBR_UNIT. Default: 50%.
     bool m_packetConservation{false};     //!< Enable/Disable packet conservation mode
     uint32_t m_priorCwnd{0};              //!< The last-known good congestion window
     bool m_idleRestart{false};            //!< When restarting from idle, set it true
@@ -370,8 +386,8 @@ class TcpBbrV2 : public TcpCongestionOps
     Time m_cycleStamp{Seconds(0)};       //!< Last time gain cycle updated
     uint32_t m_cycleIndex{0};            //!< Current index of gain cycle
     bool m_minRttExpired{false};         //!< A boolean recording whether the BBR.RTprop has expired
-    Time m_minRttFilterLen{Seconds(10)}; //!< A constant specifying the length of the RTProp min
-                                         //!< filter window, default 10 secs.
+    Time m_minRttFilterLen{Seconds(5)}; //!< A constant specifying the length of the RTProp min
+                                         //!< filter window, default 5 secs.
     Time m_minRttStamp{
         Seconds(0)}; //!< The wall clock time at which the current BBR.RTProp sample was obtained
     bool m_isInitialized{false}; //!< Set to true after first time initialization variables
