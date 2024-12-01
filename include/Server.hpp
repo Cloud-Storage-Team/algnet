@@ -48,7 +48,7 @@ protected:
 struct ServerSender : ServerBase {
     ServerSender(std::uint64_t id, std::uint32_t distance_ns);
     ServerSender() = default;
-    ~ServerSender() = default;
+    virtual ~ServerSender() = default;
 
     /**
      * Get server's CWND size in packets

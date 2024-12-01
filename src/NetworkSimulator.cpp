@@ -1,14 +1,13 @@
 #include "NetworkSimulator.hpp"
 
-NetworkSimulator::NetworkSimulator(const std::vector<std::uint32_t>& distances) {
-    flow = new Flow(distances);
-}
+#include <iostream>
 
-NetworkSimulator::~NetworkSimulator() {
-    delete flow;
+NetworkSimulator::NetworkSimulator(const std::vector<std::uint32_t>& distances) {
+    flow = std::make_unique<Flow>(distances);
 }
 
 void NetworkSimulator::Run() {
     flow->Send();
-    flow->PrintQueueSize();
+    std::uint32_t queue_size_packets = flow->GetPriorityQueueSize();
+    std::cout << "Priority queue size: " << queue_size_packets << std::endl;
 }

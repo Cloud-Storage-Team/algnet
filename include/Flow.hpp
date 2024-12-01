@@ -23,9 +23,11 @@ public:
     void Send();
 
    /**
-    * Write size of priority queue to stdout.
+    * Get size of priority queue in packets.
+    *
+    * @return std::uint32_t -- size of a priority queue in packets.
     */
-    void PrintQueueSize() const;
+    std::uint32_t GetPriorityQueueSize() const;
 
    /**
     * Get vector with source nodes (senders).

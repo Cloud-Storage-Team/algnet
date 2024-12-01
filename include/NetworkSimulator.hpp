@@ -4,7 +4,7 @@
 
 #include <cstdint>
 #include <vector>
-
+#include <memory>
 
 /**
  *  Implementation of a network simulator.
@@ -12,7 +12,7 @@
 class NetworkSimulator {
 public:
     explicit NetworkSimulator(const std::vector<std::uint32_t>& distances);
-    ~NetworkSimulator();
+    ~NetworkSimulator() = default;
 
     /**
      * Start simulation.
@@ -29,5 +29,5 @@ public:
      */
     static const std::uint64_t bandwidth_bytes = 6'250'000'000;
 private:
-    Flow* flow;
+    std::unique_ptr<Flow> flow;
 };
