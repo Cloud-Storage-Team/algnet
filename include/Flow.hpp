@@ -7,7 +7,6 @@
 #include <vector>
 #include <queue>
 
-
 /**
  * Packet flow between source and destination nodes (servers).
  */
@@ -17,36 +16,28 @@ public:
     Flow() = default;
     ~Flow() = default;
 
-   /**
-    * Send packets from every server sender in the amount of CWND size.
-    */
+    /**
+     * @brief Send packets from every server sender in the amount of CWND size.
+     */
     void Send();
 
-   /**
-    * Get size of priority queue in packets.
-    *
-    * @return std::uint32_t -- size of a priority queue in packets.
+    /**
+    * @brief Last ID given to network device.
     */
-    std::uint32_t GetPriorityQueueSize() const;
-
-   /**
-    * Get vector with source nodes (senders).
-    *
-    * @return const std::vector<ServerSender>& -- reference to a vector with source nodes.
-    */
-    const std::vector<ServerSender>& GetSourceNodes() const;
+    std::uint32_t last_given_id = 0;
 
     /**
-    * Get destination node (receiver).
-    *
-    * @return const ServerBase& -- reference to a destination node.
-    */
-    const ServerBase& GetDestinationNode() const;
-private:
-    std::uint32_t last_given_server_id = 0;
-
+     * @brief Vector with sending server objects
+     */
     std::vector<ServerSender> source_nodes;
+
+    /**
+     * @brief Server receiver object
+     */
     ServerBase destination_node;
 
+    /**
+     * @brief Priority queue with in-flight packets
+     */
     std::priority_queue<Packet> packets;
 };
