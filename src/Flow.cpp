@@ -3,7 +3,7 @@
 
 Flow::Flow(const std::vector<std::uint32_t>& distances) : destination_node(0) {
     for (std::uint32_t distance : distances) {
-        source_nodes.emplace_back(++last_given_server_id, distance);
+        source_nodes.emplace_back(++last_given_id, distance);
     }
 }
 
@@ -14,16 +14,4 @@ void Flow::Send() {
             s.IncreaseCurrentTime(s.GetDistance());
         }
     }
-}
-
-std::uint32_t Flow::GetPriorityQueueSize() const {
-    return packets.size();
-}
-
-const std::vector<ServerSender>& Flow::GetSourceNodes() const {
-    return source_nodes;
-}
-
-const ServerBase& Flow::GetDestinationNode() const {
-    return destination_node;
 }
