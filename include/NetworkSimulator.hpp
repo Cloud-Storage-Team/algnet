@@ -15,19 +15,22 @@ public:
     ~NetworkSimulator() = default;
 
     /**
-     * Start simulation.
+     * @brief Start simulation method.
      */
     void Run();
 
     /**
-     * Size of a packet in bytes.
+     * @brief Size of a packet in bytes.
      */
     static const std::uint32_t packet_size_bytes = 1024;
 
     /**
-     * Size of a receiver's bandwidth in bytes.
+     * @brief Size of a receiver's bandwidth in bytes.
      */
     static const std::uint64_t bandwidth_bytes = 6'250'000'000;
-private:
+
+    /**
+     * @brief Pointer to Flow object
+     */
     std::unique_ptr<Flow> flow;
 };
