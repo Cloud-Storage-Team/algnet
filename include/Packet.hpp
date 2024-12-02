@@ -8,12 +8,20 @@ public:
     Packet() = default;
     ~Packet() = default;
 
-    std::uint64_t GetEstimatedDeliveryTime() const;
-    std::uint32_t GetSenderId() const;
-
     bool operator<(const Packet& other) const;
-private:
+
+    /**
+     * @brief ID of the sending network device
+     */
     std::uint32_t sender_id;
+
+    /**
+     * @brief Packet sending time in nanoseconds
+     */
     std::uint64_t sending_time_ns;
+
+    /**
+     * @brief Packet delivery time in nanoseconds
+     */
     std::uint64_t estimated_delivery_time_ns;
 };
