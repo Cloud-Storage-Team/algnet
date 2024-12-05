@@ -23,5 +23,10 @@ public:
     /**
      * @brief Packet delivery time in nanoseconds
      */
-    std::uint64_t estimated_delivery_time_ns;
+    std::uint64_t delivery_time_ns;
+
+    /**
+     * @brief Number of successfully delivered bytes
+     */
+    std::uint32_t transmitted_data_size_bytes;
 };
