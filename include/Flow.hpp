@@ -7,16 +7,11 @@
 #include <memory>
 
 /**
- * Packet flow between source and destination nodes (network devices).
+ * @brief Network flow between the source and destination nodes
  */
 class Flow {
 public:
     explicit Flow(const NetworkDevice& src, const NetworkDevice& dst);
-
-    /**
-     * @brief Send packets from every server sender in the amount of CWND size.
-     */
-    void Send();
 
     /**
      * @brief Pointer to flow's source node
