@@ -1,0 +1,14 @@
+Language: Cpp
+IndentWidth: 4
+SpaceAfterCStyleCast: false
+BreakBeforeBraces: Custom
+BraceWrapping:
+    AfterStruct: false
+AllowShortFunctionsOnASingleLine: false
+SpacesBeforeTrailingComments: 2
+IndentGotoLabels: false
+# SeparateDefinitionBlocks: Always
+# Работает начиная с clang-format-15. Закомментируйте эту строку, если используете более старую версию.
+# Для условий и циклов всегда нужно использовать фигурные скобки.
+# InsertBraces: true
+
