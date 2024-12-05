@@ -56,7 +56,4 @@ class RoutingNetworkElement : public NetworkElement {
      * @param packets_wrapped required for returning updated packets back to
      * simulation queue
      */
-    virtual void ReceivePacket(std::uint64_t current_time_ns,
-                               PacketHeader &packet,
-                               PriorityQueueWrapper &packets_wrapped) = 0;
 };

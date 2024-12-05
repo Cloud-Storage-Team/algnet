@@ -6,14 +6,7 @@
 #include "packet.hpp"
 #include "utils.hpp"
 
-// Switch abstraction
 class NetworkSwitch : public RoutingNetworkElement {
-  protected:
-    // TODO: add id (may be useful for more complicated topologies)
-    // Packet queue inside switch
-    std::priority_queue<PacketHeader> buffer{};
-    std::uint8_t max_buffer_size = 64;
-
   public:
     virtual std::uint64_t
     SendPackets(std::uint64_t current_time_ns,

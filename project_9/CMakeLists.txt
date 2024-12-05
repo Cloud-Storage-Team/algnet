@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.22)
-project(express_pass)
+project(bfs_simulation)
 
 set(CMAKE_CXX_STANDARD 20)
 file(GLOB SOURCES src/*.cpp)
 
-add_executable(express_pass ${SOURCES})
+add_executable(bfs_simulation ${SOURCES})
 
-target_include_directories(express_pass PUBLIC include)
+target_include_directories(bfs_simulation PUBLIC include)
 
 add_subdirectory(tests)

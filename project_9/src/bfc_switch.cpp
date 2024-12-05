@@ -1,8 +1,10 @@
 #include "bfc_switch.hpp"
 
-BFCSwitch::BFCSwitch()
-    : queueVector(numberOfQueues), queuePauseCounter(numberOfQueues, 0),
-      numberManager(numberOfQueues) {
+BFCSwitch::BFCSwitch(std::uint32_t numberOfQueues, std::uint32_t maxQueueSize,
+                     std::uint32_t thresholdQueueSize)
+    : numberOfQueues(numberOfQueues), maxQueueSize(maxQueueSize),
+      thresholdQueueSize(thresholdQueueSize), queueVector(numberOfQueues),
+      queuePauseCounter(numberOfQueues, 0), numberManager(numberOfQueues) {
 }
 
 int BFCSwitch::getQueue() {
@@ -24,14 +26,18 @@ void BFCSwitch::resume(int queueNumber) {
 void BFCSwitch::sendPause(PacketHeader &packet) {
     if (BFCSwitch *bfsSwitch = dynamic_cast<BFCSwitch *>(
             GetNextElement(packet.GetSourceID()).get())) {
-        bfsSwitch->pause(packet.upstreamQ);
+        bfsSwitch->pause(packet.GetUpstreamQ());
+    }
+    if (ServerSender *sender = dynamic_cast<ServerSender *>(
+            GetNextElement(packet.GetSourceID()).get())) {
+        sender->DecreaseMaxAck();
     }
 }
 
 void BFCSwitch::sendResume(PacketHeader &packet) {
     if (BFCSwitch *bfsSwitch = dynamic_cast<BFCSwitch *>(
             GetNextElement(packet.GetSourceID()).get())) {
-        bfsSwitch->resume(packet.upstreamQ);
+        bfsSwitch->resume(packet.GetUpstreamQ());
     }
 }
 
@@ -45,15 +51,15 @@ std::uint64_t BFCSwitch::SendPackets(std::uint64_t current_time_ns,
             PacketHeader packet = queueVector[i].front();
             queueVector[i].pop();
 
-            std::string key =
+            std::size_t key =
                 generateKey(packet.GetSourceID(),
                             packet.GetDestinationID());  // TODO +egress port?
             table[key].size -= 1;
             returnQueue(table[key].qAssignment);
 
-            key = generateKey(packet.upstreamQ);  // TODO +ingress port?
+            key = generateKey(packet.GetUpstreamQ());  // TODO +ingress port?
 
-            if (packet.counterInc) {
+            if (packet.GetFlag(1)) {
                 pauseCounter[key] -= 1;
 
                 if (pauseCounter[key] == 0) {
@@ -62,13 +68,13 @@ std::uint64_t BFCSwitch::SendPackets(std::uint64_t current_time_ns,
                                          // key with port
                 }
             }
-            uint32_t next_packet_time =
-                current_time_ns + 1;  // TODO think about it
-            packet.SetSendingTime(next_packet_time);
-            packet.upstreamQ = packet.qAssignment;
+            last_process_time_ns =
+                std::max(last_process_time_ns, current_time_ns) + process_time;
+            packet.SetSendingTime(last_process_time_ns);
+            packet.SetUpstreamQ(packet.GetQAssignment());
             packets_wrapped.push(RoutingPacket(
                 packet, GetNextElement(packet.GetDestinationID())));
-            return next_packet_time;
+            return last_process_time_ns;
         }
     }
     return current_time_ns +
@@ -89,7 +95,7 @@ void BFCSwitch::ReceivePacket(std::uint64_t current_time_ns,
 
     // std::cout << "Got: " << packet << std::endl;
 
-    std::string key =
+    std::size_t key =
         generateKey(packet.GetSourceID(),
                     packet.GetDestinationID());  // TODO +egress Port?
     if (table[key].size >= maxQueueSize) {
@@ -107,12 +113,12 @@ void BFCSwitch::ReceivePacket(std::uint64_t current_time_ns,
     if (reassignedQueue) {
         table[key].qAssignment = getQueue();
     }
-    packet.qAssignment = table[key].qAssignment;
+    packet.SetQAssignment(table[key].qAssignment);
 
-    key = generateKey(packet.upstreamQ);  // TODO +ingress Port?
+    key = generateKey(packet.GetUpstreamQ());  // TODO +ingress Port?
 
-    if (queueVector[packet.qAssignment].size() > thresholdQueueSize) {
-        packet.counterInc = true;
+    if (queueVector[packet.GetQAssignment()].size() > thresholdQueueSize) {
+        packet.SetFlag(2, 1);
         pauseCounter[key] += 1;
 
         if (pauseCounter[key] == 1) {
@@ -122,5 +128,5 @@ void BFCSwitch::ReceivePacket(std::uint64_t current_time_ns,
     }
     // std::cout << "Put into queue: " << packet << " " << packet.qAssignment
     //           << std::endl;
-    queueVector[packet.qAssignment].push(packet);
+    queueVector[packet.GetQAssignment()].push(packet);
 }

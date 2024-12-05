@@ -7,7 +7,7 @@
 
 #include "link.hpp"
 #include "packet.hpp"
-#include "server.hpp"
+#include "server_base.hpp"
 #include "switch.hpp"
 
 class NetworkSimulator {

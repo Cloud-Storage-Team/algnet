@@ -1,42 +1,37 @@
 #pragma once
 
-#include <cstdint>
-#include <unordered_map>
-#include <vector>
+#include "server_base.hpp"
 
-#include "express_pass.hpp"
-#include "packet.hpp"
-#include "utils.hpp"
-
-// Host abstraction
-class ServerBase : public RoutingNetworkElement {
-  protected:
-    // Host id (should be given ONLY by Simulator::GenerateNewID)
-    std::uint64_t id;
+class ServerReceiver : public ServerBase {
+  private:
+    std::vector<std::uint64_t> senders_ids;
+    PacketGenerator congestion_control;
 
   public:
-    std::uint64_t GetID() {
-        return id;
-    }
+    explicit ServerReceiver(std::vector<std::uint64_t> senders_ids,
+                            std::uint64_t id);
 
-    /**
-     * Generates new packets from host
-     *
-     * Method is invoked by simulator if:
-     * 1) there is no packets in simulation queue
-     * 2) current time of simulation is equal to next_ask
-     *
-     * @param current_time_ns current time in simulation
-     * @param packets_wrapped required for returning updated packets back to
-     * simulation queue
-     * @return next time when simulator should ask for new packets
-     */
-    virtual std::uint64_t
+    std::uint64_t
     SendPackets(std::uint64_t current_time_ns,
-                PriorityQueueWrapper &packets_wrapped) = 0;
-    virtual void
-    ReceivePacket(std::uint64_t current_time_ns, PacketHeader &packet,
-                  PriorityQueueWrapper &packets_wrapped) override = 0;
-    virtual ~ServerBase() {
-    }
+                PriorityQueueWrapper &packets_wrapped) override final;
+    void ReceivePacket(std::uint64_t current_time_ns, PacketHeader &packet,
+                       PriorityQueueWrapper &packets_wrapped) override final;
+};
+
+class ServerSender : public ServerBase {
+  private:
+    std::uint64_t receiver_id;
+    PacketGenerator congestion_control;
+    std::uint64_t ack_counter = 0;
+    std::uint64_t max_ack = 1;
+
+  public:
+    explicit ServerSender(std::uint64_t receiver_id, std::uint64_t id);
+
+    std::uint64_t
+    SendPackets(std::uint64_t current_time_ns,
+                PriorityQueueWrapper &packets_wrapped) override final;
+    void ReceivePacket(std::uint64_t current_time_ns, PacketHeader &packet,
+                       PriorityQueueWrapper &packets_wrapped) override final;
+    void DecreaseMaxAck();
 };

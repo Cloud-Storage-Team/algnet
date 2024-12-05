@@ -10,15 +10,19 @@ NetworkSimulator::NetworkSimulator(
     std::uint64_t simulation_duration_ns)
     : receiver(receiver), n_switch_1(n_switch_1), n_switch_2(n_switch_2),
       simulation_duration_ns(simulation_duration_ns) {
+
     std::shared_ptr<RoutingNetworkElement> routing_receiver =
         std::dynamic_pointer_cast<RoutingNetworkElement>(receiver);
+
     std::shared_ptr<RoutingNetworkElement> routing_switch_1 =
         std::dynamic_pointer_cast<RoutingNetworkElement>(n_switch_1);
+
     std::shared_ptr<RoutingNetworkElement> routing_switch_2 =
         std::dynamic_pointer_cast<RoutingNetworkElement>(n_switch_2);
 
     auto recv_switch_1_conn =
         AddNewConnection(routing_receiver, routing_switch_1, 5);
+
     auto switch_1_2_conn =
         AddNewConnection(routing_switch_1, routing_switch_2, 5);
     // std::cout << links.back() << " " << recv_switch_conn.reversed_link <<
@@ -105,12 +109,10 @@ void NetworkSimulator::ProcessNextPacket(
 }
 
 void NetworkSimulator::StartSimulation() {
-    // std::cout << "Started sim" << std::endl;
     PriorityQueueWrapper wrapped_packets(&packets);
     SendPackets(wrapped_packets);
 
     while (current_time_ns <= simulation_duration_ns) {
-        // std::cout << current_time_ns << std::endl;
         std::uint64_t new_time = next_ask;
         if (packets.empty()) {
             current_time_ns = new_time;

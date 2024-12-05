@@ -30,6 +30,14 @@ std::uint32_t PacketHeader::GetSize() const {
     return size;
 }
 
+std::uint32_t PacketHeader::GetUpstreamQ() const {
+    return upstreamQ;
+}
+
+std::uint32_t PacketHeader::GetQAssignment() const {
+    return qAssignment;
+}
+
 std::uint8_t PacketHeader::GetFlag(std::uint8_t bit) const {
     return (flags >> bit) & 1;
 }
@@ -44,6 +52,14 @@ void PacketHeader::SetFlag(std::uint8_t bit, std::uint8_t value) {
     } else if (value == 1) {
         flags = flags | ((std::uint8_t)1 << bit);
     }
+}
+
+void PacketHeader::SetUpstreamQ(std::uint32_t queue) {
+    upstreamQ = queue;
+}
+
+void PacketHeader::SetQAssignment(std::uint32_t queue) {
+    qAssignment = queue;
 }
 
 bool PacketHeader::operator<(const PacketHeader &other) const {

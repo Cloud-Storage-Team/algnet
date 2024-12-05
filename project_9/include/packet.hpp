@@ -11,16 +11,13 @@ class PacketHeader {
     std::uint64_t sending_time;
     std::uint32_t packet_index;
     std::uint32_t size;
-
-    // 0 bit - is credit packet
-    // 2 bit - initializing connection or not
+    std::uint32_t qAssignment = 0;
+    std::uint32_t upstreamQ = 0;
+    // 0 bit - is ack packet
+    // 1 bit - is counterInc (BFC)
     std::uint8_t flags = 0;
 
   public:
-    std::uint32_t qAssignment;  // TODO insert in flags variable?
-    bool counterInc;            // TODO insert in flags variable?
-    std::uint32_t upstreamQ;    // TODO insert in flags variable?
-
     PacketHeader() = default;
     PacketHeader(std::uint64_t source_id, std::uint64_t destination_id,
                  std::uint64_t sending_time, std::uint32_t packet_index,
@@ -31,11 +28,14 @@ class PacketHeader {
     std::uint64_t GetSendingTime() const;
     std::uint64_t GetSourceID() const;
     std::uint32_t GetSize() const;
+    std::uint32_t GetQAssignment() const;
+    std::uint32_t GetUpstreamQ() const;
     std::uint8_t GetFlag(std::uint8_t bit) const;
 
     void SetSendingTime(std::uint64_t time);
     void SetFlag(std::uint8_t bit, std::uint8_t value);
-
+    void SetQAssignment(std::uint32_t);
+    void SetUpstreamQ(std::uint32_t);
     bool operator<(const PacketHeader &other) const;
 
     friend std::ostream &operator<<(std::ostream &outs,
