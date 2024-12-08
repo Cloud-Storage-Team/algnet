@@ -7,8 +7,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(SOURCE_FILES
     src/Flow.cpp
     src/Packet.cpp
+    src/Event.cpp
     src/NetworkSimulator.cpp
+    src/NetworkDevice.cpp
     src/Server.cpp
+    src/Switch.cpp
 )
 
 add_executable(network_simulator src/main.cpp ${SOURCE_FILES})

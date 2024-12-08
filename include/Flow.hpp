@@ -1,52 +1,34 @@
 #pragma once
 
-#include "Packet.hpp"
-#include "Server.hpp"
+#include "NetworkDevice.hpp"
+#include "Event.hpp"
 
 #include <cstdint>
-#include <vector>
+#include <memory>
 #include <queue>
 
-
 /**
- * Packet flow between source and destination nodes (servers).
+ * @brief Network flow between the source and destination nodes
  */
 class Flow {
 public:
-    explicit Flow(const std::vector<std::uint32_t>& distances);
-    Flow() = default;
-    ~Flow() = default;
-
-   /**
-    * Send packets from every server sender in the amount of CWND size.
-    */
-    void Send();
-
-   /**
-    * Get size of priority queue in packets.
-    *
-    * @return std::uint32_t -- size of a priority queue in packets.
-    */
-    std::uint32_t GetPriorityQueueSize() const;
-
-   /**
-    * Get vector with source nodes (senders).
-    *
-    * @return const std::vector<ServerSender>& -- reference to a vector with source nodes.
-    */
-    const std::vector<ServerSender>& GetSourceNodes() const;
+    explicit Flow(const std::vector<std::shared_ptr<NetworkDevice>>& path);
 
     /**
-    * Get destination node (receiver).
-    *
-    * @return const ServerBase& -- reference to a destination node.
-    */
-    const ServerBase& GetDestinationNode() const;
-private:
-    std::uint32_t last_given_server_id = 0;
+     * @brief Send packets from every server sender in the amount of CWND size.
+     */
+    void Send();
 
-    std::vector<ServerSender> source_nodes;
-    ServerBase destination_node;
+    /**
+     * @brief Vector of network devices forming the flow path
+     *
+     * @details First element is the source node, last element is the destination node
+     */
+    std::vector<std::shared_ptr<NetworkDevice>> path;
 
-    std::priority_queue<Packet> packets;
+    /**
+     * @brief Vector of distances in nanoseconds between nodes on the path
+     */
+    std::vector<std::uint32_t> distances_ns;
+
 };

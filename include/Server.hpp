@@ -1,67 +1,53 @@
 #pragma once
 
-#include "Packet.hpp"
+#include "NetworkDevice.hpp"
+#include "Event.hpp"
 
-#include <cstdint>
 #include <vector>
 #include <queue>
 
 /**
- * Server receiver
- *
- * The main task of ServerBase -- receive packets and send ACKs
+ * @brief
  */
-struct ServerBase {
-    explicit ServerBase(std::uint32_t id);
-    ServerBase() = default;
-    virtual ~ServerBase() = default;
+class Server: public NetworkDevice {
+public:
+    Server();
 
     /**
-     * Get ID of server
-     * @return std::uint32_t -- server's ID
+     * @brief Sends events (i. e. packets) to the receiver
+     *
+     * @details Receiver -- next device in the flow path
      */
-    std::uint32_t GetID() const;
+    void Send(std::shared_ptr<NetworkDevice> receiver, std::uint32_t distance_ns) override;
 
     /**
-     * Get server's current time in nanoseconds
-     * @return std::uint64_t -- server's current time in nanoseconds
+     * @brief Vector with packets sent by server
      */
-    std::uint64_t GetCurrentTime() const;
+    std::vector<Packet> sent_packets;
 
     /**
-     * Replace server's current time with a new value
-     * @param new_time -- new value of time in nanoseconds
+     * @brief Deque with incoming events (i. e. packets)
      */
-    void SetCurrentTime(std::uint64_t new_time);
+    std::deque<Event> ingress_events;
 
     /**
-     * Increase server's current time by delta_time nanoseconds
-     * @param delta_time -- time step in nanoseconds
+     * @brief Overridden method to std::deque
+     *
+     * @return Event in the head of deque
      */
-    void IncreaseCurrentTime(std::uint64_t delta_time);
-protected:
-    std::uint32_t id;
-    std::uint64_t current_time_ns = 0;
-};
-
-// Type for sending server, contains ID and distance to receiver
-struct ServerSender : ServerBase {
-    ServerSender(std::uint64_t id, std::uint32_t distance_ns);
-    ServerSender() = default;
-    virtual ~ServerSender() = default;
+    const Event& TopStorage() override;
 
     /**
-     * Get server's CWND size in packets
-     * @return std::uint64_t -- server's CWND size in packets
-     */
-    std::uint64_t GetCWNDSize() const;
+     * @brief Overridden method to std::deque
+     *
+     * @details Removes head event from deque
+    */
+    void PopStorage() override;
 
     /**
-     * Get server's distance to receiver in nanoseconds
-     * @return std::uint32_t -- server's distance to receiver in nanoseconds
+     * @brief Overridden method to std::deque
+     *
+     * @details Pushes event to the tail of deque
      */
-    std::uint32_t GetDistance() const;
-private:
-    std::uint32_t distance_ns;
-    std::uint64_t cwnd_size_packets = 1;
+    void PushStorage(const Event& event) override;
 };

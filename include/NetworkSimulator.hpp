@@ -1,33 +1,48 @@
 #pragma once
 
 #include "Flow.hpp"
+#include "NetworkDevice.hpp"
+#include "Switch.hpp"
+#include "Server.hpp"
+#include "Event.hpp"
 
 #include <cstdint>
 #include <vector>
 #include <memory>
+#include <queue>
 
 /**
- *  Implementation of a network simulator.
+ * @brief Implementation of a network simulator.
  */
 class NetworkSimulator {
 public:
-    explicit NetworkSimulator(const std::vector<std::uint32_t>& distances);
+    NetworkSimulator() = default;
     ~NetworkSimulator() = default;
 
     /**
-     * Start simulation.
+     * @brief Start simulation method.
      */
     void Run();
 
     /**
-     * Size of a packet in bytes.
+     * @brief Size of a packet in bytes.
      */
     static const std::uint32_t packet_size_bytes = 1024;
 
     /**
-     * Size of a receiver's bandwidth in bytes.
+     * @brief Size of a receiver's bandwidth in bytes.
      */
     static const std::uint64_t bandwidth_bytes = 6'250'000'000;
-private:
-    std::unique_ptr<Flow> flow;
+
+    /**
+     * @brief Vector with all network devices
+     */
+    std::vector<std::shared_ptr<NetworkDevice>> devices;
+
+    /**
+     * @brief Vector with all network flows
+     *
+     * @details Flow -- is a path from sender to receiver in the network
+     */
+    std::vector<std::unique_ptr<Flow>> flows;
 };

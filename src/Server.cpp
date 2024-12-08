@@ -1,31 +1,32 @@
 #include "Server.hpp"
+#include "Event.hpp"
 
-ServerBase::ServerBase(std::uint32_t id)
-    : id(id) { }
+Server::Server():
+        NetworkDevice(DeviceType::Server) { }
 
-std::uint32_t ServerBase::GetID() const {
-    return id;
+void Server::Send(std::shared_ptr<NetworkDevice> receiver, std::uint32_t distance_ns) {
+    std::uint32_t packets_number = 10;
+    for (std::uint32_t i = 0; i < packets_number; ++i) {
+        // Create packet
+        Packet p(current_time_ns);
+        sent_packets.push_back(p);
+
+        // Create event (i. e. send packet)
+        receiver->PushStorage(Event(&sent_packets.back(), current_time_ns + distance_ns));
+
+        // Update sender local time
+        current_time_ns += distance_ns;
+    }
 }
 
-std::uint64_t ServerBase::GetCurrentTime() const {
-    return current_time_ns;
+const Event& Server::TopStorage() {
+    return ingress_events.front();
 }
 
-void ServerBase::SetCurrentTime(std::uint64_t new_time) {
-    current_time_ns = new_time;
+void Server::PopStorage() {
+    ingress_events.pop_front();
 }
 
-void ServerBase::IncreaseCurrentTime(std::uint64_t delta_time) {
-    current_time_ns += delta_time;
-}
-
-ServerSender::ServerSender(std::uint64_t id, std::uint32_t distance_ns)
-    : ServerBase(id), distance_ns(distance_ns) { }
-
-std::uint64_t ServerSender::GetCWNDSize() const {
-    return cwnd_size_packets;
-}
-
-std::uint32_t ServerSender::GetDistance() const {
-    return distance_ns;
+void Server::PushStorage(const Event &event) {
+    ingress_events.push_back(event);
 }

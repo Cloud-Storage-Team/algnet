@@ -1,29 +1,16 @@
 #include "Flow.hpp"
-#include "Server.hpp"
 
-Flow::Flow(const std::vector<std::uint32_t>& distances) : destination_node(0) {
-    for (std::uint32_t distance : distances) {
-        source_nodes.emplace_back(++last_given_server_id, distance);
+#include <stdexcept>
+
+Flow::Flow(const std::vector<std::shared_ptr<NetworkDevice>>& path) {
+    if (path.size() < 2) {
+        throw std::runtime_error("Incorrect flow path.");
     }
+    this->path = path;
 }
 
 void Flow::Send() {
-    for (ServerSender& s: source_nodes) {
-        for (std::uint64_t i = 0; i < s.GetCWNDSize(); ++i) {
-            packets.emplace(s.GetID(), s.GetCurrentTime(), s.GetCurrentTime() + s.GetDistance());
-            s.IncreaseCurrentTime(s.GetDistance());
-        }
-    }
-}
-
-std::uint32_t Flow::GetPriorityQueueSize() const {
-    return packets.size();
-}
-
-const std::vector<ServerSender>& Flow::GetSourceNodes() const {
-    return source_nodes;
-}
-
-const ServerBase& Flow::GetDestinationNode() const {
-    return destination_node;
+    std::shared_ptr<NetworkDevice> server = path.at(0);
+    std::shared_ptr<NetworkDevice> device_receiver = path.at(1);
+    server->Send(device_receiver, distances_ns.at(0));
 }
