@@ -2,7 +2,9 @@
 #include "Event.hpp"
 
 Server::Server():
-        NetworkDevice(DeviceType::Server) { }
+    NetworkDevice(DeviceType::Server) {
+    id = NetworkDevice::last_given_device_id++;
+}
 
 void Server::Send(std::shared_ptr<NetworkDevice> receiver, std::uint32_t distance_ns) {
     std::uint32_t packets_number = 10;
