@@ -14,6 +14,7 @@ class NetworkElement;
  */
 class RoutingPacket {
 private:
+    // TODO: store time of passing last network element here and use it instead of PacketHeader::sending_time
     PacketHeader packet;
     std::shared_ptr<NetworkElement> next_network_element;
 public:
