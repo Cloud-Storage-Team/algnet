@@ -21,7 +21,7 @@ public:
     };
 
     void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, PriorityQueueWrapper& packets_wrapped) override final {
-        std::cout << "Received: " << packet.GetSendingTime() << std::endl << std::endl;
+        std::cout << "Received: " << packet.sending_time << std::endl << std::endl;
         if (current_time_ns <= simulation_duration) {
             amount_of_data++;
         }
@@ -56,6 +56,6 @@ public:
         return oss.str();
     };
     void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, PriorityQueueWrapper& packets_wrapped) override final {
-        amount_of_data_from_sender[packet.GetSourceID()]++;
+        amount_of_data_from_sender[packet.source_id]++;
     };
 };

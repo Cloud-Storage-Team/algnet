@@ -53,7 +53,7 @@ void NetworkSimulator::SendPackets(PriorityQueueWrapper& wrapped_packets) {
 void NetworkSimulator::ProcessNextPacket(PriorityQueueWrapper& wrapped_packets) {
     // std::cout << "Processed pac" << std::endl;
     RoutingPacket r_packet = packets.top();
-    // std::cout << "Removed: " << packet.GetDestinationID() << " " << packet.GetSendingTime() << std::endl;
+    // std::cout << "Removed: " << packet.destination_id << " " << packet.sending_time << std::endl;
     packets.pop();
     PacketHeader packet = r_packet.GetPacket();
     r_packet.GetNext()->ReceivePacket(current_time_ns, packet, wrapped_packets);
@@ -80,7 +80,7 @@ void NetworkSimulator::StartSimulation() {
             continue;
         }
 
-        std::uint64_t next_packet_time = packets.top().GetPacket().GetSendingTime();
+        std::uint64_t next_packet_time = packets.top().GetPacket().sending_time;
         if (next_packet_time >= new_time) {
             if (SetCurrentTime(new_time)) {
                 SendPackets(wrapped_packets);
@@ -94,7 +94,7 @@ void NetworkSimulator::StartSimulation() {
     }
 
     while (!packets.empty()) {
-        std::uint64_t next_packet_time = packets.top().GetPacket().GetSendingTime();
+        std::uint64_t next_packet_time = packets.top().GetPacket().sending_time;
         current_time_ns = next_packet_time;
         ProcessNextPacket(wrapped_packets);
     }

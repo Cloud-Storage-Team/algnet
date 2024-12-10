@@ -13,21 +13,21 @@ public:
     };
 
     void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, PriorityQueueWrapper& packets_wrapped) override final {
-        while (!buffer.empty() && buffer.front().GetSendingTime() <= current_time_ns) {
-            current_buffer_size_bit -= buffer.front().GetSize();
+        while (!buffer.empty() && buffer.front().sending_time <= current_time_ns) {
+            current_buffer_size_bit -= buffer.front().size;
             buffer.pop();
         }
 
         // TODO: maybe should add some check that sending time of elements in queue is decreasing 
-        if (current_buffer_size_bit + packet.GetSize() <= max_buffer_size_bit) {
-            current_buffer_size_bit += packet.GetSize();
-            std::cout << "Got packet on switch: " << packet.GetSendingTime() << std::endl;
-            packet.SetSendingTime(current_time_ns + process_time_ns);
+        if (current_buffer_size_bit + packet.size <= max_buffer_size_bit) {
+            current_buffer_size_bit += packet.size;
+            std::cout << "Got packet on switch: " << packet.sending_time << std::endl;
+            packet.sending_time = current_time_ns + process_time_ns;
             buffer.push(packet);
-            packets_wrapped.push(RoutingPacket(packet, GetNextElement(packet.GetDestinationID())));
-            std::cout << "Finish of processing is at: " << packet.GetSendingTime() << std::endl << std::endl;
+            packets_wrapped.push(RoutingPacket(packet, GetNextElement(packet.destination_id)));
+            std::cout << "Finish of processing is at: " << packet.sending_time << std::endl << std::endl;
         } else {
-            std::cout << "Dropped packet on switch: " << packet.GetSendingTime() << std::endl << std::endl;
+            std::cout << "Dropped packet on switch: " << packet.sending_time << std::endl << std::endl;
             return;
         }
     };

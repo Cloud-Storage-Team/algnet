@@ -8,33 +8,11 @@ PacketHeader::PacketHeader(std::uint64_t source_id, std::uint64_t destination_id
     packet_index(packet_index),
     size(size) {}
 
-std::uint32_t PacketHeader::GetPackageIndex() const {
-    return packet_index;
-}
-
-std::uint64_t PacketHeader::GetSendingTime() const {
-    return sending_time;
-}
-
-std::uint64_t PacketHeader::GetSourceID() const {
-    return source_id;
-}
-
-std::uint64_t PacketHeader::GetDestinationID() const {
-    return destination_id;
-}
-
-std::uint32_t PacketHeader::GetSize() const {
-    return size;
-}
 
 std::uint8_t PacketHeader::GetFlag(std::uint8_t bit) const {
     return (flags >> bit) & 1;
 }
 
-void PacketHeader::SetSendingTime(std::uint64_t time) {
-    sending_time = time;
-}
 
 void PacketHeader::SetFlag(std::uint8_t bit, std::uint8_t value) {
     if (value == 0) {

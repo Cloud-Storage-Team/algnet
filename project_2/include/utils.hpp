@@ -26,6 +26,6 @@ public:
     void push(const RoutingPacket& packet) {
         // std::cout << "Added: " << packets->size() << std::endl;
         packets->push(packet);
-        // std::cout << "Added: " << packet.GetDestinationID() << " " << packet.GetSendingTime() << std::endl;
+        // std::cout << "Added: " << packet.destination_id << " " << packet.sending_time << std::endl;
     }
 };

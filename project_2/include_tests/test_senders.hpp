@@ -23,8 +23,8 @@ public:
         }
 
         PacketHeader packet = PacketHeader(this->id, receiver_id, current_time_ns, 0, 8192);
-        std::cout << "Sent: " << packet.GetSendingTime() << std::endl;
-        packets_wrapped.push(RoutingPacket(packet, this->GetNextElement(packet.GetDestinationID())));
+        std::cout << "Sent: " << packet.sending_time << std::endl;
+        packets_wrapped.push(RoutingPacket(packet, this->GetNextElement(packet.destination_id)));
 
         next_sending_time = current_time_ns + sending_time_interval;
         std::cout << "Next sending at: " << next_sending_time << std::endl << std::endl;
@@ -58,7 +58,7 @@ public:
 
         for (int n = 0; n < packets_to_send; n++) {
             PacketHeader packet = PacketHeader(this->id, receiver_id, current_time_ns, n, 8192);
-            packets_wrapped.push(RoutingPacket(packet, this->GetNextElement(packet.GetDestinationID())));
+            packets_wrapped.push(RoutingPacket(packet, this->GetNextElement(packet.destination_id)));
         }
         packets_to_send *= multiplier;
 

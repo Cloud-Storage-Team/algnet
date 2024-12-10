@@ -8,7 +8,7 @@
  * 
  */
 class PacketHeader {
-private:
+public:
     std::uint64_t source_id;
     std::uint64_t destination_id;
     // TODO: use it as real sending time (passing first link maybe) in checks that
@@ -19,7 +19,7 @@ private:
     // 0 bit - is credit packet
     // 2 bit - initializing connection or not
     std::uint8_t flags = 0;
-public:
+
     PacketHeader() = default;
     /**
      * @brief Construct a new Packet Header object
@@ -32,14 +32,7 @@ public:
      */
     PacketHeader(std::uint64_t source_id, std::uint64_t destination_id, std::uint64_t sending_time, std::uint32_t packet_index, std::uint32_t size);
 
-    std::uint32_t GetPackageIndex() const;
-    std::uint64_t GetDestinationID() const;
-    std::uint64_t GetSendingTime() const;
-    std::uint64_t GetSourceID() const;
-    std::uint32_t GetSize() const;
     std::uint8_t GetFlag(std::uint8_t bit) const;
-
-    void SetSendingTime(std::uint64_t time);
     void SetFlag(std::uint8_t bit, std::uint8_t value);
 
     bool operator<(const PacketHeader& other) const;
