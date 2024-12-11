@@ -1,10 +1,9 @@
 #pragma once
 
+#include "Event.hpp"
 #include "Flow.hpp"
-#include "NetworkDevice.hpp"
 #include "Switch.hpp"
 #include "Server.hpp"
-#include "Event.hpp"
 
 #include <cstdint>
 #include <vector>
@@ -26,9 +25,9 @@ public:
     void Run();
 
     /**
-     * @brief Network graph topological sorting
+     * @brief Process events from the priority queue
      */
-    void Topsort();
+     void ProcessEvents();
 
     /**
      * @brief Size of a packet in bytes.
@@ -55,24 +54,24 @@ public:
      *
      * @details Flow -- is a path from sender to receiver in the network
      */
-    std::vector<std::unique_ptr<Flow>> flows;
+    inline static std::vector<std::unique_ptr<Flow>> flows;
 
     /**
-     * @brief Topsorted forward traversal of a network graph
+     * @brief Priority queue with all network events
      *
-     * @details Forward means from senders to receivers (Packets transmission)
+     * @details Events are sorted by delivery time
      */
-    std::vector<std::uint32_t> forward_device_visit_order;
+    inline static std::priority_queue<Event> event_scheduler;
 
     /**
-     * @brief Topsorted backward traversal of a network graph
+     * @brief Map: link (graph edge) --> time when link is ready to transmit next packet
      *
-     * @details Backward means from receivers to senders (ACKs transmission)
+     * @details Key is a pair (min(a, b), max(a, b)), where a and b are IDs of devices connected by this link
      */
-    std::vector<std::uint32_t> backward_device_visit_order;
+     inline static std::map<std::pair<std::uint32_t, std::uint32_t>, std::uint64_t> link_last_process_time_ns;
 
     /**
      * @brief Map: device ID --> index in `devices` vector
      */
-    std::map<std::uint32_t, std::uint32_t> device_by_id;
+    std::map<std::uint32_t, std::uint32_t> device_index_by_id;
 };
