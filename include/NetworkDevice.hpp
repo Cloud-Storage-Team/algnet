@@ -1,22 +1,27 @@
 #pragma once
 
-#include "Packet.hpp"
-
 #include <vector>
 #include <memory>
 #include <cstdint>
-#include <unordered_map>
+#include <queue>
 
 enum class DeviceType: std::uint8_t {
     Switch,
-    ComputerSenderNode,
-    ComputerReceiverNode,
+    ServerSender,
+    ServerReceiver,
 };
 
 class NetworkDevice {
 public:
-    explicit NetworkDevice(DeviceType type, std::uint32_t id);
+    explicit NetworkDevice(DeviceType type);
     virtual ~NetworkDevice() = default;
+
+    /**
+     * @brief Send events (i. e. packets) to the receiver node
+     *
+     * @details Receiver -- next device in the flow path
+     */
+    virtual void Send(std::uint32_t flow_id) = 0;
 
     /**
      * @brief Vector of pointers to adjacent network devices.
@@ -31,15 +36,19 @@ public:
     DeviceType type;
 
     /**
-     * @brief Network device ID.
+     * @brief Device's current time in nanoseconds
+     */
+    std::uint64_t current_time_ns = 0;
+
+    /**
+     * @brief Device ID
+     *
+     * Usage: ID is a vertex in the network graph
      */
     std::uint32_t id;
 
     /**
-     * @brief Network device storage.
-     *
-     * @details Device stores packets from adjacent device in corresponding vector. \n
-     * Key: adjacent device ID. Value: vector with packets.
+     * @brief New device ID = last given + 1
      */
-    std::unordered_map<std::uint32_t, std::vector<Packet>> storage;
+    inline static std::uint32_t last_given_device_id = 0;
 };
