@@ -1,6 +1,5 @@
 #include "routing_packet.hpp"
 #include "link.hpp"
-#include "utils.hpp"
 
 #include <unordered_map>
 

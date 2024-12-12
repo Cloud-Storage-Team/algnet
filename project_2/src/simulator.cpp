@@ -1,23 +1,23 @@
 #include "simulator.hpp"
+#include <iostream>
 
 std::uint64_t NetworkSimulator::id_to_give = 0;
 
-// TODO: pass links speed to simulation
-NetworkSimulator::NetworkSimulator(std::vector<std::shared_ptr<ServerBase>>& senders, std::shared_ptr<ServerBase> receiver, std::shared_ptr<NetworkSwitch> n_switch, std::uint64_t simulation_duration_ns):
+NetworkSimulator::NetworkSimulator(std::vector<std::shared_ptr<ServerBase>>& senders, std::shared_ptr<ServerBase> receiver, std::shared_ptr<NetworkSwitch> n_switch, std::uint64_t simulation_duration_ns, std::uint64_t links_speed):
     receiver(receiver),
     n_switch(n_switch),
     simulation_duration_ns(simulation_duration_ns)
 {
     std::shared_ptr<RoutingNetworkElement> routing_receiver = std::dynamic_pointer_cast<RoutingNetworkElement>(receiver);
     std::shared_ptr<RoutingNetworkElement> routing_switch = std::dynamic_pointer_cast<RoutingNetworkElement>(n_switch);
-    auto recv_switch_conn = AddNewConnection(routing_receiver, routing_switch, 50);
-    // std::cout << links.back() << " " << recv_switch_conn.reversed_link << std::endl;
+    auto recv_switch_conn = AddNewConnection(routing_receiver, routing_switch, links_speed);
+    
     routing_switch->AddNewRoute(receiver->GetID(), recv_switch_conn.reversed_link);
 
     for (std::shared_ptr<ServerBase> sender : senders) {
         ids_to_senders[sender->GetID()] = sender;
         std::shared_ptr<RoutingNetworkElement> routing_sender = std::dynamic_pointer_cast<RoutingNetworkElement>(sender);
-        auto switch_sender_conn = AddNewConnection(routing_switch, routing_sender, 50);
+        auto switch_sender_conn = AddNewConnection(routing_switch, routing_sender, links_speed);
         routing_switch->AddNewRoute(sender->GetID(), switch_sender_conn.direct_link);
         routing_sender->AddNewRoute(receiver->GetID(), switch_sender_conn.reversed_link);
         routing_receiver->AddNewRoute(sender->GetID(), recv_switch_conn.direct_link);
@@ -36,66 +36,35 @@ Connection NetworkSimulator::AddNewConnection(std::shared_ptr<RoutingNetworkElem
     return Connection(std::move(link), std::move(reverse_link));
 }
 
-void NetworkSimulator::SendPackets(PriorityQueueWrapper& wrapped_packets) {
-    // std::cout << "Sent packs" << std::endl;
+void NetworkSimulator::GenerateNewEvents() {
     next_ask = simulation_duration_ns + 1;
 
-    std::uint64_t possible_next_ask = receiver->SendPackets(current_time_ns, wrapped_packets);
+    std::uint64_t possible_next_ask = receiver->SendPackets(current_time_ns, events);
     next_ask = std::min(next_ask, ((possible_next_ask == 0) ? next_ask : possible_next_ask));
 
     for (auto& [_, sender] : ids_to_senders) {
-        possible_next_ask = sender->SendPackets(current_time_ns, wrapped_packets);   
+        possible_next_ask = sender->SendPackets(current_time_ns, events);   
         next_ask = std::min(next_ask, ((possible_next_ask == 0) ? next_ask : possible_next_ask));
     }
-    // std::cout << next_ask << std::endl;
-}
-
-void NetworkSimulator::ProcessNextPacket(PriorityQueueWrapper& wrapped_packets) {
-    // std::cout << "Processed pac" << std::endl;
-    RoutingPacket r_packet = packets.top();
-    // std::cout << "Removed: " << packet.destination_id << " " << packet.sending_time << std::endl;
-    packets.pop();
-    PacketHeader packet = r_packet.GetPacket();
-    r_packet.GetNext()->ReceivePacket(current_time_ns, packet, wrapped_packets);
-}
-
-bool NetworkSimulator::SetCurrentTime(std::uint64_t possible_new_time) {
-    current_time_ns = possible_new_time;
-    return current_time_ns <= simulation_duration_ns;
 }
 
 void NetworkSimulator::StartSimulation() {
-    // std::cout << "Started sim" << std::endl;
-    PriorityQueueWrapper wrapped_packets(&packets);
-    SendPackets(wrapped_packets);
+    GenerateNewEvents();
 
-    // TODO: perhaps the inequality should be strict here 
-    while (current_time_ns <= simulation_duration_ns) {
-        // std::cout << current_time_ns << std::endl;
-        std::uint64_t new_time = next_ask;
-        if (packets.empty()) {
-            if (SetCurrentTime(new_time)) {
-                SendPackets(wrapped_packets);
-            }
-            continue;
-        }
+    while (current_time_ns <= simulation_duration_ns && !events.empty()) {
+        std::shared_ptr<Event> event(events.top());
+        events.pop();
 
-        std::uint64_t next_packet_time = packets.top().GetPacket().sending_time;
-        if (next_packet_time >= new_time) {
-            if (SetCurrentTime(new_time)) {
-                SendPackets(wrapped_packets);
-            }
-        }
-
-        if (next_packet_time <= new_time) {
-            current_time_ns = next_packet_time;
-            ProcessNextPacket(wrapped_packets);
-        }
+        current_time_ns = event->event_time;
+        event->perform_action(events);
     }
 
-    while (!packets.empty()) {
-        std::uint64_t next_packet_time = packets.top().GetPacket().sending_time;
-        current_time_ns = next_packet_time;
-        ProcessNextPacket(wrapped_packets);
+    while (!events.empty()) {
+        std::shared_ptr<Event> event(events.top());
+        events.pop();
+
+        current_time_ns = event->event_time;
+
+        event->perform_action(events);
     }
 }

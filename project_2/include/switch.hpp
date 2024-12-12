@@ -1,9 +1,10 @@
 #pragma once
 
 #include <vector>
-#include <queue>
+#include <deque>
 #include "packet.hpp"
-#include "utils.hpp"
+#include "routing_packet.hpp"
+#include "network_element.hpp"
 
 /**
  * @brief Switch abstraction
@@ -16,7 +17,7 @@ protected:
     // TODO: add id (may be useful for more complicated topologies)
     // Packet queue inside switch
     // TODO: use dequeue instead of queue
-    std::queue<PacketHeader> buffer{};
+    std::deque<PacketHeader> buffer{};
     std::uint64_t max_buffer_size_bit = 81920;
     std::uint64_t current_buffer_size_bit = 0;
     
@@ -28,6 +29,6 @@ public:
      * @param packet 
      * @param packets_wrapped 
      */
-    virtual void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, PriorityQueueWrapper& packets_wrapped) override = 0;
+    virtual void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& all_events) override = 0;
     virtual ~NetworkSwitch() {}
 };

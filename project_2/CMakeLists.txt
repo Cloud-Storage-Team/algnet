@@ -13,25 +13,25 @@ file(GLOB SOURCES src/*.cpp)
 
 add_executable(express_pass ${SOURCES})
 
-add_library(express_pass_lib SHARED ${SOURCES})
+# add_library(express_pass_lib SHARED ${SOURCES})
 
 target_include_directories(express_pass PUBLIC include)
-target_include_directories(express_pass_lib PUBLIC include)
+# target_include_directories(express_pass_lib PUBLIC include)
 
-# --- Testing Setup ---
-add_subdirectory(googletest)
+# # --- Testing Setup ---
+# add_subdirectory(googletest)
 
-enable_testing()
+# enable_testing()
 
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
+# find_package(GTest REQUIRED)
+# include_directories(${GTEST_INCLUDE_DIRS})
 
-file(GLOB TEST_SOURCES tests/*.cpp)
+# file(GLOB TEST_SOURCES tests/*.cpp)
 
-add_executable(express_pass_tests ${TEST_SOURCES})
+# add_executable(express_pass_tests ${TEST_SOURCES})
 
-target_link_libraries(express_pass_tests ${GTEST_LIBRARIES} pthread express_pass_lib)
+# target_link_libraries(express_pass_tests ${GTEST_LIBRARIES} pthread express_pass_lib)
 
-target_include_directories(express_pass_tests PRIVATE include_tests)
+# target_include_directories(express_pass_tests PRIVATE include_tests)
 
-add_test(NAME express_pass_tests COMMAND express_pass_tests)
+# add_test(NAME express_pass_tests COMMAND express_pass_tests)

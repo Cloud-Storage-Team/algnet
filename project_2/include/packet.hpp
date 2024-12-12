@@ -27,7 +27,7 @@ public:
      * @param source_id packet source
      * @param destination_id packet destination
      * @param sending_time time of sending packet 
-     * @param packet_index unique packet identifier (within network element, that generated it)
+     * @param packet_index unique packet identifier (within flow)
      * @param size packet size
      */
     PacketHeader(std::uint64_t source_id, std::uint64_t destination_id, std::uint64_t sending_time, std::uint32_t packet_index, std::uint32_t size);
@@ -42,9 +42,9 @@ public:
              << "Source ID: " << packet.source_id << ", "
              << "Destination ID: " << packet.destination_id << ", "
              << "Sending Time: " << packet.sending_time << ", "
-            //  << "Packet Index: " << packet.packet_index << ", "
+             << "Packet Index: " << packet.packet_index << ", "
              << "Size: " << packet.size << ", "
-            //  << "Flags: " << static_cast<int>(packet.flags)
+             << "Flags: " << static_cast<int>(packet.flags)
              << ")";
         return outs;
     }

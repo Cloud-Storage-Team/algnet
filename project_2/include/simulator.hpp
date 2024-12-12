@@ -1,6 +1,7 @@
 #pragma once
 
 #include "packet.hpp"
+#include "event.hpp"
 #include "switch.hpp"
 #include "server.hpp"
 #include "link.hpp"
@@ -35,8 +36,8 @@ private:
     //! Switch in the middle between senders and receiver
     std::shared_ptr<NetworkSwitch> n_switch;
 
-    //! Sorts packages by sending time
-    std::priority_queue<RoutingPacket> packets{};
+    //! Sorts events by sending time
+    std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator> events;
     
     /**
      * @brief Creates direct and reverse link between two network elements with given speed (in bits per ns)
@@ -50,23 +51,7 @@ private:
      */
     Connection AddNewConnection(std::shared_ptr<RoutingNetworkElement> source, std::shared_ptr<RoutingNetworkElement> destination, std::uint64_t speed);
     
-    /**
-     * @brief Calls SendPackets method of all hosts
-     * 
-     * @remark Called when current simulation time reached next_ask or packet queue is empty
-     * 
-     * @param wrapped_packets 
-     */
-    void SendPackets(PriorityQueueWrapper& wrapped_packets);
-
-    /**
-     * @brief Calls ReceivePacket method of next network element in packet route
-     * 
-     * @remark Called when current simulation time reached packet sending time
-     * 
-     * @param wrapped_packets 
-     */
-    void ProcessNextPacket(PriorityQueueWrapper& wrapped_packets);
+    void GenerateNewEvents();
 
 public:
     /**
@@ -77,7 +62,7 @@ public:
      * @param n_switch switch between receiver and senders (represents bottle neck)
      * @param simulation_duration_ns time of running the simulation in ns
      */
-    explicit NetworkSimulator(std::vector<std::shared_ptr<ServerBase>>& senders, std::shared_ptr<ServerBase> receiver, std::shared_ptr<NetworkSwitch> n_switch, std::uint64_t simulation_duration_ns);
+    explicit NetworkSimulator(std::vector<std::shared_ptr<ServerBase>>& senders, std::shared_ptr<ServerBase> receiver, std::shared_ptr<NetworkSwitch> n_switch, std::uint64_t simulation_duration_ns, std::uint64_t links_speed);
     ~NetworkSimulator() = default;
 
     /**

@@ -55,7 +55,7 @@ public:
      * @param packet packet, received by link
      * @param packets_wrapped queue of packets, where packet should be pushed after processing
      */
-    void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, PriorityQueueWrapper& packets_wrapped) override final;
+    void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& all_events) override final;
     virtual ~Link() {}
 };
 

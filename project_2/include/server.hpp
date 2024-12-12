@@ -1,12 +1,14 @@
 #pragma once
 
 #include "packet.hpp"
+#include "network_element.hpp"
 #include "express_pass.hpp"
-#include "utils.hpp"
 
+#include <queue>
 #include <cstdint>
 #include <unordered_map>
 #include <vector>
+#include "event.hpp"
 
 /**
  * @brief Host abstraction
@@ -36,7 +38,7 @@ public:
      * @param packets_wrapped required for pushing packets back to simulation queue
      * @return std::uint64_t next time when simulator should ask for new packets
      */
-    virtual std::uint64_t SendPackets(std::uint64_t current_time_ns, PriorityQueueWrapper& packets_wrapped) = 0;
+    virtual std::uint64_t SendPackets(std::uint64_t current_time_ns, std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& all_events) = 0;
     
     /**
      * @brief Returns some statistics, calculated by host
@@ -44,6 +46,6 @@ public:
      * @return std::string 
      */
     virtual std::string ToString() const = 0;
-    virtual void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, PriorityQueueWrapper& packets_wrapped) override = 0;
+    virtual void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& all_events) override = 0;
     virtual ~ServerBase() {}
 };

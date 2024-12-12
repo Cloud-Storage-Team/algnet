@@ -1,12 +1,13 @@
 #pragma once
 
 #include "routing_packet.hpp"
-#include "utils.hpp"
+#include "event.hpp"
 
 #include <unordered_map>
+#include <queue>
 #include <memory>
 
-class PriorityQueueWrapper;
+class RoutingPacket;
 
 /**
  * @brief Abstract network element (link, switch, host, etc.)
@@ -31,7 +32,7 @@ public:
      * @param packet obtained packet
      * @param packets_wrapped required for returning updated packet or new packet to simulation queue
      */
-    virtual void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, PriorityQueueWrapper& packets_wrapped) = 0;
+    virtual void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& all_events) = 0;
     virtual ~NetworkElement() {}
 };
 
@@ -67,5 +68,5 @@ public:
      * @return std::shared_ptr<NetworkElement> next element in route 
      */
     std::shared_ptr<NetworkElement> GetNextElement(std::uint64_t destination_id) override final;
-    virtual void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, PriorityQueueWrapper& packets_wrapped) = 0;
+    virtual void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& all_events) = 0;
 };
