@@ -1,9 +1,14 @@
 #include "ServerSender.hpp"
 
+#include "NetworkSimulator.hpp"
+#include "PowerTCPCongestionWindowHandler.hpp"
+
 #include <iostream>
 
 ServerSender::ServerSender(std::uint64_t id, std::uint32_t distance_us)
-        : ServerBase(id), distance_us(distance_us) { }
+        : ServerBase(id), distance_us(distance_us) {
+    cwnd_handler = std::make_unique<PowerTCPCongestionWindowHandler>(10, 10, 0.8, 10);
+}
 
 std::uint32_t ServerSender::GetDistance() const {
     return distance_us;
@@ -14,7 +19,7 @@ std::uint32_t ServerSender::GetACKsNumber() const {
 }
 
 std::uint32_t ServerSender::GetCWNDSize() const {
-    return cwnd_size_in_packets;
+    return cwnd_handler ? cwnd_handler->getCWND() : cwnd_size_in_packets;
 }
 
 std::uint32_t ServerSender::GetCurrentTime() const {
@@ -51,6 +56,9 @@ bool ServerSender::HandleACKs() {
     cwnd_size_in_packets = std::min<std::uint32_t>(cwnd_size_in_packets + ACKs.size(), max_transmission_rate_packets);
     // Sender's current time is the delivery time of the last ACK
     UpdateCurrentTime(ACKs.back().GetEstimatedDeliveryTime());
+    if (cwnd_handler) {
+        cwnd_handler->updateOnPacket(ACKs.back(), current_time_us);
+    }
     ACKs.clear();
     return true;
 }
@@ -61,6 +69,13 @@ void ServerSender::SendPackets(std::priority_queue<PacketHeader>& packet_queue) 
         // Calculate estimated delivering time of the packet
         std::uint64_t estimated_delivering_time = current_time_us + distance_us;
         // Add packet to the priority_queue
+        PacketHeader packet_header(id, current_time_us, estimated_delivering_time);
+        packet_header.headers.push_back(INTHeader(
+            current_time_us,
+            packet_queue.size(),
+            0, //\todo
+            NetworkSimulator::bandwidth_bytes
+        ));
         packet_queue.emplace(id, current_time_us, estimated_delivering_time);
 
         // Update server time
