@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include "server.hpp"
+#include "express_pass.hpp"
 
 class ExpressPassReceiver: public ServerBase {
 private:

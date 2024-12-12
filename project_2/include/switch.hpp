@@ -3,7 +3,6 @@
 #include <vector>
 #include <deque>
 #include "packet.hpp"
-#include "routing_packet.hpp"
 #include "network_element.hpp"
 
 /**
