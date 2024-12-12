@@ -3,6 +3,7 @@
 #include "NetworkDevice.hpp"
 
 #include <unordered_map>
+#include <tuple>
 
 /**
  * @brief
@@ -20,7 +21,9 @@ public:
     void Send(std::uint32_t flow_id) override;
 
     /**
-     * @brief Map: flow_id --> next device in the path
+     * @brief Map: flow_id --> adjacent devices on the flow path
+     *
+     * @details see FindAdjDevicesInPath(std::uint32_t) in Flow.hpp
      */
-    std::unordered_map<std::uint32_t, std::pair<std::uint32_t, std::uint32_t>> switching_table;
+    std::unordered_map<std::uint32_t, std::tuple<std::uint32_t, std::uint64_t, std::uint32_t, std::uint64_t>> switching_table;
 };

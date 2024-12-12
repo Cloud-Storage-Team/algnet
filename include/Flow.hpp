@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <memory>
 #include <queue>
-#include <utility>
+#include <tuple>
 
 /**
  * @brief Network flow between the source and destination nodes
@@ -20,14 +20,25 @@ public:
     void Send();
 
     /**
-     * @brief Find next device on the path
+     * @brief Find adjacent devices on the path
      *
-     * @param sender_id -- ID of sending device
+     * @param id -- ID of current device
      *
-     * @returns {ID, distance > 0} -- next device found
-     * @returns {0, 0} -- next device not found
+     * @returns tuple {PrevID, PrevDist, NextID, NextDist}
+     * @returns PrevID -- ID of previous (closer to sender) device on the path
+     * @returns PrevDist -- distance in nanoseconds to device with ID = PrevID
+     * @returns NextID -- ID of next (closer to receiver) device on the path
+     * @returns NextDist -- distance in nanoseconds to device with ID = NextID
      */
-    std::pair<std::uint32_t, std::uint32_t> FindNextDeviceInPath(std::uint32_t sender_id);
+    std::tuple<std::uint32_t, std::uint64_t, std::uint32_t, std::uint64_t> FindAdjDevicesInPath(std::uint32_t id);
+
+    /**
+     * @brief Names for FindAdjDevicesInPath(id) return values
+     */
+    static const std::uint8_t PrevID = 0;
+    static const std::uint8_t PrevDist = 1;
+    static const std::uint8_t NextID = 2;
+    static const std::uint8_t NextDist = 3;
 
     /**
      * @brief ID of the flow

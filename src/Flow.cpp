@@ -19,11 +19,17 @@ void Flow::Send() {
     server->Send(id);
 }
 
-std::pair<std::uint32_t, std::uint32_t> Flow::FindNextDeviceInPath(std::uint32_t sender_id) {
-    for (std::uint32_t i = 1; i < path.size(); ++i) {
-        if (path[i - 1]->id == sender_id) {
-            return {path[i]->id, distances_ns[i - 1]};
+std::tuple<std::uint32_t, std::uint64_t, std::uint32_t, std::uint64_t> Flow::FindAdjDevicesInPath(std::uint32_t id) {
+    for (std::uint32_t i = 1; i < path.size() - 1; ++i) {
+        if (path[i]->id == id) {
+            return {path[i - 1]->id, distances_ns[i - 1], path[i + 1]->id, distances_ns[i]};
         }
     }
-    return {0, 0};
+    if (path[0]->id == id) {
+        return {path[1]->id, distances_ns.front(), path[1]->id, distances_ns.front()};
+    }
+    if (path[path.size() - 1]->id == id) {
+        return {path[path.size() - 2]->id, distances_ns.back(), path[path.size() - 2]->id, distances_ns.back()};
+    }
+    return {0, 0, 0, 0};
 }
