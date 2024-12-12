@@ -351,6 +351,12 @@ class TcpBbrV2 : public TcpCongestionOps
      */
     void UpdateAckAggregation(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
 
+    void ResetCongestionSignals();
+
+    void UpdateCongestionSignals(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
+
+    void CheckLossTooHighInStartup(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
+
   private:
     BbrMode_t m_state{BbrMode_t::BBR_STARTUP}; //!< Current state of BBR state machine
     MaxBandwidthFilter_t m_maxBwFilter;        //!< Maximum bandwidth filter
@@ -386,7 +392,7 @@ class TcpBbrV2 : public TcpCongestionOps
     Time m_cycleStamp{Seconds(0)};       //!< Last time gain cycle updated
     uint32_t m_cycleIndex{0};            //!< Current index of gain cycle
     bool m_minRttExpired{false};         //!< A boolean recording whether the BBR.RTprop has expired
-    Time m_minRttFilterLen{Seconds(5)}; //!< A constant specifying the length of the RTProp min
+    Time m_minRttFilterLen{Seconds(5)};  //!< A constant specifying the length of the RTProp min
                                          //!< filter window, default 5 secs.
     Time m_minRttStamp{
         Seconds(0)}; //!< The wall clock time at which the current BBR.RTProp sample was obtained
@@ -407,6 +413,14 @@ class TcpBbrV2 : public TcpCongestionOps
     bool m_hasSeenRtt{false};        //!< Have we seen RTT sample yet?
     double m_pacingMargin{0.01}; //!< BBR intentionally reduces the pacing rate by 1% to drain any
                                  //!< standing queues. See `bbr_rate_bytes_per_sec` in Linux.
+    double m_lossThresh{0.02};   //!< Estimate bw probing has gone too far if loss rate exceeds this level.
+    uint32_t m_fullLossCount{8}; //!< Exit STARTUP if number of loss marking events in a Recovery round
+                                 //!< is >= m_fullLossCount, and loss rate is higher than m_lossThresh.
+    bool m_lossInCycle{false};
+    bool m_lossInRound{false};
+    bool m_lossRoundStart{false};
+    uint32_t m_lossRoundDelivered{0};
+    uint32_t m_lossEventsInRound{0};
 };
 
 } // namespace ns3

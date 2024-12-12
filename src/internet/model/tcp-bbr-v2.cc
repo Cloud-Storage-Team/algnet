@@ -537,6 +537,58 @@ TcpBbrV2::UpdateAckAggregation(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRat
     }
 }
 
+void
+TcpBbrV2::ResetCongestionSignals()
+{
+    NS_LOG_FUNCTION(this);
+
+    m_lossInRound = false;
+    m_lossInCycle = false;
+}
+
+void
+TcpBbrV2::UpdateCongestionSignals(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
+{
+    NS_LOG_FUNCTION(this << tcb << rs);
+    m_lossRoundStart = false;
+    if (rs.m_interval <= Seconds(0.0) || rs.m_ackedSacked == 0) {
+        return;
+    }
+
+    m_lossInRound |= (rs.m_bytesLoss > 0);
+
+    if (rs.m_priorDelivered >= m_lossRoundDelivered) {
+        m_lossRoundDelivered = m_delivered;
+        m_lossRoundStart = true;
+
+        m_lossInRound = 0;
+    }
+}
+
+void
+TcpBbrV2::CheckLossTooHighInStartup(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
+{
+    NS_LOG_FUNCTION(this << tcb << rs);
+    if (m_isPipeFilled) {
+        return;
+    }
+
+    if (rs.m_bytesLoss > 0 && m_lossEventsInRound < 0xf) {
+        m_lossEventsInRound++;
+    }
+
+    if (m_fullLossCount && m_lossRoundStart &&
+        tcb->m_congState == TcpSocketState::CA_RECOVERY &&
+        m_lossEventsInRound >= m_fullLossCount /*&&
+        IsInflightTooHigh(tcb, rs)*/)
+    {
+        return;
+    }
+    if (m_lossRoundStart) {
+        m_lossEventsInRound = 0;
+    }
+}
+
 bool
 TcpBbrV2::ModulateCwndForRecovery(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
 {
@@ -651,6 +703,7 @@ void
 TcpBbrV2::UpdateModelAndState(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
 {
     NS_LOG_FUNCTION(this << tcb << rs);
+    UpdateCongestionSignals(tcb, rs);
     UpdateBottleneckBandwidth(tcb, rs);
     UpdateAckAggregation(tcb, rs);
     CheckCyclePhase(tcb, rs);
@@ -667,6 +720,8 @@ TcpBbrV2::UpdateControlParameters(Ptr<TcpSocketState> tcb, const TcpRateOps::Tcp
     SetPacingRate(tcb, m_pacingGain);
     SetSendQuantum(tcb);
     SetCwnd(tcb, rs);
+
+    m_lossInCycle |= (rs.m_bytesLoss > 0);
 }
 
 void

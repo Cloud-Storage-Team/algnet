@@ -73,9 +73,9 @@ TraceThroughput(Ptr<FlowMonitor> monitor)
 
         // Convert (curTime - prevTime) to microseconds so that throughput is in bits per
         // microsecond (which is equivalent to Mbps)
-        throughput << curTime.GetSeconds() << "s "
+        throughput << curTime.GetSeconds() << " "
                    << 8 * (itr->second.txBytes - prev) / ((curTime - prevTime).ToDouble(Time::US))
-                   << " Mbps" << std::endl;
+                   << std::endl;
         prevTime = curTime;
         prev = itr->second.txBytes;
     }
