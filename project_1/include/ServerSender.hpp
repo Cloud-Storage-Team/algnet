@@ -1,13 +1,17 @@
 #pragma once
 
-#include "ServerBase.hpp"
 #include "ACK.hpp"
+#include "CongestionWindowHandler.hpp"
 #include "PacketHeader.hpp"
+#include "ServerBase.hpp"
+
+#include "memory"
 
 // Type for sending server, contains ID and distance to receiver
 struct ServerSender : ServerBase {
     ServerSender(std::uint64_t id, std::uint32_t distance_us);
     ServerSender() = default;
+    ServerSender(ServerSender &&other) = default;
     virtual ~ServerSender() = default;
 
     std::uint32_t GetDistance() const;
@@ -29,4 +33,6 @@ private:
     std::uint32_t cwnd_size_in_packets = 1;
 
     std::vector<ACK> ACKs{};
+
+    std::unique_ptr<CongestionWindowHandler> cwnd_handler;
 };
