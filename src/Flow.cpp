@@ -14,11 +14,6 @@ Flow::Flow(const std::vector<std::shared_ptr<NetworkDevice>>& path, const std::v
     id = Flow::last_given_flow_id++;
 }
 
-void Flow::Send() {
-    std::shared_ptr<NetworkDevice> server = path.at(0);
-    server->Send(id);
-}
-
 std::tuple<std::uint32_t, std::uint64_t, std::uint32_t, std::uint64_t> Flow::FindAdjDevicesInPath(std::uint32_t id) {
     for (std::uint32_t i = 1; i < path.size() - 1; ++i) {
         if (path[i]->id == id) {
