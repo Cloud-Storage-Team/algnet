@@ -351,11 +351,36 @@ class TcpBbrV2 : public TcpCongestionOps
      */
     void UpdateAckAggregation(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
 
+    /**
+     * \brief After bw probing (STARTUP/PROBE_UP), reset signals before entering a state
+     * machine phase where we adapt our lower bound based on congestion signals.
+     */
     void ResetCongestionSignals();
 
+    /**
+     * \brief Update (most of) our congestion signals: track the recent rate and volume of
+     * delivered data, presence of loss, and EWMA degree of ECN marking.
+     * \param tcb the socket state.
+     * \param rs rate sample.
+     */
     void UpdateCongestionSignals(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
 
+    /**
+     * \brief Exit STARTUP based on loss rate > 1% and loss gaps in round >= N. Wait until
+     * the end of the round in recovery to get a good estimate of how many packets
+     * have been lost, and how many we need to drain with a low pacing rate.
+     * \param tcb the socket state.
+     * \param rs rate sample.
+     */
     void CheckLossTooHighInStartup(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
+
+    /**
+     * \brief Exit STARTUP upon N consecutive rounds with ECN mark rate > ecn_thresh.
+     * \param ceRatio delivered_ce / delivered.
+     */
+    void CheckEcnTooHighInStartup(double ceRatio);
+
+    double UpdateEcnAlpha(Ptr<TcpSocketState> tcb);
 
   private:
     BbrMode_t m_state{BbrMode_t::BBR_STARTUP}; //!< Current state of BBR state machine
@@ -416,11 +441,24 @@ class TcpBbrV2 : public TcpCongestionOps
     double m_lossThresh{0.02};   //!< Estimate bw probing has gone too far if loss rate exceeds this level.
     uint32_t m_fullLossCount{8}; //!< Exit STARTUP if number of loss marking events in a Recovery round
                                  //!< is >= m_fullLossCount, and loss rate is higher than m_lossThresh.
-    bool m_lossInCycle{false};
-    bool m_lossInRound{false};
-    bool m_lossRoundStart{false};
-    uint32_t m_lossRoundDelivered{0};
-    uint32_t m_lossEventsInRound{0};
+    bool m_lossInCycle{false};        //!< Did packet loss happen in this cycle?
+    bool m_lossInRound{false};        //!< Was there loss marked packet in the round trip?
+    bool m_lossRoundStart{false};     //!< m_lossRoundDelivered round trip?
+    uint32_t m_lossRoundDelivered{0}; //!< 
+    uint32_t m_lossEventsInRound{0};  //!< losses in STARTUP round
+    double m_ecnAlphaGain{0.0625};     //!< Gain factor for ECN mark ratio samples
+    double m_ecnFactor{0.333};         //!< On ECN, cut inflight_lo to (1 - m_ecnFactor * m_ecnAlpha)
+    double m_ecnThresh{0.5};           //!< Estimate bw probing has gone too far if CE ratio exceeds this threshold
+    Time m_ecnMaxRtt{MilliSeconds(5)}; //!< Max RTT at which to use sender-side ECN logic
+    uint32_t m_fullEcnCount{2};        //!< Exit STARTUP if number of ECN marked round trips with ECN mark rate 
+                                       //!< above m_ecnThresh meets this count
+    uint32_t m_startupEcnRounds{0}; //!< consecutive hi ECN STARTUP rounds
+    bool m_ecnInCycle{false};       //!< ECN in this cycle?
+    bool m_ecnEligible{false};      //!< sender can use ECN (RTT, handshake)?
+    double m_ecnAlpha{1};           //!< EWMA delivered_ce/delivered
+    bool m_ecnInRound{false};       //!< ECN marked in this round trip?
+    uint32_t m_alphaLastDelivered{0};   //!< m_delivered at alpha update
+    uint32_t m_alphaLastDeliveredCe{0}; //!< m_deliveredCe at alpha update
 };
 
 } // namespace ns3
