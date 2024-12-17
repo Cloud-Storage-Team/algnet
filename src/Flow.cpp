@@ -1,4 +1,5 @@
 #include "Flow.hpp"
+#include "NetworkSimulator.hpp"
 
 #include <stdexcept>
 
@@ -14,17 +15,18 @@ Flow::Flow(const std::vector<std::shared_ptr<NetworkDevice>>& path, const std::v
     id = Flow::last_given_flow_id++;
 }
 
-std::tuple<std::uint32_t, std::uint64_t, std::uint32_t, std::uint64_t> Flow::FindAdjDevicesInPath(std::uint32_t id) {
-    for (std::uint32_t i = 1; i < path.size() - 1; ++i) {
-        if (path[i]->id == id) {
-            return {path[i - 1]->id, distances_ns[i - 1], path[i + 1]->id, distances_ns[i]};
-        }
+void Flow::Send(double delta_time_ns) {
+    std::shared_ptr<NetworkDevice> sender = path.front();
+    std::shared_ptr<NetworkDevice> receiver = path.back();
+
+    double current_time_ns = 0;
+    while (current_time_ns < 1e9) {
+        Packet p(sender->id, receiver->id, 0, false);
+        NetworkSimulator::Schedule(current_time_ns, [&]() {
+            sender->Enqueue(p);
+            double delay_ns = 1.0;
+            NetworkSimulator::Schedule(delay_ns, [&](){ sender->ProcessPacket(); });
+        });
+        current_time_ns += delta_time_ns;
     }
-    if (path[0]->id == id) {
-        return {path[1]->id, distances_ns.front(), path[1]->id, distances_ns.front()};
-    }
-    if (path[path.size() - 1]->id == id) {
-        return {path[path.size() - 2]->id, distances_ns.back(), path[path.size() - 2]->id, distances_ns.back()};
-    }
-    return {0, 0, 0, 0};
 }
