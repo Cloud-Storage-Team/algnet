@@ -3,6 +3,12 @@
 #include <memory>
 
 void Flow::Send() {
-    std::shared_ptr<NetworkDevice> server = path.at(0);
-    server->Send(id);
+    std::shared_ptr<NetworkDevice> sender = path.front();
+    std::shared_ptr<NetworkDevice> receiver = path.back();
+
+    Packet p(sender->id, receiver->id, 0, false);
+    NetworkSimulator::Schedule(interval_ns, [&]() {
+        sender->ProcessPacket(p);
+        Send();
+    });
 }
