@@ -10,8 +10,10 @@ set(SOURCE_FILES
     src/Event.cpp
     src/NetworkSimulator.cpp
     src/NetworkDevice.cpp
-    src/Server.cpp
+    src/Sender.cpp
     src/Switch.cpp
+    src/Receiver.cpp
+    src/EventScheduler.cpp
 )
 
 add_executable(network_simulator src/main.cpp ${SOURCE_FILES})

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Packet.hpp"
+
 #include <vector>
 #include <memory>
 #include <cstdint>
@@ -7,48 +9,26 @@
 
 enum class DeviceType: std::uint8_t {
     Switch,
-    ServerSender,
-    ServerReceiver,
+    Sender,
+    Receiver,
 };
 
 class NetworkDevice {
 public:
-    explicit NetworkDevice(DeviceType type);
+    explicit NetworkDevice(DeviceType type, double processing_delay_ns);
     virtual ~NetworkDevice() = default;
 
-    /**
-     * @brief Send events (i. e. packets) to the receiver node
-     *
-     * @details Receiver -- next device in the flow path
-     */
-    virtual void Send(std::uint32_t flow_id) = 0;
+    virtual void ProcessPacket(Packet p) = 0;
 
-    /**
-     * @brief Vector of pointers to adjacent network devices.
-     *
-     * @details Usage of std::weak_ptr is necessary to avoid cyclic links.
-     */
-    std::vector<std::weak_ptr<NetworkDevice>> adjacent_devices;
+    void Enqueue(Packet p);
+    Packet Dequeue();
+    bool Empty() const;
+    std::shared_ptr<NetworkDevice> NextDevice() const;
 
-    /**
-     * @brief Network device type.
-     */
+    std::uint64_t id;
+    std::queue<Packet> buffer;
     DeviceType type;
-
-    /**
-     * @brief Device's current time in nanoseconds
-     */
-    std::uint64_t current_time_ns = 0;
-
-    /**
-     * @brief Device ID
-     *
-     * Usage: ID is a vertex in the network graph
-     */
-    std::uint32_t id;
-
-    /**
-     * @brief New device ID = last given + 1
-     */
-     inline static std::uint32_t last_given_device_id = 0;
+    double processing_delay_ns;
+    double next_processing_time_ns = 0;
+    inline static std::uint64_t last_given_device_id = 0;
 };

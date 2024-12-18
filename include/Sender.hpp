@@ -3,10 +3,10 @@
 #include "NetworkDevice.hpp"
 #include "Packet.hpp"
 
-class Switch: public NetworkDevice {
+class Sender: public NetworkDevice {
 public:
-    Switch(double processing_delay_ns);
-    ~Switch() override = default;
+    explicit Sender(double processing_delay_ns);
+    ~Sender() override = default;
 
     void ProcessPacket(Packet p) override;
 };

@@ -1,4 +1,5 @@
 #include "Flow.hpp"
+#include "NetworkSimulator.hpp"
 
 #include <stdexcept>
 
@@ -15,21 +16,11 @@ Flow::Flow(const std::vector<std::shared_ptr<NetworkDevice>>& path, const std::v
 }
 
 void Flow::Send() {
-    std::shared_ptr<NetworkDevice> server = path.at(0);
-    server->Send(id);
-}
+    std::shared_ptr<NetworkDevice> sender = path.front();
+    std::shared_ptr<NetworkDevice> receiver = path.back();
+    Packet p(sender->id, receiver->id, 0, false);
 
-std::tuple<std::uint32_t, std::uint64_t, std::uint32_t, std::uint64_t> Flow::FindAdjDevicesInPath(std::uint32_t id) {
-    for (std::uint32_t i = 1; i < path.size() - 1; ++i) {
-        if (path[i]->id == id) {
-            return {path[i - 1]->id, distances_ns[i - 1], path[i + 1]->id, distances_ns[i]};
-        }
-    }
-    if (path[0]->id == id) {
-        return {path[1]->id, distances_ns.front(), path[1]->id, distances_ns.front()};
-    }
-    if (path[path.size() - 1]->id == id) {
-        return {path[path.size() - 2]->id, distances_ns.back(), path[path.size() - 2]->id, distances_ns.back()};
-    }
-    return {0, 0, 0, 0};
+    NetworkSimulator::Schedule(packet_generation_interval_ns, [sender, p]() {
+        sender->ProcessPacket(p);
+    });
 }

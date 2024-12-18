@@ -1,15 +1,17 @@
 #include "Event.hpp"
 
-#include <utility>
+Event::Event(double time, const std::function<void()> &handler):
+    execution_time(time),
+    handler(handler) { }
 
-Event::Event(std::shared_ptr<Packet> packet, std::uint32_t flow_id, std::uint32_t receiver_id,
-             std::uint64_t delivery_time_ns, bool is_ACK):
-    delivery_time_ns(delivery_time_ns),
-    flow_id(flow_id),
-    receiver_id(receiver_id),
-    packet(std::move(packet)),
-    is_ACK(is_ACK) { }
+double Event::GetTime() const {
+    return execution_time;
+}
+
+void Event::Execute() const {
+    handler();
+}
 
 bool Event::operator<(const Event& other) const {
-    return delivery_time_ns > other.delivery_time_ns;
+    return execution_time > other.execution_time;
 }

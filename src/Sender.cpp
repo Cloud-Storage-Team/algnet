@@ -1,12 +1,12 @@
-#include "Switch.hpp"
+#include "Sender.hpp"
 #include "NetworkSimulator.hpp"
 
-Switch::Switch(double processing_delay_ns):
-    NetworkDevice(DeviceType::Switch, processing_delay_ns) {
+Sender::Sender(double processing_delay_ns):
+    NetworkDevice(DeviceType::Sender, processing_delay_ns) {
     id = NetworkDevice::last_given_device_id++;
 }
 
-void Switch::ProcessPacket(Packet p) {
+void Sender::ProcessPacket(Packet p) {
     Enqueue(p);
     std::shared_ptr<NetworkDevice> next_device = NextDevice();
 
@@ -17,6 +17,7 @@ void Switch::ProcessPacket(Packet p) {
 
     NetworkSimulator::Schedule(packet_processing_delay_ns, [this, next_device]() {
         Packet p = Dequeue();
+        p.m_sending_time_ns = NetworkSimulator::Now();
         next_device->ProcessPacket(p);
     });
     next_processing_time_ns = NetworkSimulator::Now() + packet_processing_delay_ns;

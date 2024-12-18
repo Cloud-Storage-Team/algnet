@@ -4,39 +4,17 @@
 
 #include <memory>
 #include <cstdint>
+#include <functional>
 
 class Event {
 public:
-    explicit Event(std::shared_ptr<Packet> packet, std::uint32_t flow_id, std::uint32_t receiver_id,
-                   std::uint64_t delivery_time_ns, bool is_ACK);
+    Event(double time, const std::function<void()>& handler);
 
-    /**
-     * @brief Pointer to the packet
-     */
-    std::shared_ptr<Packet> packet;
+    double GetTime() const;
+    void Execute() const;
 
-    /**
-     * @brief ID of network device -- receiver of the event
-     */
-    std::uint32_t receiver_id;
-
-    /**
-     * @brief ID of the corresponding flow
-     */
-    std::uint32_t flow_id;
-
-    /**
-     * @brief Packet delivery time in nanoseconds
-     */
-    std::uint64_t delivery_time_ns;
-
-    /**
-     * @brief Acknowledgement flag
-     *
-     * @details True: ACK
-     * @details False: Packet
-     */
-    bool is_ACK;
+    double execution_time;
+    std::function<void()> handler;
 
     bool operator<(const Event& other) const;
 };
