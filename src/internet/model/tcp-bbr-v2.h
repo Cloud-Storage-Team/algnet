@@ -376,11 +376,55 @@ class TcpBbrV2 : public TcpCongestionOps
 
     /**
      * \brief Exit STARTUP upon N consecutive rounds with ECN mark rate > ecn_thresh.
+     * \param tcb the socket state.
      * \param ceRatio delivered_ce / delivered.
      */
-    void CheckEcnTooHighInStartup(double ceRatio);
+    void CheckEcnTooHighInStartup(Ptr<TcpSocketState> tcb, double ceRatio);
 
+    /**
+     * \brief Update m_ecnAlpha.
+     * \param tcb the socket state.
+     * \return returns delivered_ce / delivered.
+     */
     double UpdateEcnAlpha(Ptr<TcpSocketState> tcb);
+
+    /**
+     * \brief Handles STARTUP phase on ECN and loss signals.
+     * \param tcb the socket state.
+     */
+    void HandleQueueTooHighInStartup(Ptr<TcpSocketState> tcb);
+
+    /**
+     * \brief In BBR_BW_PROBE_UP, if not seeing high loss/ECN/queue, raise inflight_hi.
+     * \param tcb the socket state.
+     * \param rs rate sample.
+     */
+    void ProbeInflightHiUpward(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample &rs);
+
+    /**
+     * Loss and/or ECN rate is too high while probing.
+     * Adapt (once per bw probe) by cutting inflight_hi and then restarting cycle.
+     */
+    void HandleInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample &rs);
+
+    /**
+     * If we're seeing bw and loss samples reflecting our bw probing, adapt
+     * using the signals we see. If loss or ECN mark rate gets too high, then adapt
+     * m_inflightHi downward. If we're able to push inflight higher without such
+     * signals, push higher: adapt m_inflightHi upward.
+     * \param tcb the socket state.
+     * \param rs rate sample.
+     * \return returns true if state transition is decided.
+     */
+    bool AdaptUpperBounds(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample &rs);
+
+    /**
+     * Does loss/ECN rate for this sample say inflight is "too high"?
+     * \param tcb the socket state.
+     * \param rs rate sample.
+     * \return returns true if loss/ECN rate say inflight is "too high"
+     */
+    bool IsInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample &rs);
 
   private:
     BbrMode_t m_state{BbrMode_t::BBR_STARTUP}; //!< Current state of BBR state machine
@@ -455,10 +499,13 @@ class TcpBbrV2 : public TcpCongestionOps
     uint32_t m_startupEcnRounds{0}; //!< consecutive hi ECN STARTUP rounds
     bool m_ecnInCycle{false};       //!< ECN in this cycle?
     bool m_ecnEligible{false};      //!< sender can use ECN (RTT, handshake)?
-    double m_ecnAlpha{1};           //!< EWMA delivered_ce/delivered
+    double m_ecnAlpha{1.0};           //!< EWMA delivered_ce/delivered
     bool m_ecnInRound{false};       //!< ECN marked in this round trip?
     uint32_t m_alphaLastDelivered{0};   //!< m_delivered at alpha update
     uint32_t m_alphaLastDeliveredCe{0}; //!< m_deliveredCe at alpha update
+    uint32_t m_inflightHi{static_cast<uint32_t>(-1)}; //!< Upper bound of inflight data range
+    uint32_t m_inflightLo{static_cast<uint32_t>(-1)}; //!< Lower bound of inflight data range
+    double m_beta{0.3}; //!< On losses, scale down inflight and pacing rate by beta
 };
 
 } // namespace ns3

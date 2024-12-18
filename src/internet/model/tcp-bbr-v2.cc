@@ -100,6 +100,11 @@ TcpBbrV2::GetTypeId()
                           DoubleValue(0.02),
                           MakeUintegerAccessor(&TcpBbrV2::m_fullEcnCount),
                           MakeUintegerChecker<uint32_t>())
+            .AddAttribute("Beta",
+                          "On losses, scale down inflight and pacing rate by beta",
+                          DoubleValue(0.3),
+                          MakeDoubleAccessor(&TcpBbrV2::m_beta),
+                          MakeDoubleChecker<double>())
             .AddTraceSource("MinRtt",
                             "Estimated two-way round-trip propagation delay of the path, estimated "
                             "from the windowed minimum recent round-trip delay sample",
@@ -182,7 +187,10 @@ TcpBbrV2::TcpBbrV2(const TcpBbrV2& sock)
       m_ecnAlpha(sock.m_ecnAlpha),
       m_ecnInRound(sock.m_ecnInRound),
       m_alphaLastDelivered(sock.m_alphaLastDelivered),
-      m_alphaLastDeliveredCe(sock.m_alphaLastDeliveredCe)
+      m_alphaLastDeliveredCe(sock.m_alphaLastDeliveredCe),
+      m_inflightHi(sock.m_inflightHi),
+      m_inflightLo(sock.m_inflightLo),
+      m_beta(sock.m_beta)
 {
     NS_LOG_FUNCTION(this);
 }
@@ -644,6 +652,7 @@ TcpBbrV2::CheckLossTooHighInStartup(Ptr<TcpSocketState> tcb, const TcpRateOps::T
         m_lossEventsInRound >= m_fullLossCount /* TODO: &&
         IsInflightTooHigh(tcb, rs)*/)
     {
+        HandleQueueTooHighInStartup(tcb);
         return;
     }
     if (m_lossRoundStart)
@@ -653,7 +662,7 @@ TcpBbrV2::CheckLossTooHighInStartup(Ptr<TcpSocketState> tcb, const TcpRateOps::T
 }
 
 void
-TcpBbrV2::CheckEcnTooHighInStartup(double ceRatio)
+TcpBbrV2::CheckEcnTooHighInStartup(Ptr<TcpSocketState> tcb, double ceRatio)
 {
     if (m_isPipeFilled || !m_ecnEligible || !m_fullEcnCount || !m_ecnThresh)
     {
@@ -671,7 +680,7 @@ TcpBbrV2::CheckEcnTooHighInStartup(double ceRatio)
 
     if (m_startupEcnRounds >= m_fullEcnCount)
     {
-        // TODO: handleQueueTooHighInStartup();
+        HandleQueueTooHighInStartup(tcb);
         return;
     }
 }
@@ -704,8 +713,114 @@ TcpBbrV2::UpdateEcnAlpha(Ptr<TcpSocketState> tcb)
     m_alphaLastDelivered = m_delivered;
     m_alphaLastDeliveredCe = /* TODO: m_deliveredCe; */ 0;
 
-    CheckEcnTooHighInStartup(ceRatio);
+    CheckEcnTooHighInStartup(tcb, ceRatio);
     return ceRatio;
+}
+
+void
+TcpBbrV2::HandleQueueTooHighInStartup(Ptr<TcpSocketState> tcb)
+{
+    NS_LOG_FUNCTION(this << tcb);
+    m_isPipeFilled = true;
+    m_inflightHi = InFlight(tcb, 1.0);
+}
+
+void
+TcpBbrV2::ProbeInflightHiUpward(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
+{
+    if (!tcb->m_isCwndLimited || tcb->m_cWnd < m_inflightHi)
+    {
+        // TODO
+        // m_probeUpAcks = 0;
+        return;
+    }
+
+    // TODO
+    // m_probeUpAcks += rs.m_ackedSacked;
+    // if (m_probeUpAcks >= m_probeUpCount)
+    // {
+    //     uint32_t delta = m_probeUpAcks / m_probeUpCount;
+    //     m_probeUpAcks -= delta * m_probeUpCount;
+    //     m_inflightHi += delta;
+    // } 
+    //
+    // if (m_roundStart)
+    // {
+    //     RaiseInflightHiSlope(tcb);
+    // }
+}
+
+void
+TcpBbrV2::HandleInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
+{
+    // TODO:
+    // m_prevProbeTooHigh = true;
+    // m_bwProbeSamples = false;
+
+    if (!rs.m_isAppLimited)
+    {
+        m_inflightHi = std::max(
+            rs.m_priorInFlight, 
+            static_cast<uint32_t>(InFlight(tcb, 1.0) * (1 - m_beta)) // TODO
+        );
+        // TODO
+    }
+}
+
+bool
+TcpBbrV2::AdaptUpperBounds(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
+{
+    // TODO
+    if (IsInflightTooHigh(tcb, rs))
+    {
+        // if (m_bwProbeSamples)
+        {
+            HandleInflightTooHigh(tcb, rs);
+        }
+    }
+    else
+    {
+        if (m_inflightHi == static_cast<uint32_t>(-1))
+        {
+            return false;
+        }
+
+        if (rs.m_priorInFlight > m_inflightHi) // TODO
+        {
+            m_inflightHi = rs.m_priorInFlight;
+        }
+
+        // if (TODO)
+        {
+            ProbeInflightHiUpward(tcb, rs);
+        }
+    }
+
+    return false;
+}
+
+bool
+TcpBbrV2::IsInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
+{
+    if (rs.m_bytesLoss > 0 && rs.m_priorInFlight)
+    {
+        uint32_t lossThresh = static_cast<uint32_t>(rs.m_priorInFlight * m_lossThresh);
+        if (rs.m_bytesLoss > lossThresh)
+        {
+            return true;
+        }
+    }
+
+    if (/*rs.m_deliveredCe > 0 && */rs.m_delivered > 0 && m_ecnEligible && m_ecnThresh > 0)
+    {
+        uint32_t ecnThresh = static_cast<uint32_t>(rs.m_delivered * m_ecnThresh);
+        if (/*rs.m_deliveredCe*/0 >= ecnThresh)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool
