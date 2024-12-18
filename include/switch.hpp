@@ -24,9 +24,6 @@ public:
     /**
      * @brief creates bottle neck in network and process packets
      * 
-     * @param current_time_ns 
-     * @param packet 
-     * @param packets_wrapped 
      */
     virtual void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& all_events) override = 0;
     virtual ~NetworkSwitch() {}
