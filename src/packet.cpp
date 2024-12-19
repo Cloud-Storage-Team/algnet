@@ -21,8 +21,3 @@ void PacketHeader::SetFlag(std::uint8_t bit, std::uint8_t value) {
         flags = flags | ((std::uint8_t)1 << bit);
     }
 }
-
-bool PacketHeader::operator<(const PacketHeader& other) const {
-    return (this->sending_time > other.sending_time) || 
-           (this->sending_time == other.sending_time && this->destination_id > other.destination_id);
-}
