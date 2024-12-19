@@ -12,11 +12,14 @@ void NetworkSimulator::Run() const {
         }
     }
 
-    /* Create routing table */
+    /* Create routing tables */
     for (std::unique_ptr<Flow>& flow: flows) {
         for (std::uint32_t i = 0; i < flow->path.size() - 1; ++i) {
-            if (routing_table.count(flow->path[i]->id) == 0) {
-                routing_table[flow->path[i]->id] = device_by_id[flow->path[i + 1]->id];
+            if (forward_routing_table.count(flow->path[i]->id) == 0) {
+                forward_routing_table[flow->path[i]->id] = device_by_id[flow->path[i + 1]->id];
+            }
+            if (backward_routing_table.count(flow->path[i + 1]->id) == 0) {
+                backward_routing_table[flow->path[i + 1]->id] = device_by_id[flow->path[i]->id];
             }
         }
     }

@@ -24,6 +24,7 @@ public:
     Packet Dequeue();
     bool Empty() const;
     std::shared_ptr<NetworkDevice> NextDevice() const;
+    std::shared_ptr<NetworkDevice> PrevDevice() const;
 
     std::uint64_t id;
     std::queue<Packet> buffer;

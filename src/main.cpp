@@ -22,8 +22,8 @@ int main() {
     // Add flows to simulator
     NetworkSimulator::EmplaceFlow({sender, s, receiver}, {500, 1000});
 
-    // Turn off ACKs
-    NetworkSimulator::EnableACK = false;
+    // Turn on ACKs
+    NetworkSimulator::EnableACK = true;
     ns.StopAt(Time::Seconds(1));
 
     ns.Run();

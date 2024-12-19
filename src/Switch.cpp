@@ -8,16 +8,22 @@ Switch::Switch(double processing_delay_ns):
 
 void Switch::ProcessPacket(Packet p) {
     Enqueue(p);
-    std::shared_ptr<NetworkDevice> next_device = NextDevice();
 
     double packet_processing_delay_ns = processing_delay_ns;
     if (next_processing_time_ns > NetworkSimulator::Now()) {
         packet_processing_delay_ns += next_processing_time_ns - NetworkSimulator::Now();
     }
 
-    NetworkSimulator::Schedule(packet_processing_delay_ns, [this, next_device]() {
+    NetworkSimulator::Schedule(packet_processing_delay_ns, [this]() {
         Packet p = Dequeue();
-        next_device->ProcessPacket(p);
+        if (p.m_is_ack) {
+            std::shared_ptr<NetworkDevice> prev_device = PrevDevice();
+            prev_device->ProcessPacket(p);
+        }
+        else {
+            std::shared_ptr<NetworkDevice> next_device = NextDevice();
+            next_device->ProcessPacket(p);
+        }
     });
     next_processing_time_ns = NetworkSimulator::Now() + packet_processing_delay_ns;
 }

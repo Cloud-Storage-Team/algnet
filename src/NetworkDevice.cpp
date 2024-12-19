@@ -20,5 +20,9 @@ bool NetworkDevice::Empty() const {
 }
 
 std::shared_ptr<NetworkDevice> NetworkDevice::NextDevice() const {
-    return NetworkSimulator::routing_table[id];
+    return NetworkSimulator::forward_routing_table[id];
+}
+
+std::shared_ptr<NetworkDevice> NetworkDevice::PrevDevice() const {
+    return NetworkSimulator::backward_routing_table[id];
 }

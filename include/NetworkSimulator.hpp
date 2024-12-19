@@ -30,7 +30,8 @@ public:
 
     double stop_time_ns = 10000.0;
     static inline std::unique_ptr<EventScheduler> event_scheduler;
-    static inline std::unordered_map<std::uint32_t, std::shared_ptr<NetworkDevice>> routing_table;
+    static inline std::unordered_map<std::uint32_t, std::shared_ptr<NetworkDevice>> forward_routing_table;
+    static inline std::unordered_map<std::uint32_t, std::shared_ptr<NetworkDevice>> backward_routing_table;
     static inline std::unordered_map<std::uint32_t, std::shared_ptr<NetworkDevice>> device_by_id;
 
     static inline double current_time_ns = 0.0;
