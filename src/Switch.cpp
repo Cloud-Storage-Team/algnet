@@ -1,39 +1,50 @@
 #include "Switch.hpp"
 #include "NetworkSimulator.hpp"
 
-Switch::Switch():
-        NetworkDevice(DeviceType::Switch) {
+Switch::Switch(double processing_delay_ns):
+        NetworkDevice(DeviceType::Switch, processing_delay_ns) {
     id = NetworkDevice::last_given_device_id++;
 }
 
-void Switch::Send(std::uint32_t flow_id) {
-    const Event& event = NetworkSimulator::event_scheduler.top();
+void Switch::ProcessPacket(Packet p) {
+    Enqueue(p);
+    std::shared_ptr<NetworkDevice> next_device;
 
-    /* Searching for flow_id in table */
-    auto table_it = switching_table.find(flow_id);
-    if (table_it == switching_table.end()) {
-        /* Add key: flow_id and value: <id of the next device in flow path, distance to it> */
-        std::tuple<std::uint32_t, std::uint64_t, std::uint32_t, std::uint64_t> neighbor_devices = NetworkSimulator::flows[flow_id]->FindAdjDevicesInPath(
-                id);
-        switching_table[flow_id] = neighbor_devices;
-    }
-
-    std::uint32_t receiver_id;
-    std::uint64_t distance_ns;
-    if (event.is_ACK) {
-        receiver_id = std::get<Flow::PrevID>(switching_table[flow_id]);
-        distance_ns = std::get<Flow::PrevDist>(switching_table[flow_id]);
+    if (p.m_is_ack) {
+        next_device = PrevDevice();
     }
     else {
-        receiver_id = std::get<Flow::NextID>(switching_table[flow_id]);
-        distance_ns = std::get<Flow::NextDist>(switching_table[flow_id]);
+        next_device = NextDevice();
     }
 
-    std::uint64_t link_last_process_time = NetworkSimulator::link_last_process_time_ns[{std::min(id, receiver_id), std::max(id, receiver_id)}];
-    /* New event delivery time */
-    std::uint64_t event_delivery_time = std::max(link_last_process_time, event.delivery_time_ns) + distance_ns;
-    /* Send event to the next device */
-    NetworkSimulator::event_scheduler.emplace(event.packet, flow_id, receiver_id, event_delivery_time, event.is_ACK);
-    /* Update last link process time */
-    NetworkSimulator::link_last_process_time_ns[{std::min(id, receiver_id), std::max(id, receiver_id)}] = event_delivery_time;
+    double latency = 0.0;
+    /* Queueing delay */
+    if (next_processing_time_ns > NetworkSimulator::Now()) {
+        latency += next_processing_time_ns - NetworkSimulator::Now();
+    }
+    /* Processing delay */
+    latency += processing_delay_ns;
+
+    double link_last_process_time = NetworkSimulator::GetLinkLastProcessTime(id, next_device->id);
+    /* Waiting for the link to process previous packets */
+    if (link_last_process_time > NetworkSimulator::Now()) {
+        latency += link_last_process_time - NetworkSimulator::Now();
+    }
+    /* Transmission delay */
+    latency += NetworkSimulator::GetDistanceNs(id, next_device->id);
+    /* Update link last process time */
+    NetworkSimulator::UpdateLinkLastProcessTime(id, next_device->id, NetworkSimulator::Now() + latency);
+
+    NetworkSimulator::Schedule(latency, [this]() {
+        Packet p = Dequeue();
+        if (p.m_is_ack) {
+            std::shared_ptr<NetworkDevice> prev_device = PrevDevice();
+            prev_device->ProcessPacket(p);
+        }
+        else {
+            std::shared_ptr<NetworkDevice> next_device = NextDevice();
+            next_device->ProcessPacket(p);
+        }
+    });
+    next_processing_time_ns = NetworkSimulator::Now() + latency;
 }
