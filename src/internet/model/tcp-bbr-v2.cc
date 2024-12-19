@@ -46,7 +46,7 @@ TcpBbrV2::GetTypeId()
                           MakeUintegerChecker<uint32_t>())
             .AddAttribute("RttWindowLength",
                           "Length of RTT windowed filter",
-                          TimeValue(Seconds(10)),
+                          TimeValue(Seconds(5)),
                           MakeTimeAccessor(&TcpBbrV2::m_minRttFilterLen),
                           MakeTimeChecker())
             .AddAttribute("ProbeRttDuration",
@@ -65,6 +65,46 @@ TcpBbrV2::GetTypeId()
                 UintegerValue(1 << 12),
                 MakeUintegerAccessor(&TcpBbrV2::m_ackEpochAckedResetThresh),
                 MakeUintegerChecker<uint32_t>())
+            .AddAttribute("LossThreshold",
+                          "Stop probing when loss rate exceeds this level",
+                          DoubleValue(0.02),
+                          MakeDoubleAccessor(&TcpBbrV2::m_lossThresh),
+                          MakeDoubleChecker<double>())
+            .AddAttribute("FullLossCount",
+                          "Exit STARTUP when number of loss events exceeds this level",
+                          UintegerValue(8),
+                          MakeUintegerAccessor(&TcpBbrV2::m_fullLossCount),
+                          MakeUintegerChecker<uint32_t>())
+            .AddAttribute("EcnAlphaGain",
+                          "Gain factor for ECN mark ratio samples",
+                          DoubleValue(0.0625),
+                          MakeDoubleAccessor(&TcpBbrV2::m_ecnAlphaGain),
+                          MakeDoubleChecker<double>())
+            .AddAttribute("EcnFactor",
+                          "On ECN, cut inflight_lo to (1 - m_ecnFactor * m_ecnAlpha)",
+                          DoubleValue(0.333),
+                          MakeDoubleAccessor(&TcpBbrV2::m_ecnFactor),
+                          MakeDoubleChecker<double>())
+            .AddAttribute("EcnThreshold",
+                          "Stop probing bw when CE ratio exceeds this threshold",
+                          DoubleValue(0.5),
+                          MakeDoubleAccessor(&TcpBbrV2::m_ecnThresh),
+                          MakeDoubleChecker<double>())
+            .AddAttribute("EcnMaxRtt",
+                          "Max RTT (in usec) at which to use sender-side ECN logic",
+                          TimeValue(MilliSeconds(5)),
+                          MakeTimeAccessor(&TcpBbrV2::m_ecnMaxRtt),
+                          MakeTimeChecker())
+            .AddAttribute("FullEcnCount",
+                          "Exit STARTUP if number of round trips with ECN mark rate above m_ecnThresh meets this count",
+                          DoubleValue(0.02),
+                          MakeUintegerAccessor(&TcpBbrV2::m_fullEcnCount),
+                          MakeUintegerChecker<uint32_t>())
+            .AddAttribute("Beta",
+                          "On losses, scale down inflight and pacing rate by beta",
+                          DoubleValue(0.3),
+                          MakeDoubleAccessor(&TcpBbrV2::m_beta),
+                          MakeDoubleChecker<double>())
             .AddTraceSource("MinRtt",
                             "Estimated two-way round-trip propagation delay of the path, estimated "
                             "from the windowed minimum recent round-trip delay sample",
@@ -103,6 +143,7 @@ TcpBbrV2::TcpBbrV2(const TcpBbrV2& sock)
       m_probeRtPropStamp(sock.m_probeRtPropStamp),
       m_probeRttDoneStamp(sock.m_probeRttDoneStamp),
       m_probeRttRoundDone(sock.m_probeRttRoundDone),
+      m_probeRttCwndGain(sock.m_probeRttCwndGain),
       m_packetConservation(sock.m_packetConservation),
       m_priorCwnd(sock.m_priorCwnd),
       m_idleRestart(sock.m_idleRestart),
@@ -127,7 +168,29 @@ TcpBbrV2::TcpBbrV2(const TcpBbrV2& sock)
       m_extraAckedIdx(sock.m_extraAckedIdx),
       m_ackEpochTime(sock.m_ackEpochTime),
       m_ackEpochAcked(sock.m_ackEpochAcked),
-      m_hasSeenRtt(sock.m_hasSeenRtt)
+      m_hasSeenRtt(sock.m_hasSeenRtt),
+      m_lossThresh(sock.m_lossThresh),
+      m_fullLossCount(sock.m_fullLossCount),
+      m_lossInCycle(sock.m_lossInCycle),
+      m_lossInRound(sock.m_lossInRound),
+      m_lossRoundStart(sock.m_lossRoundStart),
+      m_lossRoundDelivered(sock.m_lossRoundDelivered),
+      m_lossEventsInRound(sock.m_lossEventsInRound),
+      m_ecnAlphaGain(sock.m_ecnAlphaGain),
+      m_ecnFactor(sock.m_ecnFactor),
+      m_ecnThresh(sock.m_ecnThresh),
+      m_ecnMaxRtt(sock.m_ecnMaxRtt),
+      m_fullEcnCount(sock.m_fullEcnCount),
+      m_startupEcnRounds(sock.m_startupEcnRounds),
+      m_ecnInCycle(sock.m_ecnInCycle),
+      m_ecnEligible(sock.m_ecnEligible),
+      m_ecnAlpha(sock.m_ecnAlpha),
+      m_ecnInRound(sock.m_ecnInRound),
+      m_alphaLastDelivered(sock.m_alphaLastDelivered),
+      m_alphaLastDeliveredCe(sock.m_alphaLastDeliveredCe),
+      m_inflightHi(sock.m_inflightHi),
+      m_inflightLo(sock.m_inflightLo),
+      m_beta(sock.m_beta)
 {
     NS_LOG_FUNCTION(this);
 }
@@ -418,7 +481,7 @@ TcpBbrV2::HandleProbeRTT(Ptr<TcpSocketState> tcb)
     uint32_t totalBytes = m_delivered + tcb->m_bytesInFlight.Get();
     m_appLimited = (totalBytes > 0 ? totalBytes : 1);
 
-    if (m_probeRttDoneStamp == Seconds(0) && tcb->m_bytesInFlight <= m_minPipeCwnd)
+    if (m_probeRttDoneStamp == Seconds(0) && tcb->m_bytesInFlight <= ProbeRTTCwnd(tcb))
     {
         m_probeRttDoneStamp = Simulator::Now() + m_probeRttDuration;
         m_probeRttRoundDone = false;
@@ -536,6 +599,230 @@ TcpBbrV2::UpdateAckAggregation(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRat
     }
 }
 
+void
+TcpBbrV2::ResetCongestionSignals()
+{
+    NS_LOG_FUNCTION(this);
+
+    m_lossInRound = false;
+    m_ecnInRound = false;
+    m_lossInCycle = false;
+    m_ecnInCycle = false;
+    // TODO:
+    // m_bwLatest = 0;
+    // m_inflightLatest = 0;
+}
+
+void
+TcpBbrV2::UpdateCongestionSignals(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
+{
+    // TODO
+    NS_LOG_FUNCTION(this << tcb << rs);
+    m_lossRoundStart = false;
+    if (rs.m_interval <= Seconds(0) || rs.m_ackedSacked == 0) {
+        return;
+    }
+
+    m_lossInRound |= (rs.m_bytesLoss > 0);
+
+    if (rs.m_priorDelivered >= m_lossRoundDelivered) {
+        m_lossRoundDelivered = m_delivered;
+        m_lossRoundStart = true;
+
+        m_lossInRound = false;
+    }
+}
+
+void
+TcpBbrV2::CheckLossTooHighInStartup(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
+{
+    NS_LOG_FUNCTION(this << tcb << rs);
+    if (m_isPipeFilled)
+    {
+        return;
+    }
+
+    if (rs.m_bytesLoss > 0 && m_lossEventsInRound < 0xf)
+    {
+        m_lossEventsInRound++;
+    }
+
+    if (m_fullLossCount > 0 && m_lossRoundStart &&
+        tcb->m_congState == TcpSocketState::CA_RECOVERY &&
+        m_lossEventsInRound >= m_fullLossCount /* TODO: &&
+        IsInflightTooHigh(tcb, rs)*/)
+    {
+        HandleQueueTooHighInStartup(tcb);
+        return;
+    }
+    if (m_lossRoundStart)
+    {
+        m_lossEventsInRound = 0;
+    }
+}
+
+void
+TcpBbrV2::CheckEcnTooHighInStartup(Ptr<TcpSocketState> tcb, double ceRatio)
+{
+    if (m_isPipeFilled || !m_ecnEligible || !m_fullEcnCount || !m_ecnThresh)
+    {
+        return;
+    }
+
+    if (ceRatio >= m_ecnThresh)
+    {
+        m_startupEcnRounds++;
+    }
+    else
+    {
+        m_startupEcnRounds = 0;
+    }
+
+    if (m_startupEcnRounds >= m_fullEcnCount)
+    {
+        HandleQueueTooHighInStartup(tcb);
+        return;
+    }
+}
+
+double
+TcpBbrV2::UpdateEcnAlpha(Ptr<TcpSocketState> tcb)
+{
+    if (m_ecnFactor == 0)
+    {
+        return -1;
+    }
+
+    uint32_t delivered = m_delivered - m_alphaLastDelivered;
+    uint32_t deliveredCe = /* TODO: m_deliveredCe - m_alphaLastDeliveredCe; */ 0;
+    if (delivered == 0)
+    {
+        return -1;
+    }
+
+    if (!m_ecnEligible && (m_minRtt <= m_ecnMaxRtt || m_ecnMaxRtt == Seconds(0)))
+    {
+        m_ecnEligible = true;
+    }
+
+    double ceRatio = static_cast<double>(deliveredCe) / delivered;
+    double alpha = (1 - m_ecnAlphaGain) * m_ecnAlpha;
+    alpha += m_ecnAlphaGain * ceRatio;
+    m_ecnAlpha = std::min(alpha, 1.0);
+
+    m_alphaLastDelivered = m_delivered;
+    m_alphaLastDeliveredCe = /* TODO: m_deliveredCe; */ 0;
+
+    CheckEcnTooHighInStartup(tcb, ceRatio);
+    return ceRatio;
+}
+
+void
+TcpBbrV2::HandleQueueTooHighInStartup(Ptr<TcpSocketState> tcb)
+{
+    NS_LOG_FUNCTION(this << tcb);
+    m_isPipeFilled = true;
+    m_inflightHi = InFlight(tcb, 1.0);
+}
+
+void
+TcpBbrV2::ProbeInflightHiUpward(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
+{
+    if (!tcb->m_isCwndLimited || tcb->m_cWnd < m_inflightHi)
+    {
+        // TODO
+        // m_probeUpAcks = 0;
+        return;
+    }
+
+    // TODO
+    // m_probeUpAcks += rs.m_ackedSacked;
+    // if (m_probeUpAcks >= m_probeUpCount)
+    // {
+    //     uint32_t delta = m_probeUpAcks / m_probeUpCount;
+    //     m_probeUpAcks -= delta * m_probeUpCount;
+    //     m_inflightHi += delta;
+    // } 
+    //
+    // if (m_roundStart)
+    // {
+    //     RaiseInflightHiSlope(tcb);
+    // }
+}
+
+void
+TcpBbrV2::HandleInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
+{
+    // TODO:
+    // m_prevProbeTooHigh = true;
+    // m_bwProbeSamples = false;
+
+    if (!rs.m_isAppLimited)
+    {
+        m_inflightHi = std::max(
+            rs.m_priorInFlight, 
+            static_cast<uint32_t>(InFlight(tcb, 1.0) * (1 - m_beta)) // TODO
+        );
+        // TODO
+    }
+}
+
+bool
+TcpBbrV2::AdaptUpperBounds(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
+{
+    // TODO
+    if (IsInflightTooHigh(tcb, rs))
+    {
+        // if (m_bwProbeSamples)
+        {
+            HandleInflightTooHigh(tcb, rs);
+        }
+    }
+    else
+    {
+        if (m_inflightHi == static_cast<uint32_t>(-1))
+        {
+            return false;
+        }
+
+        if (rs.m_priorInFlight > m_inflightHi) // TODO
+        {
+            m_inflightHi = rs.m_priorInFlight;
+        }
+
+        // if (TODO)
+        {
+            ProbeInflightHiUpward(tcb, rs);
+        }
+    }
+
+    return false;
+}
+
+bool
+TcpBbrV2::IsInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
+{
+    if (rs.m_bytesLoss > 0 && rs.m_priorInFlight)
+    {
+        uint32_t lossThresh = static_cast<uint32_t>(rs.m_priorInFlight * m_lossThresh);
+        if (rs.m_bytesLoss > lossThresh)
+        {
+            return true;
+        }
+    }
+
+    if (/*rs.m_deliveredCe > 0 && */rs.m_delivered > 0 && m_ecnEligible && m_ecnThresh > 0)
+    {
+        uint32_t ecnThresh = static_cast<uint32_t>(rs.m_delivered * m_ecnThresh);
+        if (/*rs.m_deliveredCe*/0 >= ecnThresh)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool
 TcpBbrV2::ModulateCwndForRecovery(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
 {
@@ -560,8 +847,20 @@ TcpBbrV2::ModulateCwndForProbeRTT(Ptr<TcpSocketState> tcb)
     NS_LOG_FUNCTION(this << tcb);
     if (m_state == BbrMode_t::BBR_PROBE_RTT)
     {
-        tcb->m_cWnd = std::min(tcb->m_cWnd.Get(), m_minPipeCwnd);
+        tcb->m_cWnd = std::min(tcb->m_cWnd.Get(), ProbeRTTCwnd(tcb));
     }
+}
+
+uint32_t
+TcpBbrV2::ProbeRTTCwnd(Ptr<TcpSocketState> tcb)
+{
+    NS_LOG_FUNCTION(this << tcb);
+
+    if (m_probeRttCwndGain == 0)
+    {
+        return m_minPipeCwnd;
+    }
+    return std::max(m_minPipeCwnd, GetBDP(tcb, m_probeRttCwndGain));
 }
 
 void
@@ -603,7 +902,7 @@ void
 TcpBbrV2::UpdateRound(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
 {
     NS_LOG_FUNCTION(this << tcb << rs);
-    if (rs.m_priorDelivered >= m_nextRoundDelivered)
+    if (rs.m_interval > Seconds(0) && rs.m_priorDelivered >= m_nextRoundDelivered)
     {
         m_nextRoundDelivered = m_delivered;
         m_roundCount++;
@@ -626,8 +925,6 @@ TcpBbrV2::UpdateBottleneckBandwidth(Ptr<TcpSocketState> tcb, const TcpRateOps::T
         return;
     }
 
-    UpdateRound(tcb, rs);
-
     if (rs.m_deliveryRate >= m_maxBwFilter.GetBest() || !rs.m_isAppLimited)
     {
         m_maxBwFilter.Update(rs.m_deliveryRate, m_roundCount);
@@ -638,11 +935,12 @@ void
 TcpBbrV2::UpdateModelAndState(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
 {
     NS_LOG_FUNCTION(this << tcb << rs);
-    UpdateBottleneckBandwidth(tcb, rs);
+    UpdateCongestionSignals(tcb, rs);
     UpdateAckAggregation(tcb, rs);
-    CheckCyclePhase(tcb, rs);
+    CheckLossTooHighInStartup(tcb, rs);
     CheckFullPipe(rs);
     CheckDrain(tcb);
+    CheckCyclePhase(tcb, rs);
     UpdateRTprop(tcb);
     CheckProbeRTT(tcb, rs);
 }
@@ -679,6 +977,19 @@ TcpBbrV2::GetCwndGain()
     return m_cWndGain;
 }
 
+uint32_t
+TcpBbrV2::GetBDP(Ptr<TcpSocketState> tcb, double gain)
+{
+    NS_LOG_FUNCTION(this << tcb << gain);
+    if (m_minRtt == Time::Max())
+    {
+        return tcb->m_initialCWnd * tcb->m_segmentSize;
+    }
+
+    double estimatedBdp = m_maxBwFilter.GetBest() * m_minRtt / 8.0;
+    return estimatedBdp * gain;
+}
+
 double
 TcpBbrV2::GetPacingGain()
 {
@@ -704,10 +1015,23 @@ TcpBbrV2::CongControl(Ptr<TcpSocketState> tcb,
                     const TcpRateOps::TcpRateConnection& rc,
                     const TcpRateOps::TcpRateSample& rs)
 {
+    // TODO
     NS_LOG_FUNCTION(this << tcb << rs);
     m_delivered = rc.m_delivered;
+
+    UpdateRound(tcb, rs);
+    if (m_roundStart)
+    {
+        /*double ce_ratio = */UpdateEcnAlpha(tcb);
+    }
+    m_ecnInRound |= tcb->m_ecnState == TcpSocketState::ECN_ECE_RCVD;
+
+    UpdateBottleneckBandwidth(tcb, rs);
     UpdateModelAndState(tcb, rs);
     UpdateControlParameters(tcb, rs);
+
+    m_lossInCycle |= (rs.m_bytesLoss > 0);
+    m_ecnInCycle |= tcb->m_ecnState == TcpSocketState::ECN_ECE_RCVD;
 }
 
 void
