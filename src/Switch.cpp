@@ -8,13 +8,34 @@ Switch::Switch(double processing_delay_ns):
 
 void Switch::ProcessPacket(Packet p) {
     Enqueue(p);
+    std::shared_ptr<NetworkDevice> next_device;
 
-    double packet_processing_delay_ns = processing_delay_ns;
-    if (next_processing_time_ns > NetworkSimulator::Now()) {
-        packet_processing_delay_ns += next_processing_time_ns - NetworkSimulator::Now();
+    if (p.m_is_ack) {
+        next_device = PrevDevice();
+    }
+    else {
+        next_device = NextDevice();
     }
 
-    NetworkSimulator::Schedule(packet_processing_delay_ns, [this]() {
+    double latency = 0.0;
+    /* Queueing delay */
+    if (next_processing_time_ns > NetworkSimulator::Now()) {
+        latency += next_processing_time_ns - NetworkSimulator::Now();
+    }
+    /* Processing delay */
+    latency += processing_delay_ns;
+
+    double link_last_process_time = NetworkSimulator::GetLinkLastProcessTime(id, next_device->id);
+    /* Waiting for the link to process previous packets */
+    if (link_last_process_time > NetworkSimulator::Now()) {
+        latency += link_last_process_time - NetworkSimulator::Now();
+    }
+    /* Transmission delay */
+    latency += NetworkSimulator::GetDistanceNs(id, next_device->id);
+    /* Update link last process time */
+    NetworkSimulator::UpdateLinkLastProcessTime(id, next_device->id, NetworkSimulator::Now() + latency);
+
+    NetworkSimulator::Schedule(latency, [this]() {
         Packet p = Dequeue();
         if (p.m_is_ack) {
             std::shared_ptr<NetworkDevice> prev_device = PrevDevice();
@@ -25,5 +46,5 @@ void Switch::ProcessPacket(Packet p) {
             next_device->ProcessPacket(p);
         }
     });
-    next_processing_time_ns = NetworkSimulator::Now() + packet_processing_delay_ns;
+    next_processing_time_ns = NetworkSimulator::Now() + latency;
 }
