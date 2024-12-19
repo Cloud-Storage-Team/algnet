@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-Sender::Sender(double processing_delay_ns):
+Sender::Sender(std::uint64_t processing_delay_ns):
     NetworkDevice(DeviceType::Sender, processing_delay_ns) {
     id = NetworkDevice::last_given_device_id++;
 }
@@ -12,7 +12,7 @@ void Sender::ProcessPacket(Packet p) {
     Enqueue(p);
     std::shared_ptr<NetworkDevice> next_device = NextDevice();
 
-    double latency = 0.0;
+    std::uint64_t latency = 0;
     /* Queueing delay */
     if (next_processing_time_ns > NetworkSimulator::Now()) {
         latency += next_processing_time_ns - NetworkSimulator::Now();
@@ -21,7 +21,7 @@ void Sender::ProcessPacket(Packet p) {
     latency += processing_delay_ns;
 
     if (!p.m_is_ack) {
-        double link_last_process_time = NetworkSimulator::GetLinkLastProcessTime(id, next_device->id);
+        std::uint64_t link_last_process_time = NetworkSimulator::GetLinkLastProcessTime(id, next_device->id);
         /* Waiting for link to process previous packets */
         if (link_last_process_time > NetworkSimulator::Now()) {
             latency += link_last_process_time - NetworkSimulator::Now();

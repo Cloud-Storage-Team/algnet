@@ -1,6 +1,6 @@
 #include "EventScheduler.hpp"
 
-void EventScheduler::Schedule(double time, const std::function<void()>& handler) {
+void EventScheduler::Schedule(std::uint64_t time, const std::function<void()>& handler) {
     events.emplace(time, handler);
 }
 
@@ -10,9 +10,9 @@ Event EventScheduler::PopNextEvent() {
     return result;
 }
 
-double EventScheduler::PeekNextEventTime() const {
+std::uint64_t EventScheduler::PeekNextEventTime() const {
     if (events.empty()) {
-        return -1.0;
+        return 0;
     }
     return events.top().execution_time;
 }

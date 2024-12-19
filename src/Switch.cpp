@@ -1,7 +1,7 @@
 #include "Switch.hpp"
 #include "NetworkSimulator.hpp"
 
-Switch::Switch(double processing_delay_ns):
+Switch::Switch(std::uint64_t processing_delay_ns):
     NetworkDevice(DeviceType::Switch, processing_delay_ns) {
     id = NetworkDevice::last_given_device_id++;
 }
@@ -17,7 +17,7 @@ void Switch::ProcessPacket(Packet p) {
         next_device = NextDevice();
     }
 
-    double latency = 0.0;
+    std::uint64_t latency = 0;
     /* Queueing delay */
     if (next_processing_time_ns > NetworkSimulator::Now()) {
         latency += next_processing_time_ns - NetworkSimulator::Now();
@@ -25,7 +25,7 @@ void Switch::ProcessPacket(Packet p) {
     /* Processing delay */
     latency += processing_delay_ns;
 
-    double link_last_process_time = NetworkSimulator::GetLinkLastProcessTime(id, next_device->id);
+    std::uint64_t link_last_process_time = NetworkSimulator::GetLinkLastProcessTime(id, next_device->id);
     /* Waiting for the link to process previous packets */
     if (link_last_process_time > NetworkSimulator::Now()) {
         latency += link_last_process_time - NetworkSimulator::Now();

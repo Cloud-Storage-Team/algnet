@@ -5,7 +5,7 @@
 
 class Sender: public NetworkDevice {
 public:
-    explicit Sender(double processing_delay_ns);
+    explicit Sender(std::uint64_t processing_delay_ns);
     ~Sender() override = default;
 
     void ProcessPacket(Packet p) override;

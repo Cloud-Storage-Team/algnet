@@ -1,10 +1,10 @@
 #include "Event.hpp"
 
-Event::Event(double time, const std::function<void()> &handler):
+Event::Event(std::uint64_t time, const std::function<void()> &handler):
     execution_time(time),
     handler(handler) { }
 
-double Event::GetTime() const {
+std::uint64_t Event::GetTime() const {
     return execution_time;
 }
 

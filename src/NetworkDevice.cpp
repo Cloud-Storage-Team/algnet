@@ -1,7 +1,7 @@
 #include "NetworkDevice.hpp"
 #include "NetworkSimulator.hpp"
 
-NetworkDevice::NetworkDevice(DeviceType type, double processing_delay_ns):
+NetworkDevice::NetworkDevice(DeviceType type, std::uint64_t processing_delay_ns):
     type(type),
     processing_delay_ns(processing_delay_ns) { }
 

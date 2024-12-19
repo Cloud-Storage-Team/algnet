@@ -9,9 +9,9 @@ class EventScheduler {
 public:
     EventScheduler() = default;
 
-    void Schedule(double time, const std::function<void()>& handler);
+    void Schedule(std::uint64_t time, const std::function<void()>& handler);
     Event PopNextEvent();
-    double PeekNextEventTime() const;
+    std::uint64_t PeekNextEventTime() const;
     bool Empty() const;
 
     std::priority_queue<Event> events;

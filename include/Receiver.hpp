@@ -5,7 +5,7 @@
 
 class Receiver: public NetworkDevice {
 public:
-    explicit Receiver(double process_time_ns);
+    explicit Receiver(std::uint64_t process_time_ns);
     ~Receiver() override = default;
 
     void ProcessPacket(Packet p) override;

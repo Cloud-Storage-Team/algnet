@@ -5,7 +5,7 @@
 
 class Switch: public NetworkDevice {
 public:
-    Switch(double processing_delay_ns);
+    Switch(std::uint64_t processing_delay_ns);
     ~Switch() override = default;
 
     void ProcessPacket(Packet p) override;
