@@ -1,0 +1,16 @@
+#include "Flow.hpp"
+#include "NetworkSimulator.hpp"
+
+#include <stdexcept>
+
+Flow::Flow(const std::vector<std::shared_ptr<NetworkDevice>>& path, const std::vector<std::uint32_t>& distances_ns) {
+    if (path.size() < 2) {
+        throw std::runtime_error("Error: Incorrect flow path.");
+    }
+    if (distances_ns.size() != path.size() - 1) {
+        throw std::runtime_error("Error: Incorrect flow distances.");
+    }
+    this->path = path;
+    this->distances_ns = distances_ns;
+    id = Flow::last_given_flow_id++;
+}
