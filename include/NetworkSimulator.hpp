@@ -23,8 +23,9 @@ public:
     void Run() const;
     void StopAt(std::uint64_t time_ns);
     static void AddDevice(std::shared_ptr<NetworkDevice> device);
-    static void EmplaceFlow(const std::vector<std::shared_ptr<NetworkDevice>>& path,
-                            const std::vector<std::uint32_t>& distances_ns);
+    static void EmplaceFlow(const std::vector<std::shared_ptr<NetworkDevice>>& flow_path,
+                            const std::vector<std::uint32_t>& flow_distances_ns,
+                            std::uint64_t flow_packet_generation_interval_ns);
     static void Schedule(std::uint64_t delay, const std::function<void(void)>& handler);
     static std::uint64_t Now();
 

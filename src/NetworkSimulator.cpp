@@ -47,9 +47,10 @@ void NetworkSimulator::AddDevice(std::shared_ptr<NetworkDevice> device) {
     device_by_id[device->id] = device;
 }
 
-void NetworkSimulator::EmplaceFlow(const std::vector<std::shared_ptr<NetworkDevice>>& path,
-                                   const std::vector<std::uint32_t>& distances_ns) {
-    flows.emplace_back(new Flow(path, distances_ns));
+void NetworkSimulator::EmplaceFlow(const std::vector<std::shared_ptr<NetworkDevice>>& flow_path,
+                                   const std::vector<std::uint32_t>& flow_distances_ns,
+                                   std::uint64_t flow_packet_generation_interval_ns) {
+    flows.emplace_back(new Flow(flow_path, flow_distances_ns, flow_packet_generation_interval_ns));
 }
 
 void NetworkSimulator::Schedule(std::uint64_t delay, const std::function<void()>& handler) {

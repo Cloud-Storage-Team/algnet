@@ -20,7 +20,7 @@ int main() {
     NetworkSimulator::AddDevice(receiver);
 
     // Add flows to simulator
-    NetworkSimulator::EmplaceFlow({sender, s, receiver}, {10, 10});
+    NetworkSimulator::EmplaceFlow({sender, s, receiver}, {10, 10}, 5);
 
     // Turn on ACKs
     NetworkSimulator::EnableACK = true;
