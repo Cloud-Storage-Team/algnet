@@ -1,72 +1,52 @@
 #pragma once
 
-#include "Event.hpp"
+#include "EventScheduler.hpp"
 #include "Flow.hpp"
 #include "Switch.hpp"
-#include "Server.hpp"
+#include "Sender.hpp"
+#include "Receiver.hpp"
 
 #include <cstdint>
 #include <vector>
 #include <memory>
 #include <queue>
+#include <unordered_map>
 #include <map>
 
-/**
- * @brief Implementation of a network simulator.
- */
 class NetworkSimulator {
 public:
     NetworkSimulator() = default;
     ~NetworkSimulator() = default;
 
-    /**
-     * @brief Start simulation method.
-     */
-    void Run();
+    static inline bool EnableACK = true;
 
-    /**
-     * @brief Process events from the priority queue
-     */
-    void ProcessEvents();
+    void Run() const;
+    void StopAt(double time_ns);
+    static void AddDevice(std::shared_ptr<NetworkDevice> device);
+    static void EmplaceFlow(const std::vector<std::shared_ptr<NetworkDevice>>& path,
+                            const std::vector<std::uint32_t>& distances_ns);
+    static void Schedule(double delay, const std::function<void(void)>& handler);
+    static double Now();
 
-    /**
-     * @brief Size of a packet in bytes.
-     */
+    static std::uint32_t GetDistanceNs(std::uint32_t src_id, std::uint32_t dst_id);
+    static double GetLinkLastProcessTime(std::uint32_t src_id, std::uint32_t dst_id);
+    static void UpdateLinkLastProcessTime(std::uint32_t src_id, std::uint32_t dst_id, double value);
+
+    double stop_time_ns = 10000.0;
+    static inline std::unique_ptr<EventScheduler> event_scheduler;
+    static inline std::unordered_map<std::uint32_t, std::shared_ptr<NetworkDevice>> forward_routing_table;
+    static inline std::unordered_map<std::uint32_t, std::shared_ptr<NetworkDevice>> backward_routing_table;
+    static inline std::unordered_map<std::uint32_t, std::shared_ptr<NetworkDevice>> device_by_id;
+
+    static inline double current_time_ns = 0.0;
     static const std::uint32_t packet_size_bytes = 1024;
-
-    /**
-     * @brief Size of a receiver's bandwidth in bytes.
-     */
     static const std::uint64_t bandwidth_bytes = 6'250'000'000;
-
-    /**
-     * @brief Vector with all network devices
-     */
-    std::vector<std::shared_ptr<NetworkDevice>> devices;
-
-    /**
-     * @brief Vector with all network flows
-     *
-     * @details Flow -- is a path from sender to receiver in the network
-     */
-    inline static std::vector<std::unique_ptr<Flow>> flows;
-
-    /**
-     * @brief Priority queue with all network events
-     *
-     * @details Events are sorted by delivery time
-     */
-    inline static std::priority_queue<Event> event_scheduler;
-
-    /**
-     * @brief Map: link (graph edge) --> time when link is ready to transmit next packet
-     *
-     * @details Key is a pair (min(a, b), max(a, b)), where a and b are IDs of devices connected by this link
-     */
-    inline static std::map<std::pair<std::uint32_t, std::uint32_t>, std::uint64_t> link_last_process_time_ns;
-
-    /**
-     * @brief Map: device ID --> index in `devices` vector
-     */
-    std::map<std::uint32_t, std::uint32_t> device_index_by_id;
+    static inline std::vector<std::unique_ptr<Flow>> flows;
+    static inline std::map<std::pair<std::uint32_t, std::uint32_t>, double> link_last_process_time_ns;
+    static inline std::map<std::pair<std::uint32_t, std::uint32_t>, std::uint32_t> distances_ns;
 };
+
+namespace Time {
+    double Seconds(double time_s);
+    static const double s_to_ns = 1000000000.0;
+}
