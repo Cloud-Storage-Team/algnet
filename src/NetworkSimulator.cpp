@@ -8,7 +8,7 @@ void NetworkSimulator::Run() const {
     for (std::unique_ptr<Flow>& flow: flows) {
         for (std::uint32_t i = 0; i < flow->path.size() - 1; ++i) {
             link_last_process_time_ns[{std::min(flow->path[i]->id, flow->path[i + 1]->id),
-                                       std::max(flow->path[i]->id, flow->path[i + 1]->id)}] = 0.0;
+                                       std::max(flow->path[i]->id, flow->path[i + 1]->id)}] = 0;
 
             distances_ns[{std::min(flow->path[i]->id, flow->path[i + 1]->id),
                           std::max(flow->path[i]->id, flow->path[i + 1]->id)}] = flow->distances_ns[i];
@@ -39,7 +39,7 @@ void NetworkSimulator::Run() const {
     }
 }
 
-void NetworkSimulator::StopAt(double time_ns) {
+void NetworkSimulator::StopAt(std::uint64_t time_ns) {
     stop_time_ns = time_ns;
 }
 
@@ -47,16 +47,17 @@ void NetworkSimulator::AddDevice(std::shared_ptr<NetworkDevice> device) {
     device_by_id[device->id] = device;
 }
 
-void NetworkSimulator::EmplaceFlow(const std::vector<std::shared_ptr<NetworkDevice>>& path,
-                                   const std::vector<std::uint32_t>& distances_ns) {
-    flows.emplace_back(new Flow(path, distances_ns));
+void NetworkSimulator::EmplaceFlow(const std::vector<std::shared_ptr<NetworkDevice>>& flow_path,
+                                   const std::vector<std::uint32_t>& flow_distances_ns,
+                                   std::uint64_t flow_packet_generation_interval_ns) {
+    flows.emplace_back(new Flow(flow_path, flow_distances_ns, flow_packet_generation_interval_ns));
 }
 
-void NetworkSimulator::Schedule(double delay, const std::function<void()>& handler) {
+void NetworkSimulator::Schedule(std::uint64_t delay, const std::function<void()>& handler) {
     event_scheduler->Schedule(current_time_ns + delay, handler);
 }
 
-double NetworkSimulator::Now() {
+std::uint64_t NetworkSimulator::Now() {
     return current_time_ns;
 }
 
@@ -64,14 +65,14 @@ std::uint32_t NetworkSimulator::GetDistanceNs(std::uint32_t src_id, std::uint32_
     return NetworkSimulator::distances_ns[{std::min(src_id, dst_id), std::max(src_id, dst_id)}];
 }
 
-double NetworkSimulator::GetLinkLastProcessTime(std::uint32_t src_id, std::uint32_t dst_id) {
+std::uint64_t NetworkSimulator::GetLinkLastProcessTime(std::uint32_t src_id, std::uint32_t dst_id) {
     return NetworkSimulator::link_last_process_time_ns[{std::min(src_id, dst_id), std::max(src_id, dst_id)}];
 }
 
-void NetworkSimulator::UpdateLinkLastProcessTime(std::uint32_t src_id, std::uint32_t dst_id, double value) {
+void NetworkSimulator::UpdateLinkLastProcessTime(std::uint32_t src_id, std::uint32_t dst_id, std::uint64_t value) {
     NetworkSimulator::link_last_process_time_ns[{std::min(src_id, dst_id), std::max(src_id, dst_id)}] = value;
 }
 
-double Time::Seconds(double time_s) {
+std::uint64_t Time::Seconds(std::uint64_t time_s) {
     return time_s * s_to_ns;
 }
