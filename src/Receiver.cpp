@@ -4,7 +4,7 @@
 #include <iostream>
 
 Receiver::Receiver(std::uint64_t processing_delay_ns):
-    NetworkDevice(DeviceType::Receiver, processing_delay_ns) {
+    NetworkDevice(processing_delay_ns) {
     id = NetworkDevice::last_given_device_id++;
 }
 
