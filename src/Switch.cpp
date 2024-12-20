@@ -2,7 +2,7 @@
 #include "NetworkSimulator.hpp"
 
 Switch::Switch(std::uint64_t processing_delay_ns):
-    NetworkDevice(DeviceType::Switch, processing_delay_ns) {
+    NetworkDevice(processing_delay_ns) {
     id = NetworkDevice::last_given_device_id++;
 }
 

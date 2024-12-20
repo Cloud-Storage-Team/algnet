@@ -49,5 +49,5 @@ public:
 
 namespace Time {
     std::uint64_t Seconds(std::uint64_t time_s);
-    static const std::uint64_t s_to_ns = 1000000000;
+    static const std::uint64_t s_to_ns = 1'000'000'000;
 }
