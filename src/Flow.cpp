@@ -3,7 +3,10 @@
 
 #include <stdexcept>
 
-Flow::Flow(const std::vector<std::shared_ptr<NetworkDevice>>& path, const std::vector<std::uint32_t>& distances_ns) {
+Flow::Flow(const std::vector<std::shared_ptr<NetworkDevice>>& path,
+           const std::vector<std::uint32_t>& distances_ns,
+           std::uint64_t packet_generation_interval_ns):
+        packet_generation_interval_ns(packet_generation_interval_ns) {
     if (path.size() < 2) {
         throw std::runtime_error("Error: Incorrect flow path.");
     }
