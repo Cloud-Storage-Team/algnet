@@ -1,18 +1,14 @@
 #pragma once
 #include <vector>
-#include "NetworkNode.hpp"
+#include "NetworkDevice.hpp"
+#include "Packet.hpp"
 
-namespace NetworkSimulator
+class Switch : public NetworkDevice  
 {
-    class Switch : public NetworkNode  
-    {
-        public:
+    public:
+        void ProcessPacket(Packet p) override;
+        
+    private:
 
-        void send(NetworkSimulator::Packet packet) override
-        {
+};
 
-        }
-        private:
-
-    };
-}
