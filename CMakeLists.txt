@@ -1,22 +1,12 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.20)
 project(network_simulator)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(SOURCE_FILES
-    src/Flow.cpp
-    src/Packet.cpp
-    src/Event.cpp
-    src/NetworkSimulator.cpp
-    src/NetworkDevice.cpp
-    src/Sender.cpp
-    src/Switch.cpp
-    src/Receiver.cpp
-    src/EventScheduler.cpp
-)
+file(GLOB SOURCE src/*.cpp)
 
-add_executable(network_simulator src/main.cpp ${SOURCE_FILES})
+add_executable(network_simulator src/main.cpp ${SOURCE})
 
 target_include_directories(network_simulator PUBLIC include)
 
@@ -31,7 +21,7 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-add_executable(network_simulator_test test/NetworkSimulatorTest.cpp ${SOURCE_FILES})
+add_executable(network_simulator_test test/NetworkSimulatorTest.cpp ${SOURCE})
 target_link_libraries(
         network_simulator_test
         GTest::gtest_main

@@ -13,4 +13,7 @@ public:
     std::uint64_t m_sending_time_ns;
     std::uint32_t m_transmitted_data_size_bytes;
     bool m_is_ack;
+
+    std::int32_t upstreamQ = -1;
+    bool counterInc = false;
 };
