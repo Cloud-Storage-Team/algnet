@@ -10,25 +10,19 @@ Sender::Sender(std::uint64_t processing_delay_ns):
 
 void Sender::ProcessPacket(Packet p) {
     Enqueue(p);
+    /* Next device in the flow path */
     std::shared_ptr<NetworkDevice> next_device = NextDevice();
 
-    std::uint64_t latency = 0;
-    /* Queueing delay */
-    if (next_processing_time_ns > NetworkSimulator::Now()) {
-        latency += next_processing_time_ns - NetworkSimulator::Now();
-    }
-    /* Processing delay */
-    latency += processing_delay_ns;
+    /* Latency is a sum of processing and queuing delays */
+    std::uint64_t latency = processing_delay_per_packet + std::max<std::uint64_t>(0, completion_time - NetworkSimulator::Now());
 
     std::uint64_t transmission_delay = 0;
+    /* If ACK flag set to false, send the packet to the next device */
     if (!p.m_is_ack) {
         std::uint64_t link_last_process_time = NetworkSimulator::GetLinkLastProcessTime(id, next_device->id);
-        /* Waiting for link to process previous packets */
-        if (link_last_process_time > NetworkSimulator::Now() + latency) {
-            latency += link_last_process_time - NetworkSimulator::Now();
-        }
-        /* Transmission delay */
-        transmission_delay = NetworkSimulator::GetDistanceNs(id, next_device->id);
+        /* Waiting for the link to process previous packets, then add distance (i.e. link transmission time) */
+        transmission_delay = std::max<std::uint64_t>(0, link_last_process_time - (NetworkSimulator::Now() + latency)) +
+                             NetworkSimulator::GetDistanceNs(id, next_device->id);
         /* Update link last process time */
         NetworkSimulator::UpdateLinkLastProcessTime(id, next_device->id, NetworkSimulator::Now() + latency + transmission_delay);
     }
@@ -44,5 +38,5 @@ void Sender::ProcessPacket(Packet p) {
             next_device->ProcessPacket(p);
         }
     });
-    next_processing_time_ns = NetworkSimulator::Now() + latency;
+    completion_time = NetworkSimulator::Now() + latency;
 }
