@@ -22,7 +22,7 @@ public:
 
     std::uint64_t id;
     std::queue<Packet> buffer;
-    std::uint64_t processing_delay_ns;
-    std::uint64_t next_processing_time_ns = 0;
+    std::uint64_t processing_delay_per_packet;
+    std::uint64_t completion_time = 0;
     inline static std::uint64_t last_given_device_id = 0;
 };

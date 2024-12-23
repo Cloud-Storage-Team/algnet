@@ -2,7 +2,7 @@
 #include "NetworkSimulator.hpp"
 
 NetworkDevice::NetworkDevice(std::uint64_t processing_delay_ns):
-    processing_delay_ns(processing_delay_ns) { }
+    processing_delay_per_packet(processing_delay_ns) { }
 
 void NetworkDevice::Enqueue(Packet p) {
     buffer.push(p);
