@@ -4,11 +4,13 @@
 void NetworkSimulator::Run() const {
     event_scheduler = std::make_unique<EventScheduler>();
 
-    /* Fill link time map and distances map*/
+    /* Fill link time map and distances map */
     for (std::unique_ptr<Flow>& flow: flows) {
         for (std::uint32_t i = 0; i < flow->path.size() - 1; ++i) {
-            link_last_process_time_ns[{std::min(flow->path[i]->id, flow->path[i + 1]->id),
-                                       std::max(flow->path[i]->id, flow->path[i + 1]->id)}] = 0;
+            /* Forward link */
+            link_last_process_time_ns[{flow->path[i]->id, flow->path[i + 1]->id}] = 0;
+            /* Backward link */
+            link_last_process_time_ns[{flow->path[i + 1]->id, flow->path[i]->id}] = 0;
 
             distances_ns[{std::min(flow->path[i]->id, flow->path[i + 1]->id),
                           std::max(flow->path[i]->id, flow->path[i + 1]->id)}] = flow->distances_ns[i];
@@ -66,13 +68,17 @@ std::uint32_t NetworkSimulator::GetDistanceNs(std::uint32_t src_id, std::uint32_
 }
 
 std::uint64_t NetworkSimulator::GetLinkLastProcessTime(std::uint32_t src_id, std::uint32_t dst_id) {
-    return NetworkSimulator::link_last_process_time_ns[{std::min(src_id, dst_id), std::max(src_id, dst_id)}];
+    return NetworkSimulator::link_last_process_time_ns[{src_id, dst_id}];
 }
 
 void NetworkSimulator::UpdateLinkLastProcessTime(std::uint32_t src_id, std::uint32_t dst_id, std::uint64_t value) {
-    NetworkSimulator::link_last_process_time_ns[{std::min(src_id, dst_id), std::max(src_id, dst_id)}] = value;
+    NetworkSimulator::link_last_process_time_ns[{src_id, dst_id}] = value;
 }
 
 std::uint64_t Time::Seconds(std::uint64_t time_s) {
     return time_s * s_to_ns;
+}
+
+std::uint64_t Time::Milliseconds(std::uint64_t time_ms) {
+    return time_ms * ms_to_ns;
 }

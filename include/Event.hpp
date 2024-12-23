@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Packet.hpp"
-
-#include <memory>
 #include <cstdint>
 #include <functional>
 
