@@ -11,7 +11,8 @@ Receiver::Receiver(std::uint64_t processing_delay_ns):
 void Receiver::ProcessPacket(Packet p) {
     Enqueue(p);
     /* Previous device in the flow path */
-    std::shared_ptr<NetworkDevice> prev_device = PrevDevice();
+    std::shared_ptr<Link> link = PrevLink(p.m_source_id);
+    std::shared_ptr<NetworkDevice> prev_device = link->destination;
 
     /* Latency is a sum of processing and queuing delays */
     std::uint64_t latency = processing_delay_per_packet + std::max<std::uint64_t>(0, completion_time - NetworkSimulator::Now());
@@ -19,18 +20,16 @@ void Receiver::ProcessPacket(Packet p) {
     std::uint64_t transmission_delay = 0;
     /* If ACKs are enabled, send ACK */
     if (NetworkSimulator::EnableACK) {
-        std::uint64_t link_last_process_time = NetworkSimulator::GetLinkLastProcessTime(id, prev_device->id);
-        /* Waiting for the link to process previous packets, then add distance (i.e. link transmission time) */
-        transmission_delay = std::max<std::uint64_t>(0, link_last_process_time - (NetworkSimulator::Now() + latency)) +
-                             NetworkSimulator::GetDistanceNs(id, prev_device->id);
+        /* Waiting for the link to process previous packets */
+        transmission_delay = std::max<std::uint64_t>(0, link->last_process_time_ns - (NetworkSimulator::Now() + latency)) +
+                             link->distance_ns;
         /* Update link last process time */
-        NetworkSimulator::UpdateLinkLastProcessTime(id, prev_device->id, NetworkSimulator::Now() + latency + transmission_delay);
+        link->UpdateLastProcessTime(NetworkSimulator::Now() + latency + transmission_delay);
     }
 
     NetworkSimulator::Schedule(latency + transmission_delay, [this, prev_device]() {
         Packet p = Dequeue();
-        std::uint64_t packet_delivery_time_ns = NetworkSimulator::Now() - transmission_delay;
-        std::cout << "[INFO]: Packet received. Transmission time = " << (packet_delivery_time_ns - p.m_sending_time_ns) << " ns.\n";
+        std::cout << "[INFO]: Packet received. Transmission time = " << (NetworkSimulator::Now() - p.m_sending_time_ns) << " ns.\n";
         if (NetworkSimulator::EnableACK) {
             p.m_is_ack = true;
             prev_device->ProcessPacket(p);
