@@ -20,7 +20,7 @@ void Sender::ProcessPacket(Packet p) {
     /* If ACK flag set to false, send the packet to the next device */
     if (!p.m_is_ack) {
         /* Waiting for the link to process previous packets, then add distance (i.e. link transmission time) */
-        transmission_delay = std::max<std::uint64_t>(0, link->last_process_time_ns - (NetworkSimulator::Now() + latency)) +
+        transmission_delay = (std::uint64_t)std::max<std::int64_t>(0, (std::int64_t)(link->last_process_time_ns - (NetworkSimulator::Now() + latency))) +
                              link->distance_ns;
         /* Update link last process time */
         link->UpdateLastProcessTime(NetworkSimulator::Now() + latency + transmission_delay);
@@ -30,7 +30,7 @@ void Sender::ProcessPacket(Packet p) {
     NetworkSimulator::Schedule(latency + transmission_delay, [this, next_device, transmission_delay]() {
         Packet p = Dequeue();
         if (p.m_is_ack) {
-            std::cout << "[INFO]: ACK received. RTT = " << (NetworkSimulator::Now() - p.m_sending_time_ns) << " ns.\n";
+            NetworkSimulator::logger.Log(Metric::RTT, NetworkSimulator::Now(), NetworkSimulator::Now() - p.m_sending_time_ns);
         }
         else {
             /* Packet sending time*/

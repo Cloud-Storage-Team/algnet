@@ -6,6 +6,7 @@
 #include "Sender.hpp"
 #include "Receiver.hpp"
 #include "Link.hpp"
+#include "Logger.hpp"
 
 #include <cstdint>
 #include <vector>
@@ -38,6 +39,8 @@ public:
     static const std::uint32_t packet_size_bytes = 1024;
     static const std::uint64_t bandwidth_bytes = 6'250'000'000;
     static inline std::vector<std::shared_ptr<Flow>> flows;
+
+    static inline Logger logger = Logger();
 };
 
 namespace Time {
