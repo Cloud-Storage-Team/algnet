@@ -15,6 +15,7 @@ set(SOURCE_FILES
     src/Receiver.cpp
     src/EventScheduler.cpp
     src/Link.cpp
+    src/Logger.cpp
 )
 
 add_executable(network_simulator src/main.cpp ${SOURCE_FILES})
