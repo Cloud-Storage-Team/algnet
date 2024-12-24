@@ -27,8 +27,8 @@ void NetworkSimulator::AddDevice(std::shared_ptr<NetworkDevice> device) {
 
 void NetworkSimulator::AddLink(std::shared_ptr<Link> link, std::shared_ptr<Flow> flow) {
     // pair <current_device, receiver_id> --> link to next device
-    forward_routing_table[{link->source->id, flow->receiver->id}] = link;
-    backward_routing_table[{link->destination->id, flow->sender->id}] = link;
+    routing_table[{link->source->id, flow->receiver->id}] = link;
+    routing_table[{link->destination->id, flow->sender->id}] = link;
 }
 
 void NetworkSimulator::AddFlow(std::shared_ptr<Flow> flow) {

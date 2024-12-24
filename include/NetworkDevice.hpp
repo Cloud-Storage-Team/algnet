@@ -22,7 +22,6 @@ public:
     Packet Dequeue();
     bool Empty() const;
     std::shared_ptr<Link> NextLink(std::uint32_t destination_id) const;
-    std::shared_ptr<Link> PrevLink(std::uint32_t destination_id) const;
 
     std::uint64_t id;
     std::queue<Packet> buffer;
