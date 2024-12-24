@@ -8,16 +8,12 @@
 
 class Flow {
 public:
-    explicit Flow(const std::vector<std::shared_ptr<NetworkDevice>>& path,
-                  const std::vector<std::uint32_t>& distances_ns,
+    explicit Flow(std::shared_ptr<NetworkDevice> sender, std::shared_ptr<NetworkDevice> receiver,
                   std::uint64_t packet_generation_interval_ns);
 
     void Send();
 
-    std::uint32_t id;
-    std::vector<std::shared_ptr<NetworkDevice>> path{};
-    std::vector<std::uint32_t> distances_ns{};
-
-    std::uint64_t packet_generation_interval_ns = 0;
-    inline static std::uint32_t last_given_flow_id = 0;
+    std::shared_ptr<NetworkDevice> m_sender;
+    std::shared_ptr<NetworkDevice> m_receiver;
+    std::uint64_t m_packet_generation_interval_ns = 0;
 };
