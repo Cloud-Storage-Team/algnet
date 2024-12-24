@@ -11,8 +11,8 @@ Receiver::Receiver(std::uint64_t processing_delay_ns):
 void Receiver::ProcessPacket(Packet p) {
     Enqueue(p);
     /* Previous device in the flow path */
-    std::shared_ptr<Link> link = PrevLink(p.m_source_id);
-    std::shared_ptr<NetworkDevice> prev_device = link->destination;
+    std::shared_ptr<Link> link = NextLink(p.m_source_id);
+    std::shared_ptr<NetworkDevice> next_device = link->destination;
 
     /* Latency is a sum of processing and queuing delays */
     std::uint64_t latency = processing_delay_per_packet + std::max<std::uint64_t>(0, completion_time - NetworkSimulator::Now());
@@ -27,12 +27,12 @@ void Receiver::ProcessPacket(Packet p) {
         link->UpdateLastProcessTime(NetworkSimulator::Now() + latency + transmission_delay);
     }
 
-    NetworkSimulator::Schedule(latency + transmission_delay, [this, prev_device]() {
+    NetworkSimulator::Schedule(latency + transmission_delay, [this, next_device]() {
         Packet p = Dequeue();
         std::cout << "[INFO]: Packet received. Transmission time = " << (NetworkSimulator::Now() - p.m_sending_time_ns) << " ns.\n";
         if (NetworkSimulator::EnableACK) {
             p.m_is_ack = true;
-            prev_device->ProcessPacket(p);
+            next_device->ProcessPacket(p);
         }
     });
     completion_time = NetworkSimulator::Now() + latency;
