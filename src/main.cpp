@@ -14,17 +14,24 @@ int main() {
     // Receiver
     std::shared_ptr<Receiver> receiver = std::make_shared<Receiver>(100);
 
+    std::shared_ptr<Link> link1 = std::make_shared<Link>(sender, s, 100);
+    std::shared_ptr<Link> link2 = std::make_shared<Link>(s, receiver, 100);
+
+    std::shared_ptr<Flow> flow = std::make_shared<Flow>(sender, receiver, 100);
+
     // Add devices to simulator
     NetworkSimulator::AddDevice(s);
     NetworkSimulator::AddDevice(sender);
     NetworkSimulator::AddDevice(receiver);
 
-    // Add flows to simulator
-    NetworkSimulator::EmplaceFlow({sender, s, receiver}, {10, 10}, 300);
+    NetworkSimulator::AddLink(link1, flow);
+    NetworkSimulator::AddLink(link2, flow);
+
+    NetworkSimulator::AddFlow(flow);
 
     // Turn on ACKs
     NetworkSimulator::EnableACK = true;
-    ns.StopAt(10000000);
+    ns.StopAt(Time::Milliseconds(300));
 
     ns.Run();
 }
