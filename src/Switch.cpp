@@ -12,7 +12,7 @@ void Switch::ProcessPacket(Packet p) {
 
     if (p.m_is_ack) {
         /* send ACK to packet sender */
-        link = PrevLink(p.m_source_id);
+        link = NextLink(p.m_source_id);
     }
     else {
         /* send packet to receiver */
