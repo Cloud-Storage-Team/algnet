@@ -1,13 +1,13 @@
 #include "Event.hpp"
 
 Event::Event(std::uint64_t time, const std::function<void()> &handler):
-        execution_time(time),
-        handler(handler) { }
+        m_execution_time(time),
+        m_handler(handler) { }
 
 void Event::Execute() const {
-    handler();
+    m_handler();
 }
 
 bool Event::operator<(const Event& other) const {
-    return execution_time > other.execution_time;
+    return m_execution_time > other.m_execution_time;
 }
