@@ -21,7 +21,7 @@ void Receiver::ProcessPacket(Packet p) {
     /* If ACKs are enabled, send ACK */
     if (NetworkSimulator::EnableACK) {
         /* Waiting for the link to process previous packets */
-        transmission_delay = std::max<std::uint64_t>(0, link->last_process_time_ns - (NetworkSimulator::Now() + latency)) +
+        transmission_delay = (std::uint64_t)std::max<std::uint64_t>(0, (std::int64_t)(link->last_process_time_ns - (NetworkSimulator::Now() + latency))) +
                              link->distance_ns;
         /* Update link last process time */
         link->UpdateLastProcessTime(NetworkSimulator::Now() + latency + transmission_delay);
