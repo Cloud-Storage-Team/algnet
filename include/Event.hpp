@@ -9,7 +9,7 @@ public:
 
     void Execute() const;
 
-    std::uint64_t m_execution_time;
+    std::uint64_t execution_time;
 
     bool operator<(const Event& other) const;
 private:
