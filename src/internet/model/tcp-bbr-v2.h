@@ -174,6 +174,14 @@ class TcpBbrV2 : public TcpCongestionOps
     uint32_t GetBbrState();
 
     /**
+     * \brief Calculate bdp based on min RTT and the estimated bottleneck bandwidth.
+     * \param tcb the socket state.
+     * \param gain cwnd gain.
+     * \return reutrns calculated bdp.
+     */
+    uint32_t GetBDP(Ptr<TcpSocketState> tcb, double gain);
+
+    /**
      * \brief Gets current pacing gain.
      * \return returns current pacing gain.
      */
@@ -243,6 +251,13 @@ class TcpBbrV2 : public TcpCongestionOps
      * \return true if congestion window is updated in CA_RECOVERY.
      */
     bool ModulateCwndForRecovery(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
+
+    /**
+     * \brief Returns the cwnd for PROBE_RTT mode
+     * \param tcb the socket state.
+     * \return the cwnd for PROBE_RTT mode
+     */
+    uint32_t ProbeRTTCwnd(Ptr<TcpSocketState> tcb);
 
     /**
      * \brief Helper to restore the last-known good congestion window
@@ -336,6 +351,121 @@ class TcpBbrV2 : public TcpCongestionOps
      */
     void UpdateAckAggregation(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
 
+    /**
+     * \brief After bw probing (STARTUP/PROBE_UP), reset signals before entering a state
+     * machine phase where we adapt our lower bound based on congestion signals.
+     */
+    void ResetCongestionSignals();
+
+    /**
+     * \brief Reset any short-term lower-bound adaptation to congestion, so that we can
+     * push our inflight up.
+     */
+    void ResetLowerBounds();
+
+    /**
+     * \brief Update (most of) our congestion signals: track the recent rate and volume of
+     * delivered data, presence of loss, and EWMA degree of ECN marking.
+     * \param tcb the socket state.
+     * \param rs rate sample.
+     */
+    void UpdateCongestionSignals(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs, uint32_t sampleBw);
+
+    /**
+     * \brief Exit STARTUP based on loss rate > 1% and loss gaps in round >= N. Wait until
+     * the end of the round in recovery to get a good estimate of how many packets
+     * have been lost, and how many we need to drain with a low pacing rate.
+     * \param tcb the socket state.
+     * \param rs rate sample.
+     */
+    void CheckLossTooHighInStartup(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
+
+    /**
+     * \brief Exit STARTUP upon N consecutive rounds with ECN mark rate > ecn_thresh.
+     * \param tcb the socket state.
+     * \param ceRatio delivered_ce / delivered.
+     */
+    void CheckEcnTooHighInStartup(Ptr<TcpSocketState> tcb, double ceRatio);
+
+    /**
+     * \brief Update m_ecnAlpha.
+     * \param tcb the socket state.
+     * \return returns delivered_ce / delivered.
+     */
+    double UpdateEcnAlpha(Ptr<TcpSocketState> tcb);
+
+    /**
+     * \brief Handles STARTUP phase on ECN and loss signals.
+     * \param tcb the socket state.
+     */
+    void HandleQueueTooHighInStartup(Ptr<TcpSocketState> tcb);
+
+    /**
+     * \brief In BBR_BW_PROBE_UP, if not seeing high loss/ECN/queue, raise inflight_hi.
+     * \param tcb the socket state.
+     * \param rs rate sample.
+     */
+    void ProbeInflightHiUpward(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample &rs);
+
+    /**
+     * \brief Loss and/or ECN rate is too high while probing.
+     * Adapt (once per bw probe) by cutting inflight_hi and then restarting cycle.
+     */
+    void HandleInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample &rs);
+
+    /**
+     * \brief If we're seeing bw and loss samples reflecting our bw probing, adapt
+     * using the signals we see. If loss or ECN mark rate gets too high, then adapt
+     * m_inflightHi downward. If we're able to push inflight higher without such
+     * signals, push higher: adapt m_inflightHi upward.
+     * \param tcb the socket state.
+     * \param rs rate sample.
+     * \return returns true if state transition is decided.
+     */
+    bool AdaptUpperBounds(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample &rs);
+
+    /**
+     * \brief Estimate a short-term lower bound on the capacity available now, based
+     * on measurements of the current delivery process and recent history. When we
+     * are seeing loss/ECN at times when we are not probing bw, then conservatively
+     * move toward flow balance by multiplicatively cutting our short-term
+     * estimated safe rate and volume of data (bw_lo and inflight_lo). We use a
+     * multiplicative decrease in order to converge to a lower capacity in time
+     * logarithmic in the magnitude of the decrease.
+     *
+     * However, we do not cut our short-term estimates lower than the current rate
+     * and volume of delivered data from this round trip, since from the current
+     * delivery process we can estimate the measured capacity available now.
+     *
+     * Anything faster than that approach would knowingly risk high loss, which can
+     * cause low bw for Reno/CUBIC and high loss recovery latency for
+     * request/response flows using any congestion control.
+     */
+    void AdaptLowerBounds(Ptr<TcpSocketState> tcb);
+
+    /**
+     * Does loss/ECN rate for this sample say inflight is "too high"?
+     * \param tcb the socket state.
+     * \param rs rate sample.
+     * \return returns true if loss/ECN rate say inflight is "too high".
+     */
+    bool IsInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample &rs);
+
+    /**
+     * \brief Return the windowed max recent bandwidth sample, in pkts/uS.
+     */
+    uint32_t MaxBw();
+
+    /**
+     * \brief Incorporate a new bw sample into the current window of our max filter.
+     */
+    void TakeBwHiSample(uint32_t bw);
+
+    /**
+     * \brief Keep max of last 1-2 cycles. Each PROBE_BW cycle, flip filter window.
+     */
+    void AdvanceBwHiFilter();
+
   private:
     BbrMode_t m_state{BbrMode_t::BBR_STARTUP}; //!< Current state of BBR state machine
     MaxBandwidthFilter_t m_maxBwFilter;        //!< Maximum bandwidth filter
@@ -356,6 +486,7 @@ class TcpBbrV2 : public TcpCongestionOps
         Seconds(0)}; //!< The wall clock time at which the current BBR.RTProp sample was obtained.
     Time m_probeRttDoneStamp{Seconds(0)}; //!< Time to exit from BBR_PROBE_RTT state
     bool m_probeRttRoundDone{false};      //!< True when it is time to exit BBR_PROBE_RTT
+    double m_probeRttCwndGain{0.5};       //!< Cwnd to BDP proportion in PROBE_RTT mode scaled by BBR_UNIT. Default: 50%.
     bool m_packetConservation{false};     //!< Enable/Disable packet conservation mode
     uint32_t m_priorCwnd{0};              //!< The last-known good congestion window
     bool m_idleRestart{false};            //!< When restarting from idle, set it true
@@ -370,8 +501,8 @@ class TcpBbrV2 : public TcpCongestionOps
     Time m_cycleStamp{Seconds(0)};       //!< Last time gain cycle updated
     uint32_t m_cycleIndex{0};            //!< Current index of gain cycle
     bool m_minRttExpired{false};         //!< A boolean recording whether the BBR.RTprop has expired
-    Time m_minRttFilterLen{Seconds(10)}; //!< A constant specifying the length of the RTProp min
-                                         //!< filter window, default 10 secs.
+    Time m_minRttFilterLen{Seconds(5)};  //!< A constant specifying the length of the RTProp min
+                                         //!< filter window, default 5 secs.
     Time m_minRttStamp{
         Seconds(0)}; //!< The wall clock time at which the current BBR.RTProp sample was obtained
     bool m_isInitialized{false}; //!< Set to true after first time initialization variables
@@ -391,6 +522,34 @@ class TcpBbrV2 : public TcpCongestionOps
     bool m_hasSeenRtt{false};        //!< Have we seen RTT sample yet?
     double m_pacingMargin{0.01}; //!< BBR intentionally reduces the pacing rate by 1% to drain any
                                  //!< standing queues. See `bbr_rate_bytes_per_sec` in Linux.
+    double m_lossThresh{0.02};   //!< Estimate bw probing has gone too far if loss rate exceeds this level.
+    uint32_t m_fullLossCount{8}; //!< Exit STARTUP if number of loss marking events in a Recovery round
+                                 //!< is >= m_fullLossCount, and loss rate is higher than m_lossThresh.
+    bool m_lossInCycle{false};        //!< Did packet loss happen in this cycle?
+    bool m_lossInRound{false};        //!< Was there loss marked packet in the round trip?
+    bool m_lossRoundStart{false};     //!< m_lossRoundDelivered round trip?
+    uint32_t m_lossRoundDelivered{0}; //!< 
+    uint32_t m_lossEventsInRound{0};  //!< losses in STARTUP round
+    double m_ecnAlphaGain{0.0625};     //!< Gain factor for ECN mark ratio samples
+    double m_ecnFactor{0.333};         //!< On ECN, cut inflight_lo to (1 - m_ecnFactor * m_ecnAlpha)
+    double m_ecnThresh{0.5};           //!< Estimate bw probing has gone too far if CE ratio exceeds this threshold
+    Time m_ecnMaxRtt{MilliSeconds(5)}; //!< Max RTT at which to use sender-side ECN logic
+    uint32_t m_fullEcnCount{2};        //!< Exit STARTUP if number of ECN marked round trips with ECN mark rate 
+                                       //!< above m_ecnThresh meets this count
+    uint32_t m_startupEcnRounds{0}; //!< consecutive hi ECN STARTUP rounds
+    bool m_ecnInCycle{false};       //!< ECN in this cycle?
+    bool m_ecnEligible{false};      //!< sender can use ECN (RTT, handshake)?
+    double m_ecnAlpha{1.0};           //!< EWMA delivered_ce/delivered
+    bool m_ecnInRound{false};       //!< ECN marked in this round trip?
+    uint32_t m_alphaLastDelivered{0};   //!< m_delivered at alpha update
+    uint32_t m_alphaLastDeliveredCe{0}; //!< m_deliveredCe at alpha update
+    double m_beta{0.3}; //!< On losses, scale down inflight and pacing rate by beta
+    uint32_t m_inflightHi{static_cast<uint32_t>(-1)}; //!< Upper bound of inflight data range
+    uint32_t m_inflightLo{static_cast<uint32_t>(-1)}; //!< Lower bound of inflight data range
+    uint32_t m_inflightLatest{0};                        //!< Max delivered data in last round trip
+    uint32_t m_bwLo{0};
+    uint32_t m_bwHi[2]{0, 0};
+    uint32_t m_bwLatest{0};
 };
 
 } // namespace ns3
