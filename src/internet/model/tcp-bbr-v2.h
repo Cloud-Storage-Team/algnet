@@ -358,12 +358,18 @@ class TcpBbrV2 : public TcpCongestionOps
     void ResetCongestionSignals();
 
     /**
+     * \brief Reset any short-term lower-bound adaptation to congestion, so that we can
+     * push our inflight up.
+     */
+    void ResetLowerBounds();
+
+    /**
      * \brief Update (most of) our congestion signals: track the recent rate and volume of
      * delivered data, presence of loss, and EWMA degree of ECN marking.
      * \param tcb the socket state.
      * \param rs rate sample.
      */
-    void UpdateCongestionSignals(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
+    void UpdateCongestionSignals(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs, uint32_t sampleBw);
 
     /**
      * \brief Exit STARTUP based on loss rate > 1% and loss gaps in round >= N. Wait until
@@ -402,13 +408,13 @@ class TcpBbrV2 : public TcpCongestionOps
     void ProbeInflightHiUpward(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample &rs);
 
     /**
-     * Loss and/or ECN rate is too high while probing.
+     * \brief Loss and/or ECN rate is too high while probing.
      * Adapt (once per bw probe) by cutting inflight_hi and then restarting cycle.
      */
     void HandleInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample &rs);
 
     /**
-     * If we're seeing bw and loss samples reflecting our bw probing, adapt
+     * \brief If we're seeing bw and loss samples reflecting our bw probing, adapt
      * using the signals we see. If loss or ECN mark rate gets too high, then adapt
      * m_inflightHi downward. If we're able to push inflight higher without such
      * signals, push higher: adapt m_inflightHi upward.
@@ -419,12 +425,46 @@ class TcpBbrV2 : public TcpCongestionOps
     bool AdaptUpperBounds(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample &rs);
 
     /**
+     * \brief Estimate a short-term lower bound on the capacity available now, based
+     * on measurements of the current delivery process and recent history. When we
+     * are seeing loss/ECN at times when we are not probing bw, then conservatively
+     * move toward flow balance by multiplicatively cutting our short-term
+     * estimated safe rate and volume of data (bw_lo and inflight_lo). We use a
+     * multiplicative decrease in order to converge to a lower capacity in time
+     * logarithmic in the magnitude of the decrease.
+     *
+     * However, we do not cut our short-term estimates lower than the current rate
+     * and volume of delivered data from this round trip, since from the current
+     * delivery process we can estimate the measured capacity available now.
+     *
+     * Anything faster than that approach would knowingly risk high loss, which can
+     * cause low bw for Reno/CUBIC and high loss recovery latency for
+     * request/response flows using any congestion control.
+     */
+    void AdaptLowerBounds(Ptr<TcpSocketState> tcb);
+
+    /**
      * Does loss/ECN rate for this sample say inflight is "too high"?
      * \param tcb the socket state.
      * \param rs rate sample.
-     * \return returns true if loss/ECN rate say inflight is "too high"
+     * \return returns true if loss/ECN rate say inflight is "too high".
      */
     bool IsInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample &rs);
+
+    /**
+     * \brief Return the windowed max recent bandwidth sample, in pkts/uS.
+     */
+    uint32_t MaxBw();
+
+    /**
+     * \brief Incorporate a new bw sample into the current window of our max filter.
+     */
+    void TakeBwHiSample(uint32_t bw);
+
+    /**
+     * \brief Keep max of last 1-2 cycles. Each PROBE_BW cycle, flip filter window.
+     */
+    void AdvanceBwHiFilter();
 
   private:
     BbrMode_t m_state{BbrMode_t::BBR_STARTUP}; //!< Current state of BBR state machine
@@ -503,9 +543,13 @@ class TcpBbrV2 : public TcpCongestionOps
     bool m_ecnInRound{false};       //!< ECN marked in this round trip?
     uint32_t m_alphaLastDelivered{0};   //!< m_delivered at alpha update
     uint32_t m_alphaLastDeliveredCe{0}; //!< m_deliveredCe at alpha update
+    double m_beta{0.3}; //!< On losses, scale down inflight and pacing rate by beta
     uint32_t m_inflightHi{static_cast<uint32_t>(-1)}; //!< Upper bound of inflight data range
     uint32_t m_inflightLo{static_cast<uint32_t>(-1)}; //!< Lower bound of inflight data range
-    double m_beta{0.3}; //!< On losses, scale down inflight and pacing rate by beta
+    uint32_t m_inflightLatest{0};                        //!< Max delivered data in last round trip
+    uint32_t m_bwLo{0};
+    uint32_t m_bwHi[2]{0, 0};
+    uint32_t m_bwLatest{0};
 };
 
 } // namespace ns3

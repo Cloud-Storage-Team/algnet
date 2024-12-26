@@ -188,11 +188,16 @@ TcpBbrV2::TcpBbrV2(const TcpBbrV2& sock)
       m_ecnInRound(sock.m_ecnInRound),
       m_alphaLastDelivered(sock.m_alphaLastDelivered),
       m_alphaLastDeliveredCe(sock.m_alphaLastDeliveredCe),
+      m_beta(sock.m_beta),
       m_inflightHi(sock.m_inflightHi),
       m_inflightLo(sock.m_inflightLo),
-      m_beta(sock.m_beta)
+      m_inflightLatest(sock.m_inflightLatest),
+      m_bwLo(sock.m_bwLo),
+      m_bwLatest(sock.m_bwLatest)
 {
     NS_LOG_FUNCTION(this);
+    m_bwHi[0] = sock.m_bwHi[0];
+    m_bwHi[1] = sock.m_bwHi[1];
 }
 
 const char* const TcpBbrV2::BbrModeName[BBR_PROBE_RTT + 1] = {
@@ -608,28 +613,49 @@ TcpBbrV2::ResetCongestionSignals()
     m_ecnInRound = false;
     m_lossInCycle = false;
     m_ecnInCycle = false;
-    // TODO:
-    // m_bwLatest = 0;
-    // m_inflightLatest = 0;
+    m_bwLatest = 0;
+    m_inflightLatest = 0;
 }
 
 void
-TcpBbrV2::UpdateCongestionSignals(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
+TcpBbrV2::ResetLowerBounds()
 {
-    // TODO
+    NS_LOG_FUNCTION(this);
+
+    m_bwLo = static_cast<uint32_t>(-1);
+    m_inflightLo = static_cast<uint32_t>(-1);
+}
+
+void
+TcpBbrV2::UpdateCongestionSignals(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs, uint32_t sampleBw)
+{
     NS_LOG_FUNCTION(this << tcb << rs);
+    uint32_t bw = sampleBw;
+
     m_lossRoundStart = false;
     if (rs.m_interval <= Seconds(0) || rs.m_ackedSacked == 0) {
         return;
     }
 
+    if (!rs.m_isAppLimited || bw >= MaxBw())
+    {
+        TakeBwHiSample(bw);
+    }
+
     m_lossInRound |= (rs.m_bytesLoss > 0);
+
+    m_bwLatest = std::max(m_bwLatest, sampleBw);
+    m_inflightLatest = std::max(m_inflightLatest, static_cast<uint32_t>(rs.m_delivered));
 
     if (rs.m_priorDelivered >= m_lossRoundDelivered) {
         m_lossRoundDelivered = m_delivered;
         m_lossRoundStart = true;
+        AdaptLowerBounds(tcb);
 
         m_lossInRound = false;
+        m_ecnInRound = false;
+        m_bwLatest = sampleBw;
+        m_inflightLatest = rs.m_delivered;
     }
 }
 
@@ -664,6 +690,8 @@ TcpBbrV2::CheckLossTooHighInStartup(Ptr<TcpSocketState> tcb, const TcpRateOps::T
 void
 TcpBbrV2::CheckEcnTooHighInStartup(Ptr<TcpSocketState> tcb, double ceRatio)
 {
+    NS_LOG_FUNCTION(this << tcb << ceRatio);
+
     if (m_isPipeFilled || !m_ecnEligible || !m_fullEcnCount || !m_ecnThresh)
     {
         return;
@@ -688,6 +716,8 @@ TcpBbrV2::CheckEcnTooHighInStartup(Ptr<TcpSocketState> tcb, double ceRatio)
 double
 TcpBbrV2::UpdateEcnAlpha(Ptr<TcpSocketState> tcb)
 {
+    NS_LOG_FUNCTION(this << tcb);
+
     if (m_ecnFactor == 0)
     {
         return -1;
@@ -728,6 +758,8 @@ TcpBbrV2::HandleQueueTooHighInStartup(Ptr<TcpSocketState> tcb)
 void
 TcpBbrV2::ProbeInflightHiUpward(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
 {
+    NS_LOG_FUNCTION(this << tcb << rs);
+
     if (!tcb->m_isCwndLimited || tcb->m_cWnd < m_inflightHi)
     {
         // TODO
@@ -753,6 +785,7 @@ TcpBbrV2::ProbeInflightHiUpward(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRa
 void
 TcpBbrV2::HandleInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
 {
+    NS_LOG_FUNCTION(this << tcb << rs);
     // TODO:
     // m_prevProbeTooHigh = true;
     // m_bwProbeSamples = false;
@@ -770,6 +803,7 @@ TcpBbrV2::HandleInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRa
 bool
 TcpBbrV2::AdaptUpperBounds(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
 {
+    NS_LOG_FUNCTION(this << tcb << rs);
     // TODO
     if (IsInflightTooHigh(tcb, rs))
     {
@@ -799,9 +833,45 @@ TcpBbrV2::AdaptUpperBounds(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSam
     return false;
 }
 
+void
+TcpBbrV2::AdaptLowerBounds(Ptr<TcpSocketState> tcb)
+{
+    NS_LOG_FUNCTION(this << tcb);
+    // TODO
+
+    uint32_t ecnInflightLo = static_cast<uint32_t>(-1);
+    if (m_ecnInRound && m_ecnEligible && m_ecnFactor != 0)
+    {
+        double ecnCut = 1 - m_ecnAlpha * m_ecnFactor;
+        if (m_inflightLo == static_cast<uint32_t>(-1))
+        {
+            m_inflightLo = tcb->m_cWnd;
+        }
+        ecnInflightLo = static_cast<uint32_t>(m_inflightLo * ecnCut);
+    }
+
+    if (m_lossInRound)
+    {
+        if (m_bwLo == static_cast<uint32_t>(-1))
+        {
+            m_bwLo = MaxBw();
+        }
+        if (m_inflightLo == static_cast<uint32_t>(-1))
+        {
+            m_inflightLo = tcb->m_cWnd;
+        }
+        m_bwLo = std::max(m_bwLatest, static_cast<uint32_t>(m_bwLo * (1 - m_beta)));
+        m_inflightLo = std::max(m_inflightLatest, static_cast<uint32_t>(m_inflightLo * (1 - m_beta)));
+    }
+
+    m_inflightLo = std::min(m_inflightLo, ecnInflightLo);
+}
+
 bool
 TcpBbrV2::IsInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
 {
+    NS_LOG_FUNCTION(this << tcb << rs);
+
     if (rs.m_bytesLoss > 0 && rs.m_priorInFlight)
     {
         uint32_t lossThresh = static_cast<uint32_t>(rs.m_priorInFlight * m_lossThresh);
@@ -821,6 +891,31 @@ TcpBbrV2::IsInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSa
     }
 
     return false;
+}
+
+uint32_t
+TcpBbrV2::MaxBw()
+{
+    NS_LOG_FUNCTION(this);
+    return std::max(m_bwHi[0], m_bwHi[1]);
+}
+
+void
+TcpBbrV2::TakeBwHiSample(uint32_t bw)
+{
+    NS_LOG_FUNCTION(this << bw);
+    m_bwHi[1] = std::max(bw, m_bwHi[1]);
+}
+
+void
+TcpBbrV2::AdvanceBwHiFilter()
+{
+    if (m_bwHi[1] == 0)
+    {
+        return;
+    }
+    m_bwHi[0] = m_bwHi[1];
+    m_bwHi[1] = 0;
 }
 
 bool
@@ -935,7 +1030,7 @@ void
 TcpBbrV2::UpdateModelAndState(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
 {
     NS_LOG_FUNCTION(this << tcb << rs);
-    UpdateCongestionSignals(tcb, rs);
+    UpdateCongestionSignals(tcb, rs, 0); // TODO
     UpdateAckAggregation(tcb, rs);
     CheckLossTooHighInStartup(tcb, rs);
     CheckFullPipe(rs);
