@@ -9,5 +9,5 @@ void Event::Execute() const {
 }
 
 bool Event::operator<(const Event& other) const {
-    return m_execution_time > other.m_execution_time;
+    return execution_time > other.execution_time;
 }
