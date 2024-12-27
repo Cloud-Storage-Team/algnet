@@ -4,14 +4,11 @@
 
 
 enum class stage{
-    BBR_STARTUP,
-    BBR_DRAIN,
-    BBR_NORMAL, 
-    BBR_PROBE_BW,
-    BBR_CHECK_DOWN_SPEED,
-    BBR_PROBE_BW_CHECK,
-    BBR_PROBE_RTT
-};
+    BBR_STARTUP,// to BBR_DRAIN
+    BBR_DRAIN,  // to BBR_PROBE_BW
+    BBR_PROBE_BW,//to BBR_PROBE_BW or BBR_PROBE_RTT
+    BBR_PROBE_RTT//to BBR_PROBE_BW or BBR_STARTUP
+};// We always can go to drain if RTT to big WS
 
 
 
@@ -19,25 +16,37 @@ enum class stage{
 class bbr{
 private:
     stage state = stage::BBR_STARTUP; 
-    double bwEstimate;         
-    double bwMax; 
-    double cwndCoefficient = 1;
-    double downPackageCoefficient;
-    double upPackageCoefficient;
+
+    int bwMax; 
+    int bwNow; 
     int lastRtt;
+    int lastBw;
+
+    int lstDelivered;
     int minRtt = 10000000; 
     int tick = 1;
-    int updateTick;  
+
+    int phase = 1; 
+    int cyclePhases;
+
     int cwnd = 1;
     int maxcwnd;
     int lastCwnd;
+    int fullRoinds = 0;
+    bool fullBwReached = false;
 public:
-    bbr(double downPackageCoefficient, double upPackageCoefficient, int maxcwnd);
+    bbr(int cyclePhases);
     ~bbr();
-
+    void main(Packet packet);
     int getCountPackage(int uId, int lastRtt);
 private:
-    void stateMachine();
+    void checkIsBwFull();
+    
+    void updateState();
+
+    void updateProbePhase();
+
+    void updateBw();
 
     void startup();
     
@@ -52,5 +61,9 @@ private:
     void probeRtt();
 
     void probeBWCheck();
+
+    void checkDrain();
+
+    void main();
 };
 
