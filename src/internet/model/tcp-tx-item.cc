@@ -82,6 +82,24 @@ TcpTxItem::GetLastSent() const
     return m_lastSent;
 }
 
+bool
+TcpTxItem::IsLost() const
+{
+    return m_lost;
+}
+
+bool
+TcpTxItem::IsEce() const
+{
+    return m_ece;
+}
+
+void
+TcpTxItem::SetEce(bool ece)
+{
+    m_ece = ece;
+}
+
 TcpTxItem::RateInformation&
 TcpTxItem::GetRateInformation()
 {

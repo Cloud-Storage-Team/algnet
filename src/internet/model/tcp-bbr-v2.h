@@ -507,7 +507,9 @@ class TcpBbrV2 : public TcpCongestionOps
         Seconds(0)}; //!< The wall clock time at which the current BBR.RTProp sample was obtained
     bool m_isInitialized{false}; //!< Set to true after first time initialization variables
     Ptr<UniformRandomVariable> m_uv{nullptr}; //!< Uniform Random Variable
-    uint64_t m_delivered{0}; //!< The total amount of data in bytes delivered so far
+    uint64_t m_delivered{0};   //!< The total amount of data in bytes delivered so far
+    uint64_t m_deliveredCe{0}; //!< The total amount of ECE marked data in bytes delivered so far
+    uint64_t m_lost{0};        //!< The total amount of lost data in bytes
     uint32_t m_appLimited{
         0}; //!< The index of the last transmitted packet marked as application-limited
     uint32_t m_extraAckedGain{1};         //!< Gain factor for adding extra ack to cwnd

@@ -90,6 +90,8 @@ TcpRateLinux::GenerateSample(uint32_t delivered,
 
     m_rateSample.m_interval = std::max(m_rateSample.m_sendElapsed, m_rateSample.m_ackElapsed);
     m_rateSample.m_delivered = m_rate.m_delivered - m_rateSample.m_priorDelivered;
+    m_rateSample.m_deliveredCe = m_rate.m_deliveredCe - m_rateSample.m_priorDeliveredCe;
+    m_rateSample.m_lost = m_rate.m_lost - m_rateSample.m_priorLost;
     NS_LOG_INFO("Updating sample interval=" << m_rateSample.m_interval << " and delivered data"
                                             << m_rateSample.m_delivered);
 
@@ -168,6 +170,14 @@ TcpRateLinux::SkbDelivered(TcpTxItem* skb)
     }
 
     m_rate.m_delivered += skb->GetSeqSize();
+    if (skb->IsLost())
+    {
+        m_rate.m_lost += skb->GetSeqSize();
+    }
+    if (skb->IsEce())
+    {
+        m_rate.m_deliveredCe += skb->GetSeqSize();
+    }
     m_rate.m_deliveredTime = Simulator::Now();
 
     if (m_rateSample.m_priorDelivered == 0 || skbInfo.m_delivered > m_rateSample.m_priorDelivered)
@@ -177,6 +187,8 @@ TcpRateLinux::SkbDelivered(TcpTxItem* skb)
         m_rateSample.m_priorTime = skbInfo.m_deliveredTime;
         m_rateSample.m_isAppLimited = skbInfo.m_isAppLimited;
         m_rateSample.m_sendElapsed = skb->GetLastSent() - skbInfo.m_firstSent;
+        m_rateSample.m_priorDeliveredCe = skbInfo.m_deliveredCe;
+        m_rateSample.m_lost = skbInfo.m_lost;
 
         m_rateSampleTrace(m_rateSample);
 
@@ -224,6 +236,8 @@ TcpRateLinux::SkbSent(TcpTxItem* skb, bool isStartOfTransmission)
     skbInfo.m_deliveredTime = m_rate.m_deliveredTime;
     skbInfo.m_isAppLimited = (m_rate.m_appLimited != 0);
     skbInfo.m_delivered = m_rate.m_delivered;
+    skbInfo.m_deliveredCe = m_rate.m_deliveredCe;
+    skbInfo.m_lost = m_rate.m_lost;
 }
 
 std::ostream&

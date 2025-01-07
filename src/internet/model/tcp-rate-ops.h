@@ -132,7 +132,11 @@ class TcpRateOps : public Object
         Time m_interval{Seconds(0.0)}; //!< The length of the sampling interval
         int32_t m_delivered{
             0}; //!< The amount of data marked as delivered over the sampling interval
+        int32_t m_deliveredCe{0}; //!< The amount of data with CE mark delivered over the sampling interval
+        int32_t m_lost{0}; //!< The amount of data lost over interval
         uint32_t m_priorDelivered{0};   //!< The delivered count of the most recent packet delivered
+        int32_t m_priorDeliveredCe{0};  //!< The delivered CE count of the most recent packet delivered
+        int32_t m_priorLost{0};         //!< The lost count of the most recent packet delivered
         Time m_priorTime{Seconds(0.0)}; //!< The delivered time of the most recent packet delivered
         Time m_sendElapsed{
             Seconds(0.0)}; //!< Send time interval calculated from the most recent packet delivered
@@ -162,6 +166,8 @@ class TcpRateOps : public Object
     struct TcpRateConnection
     {
         uint64_t m_delivered{0};          //!< The total amount of data in bytes delivered so far
+        uint64_t m_deliveredCe{0};        //!< The total amount of ECE marked data in bytes delivered so far
+        uint64_t m_lost{0};               //!< The total amount of lost data in bytes
         Time m_deliveredTime{Seconds(0)}; //!< Simulator time when m_delivered was last updated
         Time m_firstSentTime{
             Seconds(0)}; //!< The send time of the packet that was most recently marked as delivered

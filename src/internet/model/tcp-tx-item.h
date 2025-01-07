@@ -68,6 +68,23 @@ class TcpTxItem
     const Time& GetLastSent() const;
 
     /**
+     * \brief Has the segment been lost?
+     * \return true if the segment has been lost
+     */
+    bool IsLost() const;
+
+    /**
+     * \brief Is the item ECE marked?
+     * \return true if the item have been ECE marked
+     */
+    bool IsEce() const;
+
+    /**
+     * \brief Set ECN ECE mark
+     */
+    void SetEce(bool ece);
+
+    /**
      * \brief Various rate-related information, can be accessed by TcpRateOps.
      *
      * Note: This is not enforced through C++, but you developer must honour
@@ -75,7 +92,9 @@ class TcpTxItem
      */
     struct RateInformation
     {
-        uint64_t m_delivered{0}; //!< Connection's delivered data at the time the packet was sent
+        uint64_t m_delivered{0};   //!< Connection's delivered data at the time the packet was sent
+        uint64_t m_deliveredCe{0}; //!< Connection's delivered data with CE mark at the time the packet was sent
+        uint64_t m_lost{0};        //!< Connection's lost data at the time the packet was sent
         Time m_deliveredTime{
             Time::Max()}; //!< Connection's delivered time at the time the packet was sent
         Time m_firstSent{
@@ -100,6 +119,7 @@ class TcpTxItem
     SequenceNumber32 m_startSeq{0}; //!< Sequence number of the item (if transmitted)
     Ptr<Packet> m_packet{nullptr};  //!< Application packet (can be null)
     bool m_lost{false};             //!< Indicates if the segment has been lost (RTO)
+    bool m_ece{false};              //!< Indicates if the segment is ECE marked
     Time m_lastSent{
         Time::Max()};     //!< Timestamp of the time at which the segment has been sent last time
     bool m_sacked{false}; //!< Indicates if the segment has been SACKed

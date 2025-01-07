@@ -647,7 +647,7 @@ TcpBbrV2::UpdateCongestionSignals(Ptr<TcpSocketState> tcb, const TcpRateOps::Tcp
     m_bwLatest = std::max(m_bwLatest, sampleBw);
     m_inflightLatest = std::max(m_inflightLatest, static_cast<uint32_t>(rs.m_delivered));
 
-    if (rs.m_priorDelivered >= m_lossRoundDelivered) {
+    if (rs.m_priorDelivered * tcb->m_segmentSize >= m_lossRoundDelivered) {
         m_lossRoundDelivered = m_delivered;
         m_lossRoundStart = true;
         AdaptLowerBounds(tcb);
@@ -675,8 +675,8 @@ TcpBbrV2::CheckLossTooHighInStartup(Ptr<TcpSocketState> tcb, const TcpRateOps::T
 
     if (m_fullLossCount > 0 && m_lossRoundStart &&
         tcb->m_congState == TcpSocketState::CA_RECOVERY &&
-        m_lossEventsInRound >= m_fullLossCount /* TODO: &&
-        IsInflightTooHigh(tcb, rs)*/)
+        m_lossEventsInRound >= m_fullLossCount &&
+        IsInflightTooHigh(tcb, rs))
     {
         HandleQueueTooHighInStartup(tcb);
         return;
@@ -724,7 +724,7 @@ TcpBbrV2::UpdateEcnAlpha(Ptr<TcpSocketState> tcb)
     }
 
     uint32_t delivered = m_delivered - m_alphaLastDelivered;
-    uint32_t deliveredCe = /* TODO: m_deliveredCe - m_alphaLastDeliveredCe; */ 0;
+    uint32_t deliveredCe = m_deliveredCe - m_alphaLastDeliveredCe;
     if (delivered == 0)
     {
         return -1;
@@ -741,7 +741,7 @@ TcpBbrV2::UpdateEcnAlpha(Ptr<TcpSocketState> tcb)
     m_ecnAlpha = std::min(alpha, 1.0);
 
     m_alphaLastDelivered = m_delivered;
-    m_alphaLastDeliveredCe = /* TODO: m_deliveredCe; */ 0;
+    m_alphaLastDeliveredCe = m_deliveredCe;
 
     CheckEcnTooHighInStartup(tcb, ceRatio);
     return ceRatio;
@@ -793,11 +793,11 @@ TcpBbrV2::HandleInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRa
     if (!rs.m_isAppLimited)
     {
         m_inflightHi = std::max(
-            rs.m_priorInFlight, 
+            tcb->m_bytesInFlight.Get(),
             static_cast<uint32_t>(InFlight(tcb, 1.0) * (1 - m_beta)) // TODO
         );
-        // TODO
     }
+    // TODO
 }
 
 bool
@@ -819,9 +819,9 @@ TcpBbrV2::AdaptUpperBounds(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSam
             return false;
         }
 
-        if (rs.m_priorInFlight > m_inflightHi) // TODO
+        if (tcb->m_bytesInFlight > m_inflightHi)
         {
-            m_inflightHi = rs.m_priorInFlight;
+            m_inflightHi = tcb->m_bytesInFlight;
         }
 
         // if (TODO)
@@ -872,19 +872,19 @@ TcpBbrV2::IsInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSa
 {
     NS_LOG_FUNCTION(this << tcb << rs);
 
-    if (rs.m_bytesLoss > 0 && rs.m_priorInFlight)
+    if (rs.m_lost > 0 && tcb->m_bytesInFlight > 0u)
     {
-        uint32_t lossThresh = static_cast<uint32_t>(rs.m_priorInFlight * m_lossThresh);
-        if (rs.m_bytesLoss > lossThresh)
+        uint32_t lossThresh = static_cast<uint32_t>(tcb->m_bytesInFlight * m_lossThresh);
+        if (rs.m_lost > static_cast<int32_t>(lossThresh))
         {
             return true;
         }
     }
 
-    if (/*rs.m_deliveredCe > 0 && */rs.m_delivered > 0 && m_ecnEligible && m_ecnThresh > 0)
+    if (rs.m_deliveredCe > 0 && rs.m_delivered > 0 && m_ecnEligible && m_ecnThresh > 0)
     {
         uint32_t ecnThresh = static_cast<uint32_t>(rs.m_delivered * m_ecnThresh);
-        if (/*rs.m_deliveredCe*/0 >= ecnThresh)
+        if (rs.m_deliveredCe >= static_cast<int32_t>(ecnThresh))
         {
             return true;
         }
@@ -997,7 +997,7 @@ void
 TcpBbrV2::UpdateRound(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
 {
     NS_LOG_FUNCTION(this << tcb << rs);
-    if (rs.m_interval > Seconds(0) && rs.m_priorDelivered >= m_nextRoundDelivered)
+    if (rs.m_interval > Seconds(0) && rs.m_priorDelivered * tcb->m_segmentSize >= m_nextRoundDelivered)
     {
         m_nextRoundDelivered = m_delivered;
         m_roundCount++;
@@ -1113,6 +1113,8 @@ TcpBbrV2::CongControl(Ptr<TcpSocketState> tcb,
     // TODO
     NS_LOG_FUNCTION(this << tcb << rs);
     m_delivered = rc.m_delivered;
+    m_deliveredCe = rc.m_deliveredCe;
+    m_lost = rc.m_lost;
 
     UpdateRound(tcb, rs);
     if (m_roundStart)
@@ -1125,8 +1127,8 @@ TcpBbrV2::CongControl(Ptr<TcpSocketState> tcb,
     UpdateModelAndState(tcb, rs);
     UpdateControlParameters(tcb, rs);
 
-    m_lossInCycle |= (rs.m_bytesLoss > 0);
-    m_ecnInCycle |= tcb->m_ecnState == TcpSocketState::ECN_ECE_RCVD;
+    m_lossInCycle |= rs.m_lost > 0;
+    m_ecnInCycle |= rs.m_deliveredCe > 0;
 }
 
 void
