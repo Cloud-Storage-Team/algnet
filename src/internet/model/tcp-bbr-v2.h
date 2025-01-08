@@ -541,14 +541,14 @@ class TcpBbrV2 : public TcpCongestionOps
     uint32_t m_startupEcnRounds{0}; //!< consecutive hi ECN STARTUP rounds
     bool m_ecnInCycle{false};       //!< ECN in this cycle?
     bool m_ecnEligible{false};      //!< sender can use ECN (RTT, handshake)?
-    double m_ecnAlpha{1.0};           //!< EWMA delivered_ce/delivered
+    double m_ecnAlpha{1.0};         //!< EWMA delivered_ce/delivered
     bool m_ecnInRound{false};       //!< ECN marked in this round trip?
     uint32_t m_alphaLastDelivered{0};   //!< m_delivered at alpha update
     uint32_t m_alphaLastDeliveredCe{0}; //!< m_deliveredCe at alpha update
     double m_beta{0.3}; //!< On losses, scale down inflight and pacing rate by beta
     uint32_t m_inflightHi{static_cast<uint32_t>(-1)}; //!< Upper bound of inflight data range
     uint32_t m_inflightLo{static_cast<uint32_t>(-1)}; //!< Lower bound of inflight data range
-    uint32_t m_inflightLatest{0};                        //!< Max delivered data in last round trip
+    uint32_t m_inflightLatest{0};                     //!< Max delivered data in last round trip
     uint32_t m_bwLo{0};
     uint32_t m_bwHi[2]{0, 0};
     uint32_t m_bwLatest{0};

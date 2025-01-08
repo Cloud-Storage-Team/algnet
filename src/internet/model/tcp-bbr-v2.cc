@@ -414,6 +414,7 @@ TcpBbrV2::CheckDrain(Ptr<TcpSocketState> tcb)
     {
         EnterDrain();
         tcb->m_ssThresh = InFlight(tcb, 1);
+        ResetCongestionSignals();
     }
 
     if (m_state == BbrMode_t::BBR_DRAIN && tcb->m_bytesInFlight <= InFlight(tcb, 1))
@@ -668,7 +669,7 @@ TcpBbrV2::CheckLossTooHighInStartup(Ptr<TcpSocketState> tcb, const TcpRateOps::T
         return;
     }
 
-    if (rs.m_bytesLoss > 0 && m_lossEventsInRound < 0xf)
+    if (rs.m_bytesLoss > 0)
     {
         m_lossEventsInRound++;
     }
@@ -997,7 +998,7 @@ void
 TcpBbrV2::UpdateRound(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
 {
     NS_LOG_FUNCTION(this << tcb << rs);
-    if (rs.m_interval > Seconds(0) && rs.m_priorDelivered * tcb->m_segmentSize >= m_nextRoundDelivered)
+    if (rs.m_interval > Seconds(0) && rs.m_priorDelivered >= m_nextRoundDelivered)
     {
         m_nextRoundDelivered = m_delivered;
         m_roundCount++;
