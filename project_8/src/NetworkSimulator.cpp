@@ -1,10 +1,12 @@
 #include "NetworkSimulator.hpp"
-
+#include "EventScheduler.hpp"
+#include <memory>
 void NetworkSimulator::NetworkSimulator::Run() const 
 {
+    
     while(!scheduler_.Empty() || current_time_<stop_time_)
     {
-
+        
     }
 }
 
@@ -18,7 +20,7 @@ void NetworkSimulator::NetworkSimulator::Schedule(uint64_t delay , std::function
     scheduler_.Schedule(current_time_+delay,handler);
 }
 
-uint64_t NetworkSimulator::NetworkSimulator::Now() const
+uint64_t NetworkSimulator::NetworkSimulator::Now()
 {
-    return this->current_time_;
+    return current_time_;
 }

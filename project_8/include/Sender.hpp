@@ -3,10 +3,10 @@
 #include "NetworkDevice.hpp"
 #include "Packet.hpp"
 
-class Receiver: public NetworkDevice 
+class Sender: public NetworkDevice 
 {
 public:
-    explicit Receiver(std::uint64_t process_time_ns);
+    explicit Sender(std::uint64_t processing_delay_ns);
 
     void ProcessPacket(Packet p) override;
 };

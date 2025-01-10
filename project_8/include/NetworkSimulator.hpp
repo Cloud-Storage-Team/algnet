@@ -10,19 +10,18 @@ namespace NetworkSimulator
     {
         public:
             NetworkSimulator() = default;
-
-
+            
             void Run() const ;
-            void StopAt(uint64_t time);
-            void Schedule(uint64_t delay , std::function<void()> handler);
-            uint64_t Now() const ;
-
-
+            static void StopAt(uint64_t time);
+            static void Schedule(uint64_t delay , std::function<void()> handler);
+            static uint64_t Now();
+            static inline bool EnableACK = true;
 
         private:
-            uint64_t current_time_;
-            EventScheduler scheduler_;
-            uint64_t stop_time_;
+            static inline uint64_t current_time_;
+            static inline EventScheduler scheduler_;
+            static inline uint64_t stop_time_;
+            
         
     };
 }
