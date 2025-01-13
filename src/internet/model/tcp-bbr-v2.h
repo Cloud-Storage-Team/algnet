@@ -369,7 +369,7 @@ class TcpBbrV2 : public TcpCongestionOps
      * \param tcb the socket state.
      * \param rs rate sample.
      */
-    void UpdateCongestionSignals(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs, uint32_t sampleBw);
+    void UpdateCongestionSignals(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
 
     /**
      * \brief Exit STARTUP based on loss rate > 1% and loss gaps in round >= N. Wait until
@@ -452,19 +452,32 @@ class TcpBbrV2 : public TcpCongestionOps
     bool IsInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample &rs);
 
     /**
-     * \brief Return the windowed max recent bandwidth sample, in pkts/uS.
+     * \brief Return the windowed max recent bandwidth sample.
      */
-    uint32_t MaxBw();
+    uint64_t MaxBw();
 
     /**
      * \brief Incorporate a new bw sample into the current window of our max filter.
      */
-    void TakeBwHiSample(uint32_t bw);
+    void TakeBwHiSample(uint64_t bw);
 
     /**
      * \brief Keep max of last 1-2 cycles. Each PROBE_BW cycle, flip filter window.
      */
     void AdvanceBwHiFilter();
+
+    /**
+     * \brief Calculate the bandwidth based on how fast packets are delivered.
+     * \param rs rate sample.
+     * \return returns bandwidth sample in bps.
+     */
+    uint64_t CalculateBwSample(const TcpRateOps::TcpRateSample &rs);
+
+    /**
+     * \brief Return the estimated bandwidth of the path.
+     * \return estimated bandwidth, in bps.
+     */
+    uint64_t GetBandwidth();
 
   private:
     BbrMode_t m_state{BbrMode_t::BBR_STARTUP}; //!< Current state of BBR state machine
@@ -493,18 +506,25 @@ class TcpBbrV2 : public TcpCongestionOps
     uint32_t m_targetCWnd{0}; //!< Target value for congestion window, adapted to the estimated BDP
     DataRate m_fullBandwidth{0};      //!< Value of full bandwidth recorded
     uint32_t m_fullBandwidthCount{0}; //!< Count of full bandwidth recorded consistently
-    TracedValue<Time> m_minRtt{
-        Time::Max()}; //!< Estimated two-way round-trip propagation delay of the path, estimated
-                      //!< from the windowed minimum recent round-trip delay sample.
     uint32_t m_sendQuantum{
         0}; //!< The maximum size of a data aggregate scheduled and transmitted together
     Time m_cycleStamp{Seconds(0)};       //!< Last time gain cycle updated
     uint32_t m_cycleIndex{0};            //!< Current index of gain cycle
-    bool m_minRttExpired{false};         //!< A boolean recording whether the BBR.RTprop has expired
-    Time m_minRttFilterLen{Seconds(5)};  //!< A constant specifying the length of the RTProp min
-                                         //!< filter window, default 5 secs.
+    TracedValue<Time> m_minRtt{
+        Time::Max()}; //!< Estimated two-way round-trip propagation delay of the path, estimated
+                      //!< from the windowed minimum recent round-trip delay sample.
+    bool m_minRttExpired{false};          //!< A boolean recording whether the BBR.RTprop has expired
+    Time m_minRttFilterLen{Seconds(10)};  //!< A constant specifying the length of the RTProp min
+                                          //!< filter window, default 10 secs.
     Time m_minRttStamp{
         Seconds(0)}; //!< The wall clock time at which the current BBR.RTProp sample was obtained
+    TracedValue<Time> m_probeRttMin{
+        Time::Max()}; //!< Minimum RTT in m_probeRttMinFilterLen window.
+    bool m_probeRttMinExpired{false};         //!< A boolean recording whether the m_probeRttMin has expired
+    Time m_probeRttMinFilterLen{Seconds(5)};  //!< A constant specifying the length of the probeRtt min
+                                              //!< filter window, default 5 secs.
+    Time m_probeRttMinStamp{
+        Seconds(0)}; //!< The wall clock time at which the current m_porbeRttMin sample was obtained
     bool m_isInitialized{false}; //!< Set to true after first time initialization variables
     Ptr<UniformRandomVariable> m_uv{nullptr}; //!< Uniform Random Variable
     uint64_t m_delivered{0};   //!< The total amount of data in bytes delivered so far
@@ -549,9 +569,9 @@ class TcpBbrV2 : public TcpCongestionOps
     uint32_t m_inflightHi{static_cast<uint32_t>(-1)}; //!< Upper bound of inflight data range
     uint32_t m_inflightLo{static_cast<uint32_t>(-1)}; //!< Lower bound of inflight data range
     uint32_t m_inflightLatest{0};                     //!< Max delivered data in last round trip
-    uint32_t m_bwLo{0};
-    uint32_t m_bwHi[2]{0, 0};
-    uint32_t m_bwLatest{0};
+    uint64_t m_bwLo{static_cast<uint64_t>(-1)};
+    uint64_t m_bwHi[2]{0, 0};
+    uint64_t m_bwLatest{0};
 };
 
 } // namespace ns3
