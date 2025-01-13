@@ -376,6 +376,68 @@ TcpBbrV2::CheckCyclePhase(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSamp
 }
 
 void
+TcpBbrV2::UpdateCyclePhase(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs)
+{
+    if (!m_isPipeFilled || AdaptUpperBounds(tcb, rs) || m_state != BbrMode_t::BBR_PROBE_BW)
+    {
+        return;
+    }
+
+    uint64_t bw = MaxBw();
+    switch (m_cycleIndex)
+    {
+        case BBR_BW_PROBE_CRUISE:
+            if (CheckTimeToProbeBw(tcb))
+            {
+                return;
+            }
+            break;
+        case BBR_BW_PROBE_REFILL:
+            break;
+        case BBR_BW_PROBE_UP:
+            break;
+        case BBR_BW_PROBE_DOWN:
+            break;
+    }
+}
+
+bool
+TcpBbrV2::CheckTimeToProbeBw(Ptr<TcpSocketState> tcb)
+{
+    if (HasElapsedInPhase(m_probeWait))
+    {
+        StartBwProbeRefill();
+        return true;
+    }
+    return false;
+}
+
+void
+TcpBbrV2::StartBwProbeRefill()
+{
+    ResetLowerBounds();
+    m_bwProbeUpRounds = 0;
+    m_bwProbeUpAcks = 0;
+    m_stoppedRiskyProbe = false;
+    m_nextRoundDelivered = m_delivered;
+    m_cycleStamp = Simulator::Now();
+    m_cycleIndex = BbrPacingGainPhase_t::BBR_BW_PROBE_REFILL;
+}
+
+bool
+TcpBbrV2::HasElapsedInPhase(Time interval)
+{
+    return Simulator::Now() > m_cycleStamp + interval;
+}
+
+uint32_t
+TcpBbrV2::TargetInflight(Ptr<TcpSocketState> tcb)
+{
+    uint32_t bdp = InFlight(tcb, 1);
+    return std::min(bdp, tcb->m_cWnd.Get());
+}
+
+void
 TcpBbrV2::CheckFullPipe(const TcpRateOps::TcpRateSample& rs)
 {
     NS_LOG_FUNCTION(this << rs);
@@ -820,7 +882,7 @@ TcpBbrV2::HandleInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRa
     {
         m_inflightHi = std::max(
             tcb->m_bytesInFlight.Get(),
-            static_cast<uint32_t>(InFlight(tcb, 1.0) * (1 - m_beta)) // TODO
+            static_cast<uint32_t>(TargetInflight(tcb) * (1 - m_beta))
         );
     }
     // TODO

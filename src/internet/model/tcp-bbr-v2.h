@@ -72,6 +72,14 @@ class TcpBbrV2 : public TcpCongestionOps
         BBR_PROBE_RTT, /**< Cut inflight to min to probe min_rtt */
     };
 
+    enum BbrPacingGainPhase_t
+    {
+        BBR_BW_PROBE_UP,
+        BBR_BW_PROBE_DOWN,
+        BBR_BW_PROBE_CRUISE,
+        BBR_BW_PROBE_REFILL
+    };
+
     typedef WindowedFilter<DataRate,
                            MaxFilter<DataRate>,
                            uint32_t,
@@ -479,6 +487,26 @@ class TcpBbrV2 : public TcpCongestionOps
      */
     uint64_t GetBandwidth();
 
+    /**
+     * \brief Updates PROBE_BW state, if it is allowed.
+     * \param tcb the socket state.
+     * \param rs rate sample.
+     */
+    void UpdateCyclePhase(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
+
+    bool CheckTimeToProbeBw(Ptr<TcpSocketState> tcb);
+
+    void StartBwProbeRefill();
+
+    /**
+     * \brief Has the given amount of time elapsed since we marked the phase start?
+     * \param interval the given amount of time.
+     * \return returns true if the given amount of time elapsed.
+     */
+    bool HasElapsedInPhase(Time interval);
+
+    uint32_t TargetInflight(Ptr<TcpSocketState> tcb);
+
   private:
     BbrMode_t m_state{BbrMode_t::BBR_STARTUP}; //!< Current state of BBR state machine
     MaxBandwidthFilter_t m_maxBwFilter;        //!< Maximum bandwidth filter
@@ -569,9 +597,14 @@ class TcpBbrV2 : public TcpCongestionOps
     uint32_t m_inflightHi{static_cast<uint32_t>(-1)}; //!< Upper bound of inflight data range
     uint32_t m_inflightLo{static_cast<uint32_t>(-1)}; //!< Lower bound of inflight data range
     uint32_t m_inflightLatest{0};                     //!< Max delivered data in last round trip
-    uint64_t m_bwLo{static_cast<uint64_t>(-1)};
-    uint64_t m_bwHi[2]{0, 0};
-    uint64_t m_bwLatest{0};
+    uint64_t m_bwLo{static_cast<uint64_t>(-1)}; //!< Lower bound on sending bandwidth
+    uint64_t m_bwHi[2]{0, 0};                   //!< Upper bound of sending bandwidth range
+    uint64_t m_bwLatest{0};                     //!< max delivered bw in last round trip
+    uint32_t m_bwProbeUpCount{0};  //!< Packets delivered per m_inflightHi increment
+    uint32_t m_bwProbeUpAcks{0};   //!< Packets (S)ACKed since m_inflightHi increment
+    uint32_t m_bwProbeUpRounds{0}; //!< Cwnd-limited rounds in PROBE_UP
+    bool m_stoppedRiskyProbe{false}; //!< Last PROBE_UP stopped due to risk?
+    Time m_probeWait{Seconds(0)}; //!< PROBE_DOWN until next clock-driven probe
 };
 
 } // namespace ns3
