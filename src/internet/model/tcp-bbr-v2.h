@@ -72,7 +72,7 @@ class TcpBbrV2 : public TcpCongestionOps
         BBR_PROBE_RTT, /**< Cut inflight to min to probe min_rtt */
     };
 
-    enum BbrPacingGainPhase_t
+    enum BbrProbeBwPhase_t
     {
         BBR_BW_PROBE_UP,
         BBR_BW_PROBE_DOWN,
@@ -120,7 +120,7 @@ class TcpBbrV2 : public TcpCongestionOps
     /**
      * \brief Advances pacing gain using cycle gain algorithm, while in BBR_PROBE_BW state
      */
-    void AdvanceCyclePhase();
+    // void AdvanceCyclePhase();
 
     /**
      * \brief Checks whether to advance pacing gain in BBR_PROBE_BW state,
@@ -128,7 +128,7 @@ class TcpBbrV2 : public TcpCongestionOps
      * \param tcb the socket state.
      * \param rs rate sample.
      */
-    void CheckCyclePhase(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
+    // void CheckCyclePhase(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
 
     /**
      * \brief Checks whether its time to enter BBR_DRAIN or BBR_PROBE_BW state
@@ -212,7 +212,7 @@ class TcpBbrV2 : public TcpCongestionOps
      * \param tcb the socket state.
      * \param rs rate sample.
      */
-    void HandleRestartFromIdle(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
+    // void HandleRestartFromIdle(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
 
     /**
      * \brief Estimates the target value for congestion window
@@ -244,7 +244,7 @@ class TcpBbrV2 : public TcpCongestionOps
      * \param rs  rate sample.
      * \returns true if want to move to next value otherwise false.
      */
-    bool IsNextCyclePhase(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
+    // bool IsNextCyclePhase(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
 
     /**
      * \brief Modulates congestion window in BBR_PROBE_RTT.
@@ -413,13 +413,13 @@ class TcpBbrV2 : public TcpCongestionOps
      * \param tcb the socket state.
      * \param rs rate sample.
      */
-    void ProbeInflightHiUpward(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample &rs);
+    void ProbeInflightHiUpward(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
 
     /**
      * \brief Loss and/or ECN rate is too high while probing.
      * Adapt (once per bw probe) by cutting inflight_hi and then restarting cycle.
      */
-    void HandleInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample &rs);
+    void HandleInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
 
     /**
      * \brief If we're seeing bw and loss samples reflecting our bw probing, adapt
@@ -430,7 +430,7 @@ class TcpBbrV2 : public TcpCongestionOps
      * \param rs rate sample.
      * \return returns true if state transition is decided.
      */
-    bool AdaptUpperBounds(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample &rs);
+    bool AdaptUpperBounds(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
 
     /**
      * \brief Estimate a short-term lower bound on the capacity available now, based
@@ -457,7 +457,7 @@ class TcpBbrV2 : public TcpCongestionOps
      * \param rs rate sample.
      * \return returns true if loss/ECN rate say inflight is "too high".
      */
-    bool IsInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample &rs);
+    bool IsInflightTooHigh(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
 
     /**
      * \brief Return the windowed max recent bandwidth sample.
@@ -479,7 +479,7 @@ class TcpBbrV2 : public TcpCongestionOps
      * \param rs rate sample.
      * \return returns bandwidth sample in bps.
      */
-    uint64_t CalculateBwSample(const TcpRateOps::TcpRateSample &rs);
+    uint64_t CalculateBwSample(const TcpRateOps::TcpRateSample& rs);
 
     /**
      * \brief Return the estimated bandwidth of the path.
@@ -496,7 +496,15 @@ class TcpBbrV2 : public TcpCongestionOps
 
     bool CheckTimeToProbeBw(Ptr<TcpSocketState> tcb);
 
+    bool CheckTimeToCruise(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
+
     void StartBwProbeRefill();
+
+    void StartBwProbeUp(Ptr<TcpSocketState> tcb);
+
+    void StartBwProbeDown();
+
+    void StartBwProbeCruise();
 
     /**
      * \brief Has the given amount of time elapsed since we marked the phase start?
@@ -506,6 +514,16 @@ class TcpBbrV2 : public TcpCongestionOps
     bool HasElapsedInPhase(Time interval);
 
     uint32_t TargetInflight(Ptr<TcpSocketState> tcb);
+
+    void RaiseInflightHiSlope(Ptr<TcpSocketState> tcb);
+
+    void PickProbeWait();
+
+    bool IsProbingBandwidth();
+
+    uint32_t InflightWithHeadroom(Ptr<TcpSocketState> tcb);
+
+    void BoundCwndForInfligthModel(Ptr<TcpSocketState> tcb);
 
   private:
     BbrMode_t m_state{BbrMode_t::BBR_STARTUP}; //!< Current state of BBR state machine
@@ -600,11 +618,14 @@ class TcpBbrV2 : public TcpCongestionOps
     uint64_t m_bwLo{static_cast<uint64_t>(-1)}; //!< Lower bound on sending bandwidth
     uint64_t m_bwHi[2]{0, 0};                   //!< Upper bound of sending bandwidth range
     uint64_t m_bwLatest{0};                     //!< max delivered bw in last round trip
-    uint32_t m_bwProbeUpCount{0};  //!< Packets delivered per m_inflightHi increment
+    uint32_t m_bwProbeUpCount{static_cast<uint32_t>(-1)}; //!< Packets delivered per m_inflightHi increment
     uint32_t m_bwProbeUpAcks{0};   //!< Packets (S)ACKed since m_inflightHi increment
     uint32_t m_bwProbeUpRounds{0}; //!< Cwnd-limited rounds in PROBE_UP
     bool m_stoppedRiskyProbe{false}; //!< Last PROBE_UP stopped due to risk?
     Time m_probeWait{Seconds(0)}; //!< PROBE_DOWN until next clock-driven probe
+    bool m_prevProbeTooHigh{false}; //!< Did last PROBE_UP go too high?
+    bool m_bwProbeSamples{false}; //!< Rate samples reflect bw probing?
+    double m_inflightHeadroom{0.15}; //!< Fraction of unutilized headroom to try to leave in path upon high loss
 };
 
 } // namespace ns3
