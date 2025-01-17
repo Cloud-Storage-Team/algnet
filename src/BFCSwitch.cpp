@@ -19,29 +19,30 @@ void BFCSwitch::resume(int queueNumber) {
 }
 
 void BFCSwitch::sendPause(Packet &packet) {
+
     if (packet.m_is_ack) {
-            if (BFCSwitch *bfsSwitch = dynamic_cast<BFCSwitch *>(NextDevice().get())) {
-                    bfsSwitch->pause(packet.upstreamQ);
-            }
+        if (BFCSwitch *bfsSwitch = dynamic_cast<BFCSwitch *>(NextLink(packet.m_source_id)->destination.get())) {
+                bfsSwitch->pause(packet.upstreamQ);
         }
-        else {
-            if (BFCSwitch *bfsSwitch = dynamic_cast<BFCSwitch *>(PrevDevice().get())) {
-                    bfsSwitch->pause(packet.upstreamQ);
-            }
+    }
+    else {
+        if (BFCSwitch *bfsSwitch = dynamic_cast<BFCSwitch *>(NextLink(packet.m_destination_id)->destination.get())) {
+                bfsSwitch->pause(packet.upstreamQ);
         }
+    }
 }
 
 void BFCSwitch::sendResume(Packet &packet) {
     if (packet.m_is_ack) {
-            if (BFCSwitch *bfsSwitch = dynamic_cast<BFCSwitch *>(NextDevice().get())) {
-                    bfsSwitch->resume(packet.upstreamQ);
-            }
+        if (BFCSwitch *bfsSwitch = dynamic_cast<BFCSwitch *>(NextLink(packet.m_source_id)->destination.get())) {
+                bfsSwitch->resume(packet.upstreamQ);
         }
-        else {
-            if (BFCSwitch *bfsSwitch = dynamic_cast<BFCSwitch *>(PrevDevice().get())) {
-                    bfsSwitch->resume(packet.upstreamQ);
-            }
+    }
+    else {
+        if (BFCSwitch *bfsSwitch = dynamic_cast<BFCSwitch *>(NextLink(packet.m_destination_id)->destination.get())) {
+                bfsSwitch->resume(packet.upstreamQ);
         }
+    }
 }
 
 void BFCSwitch::SelfProcessHandler(){
@@ -75,14 +76,13 @@ void BFCSwitch::SelfProcessHandler(){
             packet.upstreamQ=i;
 
             if (packet.m_is_ack) {
-                std::shared_ptr<NetworkDevice> prev_device = PrevDevice();
-                prev_device->ProcessPacket(packet);
+                /* send ACK to packet sender */
+                NextLink(packet.m_source_id)->destination->ProcessPacket(packet);
             }
             else {
-                std::shared_ptr<NetworkDevice> next_device = NextDevice();
-                next_device->ProcessPacket(packet);
-            }            
-
+                /* send packet to receiver */
+                NextLink(packet.m_destination_id)->destination->ProcessPacket(packet);
+            }
             break;
 
         }
@@ -99,7 +99,7 @@ void BFCSwitch::ProcessPacket(Packet packet) {
         generateKey(packet.m_source_id,
                     packet.m_destination_id);  // TODO +egress Port?
     if (table[key].size >= maxQueueSize) {
-        // std::cout << "Dropped: " << packet << std::endl;
+        // std::cout << "Dropped " << std::endl;
         return;
     }
 
