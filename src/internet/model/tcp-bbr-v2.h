@@ -286,14 +286,6 @@ class TcpBbrV2 : public TcpCongestionOps
     void ModulateCwndForProbeRTT(Ptr<TcpSocketState> tcb);
 
     /**
-     * \brief Modulates congestion window in CA_RECOVERY.
-     * \param tcb the socket state.
-     * \param rs rate sample.
-     * \return true if congestion window is updated in CA_RECOVERY.
-     */
-    bool ModulateCwndForRecovery(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
-
-    /**
      * \brief Returns the cwnd for PROBE_RTT mode
      * \param tcb the socket state.
      * \return the cwnd for PROBE_RTT mode
@@ -499,16 +491,6 @@ class TcpBbrV2 : public TcpCongestionOps
     uint64_t MaxBandwidth();
 
     /**
-     * \brief Incorporate a new bw sample into the current window of our max filter.
-     */
-    void TakeBwHiSample(uint64_t bw);
-
-    /**
-     * \brief Keep max of last 1-2 cycles. Each PROBE_BW cycle, flip filter window.
-     */
-    void AdvanceBwHiFilter();
-
-    /**
      * \brief Calculate the bandwidth based on how fast packets are delivered.
      * \param rs rate sample.
      * \return returns bandwidth sample in bps.
@@ -646,7 +628,6 @@ class TcpBbrV2 : public TcpCongestionOps
     Time m_probeRttDoneStamp{Seconds(0)}; //!< Time to exit from BBR_PROBE_RTT state
     bool m_probeRttRoundDone{false};      //!< True when it is time to exit BBR_PROBE_RTT
     double m_probeRttCwndGain{0.5};       //!< Cwnd to BDP proportion in PROBE_RTT mode scaled by BBR_UNIT. Default: 50%.
-    bool m_packetConservation{false};     //!< Enable/Disable packet conservation mode
     uint32_t m_priorCwnd{0};              //!< The last-known good congestion window
     bool m_idleRestart{false};            //!< When restarting from idle, set it true
     uint32_t m_targetCWnd{0}; //!< Target value for congestion window, adapted to the estimated BDP
@@ -675,7 +656,6 @@ class TcpBbrV2 : public TcpCongestionOps
     Ptr<UniformRandomVariable> m_uv{nullptr}; //!< Uniform Random Variable
     uint64_t m_delivered{0};   //!< The total amount of data in bytes delivered so far
     uint64_t m_deliveredCe{0}; //!< The total amount of ECE marked data in bytes delivered so far
-    uint64_t m_lost{0};        //!< The total amount of lost data in bytes
     uint32_t m_appLimited{
         0}; //!< The index of the last transmitted packet marked as application-limited
     uint32_t m_extraAckedGain{1};         //!< Gain factor for adding extra ack to cwnd
@@ -716,10 +696,9 @@ class TcpBbrV2 : public TcpCongestionOps
     uint32_t m_inflightLo{static_cast<uint32_t>(-1)}; //!< Lower bound of inflight data range
     uint32_t m_inflightLatest{0};                     //!< Max delivered data in last round trip
     uint64_t m_bwLo{static_cast<uint64_t>(-1)}; //!< Lower bound on sending bandwidth
-    uint64_t m_bwHi[2]{0, 0};                   //!< Upper bound of sending bandwidth range
     uint64_t m_bwLatest{0};                     //!< max delivered bw in last round trip
-    uint32_t m_bwProbeUpCount{static_cast<uint32_t>(-1)}; //!< Packets delivered per m_inflightHi increment
-    uint32_t m_bwProbeUpAcks{0};   //!< Packets (S)ACKed since m_inflightHi increment
+    uint32_t m_bwProbeUpCount{static_cast<uint32_t>(-1)}; //!< Bytes delivered per m_inflightHi increment
+    uint32_t m_bwProbeUpAcks{0};   //!< Bytes (S)ACKed since m_inflightHi increment
     uint32_t m_bwProbeUpRounds{0}; //!< Cwnd-limited rounds in PROBE_UP
     bool m_stoppedRiskyProbe{false}; //!< Last PROBE_UP stopped due to risk?
     Time m_probeWait{Seconds(0)}; //!< PROBE_DOWN until next clock-driven probe
@@ -727,6 +706,8 @@ class TcpBbrV2 : public TcpCongestionOps
     bool m_bwProbeSamples{false}; //!< Rate samples reflect bw probing?
     double m_inflightHeadroom{0.15}; //!< Fraction of unutilized headroom to try to leave in path upon high loss
     BbrAckPhase_t m_ackPhase{BbrAckPhase_t::BBR_ACKS_INIT}; //!< Relation of incoming ACK stream to the bandwidth probing
+    Time m_bwProbeTimeBase{Seconds(2)};   //!< Use BBR-native probe time scale starting at this many seconds
+    double m_bwProbeRandSeconds{1.0}; //!< Use BBR-native probes spread over this many seconds
 };
 
 } // namespace ns3
