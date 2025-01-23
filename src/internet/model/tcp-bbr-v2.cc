@@ -130,6 +130,11 @@ TcpBbrV2::GetTypeId()
                           DoubleValue(1.0),
                           MakeDoubleAccessor(&TcpBbrV2::m_bwProbeRandSeconds),
                           MakeDoubleChecker<double>())
+            .AddAttribute("EcnEnabled",
+                          "If false, disable support of ECN functionality",
+                          BooleanValue(true),
+                          MakeBooleanAccessor(&TcpBbrV2::m_ecnEnabled),
+                          MakeBooleanChecker())
             .AddTraceSource("MinRtt",
                             "Estimated two-way round-trip propagation delay of the path, estimated "
                             "from the windowed minimum recent round-trip delay sample",
@@ -230,7 +235,8 @@ TcpBbrV2::TcpBbrV2(const TcpBbrV2& sock)
       m_prevProbeTooHigh(sock.m_prevProbeTooHigh),
       m_bwProbeSamples(sock.m_bwProbeSamples),
       m_inflightHeadroom(sock.m_inflightHeadroom),
-      m_ackPhase(sock.m_ackPhase)
+      m_ackPhase(sock.m_ackPhase),
+      m_ecnEnabled(sock.m_ecnEnabled)
 {
     NS_LOG_FUNCTION(this);
 }
@@ -952,7 +958,7 @@ TcpBbrV2::UpdateEcnAlpha(Ptr<TcpSocketState> tcb)
         return -1;
     }
 
-    if (!m_ecnEligible && (m_minRtt <= m_ecnMaxRtt || m_ecnMaxRtt == Seconds(0)))
+    if (!m_ecnEligible && m_ecnEnabled && (m_minRtt <= m_ecnMaxRtt || m_ecnMaxRtt == Seconds(0)))
     {
         m_ecnEligible = true;
     }
@@ -1343,7 +1349,7 @@ TcpBbrV2::CongControl(Ptr<TcpSocketState> tcb,
         UpdateEcnAlpha(tcb);
     }
 
-    m_ecnInRound |= tcb->m_ecnState == TcpSocketState::ECN_ECE_RCVD;
+    m_ecnInRound |= (m_ecnEligible && tcb->m_ecnState == TcpSocketState::ECN_ECE_RCVD);
 
     UpdateModelAndState(tcb, rs);
     UpdateGains();

@@ -188,7 +188,7 @@ TcpRateLinux::SkbDelivered(TcpTxItem* skb)
         m_rateSample.m_isAppLimited = skbInfo.m_isAppLimited;
         m_rateSample.m_sendElapsed = skb->GetLastSent() - skbInfo.m_firstSent;
         m_rateSample.m_priorDeliveredCe = skbInfo.m_deliveredCe;
-        m_rateSample.m_lost = skbInfo.m_lost;
+        m_rateSample.m_priorLost = skbInfo.m_lost;
 
         m_rateSampleTrace(m_rateSample);
 

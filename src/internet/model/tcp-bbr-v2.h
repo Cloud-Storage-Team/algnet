@@ -708,6 +708,7 @@ class TcpBbrV2 : public TcpCongestionOps
     BbrAckPhase_t m_ackPhase{BbrAckPhase_t::BBR_ACKS_INIT}; //!< Relation of incoming ACK stream to the bandwidth probing
     Time m_bwProbeTimeBase{Seconds(2)};   //!< Use BBR-native probe time scale starting at this many seconds
     double m_bwProbeRandSeconds{1.0}; //!< Use BBR-native probes spread over this many seconds
+    bool m_ecnEnabled{false}; //!< If false, disable support of ECN functionality
 };
 
 } // namespace ns3
