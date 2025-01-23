@@ -1,5 +1,4 @@
 #include "link.hpp"
-#include "common_events.hpp"
 
 #include <vector>
 #include <cstdint>
@@ -22,5 +21,10 @@ void Link::ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, st
     std::uint64_t process_time = (packet.size + speed - 1) / speed;
     last_process_time_ns = std::max(last_process_time_ns, current_time_ns) + process_time;
     packet.sending_time = last_process_time_ns;
-    all_events.push(std::make_shared<ProcessPacketEvent>(ProcessPacketEvent(GetNextElement(), packet, last_process_time_ns,packet.destination_id)));
+    auto last_process_time = last_process_time_ns;
+    auto process = [this, packet, last_process_time](std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& events) {
+            PacketHeader inner_packet = packet;
+            this->GetNextElement()->ReceivePacket(last_process_time, inner_packet, events);
+        };
+    all_events.push(std::make_shared<Event>(Event(last_process_time_ns, process, packet.destination_id)));
 }

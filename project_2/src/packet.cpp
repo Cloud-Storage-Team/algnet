@@ -1,11 +1,12 @@
 #include "packet.hpp"
 #include <string>
 
-PacketHeader::PacketHeader(std::uint64_t source_id, std::uint64_t destination_id, std::uint64_t sending_time, std::uint32_t packet_index, std::uint32_t size):
+PacketHeader::PacketHeader(std::uint64_t source_id, std::uint64_t destination_id, std::uint64_t sending_time, std::uint32_t packet_index, std::uint64_t RTT, std::uint32_t size):
     source_id(source_id),
     destination_id(destination_id),
     sending_time(sending_time),
     packet_index(packet_index),
+    RTT(RTT),
     size(size) {}
 
 

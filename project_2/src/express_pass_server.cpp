@@ -1,5 +1,4 @@
 
-#include "common_events.hpp"
 #include "express_pass_server.hpp"
 
 ExpressPassReceiver::ExpressPassReceiver(std::vector<std::uint64_t> senders_ids, std::uint64_t id, std::uint64_t simulation_duration, std::uint64_t inter_credit_gap):
@@ -11,12 +10,22 @@ ExpressPassReceiver::ExpressPassReceiver(std::vector<std::uint64_t> senders_ids,
 std::uint64_t ExpressPassReceiver::SendCreditByFlow(std::uint64_t flow_id, std::uint64_t current_time_ns, std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& all_events) {
     std::uint64_t jitter = congestion_control.getRandomJitter();
     std::uint64_t sending_time = current_time_ns + jitter;
-    PacketHeader credit = congestion_control.GetCredit(sending_time, id, flow_id);
-    all_events.push(std::make_shared<ProcessPacketEvent>(ProcessPacketEvent(this->GetNextElement(flow_id), credit, sending_time, flow_id)));
+    PacketHeader credit = congestion_control.GetCredit(sending_time, id, flow_id, ++flow_to_index[flow_id].last_sent_index);
+    // std::cout << "Flow id: " << flow_id << ", last sent: " << flow_to_index[flow_id].last_sent_index << std::endl;
+    this->GetNextElement(flow_id);
+
+    auto process = [this, flow_id, sending_time, credit](std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& events) {
+            auto inner_credit = credit;
+            this->GetNextElement(flow_id)->ReceivePacket(sending_time, inner_credit, events);
+        };
+    all_events.push(std::make_shared<Event>(Event(sending_time, process, flow_id)));
 
     std::uint64_t next_sending = sending_time + inter_credit_gap;
     if (next_sending < simulation_duration) {
-        all_events.push(std::make_shared<CreateCreditByFlowEvent>(CreateCreditByFlowEvent(std::make_shared<ExpressPassReceiver>(*this), flow_id, next_sending)));
+        auto create_credit = [this, flow_id, next_sending](std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& events) {
+                this->SendCreditByFlow(flow_id, next_sending, events);
+            };
+        all_events.push(std::make_shared<Event>(Event(next_sending, create_credit)));
     }
 
     return next_sending;
@@ -42,7 +51,12 @@ void ExpressPassReceiver::ReceivePacket(std::uint64_t current_time_ns, PacketHea
         return;
     }
     std::uint64_t sender_id = packet.source_id;
-    
+    flow_to_lost_credits[sender_id] += (packet.packet_index - flow_to_index[sender_id].last_received_index) - 1;
+    flow_to_index[sender_id].last_received_index = packet.packet_index;
+    // std::cout << "Flow id: " << sender_id << ", receive obtained: " << flow_to_index[sender_id].last_received_index << std::endl;
+    // std::cout << "Lost rate: " << flow_to_lost_credits[sender_id] << "/" << flow_to_index[sender_id].last_received_index << std::endl;
+    RTT = static_cast<std::uint64_t>(RTT * 0.7 + (current_time_ns - packet.RTT) * 0.3);
+    std::cout << "RTT: " << RTT << std::endl;
     if (packet.sending_time <= simulation_duration) {
         amount_of_data_from_sender[sender_id] += 1;
     }
@@ -60,6 +74,11 @@ std::string ExpressPassReceiver::ToString() const {
         for (auto& sender_and_data: result) {
             oss << "Sender id: "<< sender_and_data.first << ", Amount: " << sender_and_data.second << std::endl;
         }
+        std::uint32_t sum = 0;
+        for (auto& data: flow_to_lost_credits) {
+            sum += data.second;
+        }
+        oss << sum << std::endl;
         oss << std::endl;
 
         return oss.str();
@@ -86,7 +105,14 @@ void ExpressPassSender::ReceivePacket(std::uint64_t current_time_ns, PacketHeade
         return;
     }
     else if (packet.GetFlag(0) == 1) {
-        PacketHeader data = congestion_control.GetDataPacket(current_time_ns + process_time_ns, id, packet.source_id);
-        all_events.push(std::make_shared<ProcessPacketEvent>(ProcessPacketEvent(this->GetNextElement(data.destination_id), data, current_time_ns + process_time_ns, data.destination_id)));
+        PacketHeader data = congestion_control.GetDataPacket(current_time_ns + process_time_ns, id, packet.source_id, packet.packet_index, packet.RTT);
+        std::uint64_t process_time = process_time_ns;
+        this->GetNextElement(data.destination_id);
+
+        auto process = [this, current_time_ns, process_time, data](std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& events) {
+                auto inner_data = data;
+                this->GetNextElement(inner_data.destination_id)->ReceivePacket(current_time_ns + process_time_ns, inner_data, events);
+            };
+        all_events.push(std::make_shared<Event>(Event(current_time_ns + process_time_ns, process, data.destination_id)));
     }
 }

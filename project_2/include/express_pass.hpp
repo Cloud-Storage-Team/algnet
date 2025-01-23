@@ -18,7 +18,7 @@ public:
 
     ExpressPass() = default;
     std::uint64_t getRandomJitter() const;
-    PacketHeader GetCredit(std::uint64_t sending_time, std::uint64_t source, std::uint64_t destination, std::uint64_t size = min_packet_size) const;
+    PacketHeader GetCredit(std::uint64_t sending_time, std::uint64_t source, std::uint64_t destination,  std::uint32_t index = 0, std::uint64_t size = min_packet_size) const;
     PacketHeader GetHandshakePacket(std::uint64_t sending_time, std::uint64_t source, std::uint64_t destination, std::uint64_t size = min_packet_size) const;
-    PacketHeader GetDataPacket(std::uint64_t sending_time, std::uint64_t source, std::uint64_t destination, std::uint64_t size = default_data_size) const;
+    PacketHeader GetDataPacket(std::uint64_t sending_time, std::uint64_t source, std::uint64_t destination, std::uint32_t index = 0, std::uint64_t RTT = 0, std::uint64_t size = default_data_size) const;
 };

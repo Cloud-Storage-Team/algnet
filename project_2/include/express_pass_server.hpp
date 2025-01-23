@@ -5,12 +5,20 @@
 #include "server.hpp"
 #include "express_pass.hpp"
 
+struct IndexKeeper {
+    std::uint32_t last_sent_index = 0;
+    std::uint32_t last_received_index = 0;
+};
+
 class ExpressPassReceiver: public ServerBase {
 private:
     std::vector<std::uint64_t> senders_ids;
     std::unordered_map<std::uint64_t, std::uint32_t> amount_of_data_from_sender{};
+    std::unordered_map<std::uint64_t, IndexKeeper> flow_to_index{};
+    std::unordered_map<std::uint64_t, std::uint32_t> flow_to_lost_credits{};
     std::uint64_t inter_credit_gap;
     std::uint64_t simulation_duration;
+    std::uint64_t RTT = 1500;
     ExpressPass congestion_control;
 public:
     explicit ExpressPassReceiver(std::vector<std::uint64_t> senders_ids, std::uint64_t id, std::uint64_t simulation_duration, std::uint64_t inter_credit_gap);
