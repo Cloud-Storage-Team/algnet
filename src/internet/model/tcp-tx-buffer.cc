@@ -653,7 +653,7 @@ TcpTxBuffer::IsRetransmittedDataAcked(const SequenceNumber32& ack) const
 }
 
 void
-TcpTxBuffer::DiscardUpTo(const SequenceNumber32& seq, const Callback<void, TcpTxItem*>& beforeDelCb)
+TcpTxBuffer::DiscardUpTo(const SequenceNumber32& seq, const Callback<void, TcpTxItem*>& beforeDelCb, bool isEce)
 {
     NS_LOG_FUNCTION(this << seq);
 
@@ -703,6 +703,7 @@ TcpTxBuffer::DiscardUpTo(const SequenceNumber32& seq, const Callback<void, TcpTx
 
             if (!beforeDelCb.IsNull())
             {
+                item->SetEce(isEce);
                 // Inform Rate algorithms only when a full packet is ACKed
                 beforeDelCb(item);
             }
