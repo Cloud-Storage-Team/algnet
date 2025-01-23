@@ -19,5 +19,5 @@ bool NetworkDevice::Empty() const {
 }
 
 std::shared_ptr<Link> NetworkDevice::NextLink(std::uint32_t destination_id) const {
-    return NetworkSimulator::routing_table[{id, destination_id}];
+    return routing_table.at(destination_id);
 }

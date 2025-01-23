@@ -10,7 +10,8 @@ public:
     void Execute() const;
 
     std::uint64_t execution_time;
-    std::function<void()> handler;
 
     bool operator<(const Event& other) const;
+private:
+    std::function<void()> m_handler;
 };

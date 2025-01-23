@@ -8,6 +8,14 @@ Flow::Flow(std::shared_ptr<NetworkDevice> sender, std::shared_ptr<NetworkDevice>
     m_receiver(std::move(receiver)),
     m_packet_generation_interval_ns(packet_generation_interval_ns) { }
 
+std::uint32_t Flow::getSenderID() const {
+    return m_sender->id;
+}
+
+std::uint32_t Flow::getReceiverID() const {
+    return m_receiver->id;
+}
+
 void Flow::Send() {
     Packet p(m_sender->id, m_receiver->id, 0, false);
 

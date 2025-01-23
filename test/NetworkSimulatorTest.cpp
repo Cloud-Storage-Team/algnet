@@ -19,6 +19,7 @@ TEST(EventTest, EventOrderTest) {
 
     ASSERT_TRUE(third_event < first_event);
 
+    // First and second events are equal
     ASSERT_FALSE(first_event < second_event);
     ASSERT_FALSE(second_event < first_event);
 }
@@ -61,14 +62,14 @@ TEST(EventSchedulerTest, EventSchedulerPriorityQueueTest) {
 
     Event e = es.PopNextEvent();
 
-    ASSERT_TRUE(e.m_execution_time == first_event_time);
+    ASSERT_TRUE(e.execution_time == first_event_time);
     ASSERT_TRUE(!es.Empty());
     ASSERT_TRUE(es.PeekNextEventTime() == second_event_time);
     ASSERT_TRUE(es.events.size() == 1);
 
     e = es.PopNextEvent();
 
-    ASSERT_TRUE(e.m_execution_time == second_event_time);
+    ASSERT_TRUE(e.execution_time == second_event_time);
     ASSERT_TRUE(es.Empty());
 }
 
@@ -102,11 +103,37 @@ TEST(NetworkSimulatorTest, NetworkSimulatorBasicTest) {
     NetworkSimulator::AddFlow(flow);
 
     ASSERT_TRUE(NetworkSimulator::Now() == 0);
-    ASSERT_TRUE(NetworkSimulator::routing_table.find({sender->GetID(), swtch->GetID()}) != NetworkSimulator::routing_table.end());
-    ASSERT_TRUE(NetworkSimulator::routing_table.find({swtch->GetID(), sender->GetID()}) != NetworkSimulator::routing_table.end());
-    ASSERT_TRUE(NetworkSimulator::device_by_id[sender->GetID()] == sender);
-    ASSERT_TRUE(NetworkSimulator::device_by_id[swtch->GetID()] == swtch);
+    ASSERT_TRUE(sender->routing_table.find(swtch->id) != sender->routing_table.end());
+    ASSERT_TRUE(swtch->routing_table.find(sender->id) != swtch->routing_table.end());
+    ASSERT_TRUE(NetworkSimulator::device_by_id[sender->id] == sender);
+    ASSERT_TRUE(NetworkSimulator::device_by_id[swtch->id] == swtch);
     ASSERT_TRUE(NetworkSimulator::flows.size() == 1);
-    ASSERT_TRUE(NetworkSimulator::flows[0]->GetSenderID() == sender->GetID());
-    ASSERT_TRUE(NetworkSimulator::flows[0]->GetReceiverID() == swtch->GetID());
+    ASSERT_TRUE(NetworkSimulator::flows[0]->getSenderID() == sender->id);
+    ASSERT_TRUE(NetworkSimulator::flows[0]->getReceiverID() == swtch->id);
+}
+
+TEST(NetworkDeviceTest, RoutingTableTest) {
+    NetworkSimulator ns;
+    std::shared_ptr<Sender> sender = std::make_shared<Sender>(100);
+    std::shared_ptr<Switch> swtch = std::make_shared<Switch>(100);
+    std::shared_ptr<Receiver> receiver = std::make_shared<Receiver>(100);
+    std::shared_ptr<Link> link1 = std::make_shared<Link>(sender, swtch, 100);
+    std::shared_ptr<Link> link2 = std::make_shared<Link>(swtch, receiver, 100);
+    std::shared_ptr<Flow> flow = std::make_shared<Flow>(sender, receiver, 100);
+    NetworkSimulator::AddDevice(swtch);
+    NetworkSimulator::AddDevice(sender);
+    NetworkSimulator::AddDevice(receiver);
+    NetworkSimulator::AddLink(link1, flow);
+    NetworkSimulator::AddLink(link2, flow);
+    NetworkSimulator::AddFlow(flow);
+
+
+    ASSERT_TRUE(sender->routing_table.size() == 1); // link to switch
+    ASSERT_TRUE(swtch->routing_table.size() == 2);  // link to sender and link to receiver
+    ASSERT_TRUE(receiver->routing_table.size() == 1); // link to switch
+
+    ASSERT_TRUE(sender->routing_table.find(receiver->id) != sender->routing_table.end());
+    ASSERT_TRUE(swtch->routing_table.find(sender->id) != swtch->routing_table.end());
+    ASSERT_TRUE(swtch->routing_table.find(receiver->id) != swtch->routing_table.end());
+    ASSERT_TRUE(receiver->routing_table.find(sender->id) != receiver->routing_table.end());
 }

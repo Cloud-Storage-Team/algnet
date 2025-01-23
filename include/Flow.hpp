@@ -4,7 +4,6 @@
 
 #include <cstdint>
 #include <memory>
-#include <queue>
 
 class Flow {
 public:
@@ -12,7 +11,9 @@ public:
                   std::uint64_t packet_generation_interval_ns);
 
     void Send();
-
+    std::uint32_t getSenderID() const;
+    std::uint32_t getReceiverID() const;
+private:
     std::shared_ptr<NetworkDevice> m_sender;
     std::shared_ptr<NetworkDevice> m_receiver;
     std::uint64_t m_packet_generation_interval_ns = 0;

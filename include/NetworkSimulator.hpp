@@ -32,7 +32,6 @@ public:
 
     std::uint64_t stop_time_ns = 1'000'000'000;
     static inline std::unique_ptr<EventScheduler> event_scheduler;
-    static inline std::map<std::pair<std::uint32_t, std::uint32_t>, std::shared_ptr<Link>> routing_table;
     static inline std::unordered_map<std::uint32_t, std::shared_ptr<NetworkDevice>> device_by_id;
 
     static inline std::uint64_t current_time_ns = 0;
