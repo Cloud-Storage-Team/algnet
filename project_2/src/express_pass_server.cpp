@@ -55,8 +55,8 @@ void ExpressPassReceiver::ReceivePacket(std::uint64_t current_time_ns, PacketHea
     flow_to_index[sender_id].last_received_index = packet.packet_index;
     // std::cout << "Flow id: " << sender_id << ", receive obtained: " << flow_to_index[sender_id].last_received_index << std::endl;
     // std::cout << "Lost rate: " << flow_to_lost_credits[sender_id] << "/" << flow_to_index[sender_id].last_received_index << std::endl;
-    RTT = static_cast<std::uint64_t>(RTT * 0.7 + (current_time_ns - packet.RTT) * 0.3);
-    std::cout << "RTT: " << RTT << std::endl;
+    rtt = static_cast<std::uint64_t>(rtt * 0.7 + (current_time_ns - packet.rtt) * 0.3);
+    std::cout << "rtt: " << rtt << std::endl;
     if (packet.sending_time <= simulation_duration) {
         amount_of_data_from_sender[sender_id] += 1;
     }
@@ -105,7 +105,7 @@ void ExpressPassSender::ReceivePacket(std::uint64_t current_time_ns, PacketHeade
         return;
     }
     else if (packet.GetFlag(0) == 1) {
-        PacketHeader data = congestion_control.GetDataPacket(current_time_ns + process_time_ns, id, packet.source_id, packet.packet_index, packet.RTT);
+        PacketHeader data = congestion_control.GetDataPacket(current_time_ns + process_time_ns, id, packet.source_id, packet.packet_index, packet.rtt);
         std::uint64_t process_time = process_time_ns;
         this->GetNextElement(data.destination_id);
 

@@ -18,7 +18,7 @@ private:
     std::unordered_map<std::uint64_t, std::uint32_t> flow_to_lost_credits{};
     std::uint64_t inter_credit_gap;
     std::uint64_t simulation_duration;
-    std::uint64_t RTT = 1500;
+    std::uint64_t rtt = 1500;
     ExpressPass congestion_control;
 public:
     explicit ExpressPassReceiver(std::vector<std::uint64_t> senders_ids, std::uint64_t id, std::uint64_t simulation_duration, std::uint64_t inter_credit_gap);

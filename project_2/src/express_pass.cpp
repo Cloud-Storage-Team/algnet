@@ -17,7 +17,7 @@ PacketHeader ExpressPass::GetHandshakePacket(std::uint64_t sending_time, std::ui
     return handshake;
 }
 
-PacketHeader ExpressPass::GetDataPacket(std::uint64_t sending_time, std::uint64_t source_id, std::uint64_t destination_id,  std::uint32_t index, std::uint64_t RTT, std::uint64_t size) const {
-    PacketHeader data = PacketHeader(source_id, destination_id, sending_time, index, RTT, size);
+PacketHeader ExpressPass::GetDataPacket(std::uint64_t sending_time, std::uint64_t source_id, std::uint64_t destination_id,  std::uint32_t index, std::uint64_t rtt, std::uint64_t size) const {
+    PacketHeader data = PacketHeader(source_id, destination_id, sending_time, index, rtt, size);
     return data;
 }
