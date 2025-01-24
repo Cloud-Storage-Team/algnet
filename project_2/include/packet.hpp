@@ -14,6 +14,7 @@ public:
     std::uint64_t rtt;
 
     // 0 bit - is credit packet
+    // 1 bit - is ACK
     // 2 bit - initializing connection or not
     std::uint8_t flags = 0;
 
