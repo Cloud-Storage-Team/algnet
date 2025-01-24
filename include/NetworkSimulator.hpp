@@ -41,6 +41,8 @@ public:
     static inline std::vector<std::shared_ptr<Flow>> flows;
 
     static inline Logger logger = Logger();
+
+    static void AddNewFlow(std::shared_ptr<NetworkDevice> sender, std::shared_ptr<NetworkDevice> receiver, std::vector<std::shared_ptr<Switch>> switches);
 };
 
 namespace Time {

@@ -51,3 +51,32 @@ std::uint64_t Time::Seconds(std::uint64_t time_s) {
 std::uint64_t Time::Milliseconds(std::uint64_t time_ms) {
     return time_ms * ms_to_ns;
 }
+
+void NetworkSimulator::AddNewFlow(std::shared_ptr<NetworkDevice> sender, std::shared_ptr<NetworkDevice> receiver, std::vector<std::shared_ptr<Switch>> switches) {
+    for (auto& s : switches) {
+        if (device_by_id.find(s->id) == device_by_id.end()) {
+            AddDevice(s);
+        }
+    }
+    if (device_by_id.find(sender->id) == device_by_id.end()) {
+        AddDevice(sender);
+    }
+    if (device_by_id.find(receiver->id) == device_by_id.end()) {
+        AddDevice(receiver);
+    }
+
+    std::shared_ptr<Flow> flow = std::make_shared<Flow>(sender, receiver, 1000); //  TODO mb change 100 in generator
+    AddFlow(flow);
+
+
+    std::shared_ptr<NetworkDevice> prev_device = sender;
+    for (auto& s : switches) {
+        std::shared_ptr<Link> link = std::make_shared<Link>(prev_device, s, 100); //  TODO mb change 100 in generator
+        AddLink(link, flow);
+        prev_device = s;
+    }
+    std::shared_ptr<Link> link = std::make_shared<Link>(prev_device, receiver, 100); //  TODO mb change 100 in generator
+    AddLink(link, flow);
+    
+
+}
