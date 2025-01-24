@@ -11,9 +11,10 @@ public:
     std::uint64_t sending_time;
     std::uint32_t packet_index;
     std::uint32_t size;
-    std::uint64_t RTT;
+    std::uint64_t rtt;
 
     // 0 bit - is credit packet
+    // 1 bit - is ACK
     // 2 bit - initializing connection or not
     std::uint8_t flags = 0;
 
@@ -31,7 +32,7 @@ public:
              << "Destination ID: " << packet.destination_id << ", "
              << "Sending Time: " << packet.sending_time << ", "
              << "Packet Index: " << packet.packet_index << ", "
-             << "RTT: " << packet.RTT << ", "
+             << "RTT: " << packet.rtt << ", "
              << "Size: " << packet.size << ", "
              << "Flags: " << static_cast<int>(packet.flags)
              << ")";
