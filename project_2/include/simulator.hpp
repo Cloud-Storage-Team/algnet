@@ -39,51 +39,18 @@ private:
     //! Sorts events by sending time
     std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator> events;
     
-    /**
-     * @brief Creates direct and reverse link between two network elements with given speed (in bits per ns)
-     * 
-     * @remark Do not forget to initialize corresponding routing tables after creating new connection
-     * 
-     * @param source first end of created connection
-     * @param destination second end of created connection
-     * @param speed the speed of pushing packets into the link
-     * @return Connection 
-     */
-    Connection AddNewConnection(std::shared_ptr<RoutingNetworkElement> source, std::shared_ptr<RoutingNetworkElement> destination, std::uint64_t speed);
+    Connection AddNewConnection(std::shared_ptr<NetworkElement> source, std::shared_ptr<NetworkElement> destination, std::uint64_t speed);
     
     void GenerateNewEvents();
 
 public:
-    /**
-     * @brief Construct a new Network Simulator
-     * 
-     * @param senders list of hosts that send data packets
-     * @param receiver host which wants to receive data from senders
-     * @param n_switch switch between receiver and senders (represents bottle neck)
-     * @param simulation_duration_ns time of running the simulation in ns
-     */
     explicit NetworkSimulator(std::vector<std::shared_ptr<ServerBase>>& senders, std::shared_ptr<ServerBase> receiver, std::shared_ptr<NetworkSwitch> n_switch, std::uint64_t simulation_duration_ns, std::uint64_t links_speed);
     ~NetworkSimulator() = default;
 
-    /**
-     * @brief Starts the simulation
-     * 
-     */
     void StartSimulation();
 
-    /**
-     * @brief Sets current_time_ns
-     * 
-     * @param possible_new_time the time you want to set
-     * @return true if current_time is <= simulation_duration
-     */
     bool SetCurrentTime(std::uint64_t possible_new_time);
 
-    /**
-     * @brief generates New ID = last given ID + 1
-     * 
-     * @return std::uint64_t 
-     */
     static std::uint64_t GenerateNewID() {
         return id_to_give++;
     }
