@@ -1,7 +1,8 @@
 #include "NetworkSimulator.hpp"
 #include "Flow.hpp"
 
-void NetworkSimulator::Run() const {
+void NetworkSimulator::Run(std::uint64_t time_ns) {
+    stop_time_ns = time_ns;
     event_scheduler = std::make_unique<EventScheduler>();
 
     /* Start packet sending from each sender */
@@ -17,18 +18,14 @@ void NetworkSimulator::Run() const {
     }
 }
 
-void NetworkSimulator::StopAt(std::uint64_t time_ns) {
-    stop_time_ns = time_ns;
-}
-
 void NetworkSimulator::AddDevice(std::shared_ptr<NetworkDevice> device) {
     device_by_id[device->id] = device;
 }
 
 void NetworkSimulator::AddLink(std::shared_ptr<Link> link, std::shared_ptr<Flow> flow) {
-    std::shared_ptr<Link> reversed_link = std::make_shared<Link>(link->destination, link->source, link->distance_ns);
-    link->source->routing_table[flow->getReceiverID()] = link;
-    link->destination->routing_table[flow->getSenderID()] = reversed_link;
+    std::shared_ptr<Link> reversed_link = std::make_shared<Link>(link->dest, link->src, link->delay_ns);
+    link->src->routing_table[flow->getReceiverID()] = link;
+    link->dest->routing_table[flow->getSenderID()] = reversed_link;
 }
 
 void NetworkSimulator::AddFlow(std::shared_ptr<Flow> flow) {

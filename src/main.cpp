@@ -31,8 +31,7 @@ int main() {
 
     // Turn on ACKs
     NetworkSimulator::EnableACK = true;
-    ns.StopAt(Time::Milliseconds(300));
     NetworkSimulator::logger.Setup("../rtt.txt", "../queue_size.txt");
 
-    ns.Run();
+    ns.Run(Time::Milliseconds(300));
 }

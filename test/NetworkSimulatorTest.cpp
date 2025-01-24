@@ -79,16 +79,16 @@ TEST(LinkTest, LinkLastProcessTimeTest) {
     std::uint64_t distance_ns = 1000;
     Link link(src, dst, distance_ns);
 
-    ASSERT_TRUE(link.last_process_time_ns == 0);
+    ASSERT_TRUE(link.last_processing_time_ns == 0);
 
     link.UpdateLastProcessTime(50);
-    ASSERT_TRUE(link.last_process_time_ns == 50);
+    ASSERT_TRUE(link.last_processing_time_ns == 50);
 
     link.UpdateLastProcessTime(1000);
-    ASSERT_TRUE(link.last_process_time_ns == 1000);
+    ASSERT_TRUE(link.last_processing_time_ns == 1000);
 
     link.UpdateLastProcessTime(0);
-    ASSERT_TRUE(link.last_process_time_ns == 1000);
+    ASSERT_TRUE(link.last_processing_time_ns == 1000);
 }
 
 TEST(NetworkSimulatorTest, NetworkSimulatorBasicTest) {

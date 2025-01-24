@@ -22,8 +22,7 @@ public:
 
     static inline bool EnableACK = true;
 
-    void Run() const;
-    void StopAt(std::uint64_t time_ns);
+    void Run(std::uint64_t time_ns);
     static void AddDevice(std::shared_ptr<NetworkDevice> device);
     static void AddLink(std::shared_ptr<Link> link, std::shared_ptr<Flow> flow);
     static void AddFlow(std::shared_ptr<Flow> flow);
@@ -35,8 +34,6 @@ public:
     static inline std::unordered_map<std::uint32_t, std::shared_ptr<NetworkDevice>> device_by_id;
 
     static inline std::uint64_t current_time_ns = 0;
-    static const std::uint32_t packet_size_bytes = 1024;
-    static const std::uint64_t bandwidth_bytes = 6'250'000'000;
     static inline std::vector<std::shared_ptr<Flow>> flows;
 
     static inline Logger logger = Logger();

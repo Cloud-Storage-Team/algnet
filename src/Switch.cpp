@@ -10,21 +10,21 @@ void Switch::ProcessPacket(Packet p) {
     Enqueue(p);
     std::shared_ptr<Link> link;
 
-    if (p.m_is_ack) {
+    if (p.is_ack) {
         /* send ACK to packet sender */
-        link = NextLink(p.m_source_id);
+        link = NextLink(p.source_id);
     }
     else {
         /* send packet to receiver */
-        link = NextLink(p.m_destination_id);
+        link = NextLink(p.destination_id);
     }
-    std::shared_ptr<NetworkDevice> next_device = link->destination;
+    std::shared_ptr<NetworkDevice> next_device = link->dest;
 
     /* Latency is a sum of processing and queuing delays */
     std::uint64_t latency = processing_delay_per_packet + std::max<std::uint64_t>(0, completion_time - NetworkSimulator::Now());
     /* Waiting for the link to process previous packets, then add distance (i.e. link transmission time) */
-    std::uint64_t transmission_delay = (std::uint64_t)std::max<std::uint64_t>(0, (std::int64_t)(link->last_process_time_ns - (NetworkSimulator::Now() + latency))) +
-                                       link->distance_ns;
+    std::uint64_t transmission_delay = (std::uint64_t)std::max<std::uint64_t>(0, (std::int64_t)(link->last_processing_time_ns - (NetworkSimulator::Now() + latency))) +
+                                       link->delay_ns;
     /* Update link last process time */
     link->UpdateLastProcessTime(NetworkSimulator::Now() + latency + transmission_delay);
 
