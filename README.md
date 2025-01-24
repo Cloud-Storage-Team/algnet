@@ -1,3 +1,9 @@
+# Network simulator
+
+See draft of the simulator code by [@rcomrad](https://github.com/rcomrad):
+
+https://github.com/rcomrad/KusServer/tree/simulator/simulator
+
 # Основные требования к функционалу и реализации симулятора
 ## 1. Цель
 Разработать минимально функциональную систему симуляции передачи пакетов в сети. Система должна включать:
