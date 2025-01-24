@@ -6,7 +6,7 @@ ExpressPassSwitch::ExpressPassSwitch(std::uint64_t credit_rate_limit_ns, std::ui
     credit_rate_limit_ns(credit_rate_limit_ns) {};
 
 void ExpressPassSwitch::ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& all_events) {
-    if (packet.GetFlag(0) == 0) {
+    if (packet.GetFlag(PacketType::IsCredit) == 0) {
         auto process = [this, packet](std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& events) {
                 PacketHeader inner_packet = packet;
                 this->GetNextElement(inner_packet.destination_id)->ReceivePacket(inner_packet.sending_time, inner_packet, events);

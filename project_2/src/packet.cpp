@@ -10,16 +10,16 @@ PacketHeader::PacketHeader(std::uint64_t source_id, std::uint64_t destination_id
     size(size) {}
 
 
-std::uint8_t PacketHeader::GetFlag(std::uint8_t bit) const {
-    return (flags >> bit) & 1;
+std::uint8_t PacketHeader::GetFlag(PacketType bit) const {
+    return (flags >> static_cast<uint8_t>(bit)) & 1;
 }
 
 
-void PacketHeader::SetFlag(std::uint8_t bit, std::uint8_t value) {
+void PacketHeader::SetFlag(PacketType bit, std::uint8_t value) {
     if (value == 0) {
-        flags = flags & ~((std::uint8_t)1 << bit);
+        flags = flags & ~((std::uint8_t)1 << static_cast<uint8_t>(bit));
     } else if (value == 1) {
-        flags = flags | ((std::uint8_t)1 << bit);
+        flags = flags | ((std::uint8_t)1 << static_cast<uint8_t>(bit));
     }
 }
 

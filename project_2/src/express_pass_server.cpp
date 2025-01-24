@@ -46,7 +46,7 @@ std::uint64_t ExpressPassReceiver::SendPackets(std::uint64_t current_time_ns, st
 }
 
 void ExpressPassReceiver::ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& all_events) {
-    if (packet.GetFlag(2) == 1) {
+    if (packet.GetFlag(PacketType::IsAck) == 1) {
         // TODO: On 0 iteration we just remember that flow is now active
         return;
     }
@@ -100,11 +100,11 @@ std::uint64_t ExpressPassSender::SendPackets(std::uint64_t current_time_ns, std:
 }
 
 void ExpressPassSender::ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& all_events) {
-    if (packet.GetFlag(2) == 1) {
+    if (packet.GetFlag(PacketType::IsInitializer) == 1) {
         // TODO: On 0 iteration we send packet with agreement to setup connection
         return;
     }
-    else if (packet.GetFlag(0) == 1) {
+    else if (packet.GetFlag(PacketType::IsCredit) == 1) {
         PacketHeader data = congestion_control.GetDataPacket(current_time_ns + process_time_ns, id, packet.source_id, packet.packet_index, packet.rtt);
         std::uint64_t process_time = process_time_ns;
         this->GetNextElement(data.destination_id);
