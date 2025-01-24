@@ -7,7 +7,7 @@ class PacketHeader {
 public:
     std::uint64_t source_id;
     std::uint64_t destination_id;
-    // TODO: use it as real sending time (passing first link maybe) in checks that
+    // TODO: use it as real sending time insted of time of sending from last network element
     std::uint64_t sending_time;
     std::uint32_t packet_index;
     std::uint32_t size;
