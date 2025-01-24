@@ -18,6 +18,6 @@ bool NetworkDevice::Empty() const {
     return buffer.empty();
 }
 
-std::shared_ptr<Link> NetworkDevice::NextLink(std::uint32_t destination_id) const {
-    return NetworkSimulator::routing_table[{id, destination_id}];
+std::shared_ptr<Link> NetworkDevice::NextLink(std::uint32_t dest_id) const {
+    return routing_table.at(dest_id);
 }

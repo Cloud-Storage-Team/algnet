@@ -6,6 +6,7 @@
 #include <memory>
 #include <cstdint>
 #include <queue>
+#include <unordered_map>
 
 /* Forward declaration of Link class is necessary
  because NetworkDevice uses Link and Link uses NetworkDevice */
@@ -25,6 +26,7 @@ public:
 
     std::uint64_t id;
     std::queue<Packet> buffer;
+    std::unordered_map<std::uint32_t, std::shared_ptr<Link>> routing_table;
     std::uint64_t processing_delay_per_packet;
     std::uint64_t completion_time = 0;
     inline static std::uint64_t last_given_device_id = 0;
