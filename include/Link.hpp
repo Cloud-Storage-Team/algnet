@@ -7,16 +7,16 @@
 
 class Link {
 public:
-    Link(std::shared_ptr<NetworkDevice> source, std::shared_ptr<NetworkDevice> destination, std::uint64_t distance_ns);
+    Link(std::shared_ptr<NetworkDevice> src, std::shared_ptr<NetworkDevice> dest, std::uint64_t distance_ns);
 
-    void UpdateLastProcessTime(std::uint64_t new_process_time_ns);
+    void UpdateLastProcessTime(std::uint64_t new_processing_time_ns);
 
-    std::shared_ptr<NetworkDevice> source;
-    std::shared_ptr<NetworkDevice> destination;
-    std::uint64_t distance_ns;
+    std::shared_ptr<NetworkDevice> src;
+    std::shared_ptr<NetworkDevice> dest;
+    std::uint64_t delay_ns;
 
     // In bits per ns
-    std::uint64_t speed = 0;
+    std::uint64_t bandwidth = 0;
     // Stores time when the last packet was pushed through
-    std::uint64_t last_process_time_ns = 0;
+    std::uint64_t last_processing_time_ns = 0;
 };

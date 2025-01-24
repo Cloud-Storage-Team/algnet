@@ -4,11 +4,11 @@
 #include <vector>
 #include <memory>
 
-Link::Link(std::shared_ptr<NetworkDevice> source, std::shared_ptr<NetworkDevice> destination, std::uint64_t distance_ns):
-        source(std::move(source)),
-        destination(std::move(destination)),
-        distance_ns(distance_ns) { }
+Link::Link(std::shared_ptr<NetworkDevice> src, std::shared_ptr<NetworkDevice> dest, std::uint64_t delay_ns):
+        src(std::move(src)),
+        dest(std::move(dest)),
+        delay_ns(delay_ns) { }
 
-void Link::UpdateLastProcessTime(std::uint64_t new_process_time_ns) {
-    last_process_time_ns = std::max(last_process_time_ns, new_process_time_ns);
+void Link::UpdateLastProcessTime(std::uint64_t new_processing_time_ns) {
+    last_processing_time_ns = std::max(last_processing_time_ns, new_processing_time_ns);
 }
