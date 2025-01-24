@@ -38,6 +38,10 @@ public:
     static const std::uint32_t packet_size_bytes = 1024;
     static const std::uint64_t bandwidth_bytes = 6'250'000'000;
     static inline std::vector<std::shared_ptr<Flow>> flows;
+
+    static void AddNewFlow(std::shared_ptr<NetworkDevice> sender, std::shared_ptr<NetworkDevice> receiver, std::vector<std::shared_ptr<Switch>>& switches);
+
+    static void GenerateTree(std::shared_ptr<NetworkDevice> receiver, int maxDepth, int k, std::vector<std::shared_ptr<Switch>>& currentSwitches, int currentDepth = 0);
 };
 
 namespace Time {
