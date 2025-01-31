@@ -29,8 +29,7 @@ struct Generate : public Event {
 };
 
 /**
- * Enqueue the packet into the node ingress buffer.
- * Schedule the Dequeue event for the packet.
+ * Enqueue the packet to the node for processing.
  */
 struct Enqueue : public Event {
     Enqueue(Node *a_node, Packet *a_packet);
@@ -41,8 +40,8 @@ struct Enqueue : public Event {
 };
 
 /**
- * Dequeue a packet from the node buffer. Find the next hop
- * and pass the packet to the corresponding link for processing
+ * Dequeue a packet from the node ingress buffer.
+ * Pass the packet to the egress buffer (link).
  */
 struct Dequeue : public Event {
     Dequeue(Node *a_node);
