@@ -22,12 +22,11 @@ public:
     void Enqueue(Packet p);
     Packet Dequeue();
     bool Empty() const;
-    std::shared_ptr<Link> NextLink(std::uint32_t destination_id) const;
+    std::shared_ptr<Link> NextLink(std::uint32_t dest_id) const;
 
     std::uint64_t id;
     std::queue<Packet> buffer;
     std::unordered_map<std::uint32_t, std::shared_ptr<Link>> routing_table;
     std::uint64_t processing_delay_per_packet;
     std::uint64_t completion_time = 0;
-    inline static std::uint64_t last_given_device_id = 0;
 };
