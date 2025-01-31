@@ -14,7 +14,7 @@ void Receiver::ProcessPacket(Packet p)
     Enqueue(p);
     /* Previous device in the flow path */
     std::shared_ptr<Link> link = NextLink(p.GetSourceID());
-    std::shared_ptr<NetworkDevice> next_device = link->destination;
+    
 
     /* Latency is a sum of processing and queuing delays */
     std::uint64_t latency = GetDelay() + std::max<std::uint64_t>(0, completion_time_ - NetworkSimulator::NetworkSimulator::Now());

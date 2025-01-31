@@ -18,3 +18,9 @@ std::uint64_t Link::GetLastProcessTime()
 {
     return last_process_time_ns_;
 }
+
+std::shared_ptr<NetworkDevice> Link::GetNextDevice(uint32_t id)
+{
+    return id == first_device_->GetId() ? second_device_: first_device_;
+}
+

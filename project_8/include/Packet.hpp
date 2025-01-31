@@ -5,7 +5,7 @@
 class Packet 
 {
     public:
-        explicit Packet(std::uint64_t src_id, std::uint64_t dst_id, std::uint64_t sending_time_ns, bool is_ack);
+        explicit Packet(std::uint64_t src_id, std::uint64_t dst_id, std::uint64_t sending_time_ns, bool is_ack , std::uint32_t flow_id);
         Packet() = default;
         ~Packet() = default;
 
@@ -14,6 +14,7 @@ class Packet
         std::uint64_t GetDestinationID() const;
         std::uint64_t GetSendingTime() const;
         std::uint32_t GetTransmittedDataSize() const;
+        std::uint64_t GetFlowId() const;
         bool IsAck() const;
         void SetAck(bool value);
     private:
@@ -21,5 +22,6 @@ class Packet
         std::uint64_t destination_id_;
         std::uint64_t sending_time_ns_;
         std::uint32_t data_size_bytes_;
+        std::uint64_t flow_id_;
         bool is_ack_;
 };

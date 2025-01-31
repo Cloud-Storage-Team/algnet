@@ -13,7 +13,8 @@ public:
     
     std::uint64_t GetDistance();
     std::uint64_t GetLastProcessTime();
-
+    
+    std::shared_ptr<NetworkDevice> GetNextDevice(uint32_t id);
     private:
     std::shared_ptr<NetworkDevice> first_device_;
     std::shared_ptr<NetworkDevice> second_device_;
