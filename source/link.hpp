@@ -1,5 +1,7 @@
 #pragma once
 
+#include <queue>
+
 #include "packet.hpp"
 
 namespace sim {
@@ -8,20 +10,23 @@ namespace sim {
  * Unidirectional link from the source to a_next
  */
 class Link {
-  public:
-    Link(Node *a_next, int a_speed_mbps);
+public:
+    Link(Device *a_next, int a_speed_mbps);
 
     /**
-     * Update the queueing delay and schedule the Enqueue event
-     * on the next node based on the queueing and transmission delays.
+     * Update the source egress delay and schedule the arrival event
+     * based on the egress queueing and transmission delays.
      */
     void process(Packet a_packet);
 
-  private:
-    Node *m_next;
+private:
+    Device *m_next;
     int m_speed_mbps;
-    int m_queueing_delay;
+    int m_src_egress_delay;
     int m_transmission_delay;
+
+    // Queue at the ingress port of the m_next device
+    std::queue<Packet> m_next_ingress;
 };
 
 }  // namespace sim

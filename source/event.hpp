@@ -3,8 +3,8 @@
 #include <any>
 #include <queue>
 
+#include "device.hpp"
 #include "flow.hpp"
-#include "node.hpp"
 #include "packet.hpp"
 
 namespace sim {
@@ -18,7 +18,7 @@ struct Event {
 
 /**
  * Generate a packet in the flow and enqueue it in
- * the source node ingress buffer for processing and dispatch.
+ * the source node ingress buffer for processing.
  * Schedule the next packet generation event.
  */
 struct Generate : public Event {
@@ -29,23 +29,23 @@ struct Generate : public Event {
 };
 
 /**
- * Enqueue the packet to the node for processing.
+ * Enqueue the packet to the ingress port of the next node
  */
-struct Enqueue : public Event {
-    Enqueue(Node *a_node, Packet *a_packet);
-    Node *node;
+struct Arrive : public Event {
+    Arrive(Link *a_link, Packet *a_packet);
+    Link *link;
     Packet *packet;
 
     virtual void operator()() final;
 };
 
 /**
- * Dequeue a packet from the node ingress buffer.
- * Pass the packet to the egress buffer (link).
+ * Dequeue a packet from the device ingress buffer
+ * and start processing at the device.
  */
-struct Dequeue : public Event {
-    Dequeue(Node *a_node);
-    Node *node;
+struct Process : public Event {
+    Process(Device *a_device);
+    Device *node;
 
     virtual void operator()() final;
 };

@@ -1,14 +1,14 @@
 #pragma once
 
+#include "device.hpp"
 #include "flow.hpp"
-#include "node.hpp"
 
 namespace sim {
 
 struct Packet {
     int size;
-    Node* src;
-    Node* dest;
+    Device* src;
+    Device* dest;
     Flow* flow;
 };
 
