@@ -9,9 +9,9 @@ namespace sim {
 // Scheduler is implemented as a Singleton class
 // which provides a global access to a single instance
 class Scheduler {
-  public:
+public:
     // Static method to get the instance
-    static Scheduler& getInstance() {
+    static Scheduler& get_instance() {
         static Scheduler instance;
         return instance;
     }
@@ -19,7 +19,7 @@ class Scheduler {
     void tick();
     void add(Event event);
 
-  private:
+private:
     // Private constructor to prevent instantiation
     Scheduler() {}
     // No copy constructor and assignment operators

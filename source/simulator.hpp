@@ -10,9 +10,8 @@ namespace sim {
 class Simulator {
 public:
     Simulator();
-    void createDevice(std::string a_name);
-    void createLink(std::string a_node1, std::string a_node2, size_t a_delay);
-
+    void create_device(std::string a_name);
+    void create_link(std::string a_node1, std::string a_node2, size_t a_delay);
     void start();
 
 private:
