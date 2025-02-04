@@ -14,6 +14,9 @@ public:
     // BFS to update the routing table
     void recalculate_paths();
 
+    // Different process implemntations in switch/sender/receiver
+    virtual void process();
+
 private:
     // Ordered set as we need to iterate over the ingress buffers
     std::set<Link> m_inlinks;
