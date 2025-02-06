@@ -52,8 +52,7 @@ void NetworkSimulator::StartSimulation() {
     GenerateNewEvents();
 
     while (current_time_ns <= simulation_duration_ns && !events.empty()) {
-        std::shared_ptr<Event> event(events.top());
-        events.pop();
+        std::shared_ptr<Event> event(events.get_and_remove());
 
         current_time_ns = event->event_time;
         event->perform_action(events);

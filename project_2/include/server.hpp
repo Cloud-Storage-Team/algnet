@@ -21,9 +21,10 @@ public:
         return id;
     }
 
-    virtual std::uint64_t SendPackets(std::uint64_t current_time_ns, std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& all_events) = 0;
+    virtual std::uint64_t SendPackets(std::uint64_t current_time_ns, EventQueue& all_events) = 0;
     
     virtual std::string ToString() const = 0;
-    virtual void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& all_events) override = 0;
+    virtual void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, EventQueue& all_events) override = 0;
+    virtual void ProcessPacket(std::uint64_t current_time_ns, EventQueue& all_events) override = 0;
     virtual ~ServerBase() {}
 };

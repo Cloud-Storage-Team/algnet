@@ -20,5 +20,6 @@ public:
     void AddNewRoute(std::uint64_t destination_id, std::shared_ptr<Link>& link);
 
     virtual std::shared_ptr<Link> GetNextElement(std::uint64_t destination_id);
-    virtual void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& all_events) = 0;
+    virtual void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, EventQueue& all_events) = 0;
+    virtual void ProcessPacket(std::uint64_t current_time_ns, EventQueue& all_events) = 0;
 };

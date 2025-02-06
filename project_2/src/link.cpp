@@ -1,4 +1,5 @@
 #include "link.hpp"
+#include "network_element.hpp"
 
 #include <vector>
 #include <cstdint>
@@ -17,12 +18,12 @@ std::shared_ptr<NetworkElement> Link::GetNextElement(std::uint64_t destination_i
     return destination;
 }
 
-void Link::ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& all_events) {
+void Link::ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, EventQueue& all_events) {
     std::uint64_t process_time = (packet.size + speed - 1) / speed;
     last_process_time_ns = std::max(last_process_time_ns, current_time_ns) + process_time;
     packet.sending_time = last_process_time_ns;
     auto last_process_time = last_process_time_ns;
-    auto process = [this, packet, last_process_time](std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& events) {
+    auto process = [this, packet, last_process_time](EventQueue& events) {
             PacketHeader inner_packet = packet;
             this->GetNextElement()->ReceivePacket(last_process_time, inner_packet, events);
         };

@@ -37,7 +37,7 @@ private:
     std::shared_ptr<NetworkSwitch> n_switch;
 
     //! Sorts events by sending time
-    std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator> events;
+    EventQueue events;
     
     Connection AddNewConnection(std::shared_ptr<NetworkElement> source, std::shared_ptr<NetworkElement> destination, std::uint64_t speed);
     

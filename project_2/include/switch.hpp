@@ -14,6 +14,7 @@ protected:
     std::uint64_t current_buffer_size_bit = 0;
     
 public:
-    virtual void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& all_events) override = 0;
+    virtual void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, EventQueue& all_events) override = 0;
+    virtual void ProcessPacket(std::uint64_t current_time_ns, EventQueue& all_events) override = 0;
     virtual ~NetworkSwitch() {}
 };

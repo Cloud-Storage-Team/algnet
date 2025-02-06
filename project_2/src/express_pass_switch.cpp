@@ -5,9 +5,9 @@ ExpressPassSwitch::ExpressPassSwitch(std::uint64_t credit_rate_limit_ns, std::ui
     max_credit_buffer_size(max_credit_buffer_size),
     credit_rate_limit_ns(credit_rate_limit_ns) {};
 
-void ExpressPassSwitch::ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& all_events) {
+void ExpressPassSwitch::ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, EventQueue& all_events) {
     if (packet.GetFlag(PacketType::IsCredit) == 0) {
-        auto process = [this, packet](std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& events) {
+        auto process = [this, packet](EventQueue& events) {
                 PacketHeader inner_packet = packet;
                 this->GetNextElement(inner_packet.destination_id)->ReceivePacket(inner_packet.sending_time, inner_packet, events);
             };
@@ -26,7 +26,7 @@ void ExpressPassSwitch::ReceivePacket(std::uint64_t current_time_ns, PacketHeade
         packet.sending_time = last_credit_process_time_ns;
         last_credit_process_time_ns += credit_rate_limit_ns;
         credit_buffer.push(packet);
-        auto process = [this, packet](std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& events) {
+        auto process = [this, packet](EventQueue& events) {
                 PacketHeader inner_packet = packet;
                 this->GetNextElement(inner_packet.destination_id)->ReceivePacket(inner_packet.sending_time, inner_packet, events);
             };

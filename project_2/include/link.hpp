@@ -1,5 +1,6 @@
 #pragma once
-#include "network_element.hpp"
+#include "event.hpp"
+#include "packet.hpp"
 
 #include <vector>
 #include <cstdint>
@@ -25,7 +26,8 @@ public:
 
     Link(std::shared_ptr<NetworkElement>& source, std::shared_ptr<NetworkElement>& destination, std::uint64_t speed, std::uint64_t last_process_time_ns = 0);
     std::shared_ptr<NetworkElement> GetNextElement(std::uint64_t destination_id = 0);
-    void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator>& all_events);
+    void ReceivePacket(std::uint64_t current_time_ns, PacketHeader& packet, EventQueue& all_events);
+    void ProcessPacket(std::uint64_t current_time_ns, EventQueue& all_events);
     virtual ~Link() {}
 };
 
