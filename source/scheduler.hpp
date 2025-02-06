@@ -17,7 +17,7 @@ public:
     }
 
     void tick();
-    void add(Event event);
+    void add(Event& event);
 
 private:
     // Private constructor to prevent instantiation
