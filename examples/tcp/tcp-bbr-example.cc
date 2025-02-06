@@ -10,9 +10,9 @@
 
 // This program simulates the following topology:
 //
-//           1000 Mbps           10Mbps          1000 Mbps
+//           1000 Mbps           50Mbps          1000 Mbps
 //  Sender -------------- R1 -------------- R2 -------------- Receiver
-//              5ms               10ms               5ms
+//              10ms              10ms              10ms
 //
 // The link between R1 and R2 is a bottleneck link with 10 Mbps. All other
 // links are 1000 Mbps.
@@ -56,10 +56,13 @@ using namespace ns3::SystemPath;
 
 std::string dir;
 std::ofstream throughput;
+std::ofstream rtt;
 std::ofstream queueSize;
+std::ofstream losses;
 
 uint32_t prev = 0;
 Time prevTime = Seconds(0);
+uint32_t prevLost = 0;
 
 // Calculate throughput
 static void
@@ -73,13 +76,32 @@ TraceThroughput(Ptr<FlowMonitor> monitor)
 
         // Convert (curTime - prevTime) to microseconds so that throughput is in bits per
         // microsecond (which is equivalent to Mbps)
-        throughput << curTime.GetSeconds() << "s "
+        throughput << curTime.GetSeconds() << " "
                    << 8 * (itr->second.txBytes - prev) / ((curTime - prevTime).ToDouble(Time::US))
-                   << " Mbps" << std::endl;
+                   << std::endl;
+        rtt << curTime.GetSeconds() << " "
+            << itr->second.lastDelay.GetMilliSeconds()
+            << std::endl;
         prevTime = curTime;
         prev = itr->second.txBytes;
     }
     Simulator::Schedule(Seconds(0.2), &TraceThroughput, monitor);
+}
+
+static void
+TraceLosses(Ptr<FlowMonitor> monitor)
+{
+    FlowMonitor::FlowStatsContainer stats = monitor->GetFlowStats();
+    if (!stats.empty())
+    {
+        auto itr = stats.begin();
+        Time curTime = Now();
+
+        // Log the packet drops
+        losses << curTime.GetSeconds() << " " << (itr->second.lostPackets - prevLost) << std::endl;
+        prevLost = itr->second.lostPackets;
+    }
+    Simulator::Schedule(Seconds(0.2), &TraceLosses, monitor);
 }
 
 // Check the queue size
@@ -95,7 +117,7 @@ CheckQueueSize(Ptr<QueueDisc> qd)
 static void
 CwndTracer(Ptr<OutputStreamWrapper> stream, uint32_t oldval, uint32_t newval)
 {
-    *stream->GetStream() << Simulator::Now().GetSeconds() << " " << newval / 1448.0 << std::endl;
+    *stream->GetStream() << Simulator::Now().GetSeconds() << " " << newval / 1500.0 << std::endl;
 }
 
 void
@@ -107,6 +129,41 @@ TraceCwnd(uint32_t nodeId, uint32_t socketId)
                                       "/$ns3::TcpL4Protocol/SocketList/" +
                                       std::to_string(socketId) + "/CongestionWindow",
                                   MakeBoundCallback(&CwndTracer, stream));
+}
+
+// Trace RTprop
+static void
+MinRttTracer(Ptr<OutputStreamWrapper> stream, Time oldval, Time newval)
+{
+    *stream->GetStream() << Simulator::Now().GetSeconds() << " " << newval.GetMilliSeconds() << std::endl;
+}
+
+void
+TraceMinRtt(uint32_t nodeId, uint32_t socketId)
+{
+    AsciiTraceHelper ascii;
+    Ptr<OutputStreamWrapper> stream = ascii.CreateFileStream(dir + "/min_rtt.dat");
+    Config::ConnectWithoutContext("/NodeList/" + std::to_string(nodeId) +
+                                      "/$ns3::TcpL4Protocol/SocketList/" +
+                                      std::to_string(socketId) + "/CongestionOps/$ns3::TcpBbr/MinRtt",
+                                  MakeBoundCallback(&MinRttTracer, stream));
+}
+
+static void
+PacingGainTracer(Ptr<OutputStreamWrapper> stream, double oldval, double newval)
+{
+    *stream->GetStream() << Simulator::Now().GetSeconds() << " " << newval << std::endl;
+}
+
+void
+TracePacingGain(uint32_t nodeId, uint32_t socketId)
+{
+    AsciiTraceHelper ascii;
+    Ptr<OutputStreamWrapper> stream = ascii.CreateFileStream(dir + "/pacing_gain.dat");
+    Config::ConnectWithoutContext("/NodeList/" + std::to_string(nodeId) +
+                                      "/$ns3::TcpL4Protocol/SocketList/" +
+                                      std::to_string(socketId) + "/CongestionOps/$ns3::TcpBbr/PacingGain",
+                                  MakeBoundCallback(&PacingGainTracer, stream));
 }
 
 int
@@ -126,7 +183,8 @@ main(int argc, char* argv[])
     uint32_t delAckCount = 2;
     bool bql = true;
     bool enablePcap = false;
-    Time stopTime = Seconds(100);
+    Time stopTime = Seconds(20);
+    std::string bottleneckBuffer = "1000p";
 
     CommandLine cmd(__FILE__);
     cmd.AddValue("tcpTypeId", "Transport protocol to use: TcpNewReno, TcpBbr", tcpTypeId);
@@ -135,6 +193,7 @@ main(int argc, char* argv[])
     cmd.AddValue("stopTime",
                  "Stop time for applications / simulation time will be stopTime + 1",
                  stopTime);
+    cmd.AddValue("buffer", "Bottleneck buffer", bottleneckBuffer);
     cmd.Parse(argc, argv);
 
     queueDisc = std::string("ns3::") + queueDisc;
@@ -148,9 +207,9 @@ main(int argc, char* argv[])
     Config::SetDefault("ns3::TcpSocket::RcvBufSize", UintegerValue(6291456));
     Config::SetDefault("ns3::TcpSocket::InitialCwnd", UintegerValue(10));
     Config::SetDefault("ns3::TcpSocket::DelAckCount", UintegerValue(delAckCount));
-    Config::SetDefault("ns3::TcpSocket::SegmentSize", UintegerValue(1448));
-    Config::SetDefault("ns3::DropTailQueue<Packet>::MaxSize", QueueSizeValue(QueueSize("1p")));
-    Config::SetDefault(queueDisc + "::MaxSize", QueueSizeValue(QueueSize("100p")));
+    Config::SetDefault("ns3::TcpSocket::SegmentSize", UintegerValue(1500));
+    Config::SetDefault("ns3::DropTailQueue<Packet>::MaxSize", QueueSizeValue(QueueSize(bottleneckBuffer)));
+    Config::SetDefault(queueDisc + "::MaxSize", QueueSizeValue(QueueSize(bottleneckBuffer)));
 
     NodeContainer sender;
     NodeContainer receiver;
@@ -161,12 +220,12 @@ main(int argc, char* argv[])
 
     // Create the point-to-point link helpers
     PointToPointHelper bottleneckLink;
-    bottleneckLink.SetDeviceAttribute("DataRate", StringValue("10Mbps"));
+    bottleneckLink.SetDeviceAttribute("DataRate", StringValue("50Mbps"));
     bottleneckLink.SetChannelAttribute("Delay", StringValue("10ms"));
 
     PointToPointHelper edgeLink;
     edgeLink.SetDeviceAttribute("DataRate", StringValue("1000Mbps"));
-    edgeLink.SetChannelAttribute("Delay", StringValue("5ms"));
+    edgeLink.SetChannelAttribute("Delay", StringValue("10ms"));
 
     // Create NetDevice containers
     NetDeviceContainer senderEdge = edgeLink.Install(sender.Get(0), routers.Get(0));
@@ -216,6 +275,8 @@ main(int argc, char* argv[])
     sourceApps.Start(Seconds(0.1));
     // Hook trace source after application starts
     Simulator::Schedule(Seconds(0.1) + MilliSeconds(1), &TraceCwnd, 0, 0);
+    Simulator::Schedule(Seconds(0.1) + MilliSeconds(1), &TraceMinRtt, 0, 0);
+    Simulator::Schedule(Seconds(0.1) + MilliSeconds(1), &TracePacingGain, 0, 0);
     sourceApps.Stop(stopTime);
 
     // Install application on the receiver
@@ -256,7 +317,9 @@ main(int argc, char* argv[])
 
     // Open files for writing throughput traces and queue size
     throughput.open(dir + "/throughput.dat", std::ios::out);
+    rtt.open(dir + "/rtt.dat", std::ios::out);
     queueSize.open(dir + "/queueSize.dat", std::ios::out);
+    losses.open(dir + "/losses.dat", std::ios::out);
 
     NS_ASSERT_MSG(throughput.is_open(), "Throughput file was not opened correctly");
     NS_ASSERT_MSG(queueSize.is_open(), "Queue size file was not opened correctly");
@@ -265,6 +328,7 @@ main(int argc, char* argv[])
     FlowMonitorHelper flowmon;
     Ptr<FlowMonitor> monitor = flowmon.InstallAll();
     Simulator::Schedule(Seconds(0 + 0.000001), &TraceThroughput, monitor);
+    Simulator::Schedule(Seconds(0 + 0.2), &TraceLosses, monitor);
 
     Simulator::Stop(stopTime + TimeStep(1));
     Simulator::Run();
@@ -272,6 +336,7 @@ main(int argc, char* argv[])
 
     throughput.close();
     queueSize.close();
+    losses.close();
 
     return 0;
 }
