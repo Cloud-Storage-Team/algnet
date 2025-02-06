@@ -692,8 +692,8 @@ class TcpBbrV2 : public TcpCongestionOps
     uint32_t m_alphaLastDelivered{0};   //!< m_delivered at alpha update
     uint32_t m_alphaLastDeliveredCe{0}; //!< m_deliveredCe at alpha update
     double m_beta{0.3}; //!< On losses, scale down inflight and pacing rate by beta
-    uint32_t m_inflightHi{static_cast<uint32_t>(-1)}; //!< Upper bound of inflight data range
-    uint32_t m_inflightLo{static_cast<uint32_t>(-1)}; //!< Lower bound of inflight data range
+    TracedValue<uint32_t> m_inflightHi{static_cast<uint32_t>(-1)}; //!< Upper bound of inflight data range
+    TracedValue<uint32_t> m_inflightLo{static_cast<uint32_t>(-1)}; //!< Lower bound of inflight data range
     uint32_t m_inflightLatest{0};                     //!< Max delivered data in last round trip
     uint64_t m_bwLo{static_cast<uint64_t>(-1)}; //!< Lower bound on sending bandwidth
     uint64_t m_bwLatest{0};                     //!< max delivered bw in last round trip

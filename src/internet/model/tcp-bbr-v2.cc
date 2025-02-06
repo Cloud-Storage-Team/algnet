@@ -147,7 +147,15 @@ TcpBbrV2::GetTypeId()
             .AddTraceSource("CwndGain",
                             "The dynamic congestion window gain factor",
                             MakeTraceSourceAccessor(&TcpBbrV2::m_cWndGain),
-                            "ns3::TracedValueCallback::Double");
+                            "ns3::TracedValueCallback::Double")
+            .AddTraceSource("InflightLo",
+                            "The dynamic inflight lower bound",
+                            MakeTraceSourceAccessor(&TcpBbrV2::m_inflightLo),
+                            "ns3::TracedValueCallback::Uint32")
+            .AddTraceSource("InflightHi",
+                            "The dynamic inflight upper bound",
+                            MakeTraceSourceAccessor(&TcpBbrV2::m_inflightHi),
+                            "ns3::TracedValueCallback::Uint32");
     return tid;
 }
 
@@ -474,7 +482,7 @@ TcpBbrV2::StartBwProbeCruise()
     NS_LOG_FUNCTION(this);
     if (m_inflightLo != static_cast<uint32_t>(-1))
     {
-        m_inflightLo = std::min(m_inflightLo, m_inflightHi);
+        m_inflightLo = std::min(m_inflightLo.Get(), m_inflightHi.Get());
     }
     m_cycleIndex = BbrProbeBwPhase_t::BBR_BW_PROBE_CRUISE;
 }
@@ -529,8 +537,8 @@ TcpBbrV2::InflightWithHeadroom(Ptr<TcpSocketState> tcb)
         return static_cast<uint32_t>(-1);
     }
 
-    uint32_t headroom = std::max(1u, static_cast<uint32_t>(m_inflightHi * m_inflightHeadroom));
-    return std::max(m_inflightHi - headroom, m_minPipeCwnd);
+    uint32_t headroom = std::max(1u, static_cast<uint32_t>(m_inflightHi.Get() * m_inflightHeadroom));
+    return std::max(m_inflightHi.Get() - headroom, m_minPipeCwnd);
 }
 
 void
@@ -550,7 +558,7 @@ TcpBbrV2::BoundCwndForInflightModel(Ptr<TcpSocketState> tcb)
         cap = InflightWithHeadroom(tcb);
     }
 
-    cap = std::min(cap, m_inflightLo);
+    cap = std::min(cap, m_inflightLo.Get());
     cap = std::max(cap, m_minPipeCwnd);
 
     tcb->m_cWnd = std::min(tcb->m_cWnd.Get(), cap);
@@ -651,9 +659,9 @@ TcpBbrV2::UpdateRTprop(Ptr<TcpSocketState> tcb)
     }
 
     m_minRttExpired = Simulator::Now() > (m_minRttStamp + m_minRttFilterLen);
-    if (tcb->m_lastRtt >= Seconds(0) && (tcb->m_lastRtt <= m_minRtt || m_minRttExpired))
+    if (tcb->m_lastRtt >= Seconds(0) && (m_probeRttMin <= m_minRtt || m_minRttExpired))
     {
-        m_minRtt = tcb->m_lastRtt;
+        m_minRtt = m_probeRttMin;
         m_minRttStamp = Simulator::Now();
     }
 }
@@ -1110,7 +1118,7 @@ TcpBbrV2::AdaptLowerBounds(Ptr<TcpSocketState> tcb)
         m_inflightLo = std::max(m_inflightLatest, static_cast<uint32_t>(m_inflightLo * (1 - m_beta)));
     }
 
-    m_inflightLo = std::min(m_inflightLo, ecnInflightLo);
+    m_inflightLo = std::min(m_inflightLo.Get(), ecnInflightLo);
 }
 
 bool
