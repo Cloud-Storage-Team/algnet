@@ -15,7 +15,7 @@ public:
     void start();
 
 private:
-    Scheduler m_scheduler;
+    Scheduler& m_scheduler;
     std::unordered_map<std::string, Device*> m_graph;
     std::vector<Flow> m_flows;
 };
