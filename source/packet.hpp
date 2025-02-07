@@ -5,7 +5,10 @@
 
 namespace sim {
 
+enum PacketType { ACK, DATA };
+
 struct Packet {
+    PacketType type;
     int size;
     Device* src;
     Device* dest;
