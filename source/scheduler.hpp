@@ -17,7 +17,7 @@ public:
     }
 
     void tick();
-    void add(Event& event);
+    void add(const Event& event);
 
     // Clear all events
     void clear();
