@@ -19,6 +19,9 @@ public:
     void tick();
     void add(Event& event);
 
+    // Clear all events
+    void clear();
+
 private:
     // Private constructor to prevent instantiation
     Scheduler() {}
