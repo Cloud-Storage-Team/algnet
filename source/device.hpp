@@ -25,7 +25,7 @@ private:
     std::set<Link>::iterator m_next_inlink;
 
     // A routing table: maps destination node to a specific link
-    std::unordered_map<Device*, Link> m_outlinks;
+    std::unordered_map<Device*, Link*> m_outlinks;
 };
 
 }  // namespace sim
