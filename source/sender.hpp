@@ -8,6 +8,8 @@ namespace sim {
 
 class Sender : public Device {
 public:
+    Sender();
+
     // Process an ACK by removing it from the ingress buffer,
     // update the flow state,
     // and schedule next ACK processing event after a delay.
