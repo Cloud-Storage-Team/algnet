@@ -26,7 +26,7 @@ private:
     Scheduler(const Scheduler&) = delete;
     Scheduler& operator=(const Scheduler&) = delete;
 
-    std::priority_queue<Event*> m_events;
+    std::priority_queue<Event> m_events;
 };
 
 }  // namespace sim
