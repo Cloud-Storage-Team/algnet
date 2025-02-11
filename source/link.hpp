@@ -20,7 +20,7 @@ public:
     void process(Packet a_packet);
 
 private:
-    Device *m_next;
+    Device *m_dest;
     int m_speed_mbps;
     int m_src_egress_delay;
     int m_transmission_delay;
