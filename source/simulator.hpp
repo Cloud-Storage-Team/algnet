@@ -11,7 +11,7 @@ class Simulator {
 public:
     Simulator();
     void create_device(std::string a_name);
-    void create_link(std::string a_node1, std::string a_node2, int a_delay);
+    void create_link(Device* a_node1, Device* a_node2, int a_delay);
     void start(int a_stop_time);
 
 private:
