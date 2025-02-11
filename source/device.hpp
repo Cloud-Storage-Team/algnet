@@ -22,7 +22,7 @@ private:
     std::set<Link*> m_inlinks;
 
     // Iterator for the next ingress to process
-    std::set<Link>::iterator m_next_inlink;
+    std::set<Link*>::iterator m_next_inlink;
 
     // A routing table: maps destination node to a specific link
     std::unordered_map<Device*, Link*> m_outlinks;
