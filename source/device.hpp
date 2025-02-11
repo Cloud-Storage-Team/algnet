@@ -19,7 +19,7 @@ public:
 
 private:
     // Ordered set as we need to iterate over the ingress buffers
-    std::set<Link> m_inlinks;
+    std::set<Link*> m_inlinks;
 
     // Iterator for the next ingress to process
     std::set<Link>::iterator m_next_inlink;
