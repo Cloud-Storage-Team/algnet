@@ -6,6 +6,8 @@ namespace sim {
 
 class Receiver : public Device {
 public:
+    Receiver();
+
     // Process a packet by removing it from the ingress buffer
     // Send an ACK to the egress buffer
     // and schedule next receive event after a delay.

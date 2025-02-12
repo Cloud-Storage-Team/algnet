@@ -10,12 +10,13 @@ namespace sim {
 class Simulator {
 public:
     Simulator();
-    void create_device(std::string a_name);
-    void create_link(std::string a_node1, std::string a_node2, size_t a_delay);
-    void start();
+    void add_device(std::string a_name, DeviceType a_type);
+    void add_link(Device* a_node1, Device* a_node2, int a_delay);
+    void recalculate_paths();  // BFS to update the routing table
+    void start(int a_stop_time);
 
 private:
-    Scheduler m_scheduler;
+    Scheduler& m_scheduler;
     std::unordered_map<std::string, Device*> m_graph;
     std::vector<Flow> m_flows;
 };
