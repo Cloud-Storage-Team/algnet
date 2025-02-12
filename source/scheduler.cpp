@@ -20,4 +20,8 @@ void Scheduler::tick() {
 
 void Scheduler::add(const Event& event) { m_events.emplace(event); }
 
+void Scheduler::clear() {
+    m_events = std::priority_queue<Event>()
+}
+
 }  // namespace sim
