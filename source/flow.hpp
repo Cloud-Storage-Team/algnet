@@ -1,8 +1,9 @@
 #pragma once
 
-#include "device.hpp"
-
 namespace sim {
+
+class Device;
+class Packet;
 
 class Flow {
 public:
