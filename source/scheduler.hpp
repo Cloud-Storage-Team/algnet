@@ -17,7 +17,10 @@ public:
     }
 
     void tick();
-    void add(Event event);
+    void add(const Event& event);
+
+    // Clear all events
+    void clear();
 
 private:
     // Private constructor to prevent instantiation
@@ -26,7 +29,7 @@ private:
     Scheduler(const Scheduler&) = delete;
     Scheduler& operator=(const Scheduler&) = delete;
 
-    std::priority_queue<Event*> m_events;
+    std::priority_queue<Event> m_events;
 };
 
 }  // namespace sim
