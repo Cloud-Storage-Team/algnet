@@ -1,0 +1,9 @@
+cmake_minimum_required(VERSION 3.0.0)
+
+project(simulator)
+
+set(TARGET_NAME "${PROJECT_NAME}")
+
+file(GLOB_RECURSE src  "src/*.cpp")
+
+add_executable(${TARGET_NAME} ${src})
