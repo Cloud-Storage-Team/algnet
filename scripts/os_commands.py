@@ -12,3 +12,8 @@ def clear_console():
         try_os('cls')
     else:
         try_os('clear')
+
+def go_to_project_root():
+    dirpath = os.path.dirname(__file__)
+    project_path = os.path.dirname(dirpath)
+    os.chdir(project_path)

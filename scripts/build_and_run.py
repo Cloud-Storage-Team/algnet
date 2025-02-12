@@ -1,16 +1,15 @@
 import os
 import os_commands
 
+BUILD_DIR_NAME = "build"
+
 def main():
-
-    dirpath = os.path.dirname(__file__)
-    project_path = os.path.dirname(dirpath)
-    build_dir_path = os.path.join(project_path, "build")
-
-    os.chdir(build_dir_path)
+    os_commands.go_to_project_root()
+    os.chdir(BUILD_DIR_NAME)
     os_commands.try_os("cmake --build .")
     os.chdir("Debug")
     os_commands.clear_console()
     os_commands.try_os("simulator.exe")
 
-main()
+if __name__ == "__main__":
+    main()

@@ -1,7 +1,7 @@
 # algnet
 
-# Сборка и запуск проекта
+# Build and run project
 
-В папке `script` лежит 2 полезных программы:
-- `build_and_run.py` собирает и запускает проект
-- `cmake_restart.py` делает то же самое, но дополнительно перед сборкой еще перезапускает Сmake (может быть полезно, когда добавляете новые файлы в проект)
+There are two userful scripts in `scripts` directory:
+- `build_and_run.py` builds and runs project
+- `cmake_restart.py` does same things, but additionally restarts Cmare before build (might be useful when new files add to project) 
