@@ -1,21 +1,32 @@
 import os
 import shutil
-import os_commands
-import build_and_run
+
+BUILD_DIR_NAME = "build"
+
+def go_to_project_root():
+    dirpath = os.path.dirname(__file__)
+    project_path = os.path.dirname(dirpath)
+    os.chdir(project_path)
+
+
+def try_os(command : str):
+    res = os.system(command)
+    if (res != 0):
+        print(f"Command `{command}` failed with code {res}")
+        exit(0)
 
 def main():
-    os_commands.go_to_project_root()
-    if os.path.exists(build_and_run.BUILD_DIR_NAME):
-        shutil.rmtree(build_and_run.BUILD_DIR_NAME)
+    go_to_project_root()
+    if os.path.exists(BUILD_DIR_NAME):
+        shutil.rmtree(BUILD_DIR_NAME)
         print("build directory deleted")
     else:
         print("build directory not found")
 
-    os.mkdir(build_and_run.BUILD_DIR_NAME)
-    os.chdir(build_and_run.BUILD_DIR_NAME)
+    os.mkdir(BUILD_DIR_NAME)
+    os.chdir(BUILD_DIR_NAME)
 
-    os_commands.try_os(f"cmake .. -G \"Visual Studio 17 2022\"")
-    build_and_run.main()
+    try_os(f"cmake .. -G \"Unix Makefiles\"")
 
 if __name__ == "__main__":
     main()
