@@ -2,6 +2,4 @@
 
 # Build and run project
 
-There are two userful scripts in `scripts` directory:
-- `build_and_run.py` builds and runs project
-- `cmake_restart.py` does same things, but additionally restarts Cmare before build (might be useful when new files add to project) 
+It is assumed that build files locates in `out` directory. You may do it the way you wish, but Cmake Tools extention for VsCode is recomended.
