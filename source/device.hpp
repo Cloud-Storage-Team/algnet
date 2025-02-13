@@ -11,8 +11,8 @@ enum DeviceType { SWITCH, SENDER, RECEIVER };
 
 class Device {
 public:
-    Device(DeviceType a_type) {};
-    virtual ~Device() = default;
+    Device(DeviceType a_type);
+    virtual ~Device();
     virtual void process();
 
 private:
