@@ -18,6 +18,7 @@ public:
 
     void tick();
     void add(const Event& event);
+    int peek_time() const;
 
     // Clear all events
     void clear();
