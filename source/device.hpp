@@ -15,6 +15,12 @@ public:
     virtual ~Device();
     virtual void process();
 
+    void add_inlink(Link* link);
+    void add_outlink(Link* link, Device* dest);
+
+    // TODO: add update_routing_table method
+    // TODO: add get_neighbors method
+
 private:
     DeviceType m_type;
 
