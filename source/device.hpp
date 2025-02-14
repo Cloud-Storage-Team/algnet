@@ -2,6 +2,7 @@
 
 #include <set>
 #include <unordered_map>
+#include <vector>
 
 namespace sim {
 
@@ -14,6 +15,10 @@ public:
     Device(DeviceType a_type);
     virtual ~Device();
     virtual void process();
+    void add_inlink(Link* a_link);
+    void update_routing_table(Device* a_device, Link* a_link);
+    std::vector<Device*> get_neighbors() const;
+    Link* get_link_to_device(Device* a_device) const;
 
 private:
     DeviceType m_type;
