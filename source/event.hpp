@@ -1,13 +1,11 @@
 #pragma once
 
-#include <any>
-#include <queue>
-
-#include "device.hpp"
-#include "flow.hpp"
-#include "packet.hpp"
-
 namespace sim {
+
+class Flow;
+class Device;
+class Link;
+class Packet;
 
 // Base class for event
 struct Event {

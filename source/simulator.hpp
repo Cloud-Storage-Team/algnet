@@ -2,10 +2,14 @@
 
 #include <string>
 #include <unordered_map>
-
-#include "scheduler.hpp"
+#include <vector>
+#include "device.hpp"
 
 namespace sim {
+
+class Link;
+class Scheduler;
+class Flow;
 
 class Simulator {
 public:

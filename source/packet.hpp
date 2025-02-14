@@ -1,9 +1,9 @@
 #pragma once
 
-#include "device.hpp"
-#include "flow.hpp"
-
 namespace sim {
+
+class Device;
+class Flow;
 
 enum PacketType { ACK, DATA };
 

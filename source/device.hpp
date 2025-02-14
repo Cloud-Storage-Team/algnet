@@ -3,11 +3,9 @@
 #include <set>
 #include <unordered_map>
 
-#include "flow.hpp"
-#include "link.hpp"
-#include "packet.hpp"
-
 namespace sim {
+
+class Link;
 
 enum DeviceType { SWITCH, SENDER, RECEIVER };
 

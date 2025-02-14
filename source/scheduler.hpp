@@ -2,9 +2,9 @@
 
 #include <queue>
 
-#include "event.hpp"
-
 namespace sim {
+
+class Event;
 
 // Scheduler is implemented as a Singleton class
 // which provides a global access to a single instance
