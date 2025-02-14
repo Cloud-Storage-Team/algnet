@@ -7,4 +7,4 @@ set(TARGET_NAME "${PROJECT_NAME}")
 
 file(GLOB_RECURSE src  "src/*.cpp")
 
-add_executable(${TARGET_NAME} ${src})
+add_executable(${TARGET_NAME} main.cpp ${src})
