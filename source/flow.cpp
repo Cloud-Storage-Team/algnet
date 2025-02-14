@@ -7,9 +7,8 @@
 
 namespace sim {
 
-    Flow::Flow(Device* src, Device* dest, size_t packet_size, size_t delay_between_packets, size_t total_packets)
+    Flow::Flow(Device* src, size_t packet_size, size_t delay_between_packets, size_t total_packets)
         : m_src(src), 
-          m_dest(dest), 
           m_packet_size(packet_size), 
           m_delay_between_packets(delay_between_packets), 
           m_total_packets(total_packets),
@@ -21,16 +20,24 @@ namespace sim {
           m_packets_acked(0),
           m_last_send_time(0) {}
 
-    void Flow::start(int time){
+    void Flow::start(size_t time){
         schedule_packet_generation(time);
     };
 
-    bool Flow::try_to_generate() { 
+    bool Flow::try_to_generate(size_t current_time) { 
         if (m_packets_in_flight < m_cwnd && m_packets_sent<m_total_packets) { //maybe good to stop generating events if all packets are sent
-            schedule_packet_generation(m_last_send_time + m_delay_between_packets); //what if the last sending (due to flow congestion control) was a long time ago and the time is shorter than in the scheduler, it seems the get_cur_time() method is needed?
+            schedule_packet_generation(std::max(m_last_send_time + m_delay_between_packets, current_time));
             return true;
         }
         return false;
+    }
+
+    void Flow::update(size_t delay){
+        if (delay < 100){
+            ack();
+        } else {
+            trigger_congestion();
+        }
     }
 
     void Flow::ack() {

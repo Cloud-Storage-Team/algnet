@@ -7,7 +7,7 @@ class Packet;
 
 class Flow {
 public:
-    Flow(Device* src, Device* dest, size_t packet_size, size_t delay_between_packets, size_t total_packets);
+    Flow(Device* src, size_t packet_size, size_t delay_between_packets, size_t total_packets);
 
     void start(int time);
 
@@ -16,18 +16,19 @@ public:
     // Schedule the next generation event.
     bool try_to_generate();
 
+    void update(Packet packet);
+
+    Device *m_src;
+
+private:
+    void schedule_packet_generation(int time);
+
     // Update the internal state according to some congestion control algorithm
     // Call on sender-only if ACK packet was received 
     void ack();
 
     // Call on sender-only in case of congestions
     void trigger_congestion();
-
-    Device *m_src;
-    Device *m_dest;
-
-private:
-    void schedule_packet_generation(int time);
     
     size_t m_packet_size;
     size_t m_delay_between_packets;
