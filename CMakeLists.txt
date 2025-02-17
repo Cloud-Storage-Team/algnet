@@ -5,9 +5,13 @@ project(simulator)
 
 # main part of project
 
-set(TARGET_NAME "${PROJECT_NAME}")
-file(GLOB_RECURSE src "source/*.cpp")
-add_executable(${TARGET_NAME} main.cpp ${src})
+option(BUILD_PROJECT "Build tests" ON)
+
+if (BUILD_PROJECT)
+    set(TARGET_NAME "${PROJECT_NAME}")
+    file(GLOB_RECURSE src "source/*.cpp")
+    add_executable(${TARGET_NAME} main.cpp ${src})
+endif()
 
 # tests
 option(BUILD_TESTS "Build tests" ON)

@@ -2,60 +2,64 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "ultra build all",
+            "label": "set up build all",
             "type": "shell",
-            "command": "cmake -DCMAKE_INSTALL_PREFIX=${workspaceFolder}/build/install/ -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_BUILD_TYPE=Debug -S${workspaceFolder} -B${workspaceFolder}/build",
-            "group": "build",
-            "problemMatcher": [
-                "$gcc"
+            "command": "cmake",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=Debug",
+                "-B${workspaceFolder}/build",
+                "-DBUILD_PROJECT=ON",
+                "-DBUILD_TESTS=ON"
             ],
+            "group": "build"
+        },
+        {
+            "label": "set up build project",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=Debug",
+                "-B${workspaceFolder}/build",
+                "-DBUILD_PROJECT=ON",
+                "-DBUILD_TESTS=OFF"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "set up build tests",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=Debug",
+                "-B${workspaceFolder}/build",
+                "-DBUILD_PROJECT=ON",
+                "-DBUILD_TESTS=OFF"
+            ],
+            "group": "test"
         },
         {
             "label": "build all",
+            "dependsOn": "set up build all",
             "type": "shell",
-            "command": "cmake --build ${workspaceFolder}/build --config Debug",
+            "command": "cmake --build ${workspaceFolder}/build",
             "group": "build",
-            "problemMatcher": [
-                "$gcc"
-            ],
+            "problemMatcher": ["$gcc"]
         },
         {
             "label": "build project",
+            "dependsOn": "set up build project",
             "type": "shell",
-            "command": "cmake",
-            "args": [
-                "-DBUILD_TESTS:boolean=OFF", //dont work with no wisible reason
-                "--build",
-                "${workspaceFolder}/build",
-                "--config",
-                "Debug",
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
+            "command": "cmake --build ${workspaceFolder}/build",
+            "group": "build",
+            "problemMatcher": ["$gcc"]
         },
         {
             "label": "build tests",
+            "dependsOn": "set up build all",
             "type": "shell",
-            "command": "cmake",
-            "args": [
-                "--build",
-                "${workspaceFolder}/build",
-                "--config",
-                "Debug",
-                "-DBUILD_MAIN=OFF"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
+            "command": "cmake --build ${workspaceFolder}/build",
+            "group": "test",
+            "problemMatcher": ["$gcc"]
         },
     ]
 }

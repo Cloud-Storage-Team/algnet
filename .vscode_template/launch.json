@@ -5,7 +5,7 @@
             "name": "Debug simulator",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/simulator", // Укажите путь к вашему исполняемому файлу тестов
+            "program": "${workspaceFolder}/build/simulator",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build",
@@ -19,20 +19,20 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "build all",
-            "miDebuggerPath": "/usr/bin/gdb", // Укажите путь к вашему отладчику
+            "preLaunchTask": "build project",
+            "miDebuggerPath": "/usr/bin/gdb",
         },
         {
             "name": "Debug Tests",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/test_simulator", // Укажите путь к вашему исполняемому файлу тестов
+            "program": "${workspaceFolder}/build/test_simulator",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build",
             "environment": [],
             "externalConsole": false,
-            "MIMode": "gdb", // или "lldb" для macOS
+            "MIMode": "gdb",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -40,8 +40,8 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "build all",
-            "miDebuggerPath": "/usr/bin/gdb", // Укажите путь к вашему отладчику
+            "preLaunchTask": "build tests",
+            "miDebuggerPath": "/usr/bin/gdb",
         },
     ]
 }
