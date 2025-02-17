@@ -18,6 +18,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Update submodules
+      run: git submodule update --init --recursive
+
     - name: Configure CMake for building project
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Debug -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF
 
@@ -27,6 +30,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+
+    - name: Update submodules
+      run: git submodule update --init --recursive
 
     - name: Configure CMake for building tests
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Debug -DBUILD_PROJECT=OFF -DBUILD_TESTS=ON
