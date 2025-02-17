@@ -1,12 +1,10 @@
-# This starter workflow is for a CMake project running on a single platform. There is a different starter workflow if you need cross-platform coverage.
-# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-multi-platform.yml
-name: CMake on a single platform
+name: CMake Ubuntu latest
 
 on:
   push:
-    branches: [ "*" ]
-  pull_request:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "*" ]
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -22,7 +20,7 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Configure CMake for building project
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Debug -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF
 
     - name: Build project
       run: cmake --build ${{github.workspace}}/build --config Debug
@@ -35,7 +33,7 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Configure CMake for building tests
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Debug -DBUILD_PROJECT=OFF -DBUILD_TESTS=ON
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_PROJECT=OFF -DBUILD_TESTS=ON
 
     - name: Build tests
       run: cmake --build ${{github.workspace}}/build --config Debug
