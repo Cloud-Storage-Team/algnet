@@ -19,7 +19,7 @@ public:
      * based on the egress queueing and transmission delays.
      */
     void process(Packet a_packet);
-
+void schedule_arrival();
 private:
     Device *m_dest;
     int m_speed_mbps;
