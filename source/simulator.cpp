@@ -11,8 +11,14 @@ namespace sim {
 Simulator::Simulator() : m_scheduler(Scheduler::get_instance()) {}
 
 Simulator::~Simulator() {
-    for (auto& p : m_graph) {
-        delete p.second;
+    for (auto& [_, device] : m_graph) {
+        std::vector<Device*> neighbors = device->get_neighbors();
+        for (Device* neighbor : neighbors) {
+            delete device->get_link_to_device(neighbor);
+        }
+    }
+    for (auto& [_, device] : m_graph) {
+        delete device;
     }
 }
 
@@ -35,13 +41,10 @@ void Simulator::add_device(std::string a_name, DeviceType a_type) {
 
 void Simulator::add_link(std::string a_from_name, std::string a_dest_name,
                          std::uint32_t a_speed_mbps, std::uint32_t a_delay) {
-    Link* outlink = new Link(m_graph[a_from_name], m_graph[a_dest_name],
-                             a_speed_mbps, a_delay);
-    m_graph[a_from_name]->add_outlink(outlink);
-
-    Link* inlink = new Link(m_graph[a_dest_name], m_graph[a_from_name],
-                            a_speed_mbps, a_delay);
-    m_graph[a_dest_name]->add_inlink(inlink);
+    Link* link = new Link(m_graph[a_from_name], m_graph[a_dest_name],
+                          a_speed_mbps, a_delay);
+    m_graph[a_from_name]->add_outlink(link);
+    m_graph[a_dest_name]->add_inlink(link);
 }
 
 void Simulator::recalculate_paths() {
