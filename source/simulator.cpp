@@ -33,11 +33,15 @@ void Simulator::add_device(std::string a_name, DeviceType a_type) {
     }
 }
 
-void Simulator::add_link(Device* a_node1, Device* a_node2, int a_delay) {
-    Link* link = new Link(a_node1, a_delay);
-    a_node2->add_inlink(link);
-    link = new Link(a_node2, a_delay);
-    a_node1->add_inlink(link);
+void Simulator::add_link(std::string a_from_name, std::string a_dest_name,
+                         std::uint32_t a_speed_mbps, std::uint32_t a_delay) {
+    Link* outlink = new Link(m_graph[a_from_name], m_graph[a_dest_name],
+                             a_speed_mbps, a_delay);
+    m_graph[a_from_name]->add_outlink(outlink);
+
+    Link* inlink = new Link(m_graph[a_dest_name], m_graph[a_from_name],
+                            a_speed_mbps, a_delay);
+    m_graph[a_dest_name]->add_inlink(inlink);
 }
 
 void Simulator::recalculate_paths() {
@@ -71,10 +75,12 @@ void Simulator::recalculate_paths() {
     }
 }
 
-void Simulator::start(int a_stop_time) {
-    while (m_scheduler.peek_time() <= a_stop_time) {
+void Simulator::start(std::uint32_t a_stop_time) {
+    while (m_scheduler.pick_time() <= a_stop_time) {
         m_scheduler.tick();
     }
 }
+
+void Simulator::clear() { m_scheduler.clear(); }
 
 }  // namespace sim

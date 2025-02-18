@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -17,8 +18,9 @@ public:
     Simulator();
     ~Simulator();
     void add_device(std::string a_name, DeviceType a_type);
-    void add_link(Device* a_from, Device* a_to, std::uint32_t a_speed_mbps,
-                  std::uint32_t m_delay);
+    void add_link(std::string a_from_name, std::string a_to_name,
+                  std::uint32_t a_speed_mbps, std::uint32_t a_delay);
+    void add_flow(std::string a_from_name, std::string a_to_name);
     void recalculate_paths();  // BFS to update the routing table
     void start(std::uint32_t a_stop_time);
     void clear();
