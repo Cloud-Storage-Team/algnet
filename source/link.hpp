@@ -12,7 +12,7 @@ class Packet;
  */
 class Link {
 public:
-    Link(Device *a_next, int a_speed_mbps);
+    Link(Device *a_dest, int a_speed_mbps);
 
     /**
      * Update the source egress delay and schedule the arrival event
