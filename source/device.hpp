@@ -2,6 +2,7 @@
 
 #include <set>
 #include <unordered_map>
+#include <vector>
 
 namespace sim {
 
@@ -16,6 +17,8 @@ public:
     virtual void process();
     void add_inlink(Link *link);
     void add_outlink(Device *dest, Link *link);
+    std::vector<Device*> get_neighbors() const;
+    Link* get_link_to_device(Device* a_device) const;
 
 protected:
     DeviceType m_type;
