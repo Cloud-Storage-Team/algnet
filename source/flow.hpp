@@ -8,6 +8,8 @@ class Packet;
 
 class Flow {
 public:
+    Flow(Device *a_src, Device *a_dest);
+
     // Start at time
     void start(std::uint32_t time);
 
@@ -22,6 +24,7 @@ public:
 
 private:
     Device *m_src;
+    Device *m_dest;
     std::uint32_t m_nacks;
     float m_cwnd;
     std::uint32_t m_sent_bytes;

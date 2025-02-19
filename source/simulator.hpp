@@ -15,9 +15,11 @@ class Flow;
 class Simulator {
 public:
     Simulator();
-    void add_device(std::string a_name, DeviceType a_type);
+    ~Simulator();
+    Device* add_device(std::string a_name, DeviceType a_type);
+    void add_flow(Device a_from, Device a_to);
     void add_link(Device* a_from, Device* a_to, std::uint32_t a_speed_mbps,
-                  std::uint32_t m_delay);
+                  std::uint32_t a_delay);
     // Clear all events in the Scheduler
     void clear();
     // BFS to update the routing table
