@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 namespace sim {
 
@@ -9,9 +10,10 @@ class Packet;
 
 // Base class for event
 struct Event {
-    int time;
+    std::uint32_t time;
     virtual ~Event();
     virtual void operator()() = 0;
+    bool operator>(const Event &other) const { return time > other.time; }
 };
 
 /**
@@ -20,7 +22,7 @@ struct Event {
  * Schedule the next packet generation event.
  */
 struct Generate : public Event {
-    Generate(Flow *a_flow, int a_packet_size);
+    Generate(Flow *a_flow, std::uint32_t a_packet_size);
     Flow *flow;
 
     virtual void operator()() final;
@@ -45,6 +47,13 @@ struct Process : public Event {
     Process(Device *a_device);
     Device *node;
 
+    virtual void operator()() final;
+};
+
+/**
+ * Stop simulation and clear all events remaining in the Scheduler
+ */
+struct Stop : public Event {
     virtual void operator()() final;
 };
 
