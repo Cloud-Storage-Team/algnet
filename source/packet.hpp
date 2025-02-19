@@ -1,17 +1,16 @@
 #pragma once
-
-#include "device.hpp"
-#include "flow.hpp"
+#include <cstdint>
 
 namespace sim {
+
+class Device;
+class Flow;
 
 enum PacketType { ACK, DATA };
 
 struct Packet {
     PacketType type;
-    int size;
-    Device* src;
-    Device* dest;
+    std::uint32_t size;
     Flow* flow;
 };
 

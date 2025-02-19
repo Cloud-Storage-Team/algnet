@@ -8,8 +8,8 @@ void Device::add_inlink(Link* link) {
     // TODO: maybe some update of m_next_inlink is needed here
 }
 
-void Device::add_outlink(Link* link, Device* dest) {
-    m_outlinks[dest] = link;
+void Device::update_routing_table(Device* dest, Link* link) {
+    m_routing_table[dest] = link;
 }
 
 

@@ -1,10 +1,11 @@
 #pragma once
 
+#include <cstdint>
 #include <queue>
 
-#include "event.hpp"
-
 namespace sim {
+
+class Event;
 
 // Scheduler is implemented as a Singleton class
 // which provides a global access to a single instance
@@ -16,11 +17,9 @@ public:
         return instance;
     }
 
-    void tick();
     void add(const Event& event);
-
-    // Clear all events
-    void clear();
+    void clear();  // Clear all events
+    void tick();
 
 private:
     // Private constructor to prevent instantiation

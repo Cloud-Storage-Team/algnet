@@ -6,6 +6,8 @@
 
 namespace sim {
 
+class Packet;
+
 class Sender : public Device {
 public:
     Sender();
@@ -18,6 +20,8 @@ public:
     // ACKs are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
     void process();
+
+    void enqueue_packet(Packet packet);
 
 private:
     std::queue<Packet> m_flow_buffer;
