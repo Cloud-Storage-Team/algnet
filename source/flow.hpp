@@ -8,7 +8,7 @@ class Packet;
 
 class Flow {
 public:
-    Flow(Device *a_src, Device *a_dest);
+    Flow(Device *a_src, Device *a_dest, float a_start_cwnd);
 
     // Start at time
     void start(std::uint32_t time);

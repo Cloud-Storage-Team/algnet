@@ -17,7 +17,7 @@ public:
     Simulator();
     ~Simulator();
     Device* add_device(std::string a_name, DeviceType a_type);
-    void add_flow(Device a_from, Device a_to);
+    void add_flow(Device* a_from, Device* a_to);
     void add_link(Device* a_from, Device* a_to, std::uint32_t a_speed_mbps,
                   std::uint32_t a_delay);
     // Clear all events in the Scheduler
