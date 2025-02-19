@@ -19,7 +19,6 @@ public:
 
     void add(const Event& event);
     void clear();  // Clear all events
-    std::uint32_t pick_time() const;
     void tick();
 
 private:

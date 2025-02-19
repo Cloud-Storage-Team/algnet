@@ -50,4 +50,11 @@ struct Process : public Event {
     virtual void operator()() final;
 };
 
+/**
+ * Stop simulation and clear all events remaining in the Scheduler
+ */
+struct Stop : public Event {
+    virtual void operator()() final;
+};
+
 }  // namespace sim

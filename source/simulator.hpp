@@ -18,9 +18,12 @@ public:
     void add_device(std::string a_name, DeviceType a_type);
     void add_link(Device* a_from, Device* a_to, std::uint32_t a_speed_mbps,
                   std::uint32_t m_delay);
-    void recalculate_paths();  // BFS to update the routing table
-    void start(std::uint32_t a_stop_time);
+    // Clear all events in the Scheduler
     void clear();
+    // BFS to update the routing table
+    void recalculate_paths();
+    // Create a Stop event at a_stop_time and start simulation
+    void start(std::uint32_t a_stop_time);
 
 private:
     Scheduler& m_scheduler;
