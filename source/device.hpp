@@ -15,7 +15,6 @@ public:
     virtual ~Device();
     virtual void process();
     void add_inlink(Link *link);
-    void add_outlink(Link *link);
     void update_routing_table(Device *dest, Link *link);
 
 protected:
