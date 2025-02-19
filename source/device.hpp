@@ -15,7 +15,7 @@ public:
     virtual ~Device();
     virtual void process();
     void add_inlink(Link *link);
-    void add_outlink(Device *dest, Link *link);
+    void add_outlink(Link *link);
 
 protected:
     DeviceType m_type;
