@@ -11,8 +11,6 @@ enum PacketType { ACK, DATA };
 struct Packet {
     PacketType type;
     std::uint32_t size;
-    Device* src;
-    Device* dest;
     Flow* flow;
 };
 
