@@ -27,7 +27,7 @@ protected:
     std::set<Link *>::iterator m_next_inlink;
 
     // A routing table: maps the final destination to a specific link
-    std::unordered_map<Device *, Link *> m_outlinks;
+    std::unordered_map<Device *, Link *> m_routing_table;
 };
 
 }  // namespace sim
