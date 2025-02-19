@@ -1,5 +1,6 @@
 #include "scheduler.hpp"
 
+#include <spdlog/spdlog.h>
 #include <iostream>
 #include <queue>
 
@@ -9,16 +10,19 @@ namespace sim {
 
 void Scheduler::tick() {
     if (!m_events.empty()) {
-        Event* event = m_events.top();
+        auto event = m_events.top();
         m_events.pop();
-        (*event)();
-        delete event;
+        event();
     } else {
-        std::cout << "No events to process." << std::endl;
+        logger->warn("No events to process.");
     }
 }
 
-void Scheduler::add(Event& event) { m_events.emplace(event); }
+void Scheduler::add(const Event& event) { m_events.emplace(event); }
+
+void Scheduler::clear() {
+    m_events = std::priority_queue<Event>()
+}
 
 void Scheduler::clear() {
     m_events = std::priority_queue<Event>()
