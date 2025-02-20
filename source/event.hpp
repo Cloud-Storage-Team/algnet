@@ -10,10 +10,11 @@ namespace sim {
 
 // Base class for event
 struct Event {
+    Event(std::uint32_t a_time);
+
     std::uint32_t time;
     virtual ~Event();
     virtual void operator()() = 0;
-    bool operator>(const Event &other) const { return time > other.time; }
 };
 
 /**
@@ -54,6 +55,8 @@ struct Process : public Event {
  * Stop simulation and clear all events remaining in the Scheduler
  */
 struct Stop : public Event {
+    Stop(std::uint32_t a_time);
+    ~Stop() override;
     virtual void operator()() final;
 };
 
