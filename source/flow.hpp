@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include "device.hpp"
 
 #include "device.hpp"
 
@@ -14,7 +15,6 @@ public:
 
     // Try to generate a new packet if the internal state allows to do so.
     // by placing it into the flow buffer of the source node.
-    // Schedule the next generation event.
     bool try_to_generate(std::uint32_t packet_size);
 
     // Update the internal state according to some congestion control algorithm

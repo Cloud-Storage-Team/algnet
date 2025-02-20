@@ -2,10 +2,18 @@
 
 #include <cstdint>
 #include <queue>
+#include "event.hpp"
 
 #include "event.hpp"
 
-namespace sim {
+namespace sim
+{
+
+class EventComparator {
+    bool operator()(const Event* a_first_event, const Event* a_second_event) {
+        return a_first_event->get_time() > a_second_event->get_time();
+    }
+};
 
 // Scheduler is implemented as a Singleton class
 // which provides a global access to a single instance
@@ -17,7 +25,7 @@ public:
         return instance;
     }
 
-    void add(const Event& event);
+    void add(const Event* event);
     void clear();  // Clear all events
     void tick();
 
@@ -28,7 +36,7 @@ private:
     Scheduler(const Scheduler&) = delete;
     Scheduler& operator=(const Scheduler&) = delete;
 
-    std::priority_queue<Event> m_events;
+    std::priority_queue<Event*, std::vector<Event*>, EventComparator> m_events;
 };
 
 }  // namespace sim

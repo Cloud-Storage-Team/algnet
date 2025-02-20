@@ -2,6 +2,8 @@
 
 #include <cstdint>
 #include <queue>
+#include "device.hpp"
+#include "packet.hpp"
 
 #include "packet.hpp"
 
