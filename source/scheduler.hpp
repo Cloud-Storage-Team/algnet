@@ -1,10 +1,11 @@
 #pragma once
 
+#include <cstdint>
 #include <queue>
 
-#include "event.hpp"
-
 namespace sim {
+
+class Event;
 
 // Scheduler is implemented as a Singleton class
 // which provides a global access to a single instance
@@ -16,8 +17,9 @@ public:
         return instance;
     }
 
+    void add(const Event& event);
+    void clear();  // Clear all events
     void tick();
-    void add(Event event);
 
 private:
     // Private constructor to prevent instantiation
@@ -26,7 +28,7 @@ private:
     Scheduler(const Scheduler&) = delete;
     Scheduler& operator=(const Scheduler&) = delete;
 
-    std::priority_queue<Event*> m_events;
+    std::priority_queue<Event> m_events;
 };
 
 }  // namespace sim
