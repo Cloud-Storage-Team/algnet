@@ -15,8 +15,7 @@ public:
     void start(std::uint32_t time);
 
     // Try to generate a new packet if the internal state allows to do so.
-    // by placing it into the flow buffer of the source node.
-    // Schedule the next generation event.
+    // Returns true if a generate_event was created and placed in scheduler
     bool try_to_generate(std::uint32_t current_time);
 
     /*
