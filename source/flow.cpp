@@ -9,12 +9,14 @@
 
 namespace sim {
 
-Flow::Flow(Device* src, size_t packet_size, size_t delay_between_packets,
-           size_t total_packets, size_t congestion_delay)
-    : m_src(src),
-      m_packet_size(packet_size),
-      m_delay_between_packets(delay_between_packets),
-      m_total_packets(total_packets),
+Flow::Flow(Device* a_src, Device* a_dest, std::uint32_t a_packet_size,
+           std::uint32_t a_delay_between_packets, std::uint32_t a_total_packets,
+           std::uint32_t a_delay_threshold)
+    : m_src(a_src),
+      m_dest(a_dest),
+      m_packet_size(a_packet_size),
+      m_delay_between_packets(a_delay_between_packets),
+      m_total_packets(a_total_packets),
       m_packets_sent(0),
       m_cwnd(1),
       m_ssthresh(128),
@@ -22,23 +24,23 @@ Flow::Flow(Device* src, size_t packet_size, size_t delay_between_packets,
       m_packets_in_flight(0),
       m_packets_acked(0),
       m_last_send_time(0),
-      m_delay(congestion_delay) {}
+      m_delay_threshold(a_delay_threshold) {}
 
-void Flow::start(int time) { schedule_packet_generation(time); };
+void Flow::start(std::uint32_t time) { schedule_packet_generation(time); };
 
-bool Flow::try_to_generate(size_t current_time) {
+bool Flow::try_to_generate(std::uint32_t a_current_time) {
     if (m_packets_in_flight < m_cwnd &&
         m_packets_sent < m_total_packets) {  // maybe good to stop generating
                                              // events if all packets are sent
-        schedule_packet_generation(
-            std::max(m_last_send_time + m_delay_between_packets, current_time));
+        schedule_packet_generation(std::max(
+            m_last_send_time + m_delay_between_packets, a_current_time));
         return true;
     }
     return false;
 }
 
-void Flow::update(size_t delay) {
-    if (delay < m_delay) {  // ack
+void Flow::update(std::uint32_t delay) {
+    if (delay < m_delay_threshold) {  // ack
         m_packets_in_flight--;
         if (m_cwnd < m_ssthresh) {
             m_cwnd++;
@@ -56,7 +58,7 @@ void Flow::update(size_t delay) {
     }
 }
 
-void Flow::schedule_packet_generation(int time) {
+void Flow::schedule_packet_generation(std::uint32_t time) {
     Generate generate_event(this, m_packet_size);
     generate_event.time = time;
     Scheduler::get_instance().add(generate_event);
