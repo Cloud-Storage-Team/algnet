@@ -59,7 +59,7 @@ links:
   link_id:
     from: <source_device>
     to: <destination_device>
-    egress_delay: <value><unit>
+    latency: <value><unit>
     throughput: <value><unit>
 ```
 
@@ -69,6 +69,10 @@ links:
 
 - `to`: Destination device (host or switch).
 
-- `egress_delay`: Transmission delay (e.g., 5ms).
+- `latency`: Transmission delay (e.g., 5ms).
 
 - `throughput`: Link bandwidth (e.g., 1Gbps).
+
+### Examples images
+
+[Images](images) of topologies are generated using the [generate.py](images/generator.py) script.

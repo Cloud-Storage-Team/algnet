@@ -19,20 +19,20 @@ links:
   link1:
     from: central
     to: switch1
-    egress_delay: 1ms
+    latency: 1ms
     throughput: 10Gbps
   link2:
     from: switch1
     to: receiver1
-    egress_delay: 1ms
+    latency: 1ms
     throughput: 10Gbps
   link3:
     from: switch1
     to: receiver2
-    egress_delay: 1ms
+    latency: 1ms
     throughput: 10Gbps
   link4:
     from: switch1
     to: receiver3
-    egress_delay: 1ms
+    latency: 1ms
     throughput: 10Gbps

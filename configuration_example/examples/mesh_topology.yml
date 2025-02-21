@@ -28,40 +28,40 @@ links:
   link1:
     from: sender1
     to: switch1
-    egress_delay: 3ms
+    latency: 3ms
     throughput: 10Gbps
   link2:
     from: sender2
     to: switch1
-    egress_delay: 3ms
+    latency: 3ms
     throughput: 10Gbps
   link3:
     from: sender3
     to: switch2
-    egress_delay: 3ms
+    latency: 3ms
     throughput: 10Gbps
   link4:
     from: switch1
     to: switch2
-    egress_delay: 2ms
+    latency: 2ms
     throughput: 40Gbps
   link5:
     from: switch1
     to: receiver1
-    egress_delay: 3ms
+    latency: 3ms
     throughput: 10Gbps
   link6:
     from: switch1
     to: receiver2
-    egress_delay: 3ms
+    latency: 3ms
     throughput: 10Gbps
   link7:
     from: switch2
     to: receiver2
-    egress_delay: 3ms
+    latency: 3ms
     throughput: 10Gbps
   link8:
     from: switch2
     to: receiver3
-    egress_delay: 3ms
+    latency: 3ms
     throughput: 10Gbps
