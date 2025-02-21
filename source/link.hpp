@@ -2,11 +2,12 @@
 
 #include <cstdint>
 #include <queue>
+#include "device.hpp"
+#include "packet.hpp"
 
 namespace sim {
 
 class Device;
-class Packet;
 
 /**
  * Unidirectional link from the source to a_next
