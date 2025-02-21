@@ -5,9 +5,9 @@
 namespace sim
 {
 
-Event::Event(std::uint32_t a_time) {
-    m_time = a_time;
-}
+Event::Event(std::uint32_t a_time):
+    m_time(a_time)
+{}
 
 std::uint32_t Event::get_time() const {
     return m_time;
