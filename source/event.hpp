@@ -57,7 +57,7 @@ private:
  * and start processing at the device.
  */
 class Process : public Event {
-    Process(std::uint32_t time, Device *a_device);
+    Process(std::uint32_t a_time, Device *a_device);
     ~Process() = default;
     virtual void operator()() final;
 
