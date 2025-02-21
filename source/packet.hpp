@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 namespace sim {
 
@@ -9,9 +10,7 @@ enum PacketType { ACK, DATA };
 
 struct Packet {
     PacketType type;
-    int size;
-    Device* src;
-    Device* dest;
+    std::uint32_t size;
     Flow* flow;
 };
 

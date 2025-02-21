@@ -11,6 +11,7 @@ public:
          std::uint32_t a_delay_between_packets, std::uint32_t a_total_packets,
          std::uint32_t a_delay_threshold);
 
+    // Start at time
     void start(std::uint32_t time);
 
     // Try to generate a new packet if the internal state allows to do so.

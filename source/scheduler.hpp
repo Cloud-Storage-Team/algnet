@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <queue>
 
 namespace sim {
@@ -16,11 +17,9 @@ public:
         return instance;
     }
 
-    void tick();
     void add(const Event& event);
-
-    // Clear all events
-    void clear();
+    void clear();  // Clear all events
+    void tick();
 
 private:
     // Private constructor to prevent instantiation
