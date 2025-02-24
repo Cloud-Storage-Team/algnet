@@ -21,6 +21,11 @@ public:
     // Call try_to_generate upon the update
     void update();
 
+    // TODO: move to .cpp
+    Device* get_source() {
+        return m_src;
+    };
+
 private:
     Device *m_src;
     Device *m_dest;
