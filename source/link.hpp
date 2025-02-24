@@ -23,6 +23,8 @@ public:
      */
     void schedule_arrival(Packet a_packet);
 
+    Packet get_packet();
+
 private:
     IRoutingDevice* m_from;
     IRoutingDevice* m_to;

@@ -22,6 +22,8 @@ public:
     // Call try_to_generate upon the update
     void update();
 
+    Device *get_destination() const;
+
 private:
     ISender *m_src;
     IReceiver *m_dest;

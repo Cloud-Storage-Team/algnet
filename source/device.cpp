@@ -1,5 +1,7 @@
 #include "device.hpp"
 
+#include "link.hpp"
+
 namespace sim {
 
 void RoutingModule::add_inlink(std::shared_ptr<Link> link) {
