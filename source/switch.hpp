@@ -7,6 +7,7 @@ namespace sim {
 class Switch : public Device {
 public:
     Switch(DeviceType a_type);
+    ~Switch() = default;
 
     // Process a packet by moving it from ingress to egress
     // and schedule next process event after a delay.
