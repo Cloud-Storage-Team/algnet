@@ -1,10 +1,8 @@
 #pragma once
 #include <cstdint>
+#include "flow.hpp"
 
 namespace sim {
-
-class Device;
-class Flow;
 
 enum PacketType { ACK, DATA };
 
