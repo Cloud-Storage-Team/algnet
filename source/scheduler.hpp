@@ -3,9 +3,9 @@
 #include <cstdint>
 #include <queue>
 
-namespace sim {
+#include "event.hpp"
 
-class Event;
+namespace sim {
 
 // Scheduler is implemented as a Singleton class
 // which provides a global access to a single instance
