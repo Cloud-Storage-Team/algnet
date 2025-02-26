@@ -5,12 +5,9 @@
 #include <vector>
 
 #include "device.hpp"
+#include "scheduler.hpp"
 
 namespace sim {
-
-class Link;
-class Scheduler;
-class Flow;
 
 class Simulator {
 public:

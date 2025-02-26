@@ -1,12 +1,12 @@
 #pragma once
 #include <cstdint>
 
-namespace sim {
+#include "device.hpp"
+#include "flow.hpp"
+#include "link.hpp"
+#include "packet.hpp"
 
-class Flow;
-class Device;
-class Link;
-class Packet;
+namespace sim {
 
 // Base class for event
 struct Event {
