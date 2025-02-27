@@ -1,15 +1,16 @@
 #pragma once
 
 #include <cstdint>
-#include <queue>
 #include <memory>
+#include <queue>
 
 #include "event.hpp"
 
 namespace sim {
 
 struct EventComparator {
-    bool operator()(const std::unique_ptr<Event>& lhs, const std::unique_ptr<Event>& rhs) const {
+    bool operator()(const std::unique_ptr<Event>& lhs,
+                    const std::unique_ptr<Event>& rhs) const {
         return (*lhs.get()) > (*rhs.get());
     }
 };
@@ -35,7 +36,9 @@ private:
     Scheduler(const Scheduler&) = delete;
     Scheduler& operator=(const Scheduler&) = delete;
 
-    std::priority_queue<std::unique_ptr<Event>, std::vector<std::unique_ptr<Event>>, EventComparator> m_events;
+    std::priority_queue<std::unique_ptr<Event>,
+                        std::vector<std::unique_ptr<Event>>, EventComparator>
+        m_events;
 };
 
 }  // namespace sim

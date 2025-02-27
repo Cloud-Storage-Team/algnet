@@ -10,7 +10,7 @@ namespace sim {
 
 // Base class for event
 struct Event {
-    std::uint32_t time;    
+    std::uint32_t time;
     virtual ~Event() = default;
     virtual void operator()() = 0;
     bool operator>(const Event &other) const { return time > other.time; }

@@ -7,11 +7,12 @@ int sim::CountingEvent::cnt;
 
 TEST(Add, ExpectedAmountOfElements) {
     int number_of_events = 100;
-    
+
     sim::CountingEvent::cnt = 0;
     sim::AddEvents<sim::CountingEvent>(number_of_events);
 
-    while(sim::Scheduler::get_instance().tick()) {}
+    while (sim::Scheduler::get_instance().tick()) {
+    }
 
     EXPECT_EQ(sim::CountingEvent::cnt, number_of_events);
 

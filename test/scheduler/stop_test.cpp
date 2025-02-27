@@ -4,6 +4,6 @@
 
 TEST(Stop, TickReturnsFalseOnStop) {
     EXPECT_TRUE(true);
-    
+
     sim::Scheduler::get_instance().clear();
 }
