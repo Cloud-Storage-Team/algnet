@@ -1,5 +1,7 @@
 #include "simulator.hpp"
 
+#include <set>
+
 #include "event.hpp"
 #include "link.hpp"
 #include "receiver.hpp"
@@ -45,43 +47,44 @@ void Simulator::add_link(Device* a_from, Device* a_to,
     a_to->add_inlink(link);
 }
 
-void Simulator::recalculate_paths() {
-    // returns map, that gives for each meet device its parent in bfs bypass tree
-    std::unordered_map<Device*, Device*> bfs (Device* start_device) {
-        std::unordered_map<Device*, Device*> parent_table;
-        std::queue<Device*> queue;
-        std::set<Device*> used;
-        queue.push(start_device);
+// returns map, that gives for each meet device its parent in bfs bypass tree
+std::unordered_map<Device*, Device*> bfs(Device* start_device) {
+    std::unordered_map<Device*, Device*> parent_table;
+    std::queue<Device*> queue;
+    std::set<Device*> used;
+    queue.push(start_device);
 
-        while (!queue.empty()) {
-            Device* device = queue.front();
-            queue.pop();
-            if (used.contains(device)) {
+    while (!queue.empty()) {
+        Device* device = queue.front();
+        queue.pop();
+        if (used.find(device) != used.end()) {
+            continue;
+        }
+        used.insert(device);
+        std::vector<Device*> neighbors = device->get_neighbors();
+        for (Device* neighbor : neighbors) {
+            if (used.find(neighbor) != used.end()) {
                 continue;
             }
-            used.insert(device);
-            std::vector<Device*> neighbors = device->get_neighbors();
-            for (Device* neighbor : neighbors) {
-                if (used.contains(neighbor)) {
-                    continue;
-                }
-                parent_table[neighbor] = device;
-                queue.push(neighbor);
-            }
+            parent_table[neighbor] = device;
+            queue.push(neighbor);
         }
-        return parent_table;
-    };
+    }
+    return parent_table;
+};
 
+void Simulator::recalculate_paths() {
     for (auto& [_, src_device] : m_graph) {
-        std::unordered_map<Device*, Device*> parent_table = bfs(src_device);
+        std::unordered_map<Device*, Device*> parent_table =
+            bfs(src_device.get());
         for (auto& [_, dest_device] : m_graph) {
-            Device* next_hop = dest_device;
-            if (!path.contains(dest_device)) {
-                 src_device->update_rounting_table(dest_device, nullptr);
-                 conitinue;
+            Device* next_hop = dest_device.get();
+            if (parent_table.find(dest_device.get()) == parent_table.end()) {
+                src_device->update_routing_table(dest_device.get(), nullptr);
+                continue;
             }
-            while (path[next_hop] != src_device) {
-                next_hop = path[next_hop];
+            while (parent_table[next_hop] != src_device.get()) {
+                next_hop = parent_table[next_hop];
             }
             src_device->update_routing_table(
                 dest_device, src_device->get_link_to_device(next_hop));
