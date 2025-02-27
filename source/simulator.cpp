@@ -76,6 +76,10 @@ void Simulator::recalculate_paths() {
         std::unordered_map<Device*, Device*> parent_table = bfs(src_device);
         for (auto& [_, dest_device] : m_graph) {
             Device* next_hop = dest_device;
+            if (!path.contains(dest_device)) {
+                 src_device->update_rounting_table(dest_device, nullptr);
+                 conitinue;
+            }
             while (path[next_hop] != src_device) {
                 next_hop = path[next_hop];
             }
