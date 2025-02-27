@@ -21,9 +21,9 @@ public:
      * Update the source egress delay and schedule the arrival event
      * based on the egress queueing and transmission delays.
      */
-    void schedule_arrival(Packet a_packet);
+    virtual void schedule_arrival(Packet a_packet);
 
-    Packet get_packet();
+    virtual Packet get_packet();
 
 private:
     IRoutingDevice* m_from;
