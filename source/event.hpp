@@ -1,12 +1,12 @@
 #pragma once
 #include <cstdint>
 
-namespace sim {
+#include "device.hpp"
+#include "flow.hpp"
+#include "link.hpp"
+#include "packet.hpp"
 
-class Flow;
-class Device;
-class Link;
-class Packet;
+namespace sim {
 
 // Base class for event
 struct Event {
@@ -47,6 +47,13 @@ struct Process : public Event {
     Process(Device *a_device);
     Device *node;
 
+    virtual void operator()() final;
+};
+
+/**
+ * Stop simulation and clear all events remaining in the Scheduler
+ */
+struct Stop : public Event {
     virtual void operator()() final;
 };
 

@@ -3,8 +3,24 @@ set(CMAKE_CXX_STANDARD 20)
 
 project(simulator)
 
-set(TARGET_NAME "${PROJECT_NAME}")
+# main part of project
 
-file(GLOB_RECURSE src  "src/*.cpp")
+option(BUILD_PROJECT "Build tests" ON)
 
-add_executable(${TARGET_NAME} main.cpp ${src})
+if (BUILD_PROJECT)
+    set(TARGET_NAME "${PROJECT_NAME}")
+    file(GLOB_RECURSE src "source/*.cpp")
+    add_executable(${TARGET_NAME} main.cpp ${src})
+endif()
+
+# tests
+option(BUILD_TESTS "Build tests" ON)
+
+if(BUILD_TESTS)
+    add_subdirectory(googletest)
+    set(TEST_NAME "test_simulator")
+    add_executable(${TEST_NAME} test/simple_test.cpp) 
+    target_link_libraries(${TEST_NAME} gtest gtest_main)
+    enable_testing()
+    add_test(NAME MyTests COMMAND ${TEST_NAME})
+endif()

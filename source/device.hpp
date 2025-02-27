@@ -2,7 +2,6 @@
 
 #include <set>
 #include <unordered_map>
-#include <vector>
 
 namespace sim {
 
@@ -16,9 +15,7 @@ public:
     virtual ~Device();
     virtual void process();
     void add_inlink(Link *link);
-    void add_outlink(Device *dest, Link *link);
-    std::vector<Device*> get_neighbors() const;
-    Link* get_link_to_device(Device* a_device) const;
+    void update_routing_table(Device *dest, Link *link);
 
 protected:
     DeviceType m_type;
@@ -30,7 +27,7 @@ protected:
     std::set<Link *>::iterator m_next_inlink;
 
     // A routing table: maps the final destination to a specific link
-    std::unordered_map<Device *, Link *> m_outlinks;
+    std::unordered_map<Device *, Link *> m_routing_table;
 };
 
 }  // namespace sim

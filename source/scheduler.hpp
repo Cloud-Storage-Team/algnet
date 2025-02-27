@@ -3,9 +3,9 @@
 #include <cstdint>
 #include <queue>
 
-namespace sim {
+#include "event.hpp"
 
-class Event;
+namespace sim {
 
 // Scheduler is implemented as a Singleton class
 // which provides a global access to a single instance
@@ -19,7 +19,6 @@ public:
 
     void add(const Event& event);
     void clear();  // Clear all events
-    std::uint32_t pick_time() const;
     void tick();
 
 private:
