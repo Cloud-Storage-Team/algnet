@@ -12,9 +12,7 @@ Link::Link(Device* a_from, Device* a_to, std::uint32_t a_speed_mbps, std::uint32
 {}
 
 Packet Link::get_packet() {
-    Packet result = m_next_ingress.front();
-    m_next_ingress.pop();
-    return result;
+    return Packet(PacketType::DATA, 0, nullptr);
 }
 
 void Link::schedule_arrival(Packet a_packet) {}
