@@ -1,5 +1,4 @@
 #include "simulator.hpp"
-#include <memory>
 
 #include "event.hpp"
 #include "link.hpp"
@@ -36,14 +35,14 @@ Device* Simulator::add_device(std::string a_name, DeviceType a_type) {
             m_graph[a_name] = std::make_unique<Receiver>();
             break;
     }
+    return m_graph[a_name].get();
 }
 
-void Simulator::add_link(std::string a_from_name, std::string a_dest_name,
+void Simulator::add_link(Device* a_from, Device* a_to,
                          std::uint32_t a_speed_mbps, std::uint32_t a_delay) {
-    Link* link = new Link(m_graph[a_from_name], m_graph[a_dest_name],
-                          a_speed_mbps, a_delay);
-    m_graph[a_from_name]->add_outlink(link);
-    m_graph[a_dest_name]->add_inlink(link);
+    Link* link = new Link(a_from, a_to, a_speed_mbps, a_delay);
+    a_from->add_outlink(link);
+    a_to->add_inlink(link);
 }
 
 void Simulator::recalculate_paths() {
@@ -82,7 +81,5 @@ void Simulator::start(std::uint32_t a_stop_time) {
     while (m_scheduler.tick()) {
     }
 }
-
-void Simulator::clear() { m_scheduler.clear(); }
 
 }  // namespace sim
