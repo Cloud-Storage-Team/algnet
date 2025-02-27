@@ -1,6 +1,6 @@
 #include "scheduler.hpp"
 
-#include <spdlog/spdlog.h>
+// #include <spdlog/spdlog.h>
 #include <iostream>
 #include <queue>
 
@@ -8,24 +8,23 @@
 
 namespace sim {
 
-void Scheduler::tick() {
-    if (!m_events.empty()) {
-        auto event = m_events.top();
-        m_events.pop();
-        event();
-    } else {
-        logger->warn("No events to process.");
+bool Scheduler::tick() {
+    if (m_events.empty()) {
+        return false;
     }
+
+    std::unique_ptr<Event> event = std::move(const_cast<std::unique_ptr<Event>&>(m_events.top()));
+    m_events.pop();
+    event->operator()();
+    return true;
 }
 
-void Scheduler::add(const Event& event) { m_events.emplace(event); }
-
-void Scheduler::clear() {
-    m_events = std::priority_queue<Event>()
+void Scheduler::add(std::unique_ptr<Event> event) { 
+    m_events.emplace(std::move(event)); 
 }
 
 void Scheduler::clear() {
-    m_events = std::priority_queue<Event>()
+    m_events = std::priority_queue<std::unique_ptr<Event>, std::vector<std::unique_ptr<Event>>, EventComparator>();
 }
 
 }  // namespace sim

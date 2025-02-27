@@ -10,8 +10,8 @@ namespace sim {
 
 // Base class for event
 struct Event {
-    std::uint32_t time;
-    virtual ~Event();
+    std::uint32_t time;    
+    virtual ~Event() = default;
     virtual void operator()() = 0;
     bool operator>(const Event &other) const { return time > other.time; }
 };
@@ -23,6 +23,7 @@ struct Event {
  */
 struct Generate : public Event {
     Generate(Flow *a_flow, std::uint32_t a_packet_size);
+    ~Generate() = default;
     Flow *flow;
 
     virtual void operator()() final;
@@ -33,6 +34,7 @@ struct Generate : public Event {
  */
 struct Arrive : public Event {
     Arrive(Link *a_link, Packet *a_packet);
+    ~Arrive() = default;
     Link *link;
     Packet *packet;
 
@@ -45,6 +47,7 @@ struct Arrive : public Event {
  */
 struct Process : public Event {
     Process(Device *a_device);
+    ~Process() = default;
     Device *node;
 
     virtual void operator()() final;
@@ -54,6 +57,7 @@ struct Process : public Event {
  * Stop simulation and clear all events remaining in the Scheduler
  */
 struct Stop : public Event {
+    ~Stop() = default;
     virtual void operator()() final;
 };
 

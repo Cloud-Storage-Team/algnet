@@ -18,9 +18,18 @@ option(BUILD_TESTS "Build tests" ON)
 
 if(BUILD_TESTS)
     add_subdirectory(googletest)
+
     set(TEST_NAME "test_simulator")
     add_executable(${TEST_NAME} test/simple_test.cpp) 
     target_link_libraries(${TEST_NAME} gtest gtest_main)
     enable_testing()
     add_test(NAME MyTests COMMAND ${TEST_NAME})
+
+    # Test for scheduler tests
+    set(SCHEDULER_TEST "scheduler_tests")
+    file(GLOB SCHEDULER test/scheduler/*.cpp source/scheduler.cpp)
+    add_executable(${SCHEDULER_TEST} ${SCHEDULER})
+    target_include_directories(${SCHEDULER_TEST} PUBLIC source)
+    target_link_libraries(${SCHEDULER_TEST} gtest gtest_main)
+    add_test(NAME SchedulerTests COMMAND ${SCHEDULER_TEST})
 endif()
