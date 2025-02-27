@@ -1,5 +1,7 @@
 #include "simulator.hpp"
+#include <memory>
 
+#include "event.hpp"
 #include "link.hpp"
 #include "receiver.hpp"
 #include "scheduler.hpp"
@@ -17,24 +19,21 @@ Simulator::~Simulator() {
             delete device->get_link_to_device(neighbor);
         }
     }
-    for (auto& [_, device] : m_graph) {
-        delete device;
-    }
 }
 
-void Simulator::add_device(std::string a_name, DeviceType a_type) {
+Device* Simulator::add_device(std::string a_name, DeviceType a_type) {
     if (m_graph.find(a_name) != m_graph.end()) {
-        return;
+        return nullptr;
     }
     switch (a_type) {
         case DeviceType::SENDER:
-            m_graph[a_name] = new Sender();
+            m_graph[a_name] = std::make_unique<Sender>();
             break;
         case DeviceType::SWITCH:
-            m_graph[a_name] = new Switch();
+            m_graph[a_name] = std::make_unique<Switch>();
             break;
         case DeviceType::RECEIVER:
-            m_graph[a_name] = new Receiver();
+            m_graph[a_name] = std::make_unique<Receiver>();
             break;
     }
 }
@@ -79,8 +78,8 @@ void Simulator::recalculate_paths() {
 }
 
 void Simulator::start(std::uint32_t a_stop_time) {
-    while (m_scheduler.pick_time() <= a_stop_time) {
-        m_scheduler.tick();
+    m_scheduler.add(std::move(std::make_unique<Stop>(a_stop_time)));
+    while (m_scheduler.tick()) {
     }
 }
 

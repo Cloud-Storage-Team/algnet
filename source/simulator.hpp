@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <memory>
 
 #include "device.hpp"
 #include "scheduler.hpp"
@@ -26,7 +27,7 @@ public:
 
 private:
     Scheduler& m_scheduler;
-    std::unordered_map<std::string, Device*> m_graph;
+    std::unordered_map<std::string, std::unique_ptr<Device>> m_graph;
     std::vector<Flow> m_flows;
 };
 
