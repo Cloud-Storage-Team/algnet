@@ -46,21 +46,30 @@ void Simulator::add_link(Device* a_from, Device* a_to,
 }
 
 void Simulator::recalculate_paths() {
-    auto bfs = [](Device* a_vertex) {
-        std::unordered_map<Device*, Device*> path;
-        std::queue<Device*> q;
-        q.push(a_vertex);
+    // returns map, that gives for each meet device its parent in bfs bypass tree
+    std::unordered_map<Device*, Device*> bfs (Device* start_device) {
+        std::unordered_map<Device*, Device*> parent_table;
+        std::queue<Device*> queue;
+        std::set<Device*> used;
+        queue.push(start_device);
 
-        while (!q.empty()) {
-            Device* vertex = q.front();
-            q.pop();
-            std::vector<Device*> neighbors = vertex->get_neighbors();
+        while (!queue.empty()) {
+            Device* device = queue.front();
+            queue.pop();
+            if (used.contains(device)) {
+                continue;
+            }
+            used.insert(device);
+            std::vector<Device*> neighbors = device->get_neighbors();
             for (Device* neighbor : neighbors) {
-                path[neighbor] = vertex;
-                q.push(neighbor);
+                if (used.contains(neighbor)) {
+                    continue;
+                }
+                parent_table[neighbor] = device;
+                queue.push(neighbor);
             }
         }
-        return path;
+        return parent_table;
     };
 
     for (auto& [_, src_device] : m_graph) {
