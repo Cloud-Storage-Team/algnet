@@ -21,6 +21,8 @@ public:
     // Call try_to_generate upon the update
     void update();
 
+    Device* get_destination();
+
 private:
     Device *m_src;
     Device *m_dest;

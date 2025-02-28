@@ -22,6 +22,7 @@ public:
      * based on the egress queueing and transmission delays.
      */
     void schedule_arrival(Packet a_packet);
+    Packet get_packet();
 
 private:
     Device* m_from;
