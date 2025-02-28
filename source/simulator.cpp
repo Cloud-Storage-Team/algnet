@@ -40,6 +40,10 @@ Device* Simulator::add_device(std::string a_name, DeviceType a_type) {
     return m_graph[a_name].get();
 }
 
+void Simulator::add_flow(Device* a_from, Device* a_to, float a_start_cwnd) {
+    m_flows.emplace_back(a_from, a_to, a_start_cwnd);
+}
+
 void Simulator::add_link(Device* a_from, Device* a_to,
                          std::uint32_t a_speed_mbps, std::uint32_t a_delay) {
     Link* link = new Link(a_from, a_to, a_speed_mbps, a_delay);
