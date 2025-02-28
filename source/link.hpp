@@ -3,10 +3,18 @@
 #include <cstdint>
 #include <queue>
 
+<<<<<<< HEAD
 namespace sim {
 
 class Device;
 class Packet;
+=======
+#include "packet.hpp"
+
+namespace sim {
+
+class Device;
+>>>>>>> origin/main
 
 /**
  * Unidirectional link from the source to a_next

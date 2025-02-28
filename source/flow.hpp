@@ -1,10 +1,16 @@
 #pragma once
 #include <cstdint>
 
+<<<<<<< HEAD
 namespace sim {
 
 class Device;
 class Packet;
+=======
+#include "device.hpp"
+
+namespace sim {
+>>>>>>> origin/main
 
 class Flow {
 public:
