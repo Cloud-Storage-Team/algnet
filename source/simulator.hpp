@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "device.hpp"
+#include "link.hpp"
 #include "scheduler.hpp"
 
 namespace sim {
@@ -13,7 +14,6 @@ namespace sim {
 class Simulator {
 public:
     Simulator();
-    ~Simulator();
     Device* add_device(std::string a_name, DeviceType a_type);
     void add_flow(Device* a_from, Device* a_to, float a_start_cwnd);
     void add_link(Device* a_from, Device* a_to, std::uint32_t a_speed_mbps,
@@ -27,6 +27,7 @@ private:
     Scheduler& m_scheduler;
     std::unordered_map<std::string, std::unique_ptr<Device>> m_graph;
     std::vector<Flow> m_flows;
+    std::vector<std::unique_ptr<Link>> m_links;
 };
 
 }  // namespace sim
