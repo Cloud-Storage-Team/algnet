@@ -2,12 +2,10 @@
 
 #include <cstdint>
 #include <queue>
-#include "event.hpp"
 
 #include "event.hpp"
 
-namespace sim
-{
+namespace sim {
 
 class EventComparator {
     bool operator()(const Event* a_first_event, const Event* a_second_event) {

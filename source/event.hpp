@@ -1,9 +1,5 @@
 #pragma once
 #include <cstdint>
-#include "flow.hpp"
-#include "device.hpp"
-#include "link.hpp"
-#include "packet.hpp"
 
 #include "device.hpp"
 #include "flow.hpp"
@@ -20,6 +16,7 @@ public:
     virtual void operator()() = 0;
 
     std::uint32_t get_time() const;
+
 protected:
     std::uint32_t m_time;
 };

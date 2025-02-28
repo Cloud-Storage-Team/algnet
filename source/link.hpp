@@ -2,9 +2,8 @@
 
 #include <cstdint>
 #include <queue>
-#include "device.hpp"
-#include "packet.hpp"
 
+#include "device.hpp"
 #include "packet.hpp"
 
 namespace sim {
