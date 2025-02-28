@@ -274,9 +274,10 @@ class TcpTxBuffer : public Object
      * previous sequences.
      * \param beforeDelCb Callback invoked, if it is not null, before the deletion
      * of an Item (because it was, probably, ACKed)
+     * \param isEce Has ACK been ECN ECE marked?
      */
     void DiscardUpTo(const SequenceNumber32& seq,
-                     const Callback<void, TcpTxItem*>& beforeDelCb = m_nullCb);
+                     const Callback<void, TcpTxItem*>& beforeDelCb = m_nullCb, bool isEce = false);
 
     /**
      * \brief Update the scoreboard

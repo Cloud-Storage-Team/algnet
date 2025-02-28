@@ -68,7 +68,9 @@ uint32_t prevLost = 0;
 static void
 TraceThroughput(Ptr<FlowMonitor> monitor)
 {
+    monitor->CheckForLostPackets();
     FlowMonitor::FlowStatsContainer stats = monitor->GetFlowStats();
+
     if (!stats.empty())
     {
         auto itr = stats.begin();
@@ -82,30 +84,16 @@ TraceThroughput(Ptr<FlowMonitor> monitor)
         rtt << curTime.GetSeconds() << " "
             << itr->second.lastDelay.GetMilliSeconds()
             << std::endl;
+        losses << curTime.GetSeconds() << " " << (itr->second.lostPackets - prevLost) << std::endl;
+        prevLost = itr->second.lostPackets;
         prevTime = curTime;
         prev = itr->second.txBytes;
     }
     Simulator::Schedule(Seconds(0.2), &TraceThroughput, monitor);
 }
 
-static void
-TraceLosses(Ptr<FlowMonitor> monitor)
-{
-    FlowMonitor::FlowStatsContainer stats = monitor->GetFlowStats();
-    if (!stats.empty())
-    {
-        auto itr = stats.begin();
-        Time curTime = Now();
-
-        // Log the packet drops
-        losses << curTime.GetSeconds() << " " << (itr->second.lostPackets - prevLost) << std::endl;
-        prevLost = itr->second.lostPackets;
-    }
-    Simulator::Schedule(Seconds(0.2), &TraceLosses, monitor);
-}
-
 // Check the queue size
-void
+static void
 CheckQueueSize(Ptr<QueueDisc> qd)
 {
     uint32_t qsize = qd->GetCurrentSize().GetValue();
@@ -120,7 +108,7 @@ CwndTracer(Ptr<OutputStreamWrapper> stream, uint32_t oldval, uint32_t newval)
     *stream->GetStream() << Simulator::Now().GetSeconds() << " " << newval / 1500.0 << std::endl;
 }
 
-void
+static void
 TraceCwnd(uint32_t nodeId, uint32_t socketId)
 {
     AsciiTraceHelper ascii;
@@ -138,7 +126,7 @@ MinRttTracer(Ptr<OutputStreamWrapper> stream, Time oldval, Time newval)
     *stream->GetStream() << Simulator::Now().GetSeconds() << " " << newval.GetMilliSeconds() << std::endl;
 }
 
-void
+static void
 TraceMinRtt(uint32_t nodeId, uint32_t socketId)
 {
     AsciiTraceHelper ascii;
@@ -155,7 +143,7 @@ PacingGainTracer(Ptr<OutputStreamWrapper> stream, double oldval, double newval)
     *stream->GetStream() << Simulator::Now().GetSeconds() << " " << newval << std::endl;
 }
 
-void
+static void
 TracePacingGain(uint32_t nodeId, uint32_t socketId)
 {
     AsciiTraceHelper ascii;
@@ -173,7 +161,7 @@ InflightTracer(Ptr<OutputStreamWrapper> stream, uint32_t oldval, uint32_t newval
     *stream->GetStream() << Simulator::Now().GetSeconds() << " " << val << std::endl;
 }
 
-void
+static void
 TraceInflightLo(uint32_t nodeId, uint32_t socketId)
 {
     AsciiTraceHelper ascii;
@@ -184,7 +172,7 @@ TraceInflightLo(uint32_t nodeId, uint32_t socketId)
                                   MakeBoundCallback(&InflightTracer, stream));
 }
 
-void
+static void
 TraceInflightHi(uint32_t nodeId, uint32_t socketId)
 {
     AsciiTraceHelper ascii;
@@ -206,6 +194,8 @@ main(int argc, char* argv[])
     timeinfo = localtime(&rawtime);
     strftime(buffer, sizeof(buffer), "%d-%m-%Y-%I-%M-%S", timeinfo);
     std::string currentTime(buffer);
+    uint32_t nSenders = 1;
+    uint32_t tracedSenderInd = 0;
 
     std::string tcpTypeId = "TcpBbrV2";
     std::string queueDisc = "FifoQueueDisc";
@@ -214,6 +204,8 @@ main(int argc, char* argv[])
     bool enablePcap = false;
     Time stopTime = Seconds(20);
     std::string bottleneckBuffer = "1000p";
+    std::string protocols[] = {"ns3::TcpBbrV2", "ns3::TcpBbr", "ns3::TcpCubic"};
+    std::string protocolsSelect;
 
     CommandLine cmd(__FILE__);
     cmd.AddValue("tcpTypeId", "Transport protocol to use: TcpNewReno, TcpBbrV2", tcpTypeId);
@@ -223,11 +215,20 @@ main(int argc, char* argv[])
                  "Stop time for applications / simulation time will be stopTime + 1",
                  stopTime);
     cmd.AddValue("buffer", "Bottleneck buffer", bottleneckBuffer);
+    cmd.AddValue("nSenders", "Number of senders", nSenders);
+    cmd.AddValue("sndInd", "Index of sender to trace", tracedSenderInd);
+    cmd.AddValue("protocols", "Indexes of protocols for senders", protocolsSelect);
     cmd.Parse(argc, argv);
+
+    std::vector<int> protocolsInd(nSenders, 0);
+    for (uint32_t i = 0; i < std::min<uint32_t>(nSenders, protocolsSelect.size()); ++i)
+    {
+        protocolsInd[i] = protocolsSelect[i] - '0';
+    }
 
     queueDisc = std::string("ns3::") + queueDisc;
 
-    Config::SetDefault("ns3::TcpL4Protocol::SocketType", StringValue("ns3::" + tcpTypeId));
+    // Config::SetDefault("ns3::TcpL4Protocol::SocketType", StringValue("ns3::" + tcpTypeId));
 
     // The maximum send buffer size is set to 4194304 bytes (4MB) and the
     // maximum receive buffer size is set to 6291456 bytes (6MB) in the Linux
@@ -240,10 +241,10 @@ main(int argc, char* argv[])
     Config::SetDefault("ns3::DropTailQueue<Packet>::MaxSize", QueueSizeValue(QueueSize(bottleneckBuffer)));
     Config::SetDefault(queueDisc + "::MaxSize", QueueSizeValue(QueueSize(bottleneckBuffer)));
 
-    NodeContainer sender;
+    NodeContainer senders;
     NodeContainer receiver;
     NodeContainer routers;
-    sender.Create(1);
+    senders.Create(nSenders);
     receiver.Create(1);
     routers.Create(2);
 
@@ -257,15 +258,26 @@ main(int argc, char* argv[])
     edgeLink.SetChannelAttribute("Delay", StringValue("10ms"));
 
     // Create NetDevice containers
-    NetDeviceContainer senderEdge = edgeLink.Install(sender.Get(0), routers.Get(0));
+    std::vector<NetDeviceContainer> senderEdges(nSenders);
+    for (uint32_t i = 0; i < nSenders; ++i)
+    {
+        senderEdges[i] = edgeLink.Install(senders.Get(i), routers.Get(0));
+    }
     NetDeviceContainer r1r2 = bottleneckLink.Install(routers.Get(0), routers.Get(1));
     NetDeviceContainer receiverEdge = edgeLink.Install(routers.Get(1), receiver.Get(0));
 
     // Install Stack
     InternetStackHelper internet;
-    internet.Install(sender);
+    internet.Install(senders);
     internet.Install(receiver);
     internet.Install(routers);
+
+    for (uint32_t i = 0; i < nSenders; ++i)
+    {
+        // Use Config::Set to change the default SocketType for the current sender
+        Config::Set("/NodeList/" + std::to_string(senders.Get(i)->GetId()) + "/$ns3::TcpL4Protocol/SocketType", 
+                    StringValue(protocols[protocolsInd[i]]));
+    }
 
     // Configure the root queue discipline
     TrafficControlHelper tch;
@@ -276,7 +288,10 @@ main(int argc, char* argv[])
         tch.SetQueueLimits("ns3::DynamicQueueLimits", "HoldTime", StringValue("1000ms"));
     }
 
-    tch.Install(senderEdge);
+    for (uint32_t i = 0; i < nSenders; ++i)
+    {
+        tch.Install(senderEdges[i]);
+    }
     tch.Install(receiverEdge);
 
     // Assign IP addresses
@@ -284,10 +299,11 @@ main(int argc, char* argv[])
     ipv4.SetBase("10.0.0.0", "255.255.255.0");
 
     Ipv4InterfaceContainer i1i2 = ipv4.Assign(r1r2);
-
-    ipv4.NewNetwork();
-    Ipv4InterfaceContainer is1 = ipv4.Assign(senderEdge);
-
+    for (uint32_t i = 0; i < nSenders; ++i)
+    {
+        ipv4.NewNetwork();
+        Ipv4InterfaceContainer senderInterface = ipv4.Assign(senderEdges[i]);
+    }
     ipv4.NewNetwork();
     Ipv4InterfaceContainer ir1 = ipv4.Assign(receiverEdge);
 
@@ -300,14 +316,18 @@ main(int argc, char* argv[])
     // Install application on the sender
     BulkSendHelper source("ns3::TcpSocketFactory", InetSocketAddress(ir1.GetAddress(1), port));
     source.SetAttribute("MaxBytes", UintegerValue(0));
-    ApplicationContainer sourceApps = source.Install(sender.Get(0));
+    ApplicationContainer sourceApps = source.Install(senders);
     sourceApps.Start(Seconds(0.1));
     // Hook trace source after application starts
-    Simulator::Schedule(Seconds(0.1) + MilliSeconds(1), &TraceCwnd, 0, 0);
-    Simulator::Schedule(Seconds(0.1) + MilliSeconds(1), &TraceMinRtt, 0, 0);
-    Simulator::Schedule(Seconds(0.1) + MilliSeconds(1), &TracePacingGain, 0, 0);
-    Simulator::Schedule(Seconds(0.1) + MilliSeconds(1), &TraceInflightLo, 0, 0);
-    Simulator::Schedule(Seconds(0.1) + MilliSeconds(1), &TraceInflightHi, 0, 0);
+    uint32_t nodeId = senders.Get(tracedSenderInd)->GetId();
+    if (protocolsInd[nodeId] == 0)
+    {
+        Simulator::Schedule(Seconds(0.1) + MilliSeconds(1), &TraceCwnd, nodeId, 0);
+        Simulator::Schedule(Seconds(0.1) + MilliSeconds(1), &TraceMinRtt, nodeId, 0);
+        Simulator::Schedule(Seconds(0.1) + MilliSeconds(1), &TracePacingGain, nodeId, 0);
+        Simulator::Schedule(Seconds(0.1) + MilliSeconds(1), &TraceInflightLo, nodeId, 0);
+        Simulator::Schedule(Seconds(0.1) + MilliSeconds(1), &TraceInflightHi, nodeId, 0);
+    }
     sourceApps.Stop(stopTime);
 
     // Install application on the receiver
@@ -357,9 +377,13 @@ main(int argc, char* argv[])
 
     // Check for dropped packets using Flow Monitor
     FlowMonitorHelper flowmon;
-    Ptr<FlowMonitor> monitor = flowmon.InstallAll();
+    NodeContainer flowContainer;
+    flowContainer.Add(senders.Get(tracedSenderInd));
+    flowContainer.Add(routers);
+    flowContainer.Add(receiver);
+    // Ptr<FlowMonitor> monitor = flowmon.Install(senders.Get(tracedSenderInd));
+    Ptr<FlowMonitor> monitor = flowmon.Install(flowContainer);
     Simulator::Schedule(Seconds(0 + 0.000001), &TraceThroughput, monitor);
-    Simulator::Schedule(Seconds(0 + 0.2), &TraceLosses, monitor);
 
     Simulator::Stop(stopTime + TimeStep(1));
     Simulator::Run();
