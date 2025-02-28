@@ -16,7 +16,7 @@ public:
     void SetUp() override{};
 };
 
-namespace sim {
+namespace test {
 struct EmptyEvent : public Event {
     ~EmptyEvent() = default;
     virtual void operator()() final{};
