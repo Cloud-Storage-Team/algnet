@@ -1,5 +1,5 @@
 #pragma once
-#include <stdint.h>
+#include <cstdint>
 
 #include "device.hpp"
 
@@ -8,6 +8,8 @@ namespace sim {
 class Receiver : public Device {
 public:
     Receiver();
+
+    // TODO: choose a way of passing time to create new events
 
     // Process a packet by removing it from the ingress buffer
     // Send an ACK to the egress buffer
