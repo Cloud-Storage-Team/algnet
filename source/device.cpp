@@ -8,9 +8,8 @@ void Device::add_inlink(Link* link) {
     // TODO: maybe some update of m_next_inlink is needed here
 }
 
-void Device::update_routing_table(Device* dest, Link* link) {
+void Device::update_routing_table(IDevice* dest, Link* link) {
     m_routing_table[dest] = link;
 }
-
 
 }  // namespace sim
