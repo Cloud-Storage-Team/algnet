@@ -10,7 +10,7 @@ public:
     void SetUp() override{};
 };
 
-TEST(UpdateTable, RoutPresents) {
+TEST_F(UpdateTable, RoutPresents) {
     sim::TestDevice* source = new sim::TestDevice();
     sim::TestDevice* neighbour = new sim::TestDevice();
     sim::TestDevice* dest = new sim::TestDevice();

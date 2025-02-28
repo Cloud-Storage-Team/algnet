@@ -10,7 +10,7 @@ public:
     void SetUp() override{};
 };
 
-TEST(Neighbors, TwoPointersToTheSameDevice) {
+TEST_F(Neighbors, TwoPointersToTheSameDevice) {
     sim::TestDevice* source = new sim::TestDevice();
 
     sim::TestDevice* neighbour1 = new sim::TestDevice();
