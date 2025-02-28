@@ -13,6 +13,4 @@ TEST_F(TestScheduler, ExpectedProcessingOrder) {
 
     while (sim::Scheduler::get_instance().tick()) {
     }
-
-    sim::Scheduler::get_instance().clear();
 }

@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "../../source/scheduler.hpp"
 #include "utils.hpp"
 
 int sim::CountingEvent::cnt;
@@ -15,6 +14,4 @@ TEST_F(TestScheduler, AddExpectedAmountOfElements) {
     }
 
     EXPECT_EQ(sim::CountingEvent::cnt, number_of_events);
-
-    sim::Scheduler::get_instance().clear();
 }

@@ -6,6 +6,7 @@
 #include <type_traits>
 
 #include "../../source/event.hpp"
+#include "../../source/scheduler.hpp"
 
 class TestScheduler : public testing::Test {
 public:

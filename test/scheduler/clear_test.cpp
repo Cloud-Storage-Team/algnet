@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "../../source/scheduler.hpp"
 #include "utils.hpp"
 
 TEST_F(TestScheduler, ClearEmptyAtStart) {
