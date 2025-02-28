@@ -30,6 +30,8 @@ public:
      * based on the egress queueing and transmission delays.
      */
     void schedule_arrival(Packet a_packet);
+    // TODO: move implementation to .cpp
+    Device* get_dest() { return m_to; };
 
 private:
     Device* m_from;
