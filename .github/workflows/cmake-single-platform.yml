@@ -11,6 +11,16 @@ env:
   BUILD_TYPE: Release
 
 jobs:
+  clang-format:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Clang Format
+      run: sudo apt-get install clang-format
+    
+    - name: Clang format
+      run: clang-format --dry-run -Werror source/*.hpp test/*.cpp main.cpp
   build:
     runs-on: ubuntu-latest
     steps:
@@ -20,10 +30,10 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Configure CMake for building project
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF
+      run: cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF
 
     - name: Build project
-      run: cmake --build ${{github.workspace}}/build --config Debug
+      run: cmake --build build --config Debug
   test:
     runs-on: ubuntu-latest
     steps:
@@ -33,12 +43,12 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Configure CMake for building tests
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_PROJECT=OFF -DBUILD_TESTS=ON
+      run: cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_PROJECT=OFF -DBUILD_TESTS=ON
 
     - name: Build tests
-      run: cmake --build ${{github.workspace}}/build --config Debug
+      run: cmake --build build --config Debug
     
     - name: Run tests
-      working-directory: ${{github.workspace}}/build
+      working-directory: build
       run: ./test_simulator
 
