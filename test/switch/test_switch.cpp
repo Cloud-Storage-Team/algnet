@@ -4,8 +4,8 @@
 
 #include "../../source/device.hpp"
 #include "../../source/link.hpp"
-#include "../../source/switch.hpp"
 #include "../../source/packet.hpp"
+#include "../../source/switch.hpp"
 #include "device_mock.hpp"
 #include "link_mock.hpp"
 
@@ -13,9 +13,20 @@ namespace {
 
 class TestSwitch : public testing::Test {
 public:
-    void TearDown() override {};
-    void SetUp() override {};
+    void TearDown() override{};
+    void SetUp() override{};
 };
+
+TEST_F(TestSwitch, test_no_senders) {
+    sim::Switch switch_device;
+    bool exception_catched = false;
+    try {
+        switch_device.process();
+    } catch (const std::runtime_error& e) {
+        exception_catched = true;
+    }
+    ASSERT_TRUE(exception_catched);
+}
 
 void test_senders(size_t senders_count) {
     // create devices
@@ -63,12 +74,8 @@ void test_senders(size_t senders_count) {
     ASSERT_TRUE(switch_reciever_link.get_arrived_packets() == packets);
 }
 
-TEST_F(TestSwitch, test_one_sender) {
-    test_senders(1);
-}
+TEST_F(TestSwitch, test_one_sender) { test_senders(1); }
 
-TEST_F(TestSwitch, test_multiple_senders) {
-    test_senders(5);
-}
+TEST_F(TestSwitch, test_multiple_senders) { test_senders(5); }
 
-}
+}  // namespace
