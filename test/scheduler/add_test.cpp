@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 
-#include "scheduler.hpp"
+#include "../../source/scheduler.hpp"
 #include "utils.hpp"
 
 int sim::CountingEvent::cnt;
 
-TEST(TestScheduler, AddExpectedAmountOfElements) {
+TEST_F(TestScheduler, AddExpectedAmountOfElements) {
     int number_of_events = 100;
 
     sim::CountingEvent::cnt = 0;

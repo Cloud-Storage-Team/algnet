@@ -1,8 +1,9 @@
 #include <gtest/gtest.h>
 
-#include "scheduler.hpp"
+#include "../../source/scheduler.hpp"
+#include "utils.hpp"
 
-TEST(TestScheduler, TickReturnsFalseOnStop) {
+TEST_F(TestScheduler, TickReturnsFalseOnStop) {
     // TODO: implement after discussing mechanism   
     EXPECT_TRUE(false);
 

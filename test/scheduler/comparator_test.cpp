@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 
-#include "scheduler.hpp"
+#include "../../source/scheduler.hpp"
 #include "utils.hpp"
 
 std::uint32_t sim::ComparatorEvent::last_time;
 
-TEST(TestScheduler, ExpectedProcessingOrder) {
+TEST_F(TestScheduler, ExpectedProcessingOrder) {
     int number_of_events = 100;
 
     sim::ComparatorEvent::last_time = 0;

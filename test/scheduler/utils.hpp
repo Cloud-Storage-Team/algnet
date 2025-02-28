@@ -5,7 +5,7 @@
 #include <ctime>
 #include <type_traits>
 
-#include "event.hpp"
+#include "../../source/event.hpp"
 
 class TestScheduler : public testing::Test {
 public:
