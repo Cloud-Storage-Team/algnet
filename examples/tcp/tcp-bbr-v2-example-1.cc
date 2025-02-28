@@ -1,0 +1,398 @@
+/*
+ * Copyright (c) 2018-20 NITK Surathkal
+ *
+ * SPDX-License-Identifier: GPL-2.0-only
+ *
+ * Authors: Aarti Nandagiri <aarti.nandagiri@gmail.com>
+ *          Vivek Jain <jain.vivek.anand@gmail.com>
+ *          Mohit P. Tahiliani <tahiliani@nitk.edu.in>
+ */
+
+// This program simulates the following topology:
+//
+//           1000 Mbps           50Mbps          1000 Mbps
+//  Sender -------------- R1 -------------- R2 -------------- Receiver
+//             10ms               10ms              10ms
+//
+// The link between R1 and R2 is a bottleneck link with 10 Mbps. All other
+// links are 1000 Mbps.
+//
+// This program runs by default for 100 seconds and creates a new directory
+// called 'bbr-results' in the ns-3 root directory. The program creates one
+// sub-directory called 'pcap' in 'bbr-results' directory (if pcap generation
+// is enabled) and three .dat files.
+//
+// (1) 'pcap' sub-directory contains six PCAP files:
+//     * bbr-0-0.pcap for the interface on Sender
+//     * bbr-1-0.pcap for the interface on Receiver
+//     * bbr-2-0.pcap for the first interface on R1
+//     * bbr-2-1.pcap for the second interface on R1
+//     * bbr-3-0.pcap for the first interface on R2
+//     * bbr-3-1.pcap for the second interface on R2
+// (2) cwnd.dat file contains congestion window trace for the sender node
+// (3) throughput.dat file contains sender side throughput trace (throughput is in Mbit/s)
+// (4) queueSize.dat file contains queue length trace from the bottleneck link
+//
+// BBR algorithm enters PROBE_RTT phase in every 10 seconds. The congestion
+// window is fixed to 4 segments in this phase with a goal to achieve a better
+// estimate of minimum RTT (because queue at the bottleneck link tends to drain
+// when the congestion window is reduced to 4 segments).
+//
+// The congestion window and queue occupancy traces output by this program show
+// periodic drops every 10 seconds when BBR algorithm is in PROBE_RTT phase.
+
+#include "ns3/applications-module.h"
+#include "ns3/core-module.h"
+#include "ns3/flow-monitor-module.h"
+#include "ns3/internet-module.h"
+#include "ns3/network-module.h"
+#include "ns3/point-to-point-module.h"
+#include "ns3/traffic-control-module.h"
+
+#include <filesystem>
+
+using namespace ns3;
+using namespace ns3::SystemPath;
+
+std::string dir;
+std::ofstream throughput;
+std::ofstream rtt;
+std::ofstream queueSize;
+std::ofstream losses;
+
+uint32_t prev = 0;
+Time prevTime = Seconds(0);
+uint32_t prevLost = 0;
+
+// Calculate throughput
+static void
+TraceThroughput(Ptr<FlowMonitor> monitor)
+{
+    monitor->CheckForLostPackets();
+    FlowMonitor::FlowStatsContainer stats = monitor->GetFlowStats();
+
+    if (!stats.empty())
+    {
+        auto itr = stats.begin();
+        Time curTime = Now();
+
+        // Convert (curTime - prevTime) to microseconds so that throughput is in bits per
+        // microsecond (which is equivalent to Mbps)
+        throughput << curTime.GetSeconds() << " "
+                   << 8 * (itr->second.txBytes - prev) / ((curTime - prevTime).ToDouble(Time::US))
+                   << std::endl;
+        rtt << curTime.GetSeconds() << " "
+            << itr->second.lastDelay.GetMilliSeconds()
+            << std::endl;
+        losses << curTime.GetSeconds() << " " << (itr->second.lostPackets - prevLost) << std::endl;
+        prevLost = itr->second.lostPackets;
+        prevTime = curTime;
+        prev = itr->second.txBytes;
+    }
+    Simulator::Schedule(Seconds(0.2), &TraceThroughput, monitor);
+}
+
+// Check the queue size
+static void
+CheckQueueSize(Ptr<QueueDisc> qd)
+{
+    uint32_t qsize = qd->GetCurrentSize().GetValue();
+    Simulator::Schedule(Seconds(0.2), &CheckQueueSize, qd);
+    queueSize << Simulator::Now().GetSeconds() << " " << qsize << std::endl;
+}
+
+// Trace congestion window
+static void
+CwndTracer(Ptr<OutputStreamWrapper> stream, uint32_t oldval, uint32_t newval)
+{
+    *stream->GetStream() << Simulator::Now().GetSeconds() << " " << newval / 1500.0 << std::endl;
+}
+
+static void
+TraceCwnd(uint32_t nodeId, uint32_t socketId)
+{
+    AsciiTraceHelper ascii;
+    Ptr<OutputStreamWrapper> stream = ascii.CreateFileStream(dir + "/cwnd.dat");
+    Config::ConnectWithoutContext("/NodeList/" + std::to_string(nodeId) +
+                                      "/$ns3::TcpL4Protocol/SocketList/" +
+                                      std::to_string(socketId) + "/CongestionWindow",
+                                  MakeBoundCallback(&CwndTracer, stream));
+}
+
+// Trace RTprop
+static void
+MinRttTracer(Ptr<OutputStreamWrapper> stream, Time oldval, Time newval)
+{
+    *stream->GetStream() << Simulator::Now().GetSeconds() << " " << newval.GetMilliSeconds() << std::endl;
+}
+
+static void
+TraceMinRtt(uint32_t nodeId, uint32_t socketId)
+{
+    AsciiTraceHelper ascii;
+    Ptr<OutputStreamWrapper> stream = ascii.CreateFileStream(dir + "/min_rtt.dat");
+    Config::ConnectWithoutContext("/NodeList/" + std::to_string(nodeId) +
+                                      "/$ns3::TcpL4Protocol/SocketList/" +
+                                      std::to_string(socketId) + "/CongestionOps/$ns3::TcpBbrV2/MinRtt",
+                                  MakeBoundCallback(&MinRttTracer, stream));
+}
+
+static void
+PacingGainTracer(Ptr<OutputStreamWrapper> stream, double oldval, double newval)
+{
+    *stream->GetStream() << Simulator::Now().GetSeconds() << " " << newval << std::endl;
+}
+
+static void
+TracePacingGain(uint32_t nodeId, uint32_t socketId)
+{
+    AsciiTraceHelper ascii;
+    Ptr<OutputStreamWrapper> stream = ascii.CreateFileStream(dir + "/pacing_gain.dat");
+    Config::ConnectWithoutContext("/NodeList/" + std::to_string(nodeId) +
+                                      "/$ns3::TcpL4Protocol/SocketList/" +
+                                      std::to_string(socketId) + "/CongestionOps/$ns3::TcpBbrV2/PacingGain",
+                                  MakeBoundCallback(&PacingGainTracer, stream));
+}
+
+static void
+InflightTracer(Ptr<OutputStreamWrapper> stream, uint32_t oldval, uint32_t newval)
+{
+    double val = newval == static_cast<uint32_t>(-1) ? -1 : newval / 1500.0;
+    *stream->GetStream() << Simulator::Now().GetSeconds() << " " << val << std::endl;
+}
+
+static void
+TraceInflightLo(uint32_t nodeId, uint32_t socketId)
+{
+    AsciiTraceHelper ascii;
+    Ptr<OutputStreamWrapper> stream = ascii.CreateFileStream(dir + "/inflight_lo.dat");
+    Config::ConnectWithoutContext("/NodeList/" + std::to_string(nodeId) +
+                                      "/$ns3::TcpL4Protocol/SocketList/" +
+                                      std::to_string(socketId) + "/CongestionOps/$ns3::TcpBbrV2/InflightLo",
+                                  MakeBoundCallback(&InflightTracer, stream));
+}
+
+static void
+TraceInflightHi(uint32_t nodeId, uint32_t socketId)
+{
+    AsciiTraceHelper ascii;
+    Ptr<OutputStreamWrapper> stream = ascii.CreateFileStream(dir + "/inflight_hi.dat");
+    Config::ConnectWithoutContext("/NodeList/" + std::to_string(nodeId) +
+                                      "/$ns3::TcpL4Protocol/SocketList/" +
+                                      std::to_string(socketId) + "/CongestionOps/$ns3::TcpBbrV2/InflightHi",
+                                  MakeBoundCallback(&InflightTracer, stream));
+}
+
+int
+main(int argc, char* argv[])
+{
+    // Naming the output directory using local system time
+    time_t rawtime;
+    struct tm* timeinfo;
+    char buffer[80];
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    strftime(buffer, sizeof(buffer), "%d-%m-%Y-%I-%M-%S", timeinfo);
+    std::string currentTime(buffer);
+    uint32_t nSenders = 1;
+    uint32_t tracedSenderInd = 0;
+
+    std::string tcpTypeId = "TcpBbrV2";
+    std::string queueDisc = "FifoQueueDisc";
+    uint32_t delAckCount = 2;
+    bool bql = true;
+    bool enablePcap = false;
+    Time stopTime = Seconds(20);
+    std::string bottleneckBuffer = "1000p";
+    std::string protocols[] = {"ns3::TcpBbrV2", "ns3::TcpBbr", "ns3::TcpCubic"};
+    std::string protocolsSelect;
+
+    CommandLine cmd(__FILE__);
+    cmd.AddValue("tcpTypeId", "Transport protocol to use: TcpNewReno, TcpBbrV2", tcpTypeId);
+    cmd.AddValue("delAckCount", "Delayed ACK count", delAckCount);
+    cmd.AddValue("enablePcap", "Enable/Disable pcap file generation", enablePcap);
+    cmd.AddValue("stopTime",
+                 "Stop time for applications / simulation time will be stopTime + 1",
+                 stopTime);
+    cmd.AddValue("buffer", "Bottleneck buffer", bottleneckBuffer);
+    cmd.AddValue("nSenders", "Number of senders", nSenders);
+    cmd.AddValue("sndInd", "Index of sender to trace", tracedSenderInd);
+    cmd.AddValue("protocols", "Indexes of protocols for senders", protocolsSelect);
+    cmd.Parse(argc, argv);
+
+    std::vector<int> protocolsInd(nSenders, 0);
+    for (uint32_t i = 0; i < std::min<uint32_t>(nSenders, protocolsSelect.size()); ++i)
+    {
+        protocolsInd[i] = protocolsSelect[i] - '0';
+    }
+
+    queueDisc = std::string("ns3::") + queueDisc;
+
+    // Config::SetDefault("ns3::TcpL4Protocol::SocketType", StringValue("ns3::" + tcpTypeId));
+
+    // The maximum send buffer size is set to 4194304 bytes (4MB) and the
+    // maximum receive buffer size is set to 6291456 bytes (6MB) in the Linux
+    // kernel. The same buffer sizes are used as default in this example.
+    Config::SetDefault("ns3::TcpSocket::SndBufSize", UintegerValue(4194304));
+    Config::SetDefault("ns3::TcpSocket::RcvBufSize", UintegerValue(6291456));
+    Config::SetDefault("ns3::TcpSocket::InitialCwnd", UintegerValue(10));
+    Config::SetDefault("ns3::TcpSocket::DelAckCount", UintegerValue(delAckCount));
+    Config::SetDefault("ns3::TcpSocket::SegmentSize", UintegerValue(1500));
+    Config::SetDefault("ns3::DropTailQueue<Packet>::MaxSize", QueueSizeValue(QueueSize(bottleneckBuffer)));
+    Config::SetDefault(queueDisc + "::MaxSize", QueueSizeValue(QueueSize(bottleneckBuffer)));
+
+    NodeContainer senders;
+    NodeContainer receiver;
+    NodeContainer routers;
+    senders.Create(nSenders);
+    receiver.Create(1);
+    routers.Create(2);
+
+    // Create the point-to-point link helpers
+    PointToPointHelper bottleneckLink;
+    bottleneckLink.SetDeviceAttribute("DataRate", StringValue("50Mbps"));
+    bottleneckLink.SetChannelAttribute("Delay", StringValue("10ms"));
+
+    PointToPointHelper edgeLink;
+    edgeLink.SetDeviceAttribute("DataRate", StringValue("1000Mbps"));
+    edgeLink.SetChannelAttribute("Delay", StringValue("10ms"));
+
+    // Create NetDevice containers
+    std::vector<NetDeviceContainer> senderEdges(nSenders);
+    for (uint32_t i = 0; i < nSenders; ++i)
+    {
+        senderEdges[i] = edgeLink.Install(senders.Get(i), routers.Get(0));
+    }
+    NetDeviceContainer r1r2 = bottleneckLink.Install(routers.Get(0), routers.Get(1));
+    NetDeviceContainer receiverEdge = edgeLink.Install(routers.Get(1), receiver.Get(0));
+
+    // Install Stack
+    InternetStackHelper internet;
+    internet.Install(senders);
+    internet.Install(receiver);
+    internet.Install(routers);
+
+    for (uint32_t i = 0; i < nSenders; ++i)
+    {
+        // Use Config::Set to change the default SocketType for the current sender
+        Config::Set("/NodeList/" + std::to_string(senders.Get(i)->GetId()) + "/$ns3::TcpL4Protocol/SocketType", 
+                    StringValue(protocols[protocolsInd[i]]));
+    }
+
+    // Configure the root queue discipline
+    TrafficControlHelper tch;
+    tch.SetRootQueueDisc(queueDisc);
+
+    if (bql)
+    {
+        tch.SetQueueLimits("ns3::DynamicQueueLimits", "HoldTime", StringValue("1000ms"));
+    }
+
+    for (uint32_t i = 0; i < nSenders; ++i)
+    {
+        tch.Install(senderEdges[i]);
+    }
+    tch.Install(receiverEdge);
+
+    // Assign IP addresses
+    Ipv4AddressHelper ipv4;
+    ipv4.SetBase("10.0.0.0", "255.255.255.0");
+
+    Ipv4InterfaceContainer i1i2 = ipv4.Assign(r1r2);
+    for (uint32_t i = 0; i < nSenders; ++i)
+    {
+        ipv4.NewNetwork();
+        Ipv4InterfaceContainer senderInterface = ipv4.Assign(senderEdges[i]);
+    }
+    ipv4.NewNetwork();
+    Ipv4InterfaceContainer ir1 = ipv4.Assign(receiverEdge);
+
+    // Populate routing tables
+    Ipv4GlobalRoutingHelper::PopulateRoutingTables();
+
+    // Select sender side port
+    uint16_t port = 50001;
+
+    // Install application on the sender
+    BulkSendHelper source("ns3::TcpSocketFactory", InetSocketAddress(ir1.GetAddress(1), port));
+    source.SetAttribute("MaxBytes", UintegerValue(0));
+    ApplicationContainer sourceApps = source.Install(senders);
+    sourceApps.Start(Seconds(0.1));
+    // Hook trace source after application starts
+    uint32_t nodeId = senders.Get(tracedSenderInd)->GetId();
+    if (protocolsInd[nodeId] == 0)
+    {
+        Simulator::Schedule(Seconds(0.1) + MilliSeconds(1), &TraceCwnd, nodeId, 0);
+        Simulator::Schedule(Seconds(0.1) + MilliSeconds(1), &TraceMinRtt, nodeId, 0);
+        Simulator::Schedule(Seconds(0.1) + MilliSeconds(1), &TracePacingGain, nodeId, 0);
+        Simulator::Schedule(Seconds(0.1) + MilliSeconds(1), &TraceInflightLo, nodeId, 0);
+        Simulator::Schedule(Seconds(0.1) + MilliSeconds(1), &TraceInflightHi, nodeId, 0);
+    }
+    sourceApps.Stop(stopTime);
+
+    // Install application on the receiver
+    PacketSinkHelper sink("ns3::TcpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), port));
+    ApplicationContainer sinkApps = sink.Install(receiver.Get(0));
+    sinkApps.Start(Seconds(0.0));
+    sinkApps.Stop(stopTime);
+
+    // Create a new directory to store the output of the program
+    dir = "bbr-v2-results/" + currentTime + "/";
+    MakeDirectories(dir);
+
+    // The plotting scripts are provided in the following repository, if needed:
+    // https://github.com/mohittahiliani/BBR-Validation/
+    //
+    // Download 'PlotScripts' directory (which is inside ns-3 scripts directory)
+    // from the link given above and place it in the ns-3 root directory.
+    // Uncomment the following three lines to copy plot scripts for
+    // Congestion Window, sender side throughput and queue occupancy on the
+    // bottleneck link into the output directory.
+    //
+    // std::filesystem::copy("PlotScripts/gnuplotScriptCwnd", dir);
+    // std::filesystem::copy("PlotScripts/gnuplotScriptThroughput", dir);
+    // std::filesystem::copy("PlotScripts/gnuplotScriptQueueSize", dir);
+
+    // Trace the queue occupancy on the second interface of R1
+    tch.Uninstall(routers.Get(0)->GetDevice(1));
+    QueueDiscContainer qd;
+    qd = tch.Install(routers.Get(0)->GetDevice(1));
+    Simulator::ScheduleNow(&CheckQueueSize, qd.Get(0));
+
+    // Generate PCAP traces if it is enabled
+    if (enablePcap)
+    {
+        MakeDirectories(dir + "pcap/");
+        bottleneckLink.EnablePcapAll(dir + "/pcap/bbr", true);
+    }
+
+    // Open files for writing throughput traces and queue size
+    throughput.open(dir + "/throughput.dat", std::ios::out);
+    rtt.open(dir + "/rtt.dat", std::ios::out);
+    queueSize.open(dir + "/queueSize.dat", std::ios::out);
+    losses.open(dir + "/losses.dat", std::ios::out);
+
+    NS_ASSERT_MSG(throughput.is_open(), "Throughput file was not opened correctly");
+    NS_ASSERT_MSG(queueSize.is_open(), "Queue size file was not opened correctly");
+
+    // Check for dropped packets using Flow Monitor
+    FlowMonitorHelper flowmon;
+    NodeContainer flowContainer;
+    flowContainer.Add(senders.Get(tracedSenderInd));
+    flowContainer.Add(routers);
+    flowContainer.Add(receiver);
+    // Ptr<FlowMonitor> monitor = flowmon.Install(senders.Get(tracedSenderInd));
+    Ptr<FlowMonitor> monitor = flowmon.Install(flowContainer);
+    Simulator::Schedule(Seconds(0 + 0.000001), &TraceThroughput, monitor);
+
+    Simulator::Stop(stopTime + TimeStep(1));
+    Simulator::Run();
+    Simulator::Destroy();
+
+    throughput.close();
+    queueSize.close();
+    losses.close();
+    rtt.close();
+
+    return 0;
+}
