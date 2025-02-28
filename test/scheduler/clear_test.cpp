@@ -3,18 +3,18 @@
 #include "scheduler.hpp"
 #include "utils.hpp"
 
-TEST(Clear, EmptyAtStart) {
+TEST(TestScheduler, ClearEmptyAtStart) {
     EXPECT_FALSE(sim::Scheduler::get_instance().tick());
 }
 
-TEST(Clear, EmptyAfterClear) {
+TEST(TestScheduler, EmptyAfterClear) {
     sim::AddEvents<sim::EmptyEvent>(3);
     sim::Scheduler::get_instance().clear();
 
     EXPECT_FALSE(sim::Scheduler::get_instance().tick());
 }
 
-TEST(Clear, ClearWhenEmpty) {
+TEST(TestScheduler, ClearWhenEmpty) {
     sim::Scheduler::get_instance().clear();
     EXPECT_FALSE(sim::Scheduler::get_instance().tick());
 }

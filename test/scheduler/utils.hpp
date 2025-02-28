@@ -5,6 +5,14 @@
 
 #include "event.hpp"
 
+class TestScheduler : public testing::Test {
+public:
+    void TearDown() override{
+        sim::Scheduler::get_instance().clear();
+    };
+    void SetUp() override{};
+};
+
 namespace sim {
 struct EmptyEvent : public Event {
     ~EmptyEvent() = default;

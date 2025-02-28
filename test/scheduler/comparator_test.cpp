@@ -5,7 +5,7 @@
 
 std::uint32_t sim::ComparatorEvent::last_time;
 
-TEST(Compare, ExpectedProcessingOrder) {
+TEST(TestScheduler, ExpectedProcessingOrder) {
     int number_of_events = 100;
 
     sim::ComparatorEvent::last_time = 0;

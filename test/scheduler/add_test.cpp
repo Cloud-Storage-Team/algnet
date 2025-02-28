@@ -5,7 +5,7 @@
 
 int sim::CountingEvent::cnt;
 
-TEST(Add, ExpectedAmountOfElements) {
+TEST(TestScheduler, AddExpectedAmountOfElements) {
     int number_of_events = 100;
 
     sim::CountingEvent::cnt = 0;
