@@ -26,16 +26,25 @@ Flow::Flow(Device* a_src, Device* a_dest, std::uint32_t a_packet_size,
       m_last_send_time(0),
       m_delay_threshold(a_delay_threshold) {}
 
-void Flow::start(std::uint32_t time) { schedule_packet_generation(time); };
+void Flow::start(std::uint32_t time) {
+    Generate generate_event(this);
+    generate_event.time = time;
+    Scheduler::get_instance().add(generate_event);
+}
 
 bool Flow::try_to_generate(std::uint32_t a_current_time) {
-    if (m_packets_in_flight < m_cwnd &&
-        m_packets_sent < m_total_packets) {  // maybe good to stop generating
-                                             // events if all packets are sent
-        schedule_packet_generation(std::max(
-            m_last_send_time + m_delay_between_packets, a_current_time));
+    if (m_packets_sent >= m_total_packets) {  // stop generate packets
+        return false;
+    }
+    if (m_packets_in_flight < m_cwnd) {
+        m_packets_in_flight++;
+        m_packets_sent++;
+        Packet p(PacketType::DATA, m_packet_size, this);  // TODO constructor
+        m_src.add_packet(p);  // TODO add_packet method
+        schedule_packet_generation(a_current_time + m_delay_between_packets);
         return true;
     }
+    schedule_packet_generation(a_current_time + m_delay_between_packets);
     return false;
 }
 
@@ -59,12 +68,9 @@ void Flow::update(std::uint32_t delay) {
 }
 
 void Flow::schedule_packet_generation(std::uint32_t time) {
-    Generate generate_event(this, m_packet_size);
+    Generate generate_event(this);
     generate_event.time = time;
     Scheduler::get_instance().add(generate_event);
-    m_packets_in_flight++;
-    m_packets_sent++;
-    m_last_send_time = time;
 }
 
 }  // namespace sim
