@@ -1,12 +1,10 @@
 #pragma once
-
 #include <queue>
 
 #include "device.hpp"
+#include "packet.hpp"
 
 namespace sim {
-
-class Packet;
 
 class Sender : public Device {
 public:
