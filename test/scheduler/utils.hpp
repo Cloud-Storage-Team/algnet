@@ -56,4 +56,4 @@ void AddEvents(int number) {
         Scheduler::get_instance().add(std::move(event_ptr));
     }
 }
-}  // namespace sim
+}  // namespace test
