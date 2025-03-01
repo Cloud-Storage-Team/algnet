@@ -36,6 +36,7 @@ void Sender::process() {
     Packet data_packet = m_flow_buffer.front();
     m_flow_buffer.pop();
 
+    // TODO: think about spliting logic of handling acks and sending data
     Device* destination = packet.flow->get_destination();
     Link* next_link = m_routing_table[destination];
     next_link->schedule_arrival(data_packet);
