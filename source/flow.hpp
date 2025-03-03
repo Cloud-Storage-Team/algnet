@@ -23,8 +23,8 @@ public:
     void update();
 
 private:
-    IRoutingDevice *m_src;
-    IRoutingDevice *m_dest;
+    ISender *m_src;
+    IReceiver *m_dest;
     std::uint32_t m_nacks;
     float m_cwnd;
     std::uint32_t m_sent_bytes;
