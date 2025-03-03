@@ -1,7 +1,6 @@
 #pragma once
 #include <cstdint>
 
-#include "device.hpp"
 #include "receiver.hpp"
 #include "sender.hpp"
 

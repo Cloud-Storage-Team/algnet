@@ -15,8 +15,9 @@ public:
     Receiver() = default;
     ~Receiver() = default;
 
-    void add_inlink(Link *link) final;
-    void update_routing_table(IRoutingDevice *dest, Link *link) final;
+    void add_inlink(std::shared_ptr<Link> link) final;
+    void update_routing_table(std::shared_ptr<IRoutingDevice> dest,
+                              std::shared_ptr<Link> link) final;
 
     DeviceType get_type() const final;
     // Process a packet by removing it from the ingress buffer

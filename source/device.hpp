@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <set>
 #include <unordered_map>
 
@@ -25,32 +26,33 @@ class IRoutingDevice {
 public:
     virtual ~IRoutingDevice() = default;
 
-    virtual void add_inlink(Link *link) = 0;
-    virtual void update_routing_table(IRoutingDevice *dest, Link *link) = 0;
-    virtual Link *next_inlink() = 0;
+    virtual void add_inlink(std::shared_ptr<Link> link) = 0;
+    virtual void update_routing_table(std::shared_ptr<IRoutingDevice> dest,
+                                      std::shared_ptr<Link> link) = 0;
+    virtual std::shared_ptr<Link> next_inlink() = 0;
 };
 
-// Default relisation of IDevice
-// No override for process() !!!
 class RountingModule : public IRoutingDevice {
 public:
     ~RountingModule() = default;
 
-    void add_inlink(Link *link) final;
-    void update_routing_table(IRoutingDevice *dest, Link *link) final;
+    virtual void add_inlink(std::shared_ptr<Link> link) final;
+    virtual void update_routing_table(std::shared_ptr<IRoutingDevice> dest,
+                                      std::shared_ptr<Link> link) final;
 
     // returns next inlink and moves inlinks set iterator forward
-    Link *next_inlink() final;
+    std::shared_ptr<Link> next_inlink() final;
 
 private:
     // Ordered set as we need to iterate over the ingress buffers
-    std::set<Link *> m_inlinks;
+    std::set<std::shared_ptr<Link> > m_inlinks;
 
     // A routing table: maps the final destination to a specific link
-    std::unordered_map<IRoutingDevice *, Link *> m_routing_table;
+    std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<Link> >
+        m_routing_table;
 
     // Iterator for the next ingress to process
-    std::set<Link *>::iterator m_next_inlink;
+    std::set<std::shared_ptr<Link> >::iterator m_next_inlink;
 };
 
 }  // namespace sim

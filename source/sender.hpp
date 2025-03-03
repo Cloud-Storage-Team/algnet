@@ -2,9 +2,10 @@
 #include <queue>
 
 #include "device.hpp"
-#include "packet.hpp"
 
 namespace sim {
+
+class Packet;
 
 class ISender : public IRoutingDevice, IProcessableDevice {
 public:
@@ -16,6 +17,10 @@ class Sender : public ISender {
 public:
     Sender() = default;
     ~Sender() = default;
+
+    void add_inlink(std::shared_ptr<Link> link) final;
+    void update_routing_table(std::shared_ptr<IRoutingDevice> dest,
+                              std::shared_ptr<Link> link) final;
 
     DeviceType get_type() const final;
     // Process an ACK by removing it from the ingress buffer,
