@@ -1,18 +1,33 @@
 #pragma once
 
+#include <memory>
+
 #include "device.hpp"
 
 namespace sim {
 
-class Switch : public Device {
+class ISwitch : public IRoutingDevice, IProcessableDevice {
 public:
-    Switch();
+    virtual ~ISwitch() = default;
+};
 
+class Switch : public ISwitch {
+public:
+    Switch() = default;
+    ~Switch() = default;
+
+    void add_inlink(Link *link) final;
+    void update_routing_table(IRoutingDevice *dest, Link *link) final;
+
+    DeviceType get_type() const final;
     // Process a packet by moving it from ingress to egress
     // and schedule next process event after a delay.
     // Packets are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
-    void process();
+    void process() final;
+
+private:
+    std::unique_ptr<IRoutingDevice> m_router;
 };
 
 }  // namespace sim

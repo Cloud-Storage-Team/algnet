@@ -44,8 +44,8 @@ struct Arrive : public Event {
  * and start processing at the device.
  */
 struct Process : public Event {
-    Process(Device *a_device);
-    Device *node;
+    Process(RountingModule *a_device);
+    RountingModule *node;
 
     virtual void operator()() final;
 };
