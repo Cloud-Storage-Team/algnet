@@ -1,7 +1,8 @@
 #pragma once
 #include <cstdint>
 
-#include "device.hpp"
+#include "receiver.hpp"
+#include "sender.hpp"
 
 namespace sim {
 
@@ -9,7 +10,7 @@ class Flow {
 public:
     virtual ~Flow() = default;
 
-    Flow(Device* a_src, Device* a_dest);
+    Flow(ISender *a_src, IReceiver *a_dest);
 
     // Start at time
     virtual void start(std::uint32_t time);
@@ -21,8 +22,8 @@ public:
     // Update flow state based on delay
     virtual void update(std::uint32_t delay) = 0;
 
-    Device* m_src;
-    Device* m_dest;
+    ISender *m_src;
+    IReceiver *m_dest;
 
 protected:
     void schedule_packet_generation(std::uint32_t time);

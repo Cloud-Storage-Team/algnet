@@ -4,7 +4,7 @@
 
 namespace sim {
 
-Flow::Flow(Device* a_src, Device* a_dest) : m_src(a_src), m_dest(a_dest) {}
+Flow::Flow(ISender *a_src, IReceiver *a_dest) : m_src(a_src), m_dest(a_dest) {}
 
 void Flow::schedule_packet_generation(std::uint32_t time) {
     Generate generate_event(this);

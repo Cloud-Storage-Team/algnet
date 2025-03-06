@@ -7,15 +7,15 @@
 
 namespace sim {
 
-class Device;
+class RoutingModule;
 
 /**
  * Unidirectional link from the source to a_next
  */
 class Link {
 public:
-    Link(Device* a_from, Device* a_to, std::uint32_t a_speed_mbps,
-         std::uint32_t m_delay);
+    Link(IRoutingDevice* a_from, IRoutingDevice* a_to,
+         std::uint32_t a_speed_mbps, std::uint32_t m_delay);
 
     /**
      * Update the source egress delay and schedule the arrival event
@@ -24,8 +24,8 @@ public:
     void schedule_arrival(Packet a_packet);
 
 private:
-    Device* m_from;
-    Device* m_to;
+    IRoutingDevice* m_from;
+    IRoutingDevice* m_to;
     std::uint32_t m_speed_mbps;
     std::uint32_t m_src_egress_delay;
     std::uint32_t m_transmission_delay;
