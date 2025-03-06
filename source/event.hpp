@@ -27,6 +27,7 @@ protected:
  * Schedule the next packet generation event.
  */
 class Generate : public Event {
+public:
     Generate(std::uint32_t a_time, Flow *a_flow, std::uint32_t a_packet_size);
     ~Generate() = default;
     virtual void operator()() final;
@@ -40,6 +41,7 @@ private:
  * Enqueue the packet to the ingress port of the next node
  */
 class Arrive : public Event {
+public:
     Arrive(std::uint32_t a_time, Link *a_link, Packet a_packet);
     ~Arrive() = default;
     virtual void operator()() final;
@@ -54,6 +56,7 @@ private:
  * and start processing at the device.
  */
 class Process : public Event {
+public:
     Process(std::uint32_t a_time, Device *a_device);
     ~Process() = default;
     virtual void operator()() final;
