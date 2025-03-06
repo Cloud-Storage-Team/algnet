@@ -1,7 +1,13 @@
 #include "link_mock.hpp"
 
-LinkMock::LinkMock(sim::Device* a_src, sim::Device* a_dest)
-    : Link(a_src, a_dest, 0, 0) {}
+LinkMock::LinkMock() : m_arrived_packets(), m_ingress_packet() {}
+
+std::shared_ptr<sim::IRoutingDevice> LinkMock::get_from() const {
+    return nullptr;
+}
+std::shared_ptr<sim::IRoutingDevice> LinkMock::get_to() const {
+    return nullptr;
+}
 
 void LinkMock::schedule_arrival(sim::Packet a_packet) {
     m_arrived_packets.push_back(a_packet);

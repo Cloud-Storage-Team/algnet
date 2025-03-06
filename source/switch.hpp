@@ -16,12 +16,12 @@ public:
     Switch();
     ~Switch() = default;
 
-    void add_inlink(std::shared_ptr<Link> link) final;
+    void add_inlink(std::shared_ptr<ILink> link) final;
     void update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                              std::shared_ptr<Link> link) final;
+                              std::shared_ptr<ILink> link) final;
 
-    std::shared_ptr<Link> next_inlink() final;
-    std::shared_ptr<Link> get_destination(
+    std::shared_ptr<ILink> next_inlink() final;
+    std::shared_ptr<ILink> get_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;
 
     DeviceType get_type() const final;
@@ -32,7 +32,7 @@ public:
     void process() final;
 
 private:
-    std::unique_ptr<IRoutingDevice> m_router;
+    std::unique_ptr<RoutingModule> m_router;
 };
 
 }  // namespace sim
