@@ -21,8 +21,10 @@ public:
      * Update the source egress delay and schedule the arrival event
      * based on the egress queueing and transmission delays.
      */
-    void schedule_arrival(Packet a_packet);
-  
+    void schedule_arrival(Packet a_packet){
+        // TODO: implement and move to .cpp
+    };
+
     // TODO: move to .cpp
     Packet get_packet() {
         Packet result = m_next_ingress.front();

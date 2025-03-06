@@ -8,6 +8,7 @@ namespace sim {
 class Receiver : public Device {
 public:
     Receiver();
+    ~Receiver() = default;
 
     // TODO: choose a way of passing time to create new events
 
@@ -17,7 +18,7 @@ public:
     // Upon receiving send an ACK to the sender.
     // Packets are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
-    void process(std::uint32_t start_time);
+    std::uint32_t process() final;
 };
 
 }  // namespace sim

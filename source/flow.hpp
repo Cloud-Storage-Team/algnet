@@ -22,9 +22,7 @@ public:
     void update();
 
     // TODO: move to .cpp
-    Device* get_source() {
-        return m_src;
-    };
+    Device *get_source() { return m_src; };
 
 private:
     Device *m_src;

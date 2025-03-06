@@ -17,7 +17,7 @@ public:
     // and move it to the egress port (link)
     // ACKs are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
-    void process();
+    std::uint32_t process() final;
 
     void enqueue_packet(Packet packet);
 

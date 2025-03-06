@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <set>
 #include <unordered_map>
 
@@ -12,8 +13,8 @@ enum DeviceType { SWITCH, SENDER, RECEIVER };
 class Device {
 public:
     Device(DeviceType a_type);
-    virtual ~Device();
-    virtual void process();
+    virtual ~Device() = default;
+    virtual std::uint32_t process() = 0;
     void add_inlink(Link *link);
     void update_routing_table(Device *dest, Link *link);
 

@@ -12,5 +12,4 @@ void Device::update_routing_table(Device* dest, Link* link) {
     m_routing_table[dest] = link;
 }
 
-
 }  // namespace sim

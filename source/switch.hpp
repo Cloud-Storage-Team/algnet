@@ -12,7 +12,7 @@ public:
     // and schedule next process event after a delay.
     // Packets are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
-    void process();
+    std::uint32_t process() final;
 };
 
 }  // namespace sim
