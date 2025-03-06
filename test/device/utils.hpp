@@ -4,7 +4,7 @@
 #include "../../source/device.hpp"
 #include "../../source/link.hpp"
 
-namespace sim {
+namespace test {
 
 class Link;
 
