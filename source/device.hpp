@@ -10,9 +10,9 @@ class Link;
 
 enum DeviceType { SWITCH, SENDER, RECEIVER };
 
-class IProcessableDevice {
+class IProcessingDevice {
 public:
-    virtual ~IProcessableDevice() = default;
+    virtual ~IProcessingDevice() = default;
 
     // One step of device work cycle;
     // e.g. see next inlink, take one packet from it,
@@ -32,9 +32,9 @@ public:
     virtual std::shared_ptr<Link> next_inlink() = 0;
 };
 
-class RountingModule : public IRoutingDevice {
+class RoutingModule : public IRoutingDevice {
 public:
-    ~RountingModule() = default;
+    ~RoutingModule() = default;
 
     virtual void add_inlink(std::shared_ptr<Link> link) final;
     virtual void update_routing_table(std::shared_ptr<IRoutingDevice> dest,

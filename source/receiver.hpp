@@ -5,7 +5,7 @@
 
 namespace sim {
 
-class IReceiver : public IRoutingDevice, IProcessableDevice {
+class IReceiver : public IRoutingDevice, IProcessingDevice {
 public:
     virtual ~IReceiver() = default;
 };

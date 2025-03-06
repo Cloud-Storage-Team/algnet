@@ -7,7 +7,7 @@
 
 namespace sim {
 
-class RountingModule;
+class RoutingModule;
 
 /**
  * Unidirectional link from the source to a_next
