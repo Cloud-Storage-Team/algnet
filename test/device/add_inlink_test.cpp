@@ -11,10 +11,10 @@ public:
 };
 
 TEST_F(AddInlink, LinkPresents) {
-    sim::TestDevice* source = new sim::TestDevice();
-    sim::TestDevice* dest = new sim::TestDevice();
-    sim::TestLink* link1 = new sim::TestLink(source, dest);
-    sim::TestLink* link2 = new sim::TestLink(source, dest);
+   sim::TestDevice source = sim::TestDevice();
+   sim::TestDevice dest = sim::TestDevice();
+   sim::TestLink link1 = sim::TestLink(source, dest);
+   sim::TestLink link2 = sim::TestLink(source, dest);
 
     EXPECT_FALSE(dest->has_inlink(link1));
     dest->add_inlink(link1);
