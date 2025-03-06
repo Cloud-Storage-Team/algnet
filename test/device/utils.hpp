@@ -13,7 +13,7 @@ public:
     TestDevice();
     ~TestDevice() = default;
 
-    void process();
+    void process() final;
 
     bool has_inlink(Link* link);
     bool check_rout(Device* device, Link* link);
