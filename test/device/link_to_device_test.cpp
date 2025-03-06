@@ -10,14 +10,14 @@ public:
     void SetUp() override{};
 };
 
-TEST_F(LinkToDevice, NoLinkToDEvice) {
+TEST_F(LinkToDevice, NoLinkToDevice) {
     sim::TestDevice* source = new sim::TestDevice();
     sim::TestDevice* dest = new sim::TestDevice();
 
     EXPECT_EQ(dest->get_link_to_device(dest), nullptr);
 }
 
-TEST_F(LinkToDevice, LinkPresents) {
+TEST_F(LinkToDevice, LinkIsPresent) {
     sim::TestDevice* source = new sim::TestDevice();
     sim::TestDevice* neighbour = new sim::TestDevice();
     sim::TestDevice* dest = new sim::TestDevice();

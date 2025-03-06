@@ -16,7 +16,7 @@ public:
     void process();
 
     bool has_inlink(Link* link);
-    bool check_rout(Device* device, Link* link);
+    bool check_route(Device* device, Link* link);
 };
 
 class TestLink : public sim::Link {

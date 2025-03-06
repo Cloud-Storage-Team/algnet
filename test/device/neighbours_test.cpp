@@ -4,13 +4,13 @@
 
 namespace {
 
-class Neighbors : public testing::Test {
+class Neighbours : public testing::Test {
 public:
     void TearDown() override{};
     void SetUp() override{};
 };
 
-TEST_F(Neighbors, TwoPointersToTheSameDevice) {
+TEST_F(Neighbours, TwoPointersToTheSameDevice) {
     sim::TestDevice* source = new sim::TestDevice();
 
     sim::TestDevice* neighbour1 = new sim::TestDevice();
@@ -37,9 +37,9 @@ TEST_F(Neighbors, TwoPointersToTheSameDevice) {
     source->update_routing_table(dest4, link3_neighbour1);
     source->update_routing_table(dest5, link1_neighbour1);
 
-    std::vector<sim::Device*> neighbors = source->get_neighbors();
-    EXPECT_TRUE(neighbors.size() == 3);
-    for (auto* neighbour : neighbors) {
+    std::vector<sim::Device*> neighbours = source->get_neighbors();
+    EXPECT_TRUE(neighbours.size() == 3);
+    for (auto* neighbour : neighbours) {
         EXPECT_TRUE(neighbour == neighbour1 || neighbour == neighbour2 ||
                     neighbour == neighbour3);
     }

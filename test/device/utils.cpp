@@ -10,7 +10,7 @@ bool TestDevice::has_inlink(Link* link) {
     return m_inlinks.find(link) != m_inlinks.end();
 }
 
-bool TestDevice::check_rout(Device* device, Link* link) {
+bool TestDevice::check_route(Device* device, Link* link) {
     if (m_routing_table.find(device) == m_routing_table.end()) {
         return false;
     }

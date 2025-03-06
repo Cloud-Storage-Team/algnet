@@ -10,7 +10,7 @@ public:
     void SetUp() override{};
 };
 
-TEST_F(UpdateTable, RoutPresents) {
+TEST_F(UpdateTable, RouteIsPresent) {
     sim::TestDevice* source = new sim::TestDevice();
     sim::TestDevice* neighbour = new sim::TestDevice();
     sim::TestDevice* dest = new sim::TestDevice();
@@ -18,13 +18,13 @@ TEST_F(UpdateTable, RoutPresents) {
 
     sim::TestLink* link_neighbour = new sim::TestLink(source, neighbour);
 
-    EXPECT_FALSE(source->check_rout(dest, link_neighbour));
-    EXPECT_FALSE(source->check_rout(another_dest, link_neighbour));
+    EXPECT_FALSE(source->check_route(dest, link_neighbour));
+    EXPECT_FALSE(source->check_route(another_dest, link_neighbour));
 
     source->update_routing_table(dest, link_neighbour);
 
-    EXPECT_TRUE(source->check_rout(dest, link_neighbour));
-    EXPECT_FALSE(source->check_rout(another_dest, link_neighbour));
+    EXPECT_TRUE(source->check_route(dest, link_neighbour));
+    EXPECT_FALSE(source->check_route(another_dest, link_neighbour));
 }
 
 }  // namespace

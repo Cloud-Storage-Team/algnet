@@ -10,7 +10,7 @@ public:
     void SetUp() override{};
 };
 
-TEST_F(AddInlink, LinkPresents) {
+TEST_F(AddInlink, LinkIsPresent) {
     sim::TestDevice* source = new sim::TestDevice();
     sim::TestDevice* dest = new sim::TestDevice();
     sim::TestLink* link1 = new sim::TestLink(source, dest);

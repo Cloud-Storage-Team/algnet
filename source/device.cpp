@@ -27,9 +27,9 @@ std::vector<Device*> Device::get_neighbors() const {
         outlinks.emplace((device_link.second)->get_dest());
     }
 
-    std::vector<Device*> neighbors{};
-    neighbors.insert(neighbors.begin(), outlinks.begin(), outlinks.end());
-    return neighbors;
+    std::vector<Device*> neighbours{};
+    neighbours.insert(neighbours.begin(), outlinks.begin(), outlinks.end());
+    return neighbours;
 }
 
 Link* Device::get_link_to_device(Device* device) const {
