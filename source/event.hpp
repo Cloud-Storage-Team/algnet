@@ -9,11 +9,16 @@
 namespace sim {
 
 // Base class for event
-struct Event {
-    std::uint32_t time;
-    virtual ~Event();
+class Event {
+public:
+    Event(std::uint32_t a_time);
+    virtual ~Event() = default;
     virtual void operator()() = 0;
-    bool operator>(const Event &other) const { return time > other.time; }
+
+    std::uint32_t get_time() const;
+
+protected:
+    std::uint32_t m_time;
 };
 
 /**
@@ -21,39 +26,52 @@ struct Event {
  * the source node ingress buffer for processing.
  * Schedule the next packet generation event.
  */
-struct Generate : public Event {
-    Generate(Flow *a_flow, std::uint32_t a_packet_size);
-    Flow *flow;
-
+class Generate : public Event {
+public:
+    Generate(std::uint32_t a_time, Flow *a_flow, std::uint32_t a_packet_size);
+    ~Generate() = default;
     virtual void operator()() final;
+
+private:
+    Flow *m_flow;
+    std::uint32_t m_packet_size;
 };
 
 /**
  * Enqueue the packet to the ingress port of the next node
  */
-struct Arrive : public Event {
-    Arrive(Link *a_link, Packet *a_packet);
-    Link *link;
-    Packet *packet;
-
+class Arrive : public Event {
+public:
+    Arrive(std::uint32_t a_time, Link *a_link, Packet a_packet);
+    ~Arrive() = default;
     virtual void operator()() final;
+
+private:
+    Link *m_link;
+    Packet m_packet;
 };
 
 /**
  * Dequeue a packet from the device ingress buffer
  * and start processing at the device.
  */
-struct Process : public Event {
-    Process(Device *a_device);
-    Device *node;
-
+class Process : public Event {
+public:
+    Process(std::uint32_t a_time, Device *a_device);
+    ~Process() = default;
     virtual void operator()() final;
+
+private:
+    Device *m_device;
 };
 
 /**
  * Stop simulation and clear all events remaining in the Scheduler
  */
-struct Stop : public Event {
+class Stop : public Event {
+public:
+    Stop(std::uint32_t a_time);
+    ~Stop() = default;
     virtual void operator()() final;
 };
 
