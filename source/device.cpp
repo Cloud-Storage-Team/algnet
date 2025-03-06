@@ -26,4 +26,13 @@ std::shared_ptr<Link> RoutingModule::next_inlink() {
     return link;
 }
 
+std::shared_ptr<Link> RoutingModule::get_destination(
+    std::shared_ptr<IRoutingDevice> dest) const {
+    auto iter = m_routing_table.find(dest);
+    if (iter != m_routing_table.end()) {
+        return iter->second;
+    }
+    return nullptr;
+}
+
 }  // namespace sim

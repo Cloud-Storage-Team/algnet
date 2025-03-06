@@ -7,7 +7,7 @@
 
 namespace {
 
-class DeviceMock : public sim::Device {
+class DeviceMock : public sim::I {
 public:
     DeviceMock(sim::DeviceType a_type);
     ~DeviceMock() = default;
