@@ -2,16 +2,18 @@
 
 #include "utils.hpp"
 
-int sim::CountingEvent::cnt;
+namespace test {
 
 TEST_F(TestScheduler, AddExpectedAmountOfElements) {
     int number_of_events = 100;
 
-    sim::CountingEvent::cnt = 0;
-    sim::AddEvents<sim::CountingEvent>(number_of_events);
+    CountingEvent::cnt = 0;
+    AddEvents<CountingEvent>(number_of_events);
 
     while (sim::Scheduler::get_instance().tick()) {
     }
 
-    EXPECT_EQ(sim::CountingEvent::cnt, number_of_events);
+    EXPECT_EQ(CountingEvent::cnt, number_of_events);
 }
+
+}  // namespace test

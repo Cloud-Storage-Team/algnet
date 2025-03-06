@@ -57,6 +57,7 @@ struct Process : public Event {
  * Stop simulation and clear all events remaining in the Scheduler
  */
 struct Stop : public Event {
+    Stop();
     ~Stop() = default;
     virtual void operator()() final;
 };
