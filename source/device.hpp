@@ -30,7 +30,7 @@ public:
     virtual void add_inlink(std::shared_ptr<Link> link) = 0;
     virtual void update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                       std::shared_ptr<Link> link) = 0;
-    virtual std::vector<std::shared_ptr<IRoutingDevice>> get_neighbors()
+    virtual std::vector<std::shared_ptr<IRoutingDevice>> get_neighbours()
         const = 0;
     virtual std::shared_ptr<Link> get_link_to_device(
         std::shared_ptr<IRoutingDevice> device) const = 0;
@@ -44,7 +44,7 @@ public:
     virtual void add_inlink(std::shared_ptr<Link> link) final;
     virtual void update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                       std::shared_ptr<Link> link) final;
-    virtual std::vector<std::shared_ptr<IRoutingDevice>> get_neighbors()
+    virtual std::vector<std::shared_ptr<IRoutingDevice>> get_neighbours()
         const final;
     virtual std::shared_ptr<Link> get_link_to_device(
         std::shared_ptr<IRoutingDevice> device) const final;

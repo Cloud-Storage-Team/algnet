@@ -38,7 +38,7 @@ TEST_F(Neighbours, NeighboursAreCalculatedCorrectly) {
         std::make_shared<TestLink>(TestLink(source, neighbour3));
     std::cout << "Create ls" << std::endl;
 
-    EXPECT_TRUE(source->get_neighbors().empty());
+    EXPECT_TRUE(source->get_neighbours().empty());
     std::cout << "Check empty" << std::endl;
 
     source->update_routing_table(dest1, link2_neighbour1);
@@ -49,7 +49,7 @@ TEST_F(Neighbours, NeighboursAreCalculatedCorrectly) {
     std::cout << "Update" << std::endl;
 
     std::vector<std::shared_ptr<sim::IRoutingDevice>> neighbours =
-        source->get_neighbors();
+        source->get_neighbours();
     EXPECT_TRUE(neighbours.size() == 3);
     std::cout << "Basic check" << std::endl;
     for (auto neighbour : neighbours) {
