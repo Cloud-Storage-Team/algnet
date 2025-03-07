@@ -14,24 +14,29 @@ class RoutingModule;
  */
 class Link {
 public:
-    Link(IRoutingDevice* a_from, IRoutingDevice* a_to,
-         std::uint32_t a_speed_mbps, std::uint32_t m_delay);
+    Link() = default;
+    virtual ~Link() = default;
 
     /**
      * Update the source egress delay and schedule the arrival event
      * based on the egress queueing and transmission delays.
      */
-    void schedule_arrival(Packet a_packet);
+    virtual void schedule_arrival(Packet a_packet) = 0;
 
-private:
-    IRoutingDevice* m_from;
-    IRoutingDevice* m_to;
-    std::uint32_t m_speed_mbps;
-    std::uint32_t m_src_egress_delay;
-    std::uint32_t m_transmission_delay;
+    virtual Packet get_packet() = 0;
+    virtual std::shared_ptr<IRoutingDevice> get_from() const = 0;
+    virtual std::shared_ptr<IRoutingDevice> get_to() const = 0;
 
-    // Queue at the ingress port of the m_next device
-    std::queue<Packet> m_next_ingress;
+    // TODO: move to realisation
+    //  private:
+    //  std::weak_ptr<IRoutingDevice> m_from;
+    //  std::weak_ptr<IRoutingDevice> m_to;
+    //  std::uint32_t m_speed_mbps;
+    //  std::uint32_t m_src_egress_delay;
+    //  std::uint32_t m_transmission_delay;
+
+    // // Queue at the ingress port of the m_next device
+    // std::queue<Packet> m_next_ingress;
 };
 
 }  // namespace sim

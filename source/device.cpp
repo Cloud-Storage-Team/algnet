@@ -1,5 +1,7 @@
 #include "device.hpp"
 
+#include "link.hpp"
+
 namespace sim {
 
 void RoutingModule::add_inlink(std::shared_ptr<Link> link) {
@@ -9,6 +11,10 @@ void RoutingModule::add_inlink(std::shared_ptr<Link> link) {
 
 void RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                          std::shared_ptr<Link> link) {
+    // TODO: discuss this
+    if (dest == nullptr) {
+        return;
+    }
     m_routing_table[dest] = link;
 }
 
@@ -22,6 +28,16 @@ std::shared_ptr<Link> RoutingModule::next_inlink() {
         m_next_inlink = m_inlinks.begin();
     }
     return link;
+}
+
+std::shared_ptr<Link> RoutingModule::get_destination(
+    std::shared_ptr<IRoutingDevice> dest) const {
+    // TODO: discuss nullptr
+    auto iter = m_routing_table.find(dest);
+    if (iter != m_routing_table.end()) {
+        return iter->second;
+    }
+    return nullptr;
 }
 
 }  // namespace sim
