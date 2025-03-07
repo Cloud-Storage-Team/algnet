@@ -3,7 +3,7 @@
 
 namespace test {
 
-class FlowMock : public sim::IFlow {
+class FlowMock : public sim::Flow {
 public:
     ~FlowMock() = default;
     FlowMock(sim::IReceiver* a_receiver);

@@ -14,8 +14,7 @@ class RoutingModule;
  */
 class Link {
 public:
-    Link(std::weak_ptr<IRoutingDevice>  a_from, std::weak_ptr<IRoutingDevice>  a_to,
-         std::uint32_t a_speed_mbps, std::uint32_t a_delay);
+    Link() = default;
     virtual ~Link() = default;
 
     /**
@@ -28,15 +27,16 @@ public:
     virtual std::shared_ptr<IRoutingDevice> get_from() const = 0;
     virtual std::shared_ptr<IRoutingDevice> get_to() const = 0;
 
-private:
-    std::weak_ptr<IRoutingDevice> m_from;
-    std::weak_ptr<IRoutingDevice> m_to;
-    std::uint32_t m_speed_mbps;
-    std::uint32_t m_src_egress_delay;
-    std::uint32_t m_transmission_delay;
+//TODO: move to realisation
+// private:
+    // std::weak_ptr<IRoutingDevice> m_from;
+    // std::weak_ptr<IRoutingDevice> m_to;
+    // std::uint32_t m_speed_mbps;
+    // std::uint32_t m_src_egress_delay;
+    // std::uint32_t m_transmission_delay;
 
-    // Queue at the ingress port of the m_next device
-    std::queue<Packet> m_next_ingress;
+    // // Queue at the ingress port of the m_next device
+    // std::queue<Packet> m_next_ingress;
 };
 
 }  // namespace sim

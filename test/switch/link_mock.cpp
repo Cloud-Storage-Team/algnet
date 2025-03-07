@@ -1,8 +1,6 @@
 #include "link_mock.hpp"
 
-LinkMock::LinkMock() :
-    sim::Link(std::weak_ptr<sim::IRoutingDevice>(), std::weak_ptr<sim::IRoutingDevice>(), 0, 0),
-    m_arrived_packets(), m_ingress_packet() {}
+LinkMock::LinkMock() : m_arrived_packets(), m_ingress_packet() {}
 
 std::shared_ptr<sim::IRoutingDevice> LinkMock::get_from() const {
     return nullptr;

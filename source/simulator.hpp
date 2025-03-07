@@ -27,7 +27,7 @@ public:
 private:
     Scheduler& m_scheduler;
     std::unordered_map<std::string, IRoutingDevice*> m_graph;
-    std::vector<IFlow> m_flows;
+    std::vector<Flow> m_flows;
 };
 
 }  // namespace sim
