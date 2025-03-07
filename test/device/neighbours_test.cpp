@@ -46,7 +46,6 @@ TEST_F(Neighbours, NeighboursAreCalculatedCorrectly) {
     source->update_routing_table(dest3, link1_neighbour2);
     source->update_routing_table(dest4, link3_neighbour1);
     source->update_routing_table(dest5, link1_neighbour1);
-    std::cout << "Update" << std::endl;
 
     std::vector<std::shared_ptr<sim::IRoutingDevice>> neighbours =
         source->get_neighbours();
