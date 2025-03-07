@@ -15,7 +15,8 @@ class RoutingModule;
 class Link {
 public:
     // TODO: move implementation to .cpp
-    Link(std::shared_ptr<IRoutingDevice> a_from, std::shared_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_mbps,
+    Link(std::shared_ptr<IRoutingDevice> a_from,
+         std::shared_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_mbps,
          std::uint32_t a_delay)
         : m_from(a_from),
           m_to(a_to),

@@ -21,9 +21,11 @@ TEST_F(LinkToDevice, LinkIsPresent) {
     auto source = std::make_shared<TestRoutingModule>(TestRoutingModule());
     auto neighbour = std::make_shared<TestRoutingModule>(TestRoutingModule());
     auto dest = std::make_shared<TestRoutingModule>(TestRoutingModule());
-    auto another_dest = std::make_shared<TestRoutingModule>(TestRoutingModule());
+    auto another_dest =
+        std::make_shared<TestRoutingModule>(TestRoutingModule());
 
-    auto link_neighbour = std::make_shared<TestLink>(TestLink(source, neighbour));
+    auto link_neighbour =
+        std::make_shared<TestLink>(TestLink(source, neighbour));
     source->update_routing_table(neighbour, link_neighbour);
     auto link_dest = std::make_shared<TestLink>(TestLink(source, dest));
     source->update_routing_table(dest, link_dest);
@@ -36,4 +38,4 @@ TEST_F(LinkToDevice, LinkIsPresent) {
     EXPECT_EQ(source->get_link_to_device(another_dest), link_neighbour);
 }
 
-}  // namespace
+}  // namespace test

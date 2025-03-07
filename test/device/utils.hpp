@@ -14,12 +14,14 @@ public:
     ~TestRoutingModule() = default;
 
     bool has_inlink(std::shared_ptr<sim::Link> link);
-    bool check_route(std::shared_ptr<sim::IRoutingDevice> device, std::shared_ptr<sim::Link> link);
+    bool check_route(std::shared_ptr<sim::IRoutingDevice> device,
+                     std::shared_ptr<sim::Link> link);
 };
 
 class TestLink : public sim::Link {
 public:
-    TestLink(std::shared_ptr<sim::IRoutingDevice> a_src, std::shared_ptr<sim::IRoutingDevice> a_dest);
+    TestLink(std::shared_ptr<sim::IRoutingDevice> a_src,
+             std::shared_ptr<sim::IRoutingDevice> a_dest);
     ~TestLink() = default;
 };
 

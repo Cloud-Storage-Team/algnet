@@ -25,4 +25,4 @@ TEST_F(AddInlink, LinkIsPresent) {
     EXPECT_TRUE(dest->has_inlink(link2));
 }
 
-}  // namespace
+}  // namespace test

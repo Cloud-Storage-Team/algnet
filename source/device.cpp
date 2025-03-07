@@ -1,7 +1,7 @@
 #include "device.hpp"
 
-#include <unordered_set>
 #include <iostream>
+#include <unordered_set>
 
 #include "link.hpp"
 
@@ -17,7 +17,8 @@ void RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     m_routing_table[dest] = link;
 }
 
-std::vector<std::shared_ptr<IRoutingDevice>> RoutingModule::get_neighbors() const {
+std::vector<std::shared_ptr<IRoutingDevice>> RoutingModule::get_neighbors()
+    const {
     std::cout << "started getting" << std::endl;
     std::unordered_set<std::shared_ptr<IRoutingDevice>> outlinks;
     for (auto device_link : m_routing_table) {
@@ -31,7 +32,8 @@ std::vector<std::shared_ptr<IRoutingDevice>> RoutingModule::get_neighbors() cons
     return neighbours;
 }
 
-std::shared_ptr<Link> RoutingModule::get_link_to_device(std::shared_ptr<IRoutingDevice> device) const {
+std::shared_ptr<Link> RoutingModule::get_link_to_device(
+    std::shared_ptr<IRoutingDevice> device) const {
     auto iterator = m_routing_table.find(device);
     if (iterator == m_routing_table.end()) {
         return nullptr;
