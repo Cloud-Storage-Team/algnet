@@ -7,8 +7,8 @@ namespace sim {
 class TCPFlow : public Flow {
 public:
     TCPFlow(ISender *a_src, IReceiver *a_dest, std::uint32_t a_packet_size,
-            std::uint32_t a_delay_between_packets, std::uint32_t a_total_packets,
-            std::uint32_t a_delay_threshold);
+            std::uint32_t a_delay_between_packets,
+            std::uint32_t a_total_packets, std::uint32_t a_delay_threshold);
 
     void start(std::uint32_t time);
 
@@ -41,7 +41,7 @@ private:
 
     std::uint32_t m_cwnd;      // Congestion window
     std::uint32_t m_ssthresh;  // Slow start threshold
-    std::uint32_t m_linear_coeficient; 
+    std::uint32_t m_linear_coeficient;
     std::uint32_t m_packets_in_flight;
     std::uint32_t m_packets_acked;
     std::uint32_t m_delay_threshold;  // delay threshold for update
