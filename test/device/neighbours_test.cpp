@@ -51,7 +51,6 @@ TEST_F(Neighbours, NeighboursAreCalculatedCorrectly) {
     std::vector<std::shared_ptr<sim::IRoutingDevice>> neighbours =
         source->get_neighbours();
     EXPECT_TRUE(neighbours.size() == 3);
-    std::cout << "Basic check" << std::endl;
     for (auto neighbour : neighbours) {
         EXPECT_TRUE(neighbour == neighbour1 || neighbour == neighbour2 ||
                     neighbour == neighbour3);
