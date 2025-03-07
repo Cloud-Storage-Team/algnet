@@ -10,7 +10,7 @@ class Flow {
 public:
     virtual ~Flow() = default;
 
-    Flow(ISender *a_src, IReceiver *a_dest);
+    Flow(ISender *a_src, IReceiver *a_dest, uint32_t a_packet_size);
 
     // Start at time
     virtual void start(std::uint32_t time);
@@ -27,6 +27,7 @@ public:
 
 protected:
     void schedule_packet_generation(std::uint32_t time);
+    void generate_packet();
     std::uint32_t m_packet_size;
 };
 
