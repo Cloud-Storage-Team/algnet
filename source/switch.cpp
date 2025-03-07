@@ -36,8 +36,8 @@ void Switch::process() {
     }
 
     Packet packet = link->get_packet();
-    IReceiver* destination = packet.flow->get_destination();
-    // TODO:: remove creating smart pointer from here
+    std::shared_ptr<IReceiver> destination = packet.flow->get_destination();
+    // TODO: think about nullptr (now delegates to get_destination, OK I think)
     std::shared_ptr<Link> next_link =
         get_destination(std::shared_ptr<IRoutingDevice>(destination));
 

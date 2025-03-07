@@ -23,12 +23,12 @@ public:
     // Call try_to_generate upon the update
     virtual void update() = 0;
 
-    virtual IReceiver *get_destination() const = 0;
+    virtual std::shared_ptr<IReceiver> get_destination() const = 0;
 
     // TODO: move to realisation
     //  private:
-    //      ISender *m_src;
-    //      IReceiver *m_dest;
+    //      std::shared_ptr<ISender> m_src;
+    //      std::shared_ptr<IReceiver> m_dest;
     //      std::uint32_t m_nacks;
     //      float m_cwnd;
     //      std::uint32_t m_sent_bytes;

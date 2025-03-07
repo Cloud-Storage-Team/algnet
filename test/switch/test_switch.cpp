@@ -33,7 +33,7 @@ void test_senders(size_t senders_count) {
     std::vector<FlowMock> flows;
     flows.reserve(senders_count);
     for (size_t i = 0; i < senders_count; i++) {
-        flows.push_back(FlowMock(receiver.get()));
+        flows.push_back(FlowMock(receiver));
     }
 
     // create packets
@@ -52,21 +52,21 @@ void test_senders(size_t senders_count) {
         std::make_shared<LinkMock>();
 
     // // set ingress packets
-    // for (size_t i = 0; i < senders_count; i++) {
-    //     links[i]->set_ingress_packet(packets[i]);
-    // }
+    for (size_t i = 0; i < senders_count; i++) {
+        links[i]->set_ingress_packet(packets[i]);
+    }
 
-    // // add inlinks to switch device and update its routing table
-    // for (size_t i = 0; i < senders_count; i++) {
-    //     switch_device.add_inlink(links[i]);
-    // }
-    // switch_device.update_routing_table(receiver, switch_reciever_link);
+    // add inlinks to switch device and update its routing table
+    for (size_t i = 0; i < senders_count; i++) {
+        switch_device.add_inlink(links[i]);
+    }
+    switch_device.update_routing_table(receiver, switch_reciever_link);
 
-    // for (size_t i = 0; i < senders_count; i++) {
-    //     switch_device.process();
-    // }
+    for (size_t i = 0; i < senders_count; i++) {
+        switch_device.process();
+    }
 
-    // ASSERT_TRUE(switch_reciever_link->get_arrived_packets() == packets);
+    ASSERT_TRUE(switch_reciever_link->get_arrived_packets() == packets);
 }
 
 TEST_F(TestSwitch, test_one_sender) { test_senders(1); }
