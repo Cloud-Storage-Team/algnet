@@ -2,7 +2,7 @@
 
 #include "utils.hpp"
 
-namespace {
+namespace test {
 
 class LinkToDevice : public testing::Test {
 public:
@@ -11,29 +11,29 @@ public:
 };
 
 TEST_F(LinkToDevice, NoLinkToDevice) {
-    sim::TestDevice* source = new sim::TestDevice();
-    sim::TestDevice* dest = new sim::TestDevice();
+    TestDevice source = TestDevice();
+    TestDevice dest = TestDevice();
 
-    EXPECT_EQ(dest->get_link_to_device(dest), nullptr);
+    EXPECT_EQ(source.get_link_to_device(&dest), nullptr);
 }
 
 TEST_F(LinkToDevice, LinkIsPresent) {
-    sim::TestDevice* source = new sim::TestDevice();
-    sim::TestDevice* neighbour = new sim::TestDevice();
-    sim::TestDevice* dest = new sim::TestDevice();
-    sim::TestDevice* another_dest = new sim::TestDevice();
+    TestDevice source = TestDevice();
+    TestDevice neighbour = TestDevice();
+    TestDevice dest = TestDevice();
+    TestDevice another_dest = TestDevice();
 
-    sim::TestLink* link_neighbour = new sim::TestLink(source, neighbour);
-    source->update_routing_table(neighbour, link_neighbour);
-    sim::TestLink* link_dest = new sim::TestLink(source, dest);
-    source->update_routing_table(dest, link_dest);
+    TestLink link_neighbour = TestLink(&source, &neighbour);
+    source.update_routing_table(&neighbour, &link_neighbour);
+    TestLink link_dest = TestLink(&source, &dest);
+    source.update_routing_table(&dest, &link_dest);
 
-    EXPECT_EQ(source->get_link_to_device(dest), link_dest);
-    EXPECT_EQ(source->get_link_to_device(neighbour), link_neighbour);
-    EXPECT_EQ(source->get_link_to_device(another_dest), nullptr);
-    source->update_routing_table(another_dest, link_neighbour);
+    EXPECT_EQ(source.get_link_to_device(&dest), link_dest);
+    EXPECT_EQ(source.get_link_to_device(&neighbour), link_neighbour);
+    EXPECT_EQ(source.get_link_to_device(&another_dest), nullptr);
+    source.update_routing_table(&another_dest, &link_neighbour);
 
-    EXPECT_EQ(source->get_link_to_device(another_dest), link_neighbour);
+    EXPECT_EQ(source.get_link_to_device(&another_dest), link_neighbour);
 }
 
 }  // namespace

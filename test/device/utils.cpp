@@ -1,16 +1,16 @@
 #include "utils.hpp"
 
-namespace sim {
+namespace test {
 
-TestDevice::TestDevice() : Device(DeviceType::SENDER) {}
+TestDevice::TestDevice() : sim::Device(sim::DeviceType::SENDER) {}
 
 void TestDevice::process() {}
 
-bool TestDevice::has_inlink(Link* link) {
+bool TestDevice::has_inlink(sim::Link* link) {
     return m_inlinks.find(link) != m_inlinks.end();
 }
 
-bool TestDevice::check_route(Device* device, Link* link) {
+bool TestDevice::check_route(sim::Device* device, sim::Link* link) {
     if (m_routing_table.find(device) == m_routing_table.end()) {
         return false;
     }

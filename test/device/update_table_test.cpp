@@ -2,7 +2,7 @@
 
 #include "utils.hpp"
 
-namespace {
+namespace test {
 
 class UpdateTable : public testing::Test {
 public:
@@ -11,20 +11,20 @@ public:
 };
 
 TEST_F(UpdateTable, RouteIsPresent) {
-    sim::TestDevice* source = new sim::TestDevice();
-    sim::TestDevice* neighbour = new sim::TestDevice();
-    sim::TestDevice* dest = new sim::TestDevice();
-    sim::TestDevice* another_dest = new sim::TestDevice();
+    TestDevice source = TestDevice();
+    TestDevice neighbour = TestDevice();
+    TestDevice dest = TestDevice();
+    TestDevice another_dest = TestDevice();
 
-    sim::TestLink* link_neighbour = new sim::TestLink(source, neighbour);
+    TestLink link_neighbour = TestLink(&source, &neighbour);
 
-    EXPECT_FALSE(source->check_route(dest, link_neighbour));
-    EXPECT_FALSE(source->check_route(another_dest, link_neighbour));
+    EXPECT_FALSE(source.check_route(&dest, &link_neighbour));
+    EXPECT_FALSE(source.check_route(&another_dest, &link_neighbour));
 
-    source->update_routing_table(dest, link_neighbour);
+    source.update_routing_table(&dest, &link_neighbour);
 
-    EXPECT_TRUE(source->check_route(dest, link_neighbour));
-    EXPECT_FALSE(source->check_route(another_dest, link_neighbour));
+    EXPECT_TRUE(source.check_route(&dest, &link_neighbour));
+    EXPECT_FALSE(source.check_route(&another_dest, &link_neighbour));
 }
 
 }  // namespace

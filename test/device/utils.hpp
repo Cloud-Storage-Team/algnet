@@ -4,19 +4,19 @@
 #include "../../source/device.hpp"
 #include "../../source/link.hpp"
 
-namespace sim {
+namespace test {
 
 class Link;
 
-class TestDevice : public Device {
+class TestDevice : public sim::Device {
 public:
     TestDevice();
     ~TestDevice() = default;
 
-    void process();
+    void process() final;
 
-    bool has_inlink(Link* link);
-    bool check_route(Device* device, Link* link);
+    bool has_inlink(sim::Link* link);
+    bool check_route(sim::Device* device, sim::Link* link);
 };
 
 class TestLink : public sim::Link {
@@ -25,4 +25,4 @@ public:
     ~TestLink() = default;
 };
 
-}  // namespace sim
+}  // namespace test
