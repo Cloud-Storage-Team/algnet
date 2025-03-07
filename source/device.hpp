@@ -52,7 +52,7 @@ public:
     // returns next inlink and moves inlinks set iterator forward
     std::shared_ptr<Link> next_inlink() final;
 
-protected:
+private:
     // Ordered set as we need to iterate over the ingress buffers
     std::set<std::shared_ptr<Link>> m_inlinks;
 
