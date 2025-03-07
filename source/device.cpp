@@ -8,6 +8,10 @@
 namespace sim {
 
 void RoutingModule::add_inlink(std::shared_ptr<Link> link) {
+    if (link == nullptr) {
+         //TODO: add warning to log
+           return;
+    }
     m_inlinks.insert(link);
     m_next_inlink = m_inlinks.begin();
 }
