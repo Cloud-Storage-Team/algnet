@@ -2,7 +2,7 @@
 #include "../../source/device.hpp"
 #include "../../source/link.hpp"
 
-class LinkMock : public sim::ILink {
+class LinkMock : public sim::Link {
 public:
     LinkMock();
     void schedule_arrival(sim::Packet a_packet) final;

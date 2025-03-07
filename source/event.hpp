@@ -32,8 +32,8 @@ struct Generate : public Event {
  * Enqueue the packet to the ingress port of the next node
  */
 struct Arrive : public Event {
-    Arrive(ILink *a_link, Packet *a_packet);
-    ILink *link;
+    Arrive(Link *a_link, Packet *a_packet);
+    Link *link;
     Packet *packet;
 
     virtual void operator()() final;

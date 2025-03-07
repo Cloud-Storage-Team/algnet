@@ -12,31 +12,21 @@ class RoutingModule;
 /**
  * Unidirectional link from the source to a_next
  */
-
-class ILink {
+class Link {
 public:
-    virtual ~ILink() = default;
-
-    virtual void schedule_arrival(Packet a_packet) = 0;
-    virtual Packet get_packet() = 0;
-    virtual std::shared_ptr<IRoutingDevice> get_from() const = 0;
-    virtual std::shared_ptr<IRoutingDevice> get_to() const = 0;
-};
-
-class Link : ILink {
-public:
-    Link(IRoutingDevice* a_from, IRoutingDevice* a_to,
-         std::uint32_t a_speed_mbps, std::uint32_t m_delay);
+    Link(std::weak_ptr<IRoutingDevice>  a_from, std::weak_ptr<IRoutingDevice>  a_to,
+         std::uint32_t a_speed_mbps, std::uint32_t a_delay);
+    virtual ~Link() = default;
 
     /**
      * Update the source egress delay and schedule the arrival event
      * based on the egress queueing and transmission delays.
      */
-    void schedule_arrival(Packet a_packet) final;
+    virtual void schedule_arrival(Packet a_packet) = 0;
 
-    Packet get_packet() final;
-    std::shared_ptr<IRoutingDevice> get_from() const final;
-    std::shared_ptr<IRoutingDevice> get_to() const final;
+    virtual Packet get_packet() = 0;
+    virtual std::shared_ptr<IRoutingDevice> get_from() const = 0;
+    virtual std::shared_ptr<IRoutingDevice> get_to() const = 0;
 
 private:
     std::weak_ptr<IRoutingDevice> m_from;
