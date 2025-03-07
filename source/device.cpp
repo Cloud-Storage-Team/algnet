@@ -6,39 +6,26 @@
 
 namespace sim {
 
-Device::Device(DeviceType a_type) : m_type(a_type) {
-    m_inlinks = std::set<Link*>(),
-    m_routing_table = std::unordered_map<Device*, Link*>();
-    m_next_inlink = m_inlinks.begin();
-}
-
-void Device::add_inlink(Link* link) {
+void RoutingModule::add_inlink(std::shared_ptr<Link> link) {
     m_inlinks.insert(link);
     m_next_inlink = m_inlinks.begin();
 }
 
-void Device::update_routing_table(Device* dest, Link* link) {
+void RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
+                                         std::shared_ptr<Link> link) {
     m_routing_table[dest] = link;
 }
 
-std::vector<Device*> Device::get_neighbors() const {
-    std::unordered_set<Device*> outlinks;
-    for (auto device_link : m_routing_table) {
-        outlinks.emplace((device_link.second)->get_dest());
-    }
-
-    std::vector<Device*> neighbours{};
-    neighbours.insert(neighbours.begin(), outlinks.begin(), outlinks.end());
-    return neighbours;
-}
-
-Link* Device::get_link_to_device(Device* device) const {
-    auto iterator = m_routing_table.find(device);
-    if (iterator == m_routing_table.end()) {
+std::shared_ptr<Link> RoutingModule::next_inlink() {
+    if (m_inlinks.empty()) {
         return nullptr;
     }
 
-    return (*iterator).second;
+    std::shared_ptr<Link> link = *m_next_inlink;
+    if (++m_next_inlink == m_inlinks.end()) {
+        m_next_inlink = m_inlinks.begin();
+    }
+    return link;
 }
 
 }  // namespace sim

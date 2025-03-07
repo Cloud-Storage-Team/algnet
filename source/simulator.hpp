@@ -13,10 +13,10 @@ class Simulator {
 public:
     Simulator();
     ~Simulator();
-    Device* add_device(std::string a_name, DeviceType a_type);
-    void add_flow(Device* a_from, Device* a_to);
-    void add_link(Device* a_from, Device* a_to, std::uint32_t a_speed_mbps,
-                  std::uint32_t a_delay);
+    IRoutingDevice* add_device(std::string a_name, DeviceType a_type);
+    void add_flow(ISender* a_from, IReceiver* a_to);
+    void add_link(IRoutingDevice* a_from, IRoutingDevice* a_to,
+                  std::uint32_t a_speed_mbps, std::uint32_t a_delay);
     // Clear all events in the Scheduler
     void clear();
     // BFS to update the routing table
@@ -26,7 +26,7 @@ public:
 
 private:
     Scheduler& m_scheduler;
-    std::unordered_map<std::string, Device*> m_graph;
+    std::unordered_map<std::string, IRoutingDevice*> m_graph;
     std::vector<Flow> m_flows;
 };
 
