@@ -11,18 +11,18 @@ public:
 };
 
 TEST_F(AddInlink, LinkIsPresent) {
-   TestDevice source = TestDevice();
-   TestDevice dest = TestDevice();
-   TestLink link1 = TestLink(&source, &dest);
-   TestLink link2 = TestLink(&source, &dest);
+    auto source = std::make_shared<TestRoutingModule>(TestRoutingModule());
+    auto dest = std::make_shared<TestRoutingModule>(TestRoutingModule());
+    auto link1 = std::make_shared<TestLink>(TestLink(source, dest));
+    auto link2 = std::make_shared<TestLink>(TestLink(source, dest));
 
-    EXPECT_FALSE(dest.has_inlink(&link1));
-    dest.add_inlink(&link1);
-    EXPECT_TRUE(dest.has_inlink(&link1));
-    EXPECT_FALSE(dest.has_inlink(&link2));
-    dest.add_inlink(&link2);
-    EXPECT_TRUE(dest.has_inlink(&link1));
-    EXPECT_TRUE(dest.has_inlink(&link2));
+    EXPECT_FALSE(dest->has_inlink(link1));
+    dest->add_inlink(link1);
+    EXPECT_TRUE(dest->has_inlink(link1));
+    EXPECT_FALSE(dest->has_inlink(link2));
+    dest->add_inlink(link2);
+    EXPECT_TRUE(dest->has_inlink(link1));
+    EXPECT_TRUE(dest->has_inlink(link2));
 }
 
 }  // namespace

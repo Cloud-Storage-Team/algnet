@@ -8,20 +8,18 @@ namespace test {
 
 class Link;
 
-class TestDevice : public sim::Device {
+class TestRoutingModule : public sim::RoutingModule {
 public:
-    TestDevice();
-    ~TestDevice() = default;
+    TestRoutingModule();
+    ~TestRoutingModule() = default;
 
-    void process() final;
-
-    bool has_inlink(sim::Link* link);
-    bool check_route(sim::Device* device, sim::Link* link);
+    bool has_inlink(std::shared_ptr<sim::Link> link);
+    bool check_route(std::shared_ptr<sim::IRoutingDevice> device, std::shared_ptr<sim::Link> link);
 };
 
 class TestLink : public sim::Link {
 public:
-    TestLink(sim::Device* a_src, sim::Device* a_dest);
+    TestLink(std::shared_ptr<sim::IRoutingDevice> a_src, std::shared_ptr<sim::IRoutingDevice> a_dest);
     ~TestLink() = default;
 };
 

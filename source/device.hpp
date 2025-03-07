@@ -30,6 +30,8 @@ public:
     virtual void add_inlink(std::shared_ptr<Link> link) = 0;
     virtual void update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                       std::shared_ptr<Link> link) = 0;
+    virtual std::vector<std::shared_ptr<IRoutingDevice>> get_neighbors() const = 0;
+    virtual std::shared_ptr<Link> get_link_to_device(std::shared_ptr<IRoutingDevice> device) const = 0;
     virtual std::shared_ptr<Link> next_inlink() = 0;
 };
 
@@ -40,17 +42,15 @@ public:
     virtual void add_inlink(std::shared_ptr<Link> link) final;
     virtual void update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                       std::shared_ptr<Link> link) final;
+    virtual std::vector<std::shared_ptr<IRoutingDevice>> get_neighbors() const final;
+    virtual std::shared_ptr<Link> get_link_to_device(std::shared_ptr<IRoutingDevice> device) const final;
 
     // returns next inlink and moves inlinks set iterator forward
     std::shared_ptr<Link> next_inlink() final;
 
-private:
+protected:
     // Ordered set as we need to iterate over the ingress buffers
     std::set<std::shared_ptr<Link> > m_inlinks;
-
-    // TODO: think about a problem of having 2 pointers storing the same object
-    // and being unable to find link when passing pointer different from one
-    // which was used for updating routing table
 
     // A routing table: maps the final destination to a specific link
     std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<Link> >

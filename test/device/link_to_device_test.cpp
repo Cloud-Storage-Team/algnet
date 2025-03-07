@@ -11,29 +11,29 @@ public:
 };
 
 TEST_F(LinkToDevice, NoLinkToDevice) {
-    TestDevice source = TestDevice();
-    TestDevice dest = TestDevice();
+    auto source = std::make_shared<TestRoutingModule>(TestRoutingModule());
+    auto dest = std::make_shared<TestRoutingModule>(TestRoutingModule());
 
-    EXPECT_EQ(source.get_link_to_device(&dest), nullptr);
+    EXPECT_EQ(source->get_link_to_device(dest), nullptr);
 }
 
 TEST_F(LinkToDevice, LinkIsPresent) {
-    TestDevice source = TestDevice();
-    TestDevice neighbour = TestDevice();
-    TestDevice dest = TestDevice();
-    TestDevice another_dest = TestDevice();
+    auto source = std::make_shared<TestRoutingModule>(TestRoutingModule());
+    auto neighbour = std::make_shared<TestRoutingModule>(TestRoutingModule());
+    auto dest = std::make_shared<TestRoutingModule>(TestRoutingModule());
+    auto another_dest = std::make_shared<TestRoutingModule>(TestRoutingModule());
 
-    TestLink link_neighbour = TestLink(&source, &neighbour);
-    source.update_routing_table(&neighbour, &link_neighbour);
-    TestLink link_dest = TestLink(&source, &dest);
-    source.update_routing_table(&dest, &link_dest);
+    auto link_neighbour = std::make_shared<TestLink>(TestLink(source, neighbour));
+    source->update_routing_table(neighbour, link_neighbour);
+    auto link_dest = std::make_shared<TestLink>(TestLink(source, dest));
+    source->update_routing_table(dest, link_dest);
 
-    EXPECT_EQ(source.get_link_to_device(&dest), &link_dest);
-    EXPECT_EQ(source.get_link_to_device(&neighbour), &link_neighbour);
-    EXPECT_EQ(source.get_link_to_device(&another_dest), nullptr);
-    source.update_routing_table(&another_dest, &link_neighbour);
+    EXPECT_EQ(source->get_link_to_device(dest), link_dest);
+    EXPECT_EQ(source->get_link_to_device(neighbour), link_neighbour);
+    EXPECT_EQ(source->get_link_to_device(another_dest), nullptr);
+    source->update_routing_table(another_dest, link_neighbour);
 
-    EXPECT_EQ(source.get_link_to_device(&another_dest), &link_neighbour);
+    EXPECT_EQ(source->get_link_to_device(another_dest), link_neighbour);
 }
 
 }  // namespace

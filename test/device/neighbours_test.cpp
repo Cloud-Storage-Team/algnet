@@ -11,38 +11,46 @@ public:
 };
 
 TEST_F(Neighbours, NeighboursAreCalculatedCorrectly) {
-    TestDevice source = TestDevice();
+    auto source = std::make_shared<TestRoutingModule>(TestRoutingModule());
+    std::cout << "Create s" << std::endl;
 
-    TestDevice neighbour1 = TestDevice();
-    TestDevice neighbour2 = TestDevice();
-    TestDevice neighbour3 = TestDevice();
+    auto neighbour1 = std::make_shared<TestRoutingModule>(TestRoutingModule());
+    auto neighbour2 = std::make_shared<TestRoutingModule>(TestRoutingModule());
+    auto neighbour3 = std::make_shared<TestRoutingModule>(TestRoutingModule());
+    std::cout << "Create n" << std::endl;
 
-    TestDevice dest1 = TestDevice();
-    TestDevice dest2 = TestDevice();
-    TestDevice dest3 = TestDevice();
-    TestDevice dest4 = TestDevice();
-    TestDevice dest5 = TestDevice();
+    auto dest1 = std::make_shared<TestRoutingModule>(TestRoutingModule());
+    auto dest2 = std::make_shared<TestRoutingModule>(TestRoutingModule());
+    auto dest3 = std::make_shared<TestRoutingModule>(TestRoutingModule());
+    auto dest4 = std::make_shared<TestRoutingModule>(TestRoutingModule());
+    auto dest5 = std::make_shared<TestRoutingModule>(TestRoutingModule());
+    std::cout << "Create d" << std::endl;
 
-    TestLink link1_neighbour1 = TestLink(&source, &neighbour1);
-    TestLink link2_neighbour1 = TestLink(&source, &neighbour1);
-    TestLink link3_neighbour1 = TestLink(&source, &neighbour1);
-    TestLink link1_neighbour2 = TestLink(&source, &neighbour2);
-    TestLink link1_neighbour3 = TestLink(&source, &neighbour3);
+    auto link1_neighbour1 = std::make_shared<TestLink>(TestLink(source, neighbour1));
+    auto link2_neighbour1 = std::make_shared<TestLink>(TestLink(source, neighbour1));
+    auto link3_neighbour1 = std::make_shared<TestLink>(TestLink(source, neighbour1));
+    auto link1_neighbour2 = std::make_shared<TestLink>(TestLink(source, neighbour2));
+    auto link1_neighbour3 = std::make_shared<TestLink>(TestLink(source, neighbour3));
+    std::cout << "Create ls" << std::endl;
 
-    EXPECT_TRUE(source.get_neighbors().empty());
+    EXPECT_TRUE(source->get_neighbors().empty());
+    std::cout << "Check empty" << std::endl;
 
-    source.update_routing_table(&dest1, &link2_neighbour1);
-    source.update_routing_table(&dest2, &link1_neighbour3);
-    source.update_routing_table(&dest3, &link1_neighbour2);
-    source.update_routing_table(&dest4, &link3_neighbour1);
-    source.update_routing_table(&dest5, &link1_neighbour1);
+    source->update_routing_table(dest1, link2_neighbour1);
+    source->update_routing_table(dest2, link1_neighbour3);
+    source->update_routing_table(dest3, link1_neighbour2);
+    source->update_routing_table(dest4, link3_neighbour1);
+    source->update_routing_table(dest5, link1_neighbour1);
+    std::cout << "Update" << std::endl;
 
-    std::vector<sim::Device*> neighbours = source.get_neighbors();
+    std::vector<std::shared_ptr<sim::IRoutingDevice>> neighbours = source->get_neighbors();
     EXPECT_TRUE(neighbours.size() == 3);
-    for (auto* neighbour : neighbours) {
-        EXPECT_TRUE(neighbour == &neighbour1 || neighbour == &neighbour2 ||
-                    neighbour == &neighbour3);
+    std::cout << "Basic check" << std::endl;
+    for (auto neighbour : neighbours) {
+        EXPECT_TRUE(neighbour == neighbour1 || neighbour == neighbour2 ||
+                    neighbour == neighbour3);
     }
+    std::cout << "Full check" << std::endl;
 }
 
 }  // namespace
