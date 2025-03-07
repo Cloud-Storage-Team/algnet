@@ -1,13 +1,14 @@
 #pragma once
 #include <cstdint>
 
-#include "device.hpp"
+#include "receiver.hpp"
+#include "sender.hpp"
 
 namespace sim {
 
 class Flow {
 public:
-    Flow(Device *a_src, Device *a_dest, float a_start_cwnd);
+    Flow(ISender *a_src, IReceiver *a_dest, float a_start_cwnd);
 
     // Start at time
     void start(std::uint32_t time);
@@ -22,8 +23,8 @@ public:
     void update();
 
 private:
-    Device *m_src;
-    Device *m_dest;
+    ISender *m_src;
+    IReceiver *m_dest;
     std::uint32_t m_nacks;
     float m_cwnd;
     std::uint32_t m_sent_bytes;
