@@ -28,12 +28,12 @@ TEST_F(LinkToDevice, LinkIsPresent) {
     TestLink link_dest = TestLink(&source, &dest);
     source.update_routing_table(&dest, &link_dest);
 
-    EXPECT_EQ(source.get_link_to_device(&dest), link_dest);
-    EXPECT_EQ(source.get_link_to_device(&neighbour), link_neighbour);
+    EXPECT_EQ(source.get_link_to_device(&dest), &link_dest);
+    EXPECT_EQ(source.get_link_to_device(&neighbour), &link_neighbour);
     EXPECT_EQ(source.get_link_to_device(&another_dest), nullptr);
     source.update_routing_table(&another_dest, &link_neighbour);
 
-    EXPECT_EQ(source.get_link_to_device(&another_dest), link_neighbour);
+    EXPECT_EQ(source.get_link_to_device(&another_dest), &link_neighbour);
 }
 
 }  // namespace
