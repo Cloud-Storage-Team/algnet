@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include <set>
 #include <unordered_map>
 
@@ -30,6 +31,8 @@ public:
     virtual void update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                       std::shared_ptr<Link> link) = 0;
     virtual std::shared_ptr<Link> next_inlink() = 0;
+    virtual std::shared_ptr<Link> get_link_to_device(IRoutingDevice* a_device) = 0;
+    virtual std::vector<IRoutingDevice*> get_neighbors() = 0;    
 };
 
 class RoutingModule : public IRoutingDevice {
