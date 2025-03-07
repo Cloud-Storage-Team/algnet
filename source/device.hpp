@@ -1,9 +1,9 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 #include <set>
 #include <unordered_map>
+#include <vector>
 
 namespace sim {
 
@@ -31,8 +31,9 @@ public:
     virtual void update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                       std::shared_ptr<Link> link) = 0;
     virtual std::shared_ptr<Link> next_inlink() = 0;
-    virtual std::shared_ptr<Link> get_link_to_device(IRoutingDevice* a_device) = 0;
-    virtual std::vector<IRoutingDevice*> get_neighbors() = 0;    
+    virtual std::shared_ptr<Link> get_destination(
+        std::shared_ptr<IRoutingDevice> dest) const = 0;
+    virtual std::vector<std::shared_ptr<IRoutingDevice>> get_neighbors() = 0;
 };
 
 class RoutingModule : public IRoutingDevice {
@@ -45,6 +46,8 @@ public:
 
     // returns next inlink and moves inlinks set iterator forward
     std::shared_ptr<Link> next_inlink() final;
+    std::shared_ptr<Link> get_destination(
+        std::shared_ptr<IRoutingDevice> dest) const final;
 
 private:
     // Ordered set as we need to iterate over the ingress buffers

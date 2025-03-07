@@ -46,21 +46,26 @@ void Simulator::add_link(std::shared_ptr<IRoutingDevice> a_from,
 }
 
 // returns map, that gives for each meet device its parent in bfs bypass tree
-std::unordered_map<IRoutingDevice*, IRoutingDevice*> bfs(IRoutingDevice* start_device) {
-    std::unordered_map<IRoutingDevice*, IRoutingDevice*> parent_table;
-    std::queue<IRoutingDevice*> queue;
-    std::set<IRoutingDevice*> used;
+std::unordered_map<std::shared_ptr<IRoutingDevice>,
+                   std::shared_ptr<IRoutingDevice>>
+bfs(std::shared_ptr<IRoutingDevice> start_device) {
+    std::unordered_map<std::shared_ptr<IRoutingDevice>,
+                       std::shared_ptr<IRoutingDevice>>
+        parent_table;
+    std::queue<std::shared_ptr<IRoutingDevice>> queue;
+    std::set<std::shared_ptr<IRoutingDevice>> used;
     queue.push(start_device);
 
     while (!queue.empty()) {
-        IRoutingDevice* device = queue.front();
+        std::shared_ptr<IRoutingDevice> device = queue.front();
         queue.pop();
         if (used.find(device) != used.end()) {
             continue;
         }
         used.insert(device);
-        std::vector<IRoutingDevice*> neighbors = device->get_neighbors();
-        for (IRoutingDevice* neighbor : neighbors) {
+        std::vector<std::shared_ptr<IRoutingDevice>> neighbors =
+            device->get_neighbors();
+        for (std::shared_ptr<IRoutingDevice> neighbor : neighbors) {
             if (used.find(neighbor) != used.end()) {
                 continue;
             }
@@ -73,19 +78,20 @@ std::unordered_map<IRoutingDevice*, IRoutingDevice*> bfs(IRoutingDevice* start_d
 
 void Simulator::recalculate_paths() {
     for (auto& [_, src_device] : m_graph) {
-        std::unordered_map<IRoutingDevice*, IRoutingDevice*> parent_table =
-            bfs(src_device.get());
+        std::unordered_map<std::shared_ptr<IRoutingDevice>,
+                           std::shared_ptr<IRoutingDevice>>
+            parent_table = bfs(src_device);
         for (auto& [_, dest_device] : m_graph) {
-            IRoutingDevice* next_hop = dest_device.get();
-            if (parent_table.find(dest_device.get()) == parent_table.end()) {
+            std::shared_ptr<IRoutingDevice> next_hop = dest_device;
+            if (parent_table.find(dest_device) == parent_table.end()) {
                 src_device->update_routing_table(dest_device, nullptr);
                 continue;
             }
-            while (parent_table[next_hop] != src_device.get()) {
+            while (parent_table[next_hop] != src_device) {
                 next_hop = parent_table[next_hop];
             }
             src_device->update_routing_table(
-                dest_device, src_device->get_link_to_device(next_hop));
+                dest_device, src_device->get_destination(next_hop));
         }
     }
 }
