@@ -24,7 +24,6 @@ std::vector<std::shared_ptr<IRoutingDevice>> RoutingModule::get_neighbours()
     for (auto device_link : m_routing_table) {
         outlinks.emplace((device_link.second)->get_dest());
     }
-    std::cout << "got unique" << std::endl;
 
     std::vector<std::shared_ptr<IRoutingDevice>> neighbours{};
     neighbours.insert(neighbours.begin(), outlinks.begin(), outlinks.end());
