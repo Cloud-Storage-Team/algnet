@@ -56,7 +56,6 @@ TEST_F(Neighbours, NeighboursAreCalculatedCorrectly) {
         EXPECT_TRUE(neighbour == neighbour1 || neighbour == neighbour2 ||
                     neighbour == neighbour3);
     }
-    std::cout << "Full check" << std::endl;
 }
 
 }  // namespace test
