@@ -26,7 +26,6 @@ std::vector<std::shared_ptr<IRoutingDevice>> RoutingModule::get_neighbours()
 
     std::vector<std::shared_ptr<IRoutingDevice>> neighbours{};
     neighbours.insert(neighbours.begin(), outlinks.begin(), outlinks.end());
-    std::cout << "finished getting" << std::endl;
     return neighbours;
 }
 
