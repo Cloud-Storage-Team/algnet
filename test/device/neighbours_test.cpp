@@ -36,7 +36,6 @@ TEST_F(Neighbours, NeighboursAreCalculatedCorrectly) {
         std::make_shared<TestLink>(TestLink(source, neighbour2));
     auto link1_neighbour3 =
         std::make_shared<TestLink>(TestLink(source, neighbour3));
-    std::cout << "Create ls" << std::endl;
 
     EXPECT_TRUE(source->get_neighbours().empty());
     std::cout << "Check empty" << std::endl;
