@@ -5,6 +5,7 @@
 class LinkMock : public sim::Link {
 public:
     LinkMock();
+    LinkMock(sim::Packet a_ingress_packet);
     void schedule_arrival(sim::Packet a_packet) final;
     sim::Packet get_packet() final;
     std::shared_ptr<sim::IRoutingDevice> get_from() const final;

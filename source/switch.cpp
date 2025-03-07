@@ -30,12 +30,18 @@ DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
 void Switch::process() {
     std::shared_ptr<Link> link = m_router->next_inlink();
 
-    // TODO: discuss this
     if (link == nullptr) {
-        throw std::runtime_error("No next inlink");
+        // TODO: write warning to log
+        return;
     }
 
     Packet packet = link->get_packet();
+    Flow* flow = packet.flow;
+    if (flow == nullptr) {
+        // TODO: write warning to log
+        return;
+    }
+
     std::shared_ptr<IReceiver> destination = packet.flow->get_destination();
     // TODO: think about nullptr (now delegates to get_destination, OK I think)
     std::shared_ptr<Link> next_link =
@@ -43,7 +49,7 @@ void Switch::process() {
 
     // TODO: discuss this
     if (next_link == nullptr) {
-        // TODO: write warning to log
+        // TODO: write warning to log instead of exception
         return;
     }
     next_link->schedule_arrival(packet);

@@ -2,6 +2,9 @@
 
 LinkMock::LinkMock() : m_arrived_packets(), m_ingress_packet() {}
 
+LinkMock::LinkMock(sim::Packet a_ingress_packet)
+    : m_arrived_packets(), m_ingress_packet(a_ingress_packet) {}
+
 std::shared_ptr<sim::IRoutingDevice> LinkMock::get_from() const {
     return nullptr;
 }

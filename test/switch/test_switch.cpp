@@ -14,15 +14,26 @@ namespace test {
 
 class TestSwitch : public testing::Test {};
 
-TEST_F(TestSwitch, test_no_senders) {
+TEST_F(TestSwitch, test_type) {
     sim::Switch switch_device;
-    bool exception_catched = false;
-    try {
-        switch_device.process();
-    } catch (const std::runtime_error& e) {
-        exception_catched = true;
-    }
-    ASSERT_TRUE(exception_catched);
+    ASSERT_EQ(switch_device.get_type(), sim::DeviceType::SWITCH);
+}
+
+TEST_F(TestSwitch, test_no_inlinks) {
+    sim::Switch switch_device;
+    switch_device.process();
+}
+
+TEST_F(TestSwitch, test_no_destination) {
+    std::shared_ptr<ReceiverMock> receiver = std::make_shared<ReceiverMock>();
+    FlowMock flow_mock(receiver);
+    sim::Packet packet(sim::PacketType::DATA, 0, &flow_mock);
+    std::shared_ptr<LinkMock> link_mock = std::make_shared<LinkMock>(packet);
+    sim::Switch switch_device;
+
+    switch_device.add_inlink(link_mock);
+
+    switch_device.process();
 }
 
 void test_senders(size_t senders_count) {
