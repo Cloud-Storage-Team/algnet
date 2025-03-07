@@ -38,7 +38,6 @@ TEST_F(Neighbours, NeighboursAreCalculatedCorrectly) {
         std::make_shared<TestLink>(TestLink(source, neighbour3));
 
     EXPECT_TRUE(source->get_neighbours().empty());
-    std::cout << "Check empty" << std::endl;
 
     source->update_routing_table(dest1, link2_neighbour1);
     source->update_routing_table(dest2, link1_neighbour3);
