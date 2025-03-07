@@ -25,13 +25,13 @@ public:
 
     virtual IReceiver *get_destination() const = 0;
 
-//TODO: move to realisation
-// private:
-//     ISender *m_src;
-//     IReceiver *m_dest;
-//     std::uint32_t m_nacks;
-//     float m_cwnd;
-//     std::uint32_t m_sent_bytes;
+    // TODO: move to realisation
+    //  private:
+    //      ISender *m_src;
+    //      IReceiver *m_dest;
+    //      std::uint32_t m_nacks;
+    //      float m_cwnd;
+    //      std::uint32_t m_sent_bytes;
 };
 
 }  // namespace sim

@@ -12,11 +12,7 @@
 
 namespace test {
 
-class TestSwitch : public testing::Test {
-public:
-    void TearDown() override {};
-    void SetUp() override {};
-};
+class TestSwitch : public testing::Test {};
 
 TEST_F(TestSwitch, test_no_senders) {
     sim::Switch switch_device;
