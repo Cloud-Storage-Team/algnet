@@ -19,7 +19,6 @@ void RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
 
 std::vector<std::shared_ptr<IRoutingDevice>> RoutingModule::get_neighbours()
     const {
-    std::cout << "started getting" << std::endl;
     std::unordered_set<std::shared_ptr<IRoutingDevice>> outlinks;
     for (auto device_link : m_routing_table) {
         outlinks.emplace((device_link.second)->get_dest());
