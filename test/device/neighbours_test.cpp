@@ -12,19 +12,16 @@ public:
 
 TEST_F(Neighbours, NeighboursAreCalculatedCorrectly) {
     auto source = std::make_shared<TestRoutingModule>(TestRoutingModule());
-    std::cout << "Create s" << std::endl;
 
     auto neighbour1 = std::make_shared<TestRoutingModule>(TestRoutingModule());
     auto neighbour2 = std::make_shared<TestRoutingModule>(TestRoutingModule());
     auto neighbour3 = std::make_shared<TestRoutingModule>(TestRoutingModule());
-    std::cout << "Create n" << std::endl;
 
     auto dest1 = std::make_shared<TestRoutingModule>(TestRoutingModule());
     auto dest2 = std::make_shared<TestRoutingModule>(TestRoutingModule());
     auto dest3 = std::make_shared<TestRoutingModule>(TestRoutingModule());
     auto dest4 = std::make_shared<TestRoutingModule>(TestRoutingModule());
     auto dest5 = std::make_shared<TestRoutingModule>(TestRoutingModule());
-    std::cout << "Create d" << std::endl;
 
     auto link1_neighbour1 =
         std::make_shared<TestLink>(TestLink(source, neighbour1));
