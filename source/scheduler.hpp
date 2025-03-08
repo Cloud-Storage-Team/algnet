@@ -17,8 +17,9 @@ public:
         return instance;
     }
 
-    void add(const Event& event);
-    void clear();  // Clear all events
+    // TODO: remove implementation and use existing from .cpp
+    void add(const Event& event){};
+    void clear(){};  // Clear all events
     void tick();
 
 private:

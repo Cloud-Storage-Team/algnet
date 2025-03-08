@@ -11,7 +11,7 @@ namespace sim {
 // Base class for event
 struct Event {
     std::uint32_t time;
-    virtual ~Event();
+    virtual ~Event() = default;
     virtual void operator()() = 0;
     bool operator>(const Event &other) const { return time > other.time; }
 };
@@ -32,11 +32,13 @@ struct Generate : public Event {
  * Enqueue the packet to the ingress port of the next node
  */
 struct Arrive : public Event {
-    Arrive(Link *a_link, Packet *a_packet);
-    Link *link;
+    // TODO: move implementation to .cpp or use existing if present
+    Arrive(ILink *a_link, Packet *a_packet) : link(a_link), packet(a_packet){};
+    ~Arrive() = default;
+    ILink *link;
     Packet *packet;
 
-    virtual void operator()() final;
+    virtual void operator()() final { link->process_arrival(*packet); };
 };
 
 /**
