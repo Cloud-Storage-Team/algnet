@@ -11,8 +11,8 @@ public:
 };
 
 TEST_F(AddInlink, LinkIsPresent) {
-    auto source = std::make_shared<TestRoutingModule>(TestRoutingModule());
-    auto dest = std::make_shared<TestRoutingModule>(TestRoutingModule());
+    auto source = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
+    auto dest = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
     auto link1 = std::make_shared<TestLink>(TestLink(source, dest));
     auto link2 = std::make_shared<TestLink>(TestLink(source, dest));
 

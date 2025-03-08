@@ -2,18 +2,12 @@
 
 namespace test {
 
-TestRoutingModule::TestRoutingModule() {}
-
-bool TestRoutingModule::has_inlink(std::shared_ptr<sim::Link> link) {
-    return m_inlinks.find(link) != m_inlinks.end();
-}
-
-bool TestRoutingModule::check_route(std::shared_ptr<sim::IRoutingDevice> device,
-                                    std::shared_ptr<sim::Link> link) {
-    if (m_routing_table.find(device) == m_routing_table.end()) {
-        return false;
+std::vector<std::shared_ptr<sim::RoutingModule>> createRoutingModules(size_t count) {
+    std::vector<std::shared_ptr<sim::RoutingModule>> modules;
+    for (size_t i = 0; i < count; ++i) {
+        modules.emplace_back(std::make_shared<sim::RoutingModule>());
     }
-    return m_routing_table.at(device) == link;
+    return modules;
 }
 
 TestLink::TestLink(std::shared_ptr<sim::IRoutingDevice> a_src,
