@@ -20,7 +20,7 @@ jobs:
       run: sudo apt-get install clang-format
     
     - name: Clang format
-      run: clang-format --dry-run -Werror source/*.hpp test/*.cpp main.cpp
+      run: clang-format --dry-run -Werror source/*.hpp test/link/* main.cpp
   build:
     runs-on: ubuntu-latest
     steps:
