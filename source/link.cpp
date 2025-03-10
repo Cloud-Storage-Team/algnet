@@ -20,7 +20,7 @@ Link::Link(std::weak_ptr<IRoutingDevice> a_from,
     }
 }
 
-std::uint32_t Link::get_transmission_time(const Packet& packet) {
+std::uint32_t Link::get_transmission_time(const Packet& packet) const {
     if (m_speed_mbps == 0) {
         // TODO: warning log
         return 0;
