@@ -66,7 +66,7 @@ private:
     // Queue at the ingress port of the m_next device
     std::queue<Packet> m_next_ingress;
 
-    std::uint32_t get_transmission_time(const Packet& packet);
+    std::uint32_t get_transmission_time(const Packet& packet) const;
 };
 
 }  // namespace sim
