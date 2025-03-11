@@ -6,7 +6,7 @@
 
 namespace test {
 
-TEST_F(LinkTest, ScheduledCorrectly) { 
+TEST_F(LinkTest, ScheduledCorrectly) {
     std::shared_ptr<sim::IRoutingDevice> src =
         std::make_shared<DeviceMock>(DeviceMock());
     std::shared_ptr<sim::IRoutingDevice> dst =
