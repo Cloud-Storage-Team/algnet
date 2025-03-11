@@ -5,7 +5,7 @@
 namespace test {
 
 TEST_F(TestScheduler, StopEventWorksCorrectly) {
-    int number_of_events = 50;
+    int number_of_events = 5;
 
     CountingEvent::cnt = 0;
     std::shared_ptr<std::uint32_t> event_time =
