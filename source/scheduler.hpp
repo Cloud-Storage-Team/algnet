@@ -25,16 +25,9 @@ public:
         return instance;
     }
 
-<<<<<<< HEAD
-    // TODO: remove implementation and use existing from .cpp
-    void add(const Event& event) {};
-    void clear() {};  // Clear all events
-    void tick();
-=======
     void add(std::unique_ptr<Event> event);
     void clear();  // Clear all events
     bool tick();
->>>>>>> origin/main
 
 private:
     // Private constructor to prevent instantiation
