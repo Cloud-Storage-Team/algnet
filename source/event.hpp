@@ -23,6 +23,7 @@ struct Event {
  */
 struct Generate : public Event {
     Generate(Flow *a_flow, std::uint32_t a_packet_size);
+    ~Generate() = default;
     Flow *flow;
 
     virtual void operator()() final;
@@ -56,6 +57,8 @@ struct Process : public Event {
  * Stop simulation and clear all events remaining in the Scheduler
  */
 struct Stop : public Event {
+    Stop();
+    ~Stop() = default;
     virtual void operator()() final;
 };
 
