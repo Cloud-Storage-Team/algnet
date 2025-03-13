@@ -7,8 +7,8 @@ project(simulator)
 
 option(BUILD_PROJECT "Build tests" ON)
 
+include_directories(${CMAKE_SOURCE_DIR}/spdlog/include/)
 if (BUILD_PROJECT)
-    include_directories(${CMAKE_SOURCE_DIR}/spdlog/include/)
     set(TARGET_NAME "${PROJECT_NAME}")
     file(GLOB_RECURSE src "source/*.cpp")
     add_executable(${TARGET_NAME} main.cpp ${src})
