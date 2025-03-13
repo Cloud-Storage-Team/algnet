@@ -63,7 +63,7 @@ std::optional<Packet> Link::get_packet() {
 
 std::shared_ptr<IRoutingDevice> Link::get_from() const {
     if (m_from.expired()) {
-        spdlog::info("Source device pointer is expired");
+        spdlog::warn("Source device pointer is expired");
         return nullptr;
     }
 
