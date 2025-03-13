@@ -22,6 +22,8 @@ public:
      * based on the egress queueing and transmission delays.
      */
     void schedule_arrival(Packet a_packet);
+    std::shared_ptr<IRoutingDevice> get_from() const;
+    std::shared_ptr<IRoutingDevice> get_to() const;
 
 private:
     IRoutingDevice* m_from;

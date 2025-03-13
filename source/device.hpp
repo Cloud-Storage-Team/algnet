@@ -34,6 +34,7 @@ public:
     virtual std::shared_ptr<Link> get_destination(
         std::shared_ptr<IRoutingDevice> dest) const = 0;
     virtual std::vector<std::shared_ptr<IRoutingDevice>> get_neighbors() = 0;
+    virtual std::vector<std::shared_ptr<Link>> get_outlinks() const = 0;
 };
 
 class RoutingModule : public IRoutingDevice {
@@ -48,6 +49,7 @@ public:
     std::shared_ptr<Link> next_inlink() final;
     std::shared_ptr<Link> get_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;
+    virtual std::vector<std::shared_ptr<Link>> get_outlinks() const final;     
 
 private:
     // Ordered set as we need to iterate over the ingress buffers
