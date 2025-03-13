@@ -11,7 +11,6 @@ void RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
 
 void RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                          std::shared_ptr<ILink> link) {
-    // TODO: discuss this
     if (dest == nullptr) {
         return;
     }
@@ -32,7 +31,6 @@ std::shared_ptr<ILink> RoutingModule::next_inlink() {
 
 std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
     std::shared_ptr<IRoutingDevice> dest) const {
-    // TODO: discuss nullptr
     auto iter = m_routing_table.find(dest);
     if (iter != m_routing_table.end()) {
         return iter->second;

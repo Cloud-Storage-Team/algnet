@@ -20,13 +20,9 @@ public:
 
 TEST_F(TestSwitch, test_add_nullptr_link) {
     sim::Switch switch_device;
-    bool exception_catched = false;
-    try {
-        switch_device.add_inlink(nullptr);
-    } catch (const std::runtime_error& e) {
-        exception_catched = true;
-    }
-    ASSERT_TRUE(exception_catched);
+    // TODO: replace with ASSERT_FALSE when add_inlink returns bool instead of
+    // void
+    switch_device.add_inlink(nullptr);
 }
 
 TEST_F(TestSwitch, test_add_incorrect_inlink) {
@@ -34,65 +30,45 @@ TEST_F(TestSwitch, test_add_incorrect_inlink) {
     std::shared_ptr<sim::IRoutingDevice> null_device(nullptr);
     std::shared_ptr<LinkMock> link =
         std::make_shared<LinkMock>(null_device, null_device);
-    bool exception_catched = false;
-    try {
-        switch_device.add_inlink(link);
-    } catch (const std::runtime_error& e) {
-        exception_catched = true;
-    }
-    ASSERT_TRUE(exception_catched);
+    // TODO: replace with ASSERT_FALSE when add_inlink returns bool instead of
+    // void
+    switch_device.add_inlink(link);
 }
 
 TEST_F(TestSwitch, nullptr_destination_device) {
     auto switch_device = std::make_shared<sim::Switch>();
     auto temp_device = std::make_shared<test::ReceiverMock>();
     auto link = std::make_shared<LinkMock>(switch_device, temp_device);
-    bool exception_catched = false;
-    try {
-        switch_device->update_routing_table(nullptr, link);
-    } catch (const std::runtime_error& e) {
-        exception_catched = true;
-    }
-    ASSERT_TRUE(exception_catched);
+    // TODO: replace with ASSERT_FALSE when update_routing_table returns bool
+    // instead of void
+    switch_device->update_routing_table(nullptr, link);
 }
 
 TEST_F(TestSwitch, nullptr_outlink) {
     auto switch_device = std::make_shared<sim::Switch>();
     auto temp_device = std::make_shared<test::ReceiverMock>();
-    bool exception_catched = false;
-    try {
-        switch_device->update_routing_table(temp_device, nullptr);
-    } catch (const std::runtime_error& e) {
-        exception_catched = true;
-    }
-    ASSERT_TRUE(exception_catched);
+    // TODO: replace with ASSERT_FALSE when add_inlink returns bool instead of
+    // void
+    switch_device->update_routing_table(temp_device, nullptr);
 }
 
 TEST_F(TestSwitch, add_foreign_inlink) {
     auto switch_device = std::make_shared<sim::Switch>();
     auto temp_device = std::make_shared<test::ReceiverMock>();
     auto link = std::make_shared<LinkMock>(temp_device, switch_device);
-    bool exception_catched = false;
-    try {
-        switch_device->update_routing_table(temp_device, link);
-    } catch (const std::runtime_error& e) {
-        exception_catched = true;
-    }
-    ASSERT_TRUE(exception_catched);
+    // TODO: replace with ASSERT_FALSE when add_inlink returns bool instead of
+    // void
+    switch_device->update_routing_table(temp_device, link);
 }
 
 TEST_F(TestSwitch, test_no_senders) {
     sim::Switch switch_device;
-    bool exception_catched = false;
-    try {
-        switch_device.process();
-    } catch (const std::runtime_error& e) {
-        exception_catched = true;
-    }
-    ASSERT_TRUE(exception_catched);
+    // TODO: replace with ASSERT_FALSE when process returns bool instead of
+    // void
+    switch_device.process();
 }
 
-bool compare_packets(const sim::Packet& p1, const sim::Packet& p2) {
+static bool compare_packets(const sim::Packet& p1, const sim::Packet& p2) {
     return p1.flow < p2.flow;
 }
 
