@@ -18,9 +18,11 @@ jobs:
 
     - name: Set up Clang Format
       run: sudo apt-get install clang-format
-
+    - name: Find files for clang-format
+      run: 
     - name: Clang format
-      run: clang-format --dry-run -Werror source/*.hpp test/switch/*.cpp main.cpp
+      run:
+        clang-format --dry-run -Werror source/*.hpp test/switch/*.cpp main.cpp
   build:
     runs-on: ubuntu-latest
     steps:
