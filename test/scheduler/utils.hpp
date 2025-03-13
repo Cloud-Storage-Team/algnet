@@ -5,8 +5,8 @@
 #include <ctime>
 #include <type_traits>
 
-#include "../../source/event.hpp"
-#include "../../source/scheduler.hpp"
+#include "event.hpp"
+#include "scheduler.hpp"
 
 namespace test {
 
