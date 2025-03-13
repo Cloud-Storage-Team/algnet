@@ -11,7 +11,7 @@ namespace sim {
 // Base class for event
 struct Event {
     std::uint32_t time;
-    virtual ~Event();
+    virtual ~Event() = default;
     virtual void operator()() = 0;
     bool operator>(const Event &other) const { return time > other.time; }
 };
@@ -22,8 +22,9 @@ struct Event {
  * Schedule the next packet generation event.
  */
 struct Generate : public Event {
-    Generate(IFlow *a_flow, std::uint32_t a_packet_size);
-    IFlow *flow;
+    Generate(Flow *a_flow, std::uint32_t a_packet_size);
+    ~Generate() = default;
+    Flow *flow;
 
     virtual void operator()() final;
 };
@@ -32,8 +33,9 @@ struct Generate : public Event {
  * Enqueue the packet to the ingress port of the next node
  */
 struct Arrive : public Event {
-    Arrive(ILink *a_link, Packet *a_packet);
-    ILink *link;
+    Arrive(Link *a_link, Packet *a_packet);
+    ~Arrive() = default;
+    Link *link;
     Packet *packet;
 
     virtual void operator()() final;
@@ -54,6 +56,8 @@ struct Process : public Event {
  * Stop simulation and clear all events remaining in the Scheduler
  */
 struct Stop : public Event {
+    Stop();
+    ~Stop() = default;
     virtual void operator()() final;
 };
 

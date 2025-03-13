@@ -20,6 +20,7 @@ option(BUILD_TESTS "Build tests" ON)
 
 if(BUILD_TESTS)
     add_subdirectory(googletest)
+
     set(TEST_NAME "test_simulator")
     add_executable(${TEST_NAME} ${src} ${tests})
     target_link_libraries(${TEST_NAME} gtest gtest_main)
