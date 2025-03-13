@@ -1,5 +1,7 @@
 #include "simulator.hpp"
 
+#include <spdlog/spdlog.h>
+
 #include <memory>
 #include <set>
 
@@ -16,24 +18,34 @@ Simulator::Simulator() : m_scheduler(Scheduler::get_instance()) {}
 std::shared_ptr<IRoutingDevice> Simulator::add_device(std::string a_name,
                                                       DeviceType a_type) {
     if (m_graph.find(a_name) != m_graph.end()) {
+        spdlog::warn("add_device failed: device with name {} already exists.",
+                     a_name);
         return nullptr;
     }
     switch (a_type) {
         case DeviceType::SENDER:
-            m_graph[a_name] = std::make_shared<Sender>();
+            m_graph[a_name] = std::make_shared<ISender>();
             break;
         case DeviceType::SWITCH:
-            m_graph[a_name] = std::make_shared<Switch>();
+            m_graph[a_name] = std::make_shared<ISwitch>();
             break;
         case DeviceType::RECEIVER:
-            m_graph[a_name] = std::make_shared<Receiver>();
+            m_graph[a_name] = std::make_shared<IReceiver>();
             break;
     }
     return m_graph[a_name];
 }
 
-void Simulator::add_flow(ISender* a_from, IReceiver* a_to) {
-    m_flows.emplace_back(a_from, a_to, 0.f);
+void Simulator::add_flow(std::shared_ptr<IRoutingDevice> a_from,
+                         std::shared_ptr<IRoutingDevice> a_to) {
+    ISender* sender = dynamic_cast<ISender*>(a_from.get());
+    IReceiver* receiver = dynamic_cast<IReceiver*>(a_to.get());
+    if (sender == nullptr || receiver == nullptr) {
+        spdlog::warn(
+            "add_flow failed: a_from (ISender) and a_to (IReceiver) required");
+        return;
+    }
+    m_flows.emplace_back(sender, receiver, 0.f);
 }
 
 void Simulator::add_link(std::shared_ptr<IRoutingDevice> a_from,
