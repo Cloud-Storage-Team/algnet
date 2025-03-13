@@ -1,3 +1,5 @@
+#include <spdlog/spdlog.h>
+
 #include "link.hpp"
 
 #include "event.hpp"
@@ -14,15 +16,15 @@ Link::Link(std::weak_ptr<IRoutingDevice> a_from,
       m_transmission_delay(a_delay),
       m_src_egress_delay(0) {
     if (a_from.expired() || a_to.expired()) {
-        // TODO: warning log
+        spdlog::warn("Passed link to device is expired");
     } else if (a_speed_mbps == 0) {
-        // TODO: warning log
+        spdlog::warn("Passed zero link speed");
     }
 }
 
 std::uint32_t Link::get_transmission_time(const Packet& packet) const {
     if (m_speed_mbps == 0) {
-        // TODO: warning log
+        spdlog::warn("Passed zero link speed");
         return 0;
     }
     return (packet.size + m_speed_mbps - 1) / m_speed_mbps +
@@ -31,7 +33,7 @@ std::uint32_t Link::get_transmission_time(const Packet& packet) const {
 
 void Link::schedule_arrival(Packet packet) {
     if (m_to.expired()) {
-        // TODO: warning log
+        spdlog::warn("Destination device pointer is expired");
         return;
     }
 
@@ -50,7 +52,7 @@ void Link::process_arrival(Packet packet) {
 
 std::optional<Packet> Link::get_packet() {
     if (m_next_ingress.empty()) {
-        // TODO: info log
+        spdlog::info("Ingress packet queue is empty");
         return {};
     }
 
@@ -61,7 +63,7 @@ std::optional<Packet> Link::get_packet() {
 
 std::shared_ptr<IRoutingDevice> Link::get_from() const {
     if (m_from.expired()) {
-        // TODO: warning log
+        spdlog::info("Source device pointer is expired");
         return nullptr;
     }
 
@@ -70,7 +72,7 @@ std::shared_ptr<IRoutingDevice> Link::get_from() const {
 
 std::shared_ptr<IRoutingDevice> Link::get_to() const {
     if (m_to.expired()) {
-        // TODO: warning log
+        spdlog::warn("Destination device pointer is expired");
         return nullptr;
     }
 

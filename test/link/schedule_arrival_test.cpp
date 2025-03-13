@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "../../source/packet.hpp"
-#include "../../source/scheduler.hpp"
+#include "packet.hpp"
+#include "scheduler.hpp"
 #include "utils.hpp"
 
 namespace test {
@@ -13,8 +13,8 @@ TEST_F(LinkTest, ScheduledCorrectly) {
         std::make_shared<DeviceMock>(DeviceMock());
     auto link = sim::Link(src, dst, 10, 10);
 
-    int AMOUNT_OF_PACKETS = 10;
-    for (int i = 0; i < AMOUNT_OF_PACKETS; i++) {
+    int NUMBER_OF_PACKETS = 10;
+    for (int i = 0; i < NUMBER_OF_PACKETS; i++) {
         link.schedule_arrival(sim::Packet(sim::DATA, 100));
     }
 
@@ -22,9 +22,9 @@ TEST_F(LinkTest, ScheduledCorrectly) {
     while (sim::Scheduler::get_instance().tick()) {
         cnt++;
     }
-    ASSERT_EQ(cnt, AMOUNT_OF_PACKETS);
+    ASSERT_EQ(cnt, NUMBER_OF_PACKETS);
 
-    for (int i = 0; i < AMOUNT_OF_PACKETS; i++) {
+    for (int i = 0; i < NUMBER_OF_PACKETS; i++) {
         ASSERT_TRUE(link.get_packet().has_value());
     }
 

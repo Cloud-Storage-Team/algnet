@@ -1,6 +1,6 @@
 #include "utils.hpp"
 
-#include "../../source/scheduler.hpp"
+#include "scheduler.hpp"
 
 namespace test {
 

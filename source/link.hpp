@@ -57,6 +57,8 @@ public:
 
     // TODO: move to realisation
 private:
+    std::uint32_t get_transmission_time(const Packet& packet) const;
+
     std::weak_ptr<IRoutingDevice> m_from;
     std::weak_ptr<IRoutingDevice> m_to;
     std::uint32_t m_speed_mbps;
@@ -65,8 +67,6 @@ private:
 
     // Queue at the ingress port of the m_next device
     std::queue<Packet> m_next_ingress;
-
-    std::uint32_t get_transmission_time(const Packet& packet) const;
 };
 
 }  // namespace sim
