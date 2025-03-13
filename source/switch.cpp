@@ -28,7 +28,7 @@ std::shared_ptr<ILink> Switch::get_destination(
 DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
 
 void Switch::process() {
-    std::shared_ptr<ILink> link = m_router->next_inlink();
+    std::shared_ptr<ILink> link = next_inlink();
 
     // TODO: discuss this
     if (link == nullptr) {
@@ -36,15 +36,19 @@ void Switch::process() {
     }
 
     Packet packet = link->get_packet();
-    IReceiver* destination = packet.flow->get_destination();
+    if (packet.flow == nullptr) {
+        // TODO: change runtime_error to log warning
+        throw std::runtime_error("No flow in packet");
+    }
+    std::shared_ptr<IReceiver> destination =
+        std::shared_ptr<IReceiver>(packet.flow->get_destination());
     // TODO:: remove creating smart pointer from here
-    std::shared_ptr<ILink> next_link =
-        get_destination(std::shared_ptr<IRoutingDevice>(destination));
+    std::shared_ptr<ILink> next_link = get_destination(destination);
 
     // TODO: discuss this
     if (next_link == nullptr) {
-        // TODO: write warning to log
-        return;
+        // TODO: replace error thow to warning logging
+        throw std::runtime_error("No link corresponds to destination device");
     }
     next_link->schedule_arrival(packet);
 }

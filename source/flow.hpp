@@ -14,7 +14,7 @@ public:
     // Update the internal state according to some congestion control algorithm
     // Call try_to_generate upon the update
     virtual void update() = 0;
-    virtual IReceiver *get_destination() const = 0;
+    virtual std::shared_ptr<IReceiver> get_destination() const = 0;
 };
 
 class Flow : IFlow {
@@ -33,7 +33,7 @@ public:
     // Call try_to_generate upon the update
     void update() final;
 
-    IReceiver *get_destination() const final;
+    std::shared_ptr<IReceiver> get_destination() const final;
 
 private:
     ISender *m_src;

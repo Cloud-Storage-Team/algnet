@@ -1,5 +1,7 @@
 #include "device.hpp"
 
+#include <iostream>
+
 #include "link.hpp"
 
 namespace sim {
