@@ -9,7 +9,7 @@ void ReceiverMock::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
 
 std::shared_ptr<sim::ILink> ReceiverMock::next_inlink() { return nullptr; }
 
-std::shared_ptr<sim::ILink> ReceiverMock::get_destination(
+std::shared_ptr<sim::ILink> ReceiverMock::get_link_to_destination(
     std::shared_ptr<IRoutingDevice> dest) const {
     return nullptr;
 }

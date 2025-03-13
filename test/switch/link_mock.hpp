@@ -4,7 +4,8 @@
 
 class LinkMock : public sim::ILink {
 public:
-    LinkMock();
+    LinkMock(std::weak_ptr<sim::IRoutingDevice> a_from,
+             std::weak_ptr<sim::IRoutingDevice> a_to);
     void schedule_arrival(sim::Packet a_packet) final;
     sim::Packet get_packet() final;
     std::shared_ptr<sim::IRoutingDevice> get_from() const final;
@@ -14,6 +15,8 @@ public:
     std::vector<sim::Packet> get_arrived_packets() const;
 
 private:
+    std::weak_ptr<sim::IRoutingDevice> m_from;
+    std::weak_ptr<sim::IRoutingDevice> m_to;
     std::vector<sim::Packet> m_arrived_packets;
     sim::Packet m_ingress_packet;
 };

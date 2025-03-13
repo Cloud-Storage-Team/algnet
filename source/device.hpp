@@ -31,7 +31,7 @@ public:
                                       std::shared_ptr<ILink> link) = 0;
 
     virtual std::shared_ptr<ILink> next_inlink() = 0;
-    virtual std::shared_ptr<ILink> get_destination(
+    virtual std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> dest) const = 0;
 };
 
@@ -45,7 +45,7 @@ public:
 
     // returns next inlink and moves inlinks set iterator forward
     std::shared_ptr<ILink> next_inlink() final;
-    std::shared_ptr<ILink> get_destination(
+    std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;
 
 private:

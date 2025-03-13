@@ -1,7 +1,5 @@
 #include "device.hpp"
 
-#include <iostream>
-
 #include "link.hpp"
 
 namespace sim {
@@ -32,7 +30,7 @@ std::shared_ptr<ILink> RoutingModule::next_inlink() {
     return link;
 }
 
-std::shared_ptr<ILink> RoutingModule::get_destination(
+std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
     std::shared_ptr<IRoutingDevice> dest) const {
     // TODO: discuss nullptr
     auto iter = m_routing_table.find(dest);
