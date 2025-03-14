@@ -1,4 +1,5 @@
 #include "tcp_flow.hpp"
+
 #include "event.hpp"
 #include "packet.hpp"
 #include "scheduler.hpp"
@@ -6,9 +7,9 @@
 
 namespace sim {
 
-    TCPFlow::TCPFlow(ISender *a_src, IReceiver *a_dest, std::uint32_t a_packet_size,
-           std::uint32_t a_delay_between_packets, std::uint32_t a_total_packets,
-           std::uint32_t a_delay_threshold)
+TCPFlow::TCPFlow(ISender *a_src, IReceiver *a_dest, std::uint32_t a_packet_size,
+                 std::uint32_t a_delay_between_packets,
+                 std::uint32_t a_total_packets, std::uint32_t a_delay_threshold)
     : Flow(a_src, a_dest, a_packet_size),
       m_delay_between_packets(a_delay_between_packets),
       m_total_packets(a_total_packets),
@@ -21,9 +22,7 @@ namespace sim {
       m_last_send_time(0),
       m_delay_threshold(a_delay_threshold) {}
 
-void TCPFlow::start(std::uint32_t time) {
-    schedule_packet_generation(time);
-}
+void TCPFlow::start(std::uint32_t time) { schedule_packet_generation(time); }
 
 bool TCPFlow::try_to_generate(std::uint32_t a_current_time) {
     if (m_packets_sent >= m_total_packets) {  // stop generate packets
