@@ -24,13 +24,13 @@ std::shared_ptr<IRoutingDevice> Simulator::add_device(std::string a_name,
     }
     switch (a_type) {
         case DeviceType::SENDER:
-            m_graph[a_name] = std::make_shared<ISender>();
+            m_graph[a_name] = std::make_shared<Sender>();
             break;
         case DeviceType::SWITCH:
-            m_graph[a_name] = std::make_shared<ISwitch>();
+            m_graph[a_name] = std::make_shared<Switch>();
             break;
         case DeviceType::RECEIVER:
-            m_graph[a_name] = std::make_shared<IReceiver>();
+            m_graph[a_name] = std::make_shared<Receiver>();
             break;
     }
     return m_graph[a_name];
@@ -107,6 +107,7 @@ void Simulator::recalculate_paths() {
 }
 
 void Simulator::start(std::uint32_t a_stop_time) {
+    recalculate_paths();
     m_scheduler.add(std::move(std::make_unique<Stop>(a_stop_time)));
     while (m_scheduler.tick()) {
     }
