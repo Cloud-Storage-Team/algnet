@@ -33,7 +33,7 @@ public:
     */
     void update(std::uint32_t delay) override;
 
-private:
+public:
     std::uint32_t m_delay_between_packets;
     std::uint32_t m_total_packets;
     std::uint32_t m_packets_sent;
