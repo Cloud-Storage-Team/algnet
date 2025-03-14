@@ -6,11 +6,11 @@
 
 namespace sim {
 
-class Flow {
+class IFlow {
 public:
-    virtual ~Flow() = default;
+    virtual ~IFlow() = default;
 
-    Flow(ISender *a_src, IReceiver *a_dest, uint32_t a_packet_size);
+    IFlow(ISender *a_src, IReceiver *a_dest, uint32_t a_packet_size);
 
     // Start at time
     virtual void start(std::uint32_t time) = 0;
