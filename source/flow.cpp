@@ -7,9 +7,9 @@ Flow::Flow(ISender *a_src, IReceiver *a_dest, uint32_t a_packet_size)
     : m_src(a_src), m_dest(a_dest), m_packet_size(a_packet_size) {}
 
 void Flow::schedule_packet_generation(std::uint32_t time) {
-    Generate generate_event(this);
-    generate_event.time = time;
-    Scheduler::get_instance().add(generate_event);
+    auto generate_event_ptr = std::make_unique<Generate>(Generate(this));
+    generate_event_ptr->time = time;
+    Scheduler::get_instance().add(std::move(generate_event_ptr));
 }
 
 void Flow::generate_packet() {

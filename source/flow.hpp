@@ -13,7 +13,7 @@ public:
     Flow(ISender *a_src, IReceiver *a_dest, uint32_t a_packet_size);
 
     // Start at time
-    virtual void start(std::uint32_t time);
+    virtual void start(std::uint32_t time) = 0;
 
     // Try to generate a new packet if the internal state allows to do so.
     // Returns true if a generate_event was created and placed in scheduler
