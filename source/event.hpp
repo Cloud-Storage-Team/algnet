@@ -22,7 +22,8 @@ struct Event {
  * Schedule the next packet generation event.
  */
 struct Generate : public Event {
-    Generate(Flow *a_flow);
+    Generate(Flow *flow);
+    ~Generate() = default;
     Flow *flow;
 
     virtual void operator()() final;
