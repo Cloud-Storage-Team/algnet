@@ -1,10 +1,12 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 #include "device.hpp"
+#include "link.hpp"
 #include "scheduler.hpp"
 
 namespace sim {
@@ -13,9 +15,12 @@ class Simulator {
 public:
     Simulator();
     ~Simulator();
-    IRoutingDevice* add_device(std::string a_name, DeviceType a_type);
-    void add_flow(ISender* a_from, IReceiver* a_to);
-    void add_link(IRoutingDevice* a_from, IRoutingDevice* a_to,
+    std::shared_ptr<IRoutingDevice> add_device(std::string a_name,
+                                               DeviceType a_type);
+    void add_flow(std::shared_ptr<IRoutingDevice> a_from,
+                  std::shared_ptr<IRoutingDevice> a_to);
+    void add_link(std::shared_ptr<IRoutingDevice> a_from,
+                  std::shared_ptr<IRoutingDevice> a_to,
                   std::uint32_t a_speed_mbps, std::uint32_t a_delay);
     // Clear all events in the Scheduler
     void clear();
@@ -26,8 +31,9 @@ public:
 
 private:
     Scheduler& m_scheduler;
-    std::unordered_map<std::string, IRoutingDevice*> m_graph;
+    std::unordered_map<std::string, std::shared_ptr<IRoutingDevice>> m_graph;
     std::vector<Flow> m_flows;
+    std::vector<std::shared_ptr<Link>> m_links;
 };
 
 }  // namespace sim
