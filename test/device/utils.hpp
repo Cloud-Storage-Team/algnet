@@ -8,7 +8,8 @@ namespace test {
 
 class Link;
 
-std::vector<std::shared_ptr<sim::RoutingModule>> createRoutingModules(size_t count);
+std::vector<std::shared_ptr<sim::RoutingModule>> createRoutingModules(
+    size_t count);
 
 class TestLink : public sim::ILink {
 public:

@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
-#include <random> // Include for random number generation
-#include <algorithm> // Include for std::shuffle
+
+#include <algorithm>  // Include for std::shuffle
+#include <random>     // Include for random number generation
 
 #include "utils.hpp"
 
@@ -43,7 +44,8 @@ TEST_F(Neighbours, NeighboursAreCalculatedCorrectly) {
         source->get_neighbours();
     EXPECT_TRUE(neighbours.size() == 3);
     for (auto neighbour : neighbours) {
-        EXPECT_TRUE(neighbour == target_neighbours[0] || neighbour == target_neighbours[1] ||
+        EXPECT_TRUE(neighbour == target_neighbours[0] ||
+                    neighbour == target_neighbours[1] ||
                     neighbour == target_neighbours[2]);
     }
 }

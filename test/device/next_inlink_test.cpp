@@ -16,7 +16,8 @@ TEST_F(LinkToDevice, RoundRobin) {
     int NUMBER_OF_LINKS = 5;
 
     for (int i = 0; i < NUMBER_OF_LINKS; i++) {
-        dest->add_inlink(std::make_shared<TestLink>(TestLink(source, dest, sim::Packet(sim::DATA, i))));
+        dest->add_inlink(std::make_shared<TestLink>(
+            TestLink(source, dest, sim::Packet(sim::DATA, i))));
     }
 
     std::set<std::uint32_t> sizes{};
@@ -26,7 +27,7 @@ TEST_F(LinkToDevice, RoundRobin) {
 
     EXPECT_EQ(sizes.size(), NUMBER_OF_LINKS);
     int size = 0;
-    for (auto num: sizes) {
+    for (auto num : sizes) {
         EXPECT_EQ(num, size++);
     }
 }
