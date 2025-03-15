@@ -6,8 +6,8 @@ namespace test {
 
 class UpdateTable : public testing::Test {
 public:
-    void TearDown() override{};
-    void SetUp() override{};
+    void TearDown() override {};
+    void SetUp() override {};
 };
 
 TEST_F(UpdateTable, RouteIsPresent) {

@@ -9,8 +9,8 @@ namespace test {
 
 class Neighbours : public testing::Test {
 public:
-    void TearDown() override{};
-    void SetUp() override{};
+    void TearDown() override {};
+    void SetUp() override {};
 };
 
 TEST_F(Neighbours, NeighboursAreCalculatedCorrectly) {
