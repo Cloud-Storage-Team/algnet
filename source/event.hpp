@@ -22,9 +22,9 @@ struct Event {
  * Schedule the next packet generation event.
  */
 struct Generate : public Event {
-    Generate(Flow *a_flow, std::uint32_t a_packet_size);
+    Generate(IFlow *flow);
     ~Generate() = default;
-    Flow *flow;
+    IFlow *flow;
 
     virtual void operator()() final;
 };

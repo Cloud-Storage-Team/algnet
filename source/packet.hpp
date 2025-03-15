@@ -21,7 +21,7 @@ struct Packet {
 
     PacketType type;
     std::uint32_t size;
-    Flow* flow;
+    IFlow* flow;
 };
 
 }  // namespace sim
