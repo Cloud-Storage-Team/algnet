@@ -60,6 +60,8 @@ private:
     std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<ILink>>
         m_routing_table;
 
+    std::set<std::shared_ptr<IRoutingDevice>> m_neighbours;
+
     // Iterator for the next ingress to process
     std::set<std::shared_ptr<ILink>>::iterator m_next_inlink;
 };

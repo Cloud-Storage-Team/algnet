@@ -11,7 +11,22 @@ std::vector<std::shared_ptr<sim::RoutingModule>> createRoutingModules(size_t cou
 }
 
 TestLink::TestLink(std::shared_ptr<sim::IRoutingDevice> a_src,
-                   std::shared_ptr<sim::IRoutingDevice> a_dest)
-    : sim::Link(a_src, a_dest, 0, 0) {}
+                   std::shared_ptr<sim::IRoutingDevice> a_dest,
+                   sim::Packet packet_to_return)
+    : src(a_src), dst(a_dest), packet(packet_to_return)  {}
+
+void TestLink::schedule_arrival(sim::Packet packet) {};
+void TestLink::process_arrival(sim::Packet packet) {};
+
+std::optional<sim::Packet> TestLink::get_packet() {
+    return {packet};
+};
+
+std::shared_ptr<sim::IRoutingDevice> TestLink::get_from() const {
+    return src;
+};
+std::shared_ptr<sim::IRoutingDevice> TestLink::get_to() const {
+    return dst;
+};
 
 }  // namespace test

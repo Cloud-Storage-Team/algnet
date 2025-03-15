@@ -1,3 +1,5 @@
+#include <spdlog/spdlog.h>
+
 #include "device.hpp"
 
 #include <iostream>
@@ -9,8 +11,8 @@ namespace sim {
 
 void RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
     if (link == nullptr) {
-         //TODO: add warning to log
-           return;
+        spdlog::warn("Link is nullptr");
+        return;
     }
     m_inlinks.insert(link);
     m_next_inlink = m_inlinks.begin();
@@ -18,6 +20,24 @@ void RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
 
 void RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                          std::shared_ptr<ILink> link) {
+    if (link == nullptr) {
+        spdlog::warn("Unexpected nullptr link");
+        return;
+    }
+
+    if (dest == nullptr) {
+        spdlog::warn("Unexpected nullptr destination");
+        return;
+    }
+
+    auto link_dest = link->get_to();
+    if (link_dest == nullptr) {
+        spdlog::warn("Unexpected nullptr link destination");
+        return;
+    }
+
+    // TODO: discuss storing weak_ptrs instead of shared
+    m_neighbours.insert(link_dest);
     m_routing_table[dest] = link;
 }
 
@@ -35,6 +55,10 @@ std::vector<std::shared_ptr<IRoutingDevice>> RoutingModule::get_neighbours()
 
 std::shared_ptr<ILink> RoutingModule::get_link_to_device(
     std::shared_ptr<IRoutingDevice> device) const {
+    if (device == nullptr) {
+        spdlog::warn("Unexpected nullptr device");
+        return nullptr;
+    }
     auto iterator = m_routing_table.find(device);
     if (iterator == m_routing_table.end()) {
         return nullptr;
@@ -45,6 +69,7 @@ std::shared_ptr<ILink> RoutingModule::get_link_to_device(
 
 std::shared_ptr<ILink> RoutingModule::next_inlink() {
     if (m_inlinks.empty()) {
+        spdlog::info("Inlinks storage is empty");
         return nullptr;
     }
 

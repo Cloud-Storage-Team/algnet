@@ -20,13 +20,13 @@ TEST_F(UpdateTable, RouteIsPresent) {
     auto link_neighbour =
         std::make_shared<TestLink>(TestLink(source, neighbour));
 
-    EXPECT_FALSE(source->check_route(dest, link_neighbour));
-    EXPECT_FALSE(source->check_route(another_dest, link_neighbour));
+    EXPECT_EQ(source->get_link_to_device(dest), nullptr);
+    EXPECT_EQ(source->get_link_to_device(another_dest), nullptr);
 
     source->update_routing_table(dest, link_neighbour);
 
-    EXPECT_TRUE(source->check_route(dest, link_neighbour));
-    EXPECT_FALSE(source->check_route(another_dest, link_neighbour));
+    EXPECT_EQ(source->get_link_to_device(dest), link_neighbour);
+    EXPECT_EQ(source->get_link_to_device(another_dest), nullptr);
 }
 
 }  // namespace test

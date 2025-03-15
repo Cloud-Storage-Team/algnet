@@ -52,6 +52,7 @@ public:
     virtual void process_arrival(Packet packet) final;
 
     virtual std::optional<Packet> get_packet() final;
+    // TODO: discuss returning weak_ptrs instead of shared
     virtual std::shared_ptr<IRoutingDevice> get_from() const final;
     virtual std::shared_ptr<IRoutingDevice> get_to() const final;
 
