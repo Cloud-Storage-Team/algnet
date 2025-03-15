@@ -55,7 +55,6 @@ public:
     virtual std::shared_ptr<IRoutingDevice> get_from() const final;
     virtual std::shared_ptr<IRoutingDevice> get_to() const final;
 
-    // TODO: move to realisation
 private:
     std::uint32_t get_transmission_time(const Packet& packet) const;
 
