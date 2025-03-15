@@ -10,6 +10,7 @@ option(BUILD_PROJECT "Build tests" ON)
 file(GLOB_RECURSE src "source/*.cpp")
 file(GLOB_RECURSE tests "test/*.cpp")
 
+include_directories(${CMAKE_SOURCE_DIR}/spdlog/include/)
 if (BUILD_PROJECT)
     set(TARGET_NAME "${PROJECT_NAME}")
     add_executable(${TARGET_NAME} main.cpp ${src})
@@ -20,6 +21,7 @@ option(BUILD_TESTS "Build tests" ON)
 
 if(BUILD_TESTS)
     add_subdirectory(googletest)
+
     set(TEST_NAME "test_simulator")
     add_executable(${TEST_NAME} ${src} ${tests})
     target_include_directories(${TEST_NAME} PUBLIC "source")

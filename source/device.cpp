@@ -7,7 +7,7 @@
 
 namespace sim {
 
-void RoutingModule::add_inlink(std::shared_ptr<Link> link) {
+void RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
     if (link == nullptr) {
          //TODO: add warning to log
            return;
@@ -17,7 +17,7 @@ void RoutingModule::add_inlink(std::shared_ptr<Link> link) {
 }
 
 void RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                         std::shared_ptr<Link> link) {
+                                         std::shared_ptr<ILink> link) {
     m_routing_table[dest] = link;
 }
 
@@ -25,7 +25,7 @@ std::vector<std::shared_ptr<IRoutingDevice>> RoutingModule::get_neighbours()
     const {
     std::unordered_set<std::shared_ptr<IRoutingDevice>> outlinks;
     for (auto device_link : m_routing_table) {
-        outlinks.emplace((device_link.second)->get_dest());
+        outlinks.emplace((device_link.second)->get_to());
     }
 
     std::vector<std::shared_ptr<IRoutingDevice>> neighbours{};
@@ -33,7 +33,7 @@ std::vector<std::shared_ptr<IRoutingDevice>> RoutingModule::get_neighbours()
     return neighbours;
 }
 
-std::shared_ptr<Link> RoutingModule::get_link_to_device(
+std::shared_ptr<ILink> RoutingModule::get_link_to_device(
     std::shared_ptr<IRoutingDevice> device) const {
     auto iterator = m_routing_table.find(device);
     if (iterator == m_routing_table.end()) {
@@ -43,12 +43,12 @@ std::shared_ptr<Link> RoutingModule::get_link_to_device(
     return (*iterator).second;
 }
 
-std::shared_ptr<Link> RoutingModule::next_inlink() {
+std::shared_ptr<ILink> RoutingModule::next_inlink() {
     if (m_inlinks.empty()) {
         return nullptr;
     }
 
-    std::shared_ptr<Link> link = *m_next_inlink;
+    std::shared_ptr<ILink> link = *m_next_inlink;
     if (++m_next_inlink == m_inlinks.end()) {
         m_next_inlink = m_inlinks.begin();
     }
