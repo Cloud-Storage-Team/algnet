@@ -33,7 +33,7 @@ private:
     Scheduler& m_scheduler;
     std::unordered_map<std::string, std::shared_ptr<IRoutingDevice>> m_graph;
     std::vector<Flow> m_flows;
-    std::vector<std::shared_ptr<Link>> m_links;
+    std::vector<std::shared_ptr<ILink>> m_links;
 };
 
 }  // namespace sim

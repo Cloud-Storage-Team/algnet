@@ -51,17 +51,22 @@ void Simulator::add_flow(std::shared_ptr<IRoutingDevice> a_from,
 void Simulator::add_link(std::shared_ptr<IRoutingDevice> a_from,
                          std::shared_ptr<IRoutingDevice> a_to,
                          std::uint32_t a_speed_mbps, std::uint32_t a_delay) {
+    
+    //std::shared_ptr<Link> link_ptr = std::make_shared<Link>(a_from, a_to, a_speed_mbps, a_delay);
     m_links.emplace_back(
         std::make_shared<Link>(a_from, a_to, a_speed_mbps, a_delay));
+   
+   //m_links.push_back(link_ptr);
+                        
     a_from->update_routing_table(a_to, m_links.back());
     a_to->add_inlink(m_links.back());
 }
 
 // returns map, that for each meet device gives link to its parent in bfs bypass
 // tree
-std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<Link>> bfs(
+std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<ILink>> bfs(
     std::shared_ptr<IRoutingDevice> start_device) {
-    std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<Link>>
+    std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<ILink>>
         parent_table;
     std::queue<std::shared_ptr<IRoutingDevice>> queue;
     std::set<std::shared_ptr<IRoutingDevice>> used;
@@ -74,8 +79,8 @@ std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<Link>> bfs(
             continue;
         }
         used.insert(device);
-        std::vector<std::shared_ptr<Link>> outlinks = device->get_outlinks();
-        for (std::shared_ptr<Link> link : outlinks) {
+        std::vector<std::shared_ptr<ILink>> outlinks = device->get_outlinks();
+        for (std::shared_ptr<ILink> link : outlinks) {
             if (used.find(link->get_to()) != used.end()) {
                 continue;
             }
@@ -89,7 +94,7 @@ std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<Link>> bfs(
 void Simulator::recalculate_paths() {
     for (auto& [_, src_device] : m_graph) {
         std::unordered_map<std::shared_ptr<IRoutingDevice>,
-                           std::shared_ptr<Link>>
+                           std::shared_ptr<ILink>>
             parent_table = bfs(src_device);
         for (auto& [_, dest_device] : m_graph) {
             if (parent_table.find(dest_device) == parent_table.end()) {
