@@ -33,12 +33,13 @@ struct Generate : public Event {
  * Enqueue the packet to the ingress port of the next node
  */
 struct Arrive : public Event {
-    Arrive(Link *a_link, Packet *a_packet);
+    // TODO: move implementation to .cpp or use existing if present
+    Arrive(ILink *a_link, Packet *a_packet) : link(a_link), packet(a_packet){};
     ~Arrive() = default;
-    Link *link;
+    ILink *link;
     Packet *packet;
 
-    virtual void operator()() final;
+    virtual void operator()() final { link->process_arrival(*packet); };
 };
 
 /**
