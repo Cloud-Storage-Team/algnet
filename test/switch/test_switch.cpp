@@ -2,20 +2,20 @@
 
 #include <vector>
 
-#include "../../source/device.hpp"
-#include "../../source/link.hpp"
-#include "../../source/packet.hpp"
-#include "../../source/switch.hpp"
+#include "device.hpp"
 #include "flow_mock.hpp"
+#include "link.hpp"
 #include "link_mock.hpp"
+#include "packet.hpp"
 #include "receiver_mock.hpp"
+#include "switch.hpp"
 
 namespace test {
 
 class TestSwitch : public testing::Test {
 public:
-    void TearDown() override {};
-    void SetUp() override {};
+    void TearDown() override{};
+    void SetUp() override{};
 };
 
 TEST_F(TestSwitch, test_add_nullptr_link) {

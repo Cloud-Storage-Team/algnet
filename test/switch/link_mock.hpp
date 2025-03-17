@@ -1,6 +1,6 @@
 #pragma once
-#include "../../source/device.hpp"
-#include "../../source/link.hpp"
+#include "device.hpp"
+#include "link.hpp"
 
 class LinkMock : public sim::ILink {
 public:
