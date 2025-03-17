@@ -58,7 +58,12 @@ void Switch::process() {
         return;
     }
 
-    Packet packet = link->get_packet();
+    std::optional<Packet> optional_packet = link->get_packet();
+    if (!optional_packet.has_value()) {
+        LOG_WARN("No packet in link");
+        return;
+    }
+    Packet packet = optional_packet.value();
     if (packet.flow == nullptr) {
         LOG_WARN("No flow in packet");
         return;

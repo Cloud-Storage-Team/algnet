@@ -17,6 +17,11 @@ void DeviceMock::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
 
 };
 
+std::shared_ptr<sim::ILink> DeviceMock::get_link_to_destination(
+    std::shared_ptr<IRoutingDevice> dest) const {
+    return nullptr;
+}
+
 std::shared_ptr<sim::ILink> DeviceMock::next_inlink() { return nullptr; };
 
 }  // namespace test

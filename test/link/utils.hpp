@@ -20,6 +20,9 @@ public:
     virtual void update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                       std::shared_ptr<sim::ILink> link) final;
     virtual std::shared_ptr<sim::ILink> next_inlink() final;
+
+    virtual std::shared_ptr<sim::ILink> get_link_to_destination(
+        std::shared_ptr<IRoutingDevice> dest) const final;
 };
 
 }  // namespace test
