@@ -68,6 +68,43 @@ TEST_F(TestSwitch, test_no_senders) {
     switch_device.process();
 }
 
+TEST_F(TestSwitch, test_no_packets_on_inlinks) {
+    auto switch_device = std::make_shared<sim::Switch>();
+
+    // create links
+    std::shared_ptr<sim::IRoutingDevice> null_device(nullptr);
+    std::shared_ptr<LinkMock> switch_inlink =
+        std::make_shared<LinkMock>(null_device, switch_device);
+
+    switch_device->add_inlink(switch_inlink);
+
+    switch_device->process();
+    // TODO: add ASSERT_FALSE when process returns bool instead of void
+}
+
+TEST_F(TestSwitch, test_no_destination_route) {
+    auto switch_device = std::make_shared<sim::Switch>();
+    auto receiver = std::make_shared<ReceiverMock>();
+    FlowMock flow(receiver);
+    sim::Packet packet(sim::PacketType::DATA, 0, &flow);
+
+    std::shared_ptr<sim::IRoutingDevice> null_device(nullptr);
+    std::shared_ptr<LinkMock> switch_inlink =
+        std::make_shared<LinkMock>(null_device, switch_device);
+    switch_device->add_inlink(switch_inlink);
+    switch_inlink->set_ingress_packet(packet);
+
+    std::shared_ptr<LinkMock> switch_reciever_link =
+        std::make_shared<LinkMock>(switch_device, receiver);
+    // no update of switch routing table
+
+    // TODO: add ASSERT_FALSE when process returns bool instead of void
+    switch_device->process();
+
+    ASSERT_EQ(switch_reciever_link->get_arrived_packets(),
+              std::vector<sim::Packet>());
+}
+
 static bool compare_packets(const sim::Packet& p1, const sim::Packet& p2) {
     return p1.flow < p2.flow;
 }
@@ -99,6 +136,7 @@ void test_senders(size_t senders_count) {
     }
     std::shared_ptr<LinkMock> switch_reciever_link =
         std::make_shared<LinkMock>(switch_device, receiver);
+    switch_device->update_routing_table(receiver, switch_reciever_link);
 
     // set ingress packets
     for (size_t i = 0; i < senders_count; i++) {
@@ -109,7 +147,6 @@ void test_senders(size_t senders_count) {
     for (size_t i = 0; i < senders_count; i++) {
         switch_device->add_inlink(links[i]);
     }
-    switch_device->update_routing_table(receiver, switch_reciever_link);
 
     for (size_t i = 0; i < senders_count; i++) {
         switch_device->process();
