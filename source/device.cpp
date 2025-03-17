@@ -11,9 +11,6 @@ void RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
 
 void RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                          std::shared_ptr<ILink> link) {
-    if (dest == nullptr) {
-        return;
-    }
     m_routing_table[dest] = link;
 }
 

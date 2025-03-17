@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 #include <queue>
 
 #include "packet.hpp"
@@ -25,20 +26,49 @@ public:
 
 class Link : ILink {
 public:
-    Link(IRoutingDevice* a_from, IRoutingDevice* a_to,
-         std::uint32_t a_speed_mbps, std::uint32_t m_delay);
+    virtual ~ILink() = default;
 
     /**
      * Update the source egress delay and schedule the arrival event
      * based on the egress queueing and transmission delays.
      */
-    void schedule_arrival(Packet a_packet) final;
+    virtual void schedule_arrival(Packet packet) = 0;
 
-    Packet get_packet() final;
-    std::shared_ptr<IRoutingDevice> get_from() const final;
-    std::shared_ptr<IRoutingDevice> get_to() const final;
+    /**
+     * Removes packet from the source egress queue.
+     */
+    virtual void process_arrival(Packet packet) = 0;
+
+    virtual std::optional<Packet> get_packet() = 0;
+    virtual std::shared_ptr<IRoutingDevice> get_from() const = 0;
+    virtual std::shared_ptr<IRoutingDevice> get_to() const = 0;
+};
+
+class Link : ILink {
+public:
+    Link(std::weak_ptr<IRoutingDevice> a_from,
+         std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_mbps = 1,
+         std::uint32_t a_delay = 0);
+    virtual ~Link() = default;
+
+    /**
+     * Update the source egress delay and schedule the arrival event
+     * based on the egress queueing and transmission delays.
+     */
+    virtual void schedule_arrival(Packet packet) final;
+
+    /**
+     * Removes packet from the source egress queue.
+     */
+    virtual void process_arrival(Packet packet) final;
+
+    virtual std::optional<Packet> get_packet() final;
+    virtual std::shared_ptr<IRoutingDevice> get_from() const final;
+    virtual std::shared_ptr<IRoutingDevice> get_to() const final;
 
 private:
+    std::uint32_t get_transmission_time(const Packet& packet) const;
+
     std::weak_ptr<IRoutingDevice> m_from;
     std::weak_ptr<IRoutingDevice> m_to;
     std::uint32_t m_speed_mbps;
