@@ -1,6 +1,6 @@
-#include <spdlog/spdlog.h>
-
 #include "device.hpp"
+
+#include <spdlog/spdlog.h>
 
 #include <iostream>
 #include <unordered_set>

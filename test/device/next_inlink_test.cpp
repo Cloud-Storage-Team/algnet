@@ -11,24 +11,38 @@ public:
 };
 
 TEST_F(LinkToDevice, RoundRobin) {
-    auto source = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
+    int NUMBER_OF_LINKS = 2;
+    int NUMBER_OF_LOOPS = 3;
+    auto sources = createRoutingModules(NUMBER_OF_LINKS);
     auto dest = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
-    int NUMBER_OF_LINKS = 5;
 
+    auto links = std::vector<std::shared_ptr<TestLink>>();
     for (int i = 0; i < NUMBER_OF_LINKS; i++) {
-        dest->add_inlink(std::make_shared<TestLink>(
-            TestLink(source, dest, sim::Packet(sim::DATA, i))));
+        links.emplace_back(
+            std::make_shared<TestLink>(TestLink(sources[i], dest)));
     }
 
-    std::set<std::uint32_t> sizes{};
+    EXPECT_EQ(dest->next_inlink(), nullptr);
     for (int i = 0; i < NUMBER_OF_LINKS; i++) {
-        sizes.insert(dest->next_inlink()->get_packet().value().size);
+        dest->add_inlink(links[i]);
+    }
+    dest->add_inlink(links[0]);
+
+    std::vector<std::shared_ptr<sim::ILink>> first_inlinks_loop;
+    for (int i = 0; i < NUMBER_OF_LINKS; i++) {
+        first_inlinks_loop.emplace_back(dest->next_inlink());
     }
 
-    EXPECT_EQ(sizes.size(), NUMBER_OF_LINKS);
-    int size = 0;
-    for (auto num : sizes) {
-        EXPECT_EQ(num, size++);
+    for (int i = 0; i < NUMBER_OF_LOOPS; i++) {
+        std::vector<std::shared_ptr<sim::ILink>> new_inlinks_loop;
+        for (int j = 0; j < NUMBER_OF_LINKS; j++) {
+            new_inlinks_loop.emplace_back(dest->next_inlink());
+        }
+
+        ASSERT_EQ(first_inlinks_loop.size(), new_inlinks_loop.size());
+        for (int j = 0; j < NUMBER_OF_LINKS; j++) {
+            ASSERT_EQ(first_inlinks_loop[j], new_inlinks_loop[j]);
+        }
     }
 }
 
