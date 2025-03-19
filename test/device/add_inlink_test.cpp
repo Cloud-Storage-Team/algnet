@@ -20,7 +20,7 @@ TEST_F(AddInlink, LinkIsPresent) {
     EXPECT_EQ(dest->next_inlink(), link);
 }
 
-TEST_F(AddInlink, SameLinkTwicet) {
+TEST_F(AddInlink, SameLinkTwice) {
     int NUMBER_OF_LINKS = 2;
     int NUMBER_OF_LOOPS = 3;
     auto sources = createRoutingModules(NUMBER_OF_LINKS);
