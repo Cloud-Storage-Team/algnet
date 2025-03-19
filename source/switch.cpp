@@ -28,7 +28,7 @@ void Switch::add_inlink(std::shared_ptr<ILink> link) {
 void Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                   std::shared_ptr<ILink> link) {
     if (dest == nullptr) {
-        LOG_WARN("Destination device does not exists");
+        LOG_WARN("Destination device does not exist");
         return;
     }
     if (link == nullptr) {
