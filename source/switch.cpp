@@ -48,9 +48,9 @@ std::vector<std::shared_ptr<IRoutingDevice>> Switch::get_neighbours() const {
 
 std::shared_ptr<ILink> Switch::next_inlink() { return m_router->next_inlink(); }
 
-std::shared_ptr<ILink> Switch::get_link_to_device(
+std::shared_ptr<ILink> Switch::get_link_to_destination(
     std::shared_ptr<IRoutingDevice> dest) const {
-    return m_router->get_link_to_device(dest);
+    return m_router->get_link_to_destination(dest);
 }
 
 DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
@@ -75,7 +75,7 @@ void Switch::process() {
     }
     std::shared_ptr<IReceiver> destination = packet.flow->get_destination();
 
-    std::shared_ptr<ILink> next_link = get_link_to_device(destination);
+    std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
 
     if (next_link == nullptr) {
         LOG_WARN("No link corresponds to destination device");

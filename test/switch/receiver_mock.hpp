@@ -14,7 +14,7 @@ public:
                               std::shared_ptr<sim::ILink> link) final;
     std::vector<std::shared_ptr<IRoutingDevice>> get_neighbours() const final;
     std::shared_ptr<sim::ILink> next_inlink() final;
-    std::shared_ptr<sim::ILink> get_link_to_device(
+    std::shared_ptr<sim::ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> device) const final;
 
     void process() final;

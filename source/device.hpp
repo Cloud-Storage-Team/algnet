@@ -32,7 +32,7 @@ public:
                                       std::shared_ptr<ILink> link) = 0;
     virtual std::vector<std::shared_ptr<IRoutingDevice>> get_neighbours()
         const = 0;
-    virtual std::shared_ptr<ILink> get_link_to_device(
+    virtual std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> device) const = 0;
     virtual std::shared_ptr<ILink> next_inlink() = 0;
 };
@@ -46,7 +46,7 @@ public:
                                       std::shared_ptr<ILink> link) final;
     virtual std::vector<std::shared_ptr<IRoutingDevice>> get_neighbours()
         const final;
-    virtual std::shared_ptr<ILink> get_link_to_device(
+    virtual std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> device) const final;
 
     // returns next inlink and moves inlinks set iterator forward

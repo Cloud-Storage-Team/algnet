@@ -17,7 +17,7 @@ std::vector<std::shared_ptr<sim::IRoutingDevice>> DeviceMock::get_neighbours() c
     return std::vector<std::shared_ptr<sim::IRoutingDevice>>();
 };
 
-std::shared_ptr<sim::ILink> DeviceMock::get_link_to_device(
+std::shared_ptr<sim::ILink> DeviceMock::get_link_to_destination(
     std::shared_ptr<IRoutingDevice> device) const {
     return nullptr;
 };

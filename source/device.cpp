@@ -53,7 +53,7 @@ std::vector<std::shared_ptr<IRoutingDevice>> RoutingModule::get_neighbours()
     return neighbours;
 }
 
-std::shared_ptr<ILink> RoutingModule::get_link_to_device(
+std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
     std::shared_ptr<IRoutingDevice> device) const {
     if (device == nullptr) {
         spdlog::warn("Unexpected nullptr device");

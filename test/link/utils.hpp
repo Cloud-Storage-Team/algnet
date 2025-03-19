@@ -22,7 +22,7 @@ public:
     virtual std::shared_ptr<sim::ILink> next_inlink() final;
     virtual std::vector<std::shared_ptr<IRoutingDevice>> get_neighbours()
         const final;
-    virtual std::shared_ptr<sim::ILink> get_link_to_device(
+    virtual std::shared_ptr<sim::ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> device) const final;
 };
 

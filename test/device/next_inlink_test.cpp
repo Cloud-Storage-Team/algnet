@@ -39,10 +39,7 @@ TEST_F(LinkToDevice, RoundRobin) {
             new_inlinks_loop.emplace_back(dest->next_inlink());
         }
 
-        ASSERT_EQ(first_inlinks_loop.size(), new_inlinks_loop.size());
-        for (int j = 0; j < NUMBER_OF_LINKS; j++) {
-            ASSERT_EQ(first_inlinks_loop[j], new_inlinks_loop[j]);
-        }
+        ASSERT_EQ(first_inlinks_loop, new_inlinks_loop);
     }
 }
 
