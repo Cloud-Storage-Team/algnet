@@ -51,13 +51,8 @@ void Simulator::add_flow(std::shared_ptr<IRoutingDevice> a_from,
 void Simulator::add_link(std::shared_ptr<IRoutingDevice> a_from,
                          std::shared_ptr<IRoutingDevice> a_to,
                          std::uint32_t a_speed_mbps, std::uint32_t a_delay) {
-    
-    //std::shared_ptr<Link> link_ptr = std::make_shared<Link>(a_from, a_to, a_speed_mbps, a_delay);
     m_links.emplace_back(
         std::make_shared<Link>(a_from, a_to, a_speed_mbps, a_delay));
-   
-   //m_links.push_back(link_ptr);
-                        
     a_from->update_routing_table(a_to, m_links.back());
     a_to->add_inlink(m_links.back());
 }
@@ -114,6 +109,9 @@ void Simulator::recalculate_paths() {
 void Simulator::start(std::uint32_t a_stop_time) {
     recalculate_paths();
     m_scheduler.add(std::move(std::make_unique<Stop>(a_stop_time)));
+    for (Flow& flow : m_flows) {
+        flow.start(0);
+    }
     while (m_scheduler.tick()) {
     }
 }
