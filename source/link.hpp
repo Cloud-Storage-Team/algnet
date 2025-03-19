@@ -38,13 +38,13 @@ public:
     Link(std::weak_ptr<IRoutingDevice> a_from,
          std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_mbps = 1,
          std::uint32_t a_delay = 0);
-    virtual ~Link() = default;
+    ~Link() = default;
 
     /**
      * Update the source egress delay and schedule the arrival event
      * based on the egress queueing and transmission delays.
      */
-    virtual void schedule_arrival(Packet packet) final;
+    void schedule_arrival(Packet packet) final;
 
     /**
      * Removes packet from the source egress queue.

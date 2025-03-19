@@ -9,19 +9,14 @@ namespace sim {
 enum PacketType { ACK, DATA };
 
 struct Packet {
-    // TODO: move implementation to .cpp or use existing if present
     Packet(PacketType a_type = PacketType::DATA, std::uint32_t a_size = 0,
-           Flow* a_flow = nullptr)
-        : type(a_type), size(a_size), flow(a_flow){};
+           IFlow* flow = nullptr);
 
-    bool operator==(const Packet& packet) const {
-        return type == packet.type && size == packet.size &&
-               flow == packet.flow;
-    };
+    bool operator==(const Packet& packet) const;
 
     PacketType type;
     std::uint32_t size;
-    Flow* flow;
+    IFlow* flow;
 };
 
 }  // namespace sim

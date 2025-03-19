@@ -4,7 +4,7 @@
 
 namespace test {
 
-void LinkTest::SetUp() {};
+void LinkTest::SetUp(){};
 
 void LinkTest::TearDown() { sim::Scheduler::get_instance().clear(); };
 
@@ -13,8 +13,7 @@ void DeviceMock::add_inlink(std::shared_ptr<sim::ILink> link) {};
 void DeviceMock::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                       std::shared_ptr<sim::ILink> link) {};
 
-std::vector<std::shared_ptr<sim::IRoutingDevice>> DeviceMock::get_neighbours()
-    const {
+std::vector<std::shared_ptr<sim::IRoutingDevice>> DeviceMock::get_neighbours() const {
     return std::vector<std::shared_ptr<sim::IRoutingDevice>>();
 };
 
