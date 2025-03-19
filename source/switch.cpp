@@ -68,8 +68,7 @@ void Switch::process() {
         LOG_WARN("No flow in packet");
         return;
     }
-    std::shared_ptr<IReceiver> destination =
-        std::shared_ptr<IReceiver>(packet.flow->get_destination());
+    std::shared_ptr<IReceiver> destination = packet.flow->get_destination();
 
     std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
 
