@@ -25,16 +25,7 @@ void RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
         return;
     }
 
-    if (dest == nullptr) {
-        spdlog::warn("Unexpected nullptr destination");
-        return;
-    }
-
-    auto link_dest = link->get_to();
-    if (link_dest == nullptr) {
-        spdlog::warn("Unexpected nullptr link destination");
-        return;
-    }
+    auto link_dest = link->get_to();    
 
     // TODO: discuss storing weak_ptrs instead of shared
     m_neighbours.insert(link_dest);
@@ -55,10 +46,6 @@ std::vector<std::shared_ptr<IRoutingDevice>> RoutingModule::get_neighbours()
 
 std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
     std::shared_ptr<IRoutingDevice> device) const {
-    if (device == nullptr) {
-        spdlog::warn("Unexpected nullptr device");
-        return nullptr;
-    }
     auto iterator = m_routing_table.find(device);
     if (iterator == m_routing_table.end()) {
         return nullptr;
