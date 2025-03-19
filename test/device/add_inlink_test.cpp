@@ -38,12 +38,16 @@ TEST_F(AddInlink, SameLinkTwice) {
     }
     dest->add_inlink(links[0]);
 
-    auto first_link = dest->next_inlink();
-    EXPECT_NE(first_link, nullptr);
-    for (int i = 1; i < NUMBER_OF_LINKS * NUMBER_OF_LOOPS; i++) {
-        if (i % NUMBER_OF_LINKS == 0) {
-            EXPECT_EQ(links[i % NUMBER_OF_LINKS], first_link);
+    std::vector<std::shared_ptr<TestLink> > first_inlinks_loop;
+    for (int i = 0; i < NUMBER_OF_LINKS; i++) {
+        first_inlinks_loop.emplace_back(dest->next_inlink());
+    }
+    for (int i = 0; i < NUMBER_OF_LOOPS; i++) {
+        std::vector<std::shared_ptr<TestLink> > new_inlinks_loop;
+        for (int j = 0; j < NUMBER_OF_LINKS; j++) {
+            new_inlinks_loop.emplace_back(dest->next_inlink());
         }
+        ASSERT_EQ(first_inlinks_loop, new_inlinks_loop);
     }
 }
 
