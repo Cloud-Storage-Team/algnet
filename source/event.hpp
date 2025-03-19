@@ -11,7 +11,7 @@ namespace sim {
 // Base class for event
 struct Event {
     std::uint32_t time;
-    virtual ~Event();
+    virtual ~Event() = default;
     virtual void operator()() = 0;
     bool operator>(const Event &other) const { return time > other.time; }
 };
@@ -23,6 +23,7 @@ struct Event {
  */
 struct Generate : public Event {
     Generate(Flow *a_flow, std::uint32_t a_packet_size);
+    ~Generate() = default;
     Flow *flow;
 
     virtual void operator()() final;
@@ -32,11 +33,13 @@ struct Generate : public Event {
  * Enqueue the packet to the ingress port of the next node
  */
 struct Arrive : public Event {
-    Arrive(Link *a_link, Packet *a_packet);
-    Link *link;
+    // TODO: move implementation to .cpp or use existing if present
+    Arrive(ILink *a_link, Packet *a_packet) : link(a_link), packet(a_packet){};
+    ~Arrive() = default;
+    ILink *link;
     Packet *packet;
 
-    virtual void operator()() final;
+    virtual void operator()() final { link->process_arrival(*packet); };
 };
 
 /**
@@ -44,8 +47,8 @@ struct Arrive : public Event {
  * and start processing at the device.
  */
 struct Process : public Event {
-    Process(Device *a_device);
-    Device *node;
+    Process(IProcessingDevice *a_device);
+    IProcessingDevice *node;
 
     virtual void operator()() final;
 };
@@ -54,6 +57,8 @@ struct Process : public Event {
  * Stop simulation and clear all events remaining in the Scheduler
  */
 struct Stop : public Event {
+    Stop();
+    ~Stop() = default;
     virtual void operator()() final;
 };
 
