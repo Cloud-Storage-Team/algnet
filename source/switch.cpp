@@ -31,7 +31,7 @@ void Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
         return;
     }
     if (link == nullptr) {
-        LOG_WARN("Link does not exists");
+        LOG_WARN("Link does not exist");
         return;
     }
     if (link->get_from().get() != this) {
