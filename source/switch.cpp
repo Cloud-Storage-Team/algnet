@@ -10,6 +10,7 @@
 #define LOG_WARN(msg) spdlog::warn("{} ({}:{})", msg, __FILE__, __LINE__)
 
 namespace sim {
+
 Switch::Switch() : m_router(std::make_unique<RoutingModule>()) {}
 
 void Switch::add_inlink(std::shared_ptr<ILink> link) {
