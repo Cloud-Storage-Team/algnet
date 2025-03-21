@@ -78,12 +78,21 @@ void Receiver::process() {
     }
 
     Packet data_packet = opt_data_packet.value();
+    if (data_packet.flow == nullptr) {
+        spdlog::warn("Packet flow does not exist");
+        return;
+    }
 
     // processing...
     // total_processing_time += processing_time;
 
     Packet ack = {PacketType::ACK, 1, data_packet.flow};
     std::shared_ptr<ILink> link_to_src = m_router->get_link_to_destination(data_packet.flow->get_source());
+    if (link_to_src == nullptr) {
+        spdlog::warn("Link to send ack does not exist");
+        return;
+    }
+
     // Not sure if we want to send ack before processing or after it
     link_to_src->schedule_arrival(ack);
 
