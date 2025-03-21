@@ -12,6 +12,7 @@ public:
     bool try_to_generate(std::uint32_t packet_size) final;
 
     void update() final;
+    std::shared_ptr<sim::ISender> get_source() const final;
     std::shared_ptr<sim::IReceiver> get_destination() const final;
 
 private:
