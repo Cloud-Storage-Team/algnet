@@ -28,7 +28,7 @@ public:
 class Flow : public IFlow {  // Fixed inheritance
 public:
     Flow(ISender* a_src, IReceiver* a_dest, uint32_t a_packet_size);
-    void start(std::uint32_t time) override;
+    void start(std::uint32_t time) override = 0;
     bool try_to_generate(std::uint32_t packet_size) override = 0;
     void update(std::uint32_t delay) override = 0;
 
