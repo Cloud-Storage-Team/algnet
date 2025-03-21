@@ -4,8 +4,10 @@
 
 namespace sim {
 
-Flow::Flow(ISender *a_src, IReceiver *a_dest, uint32_t a_packet_size)
+Flow::Flow(ISender* a_src, IReceiver* a_dest, uint32_t a_packet_size)
     : m_src(a_src), m_dest(a_dest), m_packet_size(a_packet_size) {}
+
+void Flow::start(std::uint32_t time) { schedule_packet_generation(time); }
 
 void Flow::schedule_packet_generation(std::uint32_t time) {
     auto generate_event_ptr = std::make_unique<Generate>(Generate(this));
@@ -20,5 +22,9 @@ void Flow::generate_packet() {
     packet.flow = this;
     m_src->enqueue_packet(packet);
 }
+
+ISender* Flow::get_sender() const noexcept { return m_src; }
+
+IReceiver* Flow::get_receiver() const noexcept { return m_dest; }
 
 }  // namespace sim
