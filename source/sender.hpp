@@ -40,6 +40,7 @@ public:
 
 private:
     std::queue<Packet> m_flow_buffer;
+    std::unique_ptr<IRoutingDevice> m_router;
 };
 
 }  // namespace sim
