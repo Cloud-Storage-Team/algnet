@@ -52,11 +52,11 @@ std::vector<std::shared_ptr<IRoutingDevice>> Receiver::get_neighbours() const {
 std::shared_ptr<ILink> Receiver::next_inlink() {
     return m_router->next_inlink();
 };
+
 std::shared_ptr<ILink> Receiver::get_link_to_destination(
     std::shared_ptr<IRoutingDevice> dest) const {
         return m_router->get_link_to_destination(dest);
 };
-
 
 DeviceType Receiver::get_type() const {
     return DeviceType::RECEIVER;
