@@ -14,15 +14,13 @@ namespace test {
 
 class TestSwitch : public testing::Test {
 public:
-    void TearDown() override{};
-    void SetUp() override{};
+    void TearDown() override {};
+    void SetUp() override {};
 };
 
 TEST_F(TestSwitch, test_add_nullptr_link) {
     sim::Switch switch_device;
-    // TODO: replace with ASSERT_FALSE when add_inlink returns bool instead of
-    // void
-    switch_device.add_inlink(nullptr);
+    ASSERT_FALSE(switch_device.add_inlink(nullptr));
 }
 
 TEST_F(TestSwitch, test_add_incorrect_inlink) {
@@ -30,35 +28,27 @@ TEST_F(TestSwitch, test_add_incorrect_inlink) {
     std::shared_ptr<sim::IRoutingDevice> null_device(nullptr);
     std::shared_ptr<LinkMock> link =
         std::make_shared<LinkMock>(null_device, null_device);
-    // TODO: replace with ASSERT_FALSE when add_inlink returns bool instead of
-    // void
-    switch_device.add_inlink(link);
+    ASSERT_FALSE(switch_device.add_inlink(link));
 }
 
 TEST_F(TestSwitch, nullptr_destination_device) {
     auto switch_device = std::make_shared<sim::Switch>();
     auto temp_device = std::make_shared<test::ReceiverMock>();
     auto link = std::make_shared<LinkMock>(switch_device, temp_device);
-    // TODO: replace with ASSERT_FALSE when update_routing_table returns bool
-    // instead of void
-    switch_device->update_routing_table(nullptr, link);
+    ASSERT_FALSE(switch_device->update_routing_table(nullptr, link));
 }
 
 TEST_F(TestSwitch, nullptr_outlink) {
     auto switch_device = std::make_shared<sim::Switch>();
     auto temp_device = std::make_shared<test::ReceiverMock>();
-    // TODO: replace with ASSERT_FALSE when add_inlink returns bool instead of
-    // void
-    switch_device->update_routing_table(temp_device, nullptr);
+    ASSERT_FALSE(switch_device->update_routing_table(temp_device, nullptr));
 }
 
 TEST_F(TestSwitch, add_foreign_inlink) {
     auto switch_device = std::make_shared<sim::Switch>();
     auto temp_device = std::make_shared<test::ReceiverMock>();
     auto link = std::make_shared<LinkMock>(temp_device, switch_device);
-    // TODO: replace with ASSERT_FALSE when add_inlink returns bool instead of
-    // void
-    switch_device->update_routing_table(temp_device, link);
+    ASSERT_FALSE(switch_device->update_routing_table(temp_device, link));
 }
 
 TEST_F(TestSwitch, test_no_senders) {
