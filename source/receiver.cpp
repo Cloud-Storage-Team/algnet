@@ -57,7 +57,6 @@ void Receiver::process() {
     // processing...
     // total_processing_time += processing_time;
 
-
     Packet ack = {PacketType::ACK, 1, data_packet.flow};
     std::shared_ptr<ILink> link_to_src = m_router->get_link_to_destination(data_packet.flow->get_source());
     // Not sure if we want to send ack before processing or after it
