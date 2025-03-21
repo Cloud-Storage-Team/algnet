@@ -9,6 +9,7 @@ namespace sim {
 enum PacketType { ACK, DATA };
 
 struct Packet {
+    // TODO: move implementation to .cpp or use existing if present
     Packet(PacketType a_type = PacketType::DATA, std::uint32_t a_size = 0,
            IFlow* flow = nullptr);
 
