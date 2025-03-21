@@ -24,4 +24,8 @@ std::shared_ptr<sim::ILink> DeviceMock::get_link_to_destination(
 
 std::shared_ptr<sim::ILink> DeviceMock::next_inlink() { return nullptr; };
 
+std::vector<std::shared_ptr<sim::ILink>> DeviceMock::get_outlinks() const {
+    return {};
+}
+
 }  // namespace test

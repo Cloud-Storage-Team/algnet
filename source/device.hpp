@@ -43,7 +43,7 @@ public:
 
     void add_inlink(std::shared_ptr<ILink> link) final;
     void update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                      std::shared_ptr<ILink> link) final;
+                              std::shared_ptr<ILink> link) final;
 
     // returns next inlink and moves inlinks set iterator forward
     std::shared_ptr<ILink> next_inlink() final;

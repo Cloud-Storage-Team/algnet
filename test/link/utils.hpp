@@ -23,6 +23,7 @@ public:
 
     virtual std::shared_ptr<sim::ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;
+    virtual std::vector<std::shared_ptr<sim::ILink>> get_outlinks() const final;    
 };
 
 }  // namespace test

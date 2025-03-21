@@ -19,4 +19,8 @@ sim::DeviceType ReceiverMock::get_type() const {
     return sim::DeviceType::RECEIVER;
 }
 
+std::vector<std::shared_ptr<sim::ILink>> ReceiverMock::get_outlinks() const {
+    return {};
+}
+
 }  // namespace test
