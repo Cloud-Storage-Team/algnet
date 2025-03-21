@@ -80,4 +80,8 @@ void Switch::process() {
     next_link->schedule_arrival(packet);
 }
 
+std::vector<std::shared_ptr<ILink>> Switch::get_outlinks() const {
+    return m_router->get_outlinks();
+}
+
 }  // namespace sim

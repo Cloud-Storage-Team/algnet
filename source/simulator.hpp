@@ -32,7 +32,7 @@ public:
 private:
     Scheduler& m_scheduler;
     std::unordered_map<std::string, std::shared_ptr<IRoutingDevice>> m_graph;
-    std::vector<IFlow> m_flows;
+    std::vector<std::shared_ptr<IFlow>> m_flows;
     std::vector<std::shared_ptr<ILink>> m_links;
 };
 

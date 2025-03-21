@@ -17,7 +17,7 @@ public:
     virtual std::shared_ptr<IReceiver> get_destination() const = 0;
 };
 
-class Flow : IFlow {
+class Flow : public IFlow {
 public:
     Flow(ISender *a_src, IReceiver *a_dest, float a_start_cwnd);
 

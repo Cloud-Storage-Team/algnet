@@ -35,4 +35,8 @@ std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
     return nullptr;
 }
 
+std::vector<std::shared_ptr<ILink>> RoutingModule::get_outlinks() const {
+    return m_outlinks;
+}
+
 }  // namespace sim

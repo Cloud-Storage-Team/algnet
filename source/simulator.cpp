@@ -45,7 +45,7 @@ void Simulator::add_flow(std::shared_ptr<IRoutingDevice> a_from,
             "add_flow failed: a_from (ISender) and a_to (IReceiver) required");
         return;
     }
-    m_flows.emplace_back(sender, receiver, 0.f);
+    m_flows.emplace_back(std::make_shared<Flow>(sender, receiver, 0.f));
 }
 
 void Simulator::add_link(std::shared_ptr<IRoutingDevice> a_from,
@@ -109,8 +109,8 @@ void Simulator::recalculate_paths() {
 void Simulator::start(std::uint32_t a_stop_time) {
     recalculate_paths();
     m_scheduler.add(std::move(std::make_unique<Stop>(a_stop_time)));
-    for (Flow& flow : m_flows) {
-        flow.start(0);
+    for (std::shared_ptr<IFlow> flow : m_flows) {
+        flow->start(0);
     }
     while (m_scheduler.tick()) {
     }
