@@ -21,8 +21,7 @@ std::vector<std::shared_ptr<TestLink>> create_random_links(
     
     std::vector<std::shared_ptr<TestLink>> links;
 
-    std::random_device rd;
-    std::mt19937 gen(rd());
+    std::mt19937 gen(RANDOM_SEED);
     std::uniform_int_distribution<> dis(0, dests.size() - 1);
 
     for (size_t i = 0; i < number_of_links; ++i) {

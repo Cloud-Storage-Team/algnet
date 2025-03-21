@@ -29,8 +29,7 @@ TEST_F(AddInlink, SameLinkMultipleTimes) {
     auto sources = createRoutingModules(NUMBER_OF_SOURCES);
     auto dest = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
     
-    std::random_device rd;
-    std::mt19937 gen(rd());
+    std::mt19937 gen(RANDOM_SEED);
     std::uniform_int_distribution<> dis(1, MAX_LINKS);
 
     std::unordered_map<std::shared_ptr<sim::ILink>, int> number_of_appearances;

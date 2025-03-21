@@ -5,6 +5,8 @@
 #include "../../source/link.hpp"
 
 namespace test {
+    
+const unsigned RANDOM_SEED = 42;
 
 class Link;
 
