@@ -43,9 +43,6 @@ TEST_F(AddInlink, SameLinkMultipleTimes) {
         number_of_appearances[link] = 0;
     }
 
-    auto first_link = dest->next_inlink();
-    int current_number_of_loops = 0;
-
     for (size_t loop = 0; loop < NUMBER_OF_LOOPS; loop++) {
         for (size_t i = 0; i < NUMBER_OF_SOURCES; i++) {
             auto current_link = dest->next_inlink();
