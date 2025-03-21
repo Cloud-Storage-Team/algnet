@@ -2,9 +2,9 @@
 
 namespace test {
 
-std::vector<std::shared_ptr<sim::RoutingModule>> createRoutingModules(
+std::vector<std::shared_ptr<sim::IRoutingDevice>> createRoutingModules(
     size_t count) {
-    std::vector<std::shared_ptr<sim::RoutingModule>> modules;
+    std::vector<std::shared_ptr<sim::IRoutingDevice>> modules;
     for (size_t i = 0; i < count; ++i) {
         modules.emplace_back(std::make_shared<sim::RoutingModule>());
     }

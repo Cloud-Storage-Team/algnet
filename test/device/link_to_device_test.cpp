@@ -13,8 +13,8 @@ public:
 TEST_F(LinkToDevice, NoLinkToDevice) {
     auto source = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
     auto dest = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
-    auto link = std::shared_ptr<TestLink>(source, dest);
-    dest->add_inlink(source);
+    auto link = std::make_shared<TestLink>(source, dest);
+    dest->add_inlink(link);
 
     EXPECT_EQ(source->get_link_to_destination(dest), nullptr);
 }

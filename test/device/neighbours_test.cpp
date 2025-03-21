@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <algorithm>  // Include for std::shuffle
-#include <random>     // Include for random number generation
+#include <algorithm>
+#include <random>   
 
 #include "utils.hpp"
 
@@ -13,38 +13,47 @@ public:
     void SetUp() override {};
 };
 
+std::vector<std::shared_ptr<TestLink>> create_random_links(
+    const std::shared_ptr<sim::IRoutingDevice>& source,
+    const std::vector<std::shared_ptr<sim::IRoutingDevice>>& dests,
+    std::set<std::shared_ptr<sim::IRoutingDevice>>& target_neighbours,
+    size_t number_of_links) {
+    
+    std::vector<std::shared_ptr<TestLink>> links;
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, dests.size() - 1);
+
+    for (size_t i = 0; i < number_of_links; ++i) {
+        size_t random_index = dis(gen);
+        auto random_target = dests[random_index];
+
+        links.push_back(std::make_shared<TestLink>(TestLink(source, random_target)));
+        target_neighbours.insert(random_target);
+    }
+
+    return links;
+}
+
 TEST_F(Neighbours, NeighboursAreCalculatedCorrectly) {
-    auto source = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
-
-    size_t NUMBER_OF_NEIGHBOURS = 3;
-    auto target_neighbours = createRoutingModules(NUMBER_OF_NEIGHBOURS);
     size_t NUMBER_OF_DESTINATIONS = 5;
+    auto source = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
     auto dests = createRoutingModules(NUMBER_OF_DESTINATIONS);
-
-    auto link1_neighbour1 =
-        std::make_shared<TestLink>(TestLink(source, target_neighbours[0]));
-    auto link2_neighbour1 =
-        std::make_shared<TestLink>(TestLink(source, target_neighbours[0]));
-    auto link3_neighbour1 =
-        std::make_shared<TestLink>(TestLink(source, target_neighbours[0]));
-    auto link1_neighbour2 =
-        std::make_shared<TestLink>(TestLink(source, target_neighbours[1]));
-    auto link1_neighbour3 =
-        std::make_shared<TestLink>(TestLink(source, target_neighbours[2]));
+    
+    size_t NUMBER_OF_LINKS = 7;
+    auto target_neighbours = std::set<std::shared_ptr<sim::IRoutingDevice>>();
+    auto links = create_random_links(source, dests, target_neighbours, NUMBER_OF_LINKS);
 
     EXPECT_TRUE(source->get_neighbours().empty());
-
-    source->update_routing_table(dests[0], link2_neighbour1);
-    source->update_routing_table(dests[1], link1_neighbour3);
-    source->update_routing_table(dests[2], link1_neighbour2);
-    source->update_routing_table(dests[3], link3_neighbour1);
-    source->update_routing_table(dests[4], link1_neighbour1);
-
-    std::vector<std::shared_ptr<sim::IRoutingDevice>> neighbours =
+    for (size_t i = 0; i < NUMBER_OF_LINKS; i++) {
+        source->update_routing_table(dests[i], links[i]);
+    }   
+    
+    std::vector<std::shared_ptr<sim::IRoutingDevice>> neighbours_vec =
         source->get_neighbours();
-    std::sort(neighbours.begin(), neighbours.end());
-    std::sort(target_neighbours.begin(), target_neighbours.end());
-    ASSRERT_EQ(neighbours, target_neighbours);
+    std::set<std::shared_ptr<sim::IRoutingDevice>> neighbours(neighbours_vec.begin(), neighbours_vec.end());
+    EXPECT_EQ(neighbours, target_neighbours);
 }
 
 }  // namespace test
