@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "utils.hpp"
+#include <random>
 
 namespace test {
 
@@ -20,32 +21,43 @@ TEST_F(AddInlink, LinkIsPresent) {
     EXPECT_EQ(dest->next_inlink(), link);
 }
 
-TEST_F(AddInlink, SameLinkTwice) {
-    int NUMBER_OF_ITERATIONS = 6;
-    int FIRST_LINK_VALUE = 1;
-    int SECOND_LINK_VALUE = 10;
-    int EXPECTED_RESULT =
-        (FIRST_LINK_VALUE + SECOND_LINK_VALUE) * (NUMBER_OF_ITERATIONS / 2);
+TEST_F(AddInlink, SameLinkMultipleTimes) {
+    int NUMBER_OF_SOURCES = 5;
+    int MAX_LINKS = 3;
+    int NUMBER_OF_LOOPS = 3;
 
-    auto source = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
-    auto doubled_source =
-        std::make_shared<sim::RoutingModule>(sim::RoutingModule());
+    auto sources = createRoutingModules(NUMBER_OF_SOURCES);
     auto dest = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
 
-    auto link = std::make_shared<TestLink>(
-        TestLink(source, dest, sim::Packet(sim::DATA, 1)));
-    auto doubled_link = std::make_shared<TestLink>(
-        TestLink(source, dest, sim::Packet(sim::DATA, 10)));
-
-    dest->add_inlink(doubled_link);
-    dest->add_inlink(link);
-    dest->add_inlink(doubled_link);
-
-    int sum = 0;
-    for (int i = 0; i < NUMBER_OF_ITERATIONS; i++) {
-        sum += dest->next_inlink()->get_packet()->size;
+    std::unordered_map<std::shared_ptr<sim::ILink>, int> number_of_appearances;
+    for (auto source: sources) {
+        auto link = std::make_shared<TestLink>(source, dest);
+        
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dis(1, MAX_LINKS);
+        
+        int links_to_add = dis(gen);
+        for (size_t i = 0; i < links_to_add; ++i) {
+            dest->add_inlink(link);
+        }
+        number_of_appearances[link] = 0;
     }
-    EXPECT_EQ(sum, EXPECTED_RESULT);
+
+    auto first_link = dest->next_inlink();
+    int current_number_of_loops = 0;
+
+    while (current_number_of_loops < NUMBER_OF_LOOPS) {
+        auto current_link = dest->next_inlink();
+        number_of_appearances[current_link]++;
+        if (current_link == first_link) {
+            current_number_of_loops++;
+        }
+    }
+
+    for (auto appearances: number_of_appearances) {
+        EXPECT_EQ(appearances.second, NUMBER_OF_LOOPS);
+    }
 }
 
 }  // namespace test

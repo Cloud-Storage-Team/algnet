@@ -47,7 +47,7 @@ TEST_F(Neighbours, NeighboursAreCalculatedCorrectly) {
 
     EXPECT_TRUE(source->get_neighbours().empty());
     for (size_t i = 0; i < NUMBER_OF_LINKS; i++) {
-        source->update_routing_table(dests[i], links[i]);
+        source->update_routing_table(links[i]->get_to(), links[i]);
     }   
     
     std::vector<std::shared_ptr<sim::IRoutingDevice>> neighbours_vec =
