@@ -23,15 +23,7 @@ void RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     auto link_dest = link->get_to();    
 
     // TODO: discuss storing weak_ptrs instead of shared
-    m_neighbours.insert(link_dest);
     m_routing_table[dest] = link;
-}
-
-std::vector<std::shared_ptr<IRoutingDevice>> RoutingModule::get_neighbours()
-    const {
-    std::vector<std::shared_ptr<IRoutingDevice>> neighbours{};
-    neighbours.insert(neighbours.begin(), m_neighbours.begin(), m_neighbours.end());
-    return neighbours;
 }
 
 std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
@@ -55,6 +47,10 @@ std::shared_ptr<ILink> RoutingModule::next_inlink() {
         m_next_inlink = m_inlinks.begin();
     }
     return link;
+}
+
+std::vector<std::shared_ptr<ILink>> RoutingModule::get_outlinks() const {
+    return m_outlinks;
 }
 
 }  // namespace sim

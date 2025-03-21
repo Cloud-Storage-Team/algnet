@@ -42,10 +42,6 @@ void Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     m_router->update_routing_table(dest, link);
 }
 
-std::vector<std::shared_ptr<IRoutingDevice>> Switch::get_neighbours() const {
-    return m_router->get_neighbours();
-}
-
 std::shared_ptr<ILink> Switch::next_inlink() { return m_router->next_inlink(); }
 
 std::shared_ptr<ILink> Switch::get_link_to_destination(
@@ -82,6 +78,10 @@ void Switch::process() {
         return;
     }
     next_link->schedule_arrival(packet);
+}
+
+std::vector<std::shared_ptr<ILink>> Switch::get_outlinks() const {
+    return m_router->get_outlinks();
 }
 
 }  // namespace sim
