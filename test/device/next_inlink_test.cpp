@@ -26,7 +26,6 @@ TEST_F(LinkToDevice, RoundRobin) {
     for (int i = 0; i < NUMBER_OF_LINKS; i++) {
         dest->add_inlink(links[i]);
     }
-    dest->add_inlink(links[0]);
 
     std::vector<std::shared_ptr<sim::ILink>> first_inlinks_loop;
     for (int i = 0; i < NUMBER_OF_LINKS; i++) {
