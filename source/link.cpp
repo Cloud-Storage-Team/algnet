@@ -1,6 +1,6 @@
-#include <spdlog/spdlog.h>
-
 #include "link.hpp"
+
+#include <spdlog/spdlog.h>
 
 #include "event.hpp"
 #include "scheduler.hpp"
@@ -42,7 +42,8 @@ void Link::schedule_arrival(Packet packet) {
 
     m_src_egress_delay += transmission_time;
 
-    Scheduler::get_instance().add(std::make_unique<Arrive>(Arrive(this, new Packet(packet))));
+    Scheduler::get_instance().add(
+        std::make_unique<Arrive>(Arrive(this, new Packet(packet))));
 };
 
 void Link::process_arrival(Packet packet) {
