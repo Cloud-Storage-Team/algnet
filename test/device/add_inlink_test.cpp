@@ -28,14 +28,14 @@ TEST_F(AddInlink, SameLinkMultipleTimes) {
 
     auto sources = createRoutingModules(NUMBER_OF_SOURCES);
     auto dest = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
+    
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(1, MAX_LINKS);
 
     std::unordered_map<std::shared_ptr<sim::ILink>, int> number_of_appearances;
     for (auto source: sources) {
         auto link = std::make_shared<TestLink>(source, dest);
-        
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dis(1, MAX_LINKS);
         
         int links_to_add = dis(gen);
         for (size_t i = 0; i < links_to_add; ++i) {
