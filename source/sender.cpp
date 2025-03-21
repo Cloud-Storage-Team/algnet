@@ -63,41 +63,60 @@ void Sender::enqueue_packet(Packet packet) {
     m_flow_buffer.push(packet);
 }
 
-void Sender::process() {
-    // std::uint32_t current_time = start_time;
+std::uint32_t Sender::process_incoming() {
+    std::shared_ptr<ILink> current_inlink = m_router->next_inlink();
+    std::uint32_t total_processing_time = 0;
 
-    // TODO: Handle empty m_inlinks
-    Link* current_inlink = (*m_next_inlink);
-    if (++m_next_inlink == m_inlinks.end()) {
-        m_next_inlink = m_inlinks.begin();
+    if (current_inlink == nullptr) {
+        spdlog::warn("No available inlinks for device");
+        return total_processing_time;
     }
 
-    // TODO: Handle absence of packet (return optional)
-    Packet packet = current_inlink->get_packet();
+    std::optional<Packet> opt_packet = current_inlink->get_packet();
+    if (!opt_packet.has_value()) {
+        spdlog::warn("No available packets from inlink for device");
+        return total_processing_time;
+    }
+
+    Packet packet = opt_packet.value();
+    if (packet.flow == nullptr) {
+        spdlog::warn("Packet flow does not exist");
+        return total_processing_time;
+    }
+
     if (packet.type == PacketType::ACK) {
         packet.flow->update();
-    }
-    // current_time += processing_ack_time;
-
-    if (m_flow_buffer.empty()) {
-        return;
+        // total_processing_time += processing_ack_time;
     }
 
+    return total_processing_time;
+}
+
+std::uint32_t Sender::send_data() {
+    std::uint32_t total_processing_time = 0;
+    
     // TODO: wrap into some method
     Packet data_packet = m_flow_buffer.front();
     m_flow_buffer.pop();
 
     // TODO: think about spliting logic of handling acks and sending data
-    Device* destination = packet.flow->get_destination();
-    Link* next_link = m_routing_table[destination];
+    auto destination = data_packet.flow->get_destination();
+    auto next_link = m_router->get_link_to_destination(destination);
+    if (next_link == nullptr) {
+        spdlog::warn("Link to send data packet does not exist");
+        return total_processing_time;
+    }
     next_link->schedule_arrival(data_packet);
-    // current_time += sending_data_time;
+    // total_processing_time += sending_data_time;
+    return total_processing_time;
+}
 
-
-    Process new_process_event = Process(this);
-    // new_process_event.time = current_time;
-    Scheduler::get_instance().add(new_process_event);
-
+void Sender::process() {
+    std::uint32_t total_processing_time = 0;
+    total_processing_time += process_incoming();
+    total_processing_time += send_data();
+    // return total_processing_time();
+    return;
 }
 
 }  // namespace sim
