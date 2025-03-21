@@ -42,12 +42,9 @@ TEST_F(Neighbours, NeighboursAreCalculatedCorrectly) {
 
     std::vector<std::shared_ptr<sim::IRoutingDevice>> neighbours =
         source->get_neighbours();
-    EXPECT_TRUE(neighbours.size() == 3);
-    for (auto neighbour : neighbours) {
-        EXPECT_TRUE(neighbour == target_neighbours[0] ||
-                    neighbour == target_neighbours[1] ||
-                    neighbour == target_neighbours[2]);
-    }
+    std::sort(neighbours.begin(), neighbours.end());
+    std::sort(target_neighbours.begin(), target_neighbours.end());
+    ASSRERT_EQ(neighbours, target_neighbours);
 }
 
 }  // namespace test
