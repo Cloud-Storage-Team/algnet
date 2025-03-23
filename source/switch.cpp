@@ -51,6 +51,10 @@ std::shared_ptr<ILink> Switch::get_link_to_destination(
 
 DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
 
+std::vector<std::shared_ptr<IRoutingDevice>> Switch::get_neighbours() const {
+    return {};
+} 
+
 void Switch::process() {
     std::shared_ptr<ILink> link = next_inlink();
 

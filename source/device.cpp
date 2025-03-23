@@ -20,9 +20,10 @@ void RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
         spdlog::warn("Unexpected nullptr link");
         return;
     }
-    auto link_dest = link->get_to();    
+    auto link_dest = link->get_to();
 
     // TODO: discuss storing weak_ptrs instead of shared
+    m_neighbours.insert(link_dest);
     m_routing_table[dest] = link;
 }
 
@@ -51,6 +52,14 @@ std::shared_ptr<ILink> RoutingModule::next_inlink() {
 
 std::vector<std::shared_ptr<ILink>> RoutingModule::get_outlinks() const {
     return m_outlinks;
+}
+
+std::vector<std::shared_ptr<IRoutingDevice>> RoutingModule::get_neighbours()
+    const {
+    std::vector<std::shared_ptr<IRoutingDevice>> neighbours{};
+    neighbours.insert(neighbours.begin(), m_neighbours.begin(),
+                      m_neighbours.end());
+    return neighbours;
 }
 
 }  // namespace sim
