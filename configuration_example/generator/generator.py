@@ -1,6 +1,8 @@
+import os
+import sys
+
 import yaml
 from graphviz import Digraph
-import os, sys
 
 
 def generate_topology(config_file, output_file, picture_label='Network Topology'):
@@ -8,16 +10,16 @@ def generate_topology(config_file, output_file, picture_label='Network Topology'
     with open(config_file) as f:
         config = yaml.safe_load(f)
 
-    # Create a directed graph with styling
+    # Create a directed graph with top-to-bottom layout
     graph = Digraph(engine='dot')
-    graph.attr(rankdir='LR',
+    graph.attr(rankdir='TB',
                bgcolor='#F5F5F5',
                fontname='Helvetica',
                label=picture_label,
                fontsize='20',
                pad='0.5',
-               nodesep='0.5',
-               ranksep='1.2')
+               nodesep='0.8',
+               ranksep='1.5')
 
     # Common style parameters
     node_style = {
@@ -33,16 +35,14 @@ def generate_topology(config_file, output_file, picture_label='Network Topology'
         'penwidth': '2'
     }
 
-    # Add hosts with icons and styling
+    # Add hosts with vertical alignment
     hosts = config.get('hosts', {})
     for host_id, host_info in hosts.items():
         host_type = host_info.get('type', '')
         if host_type == 'sender':
-            shape = 'oval'
             color = '#2E7D32'  # Dark green
             icon = '🖥️'
         else:
-            shape = 'oval'
             color = '#C62828'  # Dark red
             icon = '🖳'
 
@@ -60,7 +60,7 @@ def generate_topology(config_file, output_file, picture_label='Network Topology'
                    fillcolor=f'{color}20',
                    **node_style)
 
-    # Add switches with 3D effect
+    # Add central switch
     switches = config.get('switches', {})
     for switch_id, switch_info in switches.items():
         label = f'''<
@@ -92,15 +92,15 @@ def generate_topology(config_file, output_file, picture_label='Network Topology'
                    fontcolor='#424242',
                    **edge_style)
 
-    # Create invisible edges to enforce hierarchy
+    # Create hierarchical groups
     with graph.subgraph() as s:
-        s.attr(rank='same')
+        s.attr(rank='min')
         for host_id in hosts:
             if hosts[host_id]['type'] == 'sender':
                 s.node(host_id)
 
     with graph.subgraph() as s:
-        s.attr(rank='same')
+        s.attr(rank='max')
         for host_id in hosts:
             if hosts[host_id]['type'] == 'receiver':
                 s.node(host_id)
