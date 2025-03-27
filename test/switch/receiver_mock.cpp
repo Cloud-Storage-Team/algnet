@@ -4,6 +4,8 @@ namespace test {
 
 void ReceiverMock::add_inlink(std::shared_ptr<sim::ILink> link) {}
 
+void ReceiverMock::add_outlink(std::shared_ptr<sim::ILink> link) {}
+
 void ReceiverMock::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                         std::shared_ptr<sim::ILink> link) {}
 
@@ -19,11 +21,12 @@ sim::DeviceType ReceiverMock::get_type() const {
     return sim::DeviceType::RECEIVER;
 }
 
-std::vector<std::shared_ptr<sim::ILink>> ReceiverMock::get_outlinks() const {
+std::set<std::shared_ptr<sim::ILink>> ReceiverMock::get_outlinks() const {
     return {};
 }
 
-std::vector<std::shared_ptr<sim::IRoutingDevice>> ReceiverMock::get_neighbours() const {
+std::vector<std::shared_ptr<sim::IRoutingDevice>> ReceiverMock::get_neighbours()
+    const {
     return {};
 }
 }  // namespace test

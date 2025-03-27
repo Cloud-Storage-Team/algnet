@@ -2,8 +2,8 @@
 
 #include <spdlog/spdlog.h>
 
-#include "link.hpp"
 #include "event.hpp"
+#include "link.hpp"
 #include "scheduler.hpp"
 
 namespace sim {
@@ -17,14 +17,28 @@ void Sender::add_inlink(std::shared_ptr<ILink> link) {
     }
 
     if (this != link->get_to().get()) {
-        spdlog::warn("Link destination device is incorrect (expected current device)");
+        spdlog::warn(
+            "Link destination device is incorrect (expected current device)");
         return;
     }
     m_router->add_inlink(link);
 }
 
+void Sender::add_outlink(std::shared_ptr<ILink> link) {
+    if (link == nullptr) {
+        spdlog::warn("Add nullptr outlink to sender device");
+        return;
+    }
+
+    if (this != link->get_from().get()) {
+        spdlog::warn("Outlink source is not our device");
+        return;
+    }
+    m_router->add_outlink(link);
+}
+
 void Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                     std::shared_ptr<ILink> link) {
+                                  std::shared_ptr<ILink> link) {
     if (link == nullptr) {
         spdlog::warn("Passed link is null");
         return;
@@ -36,7 +50,8 @@ void Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     }
 
     if (this != link->get_from().get()) {
-        spdlog::warn("Link source device is incorrect (expected current device)");
+        spdlog::warn(
+            "Link source device is incorrect (expected current device)");
         return;
     }
     m_router->update_routing_table(dest, link);
@@ -52,16 +67,12 @@ std::shared_ptr<ILink> Sender::next_inlink() {
 
 std::shared_ptr<ILink> Sender::get_link_to_destination(
     std::shared_ptr<IRoutingDevice> dest) const {
-        return m_router->get_link_to_destination(dest);
+    return m_router->get_link_to_destination(dest);
 };
 
-DeviceType Sender::get_type() const {
-    return DeviceType::SENDER;
-}
+DeviceType Sender::get_type() const { return DeviceType::SENDER; }
 
-void Sender::enqueue_packet(Packet packet) {
-    m_flow_buffer.push(packet);
-}
+void Sender::enqueue_packet(Packet packet) { m_flow_buffer.push(packet); }
 
 std::uint32_t Sender::process_incoming() {
     std::shared_ptr<ILink> current_inlink = m_router->next_inlink();
@@ -94,7 +105,7 @@ std::uint32_t Sender::process_incoming() {
 
 std::uint32_t Sender::send_data() {
     std::uint32_t total_processing_time = 0;
-    
+
     // TODO: wrap into some method
     Packet data_packet = m_flow_buffer.front();
     m_flow_buffer.pop();
@@ -119,9 +130,8 @@ void Sender::process() {
     return;
 }
 
-std::vector<std::shared_ptr<ILink>> Sender::get_outlinks() const {
-    return {};
+std::set<std::shared_ptr<ILink>> Sender::get_outlinks() const {
+    return m_router->get_outlinks();
 }
-
 
 }  // namespace sim

@@ -14,6 +14,10 @@ void RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
     m_next_inlink = m_inlinks.begin();
 }
 
+void RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
+    m_outlinks.insert(link);
+}
+
 void RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                          std::shared_ptr<ILink> link) {
     if (link == nullptr) {
@@ -50,7 +54,7 @@ std::shared_ptr<ILink> RoutingModule::next_inlink() {
     return link;
 }
 
-std::vector<std::shared_ptr<ILink>> RoutingModule::get_outlinks() const {
+std::set<std::shared_ptr<ILink>> RoutingModule::get_outlinks() const {
     return m_outlinks;
 }
 

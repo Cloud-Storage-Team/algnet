@@ -53,7 +53,7 @@ void Simulator::add_link(std::shared_ptr<IRoutingDevice> a_from,
                          std::uint32_t a_speed_mbps, std::uint32_t a_delay) {
     m_links.emplace_back(
         std::make_shared<Link>(a_from, a_to, a_speed_mbps, a_delay));
-    a_from->update_routing_table(a_to, m_links.back());
+    a_from->add_outlink(m_links.back());
     a_to->add_inlink(m_links.back());
 }
 
@@ -74,7 +74,7 @@ std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<ILink>> bfs(
             continue;
         }
         used.insert(device);
-        std::vector<std::shared_ptr<ILink>> outlinks = device->get_outlinks();
+        std::set<std::shared_ptr<ILink>> outlinks = device->get_outlinks();
         for (std::shared_ptr<ILink> link : outlinks) {
             if (used.find(link->get_to()) != used.end()) {
                 continue;
