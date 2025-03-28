@@ -63,9 +63,9 @@ void Sender::enqueue_packet(Packet packet) {
     m_flow_buffer.push(packet);
 }
 
-std::uint32_t Sender::process_incoming() {
+std::uint32_t Sender::process() {
     std::shared_ptr<ILink> current_inlink = m_router->next_inlink();
-    std::uint32_t total_processing_time = 0;
+    std::uint32_t total_processing_time = 1;
 
     if (current_inlink == nullptr) {
         spdlog::warn("No available inlinks for device");
@@ -93,13 +93,16 @@ std::uint32_t Sender::process_incoming() {
 }
 
 std::uint32_t Sender::send_data() {
-    std::uint32_t total_processing_time = 0;
+    std::uint32_t total_processing_time = 1;
     
-    // TODO: wrap into some method
+    // TODO: wrap into some method (?)
+    if (m_flow_buffer.empty()) {
+        spdlog::warn("No packets to send");
+        return total_processing_time;
+    }
     Packet data_packet = m_flow_buffer.front();
     m_flow_buffer.pop();
 
-    // TODO: think about spliting logic of handling acks and sending data
     auto destination = data_packet.flow->get_destination();
     auto next_link = m_router->get_link_to_destination(destination);
     if (next_link == nullptr) {
@@ -109,14 +112,6 @@ std::uint32_t Sender::send_data() {
     next_link->schedule_arrival(data_packet);
     // total_processing_time += sending_data_time;
     return total_processing_time;
-}
-
-void Sender::process() {
-    std::uint32_t total_processing_time = 0;
-    total_processing_time += process_incoming();
-    total_processing_time += send_data();
-    // return total_processing_time();
-    return;
 }
 
 }  // namespace sim

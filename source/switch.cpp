@@ -55,23 +55,24 @@ std::shared_ptr<ILink> Switch::get_link_to_destination(
 
 DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
 
-void Switch::process() {
+std::uint32_t Switch::process() {
+    std::uint32_t total_processing_time = 1;
     std::shared_ptr<ILink> link = next_inlink();
 
     if (link == nullptr) {
         LOG_WARN("No next inlink");
-        return;
+        return total_processing_time;
     }
 
     std::optional<Packet> optional_packet = link->get_packet();
     if (!optional_packet.has_value()) {
         LOG_WARN("No packet in link");
-        return;
+        return total_processing_time;
     }
     Packet packet = optional_packet.value();
     if (packet.flow == nullptr) {
         LOG_WARN("No flow in packet");
-        return;
+        return total_processing_time;
     }
     std::shared_ptr<IReceiver> destination = packet.flow->get_destination();
 
@@ -79,7 +80,7 @@ void Switch::process() {
 
     if (next_link == nullptr) {
         LOG_WARN("No link corresponds to destination device");
-        return;
+        return total_processing_time;
     }
     next_link->schedule_arrival(packet);
 }
