@@ -80,7 +80,7 @@ std::uint32_t Sender::process() {
 
     Packet packet = opt_packet.value();
     if (packet.flow == nullptr) {
-        spdlog::warn("Packet flow does not exist");
+        spdlog::error("Packet flow does not exist");
         return total_processing_time;
     }
 
