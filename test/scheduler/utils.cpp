@@ -3,7 +3,7 @@
 namespace test {
 
 int CountingEvent::cnt;
-std::uint32_t ComparatorEvent::last_time;
+Time ComparatorEvent::last_time;
 
 void EmptyEvent::operator()() {}
 
@@ -15,13 +15,13 @@ void ComparatorEvent::operator()() {
 }
 
 template <typename T>
-void AddEvents(int number, std::shared_ptr<std::uint32_t> event_time) {
+void AddEvents(int number, std::shared_ptr<Time> event_time) {
     static_assert(std::is_base_of<sim::Event, T>::value,
                   "T must inherit from Event");
 
     srand(static_cast<unsigned int>(time(0)));
-    std::uint32_t min_time = 1;
-    std::uint32_t max_time = static_cast<std::uint32_t>(1e9);
+    Time min_time = 1;
+    Time max_time = static_cast<Time>(1e9);
 
     while ((number--) > 0) {
         std::unique_ptr<sim::Event> event_ptr = std::make_unique<T>(T());
@@ -36,9 +36,9 @@ void AddEvents(int number, std::shared_ptr<std::uint32_t> event_time) {
     }
 }
 
-template void AddEvents<sim::Stop>(int, std::shared_ptr<std::uint32_t>);
-template void AddEvents<EmptyEvent>(int, std::shared_ptr<std::uint32_t>);
-template void AddEvents<CountingEvent>(int, std::shared_ptr<std::uint32_t>);
-template void AddEvents<ComparatorEvent>(int, std::shared_ptr<std::uint32_t>);
+template void AddEvents<sim::Stop>(int, std::shared_ptr<Time>);
+template void AddEvents<EmptyEvent>(int, std::shared_ptr<Time>);
+template void AddEvents<CountingEvent>(int, std::shared_ptr<Time>);
+template void AddEvents<ComparatorEvent>(int, std::shared_ptr<Time>);
 
 }  // namespace test

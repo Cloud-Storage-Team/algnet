@@ -9,7 +9,7 @@ namespace sim {
 
 Link::Link(std::weak_ptr<IRoutingDevice> a_from,
            std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_mbps,
-           std::uint32_t a_delay)
+           Time a_delay)
     : m_from(a_from),
       m_to(a_to),
       m_speed_mbps(a_speed_mbps),
@@ -22,7 +22,7 @@ Link::Link(std::weak_ptr<IRoutingDevice> a_from,
     }
 }
 
-std::uint32_t Link::get_transmission_time(const Packet& packet) const {
+Time Link::get_transmission_time(const Packet& packet) const {
     if (m_speed_mbps == 0) {
         spdlog::warn("Passed zero link speed");
         return 0;

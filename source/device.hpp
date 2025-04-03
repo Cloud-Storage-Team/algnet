@@ -1,5 +1,7 @@
 #pragma once
 
+#include "types.hpp"
+
 #include <memory>
 #include <set>
 #include <unordered_map>
