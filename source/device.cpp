@@ -9,26 +9,45 @@
 
 namespace sim {
 
-void RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
+bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
+    if (m_inlinks.contains(link)) {
+        spdlog::warn("Unexpected already added inlink");
+        return false;
+    }
     m_inlinks.insert(link);
     m_next_inlink = m_inlinks.begin();
+    return true;
 }
 
-void RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
+bool RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
+    if (m_outlinks.contains(link)) {
+        spdlog::warn("Unexpected already added outlink");
+        return false;
+    }
     m_outlinks.insert(link);
+    return true;
 }
 
-void RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
+bool RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                          std::shared_ptr<ILink> link) {
     if (link == nullptr) {
         spdlog::warn("Unexpected nullptr link");
-        return;
+        return false;
     }
     auto link_dest = link->get_to();
 
     // TODO: discuss storing weak_ptrs instead of shared
     m_neighbours.insert(link_dest);
     m_routing_table[dest] = link;
+    return true;
+}
+
+std::vector<std::shared_ptr<IRoutingDevice>> RoutingModule::get_neighbours()
+    const {
+    std::vector<std::shared_ptr<IRoutingDevice>> neighbours{};
+    neighbours.insert(neighbours.begin(), m_neighbours.begin(),
+                      m_neighbours.end());
+    return neighbours;
 }
 
 std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
@@ -56,14 +75,6 @@ std::shared_ptr<ILink> RoutingModule::next_inlink() {
 
 std::set<std::shared_ptr<ILink>> RoutingModule::get_outlinks() const {
     return m_outlinks;
-}
-
-std::vector<std::shared_ptr<IRoutingDevice>> RoutingModule::get_neighbours()
-    const {
-    std::vector<std::shared_ptr<IRoutingDevice>> neighbours{};
-    neighbours.insert(neighbours.begin(), m_neighbours.begin(),
-                      m_neighbours.end());
-    return neighbours;
 }
 
 }  // namespace sim

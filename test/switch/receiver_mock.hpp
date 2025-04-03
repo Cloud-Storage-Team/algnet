@@ -9,9 +9,9 @@ public:
     ReceiverMock() = default;
     ~ReceiverMock() = default;
 
-    void add_inlink(std::shared_ptr<sim::ILink> link) final;
-    void add_outlink(std::shared_ptr<sim::ILink> link) final;
-    void update_routing_table(std::shared_ptr<IRoutingDevice> dest,
+    bool add_inlink(std::shared_ptr<sim::ILink> link) final;
+    bool add_outlink(std::shared_ptr<sim::ILink> link) final;
+    bool update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                               std::shared_ptr<sim::ILink> link) final;
     std::vector<std::shared_ptr<sim::IRoutingDevice>> get_neighbours()
         const final;

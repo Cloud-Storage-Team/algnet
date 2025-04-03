@@ -16,51 +16,51 @@ namespace sim {
 
 Receiver::Receiver() : m_router(std::make_unique<RoutingModule>()) {}
 
-void Receiver::add_inlink(std::shared_ptr<ILink> link) {
+bool Receiver::add_inlink(std::shared_ptr<ILink> link) {
     if (link == nullptr) {
         spdlog::warn("Passed link is null");
-        return;
+        return false;
     }
 
     if (this != link->get_to().get()) {
         spdlog::warn(
             "Link destination device is incorrect (expected current device)");
-        return;
+        return false;
     }
-    m_router->add_inlink(link);
+    return m_router->add_inlink(link);
 }
 
-void Receiver::add_outlink(std::shared_ptr<ILink> link) {
+bool Receiver::add_outlink(std::shared_ptr<ILink> link) {
     if (link == nullptr) {
         spdlog::warn("Add nullptr outlink to receiver device");
-        return;
+        return false;
     }
 
     if (this != link->get_from().get()) {
         spdlog::warn("Outlink source is not our device");
-        return;
+        return false;
     }
-    m_router->add_outlink(link);
+    return m_router->add_outlink(link);
 }
 
-void Receiver::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
+bool Receiver::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                     std::shared_ptr<ILink> link) {
     if (link == nullptr) {
         spdlog::warn("Passed link is null");
-        return;
+        return false;
     }
 
     if (dest == nullptr) {
         spdlog::warn("Passed destination is null");
-        return;
+        return false;
     }
 
     if (this != link->get_from().get()) {
         spdlog::warn(
             "Link source device is incorrect (expected current device)");
-        return;
+        return false;
     }
-    m_router->update_routing_table(dest, link);
+    return m_router->update_routing_table(dest, link);
 }
 
 std::vector<std::shared_ptr<IRoutingDevice>> Receiver::get_neighbours() const {
