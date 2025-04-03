@@ -79,7 +79,7 @@ void Receiver::process() {
 
     Packet data_packet = opt_data_packet.value();
     if (data_packet.flow == nullptr) {
-        spdlog::warn("Packet flow does not exist");
+        spdlog::error("Packet flow does not exist");
         return;
     }
 auto source = data_packet.flow->get_source();
