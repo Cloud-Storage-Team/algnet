@@ -10,36 +10,38 @@ namespace sim {
 
 Sender::Sender() : m_router(std::make_unique<RoutingModule>()) {}
 
-void Sender::add_inlink(std::shared_ptr<ILink> link) {
+bool Sender::add_inlink(std::shared_ptr<ILink> link) {
     if (link == nullptr) {
         spdlog::warn("Passed link is null");
-        return;
+        return false;
     }
 
     if (this != link->get_to().get()) {
         spdlog::warn("Link destination device is incorrect (expected current device)");
-        return;
+        return false;
     }
     m_router->add_inlink(link);
+    return true;
 }
 
-void Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
+bool Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                      std::shared_ptr<ILink> link) {
     if (link == nullptr) {
         spdlog::warn("Passed link is null");
-        return;
+        return false;
     }
 
     if (dest == nullptr) {
         spdlog::warn("Passed destination is null");
-        return;
+        return false;
     }
 
     if (this != link->get_from().get()) {
         spdlog::warn("Link source device is incorrect (expected current device)");
-        return;
+        return false;
     }
     m_router->update_routing_table(dest, link);
+    return true;
 }
 
 std::vector<std::shared_ptr<IRoutingDevice>> Sender::get_neighbours() const {
@@ -85,16 +87,16 @@ std::uint32_t Sender::process() {
     }
 
     if (packet.type == PacketType::ACK) {
-         std::shared_ptr<IReceiver> destination = packet.flow->get_destination();
+         std::shared_ptr<ISender> destination = packet.flow->get_source();
          if (destination.get() == this) {
                  packet.flow->update();
          } else {
-             spwlog::warn("Packet arrived to Sender that is not its destination; use routing table to send it further");
+             spdlog::warn("Packet arrived to Sender that is not its destination; use routing table to send it further");
              std::shared_ptr<ILink> next_link = get_link_to_destination(destination); 
 
              if (next_link == nullptr) {
                  spdlog::warn("No link corresponds to destination device");
-                 return;
+                 return total_processing_time;
              }
              next_link->schedule_arrival(packet);
          }
