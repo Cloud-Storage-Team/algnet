@@ -93,7 +93,7 @@ if (source == nullptr) {
     Packet ack = {PacketType::ACK, 1, data_packet.flow};
     std::shared_ptr<ILink> link_to_src = m_router->get_link_to_destination(data_packet.flow->get_source());
     if (link_to_src == nullptr) {
-        spdlog::warn("Link to send ack does not exist");
+        spdlog::error("Link to send ack does not exist");
         return;
     }
 
