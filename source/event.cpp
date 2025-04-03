@@ -10,19 +10,35 @@ Stop::Stop(std::uint32_t a_time): Event(a_time) {}
 
 void Stop::operator()() { Scheduler::get_instance().clear(); }
 
-Process::Process(std::uint32_t a_time, IProcessingDevice *a_device): Event(a_time), m_device(a_device) {};
+Arrive::Arrive(std::uint32_t a_time, std::weak_ptr<ILink> a_link, Packet a_packet) : link(a_link), packet(a_packet), Event(a_time) {};
+
+void Arrive::operator()() {
+    if (link.expired()) {
+        return;
+    }
+
+    link.lock()->process_arrival(packet); 
+};
+
+Process::Process(std::uint32_t a_time, std::weak_ptr<IProcessingDevice> a_device): Event(a_time), m_device(a_device) {};
 
 void Process::operator()() {
-    std::uint32_t process_time = m_device->process();
+    if (m_device.expired()) {
+        return;
+    }
+    std::uint32_t process_time = m_device.lock()->process();
 
     std::unique_ptr<Event> next_process_event = std::make_unique<Process>(m_time + process_time, m_device);
     Scheduler::get_instance().add(std::move(next_process_event));
 };
 
-SendData::SendData(std::uint32_t a_time, ISender *a_device): Event(a_time), m_device(a_device) {};
+SendData::SendData(std::uint32_t a_time, std::weak_ptr<ISender> a_device): Event(a_time), m_device(a_device) {};
 
 void SendData::operator()() {
-    std::uint32_t process_time = m_device->send_data();
+    if (m_device.expired()) {
+        return;
+    }
+    std::uint32_t process_time = m_device.lock()->send_data();
 
     std::unique_ptr<Event> next_process_event = std::make_unique<SendData>(m_time + process_time, m_device);
     Scheduler::get_instance().add(std::move(next_process_event));

@@ -27,25 +27,30 @@ protected:
  * the source node ingress buffer for processing.
  * Schedule the next packet generation event.
  */
-struct Generate : public Event {
-    Generate(Flow *a_flow, std::uint32_t a_packet_size);
-    ~Generate() = default;
-    Flow *flow;
+class Generate : public Event {
+public:
+    Generate(std::weak_ptr<Flow> a_flow, std::uint32_t a_packet_size);
+    virtual ~Generate() = default;
+    void operator()() final;
 
-    virtual void operator()() final;
+private:
+    std::weak_ptr<Flow> flow;
 };
 
 /**
  * Enqueue the packet to the ingress port of the next node
  */
-struct Arrive : public Event {
+class Arrive : public Event {
+public:
     // TODO: move implementation to .cpp or use existing if present
-    Arrive(std::uint32_t a_time, ILink *a_link, Packet *a_packet) : link(a_link), packet(a_packet), Event(a_time) {};
-    ~Arrive() = default;
-    ILink *link;
-    Packet *packet;
+    Arrive(std::uint32_t a_time, std::weak_ptr<ILink> a_link, Packet a_packet);
+    virtual ~Arrive() = default;
 
-    virtual void operator()() final { link->process_arrival(*packet); };
+    void operator()() final;
+
+private:
+    std::weak_ptr<ILink> link;
+    Packet packet;
 };
 
 /**
@@ -55,12 +60,12 @@ struct Arrive : public Event {
 class Process : public Event {
 public:
     // TODO: move implementation to .cpp or use existing if present
-    Process(std::uint32_t a_time, IProcessingDevice *a_device);
+    Process(std::uint32_t a_time, std::weak_ptr<IProcessingDevice> a_device);
     ~Process() = default;
-    virtual void operator()() final;
+    void operator()() final;
 
 private:
-    IProcessingDevice *m_device;
+    std::weak_ptr<IProcessingDevice> m_device;
 };
 
 /**
@@ -70,21 +75,22 @@ private:
 class SendData : public Event {
 public:
     // TODO: move implementation to .cpp or use existing if present
-    SendData(std::uint32_t a_time, ISender *a_device);
+    SendData(std::uint32_t a_time, std::weak_ptr<ISender> _device);
     ~SendData() = default;
-    virtual void operator()() final;
+    void operator()() final;
 
 private:
-ISender *m_device;
+    std::weak_ptr<ISender> m_device;
 };
 
 /**
  * Stop simulation and clear all events remaining in the Scheduler
  */
-struct Stop : public Event {
+class Stop : public Event {
+public:
     Stop(std::uint32_t a_time);
-    ~Stop() = default;
-    virtual void operator()() final;
+    virtual ~Stop() = default;
+    void operator()() final;
 };
 
 }  // namespace sim
