@@ -89,7 +89,6 @@ std::uint32_t Receiver::process() {
     std::shared_ptr<IReceiver> receiver = data_packet.flow->get_receiver();
     if (receiver.get() == this) {
         // processing...
-        // total_processing_time += processing_time;
     } else {
         spdlog::warn("Packet arrived to Receiver that is not its destination; using routing table to send it further");
         std::shared_ptr<ILink> next_link = get_link_to_destination(receiver); 
@@ -100,7 +99,8 @@ std::uint32_t Receiver::process() {
         }
         next_link->schedule_arrival(data_packet);
     }
-
+    // total_processing_time += processing_time;
+    
     // TODO: move ack sending to function
     auto sender = data_packet.flow->get_sender();
     if (sender == nullptr) {
