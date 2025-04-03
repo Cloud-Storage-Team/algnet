@@ -26,7 +26,7 @@ public:
     // Upon receiving send an ACK to the sender.
     // Packets are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
-    void process() final;
+    std::uint32_t process() final;
 
 private:
     std::unique_ptr<IRoutingDevice> m_router;
