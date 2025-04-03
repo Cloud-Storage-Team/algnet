@@ -1,16 +1,16 @@
 #pragma once
-#include <cstdint>
 
 #include "device.hpp"
 #include "flow.hpp"
 #include "link.hpp"
 #include "packet.hpp"
+#include "types.hpp"
 
 namespace sim {
 
 // Base class for event
 struct Event {
-    std::uint32_t time;
+    Time time;
     virtual ~Event() = default;
     virtual void operator()() = 0;
     bool operator>(const Event &other) const { return time > other.time; }
