@@ -13,36 +13,38 @@ namespace sim {
 
 Receiver::Receiver() : m_router(std::make_unique<RoutingModule>()) {}
 
-void Receiver::add_inlink(std::shared_ptr<ILink> link) {
+bool Receiver::add_inlink(std::shared_ptr<ILink> link) {
     if (link == nullptr) {
         spdlog::warn("Passed link is null");
-        return;
+        return false;
     }
 
     if (this != link->get_to().get()) {
         spdlog::warn("Link destination device is incorrect (expected current device)");
-        return;
+        return false;
     }
     m_router->add_inlink(link);
+    return true;
 }
 
-void Receiver::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
+bool Receiver::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                      std::shared_ptr<ILink> link) {
     if (link == nullptr) {
         spdlog::warn("Passed link is null");
-        return;
+        return false;
     }
 
     if (dest == nullptr) {
         spdlog::warn("Passed destination is null");
-        return;
+        return false;
     }
 
     if (this != link->get_from().get()) {
         spdlog::warn("Link source device is incorrect (expected current device)");
-        return;
+        return false;
     }
     m_router->update_routing_table(dest, link);
+    return true;
 }
 
 std::vector<std::shared_ptr<IRoutingDevice>> Receiver::get_neighbours() const {
@@ -82,16 +84,17 @@ void Receiver::process() {
         spdlog::error("Packet flow does not exist");
         return;
     }
-auto source = data_packet.flow->get_source();
-if (source == nullptr) {
-    spdlog::error("Flow destination does not exists")
-    return;
-}
+
+    auto source = data_packet.flow->get_source();
+    if (source == nullptr) {
+        spdlog::error("Flow destination does not exists");
+        return;
+    }
     // processing...
     // total_processing_time += processing_time;
 
     Packet ack = {PacketType::ACK, 1, data_packet.flow};
-    std::shared_ptr<ILink> link_to_src = m_router->get_link_to_destination(data_packet.flow->get_source());
+    std::shared_ptr<ILink> link_to_src = m_router->get_link_to_destination(source);
     if (link_to_src == nullptr) {
         spdlog::error("Link to send ack does not exist");
         return;
