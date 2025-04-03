@@ -85,7 +85,19 @@ std::uint32_t Sender::process() {
     }
 
     if (packet.type == PacketType::ACK) {
-        packet.flow->update();
+         std::shared_ptr<IReceiver> destination = packet.flow->get_destination();
+         if (destination.get() == this) {
+                 packet.flow->update();
+         } else {
+             spwlog::warn("Packet arrived to Sender that is not its destination; use routing table to send it further");
+             std::shared_ptr<ILink> next_link = get_link_to_destination(destination); 
+
+             if (next_link == nullptr) {
+                 spdlog::warn("No link corresponds to destination device");
+                 return;
+             }
+             next_link->schedule_arrival(packet);
+         }
         // total_processing_time += processing_ack_time;
     }
 
