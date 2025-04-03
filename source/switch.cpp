@@ -13,33 +13,33 @@ namespace sim {
 
 Switch::Switch() : m_router(std::make_unique<RoutingModule>()) {}
 
-void Switch::add_inlink(std::shared_ptr<ILink> link) {
+bool Switch::add_inlink(std::shared_ptr<ILink> link) {
     if (link == nullptr) {
         LOG_WARN("Add nullptr inlink to switch device");
-        return;
+        return false;
     }
     if (link->get_to().get() != this) {
         LOG_WARN("Inlink destination is not our device");
-        return;
+        return false;
     }
-    m_router->add_inlink(link);
+    return m_router->add_inlink(link);
 }
 
-void Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
+bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                   std::shared_ptr<ILink> link) {
     if (dest == nullptr) {
         LOG_WARN("Destination device does not exist");
-        return;
+        return false;
     }
     if (link == nullptr) {
         LOG_WARN("Link does not exist");
-        return;
+        return false;
     }
     if (link->get_from().get() != this) {
         LOG_WARN("Link source is not our device");
-        return;
+        return false;
     }
-    m_router->update_routing_table(dest, link);
+    return m_router->update_routing_table(dest, link);
 }
 
 std::vector<std::shared_ptr<IRoutingDevice>> Switch::get_neighbours() const {

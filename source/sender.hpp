@@ -19,8 +19,8 @@ public:
     Sender();
     ~Sender() = default;
 
-    void add_inlink(std::shared_ptr<ILink> link) final;
-    void update_routing_table(std::shared_ptr<IRoutingDevice> dest,
+    bool add_inlink(std::shared_ptr<ILink> link) final;
+    bool update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                               std::shared_ptr<ILink> link) final;
     std::vector<std::shared_ptr<IRoutingDevice>> get_neighbours() const final;
     std::shared_ptr<ILink> next_inlink() final;
