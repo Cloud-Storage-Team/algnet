@@ -43,7 +43,7 @@ void Link::schedule_arrival(Packet packet) {
     m_src_egress_delay += transmission_time;
 
     Scheduler::get_instance().add(
-        std::make_unique<Arrive>(Arrive(total_delay, this, new Packet(packet))));
+        std::make_unique<Arrive>(Arrive(total_delay, this, packet)));
 };
 
 void Link::process_arrival(Packet packet) {

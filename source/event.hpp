@@ -43,13 +43,13 @@ private:
 class Arrive : public Event {
 public:
     // TODO: move implementation to .cpp or use existing if present
-    Arrive(std::uint32_t a_time, std::weak_ptr<ILink> a_link, Packet a_packet);
+    Arrive(std::uint32_t a_time, ILink *a_link, Packet a_packet);
     virtual ~Arrive() = default;
 
     void operator()() final;
 
 private:
-    std::weak_ptr<ILink> link;
+    ILink *link;
     Packet packet;
 };
 
