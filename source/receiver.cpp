@@ -82,7 +82,11 @@ void Receiver::process() {
         spdlog::warn("Packet flow does not exist");
         return;
     }
-
+auto source = data_packet.flow->get_source();
+if (source == nullptr) {
+    spdlog::error("Flow destination does not exists")
+    return;
+}
     // processing...
     // total_processing_time += processing_time;
 
