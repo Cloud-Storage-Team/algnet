@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <queue>
 
 #include "device.hpp"
@@ -15,12 +16,18 @@ public:
 
 class Sender : public ISender {
 public:
-    Sender() = default;
+    Sender();
     ~Sender() = default;
 
     bool add_inlink(std::shared_ptr<ILink> link) final;
+    bool add_outlink(std::shared_ptr<ILink> link) final;
     bool update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                               std::shared_ptr<ILink> link) final;
+    std::vector<std::shared_ptr<IRoutingDevice>> get_neighbours() const final;
+    std::shared_ptr<ILink> next_inlink() final;
+    std::shared_ptr<ILink> get_link_to_destination(
+        std::shared_ptr<IRoutingDevice> dest) const final;
+    std::set<std::shared_ptr<ILink>> get_outlinks() const final;
 
     DeviceType get_type() const final;
     // Process an ACK by removing it from the ingress buffer,
@@ -31,11 +38,14 @@ public:
     // ACKs are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
     void process() final;
+    std::uint32_t process_incoming();
+    std::uint32_t send_data();
 
     void enqueue_packet(Packet packet) final;
 
 private:
     std::queue<Packet> m_flow_buffer;
+    std::unique_ptr<IRoutingDevice> m_router;
 };
 
 }  // namespace sim

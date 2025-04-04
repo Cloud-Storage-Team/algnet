@@ -1,6 +1,7 @@
 #include "flow_mock.hpp"
 
 namespace test {
+
 FlowMock::FlowMock(std::shared_ptr<sim::IReceiver> m_receiver)
     : m_receiver(m_receiver) {}
 
@@ -11,5 +12,7 @@ void FlowMock::update() {}
 std::shared_ptr<sim::IReceiver> FlowMock::get_destination() const {
     return m_receiver;
 }
+
+std::shared_ptr<sim::ISender> FlowMock::get_source() const { return nullptr; }
 
 }  // namespace test

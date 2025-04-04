@@ -1,5 +1,6 @@
 #pragma once
 #include "flow.hpp"
+#include "sender.hpp"
 
 namespace test {
 
@@ -13,6 +14,7 @@ public:
 
     void update() final;
     std::shared_ptr<sim::IReceiver> get_destination() const final;
+    std::shared_ptr<sim::ISender> get_source() const final;
 
 private:
     std::shared_ptr<sim::IReceiver> m_receiver;

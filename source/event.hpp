@@ -58,6 +58,7 @@ struct Process : public Event {
  */
 struct Stop : public Event {
     Stop();
+    Stop(std::uint32_t a_stop_time);
     ~Stop() = default;
     virtual void operator()() final;
 };

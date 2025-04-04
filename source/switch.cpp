@@ -25,6 +25,18 @@ bool Switch::add_inlink(std::shared_ptr<ILink> link) {
     return m_router->add_inlink(link);
 }
 
+bool Switch::add_outlink(std::shared_ptr<ILink> link) {
+    if (link == nullptr) {
+        LOG_WARN("Add nullptr outlink to switch device");
+        return false;
+    }
+    if (link->get_from().get() != this) {
+        LOG_WARN("Outlink source is not our device");
+        return false;
+    }
+    return m_router->add_outlink(link);
+}
+
 bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                   std::shared_ptr<ILink> link) {
     if (dest == nullptr) {
@@ -82,6 +94,10 @@ void Switch::process() {
         return;
     }
     next_link->schedule_arrival(packet);
+}
+
+std::set<std::shared_ptr<ILink>> Switch::get_outlinks() const {
+    return m_router->get_outlinks();
 }
 
 }  // namespace sim

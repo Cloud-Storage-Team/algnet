@@ -19,6 +19,15 @@ bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
     return true;
 }
 
+bool RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
+    if (m_outlinks.contains(link)) {
+        spdlog::warn("Unexpected already added outlink");
+        return false;
+    }
+    m_outlinks.insert(link);
+    return true;
+}
+
 bool RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                          std::shared_ptr<ILink> link) {
     if (link == nullptr) {
@@ -62,6 +71,10 @@ std::shared_ptr<ILink> RoutingModule::next_inlink() {
         m_next_inlink = m_inlinks.begin();
     }
     return link;
+}
+
+std::set<std::shared_ptr<ILink>> RoutingModule::get_outlinks() const {
+    return m_outlinks;
 }
 
 }  // namespace sim
