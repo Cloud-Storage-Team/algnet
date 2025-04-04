@@ -87,11 +87,11 @@ std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<ILink>> bfs(
 };
 
 void Simulator::recalculate_paths() {
-    for (auto& [_, src_device] : m_graph) {
+    for (auto& [src_device_name, src_device] : m_graph) {
         std::unordered_map<std::shared_ptr<IRoutingDevice>,
                            std::shared_ptr<ILink>>
             parent_table = bfs(src_device);
-        for (auto& [_, dest_device] : m_graph) {
+        for (auto& [dest_device_name, dest_device] : m_graph) {
             if (parent_table.find(dest_device) == parent_table.end()) {
                 src_device->update_routing_table(dest_device, nullptr);
                 continue;
@@ -100,8 +100,10 @@ void Simulator::recalculate_paths() {
             while (parent_table[next_hop]->get_from() != src_device) {
                 next_hop = parent_table[next_hop]->get_from();
             }
-            spdlog::info(src_device->update_routing_table(
-                dest_device, parent_table[next_hop]));
+            bool status = src_device->update_routing_table(
+                dest_device, parent_table[next_hop]);
+            spdlog::info("Update routing table {} --> {}: {}", src_device_name,
+                         dest_device_name, (status ? "true" : "false"));
         }
     }
 }
