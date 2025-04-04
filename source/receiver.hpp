@@ -31,6 +31,7 @@ public:
     // Packets are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
     std::uint32_t process() final;
+    std::uint32_t send_ack(Packet data_packet);
 
 private:
     std::unique_ptr<RoutingModule> m_router;

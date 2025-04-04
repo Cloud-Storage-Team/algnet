@@ -87,9 +87,10 @@ std::uint32_t Receiver::process() {
     }
 
     std::shared_ptr<IReceiver> receiver = data_packet.flow->get_receiver();
-    if (receiver.get() == this) {
+    if (data_packet.type == DATA && receiver.get() == this) {
         // TODO: think about processing time
-
+        // Not sure if we want to send ack before processing or after it
+        total_processing_time += send_ack(data_packet);
     } else {
         spdlog::warn("Packet arrived to Receiver that is not its destination; using routing table to send it further");
         std::shared_ptr<ILink> next_link = get_link_to_destination(receiver); 
@@ -99,30 +100,29 @@ std::uint32_t Receiver::process() {
             return total_processing_time;
         }
         next_link->schedule_arrival(data_packet);
+        // TODO: think about redirecting time
     }
-    // total_processing_time += processing_time;
-    
-    // TODO: move ack sending to function
-    auto sender = data_packet.flow->get_sender();
-    if (sender == nullptr) {
-        spdlog::error("Flow sender does not exists");
-        return total_processing_time;
-    }
-
-    Packet ack = {PacketType::ACK, 1, data_packet.flow};
-    std::shared_ptr<ILink> link_to_src = m_router->get_link_to_destination(sender);
-    if (link_to_src == nullptr) {
-        spdlog::error("Link to send ack does not exist");
-        return total_processing_time;
-    }
-    if(data_paket.get_destination().get() == this()) {
-        // check that type of paket is DATA, replace data_paket to ask
-     }
-     // send paket using routing table
-    // Not sure if we want to send ack before processing or after it
-    link_to_src->schedule_arrival(ack);
 
     return total_processing_time;
+}
+
+std::uint32_t Receiver::send_ack(Packet data_packet) {
+    std::uint32_t processing_time = 1;
+    Packet ack = {PacketType::ACK, 1, data_packet.flow};
+
+    auto destination = ack.get_destination();
+    if (destination == nullptr) {
+        spdlog::error("Ack destination does not exists");
+        return processing_time;
+    }
+
+    std::shared_ptr<ILink> link_to_dest = m_router->get_link_to_destination(destination);
+    if (link_to_dest == nullptr) {
+        spdlog::error("Link to send ack does not exist");
+        return processing_time;
+    }
+
+    link_to_dest->schedule_arrival(ack);
 }
 
 }  // namespace sim
