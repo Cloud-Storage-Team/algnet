@@ -14,7 +14,7 @@ namespace sim {
 class Simulator {
 public:
     Simulator();
-    ~Simulator();
+    ~Simulator() = default;
     std::shared_ptr<IRoutingDevice> add_device(std::string a_name,
                                                DeviceType a_type);
     void add_flow(std::shared_ptr<IRoutingDevice> a_from,

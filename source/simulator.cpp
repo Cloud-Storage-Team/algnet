@@ -97,11 +97,11 @@ void Simulator::recalculate_paths() {
                 continue;
             }
             std::shared_ptr<IRoutingDevice> next_hop = dest_device;
-            while (parent_table[dest_device]->get_from() != src_device) {
+            while (parent_table[next_hop]->get_from() != src_device) {
                 next_hop = parent_table[next_hop]->get_from();
             }
-            src_device->update_routing_table(dest_device,
-                                             parent_table[next_hop]);
+            spdlog::info(src_device->update_routing_table(
+                dest_device, parent_table[next_hop]));
         }
     }
 }
