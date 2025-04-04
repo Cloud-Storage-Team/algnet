@@ -9,11 +9,17 @@
 namespace sim {
 
 // Base class for event
-struct Event {
-    std::uint32_t time;
+class Event {
+public:
+    Event(std::uint32_t a_time);
     virtual ~Event() = default;
     virtual void operator()() = 0;
-    bool operator>(const Event &other) const { return time > other.time; }
+
+    std::uint32_t get_time() const;
+    bool operator>(const Event &other) const { return m_time > other.m_time; }
+
+protected:
+    std::uint32_t m_time;
 };
 
 /**
@@ -34,7 +40,7 @@ struct Generate : public Event {
  */
 struct Arrive : public Event {
     // TODO: move implementation to .cpp or use existing if present
-    Arrive(ILink *a_link, Packet *a_packet) : link(a_link), packet(a_packet){};
+    Arrive(std::uint32_t a_time, ILink *a_link, Packet *a_packet) : link(a_link), packet(a_packet), Event(a_time) {};
     ~Arrive() = default;
     ILink *link;
     Packet *packet;
@@ -46,18 +52,37 @@ struct Arrive : public Event {
  * Dequeue a packet from the device ingress buffer
  * and start processing at the device.
  */
-struct Process : public Event {
-    Process(IProcessingDevice *a_device);
-    IProcessingDevice *node;
-
+class Process : public Event {
+public:
+    // TODO: move implementation to .cpp or use existing if present
+    Process(std::uint32_t a_time, IProcessingDevice *a_device);
+    ~Process() = default;
     virtual void operator()() final;
+
+private:
+    IProcessingDevice *m_device;
+};
+
+/**
+ * Dequeue a packet from the device ingress buffer
+ * and start processing at the device.
+ */
+class SendData : public Event {
+public:
+    // TODO: move implementation to .cpp or use existing if present
+    SendData(std::uint32_t a_time, ISender *a_device);
+    ~SendData() = default;
+    virtual void operator()() final;
+
+private:
+ISender *m_device;
 };
 
 /**
  * Stop simulation and clear all events remaining in the Scheduler
  */
 struct Stop : public Event {
-    Stop();
+    Stop(std::uint32_t a_time);
     ~Stop() = default;
     virtual void operator()() final;
 };

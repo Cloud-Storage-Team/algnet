@@ -34,7 +34,6 @@ public:
     void update() final;
 
     std::shared_ptr<IReceiver> get_destination() const final;
-
 private:
     ISender *m_src;
     IReceiver *m_dest;
