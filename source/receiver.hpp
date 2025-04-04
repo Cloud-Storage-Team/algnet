@@ -2,6 +2,7 @@
 #include <memory>
 
 #include "device.hpp"
+#include "packet.hpp"
 
 namespace sim {
 

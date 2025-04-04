@@ -6,7 +6,6 @@
 #include "event.hpp"
 #include "flow.hpp"
 #include "link.hpp"
-#include "packet.hpp"
 #include "scheduler.hpp"
 
 namespace sim {
