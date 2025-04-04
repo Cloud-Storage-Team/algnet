@@ -115,7 +115,10 @@ std::uint32_t Receiver::process() {
         spdlog::error("Link to send ack does not exist");
         return total_processing_time;
     }
-
+    if(data_paket.get_destination().get() == this()) {
+        // check that type of paket is DATA, replace data_paket to ask
+     }
+     // send paket using routing table
     // Not sure if we want to send ack before processing or after it
     link_to_src->schedule_arrival(ack);
 
