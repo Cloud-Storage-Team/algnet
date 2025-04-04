@@ -6,6 +6,8 @@
 
 namespace sim {
 
+struct Packet;
+
 class IReceiver : public IRoutingDevice, IProcessingDevice {
 public:
     virtual ~IReceiver() = default;
@@ -32,9 +34,9 @@ public:
     // Packets are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
     std::uint32_t process() final;
-    std::uint32_t send_ack(Packet data_packet);
 
 private:
+    std::uint32_t send_ack(Packet data_packet);
     std::unique_ptr<RoutingModule> m_router;
 };
 

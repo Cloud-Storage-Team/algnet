@@ -6,6 +6,9 @@
 
 namespace sim {
 
+class IReceiver;
+class ISender;
+
 class IFlow {
 public:
     virtual void start(std::uint32_t time) = 0;

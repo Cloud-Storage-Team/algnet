@@ -6,6 +6,8 @@
 
 namespace sim {
 
+class IFlow;
+
 enum PacketType { ACK, DATA };
 
 struct Packet {
