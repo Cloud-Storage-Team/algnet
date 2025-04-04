@@ -79,7 +79,9 @@ std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<ILink>> bfs(
             if (used.find(link->get_to()) != used.end()) {
                 continue;
             }
-            parent_table[link->get_to()] = link;
+            if (!parent_table.contains(link->get_to())) {
+                parent_table[link->get_to()] = link;
+            }
             queue.push(link->get_to());
         }
     }
