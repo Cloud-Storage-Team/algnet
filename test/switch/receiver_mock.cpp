@@ -22,7 +22,9 @@ std::shared_ptr<sim::ILink> ReceiverMock::get_link_to_destination(
     return nullptr;
 }
 
-void ReceiverMock::process() {}
+std::uint32_t ReceiverMock::process() {
+    return 1;
+}
 sim::DeviceType ReceiverMock::get_type() const {
     return sim::DeviceType::RECEIVER;
 }
