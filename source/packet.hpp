@@ -14,6 +14,7 @@ struct Packet {
            IFlow* flow = nullptr);
 
     bool operator==(const Packet& packet) const;
+    std::shared_ptr<IRoutingDevice> get_destination() const;
 
     PacketType type;
     std::uint32_t size;
