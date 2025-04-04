@@ -88,7 +88,8 @@ std::uint32_t Receiver::process() {
 
     std::shared_ptr<IReceiver> receiver = data_packet.flow->get_receiver();
     if (receiver.get() == this) {
-        // processing...
+        // TODO: think about processing time
+
     } else {
         spdlog::warn("Packet arrived to Receiver that is not its destination; using routing table to send it further");
         std::shared_ptr<ILink> next_link = get_link_to_destination(receiver); 
