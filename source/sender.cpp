@@ -85,6 +85,9 @@ Time Sender::process() {
         return total_processing_time;
     }
 
+    // TODO: add some sender ID for easier packet path tracing
+    LOG_INFO("Processing packet from link on sender. Packet: " + packet.to_string());
+
     auto destination = packet.get_destination();
     if (packet.type == PacketType::ACK && destination.get() == this) {
         packet.flow->update();
@@ -114,11 +117,18 @@ Time Sender::send_data() {
     Packet data_packet = m_flow_buffer.front();
     m_flow_buffer.pop();
 
+    // TODO: add some sender ID for easier packet path tracing
+    LOG_INFO("Taken new data packet on sender. Packet: " + data_packet.to_string());
+
     auto next_link = m_router->get_link_to_destination(data_packet.get_destination());
     if (next_link == nullptr) {
         LOG_WARN("Link to send data packet does not exist");
         return total_processing_time;
     }
+
+    // TODO: add some sender ID for easier packet path tracing
+    LOG_INFO("Sent new data packet from sender. Data packet: " + data_packet.to_string());
+
     next_link->schedule_arrival(data_packet);
     // total_processing_time += sending_data_time;
     return total_processing_time;

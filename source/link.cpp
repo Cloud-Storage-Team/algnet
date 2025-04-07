@@ -35,17 +35,22 @@ void Link::schedule_arrival(Packet packet) {
         return;
     }
 
+    LOG_INFO("Packet arrived to link's ingress queue. Packet: " + packet.to_string());
+
     unsigned int transmission_time = get_transmission_time(packet);
     unsigned int total_delay = m_src_egress_delay + transmission_time;
     (void) total_delay; // unused variable stub
 
     m_src_egress_delay += transmission_time;
 
+    // TODO: put correct event time. Arrive happens in current time + total_delay.
     Scheduler::get_instance().add(
-        std::make_unique<Arrive>(Arrive(total_delay, this, packet)));
+        std::make_unique<Arrive>(Arrive(0, this, packet)));
 };
 
 void Link::process_arrival(Packet packet) {
+    LOG_INFO("Packet arrived to link's egress queue. Packet: " + packet.to_string());
+
     m_src_egress_delay -= get_transmission_time(packet);
     m_next_ingress.push(packet);
 };
@@ -57,6 +62,7 @@ std::optional<Packet> Link::get_packet() {
     }
 
     auto packet = m_next_ingress.front();
+    LOG_INFO("Taken packet from link. Packet: " + packet.to_string());
     m_next_ingress.pop();
     return packet;
 };
