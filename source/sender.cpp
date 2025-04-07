@@ -34,7 +34,7 @@ bool Sender::add_outlink(std::shared_ptr<ILink> link) {
         spdlog::warn("Outlink source is not our device");
         return false;
     }
-    m_router->add_inlink(link);
+    m_router->add_outlink(link);
     return true;
 }
 
