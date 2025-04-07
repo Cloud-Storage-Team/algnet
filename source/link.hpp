@@ -49,12 +49,12 @@ public:
     /**
      * Removes packet from the source egress queue.
      */
-    virtual void process_arrival(Packet packet) final;
+    void process_arrival(Packet packet) final;
 
-    virtual std::optional<Packet> get_packet() final;
-    // TODO: discuss returning weak_ptrs instead of shared
-    virtual std::shared_ptr<IRoutingDevice> get_from() const final;
-    virtual std::shared_ptr<IRoutingDevice> get_to() const final;
+    std::optional<Packet> get_packet() final;
+
+    std::shared_ptr<IRoutingDevice> get_from() const final;
+    std::shared_ptr<IRoutingDevice> get_to() const final;
 
 private:
     Time get_transmission_time(const Packet& packet) const;
