@@ -49,7 +49,7 @@ public:
 
 private:
     // TODO: use weak_ptr (requires enable_from_this implementation for some links)
-    ILink *link;
+    ILink *m_link;
     Packet m_packet;
 };
 

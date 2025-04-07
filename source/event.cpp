@@ -10,10 +10,10 @@ Stop::Stop(std::uint32_t a_time): Event(a_time) {}
 
 void Stop::operator()() { Scheduler::get_instance().clear(); }
 
-Arrive::Arrive(std::uint32_t a_time, ILink *a_link, Packet a_packet) : link(a_link), packet(a_packet), Event(a_time) {};
+Arrive::Arrive(std::uint32_t a_time, ILink *a_link, Packet a_packet) : Event(a_time), m_link(a_link), m_packet(a_packet) {};
 
 void Arrive::operator()() {
-    link->process_arrival(packet); 
+    m_link->process_arrival(m_packet); 
 };
 
 Process::Process(std::uint32_t a_time, std::weak_ptr<IProcessingDevice> a_device): Event(a_time), m_device(a_device) {};
