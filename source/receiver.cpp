@@ -122,6 +122,7 @@ std::uint32_t Receiver::send_ack(Packet data_packet) {
     }
 
     link_to_dest->schedule_arrival(ack);
+    return processing_time;
 }
 
 }  // namespace sim
