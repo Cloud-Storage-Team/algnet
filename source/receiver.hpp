@@ -13,7 +13,8 @@ public:
     virtual ~IReceiver() = default;
 };
 
-class Receiver : public IReceiver {
+class Receiver : public IReceiver,
+                 public std::enable_shared_from_this<Receiver> {
 public:
     Receiver();
     ~Receiver() = default;

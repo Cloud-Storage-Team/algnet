@@ -21,7 +21,7 @@ public:
     virtual std::shared_ptr<IReceiver> get_receiver() const = 0;
 };
 
-class Flow : IFlow {
+class Flow : public IFlow, public std::enable_shared_from_this<Flow> {
 public:
     Flow(ISender *a_src, IReceiver *a_dest, float a_start_cwnd);
 
