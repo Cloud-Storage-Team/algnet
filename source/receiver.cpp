@@ -80,7 +80,6 @@ Time Receiver::process() {
 
     Packet data_packet = opt_data_packet.value();
     if (data_packet.flow == nullptr) {
-        // TODO: discuss do we need to discard packet in such scenario or process it
         spdlog::error("Packet flow does not exist");
         return total_processing_time;
     }

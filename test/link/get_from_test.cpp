@@ -10,8 +10,8 @@ TEST_F(LinkTest, SimpleFrom) {
     std::shared_ptr<sim::IRoutingDevice> dst =
         std::make_shared<DeviceMock>(DeviceMock());
 
-    auto link = sim::Link(src, dst);
-    ASSERT_EQ(link.get_from(), src);
+    auto link = std::make_shared<sim::Link>(src, dst);
+    ASSERT_EQ(link->get_from(), src);
 }
 
 TEST_F(LinkTest, FromExpiredAfterCreation) {
@@ -19,10 +19,10 @@ TEST_F(LinkTest, FromExpiredAfterCreation) {
         std::make_shared<DeviceMock>(DeviceMock());
     std::shared_ptr<sim::IRoutingDevice> dst =
         std::make_shared<DeviceMock>(DeviceMock());
-    auto link = sim::Link(src, dst);
+    auto link = std::make_shared<sim::Link>(src, dst);
 
     src.reset();
-    ASSERT_EQ(link.get_from(), nullptr);
+    ASSERT_EQ(link->get_from(), nullptr);
 }
 
 TEST_F(LinkTest, FromExpiredBeforeCreation) {
@@ -32,8 +32,8 @@ TEST_F(LinkTest, FromExpiredBeforeCreation) {
         std::make_shared<DeviceMock>(DeviceMock());
     src.reset();
 
-    auto link = sim::Link(src, dst);
-    ASSERT_EQ(link.get_from(), nullptr);
+    auto link = std::make_shared<sim::Link>(src, dst);
+    ASSERT_EQ(link->get_from(), nullptr);
 }
 
 }  // namespace test
