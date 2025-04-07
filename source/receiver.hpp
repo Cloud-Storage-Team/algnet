@@ -2,8 +2,11 @@
 #include <memory>
 
 #include "device.hpp"
+#include "packet.hpp"
 
 namespace sim {
+
+struct Packet;
 
 class IReceiver : public IRoutingDevice, IProcessingDevice {
 public:
@@ -32,10 +35,11 @@ public:
     // Upon receiving send an ACK to the sender.
     // Packets are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
-    void process() final;
+    std::uint32_t process() final;
 
 private:
-    std::unique_ptr<IRoutingDevice> m_router;
+    std::uint32_t send_ack(Packet data_packet);
+    std::unique_ptr<RoutingModule> m_router;
 };
 
 }  // namespace sim

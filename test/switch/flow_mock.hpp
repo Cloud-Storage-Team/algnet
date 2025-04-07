@@ -13,8 +13,8 @@ public:
     bool try_to_generate(std::uint32_t packet_size) final;
 
     void update() final;
-    std::shared_ptr<sim::IReceiver> get_destination() const final;
-    std::shared_ptr<sim::ISender> get_source() const final;
+    std::shared_ptr<sim::ISender> get_sender() const final;
+    std::shared_ptr<sim::IReceiver> get_receiver() const final;
 
 private:
     std::shared_ptr<sim::IReceiver> m_receiver;
