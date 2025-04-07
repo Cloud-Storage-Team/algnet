@@ -7,14 +7,18 @@
 
 namespace sim {
 
+class IFlow;
+
 enum PacketType { ACK, DATA };
 
 struct Packet {
+    // TODO: move implementation to .cpp or use existing if present
     Packet(PacketType a_type = PacketType::DATA, std::uint32_t a_size = 0,
            IFlow* flow = nullptr);
 
     bool operator==(const Packet& packet) const;
     std::string to_string() const;
+    std::shared_ptr<IRoutingDevice> get_destination() const;
 
     PacketType type;
     std::uint32_t size;
