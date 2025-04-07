@@ -16,12 +16,7 @@ bool Sender::add_inlink(std::shared_ptr<ILink> link) {
     }
 
     if (this != link->get_to().get()) {
-<<<<<<< HEAD
         LOG_WARN("Link destination device is incorrect (expected current device)");
-=======
-        spdlog::warn(
-            "Link destination device is incorrect (expected current device)");
->>>>>>> origin/main
         return false;
     }
     m_router->add_inlink(link);
@@ -41,12 +36,7 @@ bool Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     }
 
     if (this != link->get_from().get()) {
-<<<<<<< HEAD
         LOG_WARN("Link source device is incorrect (expected current device)");
-=======
-        spdlog::warn(
-            "Link source device is incorrect (expected current device)");
->>>>>>> origin/main
         return false;
     }
     m_router->update_routing_table(dest, link);
@@ -98,15 +88,8 @@ Time Sender::process() {
     if (packet.type == PacketType::ACK && destination.get() == this) {
         packet.flow->update();
     } else {
-<<<<<<< HEAD
         LOG_WARN("Packet arrived to Sender that is not its destination; use routing table to send it further");
         std::shared_ptr<ILink> next_link = get_link_to_destination(destination); 
-=======
-        spdlog::warn(
-            "Packet arrived to Sender that is not its destination; use routing "
-            "table to send it further");
-        std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
->>>>>>> origin/main
 
         if (next_link == nullptr) {
             LOG_WARN("No link corresponds to destination device");
@@ -130,15 +113,10 @@ Time Sender::send_data() {
     Packet data_packet = m_flow_buffer.front();
     m_flow_buffer.pop();
 
-<<<<<<< HEAD
     // TODO: add some sender ID for easier packet path tracing
     LOG_INFO("Taken new data packet on sender. Packet: " + data_packet.to_string());
 
     auto next_link = m_router->get_link_to_destination(data_packet.get_destination());
-=======
-    auto next_link =
-        m_router->get_link_to_destination(data_packet.get_destination());
->>>>>>> origin/main
     if (next_link == nullptr) {
         LOG_WARN("Link to send data packet does not exist");
         return total_processing_time;
