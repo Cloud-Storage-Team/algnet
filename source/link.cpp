@@ -1,7 +1,5 @@
 #include "link.hpp"
-
-#include <spdlog/spdlog.h>
-
+#include "logger.hpp"
 #include "event.hpp"
 #include "scheduler.hpp"
 
@@ -16,15 +14,15 @@ Link::Link(std::weak_ptr<IRoutingDevice> a_from,
       m_src_egress_delay(0),
       m_transmission_delay(a_delay) {
     if (a_from.expired() || a_to.expired()) {
-        spdlog::warn("Passed link to device is expired");
+        LOG_WARN("Passed link to device is expired");
     } else if (a_speed_mbps == 0) {
-        spdlog::warn("Passed zero link speed");
+        LOG_WARN("Passed zero link speed");
     }
 }
 
 std::uint32_t Link::get_transmission_time(const Packet& packet) const {
     if (m_speed_mbps == 0) {
-        spdlog::warn("Passed zero link speed");
+        LOG_WARN("Passed zero link speed");
         return 0;
     }
     return (packet.size + m_speed_mbps - 1) / m_speed_mbps +
@@ -33,7 +31,7 @@ std::uint32_t Link::get_transmission_time(const Packet& packet) const {
 
 void Link::schedule_arrival(Packet packet) {
     if (m_to.expired()) {
-        spdlog::warn("Destination device pointer is expired");
+        LOG_WARN("Destination device pointer is expired");
         return;
     }
 
@@ -54,7 +52,7 @@ void Link::process_arrival(Packet packet) {
 
 std::optional<Packet> Link::get_packet() {
     if (m_next_ingress.empty()) {
-        spdlog::info("Ingress packet queue is empty");
+        LOG_INFO("Ingress packet queue is empty");
         return {};
     }
 
@@ -65,7 +63,7 @@ std::optional<Packet> Link::get_packet() {
 
 std::shared_ptr<IRoutingDevice> Link::get_from() const {
     if (m_from.expired()) {
-        spdlog::warn("Source device pointer is expired");
+        LOG_WARN("Source device pointer is expired");
         return nullptr;
     }
 
@@ -74,7 +72,7 @@ std::shared_ptr<IRoutingDevice> Link::get_from() const {
 
 std::shared_ptr<IRoutingDevice> Link::get_to() const {
     if (m_to.expired()) {
-        spdlog::warn("Destination device pointer is expired");
+        LOG_WARN("Destination device pointer is expired");
         return nullptr;
     }
 

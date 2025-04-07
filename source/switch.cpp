@@ -1,13 +1,10 @@
 #include "switch.hpp"
-
-#include <spdlog/spdlog.h>
+#include "logger.hpp"
 
 #include <memory>
 #include <stdexcept>
 
 #include "link.hpp"
-
-#define LOG_WARN(msg) spdlog::warn("{} ({}:{})", msg, __FILE__, __LINE__)
 
 namespace sim {
 

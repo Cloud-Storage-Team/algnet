@@ -40,4 +40,5 @@ std::string Packet::to_string() const {
     
     return oss.str();
 }
+
 }  // namespace sim
