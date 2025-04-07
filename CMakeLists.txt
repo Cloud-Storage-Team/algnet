@@ -5,6 +5,7 @@ project(simulator)
 
 # main part of project
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 option(BUILD_PROJECT "Build tests" ON)
 
 file(GLOB_RECURSE src "source/*.cpp")
