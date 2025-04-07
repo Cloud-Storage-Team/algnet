@@ -42,14 +42,13 @@ private:
  */
 class Arrive : public Event {
 public:
-    Arrive(Time a_time, ILink *a_link, Packet a_packet);
+    Arrive(Time a_time, std::weak_ptr<ILink> a_link, Packet a_packet);
     virtual ~Arrive() = default;
 
     void operator()() final;
 
 private:
-    // TODO: use weak_ptr (requires enable_from_this implementation for some links)
-    ILink *m_link;
+    std::weak_ptr<ILink> m_link;
     Packet m_packet;
 };
 
