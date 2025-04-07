@@ -17,7 +17,7 @@ public:
     std::shared_ptr<sim::ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> device) const final;
 
-    void process() final;
+    std::uint32_t process() final;
     sim::DeviceType get_type() const final;
 };
 
