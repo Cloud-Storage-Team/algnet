@@ -14,6 +14,7 @@ include_directories(${CMAKE_SOURCE_DIR}/spdlog/include/)
 if (BUILD_PROJECT)
     set(TARGET_NAME "${PROJECT_NAME}")
     add_executable(${TARGET_NAME} main.cpp ${src})
+    target_compile_options(${TARGET_NAME} PRIVATE -Wall -Werror -Wextra)
 endif()
 
 # tests
@@ -24,6 +25,7 @@ if(BUILD_TESTS)
 
     set(TEST_NAME "test_simulator")
     add_executable(${TEST_NAME} ${src} ${tests})
+    target_compile_options(${TEST_NAME} PRIVATE -Wall -Wextra)
     target_include_directories(${TEST_NAME} PUBLIC "source")
     target_link_libraries(${TEST_NAME} gtest gtest_main)
     enable_testing()

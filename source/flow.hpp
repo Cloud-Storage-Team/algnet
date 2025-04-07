@@ -6,6 +6,9 @@
 
 namespace sim {
 
+class IReceiver;
+class ISender;
+
 class IFlow {
 public:
     virtual void start(std::uint32_t time) = 0;
@@ -14,7 +17,8 @@ public:
     // Update the internal state according to some congestion control algorithm
     // Call try_to_generate upon the update
     virtual void update() = 0;
-    virtual std::shared_ptr<IReceiver> get_destination() const = 0;
+    virtual std::shared_ptr<ISender> get_sender() const = 0;
+    virtual std::shared_ptr<IReceiver> get_receiver() const = 0;
 };
 
 class Flow : IFlow {
@@ -33,7 +37,8 @@ public:
     // Call try_to_generate upon the update
     void update() final;
 
-    std::shared_ptr<IReceiver> get_destination() const final;
+    std::shared_ptr<ISender> get_sender() const final;
+    std::shared_ptr<IReceiver> get_receiver() const final;
 
 private:
     ISender *m_src;

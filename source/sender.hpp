@@ -5,7 +5,7 @@
 
 namespace sim {
 
-class Packet;
+struct Packet;
 
 class ISender : public IRoutingDevice, IProcessingDevice {
 public:
@@ -18,8 +18,8 @@ public:
     Sender() = default;
     ~Sender() = default;
 
-    void add_inlink(std::shared_ptr<ILink> link) final;
-    void update_routing_table(std::shared_ptr<IRoutingDevice> dest,
+    bool add_inlink(std::shared_ptr<ILink> link) final;
+    bool update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                               std::shared_ptr<ILink> link) final;
 
     DeviceType get_type() const final;
@@ -30,7 +30,7 @@ public:
     // and move it to the egress port (link)
     // ACKs are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
-    void process() final;
+    std::uint32_t process() final;
 
     void enqueue_packet(Packet packet) final;
 
