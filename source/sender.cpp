@@ -86,7 +86,7 @@ std::uint32_t Sender::process() {
         return total_processing_time;
     }
 
-    std::shared_ptr<ISender> destination = packet.flow->get_source();
+    auto destination = packet.get_destination();
     if (packet.type == PacketType::ACK && destination.get() == this) {
         packet.flow->update();
     } else {
@@ -115,8 +115,7 @@ std::uint32_t Sender::send_data() {
     Packet data_packet = m_flow_buffer.front();
     m_flow_buffer.pop();
 
-    auto destination = data_packet.flow->get_destination();
-    auto next_link = m_router->get_link_to_destination(destination);
+    auto next_link = m_router->get_link_to_destination(data_packet.get_destination());
     if (next_link == nullptr) {
         spdlog::warn("Link to send data packet does not exist");
         return total_processing_time;

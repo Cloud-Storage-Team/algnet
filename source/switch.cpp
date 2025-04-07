@@ -58,7 +58,6 @@ DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
 std::uint32_t Switch::process() {
     std::uint32_t total_processing_time = 1;
     std::shared_ptr<ILink> link = next_inlink();
-    std::uint32_t total_processing_time = 1;
 
     if (link == nullptr) {
         LOG_WARN("No next inlink");
