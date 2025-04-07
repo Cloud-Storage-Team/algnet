@@ -11,7 +11,7 @@ class ISender : public IRoutingDevice, IProcessingDevice {
 public:
     virtual ~ISender() = default;
     virtual void enqueue_packet(Packet packet) = 0;
-    virtual std::uint32_t send_data() = 0;
+    virtual Time send_data() = 0;
 };
 
 class Sender : public ISender {
@@ -35,8 +35,8 @@ public:
     // and move it to the egress port (link)
     // ACKs are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
-    std::uint32_t process() final;
-    std::uint32_t send_data() final;
+    Time process() final;
+    Time send_data() final;
 
     void enqueue_packet(Packet packet) final;
 

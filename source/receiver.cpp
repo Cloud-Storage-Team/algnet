@@ -63,9 +63,9 @@ DeviceType Receiver::get_type() const {
     return DeviceType::RECEIVER;
 }
 
-std::uint32_t Receiver::process() {
+Time Receiver::process() {
     std::shared_ptr<ILink> current_inlink = m_router->next_inlink();
-    std::uint32_t total_processing_time = 1;
+    Time total_processing_time = 1;
 
     if (current_inlink == nullptr) {
         LOG_WARN("No available inlinks for device");
@@ -105,8 +105,8 @@ std::uint32_t Receiver::process() {
     return total_processing_time;
 }
 
-std::uint32_t Receiver::send_ack(Packet data_packet) {
-    std::uint32_t processing_time = 1;
+Time Receiver::send_ack(Packet data_packet) {
+    Time processing_time = 1;
     Packet ack = {PacketType::ACK, 1, data_packet.flow};
 
     auto destination = ack.get_destination();

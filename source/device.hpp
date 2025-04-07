@@ -1,5 +1,7 @@
 #pragma once
 
+#include "types.hpp"
+
 #include <memory>
 #include <set>
 #include <unordered_map>
@@ -18,7 +20,7 @@ public:
     // One step of device work cycle;
     // e.g. see next inlink, take one packet from it,
     // and do smth with it (send further, send ask etc)
-    virtual std::uint32_t process() = 0;
+    virtual Time process() = 0;
 
     virtual DeviceType get_type() const = 0;
 };

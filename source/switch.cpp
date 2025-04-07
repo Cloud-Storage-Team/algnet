@@ -52,8 +52,8 @@ std::shared_ptr<ILink> Switch::get_link_to_destination(
 
 DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
 
-std::uint32_t Switch::process() {
-    std::uint32_t total_processing_time = 1;
+Time Switch::process() {
+    Time total_processing_time = 1;
     std::shared_ptr<ILink> link = next_inlink();
 
     if (link == nullptr) {
