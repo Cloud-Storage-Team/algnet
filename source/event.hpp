@@ -42,13 +42,13 @@ private:
  */
 class Arrive : public Event {
 public:
-    // TODO: move implementation to .cpp or use existing if present
     Arrive(std::uint32_t a_time, ILink *a_link, Packet a_packet);
     virtual ~Arrive() = default;
 
     void operator()() final;
 
 private:
+    // TODO: use weak_ptr (requires enable_from_this implementation for some links)
     ILink *link;
     Packet packet;
 };
