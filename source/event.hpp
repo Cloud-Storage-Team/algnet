@@ -34,7 +34,7 @@ public:
     void operator()() final;
 
 private:
-    std::weak_ptr<Flow> flow;
+    std::weak_ptr<Flow> m_flow;
 };
 
 /**
