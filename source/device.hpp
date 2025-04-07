@@ -18,7 +18,7 @@ public:
     // One step of device work cycle;
     // e.g. see next inlink, take one packet from it,
     // and do smth with it (send further, send ask etc)
-    virtual uint32_t process() = 0;
+    virtual std::uint32_t process() = 0;
 
     virtual DeviceType get_type() const = 0;
 };

@@ -2,8 +2,11 @@
 #include <memory>
 
 #include "device.hpp"
+#include "packet.hpp"
 
 namespace sim {
+
+struct Packet;
 
 class IReceiver : public IRoutingDevice, IProcessingDevice {
 public:
@@ -12,12 +15,16 @@ public:
 
 class Receiver : public IReceiver {
 public:
-    Receiver() = default;
+    Receiver();
     ~Receiver() = default;
 
     bool add_inlink(std::shared_ptr<ILink> link) final;
     bool update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                               std::shared_ptr<ILink> link) final;
+    std::vector<std::shared_ptr<IRoutingDevice>> get_neighbours() const final;
+    std::shared_ptr<ILink> next_inlink() final;
+    std::shared_ptr<ILink> get_link_to_destination(
+        std::shared_ptr<IRoutingDevice> dest) const final;
 
     DeviceType get_type() const final;
     // Process a packet by removing it from the ingress buffer
@@ -29,7 +36,8 @@ public:
     std::uint32_t process() final;
 
 private:
-    std::unique_ptr<IRoutingDevice> m_router;
+    std::uint32_t send_ack(Packet data_packet);
+    std::unique_ptr<RoutingModule> m_router;
 };
 
 }  // namespace sim
