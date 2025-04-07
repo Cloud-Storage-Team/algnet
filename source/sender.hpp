@@ -5,7 +5,7 @@
 
 namespace sim {
 
-class Packet;
+struct Packet;
 
 class ISender : public IRoutingDevice, IProcessingDevice {
 public:
