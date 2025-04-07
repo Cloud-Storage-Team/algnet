@@ -5,13 +5,16 @@ namespace test {
 int CountingEvent::cnt;
 Time ComparatorEvent::last_time;
 
+EmptyEvent::EmptyEvent(std::uint32_t a_time): Event(a_time) {};
 void EmptyEvent::operator()() {}
 
+CountingEvent::CountingEvent(std::uint32_t a_time): Event(a_time) {};
 void CountingEvent::operator()() { cnt++; }
 
+ComparatorEvent::ComparatorEvent(std::uint32_t a_time): Event(a_time) {};
 void ComparatorEvent::operator()() {
-    EXPECT_GE(time, last_time);
-    last_time = time;
+    EXPECT_GE(m_time, last_time);
+    last_time = m_time;
 }
 
 template <typename T>
@@ -24,12 +27,12 @@ void AddEvents(int number, std::shared_ptr<Time> event_time) {
     Time max_time = static_cast<Time>(1e9);
 
     while ((number--) > 0) {
-        std::unique_ptr<sim::Event> event_ptr = std::make_unique<T>(T());
+        std::unique_ptr<sim::Event> event_ptr;
 
         if (event_time == nullptr) {
-            event_ptr->time = rand() % (max_time - min_time + 1) + min_time;
+            event_ptr = std::make_unique<T>(rand() % (max_time - min_time + 1) + min_time);
         } else {
-            event_ptr->time = ++(*event_time.get());
+            event_ptr = std::make_unique<T>(++(*event_time.get()));
         }
 
         sim::Scheduler::get_instance().add(std::move(event_ptr));

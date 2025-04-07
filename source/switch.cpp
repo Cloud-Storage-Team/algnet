@@ -56,8 +56,8 @@ std::shared_ptr<ILink> Switch::get_link_to_destination(
 DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
 
 Time Switch::process() {
-    std::shared_ptr<ILink> link = next_inlink();
     Time total_processing_time = 1;
+    std::shared_ptr<ILink> link = next_inlink();
 
     if (link == nullptr) {
         LOG_WARN("No next inlink");
@@ -74,7 +74,7 @@ Time Switch::process() {
         LOG_WARN("No flow in packet");
         return total_processing_time;
     }
-    std::shared_ptr<IReceiver> destination = packet.flow->get_receiver();
+    std::shared_ptr<IRoutingDevice> destination = packet.get_destination();
 
     std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
 
@@ -82,6 +82,8 @@ Time Switch::process() {
         LOG_WARN("No link corresponds to destination device");
         return total_processing_time;
     }
+    
+    // TODO: increase total_processing_time correctly
     next_link->schedule_arrival(packet);
     return total_processing_time;
 }

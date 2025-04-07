@@ -9,11 +9,17 @@
 namespace sim {
 
 // Base class for event
-struct Event {
-    Time time;
+class Event {
+public:
+    Event(Time a_time);
     virtual ~Event() = default;
     virtual void operator()() = 0;
-    bool operator>(const Event &other) const { return time > other.time; }
+
+    Time get_time() const;
+    bool operator>(const Event &other) const { return m_time > other.m_time; }
+
+protected:
+    Time m_time;
 };
 
 /**
@@ -21,45 +27,70 @@ struct Event {
  * the source node ingress buffer for processing.
  * Schedule the next packet generation event.
  */
-struct Generate : public Event {
-    Generate(Flow *a_flow, Size a_packet_size);
-    ~Generate() = default;
-    Flow *flow;
+class Generate : public Event {
+public:
+    Generate(std::weak_ptr<Flow> a_flow, Size a_packet_size);
+    virtual ~Generate() = default;
+    void operator()() final;
 
-    virtual void operator()() final;
+private:
+    std::weak_ptr<Flow> m_flow;
 };
 
 /**
  * Enqueue the packet to the ingress port of the next node
  */
-struct Arrive : public Event {
-    // TODO: move implementation to .cpp or use existing if present
-    Arrive(ILink *a_link, Packet *a_packet) : link(a_link), packet(a_packet){};
-    ~Arrive() = default;
-    ILink *link;
-    Packet *packet;
+class Arrive : public Event {
+public:
+    Arrive(Time a_time, ILink *a_link, Packet a_packet);
+    virtual ~Arrive() = default;
 
-    virtual void operator()() final { link->process_arrival(*packet); };
+    void operator()() final;
+
+private:
+    // TODO: use weak_ptr (requires enable_from_this implementation for some links)
+    ILink *m_link;
+    Packet m_packet;
 };
 
 /**
  * Dequeue a packet from the device ingress buffer
  * and start processing at the device.
  */
-struct Process : public Event {
-    Process(IProcessingDevice *a_device);
-    IProcessingDevice *node;
+class Process : public Event {
+public:
+    // TODO: move implementation to .cpp or use existing if present
+    Process(Time a_time, std::weak_ptr<IProcessingDevice> a_device);
+    ~Process() = default;
+    void operator()() final;
 
-    virtual void operator()() final;
+private:
+    std::weak_ptr<IProcessingDevice> m_device;
+};
+
+/**
+ * Dequeue a packet from the device ingress buffer
+ * and start processing at the device.
+ */
+class SendData : public Event {
+public:
+    // TODO: move implementation to .cpp or use existing if present
+    SendData(Time a_time, std::weak_ptr<ISender> _device);
+    ~SendData() = default;
+    void operator()() final;
+
+private:
+    std::weak_ptr<ISender> m_device;
 };
 
 /**
  * Stop simulation and clear all events remaining in the Scheduler
  */
-struct Stop : public Event {
-    Stop();
-    ~Stop() = default;
-    virtual void operator()() final;
+class Stop : public Event {
+public:
+    Stop(Time a_time);
+    virtual ~Stop() = default;
+    void operator()() final;
 };
 
 }  // namespace sim
