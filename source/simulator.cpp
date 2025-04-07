@@ -112,7 +112,7 @@ void Simulator::recalculate_paths() {
 
 void Simulator::start(std::uint32_t a_stop_time) {
     recalculate_paths();
-    m_scheduler.add(std::move(std::make_unique<Stop>(a_stop_time)));
+    m_scheduler.add(std::make_unique<Stop>(a_stop_time));
     for (std::shared_ptr<IFlow> flow : m_flows) {
         flow->start(0);
     }

@@ -11,7 +11,7 @@ public:
     virtual ~ISwitch() = default;
 };
 
-class Switch : public ISwitch {
+class Switch : public ISwitch, public std::enable_shared_from_this<Switch> {
 public:
     Switch();
     ~Switch() = default;
@@ -31,7 +31,7 @@ public:
     // and schedule next process event after a delay.
     // Packets are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
-    std::uint32_t process() final;
+    Time process() final;
 
 private:
     std::unique_ptr<RoutingModule> m_router;

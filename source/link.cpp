@@ -9,12 +9,12 @@ namespace sim {
 
 Link::Link(std::weak_ptr<IRoutingDevice> a_from,
            std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_mbps,
-           std::uint32_t a_delay)
+           Time a_delay)
     : m_from(a_from),
       m_to(a_to),
       m_speed_mbps(a_speed_mbps),
-      m_transmission_delay(a_delay),
-      m_src_egress_delay(0) {
+      m_src_egress_delay(0),
+      m_transmission_delay(a_delay) {
     if (a_from.expired() || a_to.expired()) {
         spdlog::warn("Passed link to device is expired");
     } else if (a_speed_mbps == 0) {
@@ -22,7 +22,7 @@ Link::Link(std::weak_ptr<IRoutingDevice> a_from,
     }
 }
 
-std::uint32_t Link::get_transmission_time(const Packet& packet) const {
+Time Link::get_transmission_time(const Packet& packet) const {
     if (m_speed_mbps == 0) {
         spdlog::warn("Passed zero link speed");
         return 0;
@@ -39,11 +39,12 @@ void Link::schedule_arrival(Packet packet) {
 
     unsigned int transmission_time = get_transmission_time(packet);
     unsigned int total_delay = m_src_egress_delay + transmission_time;
+    (void) total_delay; // unused variable stub
 
     m_src_egress_delay += transmission_time;
 
     Scheduler::get_instance().add(
-        std::make_unique<Arrive>(Arrive(this, new Packet(packet))));
+        std::make_unique<Arrive>(Arrive(total_delay, this, packet)));
 };
 
 void Link::process_arrival(Packet packet) {

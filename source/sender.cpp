@@ -34,7 +34,8 @@ bool Sender::add_outlink(std::shared_ptr<ILink> link) {
         spdlog::warn("Outlink source is not our device");
         return false;
     }
-    return m_router->add_outlink(link);
+    m_router->add_inlink(link);
+    return true;
 }
 
 bool Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
@@ -54,7 +55,8 @@ bool Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
             "Link source device is incorrect (expected current device)");
         return false;
     }
-    return m_router->update_routing_table(dest, link);
+    m_router->update_routing_table(dest, link);
+    return true;
 }
 
 std::vector<std::shared_ptr<IRoutingDevice>> Sender::get_neighbours() const {
@@ -74,9 +76,9 @@ DeviceType Sender::get_type() const { return DeviceType::SENDER; }
 
 void Sender::enqueue_packet(Packet packet) { m_flow_buffer.push(packet); }
 
-std::uint32_t Sender::process() {
+Time Sender::process() {
     std::shared_ptr<ILink> current_inlink = m_router->next_inlink();
-    std::uint32_t total_processing_time = 1;
+    Time total_processing_time = 1;
 
     if (current_inlink == nullptr) {
         spdlog::warn("No available inlinks for device");
@@ -115,8 +117,8 @@ std::uint32_t Sender::process() {
     return total_processing_time;
 }
 
-std::uint32_t Sender::send_data() {
-    std::uint32_t total_processing_time = 1;
+Time Sender::send_data() {
+    Time total_processing_time = 1;
 
     // TODO: wrap into some method (?)
     if (m_flow_buffer.empty()) {
