@@ -22,7 +22,7 @@ struct Event {
  * Schedule the next packet generation event.
  */
 struct Generate : public Event {
-    Generate(Flow *a_flow, std::uint32_t a_packet_size);
+    Generate(Flow *a_flow, Size a_packet_size);
     ~Generate() = default;
     Flow *flow;
 
