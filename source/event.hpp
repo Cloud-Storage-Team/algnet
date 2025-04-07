@@ -29,12 +29,12 @@ protected:
  */
 class Generate : public Event {
 public:
-    Generate(Time a_time, std::weak_ptr<Flow> a_flow, Size a_packet_size);
+    Generate(Time a_time, std::weak_ptr<IFlow> a_flow, Size a_packet_size);
     virtual ~Generate() = default;
     void operator()() final;
 
 private:
-    std::weak_ptr<Flow> m_flow;
+    std::weak_ptr<IFlow> m_flow;
     Size m_packet_size;
 };
 

@@ -10,7 +10,7 @@ Stop::Stop(Time a_time): Event(a_time) {}
 
 void Stop::operator()() { Scheduler::get_instance().clear(); }
 
-Generate::Generate(Time a_time, std::weak_ptr<Flow> a_flow, Size a_packet_size) : Event(a_time), m_flow(a_flow), m_packet_size(a_packet_size) {}
+Generate::Generate(Time a_time, std::weak_ptr<IFlow> a_flow, Size a_packet_size) : Event(a_time), m_flow(a_flow), m_packet_size(a_packet_size) {}
 
 void Generate::operator()() {
     if (m_flow.expired()) {
