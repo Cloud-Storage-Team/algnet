@@ -1,8 +1,8 @@
 #include "sender.hpp"
 #include "logger.hpp"
 
-#include "link.hpp"
 #include "event.hpp"
+#include "link.hpp"
 #include "scheduler.hpp"
 
 namespace sim {
@@ -16,7 +16,12 @@ bool Sender::add_inlink(std::shared_ptr<ILink> link) {
     }
 
     if (this != link->get_to().get()) {
+<<<<<<< HEAD
         LOG_WARN("Link destination device is incorrect (expected current device)");
+=======
+        spdlog::warn(
+            "Link destination device is incorrect (expected current device)");
+>>>>>>> origin/main
         return false;
     }
     m_router->add_inlink(link);
@@ -24,7 +29,7 @@ bool Sender::add_inlink(std::shared_ptr<ILink> link) {
 }
 
 bool Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                     std::shared_ptr<ILink> link) {
+                                  std::shared_ptr<ILink> link) {
     if (link == nullptr) {
         LOG_WARN("Passed link is null");
         return false;
@@ -36,7 +41,12 @@ bool Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     }
 
     if (this != link->get_from().get()) {
+<<<<<<< HEAD
         LOG_WARN("Link source device is incorrect (expected current device)");
+=======
+        spdlog::warn(
+            "Link source device is incorrect (expected current device)");
+>>>>>>> origin/main
         return false;
     }
     m_router->update_routing_table(dest, link);
@@ -53,16 +63,12 @@ std::shared_ptr<ILink> Sender::next_inlink() {
 
 std::shared_ptr<ILink> Sender::get_link_to_destination(
     std::shared_ptr<IRoutingDevice> dest) const {
-        return m_router->get_link_to_destination(dest);
+    return m_router->get_link_to_destination(dest);
 };
 
-DeviceType Sender::get_type() const {
-    return DeviceType::SENDER;
-}
+DeviceType Sender::get_type() const { return DeviceType::SENDER; }
 
-void Sender::enqueue_packet(Packet packet) {
-    m_flow_buffer.push(packet);
-}
+void Sender::enqueue_packet(Packet packet) { m_flow_buffer.push(packet); }
 
 Time Sender::process() {
     std::shared_ptr<ILink> current_inlink = m_router->next_inlink();
@@ -92,8 +98,15 @@ Time Sender::process() {
     if (packet.type == PacketType::ACK && destination.get() == this) {
         packet.flow->update();
     } else {
+<<<<<<< HEAD
         LOG_WARN("Packet arrived to Sender that is not its destination; use routing table to send it further");
         std::shared_ptr<ILink> next_link = get_link_to_destination(destination); 
+=======
+        spdlog::warn(
+            "Packet arrived to Sender that is not its destination; use routing "
+            "table to send it further");
+        std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
+>>>>>>> origin/main
 
         if (next_link == nullptr) {
             LOG_WARN("No link corresponds to destination device");
@@ -108,7 +121,7 @@ Time Sender::process() {
 
 Time Sender::send_data() {
     Time total_processing_time = 1;
-    
+
     // TODO: wrap into some method (?)
     if (m_flow_buffer.empty()) {
         LOG_WARN("No packets to send");
@@ -117,10 +130,15 @@ Time Sender::send_data() {
     Packet data_packet = m_flow_buffer.front();
     m_flow_buffer.pop();
 
+<<<<<<< HEAD
     // TODO: add some sender ID for easier packet path tracing
     LOG_INFO("Taken new data packet on sender. Packet: " + data_packet.to_string());
 
     auto next_link = m_router->get_link_to_destination(data_packet.get_destination());
+=======
+    auto next_link =
+        m_router->get_link_to_destination(data_packet.get_destination());
+>>>>>>> origin/main
     if (next_link == nullptr) {
         LOG_WARN("Link to send data packet does not exist");
         return total_processing_time;

@@ -11,7 +11,7 @@ public:
     virtual ~ISwitch() = default;
 };
 
-class Switch : public ISwitch {
+class Switch : public ISwitch, public std::enable_shared_from_this<Switch> {
 public:
     Switch();
     ~Switch() = default;
