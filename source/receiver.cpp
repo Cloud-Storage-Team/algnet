@@ -85,14 +85,14 @@ std::uint32_t Receiver::process() {
         return total_processing_time;
     }
 
-    std::shared_ptr<IReceiver> receiver = data_packet.flow->get_receiver();
-    if (data_packet.type == DATA && receiver.get() == this) {
+    std::shared_ptr<IRoutingDevice> destination = data_packet.get_destination();
+    if (data_packet.type == DATA && destination.get() == this) {
         // TODO: think about processing time
         // Not sure if we want to send ack before processing or after it
         total_processing_time += send_ack(data_packet);
     } else {
         spdlog::warn("Packet arrived to Receiver that is not its destination; using routing table to send it further");
-        std::shared_ptr<ILink> next_link = get_link_to_destination(receiver); 
+        std::shared_ptr<ILink> next_link = get_link_to_destination(destination); 
 
         if (next_link == nullptr) {
             spdlog::warn("No link corresponds to destination device");
