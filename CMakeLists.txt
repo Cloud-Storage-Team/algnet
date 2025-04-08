@@ -10,7 +10,13 @@ option(BUILD_PROJECT "Build tests" ON)
 file(GLOB_RECURSE src "source/*.cpp")
 file(GLOB_RECURSE tests "test/*.cpp")
 
-include_directories(${CMAKE_SOURCE_DIR}/spdlog/include/)
+include_directories(
+    ${CMAKE_SOURCE_DIR}/source/
+    ${CMAKE_SOURCE_DIR}/source/device/
+    ${CMAKE_SOURCE_DIR}/source/logger/
+    ${CMAKE_SOURCE_DIR}/spdlog/include/
+)
+
 if (BUILD_PROJECT)
     set(TARGET_NAME "${PROJECT_NAME}")
     add_executable(${TARGET_NAME} main.cpp ${src})

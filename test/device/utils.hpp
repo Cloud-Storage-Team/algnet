@@ -1,8 +1,8 @@
 #pragma once
 #include <gtest/gtest.h>
 
-#include "../../source/device.hpp"
-#include "../../source/link.hpp"
+#include "device.hpp"
+#include "link.hpp"
 
 namespace test {
     

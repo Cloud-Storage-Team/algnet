@@ -1,4 +1,4 @@
-#include "source/logger.hpp"
+#include "logger.hpp"
 
 int main() {
     Logger::setupLogging();
