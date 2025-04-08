@@ -24,7 +24,7 @@ std::set<std::shared_ptr<sim::ILink>> DeviceMock::get_outlinks() const {
 std::vector<std::shared_ptr<sim::IRoutingDevice>> DeviceMock::get_neighbours()
     const {
     return std::vector<std::shared_ptr<sim::IRoutingDevice>>();
-};
+}
 
 std::shared_ptr<sim::ILink> DeviceMock::get_link_to_destination(
     std::shared_ptr<IRoutingDevice> device) const {
