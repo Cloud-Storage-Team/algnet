@@ -20,7 +20,7 @@ void Generate::operator()() {
     m_flow.lock()->try_to_generate(m_packet_size);
 
     // TODO: make delay not constant (maybe try_to_generate have to return it)
-    const Time GENERATE_DELAY = 7;  // ms
+    const Time GENERATE_DELAY = 7;
     std::unique_ptr<Event> new_event = std::make_unique<Generate>(m_time + GENERATE_DELAY, m_flow, m_packet_size);
     Scheduler::get_instance().add(std::move(new_event));
 }
