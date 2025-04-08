@@ -1,13 +1,10 @@
 #include "switch.hpp"
-
-#include <spdlog/spdlog.h>
+#include "logger.hpp"
 
 #include <memory>
 #include <stdexcept>
 
 #include "link.hpp"
-
-#define LOG_WARN(msg) spdlog::warn("{} ({}:{})", msg, __FILE__, __LINE__)
 
 namespace sim {
 
@@ -83,6 +80,9 @@ Time Switch::process() {
         return total_processing_time;
     }
     
+    // TODO: add some switch ID for easier packet path tracing
+    LOG_INFO("Processing packet from link on switch. Packet: " + packet.to_string());
+
     // TODO: increase total_processing_time correctly
     next_link->schedule_arrival(packet);
     return total_processing_time;

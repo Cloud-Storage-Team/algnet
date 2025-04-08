@@ -1,6 +1,5 @@
 #include "device.hpp"
-
-#include <spdlog/spdlog.h>
+#include "logger.hpp"
 
 #include <iostream>
 #include <unordered_set>
@@ -11,7 +10,7 @@ namespace sim {
 
 bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
     if (m_inlinks.contains(link)) {
-        spdlog::warn("Unexpected already added inlink");
+        LOG_WARN("Unexpected already added inlink");
         return false;
     }
     m_inlinks.insert(link);
@@ -22,7 +21,7 @@ bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
 bool RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                          std::shared_ptr<ILink> link) {
     if (link == nullptr) {
-        spdlog::warn("Unexpected nullptr link");
+        LOG_WARN("Unexpected nullptr link");
         return false;
     }
     auto link_dest = link->get_to();
@@ -53,7 +52,7 @@ std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
 
 std::shared_ptr<ILink> RoutingModule::next_inlink() {
     if (m_inlinks.empty()) {
-        spdlog::info("Inlinks storage is empty");
+        LOG_INFO("Inlinks storage is empty");
         return nullptr;
     }
 

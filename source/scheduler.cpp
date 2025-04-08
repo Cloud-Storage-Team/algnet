@@ -1,6 +1,5 @@
 #include "scheduler.hpp"
 
-// #include <spdlog/spdlog.h>
 #include <iostream>
 #include <queue>
 
