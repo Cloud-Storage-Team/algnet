@@ -39,9 +39,13 @@ void Simulator::add_flow(std::shared_ptr<IRoutingDevice> a_from,
                          std::shared_ptr<IRoutingDevice> a_to) {
     ISender* sender = dynamic_cast<ISender*>(a_from.get());
     IReceiver* receiver = dynamic_cast<IReceiver*>(a_to.get());
-    if (sender == nullptr || receiver == nullptr) {
-        LOG_WARN(
-            "add_flow failed: a_from (ISender) and a_to (IReceiver) required");
+    if (sender == nullptr) {
+        LOG_WARN("add_flow failed: sender is nullptr");
+        return;
+    }
+    
+    if (receiver== nullptr) {
+        LOG_WARN("add_flow failed: receiver is nullptr");
         return;
     }
     m_flows.emplace_back(std::make_shared<Flow>(sender, receiver, 0.f));
