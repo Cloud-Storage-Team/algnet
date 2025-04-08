@@ -8,7 +8,6 @@
 #include "link.hpp"
 #include "scheduler.hpp"
 
-
 namespace sim {
 
 Receiver::Receiver() : m_router(std::make_unique<RoutingModule>()) {}
