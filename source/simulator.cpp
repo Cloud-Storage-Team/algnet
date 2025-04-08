@@ -53,7 +53,7 @@ void Simulator::add_flow(std::shared_ptr<IRoutingDevice> a_from,
 
 void Simulator::add_link(std::shared_ptr<IRoutingDevice> a_from,
                          std::shared_ptr<IRoutingDevice> a_to,
-                         std::uint32_t a_speed_mbps, std::uint32_t a_delay) {
+                         std::uint32_t a_speed_mbps, Time a_delay) {
     auto link = std::make_shared<Link>(a_from, a_to, a_speed_mbps, a_delay);
     m_links.emplace_back(link);
     a_from->add_outlink(link);
