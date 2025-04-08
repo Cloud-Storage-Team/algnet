@@ -1,11 +1,11 @@
 #pragma once
 
-#include "types.hpp"
-
 #include <memory>
 #include <set>
 #include <unordered_map>
 #include <vector>
+
+#include "types.hpp"
 
 namespace sim {
 
@@ -35,9 +35,9 @@ public:
                                       std::shared_ptr<ILink> link) = 0;
     virtual std::vector<std::shared_ptr<IRoutingDevice>> get_neighbours()
         const = 0;
-    virtual std::shared_ptr<ILink> next_inlink() = 0;
     virtual std::shared_ptr<ILink> get_link_to_destination(
-        std::shared_ptr<IRoutingDevice> dest) const = 0;
+        std::shared_ptr<IRoutingDevice> device) const = 0;
+    virtual std::shared_ptr<ILink> next_inlink() = 0;
     virtual std::set<std::shared_ptr<ILink>> get_outlinks() const = 0;
 };
 
