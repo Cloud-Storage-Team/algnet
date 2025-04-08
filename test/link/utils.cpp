@@ -6,7 +6,7 @@ namespace test {
 
 void LinkTest::SetUp() {}
 
-void LinkTest::TearDown() { sim::Scheduler::get_instance().clear(); };
+void LinkTest::TearDown() { sim::Scheduler::get_instance().clear(); }
 
 bool DeviceMock::add_inlink(std::shared_ptr<sim::ILink> link) { return false; }
 
