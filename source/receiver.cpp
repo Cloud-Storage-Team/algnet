@@ -23,7 +23,8 @@ bool Receiver::add_inlink(std::shared_ptr<ILink> link) {
         LOG_WARN("Link destination device is incorrect (expected current device)");
         return false;
     }
-    return m_router->add_outlink(link);
+    return m_router->add_inlink(link);
+
 }
 
 bool Receiver::add_outlink(std::shared_ptr<ILink> link) {
