@@ -54,10 +54,10 @@ void Simulator::add_flow(std::shared_ptr<IRoutingDevice> a_from,
 void Simulator::add_link(std::shared_ptr<IRoutingDevice> a_from,
                          std::shared_ptr<IRoutingDevice> a_to,
                          std::uint32_t a_speed_mbps, std::uint32_t a_delay) {
-    m_links.emplace_back(
-        std::make_shared<Link>(a_from, a_to, a_speed_mbps, a_delay));
-    a_from->add_outlink(m_links.back());
-    a_to->add_inlink(m_links.back());
+    auto link = std::make_shared<Link>(a_from, a_to, a_speed_mbps, a_delay);
+    m_links.emplace_back(link);
+    a_from->add_outlink(link);
+    a_to->add_inlink(link);
 }
 
 // returns map, that for each meet device gives link to its parent in bfs bypass
