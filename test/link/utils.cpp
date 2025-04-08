@@ -31,6 +31,6 @@ std::shared_ptr<sim::ILink> DeviceMock::get_link_to_destination(
     return nullptr;
 }
 
-std::shared_ptr<sim::ILink> DeviceMock::next_inlink() { return nullptr; };
+std::shared_ptr<sim::ILink> DeviceMock::next_inlink() { return nullptr; }
 
 }  // namespace test
