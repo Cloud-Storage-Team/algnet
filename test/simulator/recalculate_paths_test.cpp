@@ -41,7 +41,7 @@ TEST_F(RecalculatePaths, TrivialTopology) {
     for (auto src : devices) {
         for (auto dest : devices) {
             if (src != dest) {
-                EXPECT_TRUE(check_path_exists(src, dest));
+                EXPECT_TRUE(check_reachability(src, dest));
             }
         }
     }
@@ -76,7 +76,7 @@ TEST_F(RecalculatePaths, SimpleTopology) {
     for (auto src : devices) {
         for (auto dest : devices) {
             if (src != dest) {
-                EXPECT_TRUE(check_path_exists(src, dest));
+                EXPECT_TRUE(check_reachability(src, dest));
             }
         }
     }
@@ -127,7 +127,7 @@ TEST_F(RecalculatePaths, MeshTopology) {
     for (auto src : devices) {
         for (auto dest : devices) {
             if (src != dest) {
-                EXPECT_TRUE(check_path_exists(src, dest));
+                EXPECT_TRUE(check_reachability(src, dest));
             }
         }
     }
@@ -184,7 +184,7 @@ TEST_F(RecalculatePaths, LoopTopology) {
     for (auto src : devices) {
         for (auto dest : devices) {
             if (src != dest) {
-                EXPECT_TRUE(check_path_exists(src, dest));
+                EXPECT_TRUE(check_reachability(src, dest));
             }
         }
     }

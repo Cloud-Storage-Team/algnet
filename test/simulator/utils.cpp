@@ -13,7 +13,7 @@ void add_links(sim::Simulator& sim,
     }
 }
 
-bool check_path_exists(std::shared_ptr<sim::IRoutingDevice> src_device,
+bool check_reachability(std::shared_ptr<sim::IRoutingDevice> src_device,
                        std::shared_ptr<sim::IRoutingDevice> dest_device) {
     auto curr_device =
         src_device->get_link_to_destination(dest_device)->get_to();
