@@ -29,12 +29,13 @@ protected:
  */
 class Generate : public Event {
 public:
-    Generate(std::weak_ptr<Flow> a_flow, Size a_packet_size);
+    Generate(Time a_time, std::weak_ptr<IFlow> a_flow, Size a_packet_size);
     virtual ~Generate() = default;
     void operator()() final;
 
 private:
-    std::weak_ptr<Flow> m_flow;
+    std::weak_ptr<IFlow> m_flow;
+    Size m_packet_size;
 };
 
 /**
@@ -42,14 +43,13 @@ private:
  */
 class Arrive : public Event {
 public:
-    Arrive(Time a_time, ILink *a_link, Packet a_packet);
+    Arrive(Time a_time, std::weak_ptr<ILink> a_link, Packet a_packet);
     virtual ~Arrive() = default;
 
     void operator()() final;
 
 private:
-    // TODO: use weak_ptr (requires enable_from_this implementation for some links)
-    ILink *m_link;
+    std::weak_ptr<ILink> m_link;
     Packet m_packet;
 };
 
@@ -59,7 +59,6 @@ private:
  */
 class Process : public Event {
 public:
-    // TODO: move implementation to .cpp or use existing if present
     Process(Time a_time, std::weak_ptr<IProcessingDevice> a_device);
     ~Process() = default;
     void operator()() final;
@@ -74,8 +73,7 @@ private:
  */
 class SendData : public Event {
 public:
-    // TODO: move implementation to .cpp or use existing if present
-    SendData(Time a_time, std::weak_ptr<ISender> _device);
+    SendData(Time a_time, std::weak_ptr<ISender> a_device);
     ~SendData() = default;
     void operator()() final;
 

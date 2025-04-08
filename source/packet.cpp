@@ -23,6 +23,7 @@ bool Packet::operator==(const Packet& packet) const {
     return flow == packet.flow && size == packet.size && type == packet.type;
 }
 
+// TODO: think about some ID for packet (currently its impossible to distinguish packets)
 std::string Packet::to_string() const {
     std::ostringstream oss;
     oss << "Packet[type: ";
@@ -39,4 +40,5 @@ std::string Packet::to_string() const {
     
     return oss.str();
 }
+
 }  // namespace sim

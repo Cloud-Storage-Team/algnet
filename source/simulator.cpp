@@ -1,12 +1,11 @@
 #include "simulator.hpp"
 
-#include <spdlog/spdlog.h>
-
 #include <memory>
 #include <set>
 
 #include "device.hpp"
 #include "event.hpp"
+#include "logger.hpp"
 #include "receiver.hpp"
 #include "sender.hpp"
 #include "switch.hpp"
@@ -18,7 +17,7 @@ Simulator::Simulator() : m_scheduler(Scheduler::get_instance()) {}
 std::shared_ptr<IRoutingDevice> Simulator::add_device(std::string a_name,
                                                       DeviceType a_type) {
     if (m_graph.find(a_name) != m_graph.end()) {
-        spdlog::warn("add_device failed: device with name {} already exists.",
+        LOG_WARN("add_device failed: device with name {} already exists.",
                      a_name);
         return nullptr;
     }
@@ -41,7 +40,7 @@ void Simulator::add_flow(std::shared_ptr<IRoutingDevice> a_from,
     ISender* sender = dynamic_cast<ISender*>(a_from.get());
     IReceiver* receiver = dynamic_cast<IReceiver*>(a_to.get());
     if (sender == nullptr || receiver == nullptr) {
-        spdlog::warn(
+        LOG_WARN(
             "add_flow failed: a_from (ISender) and a_to (IReceiver) required");
         return;
     }
@@ -104,7 +103,7 @@ void Simulator::recalculate_paths() {
             }
             bool status = src_device->update_routing_table(
                 dest_device, parent_table[next_hop]);
-            spdlog::info("Update routing table {} --> {}: {}", src_device_name,
+            LOG_INFO("Update routing table {} --> {}: {}", src_device_name,
                          dest_device_name, (status ? "true" : "false"));
         }
     }
