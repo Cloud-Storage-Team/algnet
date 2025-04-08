@@ -73,7 +73,7 @@ private:
  */
 class SendData : public Event {
 public:
-    SendData(Time a_time, std::weak_ptr<ISender> _device);
+    SendData(Time a_time, std::weak_ptr<ISender> a_device);
     ~SendData() = default;
     void operator()() final;
 
