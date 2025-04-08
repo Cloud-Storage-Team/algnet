@@ -12,8 +12,6 @@ file(GLOB_RECURSE tests "test/*.cpp")
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/source/
-    ${CMAKE_SOURCE_DIR}/source/device/
-    ${CMAKE_SOURCE_DIR}/source/logger/
     ${CMAKE_SOURCE_DIR}/spdlog/include/
 )
 

@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "device.hpp"
+#include "device/device.hpp"
 #include "scheduler.hpp"
 
 namespace sim {

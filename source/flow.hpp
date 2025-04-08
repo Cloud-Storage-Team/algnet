@@ -1,8 +1,8 @@
 #pragma once
 #include <cstdint>
 
-#include "receiver.hpp"
-#include "sender.hpp"
+#include "device/receiver.hpp"
+#include "device/sender.hpp"
 
 namespace sim {
 

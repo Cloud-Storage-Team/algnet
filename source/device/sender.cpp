@@ -1,5 +1,5 @@
 #include "sender.hpp"
-#include "logger.hpp"
+#include "logger/logger.hpp"
 
 #include "event.hpp"
 #include "link.hpp"

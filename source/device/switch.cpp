@@ -1,5 +1,5 @@
 #include "switch.hpp"
-#include "logger.hpp"
+#include "logger/logger.hpp"
 
 #include <memory>
 #include <stdexcept>

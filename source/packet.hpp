@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <string>
 
-#include "device.hpp"
+#include "device/device.hpp"
 #include "flow.hpp"
 
 namespace sim {
