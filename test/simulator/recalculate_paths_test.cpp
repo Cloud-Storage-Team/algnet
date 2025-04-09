@@ -32,11 +32,11 @@ TEST_F(RecalculatePaths, TrivialTopology) {
     auto swtch = sim.add_device("switch", sim::DeviceType::SWITCH);
     auto receiver = sim.add_device("receiver", sim::DeviceType::RECEIVER);
 
-    add_links(sim, {{sender, swtch}, {swtch, receiver}});
+    add_two_way_links(sim, {{sender, swtch}, {swtch, receiver}});
 
     sim.recalculate_paths();
 
-    auto devices = {sender, swtch, receiver};
+    auto devices = std::vector<std::shared_ptr<sim::IRoutingDevice>>{sender, swtch, receiver};
 
     for (auto src : devices) {
         for (auto dest : devices) {
@@ -67,11 +67,11 @@ TEST_F(RecalculatePaths, SimpleTopology) {
     auto swtch = sim.add_device("switch", sim::DeviceType::SWITCH);
     auto receiver = sim.add_device("receiver", sim::DeviceType::RECEIVER);
 
-    add_links(sim, {{sender1, swtch}, {sender2, swtch}, {swtch, receiver}});
+    add_two_way_links(sim, {{sender1, swtch}, {sender2, swtch}, {swtch, receiver}});
 
     sim.recalculate_paths();
 
-    auto devices = {sender1, sender2, swtch, receiver};
+    auto devices = std::vector<std::shared_ptr<sim::IRoutingDevice>>{sender1, sender2, swtch, receiver};
 
     for (auto src : devices) {
         for (auto dest : devices) {
@@ -110,7 +110,7 @@ TEST_F(RecalculatePaths, MeshTopology) {
     auto receiver2 = sim.add_device("receiver2", sim::DeviceType::RECEIVER);
     auto receiver3 = sim.add_device("receiver3", sim::DeviceType::RECEIVER);
 
-    add_links(sim, {{sender1, swtch1},
+    add_two_way_links(sim, {{sender1, swtch1},
                     {sender2, swtch1},
                     {sender3, swtch2},
                     {swtch1, receiver1},
@@ -121,7 +121,7 @@ TEST_F(RecalculatePaths, MeshTopology) {
 
     sim.recalculate_paths();
 
-    auto devices = {sender1, sender2,   sender3,   swtch1,
+    auto devices = std::vector<std::shared_ptr<sim::IRoutingDevice>>{sender1, sender2,   sender3,   swtch1,
                     swtch2,  receiver1, receiver2, receiver3};
 
     for (auto src : devices) {
@@ -162,7 +162,7 @@ TEST_F(RecalculatePaths, LoopTopology) {
     auto receiver2 = sim.add_device("receiver2", sim::DeviceType::RECEIVER);
     auto receiver3 = sim.add_device("receiver3", sim::DeviceType::RECEIVER);
 
-    add_links(sim, {
+    add_two_way_links(sim, {
                        {sender1, swtch1},
                        {sender2, swtch2},
                        {sender3, swtch3},
@@ -178,7 +178,7 @@ TEST_F(RecalculatePaths, LoopTopology) {
 
     sim.recalculate_paths();
 
-    auto devices = {sender1, sender2, sender3,   swtch1,    swtch2,
+    auto devices = std::vector<std::shared_ptr<sim::IRoutingDevice>>{sender1, sender2, sender3,   swtch1,    swtch2,
                     swtch4,  swtch5,  receiver1, receiver2, receiver3};
 
     for (auto src : devices) {
