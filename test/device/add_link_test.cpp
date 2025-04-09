@@ -1,10 +1,12 @@
 #include <gtest/gtest.h>
 
+#include <memory>
 #include <random>
 
 #include "device.hpp"
 #include "link.hpp"
 #include "utils.hpp"
+#include "utils/loop_iterator.hpp"
 
 namespace test {
 
@@ -73,12 +75,16 @@ TEST_F(AddLink, SameLinkMultipleTimes) {
         number_of_inlink_appearances[inlink] = 0;
         number_of_outlink_appearances[outlink] = 0;
     }
-    
+
+    auto outlinks = source->get_outlinks();
+    sim::LoopIterator<std::set<std::shared_ptr<sim::ILink>>::iterator>
+        outlink_it(outlinks.begin(), outlinks.end());
+
     for (size_t loop = 0; loop < NUMBER_OF_LOOPS; loop++) {
         for (size_t i = 0; i < NUMBER_OF_NEIGHBOURS; i++) {
             auto current_inlink = dest->next_inlink();
             number_of_inlink_appearances[current_inlink]++;
-            auto current_outlink = next_outlink(source);
+            auto current_outlink = *outlink_it++;
             number_of_outlink_appearances[current_outlink]++;
         }
     }

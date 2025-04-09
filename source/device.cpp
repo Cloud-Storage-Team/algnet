@@ -1,10 +1,8 @@
 #include "device.hpp"
-#include "logger.hpp"
-
-#include <iostream>
-#include <unordered_set>
 
 #include "link.hpp"
+#include "logger.hpp"
+#include "utils/loop_iterator.hpp"
 
 namespace sim {
 
@@ -14,7 +12,8 @@ bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
         return false;
     }
     m_inlinks.insert(link);
-    m_next_inlink = m_inlinks.begin();
+    m_next_inlink = LoopIterator<std::set<std::shared_ptr<ILink>>::iterator>(
+        m_inlinks.begin(), m_inlinks.end());
     return true;
 }
 
@@ -65,11 +64,7 @@ std::shared_ptr<ILink> RoutingModule::next_inlink() {
         return nullptr;
     }
 
-    std::shared_ptr<ILink> link = *m_next_inlink;
-    if (++m_next_inlink == m_inlinks.end()) {
-        m_next_inlink = m_inlinks.begin();
-    }
-    return link;
+    return *m_next_inlink++;
 }
 
 std::set<std::shared_ptr<ILink>> RoutingModule::get_outlinks() const {

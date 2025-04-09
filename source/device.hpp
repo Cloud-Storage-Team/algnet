@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "types.hpp"
+#include "utils/loop_iterator.hpp"
 
 namespace sim {
 
@@ -69,7 +70,7 @@ private:
     std::set<std::shared_ptr<IRoutingDevice>> m_neighbours;
 
     // Iterator for the next ingress to process
-    std::set<std::shared_ptr<ILink>>::iterator m_next_inlink;
+    LoopIterator<std::set<std::shared_ptr<ILink>>::iterator> m_next_inlink;
 };
 
 }  // namespace sim
