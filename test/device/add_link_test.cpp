@@ -4,7 +4,6 @@
 
 #include "device.hpp"
 #include "link.hpp"
-#include "logger.hpp"
 #include "utils.hpp"
 
 namespace test {
@@ -52,7 +51,7 @@ TEST_F(AddLink, SameLinkMultipleTimes) {
     int MAX_LINKS = 3;
     int NUMBER_OF_LOOPS = 3;
 
-    auto neighbours = createRoutingModules(NUMBER_OF_NEIGHBOURS);
+    auto neighbour_devices = createRoutingModules(NUMBER_OF_NEIGHBOURS);
     auto dest = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
     auto source = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
 
@@ -62,7 +61,7 @@ TEST_F(AddLink, SameLinkMultipleTimes) {
     std::unordered_map<std::shared_ptr<sim::ILink>, int> number_of_inlink_appearances;
     std::unordered_map<std::shared_ptr<sim::ILink>, int> number_of_outlink_appearances;
     
-    for (auto device : neighbours) {
+    for (auto device : neighbour_devices) {
         auto inlink = std::make_shared<TestLink>(device, dest);
         auto outlink = std::make_shared<TestLink>(source, device);
 

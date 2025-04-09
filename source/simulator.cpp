@@ -39,7 +39,8 @@ std::shared_ptr<IRoutingDevice> Simulator::add_device(std::string a_name,
 }
 
 void Simulator::add_flow(std::shared_ptr<IRoutingDevice> a_from,
-                         std::shared_ptr<IRoutingDevice> a_to) {
+                         std::shared_ptr<IRoutingDevice> a_to,
+                         Time delay_between_packets, Size packet_size) {
     ISender* sender = dynamic_cast<ISender*>(a_from.get());
     IReceiver* receiver = dynamic_cast<IReceiver*>(a_to.get());
     if (sender == nullptr) {
@@ -51,7 +52,8 @@ void Simulator::add_flow(std::shared_ptr<IRoutingDevice> a_from,
         LOG_WARN("add_flow failed: receiver is nullptr");
         return;
     }
-    m_flows.emplace_back(std::make_shared<Flow>(sender, receiver, 0.f));
+    m_flows.emplace_back(std::make_shared<Flow>(sender, receiver, packet_size,
+                                                delay_between_packets));
 }
 
 void Simulator::add_link(std::shared_ptr<IRoutingDevice> a_from,

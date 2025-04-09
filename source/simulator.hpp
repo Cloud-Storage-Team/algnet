@@ -18,7 +18,8 @@ public:
     std::shared_ptr<IRoutingDevice> add_device(std::string a_name,
                                                DeviceType a_type);
     void add_flow(std::shared_ptr<IRoutingDevice> a_from,
-                  std::shared_ptr<IRoutingDevice> a_to);
+                  std::shared_ptr<IRoutingDevice> a_to,
+                  Time delay_between_packets, Size packet_size);
     void add_link(std::shared_ptr<IRoutingDevice> a_from,
                   std::shared_ptr<IRoutingDevice> a_to,
                   std::uint32_t a_speed_mbps, Time a_delay);
