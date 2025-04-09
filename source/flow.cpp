@@ -1,4 +1,5 @@
 #include "flow.hpp"
+#include <memory>
 
 #include "logger.hpp"
 #include "receiver.hpp"
@@ -6,7 +7,7 @@
 
 namespace sim {
 
-Flow::Flow(ISender* a_src, IReceiver* a_dest, Size a_packet_size,
+Flow::Flow(std::shared_ptr<ISender> a_src, std::shared_ptr<IReceiver> a_dest, Size a_packet_size,
            Time a_delay_between_packets)
     : m_src(a_src),
       m_dest(a_dest),
@@ -38,11 +39,11 @@ bool Flow::try_to_generate(Time a_current_time) {
 }
 
 std::shared_ptr<ISender> Flow::get_sender() const {
-    return nullptr;  // TODO: implement this
+    return m_src;
 }
 
 std::shared_ptr<IReceiver> Flow::get_receiver() const {
-    return nullptr;  // TODO: implement this
+    return m_dest;
 }
 
 }  // namespace sim

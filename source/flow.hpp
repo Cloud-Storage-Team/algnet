@@ -23,7 +23,7 @@ public:
 
 class Flow : public IFlow, public std::enable_shared_from_this<Flow> {
 public:
-    Flow(ISender* a_src, IReceiver* a_dest, Size a_packet_size,
+    Flow(std::shared_ptr<ISender> a_src, std::shared_ptr<IReceiver> a_dest, Size a_packet_size,
          Time a_delay_between_packets);
     virtual ~Flow() = default;
 
@@ -47,8 +47,8 @@ protected:
     void generate_packet();
 
 private:
-    ISender* m_src;
-    IReceiver* m_dest;
+    std::shared_ptr<ISender> m_src;
+    std::shared_ptr<IReceiver> m_dest;
     std::uint32_t m_nacks;
     float m_cwnd;
     Size m_sent_bytes;
