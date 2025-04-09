@@ -24,7 +24,6 @@ TEST_F(Start, TrivialTopology) {
     sim.add_flow(sender, receiver, packet_size, delay_between_packets);
 
     add_two_way_links(sim, {{sender, swtch}, {swtch, receiver}});
-    sim.recalculate_paths();
 
     sim.start(stop_time);
     
