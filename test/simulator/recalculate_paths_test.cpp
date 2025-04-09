@@ -25,6 +25,17 @@ public:
          receiver
 */
 
+static void check_pairwise_reachability(
+    std::initializer_list<std::shared_ptr<sim::IRoutingDevice>> devices) {
+    for (auto src : devices) {
+        for (auto dest : devices) {
+            if (src != dest) {
+                EXPECT_TRUE(check_reachability(src, dest));
+            }
+        }
+    }
+}
+
 TEST_F(RecalculatePaths, TrivialTopology) {
     sim::Simulator sim;
 
@@ -33,18 +44,9 @@ TEST_F(RecalculatePaths, TrivialTopology) {
     auto receiver = sim.add_device("receiver", sim::DeviceType::RECEIVER);
 
     add_two_way_links(sim, {{sender, swtch}, {swtch, receiver}});
-
     sim.recalculate_paths();
 
-    auto devices = std::vector<std::shared_ptr<sim::IRoutingDevice>>{sender, swtch, receiver};
-
-    for (auto src : devices) {
-        for (auto dest : devices) {
-            if (src != dest) {
-                EXPECT_TRUE(check_reachability(src, dest));
-            }
-        }
-    }
+    check_pairwise_reachability({sender, swtch, receiver});
 }
 
 /*
@@ -67,19 +69,12 @@ TEST_F(RecalculatePaths, SimpleTopology) {
     auto swtch = sim.add_device("switch", sim::DeviceType::SWITCH);
     auto receiver = sim.add_device("receiver", sim::DeviceType::RECEIVER);
 
-    add_two_way_links(sim, {{sender1, swtch}, {sender2, swtch}, {swtch, receiver}});
+    add_two_way_links(sim,
+                      {{sender1, swtch}, {sender2, swtch}, {swtch, receiver}});
 
     sim.recalculate_paths();
 
-    auto devices = std::vector<std::shared_ptr<sim::IRoutingDevice>>{sender1, sender2, swtch, receiver};
-
-    for (auto src : devices) {
-        for (auto dest : devices) {
-            if (src != dest) {
-                EXPECT_TRUE(check_reachability(src, dest));
-            }
-        }
-    }
+    check_pairwise_reachability({sender1, sender2, swtch, receiver});
 }
 
 /*
@@ -111,26 +106,18 @@ TEST_F(RecalculatePaths, MeshTopology) {
     auto receiver3 = sim.add_device("receiver3", sim::DeviceType::RECEIVER);
 
     add_two_way_links(sim, {{sender1, swtch1},
-                    {sender2, swtch1},
-                    {sender3, swtch2},
-                    {swtch1, receiver1},
-                    {swtch1, receiver2},
-                    {swtch1, swtch2},
-                    {swtch2, receiver2},
-                    {swtch2, receiver3}});
+                            {sender2, swtch1},
+                            {sender3, swtch2},
+                            {swtch1, receiver1},
+                            {swtch1, receiver2},
+                            {swtch1, swtch2},
+                            {swtch2, receiver2},
+                            {swtch2, receiver3}});
 
     sim.recalculate_paths();
 
-    auto devices = std::vector<std::shared_ptr<sim::IRoutingDevice>>{sender1, sender2,   sender3,   swtch1,
-                    swtch2,  receiver1, receiver2, receiver3};
-
-    for (auto src : devices) {
-        for (auto dest : devices) {
-            if (src != dest) {
-                EXPECT_TRUE(check_reachability(src, dest));
-            }
-        }
-    }
+    check_pairwise_reachability({sender1, sender2, sender3, swtch1, swtch2,
+                                 receiver1, receiver2, receiver3});
 }
 
 /*
@@ -163,31 +150,24 @@ TEST_F(RecalculatePaths, LoopTopology) {
     auto receiver3 = sim.add_device("receiver3", sim::DeviceType::RECEIVER);
 
     add_two_way_links(sim, {
-                       {sender1, swtch1},
-                       {sender2, swtch2},
-                       {sender3, swtch3},
-                       {swtch1, swtch2},
-                       {swtch2, swtch3},
-                       {swtch3, swtch5},
-                       {swtch4, swtch5},
-                       {swtch1, swtch4},
-                       {receiver1, swtch4},
-                       {receiver2, swtch5},
-                       {receiver3, swtch5},
-                   });
+                               {sender1, swtch1},
+                               {sender2, swtch2},
+                               {sender3, swtch3},
+                               {swtch1, swtch2},
+                               {swtch2, swtch3},
+                               {swtch3, swtch5},
+                               {swtch4, swtch5},
+                               {swtch1, swtch4},
+                               {receiver1, swtch4},
+                               {receiver2, swtch5},
+                               {receiver3, swtch5},
+                           });
 
     sim.recalculate_paths();
 
-    auto devices = std::vector<std::shared_ptr<sim::IRoutingDevice>>{sender1, sender2, sender3,   swtch1,    swtch2,
-                    swtch4,  swtch5,  receiver1, receiver2, receiver3};
-
-    for (auto src : devices) {
-        for (auto dest : devices) {
-            if (src != dest) {
-                EXPECT_TRUE(check_reachability(src, dest));
-            }
-        }
-    }
+    check_pairwise_reachability({sender1, sender2, sender3, swtch1, swtch2,
+                                 swtch4, swtch5, receiver1, receiver2,
+                                 receiver3});
 }
 
 }  // namespace test
