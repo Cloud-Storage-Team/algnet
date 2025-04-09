@@ -19,7 +19,7 @@ Simulator::Simulator() : m_scheduler(Scheduler::get_instance()) {}
 
 std::shared_ptr<IRoutingDevice> Simulator::add_device(std::string a_name,
                                                       DeviceType a_type) {
-    if (m_graph.find(a_name) != m_graph.end()) {
+    if (m_graph.contains(a_name)) {
         LOG_WARN("add_device failed: device with name {} already exists.",
                  a_name);
         return nullptr;
@@ -63,8 +63,7 @@ void Simulator::add_link(std::shared_ptr<IRoutingDevice> a_from,
     a_to->add_inlink(link);
 }
 
-// returns map, that for each meet device gives link to its parent in bfs bypass
-// tree
+// returns start device routing table
 routing_table_t bfs(std::shared_ptr<IRoutingDevice>& start_device) {
     routing_table_t routing_table;
     std::queue<std::shared_ptr<IRoutingDevice>> queue;
@@ -74,20 +73,21 @@ routing_table_t bfs(std::shared_ptr<IRoutingDevice>& start_device) {
     while (!queue.empty()) {
         std::shared_ptr<IRoutingDevice> device = queue.front();
         queue.pop();
-        if (used.find(device) != used.end()) {
+        if (used.contains(device)) {
             continue;
         }
         used.insert(device);
         std::set<std::shared_ptr<ILink>> outlinks = device->get_outlinks();
         for (std::shared_ptr<ILink> link : outlinks) {
-            if (used.find(link->get_to()) != used.end()) {
+            auto next_hop = link->get_to();
+            auto curr_device = link->get_from();
+            if (used.contains(next_hop)) {
                 continue;
             }
-            auto next_hop = link->get_to();
-            if (link->get_from() == start_device) {
+            if (curr_device == start_device) {
                 routing_table[next_hop] = link;
             } else if (!routing_table.contains(next_hop)) {
-                routing_table[next_hop] = routing_table[link->get_from()];
+                routing_table[next_hop] = routing_table[curr_device];
             }
             queue.push(next_hop);
         }
@@ -96,9 +96,8 @@ routing_table_t bfs(std::shared_ptr<IRoutingDevice>& start_device) {
 };
 
 void Simulator::recalculate_paths() {
-    for (auto& [src_device_name, src_device] : m_graph) {
+    for (auto& [_, src_device] : m_graph) {
         routing_table_t routing_table = bfs(src_device);
-
         for (auto [dest_device, link] : routing_table) {
             src_device->update_routing_table(dest_device, link);
         }
