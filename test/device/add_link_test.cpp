@@ -14,7 +14,7 @@ public:
     void SetUp() override {};
 };
 
-std::shared_ptr<sim::ILink> next_outlink(
+static std::shared_ptr<sim::ILink> next_outlink(
     std::shared_ptr<sim::IRoutingDevice> device) {
     static auto outlinks = device->get_outlinks();
     static auto next_outlink_it = outlinks.begin();
