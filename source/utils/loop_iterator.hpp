@@ -1,26 +1,21 @@
 #pragma once
 
-#include "../logger.hpp"
-
 #include <iterator>
 #include <stdexcept>
+
+#include "../logger.hpp"
 
 namespace sim {
 
 template <std::forward_iterator Iter>
 class LoopIterator {
 public:
-    using value_t = typename std::iterator_traits<Iter>::value_type;
     using value_ref_t = typename std::iterator_traits<Iter>::reference;
 
     LoopIterator() = default;
 
     LoopIterator(Iter a_begin, Iter a_end)
-        : m_curr(a_begin), m_begin(a_begin), m_end(a_end) {
-        if (a_begin == a_end) {
-            throw std::runtime_error("LoopIterator range cannot be empty");
-        }
-    }
+        : m_curr(a_begin), m_begin(a_begin), m_end(a_end) {}
 
     value_ref_t operator*() const {
         if (m_begin == m_end) {
@@ -35,6 +30,7 @@ public:
     LoopIterator& operator++() {
         if (m_begin == m_end) {
             LOG_ERROR("Loop's begin iterator equals to end iterator");
+            return *this;
         }
 
         if (++m_curr == m_end) {
@@ -46,11 +42,16 @@ public:
     LoopIterator operator++(int) {
         if (m_begin == m_end) {
             LOG_ERROR("Loop's begin iterator equals to end iterator");
+            return *this;
         }
 
         auto iter = *this;
         ++(*this);
         return iter;
+    }
+
+    bool operator==(const Iter &other) const {
+        return m_curr == other;
     }
 
 private:
