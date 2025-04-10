@@ -16,22 +16,6 @@ public:
     void SetUp() override {};
 };
 
-static std::shared_ptr<sim::ILink> next_outlink(
-    std::shared_ptr<sim::IRoutingDevice> device) {
-    static auto outlinks = device->get_outlinks();
-    static auto next_outlink_it = outlinks.begin();
-
-    if (outlinks.empty()) {
-        return nullptr;
-    }
-
-    std::shared_ptr<sim::ILink> link = *next_outlink_it;
-    if (++next_outlink_it == outlinks.end()) {
-        next_outlink_it = outlinks.begin();
-    }
-    return link;
-}
-
 TEST_F(AddLink, LinkIsPresent) {
     auto source = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
     auto dest = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
