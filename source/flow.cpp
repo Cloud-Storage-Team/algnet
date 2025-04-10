@@ -15,11 +15,7 @@ Flow::Flow(std::shared_ptr<ISender> a_src, std::shared_ptr<IReceiver> a_dest,
       m_packet_size(a_packet_size),
       m_delay_between_packets(a_delay_between_packets),
       m_updates_number(0),
-      m_packets_to_send(a_packets_to_send) {
-    (void)m_nacks;
-    (void)m_cwnd;
-    (void)m_sent_bytes;
-}
+      m_packets_to_send(a_packets_to_send) {}
 
 void Flow::schedule_packet_generation(Time time) {
     auto generate_event_ptr =
@@ -41,13 +37,13 @@ void Flow::update() { ++m_updates_number; }
 
 std::uint32_t Flow::get_updates_number() const { return m_updates_number; }
 
-std::optional<Time> Flow::try_to_generate() {
+Time Flow::try_to_generate() {
     if (m_packets_to_send == 0) {
-        return std::nullopt;
+        return 0;
     }
     --m_packets_to_send;
     generate_packet();
-    return {m_delay_between_packets};
+    return m_delay_between_packets;
 }
 
 std::shared_ptr<ISender> Flow::get_sender() const { return m_src; }

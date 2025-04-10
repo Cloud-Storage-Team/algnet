@@ -67,7 +67,7 @@ void Simulator::add_link(std::shared_ptr<IRoutingDevice> a_from,
 }
 
 // returns start device routing table
-routing_table_t bfs(std::shared_ptr<IRoutingDevice>& start_device) {
+static routing_table_t bfs(std::shared_ptr<IRoutingDevice>& start_device) {
     routing_table_t routing_table;
     std::queue<std::shared_ptr<IRoutingDevice>> queue;
     std::set<std::shared_ptr<IRoutingDevice>> used;

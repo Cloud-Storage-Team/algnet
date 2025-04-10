@@ -40,6 +40,11 @@ TEST_F(Start, ThreeToOneTopology) {
     auto swtch = sim.add_switch("switch");
     auto receiver = sim.add_receiver("receiver");
 
+    add_two_way_links(sim, {{sender1, swtch},
+                            {sender2, swtch},
+                            {sender3, swtch},
+                            {swtch, receiver}});
+
     constexpr Time delay_between_packets = 100;
     constexpr Time stop_time = 10000;
     constexpr Size packet_size = 1024;
@@ -53,11 +58,6 @@ TEST_F(Start, ThreeToOneTopology) {
                               delay_between_packets, packets_to_send_by_flow2);
     auto flow3 = sim.add_flow(sender3, receiver, packet_size,
                               delay_between_packets, packets_to_send_by_flow3);
-
-    add_two_way_links(sim, {{sender1, swtch},
-                            {sender2, swtch},
-                            {sender3, swtch},
-                            {swtch, receiver}});
 
     sim.start(stop_time);
 
@@ -74,6 +74,11 @@ TEST_F(Start, StopTime) {
     auto swtch = sim.add_switch("switch");
     auto receiver = sim.add_receiver("receiver");
 
+    add_two_way_links(sim, {{sender1, swtch},
+                            {sender2, swtch},
+                            {sender3, swtch},
+                            {swtch, receiver}});
+
     constexpr Time delay_between_packets = 100;
     constexpr Time stop_time = 1000;
     constexpr Size packet_size = 1024;
@@ -88,17 +93,13 @@ TEST_F(Start, StopTime) {
     auto flow3 = sim.add_flow(sender3, receiver, packet_size,
                               delay_between_packets, packets_to_send_by_flow3);
 
-    add_two_way_links(sim, {{sender1, swtch},
-                            {sender2, swtch},
-                            {sender3, swtch},
-                            {swtch, receiver}});
-
     sim.start(stop_time);
 
-    // First flow generates all packets in time 
+    // First flow generates all packets in time
     ASSERT_TRUE(flow1->get_updates_number() == packets_to_send_by_flow1);
 
-    // Second and third flows have no time to generate all packets (stop_time < packets_to_send * generate_delay)
+    // Second and third flows have no time to generate all packets (stop_time <
+    // packets_to_send * generate_delay)
     ASSERT_TRUE(flow2->get_updates_number() < packets_to_send_by_flow2);
     ASSERT_TRUE(flow3->get_updates_number() < packets_to_send_by_flow3);
 }

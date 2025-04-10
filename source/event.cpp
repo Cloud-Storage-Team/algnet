@@ -21,13 +21,13 @@ void Generate::operator()() {
         return;
     }
 
-    std::optional<Time> generate_delay_opt = m_flow.lock()->try_to_generate();
-    if (!generate_delay_opt.has_value()) {
+    Time generate_delay = m_flow.lock()->try_to_generate();
+    if (generate_delay == 0) {
         return;
     }
 
     std::unique_ptr<Event> new_event = std::make_unique<Generate>(
-        m_time + generate_delay_opt.value(), m_flow, m_packet_size);
+        m_time + generate_delay, m_flow, m_packet_size);
     Scheduler::get_instance().add(std::move(new_event));
 }
 
