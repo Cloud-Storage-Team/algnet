@@ -24,7 +24,8 @@ public:
 class Flow : public IFlow, public std::enable_shared_from_this<Flow> {
 public:
     Flow(std::shared_ptr<ISender> a_src, std::shared_ptr<IReceiver> a_dest,
-         Size a_packet_size, Time a_delay_between_packets);
+         Size a_packet_size, Time a_delay_between_packets,
+         std::uint32_t a_packets_to_send);
     virtual ~Flow() = default;
 
     // Start at time
@@ -38,7 +39,7 @@ public:
     // Update the internal state according to some congestion control algorithm
     // Call try_to_generate upon the update
     void update() final;
-    bool get_updated() const;
+    std::uint32_t get_updates_number() const;
 
     std::shared_ptr<ISender> get_sender() const final;
     std::shared_ptr<IReceiver> get_receiver() const final;
@@ -55,8 +56,8 @@ private:
     Size m_sent_bytes;
     Size m_packet_size;
     Time m_delay_between_packets;
-    bool updated;
-    bool send_packet;
+    std::uint32_t m_updates_number;
+    std::uint32_t m_packets_to_send;
 };
 
 }  // namespace sim

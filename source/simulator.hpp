@@ -25,7 +25,8 @@ public:
     std::shared_ptr<Flow> add_flow(std::shared_ptr<ISender> sender,
                                    std::shared_ptr<IReceiver> recever,
                                    Size a_packet_size,
-                                   Time a_delay_between_packets);
+                                   Time a_delay_between_packets,
+                                   std::uint32_t packets_to_send);
 
     void add_link(std::shared_ptr<IRoutingDevice> a_from,
                   std::shared_ptr<IRoutingDevice> a_to,

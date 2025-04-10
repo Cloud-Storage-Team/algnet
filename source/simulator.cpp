@@ -61,9 +61,10 @@ std::shared_ptr<IRoutingDevice> Simulator::add_device(std::string name,
 std::shared_ptr<Flow> Simulator::add_flow(std::shared_ptr<ISender> sender,
                                           std::shared_ptr<IReceiver> receiver,
                                           Size packet_size,
-                                          Time delay_between_packets) {
+                                          Time delay_between_packets,
+                                          std::uint32_t packets_to_send) {
     auto flow = std::make_shared<Flow>(sender, receiver, packet_size,
-                                       delay_between_packets);
+                                       delay_between_packets, packets_to_send);
     m_flows.emplace_back(flow);
     return flow;
 }
@@ -137,21 +138,27 @@ void Simulator::recalculate_paths() {
 void Simulator::start(Time a_stop_time) {
     recalculate_paths();
     Scheduler::get_instance().add(std::make_unique<Stop>(a_stop_time));
+    constexpr Time start_time = 0;
+
     for (std::shared_ptr<IFlow> flow : m_flows) {
-        flow->start(0);
+        flow->start(start_time);
     }
 
     for (auto [name, sender] : m_senders) {
-        Scheduler::get_instance().add(std::make_unique<Process>(0, sender));
-        Scheduler::get_instance().add(std::make_unique<SendData>(0, sender));
+        Scheduler::get_instance().add(
+            std::make_unique<Process>(start_time, sender));
+        Scheduler::get_instance().add(
+            std::make_unique<SendData>(start_time, sender));
     }
 
     for (auto [name, receiver] : m_receivers) {
-        Scheduler::get_instance().add(std::make_unique<Process>(0, receiver));
+        Scheduler::get_instance().add(
+            std::make_unique<Process>(start_time, receiver));
     }
 
     for (auto [name, swtch] : m_switches) {
-        Scheduler::get_instance().add(std::make_unique<Process>(0, swtch));
+        Scheduler::get_instance().add(
+            std::make_unique<Process>(start_time, swtch));
     }
     while (Scheduler::get_instance().tick()) {
     }
