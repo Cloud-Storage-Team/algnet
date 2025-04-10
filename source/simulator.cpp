@@ -27,7 +27,7 @@ std::shared_ptr<Sender> Simulator::add_sender(std::string name) {
 
 std::shared_ptr<Receiver> Simulator::add_receiver(std::string name) {
     if (m_receivers.contains(name)) {
-        LOG_WARN("add_sender failed: device with name {} already exists.",
+        LOG_WARN("add_receiver failed: device with name {} already exists.",
                  name);
         return nullptr;
     }
