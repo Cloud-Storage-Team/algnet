@@ -8,7 +8,7 @@ namespace sim {
 
 struct Packet;
 
-class IReceiver : public IRoutingDevice, IProcessingDevice {
+class IReceiver : public IRoutingDevice, public IProcessingDevice {
 public:
     virtual ~IReceiver() = default;
 };

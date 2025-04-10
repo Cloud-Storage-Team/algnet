@@ -7,7 +7,7 @@ namespace sim {
 
 struct Packet;
 
-class ISender : public IRoutingDevice, IProcessingDevice {
+class ISender : public IRoutingDevice, public IProcessingDevice {
 public:
     virtual ~ISender() = default;
     virtual void enqueue_packet(Packet packet) = 0;
