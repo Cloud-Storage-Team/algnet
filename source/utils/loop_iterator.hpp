@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../logger.hpp"
+
 #include <iterator>
 #include <stdexcept>
 
@@ -20,19 +22,21 @@ public:
         }
     }
 
-    value_ref_t operator*() const { 
+    value_ref_t operator*() const {
         if (m_begin == m_end) {
-            LOG_CRITICAL("Loop's begin iterator equals to end iterator while dereferencing");
+            LOG_CRITICAL(
+                "Loop's begin iterator equals to end iterator while "
+                "dereferencing");
         }
-        
-        return *m_curr; 
+
+        return *m_curr;
     }
 
     LoopIterator& operator++() {
         if (m_begin == m_end) {
             LOG_ERROR("Loop's begin iterator equals to end iterator");
         }
-        
+
         if (++m_curr == m_end) {
             m_curr = m_begin;
         }
@@ -43,7 +47,7 @@ public:
         if (m_begin == m_end) {
             LOG_ERROR("Loop's begin iterator equals to end iterator");
         }
-        
+
         auto iter = *this;
         ++(*this);
         return iter;

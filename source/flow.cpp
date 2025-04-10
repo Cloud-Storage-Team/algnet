@@ -2,7 +2,6 @@
 
 #include <memory>
 
-#include "logger.hpp"
 #include "receiver.hpp"
 #include "scheduler.hpp"
 
@@ -15,7 +14,11 @@ Flow::Flow(std::shared_ptr<ISender> a_src, std::shared_ptr<IReceiver> a_dest,
       m_packet_size(a_packet_size),
       m_delay_between_packets(a_delay_between_packets),
       updated(false),
-      send_packet(false) {}
+      send_packet(false) {
+    (void)m_nacks;
+    (void)m_cwnd;
+    (void)m_sent_bytes;
+}
 
 void Flow::schedule_packet_generation(Time time) {
     auto generate_event_ptr =
