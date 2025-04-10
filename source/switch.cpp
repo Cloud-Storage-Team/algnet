@@ -2,7 +2,6 @@
 #include "logger.hpp"
 
 #include <memory>
-#include <stdexcept>
 
 #include "link.hpp"
 

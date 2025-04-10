@@ -1,8 +1,6 @@
 #include "receiver.hpp"
 #include "logger.hpp"
 
-#include <iostream>
-
 #include "event.hpp"
 #include "flow.hpp"
 #include "link.hpp"

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iterator>
-#include <stdexcept>
 
 #include "../logger.hpp"
 
