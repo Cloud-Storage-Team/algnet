@@ -15,47 +15,51 @@ namespace sim {
 using routing_table_t =
     std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<ILink>>;
 
-Simulator::Simulator() : m_scheduler(Scheduler::get_instance()) {}
-
-std::shared_ptr<IRoutingDevice> Simulator::add_device(std::string a_name,
-                                                      DeviceType a_type) {
-    if (m_graph.contains(a_name)) {
-        LOG_WARN("add_device failed: device with name {} already exists.",
-                 a_name);
+std::shared_ptr<Sender> Simulator::add_sender(std::string name) {
+    if (m_senders.contains(name)) {
+        LOG_WARN("add_sender failed: device with name {} already exists.",
+                 name);
         return nullptr;
     }
-    switch (a_type) {
-        case DeviceType::SENDER:
-            m_graph[a_name] = std::make_shared<Sender>();
-            break;
-        case DeviceType::SWITCH:
-            m_graph[a_name] = std::make_shared<Switch>();
-            break;
-        case DeviceType::RECEIVER:
-            m_graph[a_name] = std::make_shared<Receiver>();
-            break;
-    }
-    return m_graph[a_name];
+    m_senders[name] = std::make_shared<Sender>();
+    return m_senders[name];
 }
 
-void Simulator::add_flow(std::shared_ptr<IRoutingDevice> a_from,
-                         std::shared_ptr<IRoutingDevice> a_to,
-                         Time delay_between_packets, Size packet_size) {
-    ISender* sender = dynamic_cast<ISender*>(a_from.get());
-    IReceiver* receiver = dynamic_cast<IReceiver*>(a_to.get());
-    if (sender == nullptr) {
-        LOG_WARN("add_flow failed: sender is nullptr");
-        return;
+std::shared_ptr<Receiver> Simulator::add_receiver(std::string name) {
+    if (m_receivers.contains(name)) {
+        LOG_WARN("add_sender failed: device with name {} already exists.",
+                 name);
+        return nullptr;
     }
+    m_receivers[name] = std::make_shared<Receiver>();
+    return m_receivers[name];
+}
 
-    if (receiver == nullptr) {
-        LOG_WARN("add_flow failed: receiver is nullptr");
-        return;
+std::shared_ptr<Switch> Simulator::add_switch(std::string name) {
+    if (m_switches.contains(name)) {
+        LOG_WARN("add_sender failed: device with name {} already exists.",
+                 name);
+        return nullptr;
     }
-    m_flows.emplace_back(
-        std::make_shared<Flow>(std::dynamic_pointer_cast<Sender>(a_from),
-                               std::dynamic_pointer_cast<Receiver>(a_to),
-                               packet_size, delay_between_packets));
+    m_switches[name] = std::make_shared<Switch>();
+    return m_switches[name];
+}
+
+std::shared_ptr<IRoutingDevice> Simulator::add_device(std::string name,
+                                                      DeviceType a_type) {
+    switch (a_type) {
+        case DeviceType::SENDER:
+            return add_sender(name);
+        case DeviceType::SWITCH:
+            return add_switch(name);
+        case DeviceType::RECEIVER:
+            return add_receiver(name);
+    }
+    return nullptr;
+}
+
+void Simulator::add_flow(std::shared_ptr<Flow> flow) {
+    m_flows.emplace_back(flow);
 }
 
 void Simulator::add_link(std::shared_ptr<IRoutingDevice> a_from,
@@ -99,8 +103,22 @@ routing_table_t bfs(std::shared_ptr<IRoutingDevice>& start_device) {
     return routing_table;
 };
 
+std::vector<std::shared_ptr<IRoutingDevice>> Simulator::get_devices() const {
+    std::vector<std::shared_ptr<IRoutingDevice>> result;
+    for (auto [name, device] : m_senders) {
+        result.push_back(device);
+    }
+    for (auto [name, device] : m_receivers) {
+        result.push_back(device);
+    }
+    for (auto [name, device] : m_switches) {
+        result.push_back(device);
+    }
+    return result;
+}
+
 void Simulator::recalculate_paths() {
-    for (auto& [_, src_device] : m_graph) {
+    for (auto src_device : get_devices()) {
         routing_table_t routing_table = bfs(src_device);
         for (auto [dest_device, link] : routing_table) {
             src_device->update_routing_table(dest_device, link);
@@ -110,11 +128,24 @@ void Simulator::recalculate_paths() {
 
 void Simulator::start(Time a_stop_time) {
     recalculate_paths();
-    m_scheduler.add(std::make_unique<Stop>(a_stop_time));
+    Scheduler::get_instance().add(std::make_unique<Stop>(a_stop_time));
     for (std::shared_ptr<IFlow> flow : m_flows) {
         flow->start(0);
     }
-    while (m_scheduler.tick()) {
+
+    for (auto [name, sender] : m_senders) {
+        Scheduler::get_instance().add(std::make_unique<Process>(0, sender));
+        Scheduler::get_instance().add(std::make_unique<SendData>(0, sender));
+    }
+
+    for (auto [name, receiver] : m_receivers) {
+        Scheduler::get_instance().add(std::make_unique<Process>(0, receiver));
+    }
+
+    for (auto [name, swtch] : m_switches) {
+        Scheduler::get_instance().add(std::make_unique<Process>(0, swtch));
+    }
+    while (Scheduler::get_instance().tick()) {
     }
 }
 

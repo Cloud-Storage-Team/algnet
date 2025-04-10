@@ -1,8 +1,8 @@
 #include "sender.hpp"
-#include "logger.hpp"
 
 #include "event.hpp"
 #include "link.hpp"
+#include "logger.hpp"
 #include "scheduler.hpp"
 
 namespace sim {
@@ -16,7 +16,8 @@ bool Sender::add_inlink(std::shared_ptr<ILink> link) {
     }
 
     if (this != link->get_to().get()) {
-        LOG_WARN("Link destination device is incorrect (expected current device)");
+        LOG_WARN(
+            "Link destination device is incorrect (expected current device)");
         return false;
     }
     return m_router->add_inlink(link);
@@ -71,7 +72,10 @@ std::shared_ptr<ILink> Sender::get_link_to_destination(
 
 DeviceType Sender::get_type() const { return DeviceType::SENDER; }
 
-void Sender::enqueue_packet(Packet packet) { m_flow_buffer.push(packet); }
+void Sender::enqueue_packet(Packet packet) {
+    m_flow_buffer.push(packet);
+    LOG_INFO("Packet {} arrived to sender", packet.to_string());
+}
 
 Time Sender::process() {
     std::shared_ptr<ILink> current_inlink = m_router->next_inlink();
@@ -95,14 +99,17 @@ Time Sender::process() {
     }
 
     // TODO: add some sender ID for easier packet path tracing
-    LOG_INFO("Processing packet from link on sender. Packet: " + packet.to_string());
+    LOG_INFO("Processing packet from link on sender. Packet: " +
+             packet.to_string());
 
     auto destination = packet.get_destination();
     if (packet.type == PacketType::ACK && destination.get() == this) {
         packet.flow->update();
     } else {
-        LOG_WARN("Packet arrived to Sender that is not its destination; use routing table to send it further");
-        std::shared_ptr<ILink> next_link = get_link_to_destination(destination); 
+        LOG_WARN(
+            "Packet arrived to Sender that is not its destination; use routing "
+            "table to send it further");
+        std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
 
         if (next_link == nullptr) {
             LOG_WARN("No link corresponds to destination device");
@@ -127,16 +134,19 @@ Time Sender::send_data() {
     m_flow_buffer.pop();
 
     // TODO: add some sender ID for easier packet path tracing
-    LOG_INFO("Taken new data packet on sender. Packet: " + data_packet.to_string());
+    LOG_INFO("Taken new data packet on sender. Packet: " +
+             data_packet.to_string());
 
-    auto next_link = m_router->get_link_to_destination(data_packet.get_destination());
+    auto next_link =
+        m_router->get_link_to_destination(data_packet.get_destination());
     if (next_link == nullptr) {
         LOG_WARN("Link to send data packet does not exist");
         return total_processing_time;
     }
 
     // TODO: add some sender ID for easier packet path tracing
-    LOG_INFO("Sent new data packet from sender. Data packet: " + data_packet.to_string());
+    LOG_INFO("Sent new data packet from sender. Data packet: " +
+             data_packet.to_string());
 
     next_link->schedule_arrival(data_packet);
     // total_processing_time += sending_data_time;

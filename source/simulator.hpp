@@ -8,21 +8,26 @@
 #include "device.hpp"
 #include "link.hpp"
 #include "scheduler.hpp"
+#include "switch.hpp"
 
 namespace sim {
 
 class Simulator {
 public:
-    Simulator();
+    Simulator() = default;
     ~Simulator() = default;
+    std::shared_ptr<Sender> add_sender(std::string name);
+    std::shared_ptr<Receiver> add_receiver(std::string name);
+    std::shared_ptr<Switch> add_switch(std::string name);
     std::shared_ptr<IRoutingDevice> add_device(std::string a_name,
                                                DeviceType a_type);
-    void add_flow(std::shared_ptr<IRoutingDevice> a_from,
-                  std::shared_ptr<IRoutingDevice> a_to,
-                  Time delay_between_packets, Size packet_size);
+    void add_flow(std::shared_ptr<Flow> flow);
     void add_link(std::shared_ptr<IRoutingDevice> a_from,
                   std::shared_ptr<IRoutingDevice> a_to,
                   std::uint32_t a_speed_mbps, Time a_delay);
+
+    std::vector<std::shared_ptr<IRoutingDevice>> get_devices() const;
+
     // Clear all events in the Scheduler
     void clear();
     // BFS to update the routing table
@@ -31,8 +36,9 @@ public:
     void start(Time a_stop_time);
 
 private:
-    Scheduler& m_scheduler;
-    std::unordered_map<std::string, std::shared_ptr<IRoutingDevice>> m_graph;
+    std::unordered_map<std::string, std::shared_ptr<Sender>> m_senders;
+    std::unordered_map<std::string, std::shared_ptr<Receiver>> m_receivers;
+    std::unordered_map<std::string, std::shared_ptr<Switch>> m_switches;
     std::vector<std::shared_ptr<IFlow>> m_flows;
     std::vector<std::shared_ptr<ILink>> m_links;
 };
