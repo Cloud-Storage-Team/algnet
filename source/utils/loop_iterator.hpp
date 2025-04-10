@@ -13,9 +13,9 @@ public:
 
     LoopIterator() = default;
 
-    LoopIterator(Iter begin, Iter end)
-        : m_curr(begin), m_begin(begin), m_end(end) {
-        if (begin == end) {
+    LoopIterator(Iter a_begin, Iter a_end)
+        : m_curr(a_begin), m_begin(a_begin), m_end(a_end) {
+        if (a_begin == a_end) {
             throw std::runtime_error("LoopIterator range cannot be empty");
         }
     }
