@@ -20,7 +20,13 @@ public:
         }
     }
 
-    value_ref_t operator*() const { return *m_curr; }
+    value_ref_t operator*() const { 
+        if (m_begin == m_end) {
+            LOG_CRITICAL("Loop's begin iterator equals to end iterator while dereferencing");
+        }
+        
+        return *m_curr; 
+    }
 
     LoopIterator& operator++() {
         if (m_begin == m_end) {
