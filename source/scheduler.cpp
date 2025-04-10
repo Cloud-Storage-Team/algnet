@@ -1,6 +1,5 @@
 #include "scheduler.hpp"
 
-#include <iostream>
 #include <queue>
 
 #include "event.hpp"

@@ -6,6 +6,10 @@ namespace sim {
 
 Event::Event(Time a_time): m_time(a_time) {};
 
+Time Event::get_time() const {
+    return m_time;
+}
+
 Stop::Stop(Time a_time): Event(a_time) {}
 
 void Stop::operator()() { Scheduler::get_instance().clear(); }
@@ -17,7 +21,7 @@ void Generate::operator()() {
         return;
     }
     
-    m_flow.lock()->try_to_generate(m_packet_size);
+    m_flow.lock()->try_to_generate(m_time);
 
     // TODO: make delay not constant (maybe try_to_generate have to return it)
     const Time GENERATE_DELAY = 7;
