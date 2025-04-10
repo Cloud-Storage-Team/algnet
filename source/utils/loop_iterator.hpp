@@ -34,6 +34,10 @@ public:
     }
 
     LoopIterator operator++(int) {
+        if (m_begin == m_end) {
+            LOG_ERROR("Loop's begin iterator equals to end iterator");
+        }
+        
         auto iter = *this;
         ++(*this);
         return iter;
