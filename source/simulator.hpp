@@ -7,7 +7,6 @@
 
 #include "device.hpp"
 #include "link.hpp"
-#include "scheduler.hpp"
 #include "switch.hpp"
 
 namespace sim {
@@ -19,8 +18,6 @@ public:
     std::shared_ptr<Sender> add_sender(std::string name);
     std::shared_ptr<Receiver> add_receiver(std::string name);
     std::shared_ptr<Switch> add_switch(std::string name);
-    std::shared_ptr<IRoutingDevice> add_device(std::string a_name,
-                                               DeviceType a_type);
 
     std::shared_ptr<Flow> add_flow(std::shared_ptr<ISender> sender,
                                    std::shared_ptr<IReceiver> recever,

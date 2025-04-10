@@ -7,6 +7,7 @@
 #include "event.hpp"
 #include "logger.hpp"
 #include "receiver.hpp"
+#include "scheduler.hpp"
 #include "sender.hpp"
 #include "switch.hpp"
 
@@ -43,19 +44,6 @@ std::shared_ptr<Switch> Simulator::add_switch(std::string name) {
     }
     m_switches[name] = std::make_shared<Switch>();
     return m_switches[name];
-}
-
-std::shared_ptr<IRoutingDevice> Simulator::add_device(std::string name,
-                                                      DeviceType a_type) {
-    switch (a_type) {
-        case DeviceType::SENDER:
-            return add_sender(name);
-        case DeviceType::SWITCH:
-            return add_switch(name);
-        case DeviceType::RECEIVER:
-            return add_receiver(name);
-    }
-    return nullptr;
 }
 
 std::shared_ptr<Flow> Simulator::add_flow(std::shared_ptr<ISender> sender,

@@ -39,9 +39,9 @@ static void check_pairwise_reachability(
 TEST_F(RecalculatePaths, TrivialTopology) {
     sim::Simulator sim;
 
-    auto sender = sim.add_device("sender", sim::DeviceType::SENDER);
-    auto swtch = sim.add_device("switch", sim::DeviceType::SWITCH);
-    auto receiver = sim.add_device("receiver", sim::DeviceType::RECEIVER);
+    auto sender = sim.add_sender("sender");
+    auto swtch = sim.add_switch("switch");
+    auto receiver = sim.add_receiver("receiver");
 
     add_two_way_links(sim, {{sender, swtch}, {swtch, receiver}});
     sim.recalculate_paths();
@@ -64,11 +64,11 @@ TEST_F(RecalculatePaths, TrivialTopology) {
 TEST_F(RecalculatePaths, SimpleTopology) {
     sim::Simulator sim;
 
-    auto sender1 = sim.add_device("sender1", sim::DeviceType::SENDER);
-    auto sender2 = sim.add_device("sender2", sim::DeviceType::SENDER);
-    auto swtch = sim.add_device("switch", sim::DeviceType::SWITCH);
-    auto receiver = sim.add_device("receiver", sim::DeviceType::RECEIVER);
-
+    auto sender1 = sim.add_sender("sender1");
+    auto sender2 = sim.add_sender("sender2");
+    auto swtch = sim.add_switch("switch");
+    auto receiver = sim.add_receiver("receiver");
+    
     add_two_way_links(sim,
                       {{sender1, swtch}, {sender2, swtch}, {swtch, receiver}});
 
@@ -96,14 +96,14 @@ receiver1 receiver2  receiver3
 TEST_F(RecalculatePaths, MeshTopology) {
     sim::Simulator sim;
 
-    auto sender1 = sim.add_device("sender1", sim::DeviceType::SENDER);
-    auto sender2 = sim.add_device("sender2", sim::DeviceType::SENDER);
-    auto sender3 = sim.add_device("sender3", sim::DeviceType::SENDER);
-    auto swtch1 = sim.add_device("switch1", sim::DeviceType::SWITCH);
-    auto swtch2 = sim.add_device("switch2", sim::DeviceType::SWITCH);
-    auto receiver1 = sim.add_device("receiver1", sim::DeviceType::RECEIVER);
-    auto receiver2 = sim.add_device("receiver2", sim::DeviceType::RECEIVER);
-    auto receiver3 = sim.add_device("receiver3", sim::DeviceType::RECEIVER);
+    auto sender1 = sim.add_sender("sender1");
+    auto sender2 = sim.add_sender("sender2");
+    auto sender3 = sim.add_sender("sender3");
+    auto swtch1 = sim.add_switch("switch1");
+    auto swtch2 = sim.add_switch("switch2");
+    auto receiver1 = sim.add_receiver("receiver1");
+    auto receiver2 = sim.add_receiver("receiver2");
+    auto receiver3 = sim.add_receiver("receiver3");
 
     add_two_way_links(sim, {{sender1, swtch1},
                             {sender2, swtch1},
@@ -137,17 +137,17 @@ TEST_F(RecalculatePaths, MeshTopology) {
 TEST_F(RecalculatePaths, LoopTopology) {
     sim::Simulator sim;
 
-    auto sender1 = sim.add_device("sender1", sim::DeviceType::SENDER);
-    auto sender2 = sim.add_device("sender2", sim::DeviceType::SENDER);
-    auto sender3 = sim.add_device("sender3", sim::DeviceType::SENDER);
-    auto swtch1 = sim.add_device("switch1", sim::DeviceType::SWITCH);
-    auto swtch2 = sim.add_device("switch2", sim::DeviceType::SWITCH);
-    auto swtch3 = sim.add_device("switch3", sim::DeviceType::SWITCH);
-    auto swtch4 = sim.add_device("switch4", sim::DeviceType::SWITCH);
-    auto swtch5 = sim.add_device("switch5", sim::DeviceType::SWITCH);
-    auto receiver1 = sim.add_device("receiver1", sim::DeviceType::RECEIVER);
-    auto receiver2 = sim.add_device("receiver2", sim::DeviceType::RECEIVER);
-    auto receiver3 = sim.add_device("receiver3", sim::DeviceType::RECEIVER);
+    auto sender1 = sim.add_sender("sender1");
+    auto sender2 = sim.add_sender("sender2");
+    auto sender3 = sim.add_sender("sender3");
+    auto swtch1 = sim.add_switch("switch1");
+    auto swtch2 = sim.add_switch("switch2");
+    auto swtch3 = sim.add_switch("switch3");
+    auto swtch4 = sim.add_switch("switch4");
+    auto swtch5 = sim.add_switch("switch5");
+    auto receiver1 = sim.add_receiver("receiver1");
+    auto receiver2 = sim.add_receiver("receiver2");
+    auto receiver3 = sim.add_receiver("receiver3");
 
     add_two_way_links(sim, {
                                {sender1, swtch1},
