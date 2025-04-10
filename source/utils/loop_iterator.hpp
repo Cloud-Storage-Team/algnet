@@ -2,7 +2,7 @@
 
 #include <iterator>
 
-//#include "../logger.hpp"
+#include "../logger.hpp"
 
 namespace sim {
 
@@ -18,9 +18,9 @@ public:
 
     value_ref_t operator*() const {
         if (m_begin == m_end) {
-            // LOG_CRITICAL(
-            //     "Loop's begin iterator equals to end iterator while "
-            //     "dereferencing");
+            LOG_CRITICAL(
+                "Loop's begin iterator equals to end iterator while "
+                "dereferencing");
         }
 
         return *m_curr;
@@ -28,7 +28,7 @@ public:
 
     LoopIterator& operator++() {
         if (m_begin == m_end) {
-            // LOG_ERROR("Loop's begin iterator equals to end iterator");
+            LOG_ERROR("Loop's begin iterator equals to end iterator");
             return *this;
         }
 
@@ -40,7 +40,7 @@ public:
 
     LoopIterator operator++(int) {
         if (m_begin == m_end) {
-            // LOG_ERROR("Loop's begin iterator equals to end iterator");
+            LOG_ERROR("Loop's begin iterator equals to end iterator");
             return *this;
         }
 
