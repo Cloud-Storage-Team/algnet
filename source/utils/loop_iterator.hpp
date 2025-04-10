@@ -23,6 +23,10 @@ public:
     value_ref_t operator*() const { return *m_curr; }
 
     LoopIterator& operator++() {
+        if (m_begin == m_end) {
+            LOG_ERROR("Loop's begin iterator equals to end iterator");
+        }
+        
         if (++m_curr == m_end) {
             m_curr = m_begin;
         }
