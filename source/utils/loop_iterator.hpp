@@ -23,8 +23,7 @@ public:
     value_ref_t operator*() const { return *m_curr; }
 
     LoopIterator& operator++() {
-        ++m_curr;
-        if (m_curr == m_end) {
+        if (++m_curr == m_end) {
             m_curr = m_begin;
         }
         return *this;
