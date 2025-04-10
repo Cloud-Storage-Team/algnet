@@ -58,8 +58,14 @@ std::shared_ptr<IRoutingDevice> Simulator::add_device(std::string name,
     return nullptr;
 }
 
-void Simulator::add_flow(std::shared_ptr<Flow> flow) {
+std::shared_ptr<Flow> Simulator::add_flow(std::shared_ptr<ISender> sender,
+                                          std::shared_ptr<IReceiver> receiver,
+                                          Size packet_size,
+                                          Time delay_between_packets) {
+    auto flow = std::make_shared<Flow>(sender, receiver, packet_size,
+                                       delay_between_packets);
     m_flows.emplace_back(flow);
+    return flow;
 }
 
 void Simulator::add_link(std::shared_ptr<IRoutingDevice> a_from,
@@ -105,15 +111,17 @@ routing_table_t bfs(std::shared_ptr<IRoutingDevice>& start_device) {
 
 std::vector<std::shared_ptr<IRoutingDevice>> Simulator::get_devices() const {
     std::vector<std::shared_ptr<IRoutingDevice>> result;
-    for (auto [name, device] : m_senders) {
-        result.push_back(device);
-    }
-    for (auto [name, device] : m_receivers) {
-        result.push_back(device);
-    }
-    for (auto [name, device] : m_switches) {
-        result.push_back(device);
-    }
+    std::transform(m_senders.begin(), m_senders.end(),
+                   std::back_inserter(result),
+                   [](const auto& pair) { return pair.second; });
+
+    std::transform(m_receivers.begin(), m_receivers.end(),
+                   std::back_inserter(result),
+                   [](const auto& pair) { return pair.second; });
+
+    std::transform(m_switches.begin(), m_switches.end(),
+                   std::back_inserter(result),
+                   [](const auto& pair) { return pair.second; });
     return result;
 }
 

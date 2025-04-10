@@ -21,7 +21,12 @@ public:
     std::shared_ptr<Switch> add_switch(std::string name);
     std::shared_ptr<IRoutingDevice> add_device(std::string a_name,
                                                DeviceType a_type);
-    void add_flow(std::shared_ptr<Flow> flow);
+
+    std::shared_ptr<Flow> add_flow(std::shared_ptr<ISender> sender,
+                                   std::shared_ptr<IReceiver> recever,
+                                   Size a_packet_size,
+                                   Time a_delay_between_packets);
+
     void add_link(std::shared_ptr<IRoutingDevice> a_from,
                   std::shared_ptr<IRoutingDevice> a_to,
                   std::uint32_t a_speed_mbps, Time a_delay);

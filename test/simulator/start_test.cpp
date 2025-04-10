@@ -7,8 +7,8 @@ namespace test {
 
 class Start : public testing::Test {
 public:
-    void TearDown() override{};
-    void SetUp() override{};
+    void TearDown() override {};
+    void SetUp() override {};
 };
 
 TEST_F(Start, TrivialTopology) {
@@ -21,10 +21,8 @@ TEST_F(Start, TrivialTopology) {
     constexpr Time stop_time = 1000;
     constexpr Size packet_size = 1024;
 
-    std::shared_ptr<sim::Flow> flow = std::make_shared<sim::Flow>(
-        sender, receiver, packet_size, delay_between_packets);
-
-    sim.add_flow(flow);
+    auto flow =
+        sim.add_flow(sender, receiver, packet_size, delay_between_packets);
 
     add_two_way_links(sim, {{sender, swtch}, {swtch, receiver}});
 
