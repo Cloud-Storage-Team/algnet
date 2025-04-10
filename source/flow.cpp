@@ -41,14 +41,13 @@ void Flow::update() { ++m_updates_number; }
 
 std::uint32_t Flow::get_updates_number() const { return m_updates_number; }
 
-bool Flow::try_to_generate(Time a_current_time) {
+std::optional<Time> Flow::try_to_generate() {
     if (m_packets_to_send == 0) {
-        return false;
+        return std::nullopt;
     }
     --m_packets_to_send;
     generate_packet();
-    schedule_packet_generation(a_current_time + m_delay_between_packets);
-    return true;
+    return {m_delay_between_packets};
 }
 
 std::shared_ptr<ISender> Flow::get_sender() const { return m_src; }

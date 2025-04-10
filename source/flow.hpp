@@ -12,7 +12,7 @@ class ISender;
 class IFlow {
 public:
     virtual void start(Time time) = 0;
-    virtual bool try_to_generate(Time current_time) = 0;
+    virtual std::optional<Time> try_to_generate() = 0;
 
     // Update the internal state according to some congestion control algorithm
     // Call try_to_generate upon the update
@@ -34,7 +34,7 @@ public:
     // Try to generate a new packet if the internal state allows to do so.
     // by placing it into the flow buffer of the source node.
     // Schedule the next generation event.
-    bool try_to_generate(Time current_time) final;
+    std::optional<Time> try_to_generate() final;
 
     // Update the internal state according to some congestion control algorithm
     // Call try_to_generate upon the update

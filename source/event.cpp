@@ -20,12 +20,14 @@ void Generate::operator()() {
     if (m_flow.expired()) {
         return;
     }
-    
-    m_flow.lock()->try_to_generate(m_time);
 
-    // TODO: make delay not constant (maybe try_to_generate have to return it)
-    const Time GENERATE_DELAY = 7;
-    std::unique_ptr<Event> new_event = std::make_unique<Generate>(m_time + GENERATE_DELAY, m_flow, m_packet_size);
+    std::optional<Time> generate_delay_opt = m_flow.lock()->try_to_generate();
+    if (!generate_delay_opt.has_value()) {
+        return;
+    }
+
+    std::unique_ptr<Event> new_event = std::make_unique<Generate>(
+        m_time + generate_delay_opt.value(), m_flow, m_packet_size);
     Scheduler::get_instance().add(std::move(new_event));
 }
 
