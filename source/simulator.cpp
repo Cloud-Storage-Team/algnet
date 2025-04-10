@@ -37,7 +37,7 @@ std::shared_ptr<Receiver> Simulator::add_receiver(std::string name) {
 
 std::shared_ptr<Switch> Simulator::add_switch(std::string name) {
     if (m_switches.contains(name)) {
-        LOG_WARN("add_sender failed: device with name {} already exists.",
+        LOG_WARN("add_switch failed: device with name {} already exists.",
                  name);
         return nullptr;
     }
