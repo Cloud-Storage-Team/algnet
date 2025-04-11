@@ -33,8 +33,4 @@ std::set<std::shared_ptr<sim::ILink>> ReceiverMock::get_outlinks() const {
     return {};
 }
 
-std::vector<std::shared_ptr<sim::IRoutingDevice>> ReceiverMock::get_neighbours()
-    const {
-    return {};
-}
 }  // namespace test
