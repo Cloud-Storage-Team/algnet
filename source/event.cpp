@@ -6,6 +6,10 @@ namespace sim {
 
 Event::Event(Time a_time): m_time(a_time) {};
 
+Time Event::get_time() const {
+    return m_time;
+}
+
 Stop::Stop(Time a_time): Event(a_time) {}
 
 void Stop::operator()() { Scheduler::get_instance().clear(); }
@@ -16,12 +20,14 @@ void Generate::operator()() {
     if (m_flow.expired()) {
         return;
     }
-    
-    m_flow.lock()->try_to_generate(m_packet_size);
 
-    // TODO: make delay not constant (maybe try_to_generate have to return it)
-    const Time GENERATE_DELAY = 7;
-    std::unique_ptr<Event> new_event = std::make_unique<Generate>(m_time + GENERATE_DELAY, m_flow, m_packet_size);
+    Time generate_delay = m_flow.lock()->try_to_generate();
+    if (generate_delay == 0) {
+        return;
+    }
+
+    std::unique_ptr<Event> new_event = std::make_unique<Generate>(
+        m_time + generate_delay, m_flow, m_packet_size);
     Scheduler::get_instance().add(std::move(new_event));
 }
 

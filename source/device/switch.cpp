@@ -2,7 +2,6 @@
 #include "logger/logger.hpp"
 
 #include <memory>
-#include <stdexcept>
 
 #include "link.hpp"
 
@@ -20,6 +19,18 @@ bool Switch::add_inlink(std::shared_ptr<ILink> link) {
         return false;
     }
     return m_router->add_inlink(link);
+}
+
+bool Switch::add_outlink(std::shared_ptr<ILink> link) {
+    if (link == nullptr) {
+        LOG_WARN("Add nullptr outlink to switch device");
+        return false;
+    }
+    if (link->get_from().get() != this) {
+        LOG_WARN("Outlink source is not our device");
+        return false;
+    }
+    return m_router->add_outlink(link);
 }
 
 bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
@@ -86,6 +97,10 @@ Time Switch::process() {
     // TODO: increase total_processing_time correctly
     next_link->schedule_arrival(packet);
     return total_processing_time;
+}
+
+std::set<std::shared_ptr<ILink>> Switch::get_outlinks() const {
+    return m_router->get_outlinks();
 }
 
 }  // namespace sim

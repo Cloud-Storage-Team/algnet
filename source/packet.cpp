@@ -9,14 +9,13 @@ std::shared_ptr<IRoutingDevice> Packet::get_destination() const {
     if (flow == nullptr) {
         return nullptr;
     }
-    switch (type)
-    {
-    case ACK:
-        return flow->get_sender();
-    case DATA:
-        return flow->get_receiver();
-    default:
-        return nullptr;
+    switch (type) {
+        case ACK:
+            return flow->get_sender();
+        case DATA:
+            return flow->get_receiver();
+        default:
+            return nullptr;
     }
 };
 
