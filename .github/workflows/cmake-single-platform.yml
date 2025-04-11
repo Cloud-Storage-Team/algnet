@@ -55,7 +55,7 @@ jobs:
       run: cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_PROJECT=OFF -DBUILD_TESTS=ON
 
     - name: Build tests
-      run: cmake --build build --config Debug -j 4
+      run: cmake --build build --config Debug
 
     - name: Run tests
       working-directory: build
