@@ -2,12 +2,9 @@
 
 #include <iterator>
 
-namespace sim {
+#include "../logger.hpp"
 
-struct LOG {
-    static void CRITICAL(std::string_view msg);
-    static void ERROR(std::string_view msg);
-};
+namespace sim {
 
 template <std::forward_iterator Iter>
 class LoopIterator {
@@ -21,7 +18,7 @@ public:
 
     value_ref_t operator*() const {
         if (m_begin == m_end) {
-            LOG::CRITICAL(
+            LOG_CRITICAL(
                 "Loop's begin iterator equals to end iterator while "
                 "dereferencing");
         }
@@ -31,7 +28,7 @@ public:
 
     LoopIterator& operator++() {
         if (m_begin == m_end) {
-            LOG::ERROR("Loop's begin iterator equals to end iterator");
+            LOG_ERROR("Loop's begin iterator equals to end iterator");
             return *this;
         }
 
@@ -43,7 +40,7 @@ public:
 
     LoopIterator operator++(int) {
         if (m_begin == m_end) {
-            LOG::ERROR("Loop's begin iterator equals to end iterator");
+            LOG_ERROR("Loop's begin iterator equals to end iterator");
             return *this;
         }
 
