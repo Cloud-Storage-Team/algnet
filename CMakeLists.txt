@@ -30,7 +30,7 @@ if(BUILD_TESTS)
     set(TEST_NAME "test_simulator")
     
     add_executable(${TEST_NAME} ${src} ${tests})
-    target_precompile_headers(${TEST_NAME} PRIVATE source/utils/pch.pph)
+    target_precompile_headers(${TEST_NAME} PRIVATE source/utils/pch.hpp)
     target_compile_options(${TEST_NAME} PRIVATE -Wall -Wextra)
     target_include_directories(${TEST_NAME} PUBLIC "source")
     target_link_libraries(${TEST_NAME} gtest gtest_main)
