@@ -1,7 +1,7 @@
 #pragma once
 #include <gtest/gtest.h>
 
-#include "device.hpp"
+#include "device/device.hpp"
 #include "link.hpp"
 
 namespace test {

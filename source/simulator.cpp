@@ -3,13 +3,10 @@
 #include <memory>
 #include <set>
 
-#include "device.hpp"
+#include "device/device.hpp"
 #include "event.hpp"
-#include "logger.hpp"
-#include "receiver.hpp"
+#include "logger/logger.hpp"
 #include "scheduler.hpp"
-#include "sender.hpp"
-#include "switch.hpp"
 
 namespace sim {
 

@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "receiver.hpp"
+#include "device/receiver.hpp"
 #include "scheduler.hpp"
 
 namespace sim {

@@ -5,9 +5,11 @@
 #include <unordered_map>
 #include <vector>
 
-#include "device.hpp"
+#include "device/device.hpp"
+#include "device/receiver.hpp"
+#include "device/sender.hpp"
+#include "device/switch.hpp"
 #include "link.hpp"
-#include "switch.hpp"
 
 namespace sim {
 

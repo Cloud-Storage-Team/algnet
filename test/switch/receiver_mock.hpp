@@ -1,5 +1,5 @@
 #pragma once
-#include "device.hpp"
+#include "device/device.hpp"
 #include "link.hpp"
 
 namespace test {

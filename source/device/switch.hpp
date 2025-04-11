@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "device.hpp"
+#include "routing_module.hpp"
 
 namespace sim {
 

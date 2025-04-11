@@ -1,6 +1,6 @@
 #pragma once
 
-#include "device.hpp"
+#include "device/device.hpp"
 #include "flow.hpp"
 #include "link.hpp"
 #include "packet.hpp"
