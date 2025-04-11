@@ -1,5 +1,4 @@
 #include <gtest/gtest.h>
-#include <spdlog/spdlog.h>
 
 #include "device.hpp"
 #include "simulator.hpp"

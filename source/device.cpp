@@ -1,8 +1,7 @@
 #include "device.hpp"
 
 #include "link.hpp"
-// #include "logger.hpp"
-#include "utils/loop_iterator.hpp"
+#include "logger.hpp"
 
 namespace sim {
 
