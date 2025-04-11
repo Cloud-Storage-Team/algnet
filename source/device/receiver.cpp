@@ -1,10 +1,9 @@
 #include "receiver.hpp"
-#include "logger/logger.hpp"
 
 #include "event.hpp"
-#include "flow.hpp"
 #include "link.hpp"
-#include "scheduler.hpp"
+#include "logger/logger.hpp"
+
 
 namespace sim {
 
@@ -21,7 +20,6 @@ bool Receiver::add_inlink(std::shared_ptr<ILink> link) {
         return false;
     }
     return m_router->add_inlink(link);
-
 }
 
 bool Receiver::add_outlink(std::shared_ptr<ILink> link) {

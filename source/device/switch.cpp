@@ -1,9 +1,9 @@
 #include "switch.hpp"
-#include "logger/logger.hpp"
 
 #include <memory>
 
 #include "link.hpp"
+#include "logger/logger.hpp"
 
 namespace sim {
 

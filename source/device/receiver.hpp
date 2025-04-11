@@ -1,8 +1,8 @@
 #pragma once
 #include <memory>
 
-#include "routing_module.hpp"
 #include "packet.hpp"
+#include "routing_module.hpp"
 
 namespace sim {
 
