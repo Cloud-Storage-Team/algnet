@@ -2,7 +2,7 @@
 
 #include <iterator>
 
-#include "../logger.hpp"
+#include "logger.hpp"
 
 namespace sim {
 
