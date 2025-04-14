@@ -1,10 +1,8 @@
 #include "receiver.hpp"
-#include "logger.hpp"
 
 #include "event.hpp"
-#include "flow.hpp"
 #include "link.hpp"
-#include "scheduler.hpp"
+#include "logger/logger.hpp"
 
 namespace sim {
 
@@ -21,7 +19,6 @@ bool Receiver::add_inlink(std::shared_ptr<ILink> link) {
         return false;
     }
     return m_router->add_inlink(link);
-
 }
 
 bool Receiver::add_outlink(std::shared_ptr<ILink> link) {
@@ -89,7 +86,8 @@ Time Receiver::process() {
     }
 
     // TODO: add some receiver ID for easier packet path tracing
-    LOG_INFO("Processing packet from link on receiver. Packet: " + data_packet.to_string());
+    LOG_INFO("Processing packet from link on receiver. Packet: " +
+             data_packet.to_string());
 
     std::shared_ptr<IRoutingDevice> destination = data_packet.get_destination();
     if (data_packet.type == DATA && destination.get() == this) {
@@ -97,8 +95,10 @@ Time Receiver::process() {
         // Not sure if we want to send ack before processing or after it
         total_processing_time += send_ack(data_packet);
     } else {
-        LOG_WARN("Packet arrived to Receiver that is not its destination; using routing table to send it further");
-        std::shared_ptr<ILink> next_link = get_link_to_destination(destination); 
+        LOG_WARN(
+            "Packet arrived to Receiver that is not its destination; using "
+            "routing table to send it further");
+        std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
 
         if (next_link == nullptr) {
             LOG_WARN("No link corresponds to destination device");
@@ -129,7 +129,8 @@ Time Receiver::send_ack(Packet data_packet) {
     }
 
     // TODO: add some receiver ID for easier packet path tracing
-    LOG_INFO("Sent ack after processing packet on receiver. Data packet: " + data_packet.to_string() + ". Ack packet: " + ack.to_string());
+    LOG_INFO("Sent ack after processing packet on receiver. Data packet: " +
+             data_packet.to_string() + ". Ack packet: " + ack.to_string());
 
     link_to_dest->schedule_arrival(ack);
     return processing_time;

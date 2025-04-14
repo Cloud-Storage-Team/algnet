@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "device.hpp"
+#include "device/device.hpp"
 #include "simulator.hpp"
 #include "utils.hpp"
 

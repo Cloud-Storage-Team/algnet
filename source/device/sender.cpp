@@ -2,8 +2,7 @@
 
 #include "event.hpp"
 #include "link.hpp"
-#include "logger.hpp"
-#include "scheduler.hpp"
+#include "logger/logger.hpp"
 
 namespace sim {
 

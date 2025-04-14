@@ -1,20 +1,23 @@
 #pragma once
-
 #include <memory>
 
-#include "device.hpp"
+#include "packet.hpp"
+#include "routing_module.hpp"
 
 namespace sim {
 
-class ISwitch : public IRoutingDevice, public IProcessingDevice {
+struct Packet;
+
+class IReceiver : public IRoutingDevice, public IProcessingDevice {
 public:
-    virtual ~ISwitch() = default;
+    virtual ~IReceiver() = default;
 };
 
-class Switch : public ISwitch, public std::enable_shared_from_this<Switch> {
+class Receiver : public IReceiver,
+                 public std::enable_shared_from_this<Receiver> {
 public:
-    Switch();
-    ~Switch() = default;
+    Receiver();
+    ~Receiver() = default;
 
     bool add_inlink(std::shared_ptr<ILink> link) final;
     bool add_outlink(std::shared_ptr<ILink> link) final;
@@ -26,13 +29,16 @@ public:
     std::set<std::shared_ptr<ILink>> get_outlinks() const final;
 
     DeviceType get_type() const final;
-    // Process a packet by moving it from ingress to egress
-    // and schedule next process event after a delay.
+    // Process a packet by removing it from the ingress buffer
+    // Send an ACK to the egress buffer
+    // and schedule next receive event after a delay.
+    // Upon receiving send an ACK to the sender.
     // Packets are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
     Time process() final;
 
 private:
+    Time send_ack(Packet data_packet);
     std::unique_ptr<RoutingModule> m_router;
 };
 
