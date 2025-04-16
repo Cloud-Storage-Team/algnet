@@ -8,21 +8,17 @@ project(simulator)
 option(BUILD_PROJECT "Build tests" ON)
 
 file(GLOB_RECURSE src "source/*.cpp")
-file(GLOB_RECURSE parse "topology_parser/*.cpp")
 file(GLOB_RECURSE tests "test/*.cpp")
 
-add_library(
-        parser ${parse}
+include_directories(
+    ${CMAKE_SOURCE_DIR}/source/
+    ${CMAKE_SOURCE_DIR}/spdlog/include/
 )
-add_subdirectory(${CMAKE_SOURCE_DIR}/yaml-cpp)
-#find_package(${CMAKE_SOURCE_DIR}/yaml-cpp)
-include_directories(${CMAKE_SOURCE_DIR}/spdlog/include/)
-include_directories(${CMAKE_SOURCE_DIR}/yaml-cpp/include/)
 
 if (BUILD_PROJECT)
     set(TARGET_NAME "${PROJECT_NAME}")
-    target_link_libraries(parser PUBLIC yaml-cpp::yaml-cpp)
     add_executable(${TARGET_NAME} main.cpp ${src})
+    target_compile_options(${TARGET_NAME} PRIVATE -Wall -Werror -Wextra)
 endif()
 
 # tests
@@ -33,6 +29,7 @@ if(BUILD_TESTS)
 
     set(TEST_NAME "test_simulator")
     add_executable(${TEST_NAME} ${src} ${tests})
+    target_compile_options(${TEST_NAME} PRIVATE -Wall -Wextra)
     target_include_directories(${TEST_NAME} PUBLIC "source")
     target_link_libraries(${TEST_NAME} gtest gtest_main)
     enable_testing()

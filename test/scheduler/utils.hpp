@@ -17,11 +17,13 @@ public:
 };
 
 struct EmptyEvent : public sim::Event {
+    EmptyEvent(std::uint32_t a_time);
     ~EmptyEvent() = default;
     virtual void operator()() final;
 };
 
 struct CountingEvent : public sim::Event {
+    CountingEvent(std::uint32_t a_time);
     ~CountingEvent() = default;
 
     static int cnt;
@@ -30,13 +32,14 @@ struct CountingEvent : public sim::Event {
 };
 
 struct ComparatorEvent : public sim::Event {
+    ComparatorEvent(std::uint32_t a_time);
     ~ComparatorEvent() = default;
 
-    static std::uint32_t last_time;
+    static Time last_time;
 
     virtual void operator()() final;
 };
 
 template <typename T>
-void AddEvents(int number, std::shared_ptr<std::uint32_t> event_time = nullptr);
+void AddEvents(int number, std::shared_ptr<Time> event_time = nullptr);
 }  // namespace test

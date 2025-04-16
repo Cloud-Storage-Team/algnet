@@ -2,13 +2,13 @@
 
 #include <vector>
 
-#include "device.hpp"
+#include "device/device.hpp"
 #include "flow_mock.hpp"
 #include "link.hpp"
 #include "link_mock.hpp"
 #include "packet.hpp"
 #include "receiver_mock.hpp"
-#include "switch.hpp"
+#include "device/switch.hpp"
 
 namespace test {
 
@@ -19,16 +19,16 @@ public:
 };
 
 TEST_F(TestSwitch, test_add_nullptr_link) {
-    sim::Switch switch_device;
-    ASSERT_FALSE(switch_device.add_inlink(nullptr));
+    auto switch_device = std::make_shared<sim::Switch>();
+    ASSERT_FALSE(switch_device->add_inlink(nullptr));
 }
 
 TEST_F(TestSwitch, test_add_incorrect_inlink) {
-    sim::Switch switch_device;
+    auto switch_device = std::make_shared<sim::Switch>();
     std::shared_ptr<sim::IRoutingDevice> null_device(nullptr);
     std::shared_ptr<LinkMock> link =
         std::make_shared<LinkMock>(null_device, null_device);
-    ASSERT_FALSE(switch_device.add_inlink(link));
+    ASSERT_FALSE(switch_device->add_inlink(link));
 }
 
 TEST_F(TestSwitch, nullptr_destination_device) {
@@ -52,10 +52,10 @@ TEST_F(TestSwitch, add_foreign_inlink) {
 }
 
 TEST_F(TestSwitch, test_no_senders) {
-    sim::Switch switch_device;
+    auto switch_device = std::make_shared<sim::Switch>();
     // TODO: replace with ASSERT_FALSE when process returns bool instead of
     // void
-    switch_device.process();
+    switch_device->process();
 }
 
 TEST_F(TestSwitch, test_no_packets_on_inlinks) {
