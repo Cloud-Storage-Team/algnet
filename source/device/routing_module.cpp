@@ -1,5 +1,7 @@
 #include "routing_module.hpp"
 
+#include <memory>
+
 #include "link.hpp"
 #include "logger/logger.hpp"
 
@@ -11,8 +13,10 @@ bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
         return false;
     }
     m_inlinks.insert(link);
-    m_next_inlink = LoopIterator<std::set<std::shared_ptr<ILink>>::iterator>(
-        m_inlinks.begin(), m_inlinks.end());
+    m_next_inlink =
+        LoopIterator<std::set<std::weak_ptr<ILink>,
+                              std::owner_less<std::weak_ptr<ILink>>>::iterator>(
+            m_inlinks.begin(), m_inlinks.end());
     return true;
 }
 
@@ -38,26 +42,27 @@ bool RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     return true;
 }
 
-std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
-    std::shared_ptr<IRoutingDevice> device) const {
+std::weak_ptr<ILink> RoutingModule::get_link_to_destination(
+    std::weak_ptr<IRoutingDevice> device) const {
     auto iterator = m_routing_table.find(device);
     if (iterator == m_routing_table.end()) {
-        return nullptr;
+        return std::weak_ptr<ILink>();
     }
 
     return (*iterator).second;
 }
 
-std::shared_ptr<ILink> RoutingModule::next_inlink() {
+std::weak_ptr<ILink> RoutingModule::next_inlink() {
     if (m_inlinks.empty()) {
         LOG_INFO("Inlinks storage is empty");
-        return nullptr;
+        return std::weak_ptr<ILink>();
     }
 
     return *m_next_inlink++;
 }
 
-std::set<std::shared_ptr<ILink>> RoutingModule::get_outlinks() const {
+std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
+RoutingModule::get_outlinks() const {
     return m_outlinks;
 }
 

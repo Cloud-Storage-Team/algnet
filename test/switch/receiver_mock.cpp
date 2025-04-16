@@ -1,5 +1,9 @@
 #include "receiver_mock.hpp"
 
+#include <memory>
+
+#include "link.hpp"
+
 namespace test {
 
 bool ReceiverMock::add_inlink(std::shared_ptr<sim::ILink> link) {
@@ -15,21 +19,20 @@ bool ReceiverMock::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     return false;
 }
 
-std::shared_ptr<sim::ILink> ReceiverMock::next_inlink() { return nullptr; }
+std::weak_ptr<sim::ILink> ReceiverMock::next_inlink() { return {}; }
 
-std::shared_ptr<sim::ILink> ReceiverMock::get_link_to_destination(
-    std::shared_ptr<IRoutingDevice> device) const {
-    return nullptr;
+std::weak_ptr<sim::ILink> ReceiverMock::get_link_to_destination(
+    std::weak_ptr<IRoutingDevice> device) const {
+    return {};
 }
 
-std::uint32_t ReceiverMock::process() {
-    return 1;
-}
+std::uint32_t ReceiverMock::process() { return 1; }
 sim::DeviceType ReceiverMock::get_type() const {
     return sim::DeviceType::RECEIVER;
 }
 
-std::set<std::shared_ptr<sim::ILink>> ReceiverMock::get_outlinks() const {
+std::set<std::weak_ptr<sim::ILink>, std::owner_less<std::weak_ptr<sim::ILink>>>
+ReceiverMock::get_outlinks() const {
     return {};
 }
 

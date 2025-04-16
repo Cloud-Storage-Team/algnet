@@ -77,15 +77,19 @@ static routing_table_t bfs(std::shared_ptr<IRoutingDevice>& start_device) {
             continue;
         }
         used.insert(device);
-        std::set<std::shared_ptr<ILink>> outlinks = device->get_outlinks();
-        for (std::shared_ptr<ILink> link : outlinks) {
-            auto next_hop = link->get_to();
-            auto curr_device = link->get_from();
+        auto outlinks = device->get_outlinks();
+        for (std::weak_ptr<ILink> link : outlinks) {
+            if (link.expired()) {
+                LOG_WARN("Found expired outlink");
+                continue;
+            }
+            auto next_hop = link.lock()->get_to();
+            auto curr_device = link.lock()->get_from();
             if (used.contains(next_hop)) {
                 continue;
             }
             if (curr_device == start_device) {
-                routing_table[next_hop] = link;
+                routing_table[next_hop] = link.lock();
             } else if (!routing_table.contains(next_hop)) {
                 routing_table[next_hop] = routing_table[curr_device];
             }

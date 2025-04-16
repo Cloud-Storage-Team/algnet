@@ -50,10 +50,10 @@ bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     return m_router->update_routing_table(dest, link);
 }
 
-std::shared_ptr<ILink> Switch::next_inlink() { return m_router->next_inlink(); }
+std::weak_ptr<ILink> Switch::next_inlink() { return m_router->next_inlink(); }
 
-std::shared_ptr<ILink> Switch::get_link_to_destination(
-    std::shared_ptr<IRoutingDevice> dest) const {
+std::weak_ptr<ILink> Switch::get_link_to_destination(
+    std::weak_ptr<IRoutingDevice> dest) const {
     return m_router->get_link_to_destination(dest);
 }
 
@@ -61,14 +61,14 @@ DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
 
 Time Switch::process() {
     Time total_processing_time = 1;
-    std::shared_ptr<ILink> link = next_inlink();
+    std::weak_ptr<ILink> link = next_inlink();
 
-    if (link == nullptr) {
+    if (link.expired()) {
         LOG_WARN("No next inlink");
         return total_processing_time;
     }
 
-    std::optional<Packet> optional_packet = link->get_packet();
+    std::optional<Packet> optional_packet = link.lock()->get_packet();
     if (!optional_packet.has_value()) {
         LOG_WARN("No packet in link");
         return total_processing_time;
@@ -80,22 +80,24 @@ Time Switch::process() {
     }
     std::shared_ptr<IRoutingDevice> destination = packet.get_destination();
 
-    std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
+    std::weak_ptr<ILink> next_link = get_link_to_destination(destination);
 
-    if (next_link == nullptr) {
+    if (next_link.expired()) {
         LOG_WARN("No link corresponds to destination device");
         return total_processing_time;
     }
-    
+
     // TODO: add some switch ID for easier packet path tracing
-    LOG_INFO("Processing packet from link on switch. Packet: " + packet.to_string());
+    LOG_INFO("Processing packet from link on switch. Packet: " +
+             packet.to_string());
 
     // TODO: increase total_processing_time correctly
-    next_link->schedule_arrival(packet);
+    next_link.lock()->schedule_arrival(packet);
     return total_processing_time;
 }
 
-std::set<std::shared_ptr<ILink>> Switch::get_outlinks() const {
+std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
+Switch::get_outlinks() const {
     return m_router->get_outlinks();
 }
 

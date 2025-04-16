@@ -1,5 +1,7 @@
 #include "receiver.hpp"
 
+#include <memory>
+
 #include "event.hpp"
 #include "link.hpp"
 #include "logger/logger.hpp"
@@ -53,27 +55,27 @@ bool Receiver::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     return m_router->update_routing_table(dest, link);
 }
 
-std::shared_ptr<ILink> Receiver::next_inlink() {
+std::weak_ptr<ILink> Receiver::next_inlink() {
     return m_router->next_inlink();
 };
 
-std::shared_ptr<ILink> Receiver::get_link_to_destination(
-    std::shared_ptr<IRoutingDevice> dest) const {
+std::weak_ptr<ILink> Receiver::get_link_to_destination(
+    std::weak_ptr<IRoutingDevice> dest) const {
     return m_router->get_link_to_destination(dest);
 };
 
 DeviceType Receiver::get_type() const { return DeviceType::RECEIVER; }
 
 Time Receiver::process() {
-    std::shared_ptr<ILink> current_inlink = m_router->next_inlink();
+    std::weak_ptr<ILink> current_inlink = m_router->next_inlink();
     Time total_processing_time = 1;
 
-    if (current_inlink == nullptr) {
+    if (current_inlink.expired()) {
         LOG_WARN("No available inlinks for device");
         return total_processing_time;
     }
 
-    std::optional<Packet> opt_data_packet = current_inlink->get_packet();
+    std::optional<Packet> opt_data_packet = current_inlink.lock()->get_packet();
     if (!opt_data_packet.has_value()) {
         LOG_WARN("No available packets from inlink for device");
         return total_processing_time;
@@ -98,13 +100,13 @@ Time Receiver::process() {
         LOG_WARN(
             "Packet arrived to Receiver that is not its destination; using "
             "routing table to send it further");
-        std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
+        std::weak_ptr<ILink> next_link = get_link_to_destination(destination);
 
-        if (next_link == nullptr) {
+        if (next_link.expired()) {
             LOG_WARN("No link corresponds to destination device");
             return total_processing_time;
         }
-        next_link->schedule_arrival(data_packet);
+        next_link.lock()->schedule_arrival(data_packet);
         // TODO: think about redirecting time
     }
 
@@ -121,9 +123,9 @@ Time Receiver::send_ack(Packet data_packet) {
         return processing_time;
     }
 
-    std::shared_ptr<ILink> link_to_dest =
+    std::weak_ptr<ILink> link_to_dest =
         m_router->get_link_to_destination(destination);
-    if (link_to_dest == nullptr) {
+    if (link_to_dest.expired()) {
         LOG_ERROR("Link to send ack does not exist");
         return processing_time;
     }
@@ -132,11 +134,12 @@ Time Receiver::send_ack(Packet data_packet) {
     LOG_INFO("Sent ack after processing packet on receiver. Data packet: " +
              data_packet.to_string() + ". Ack packet: " + ack.to_string());
 
-    link_to_dest->schedule_arrival(ack);
+    link_to_dest.lock()->schedule_arrival(ack);
     return processing_time;
 }
 
-std::set<std::shared_ptr<ILink>> Receiver::get_outlinks() const {
+std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
+Receiver::get_outlinks() const {
     return m_router->get_outlinks();
 }
 
