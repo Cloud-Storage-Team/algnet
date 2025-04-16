@@ -23,12 +23,12 @@ public:
     void schedule_arrival(sim::Packet packet) final;
     void process_arrival(sim::Packet packet) final;
     std::optional<sim::Packet> get_packet() final;
-    std::shared_ptr<sim::IRoutingDevice> get_from() const final;
-    std::shared_ptr<sim::IRoutingDevice> get_to() const final;
+    std::weak_ptr<sim::IRoutingDevice> get_from() const final;
+    std::weak_ptr<sim::IRoutingDevice> get_to() const final;
 
 private:
-    std::shared_ptr<sim::IRoutingDevice> src;
-    std::shared_ptr<sim::IRoutingDevice> dst;
+    std::weak_ptr<sim::IRoutingDevice> src;
+    std::weak_ptr<sim::IRoutingDevice> dst;
     sim::Packet packet;
 };
 

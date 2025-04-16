@@ -15,8 +15,15 @@ bool Sender::add_inlink(std::shared_ptr<ILink> link) {
         LOG_WARN("Passed link is null");
         return false;
     }
-
-    if (this != link->get_to().get()) {
+    if (link->get_from().expired()) {
+        LOG_WARN("Link pointer to src device has expired");
+        return false;
+    }
+    if (link->get_to().expired()) {
+        LOG_WARN("Link pointer to dst device has expired");
+        return false;
+    }
+    if (this != link->get_to().lock().get()) {
         LOG_WARN(
             "Link destination device is incorrect (expected current device)");
         return false;
@@ -29,8 +36,15 @@ bool Sender::add_outlink(std::shared_ptr<ILink> link) {
         LOG_WARN("Add nullptr outlink to sender device");
         return false;
     }
-
-    if (this != link->get_from().get()) {
+    if (link->get_from().expired()) {
+        LOG_WARN("Link pointer to src device has expired");
+        return false;
+    }
+    if (link->get_to().expired()) {
+        LOG_WARN("Link pointer to dst device has expired");
+        return false;
+    }
+    if (this != link->get_from().lock().get()) {
         LOG_WARN("Outlink source is not our device");
         return false;
     }
@@ -44,13 +58,19 @@ bool Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
         LOG_WARN("Passed link is null");
         return false;
     }
-
     if (dest == nullptr) {
         LOG_WARN("Passed destination is null");
         return false;
     }
-
-    if (this != link->get_from().get()) {
+    if (link->get_from().expired()) {
+        LOG_WARN("Link pointer to src device has expired");
+        return false;
+    }
+    if (link->get_to().expired()) {
+        LOG_WARN("Link pointer to dst device has expired");
+        return false;
+    }
+    if (this != link->get_from().lock().get()) {
         LOG_WARN("Link source device is incorrect (expected current device)");
         return false;
     }
@@ -101,7 +121,7 @@ Time Sender::process() {
 
     auto destination = packet.get_destination();
     if (destination.expired()) {
-        LOG_WARN("Destination device has been deleted");
+        LOG_WARN("Destination device pointer is expired");
         return total_processing_time;
     }
     if (packet.type == PacketType::ACK && destination.lock().get() == this) {

@@ -29,8 +29,8 @@ public:
     virtual void process_arrival(Packet packet) = 0;
 
     virtual std::optional<Packet> get_packet() = 0;
-    virtual std::shared_ptr<IRoutingDevice> get_from() const = 0;
-    virtual std::shared_ptr<IRoutingDevice> get_to() const = 0;
+    virtual std::weak_ptr<IRoutingDevice> get_from() const = 0;
+    virtual std::weak_ptr<IRoutingDevice> get_to() const = 0;
 };
 
 class Link : public ILink, public std::enable_shared_from_this<Link> {
@@ -53,8 +53,8 @@ public:
 
     std::optional<Packet> get_packet() final;
 
-    std::shared_ptr<IRoutingDevice> get_from() const final;
-    std::shared_ptr<IRoutingDevice> get_to() const final;
+    std::weak_ptr<IRoutingDevice> get_from() const final;
+    std::weak_ptr<IRoutingDevice> get_to() const final;
 
 private:
     Time get_transmission_time(const Packet& packet) const;

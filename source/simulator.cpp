@@ -83,8 +83,8 @@ static routing_table_t bfs(std::shared_ptr<IRoutingDevice>& start_device) {
                 LOG_WARN("Found expired outlink");
                 continue;
             }
-            auto next_hop = link.lock()->get_to();
-            auto curr_device = link.lock()->get_from();
+            auto next_hop = link.lock()->get_to().lock();
+            auto curr_device = link.lock()->get_from().lock();
             if (used.contains(next_hop)) {
                 continue;
             }

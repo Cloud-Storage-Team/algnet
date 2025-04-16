@@ -14,7 +14,15 @@ bool Switch::add_inlink(std::shared_ptr<ILink> link) {
         LOG_WARN("Add nullptr inlink to switch device");
         return false;
     }
-    if (link->get_to().get() != this) {
+    if (link->get_from().expired()) {
+        LOG_WARN("Link pointer to src device has expired");
+        return false;
+    }
+    if (link->get_to().expired()) {
+        LOG_WARN("Link pointer to dst device has expired");
+        return false;
+    }
+    if (link->get_to().lock().get() != this) {
         LOG_WARN("Inlink destination is not our device");
         return false;
     }
@@ -26,7 +34,15 @@ bool Switch::add_outlink(std::shared_ptr<ILink> link) {
         LOG_WARN("Add nullptr outlink to switch device");
         return false;
     }
-    if (link->get_from().get() != this) {
+    if (link->get_from().expired()) {
+        LOG_WARN("Link pointer to src device has expired");
+        return false;
+    }
+    if (link->get_to().expired()) {
+        LOG_WARN("Link pointer to dst device has expired");
+        return false;
+    }
+    if (link->get_from().lock().get() != this) {
         LOG_WARN("Outlink source is not our device");
         return false;
     }
@@ -43,7 +59,15 @@ bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
         LOG_WARN("Link does not exist");
         return false;
     }
-    if (link->get_from().get() != this) {
+    if (link->get_from().expired()) {
+        LOG_WARN("Link pointer to src device has expired");
+        return false;
+    }
+    if (link->get_to().expired()) {
+        LOG_WARN("Link pointer to dst device has expired");
+        return false;
+    }
+    if (link->get_from().lock().get() != this) {
         LOG_WARN("Link source is not our device");
         return false;
     }
@@ -80,7 +104,7 @@ Time Switch::process() {
     }
     std::weak_ptr<IRoutingDevice> destination = packet.get_destination();
     if (destination.expired()) {
-        LOG_WARN("Destination device has been deleted");
+        LOG_WARN("Destination device pointer is expired");
         return total_processing_time;
     }
 
