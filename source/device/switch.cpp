@@ -4,22 +4,14 @@
 
 #include "link.hpp"
 #include "logger/logger.hpp"
+#include "utils/validation.hpp"
 
 namespace sim {
 
 Switch::Switch() : m_router(std::make_unique<RoutingModule>()) {}
 
 bool Switch::add_inlink(std::shared_ptr<ILink> link) {
-    if (link == nullptr) {
-        LOG_WARN("Add nullptr inlink to switch device");
-        return false;
-    }
-    if (link->get_from().expired()) {
-        LOG_WARN("Link pointer to src device has expired");
-        return false;
-    }
-    if (link->get_to().expired()) {
-        LOG_WARN("Link pointer to dst device has expired");
+    if (!is_valid_link(link)) {
         return false;
     }
     if (link->get_to().lock().get() != this) {
@@ -30,16 +22,7 @@ bool Switch::add_inlink(std::shared_ptr<ILink> link) {
 }
 
 bool Switch::add_outlink(std::shared_ptr<ILink> link) {
-    if (link == nullptr) {
-        LOG_WARN("Add nullptr outlink to switch device");
-        return false;
-    }
-    if (link->get_from().expired()) {
-        LOG_WARN("Link pointer to src device has expired");
-        return false;
-    }
-    if (link->get_to().expired()) {
-        LOG_WARN("Link pointer to dst device has expired");
+    if (!is_valid_link(link)) {
         return false;
     }
     if (link->get_from().lock().get() != this) {
@@ -55,16 +38,7 @@ bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
         LOG_WARN("Destination device does not exist");
         return false;
     }
-    if (link == nullptr) {
-        LOG_WARN("Link does not exist");
-        return false;
-    }
-    if (link->get_from().expired()) {
-        LOG_WARN("Link pointer to src device has expired");
-        return false;
-    }
-    if (link->get_to().expired()) {
-        LOG_WARN("Link pointer to dst device has expired");
+    if (!is_valid_link(link)) {
         return false;
     }
     if (link->get_from().lock().get() != this) {

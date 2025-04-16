@@ -5,22 +5,14 @@
 #include "event.hpp"
 #include "link.hpp"
 #include "logger/logger.hpp"
+#include "utils/validation.hpp"
 
 namespace sim {
 
 Sender::Sender() : m_router(std::make_unique<RoutingModule>()) {}
 
 bool Sender::add_inlink(std::shared_ptr<ILink> link) {
-    if (link == nullptr) {
-        LOG_WARN("Passed link is null");
-        return false;
-    }
-    if (link->get_from().expired()) {
-        LOG_WARN("Link pointer to src device has expired");
-        return false;
-    }
-    if (link->get_to().expired()) {
-        LOG_WARN("Link pointer to dst device has expired");
+    if (!is_valid_link(link)) {
         return false;
     }
     if (this != link->get_to().lock().get()) {
@@ -32,16 +24,7 @@ bool Sender::add_inlink(std::shared_ptr<ILink> link) {
 }
 
 bool Sender::add_outlink(std::shared_ptr<ILink> link) {
-    if (link == nullptr) {
-        LOG_WARN("Add nullptr outlink to sender device");
-        return false;
-    }
-    if (link->get_from().expired()) {
-        LOG_WARN("Link pointer to src device has expired");
-        return false;
-    }
-    if (link->get_to().expired()) {
-        LOG_WARN("Link pointer to dst device has expired");
+    if (!is_valid_link(link)) {
         return false;
     }
     if (this != link->get_from().lock().get()) {
@@ -54,20 +37,11 @@ bool Sender::add_outlink(std::shared_ptr<ILink> link) {
 
 bool Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                   std::shared_ptr<ILink> link) {
-    if (link == nullptr) {
-        LOG_WARN("Passed link is null");
-        return false;
-    }
     if (dest == nullptr) {
         LOG_WARN("Passed destination is null");
         return false;
     }
-    if (link->get_from().expired()) {
-        LOG_WARN("Link pointer to src device has expired");
-        return false;
-    }
-    if (link->get_to().expired()) {
-        LOG_WARN("Link pointer to dst device has expired");
+    if (!is_valid_link(link)) {
         return false;
     }
     if (this != link->get_from().lock().get()) {

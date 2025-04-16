@@ -5,42 +5,26 @@
 #include "event.hpp"
 #include "link.hpp"
 #include "logger/logger.hpp"
+#include "utils/validation.hpp"
 
 namespace sim {
 
 Receiver::Receiver() : m_router(std::make_unique<RoutingModule>()) {}
 
 bool Receiver::add_inlink(std::shared_ptr<ILink> link) {
-    if (link == nullptr) {
-        LOG_WARN("Passed link is null");
-        return false;
-    }
-    if (link->get_from().expired()) {
-        LOG_WARN("Link pointer to src device has expired");
-        return false;
-    }
-    if (link->get_to().expired()) {
-        LOG_WARN("Link pointer to dst device has expired");
+    if (!is_valid_link(link)) {
         return false;
     }
     if (this != link->get_to().lock().get()) {
-        LOG_WARN("Link destination device is incorrect (expected current device)");
+        LOG_WARN(
+            "Link destination device is incorrect (expected current device)");
         return false;
     }
     return m_router->add_inlink(link);
 }
 
 bool Receiver::add_outlink(std::shared_ptr<ILink> link) {
-    if (link == nullptr) {
-        LOG_WARN("Add nullptr outlink to receiver device");
-        return false;
-    }
-    if (link->get_from().expired()) {
-        LOG_WARN("Link pointer to src device has expired");
-        return false;
-    }
-    if (link->get_to().expired()) {
-        LOG_WARN("Link pointer to dst device has expired");
+    if (!is_valid_link(link)) {
         return false;
     }
     if (this != link->get_from().lock().get()) {
@@ -52,20 +36,11 @@ bool Receiver::add_outlink(std::shared_ptr<ILink> link) {
 
 bool Receiver::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                     std::shared_ptr<ILink> link) {
-    if (link == nullptr) {
-        LOG_WARN("Passed link is null");
-        return false;
-    }
     if (dest == nullptr) {
         LOG_WARN("Passed destination is null");
         return false;
     }
-    if (link->get_from().expired()) {
-        LOG_WARN("Link pointer to src device has expired");
-        return false;
-    }
-    if (link->get_to().expired()) {
-        LOG_WARN("Link pointer to dst device has expired");
+    if (!is_valid_link(link)) {
         return false;
     }
     if (this != link->get_from().lock().get()) {

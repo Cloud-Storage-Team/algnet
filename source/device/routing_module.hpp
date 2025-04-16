@@ -1,7 +1,5 @@
 #pragma once
 
-#include <unordered_map>
-
 #include "device.hpp"
 #include "types.hpp"
 #include "utils/loop_iterator.hpp"
