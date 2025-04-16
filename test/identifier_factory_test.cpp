@@ -26,15 +26,15 @@ private:
 
 TEST_F(TestIdentifierFactory, TestUniqueness) {
     constexpr std::uint32_t ENTITIES_NUMBER = 10;
-    std::vector<std::unique_ptr<sim::Identifiable>> entities(ENTITIES_NUMBER);
+    std::vector<Entity> entities(ENTITIES_NUMBER);
 
     std::generate(entities.begin(), entities.end(),
-                  [] { return std::make_unique<Entity>(); });
+                  [] { return Entity(); });
 
     std::set<Id> ids;
     std::transform(entities.begin(), entities.end(),
                    std::inserter(ids, ids.begin()),
-                   [](auto& e) { return e->get_id(); });
+                   [](auto& e) { return e.get_id(); });
 
     ASSERT_EQ(ids.size(), ENTITIES_NUMBER);
 
