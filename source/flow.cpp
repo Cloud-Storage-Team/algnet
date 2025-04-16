@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "device/receiver.hpp"
+#include "logger/logger.hpp"
 #include "scheduler.hpp"
 
 namespace sim {
@@ -28,7 +29,11 @@ void Flow::generate_packet() {
     packet.type = sim::PacketType::DATA;
     packet.size = m_packet_size;
     packet.flow = this;
-    m_src->enqueue_packet(packet);
+    if (m_src.expired()) {
+        LOG_WARN("Failed to generate packet, source device has been deleted");
+        return;
+    }
+    m_src.lock()->enqueue_packet(packet);
 }
 
 void Flow::start(std::uint32_t time) { schedule_packet_generation(time); }
@@ -46,8 +51,8 @@ Time Flow::try_to_generate() {
     return m_delay_between_packets;
 }
 
-std::shared_ptr<ISender> Flow::get_sender() const { return m_src; }
+std::weak_ptr<ISender> Flow::get_sender() const { return m_src; }
 
-std::shared_ptr<IReceiver> Flow::get_receiver() const { return m_dest; }
+std::weak_ptr<IReceiver> Flow::get_receiver() const { return m_dest; }
 
 }  // namespace sim

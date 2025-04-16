@@ -100,7 +100,11 @@ Time Sender::process() {
              packet.to_string());
 
     auto destination = packet.get_destination();
-    if (packet.type == PacketType::ACK && destination.get() == this) {
+    if (destination.expired()) {
+        LOG_WARN("Destination device has been deleted");
+        return total_processing_time;
+    }
+    if (packet.type == PacketType::ACK && destination.lock().get() == this) {
         packet.flow->update();
     } else {
         LOG_WARN(

@@ -13,11 +13,11 @@ public:
     Time try_to_generate() final;
 
     void update() final;
-    std::shared_ptr<sim::ISender> get_sender() const final;
-    std::shared_ptr<sim::IReceiver> get_receiver() const final;
+    std::weak_ptr<sim::ISender> get_sender() const final;
+    std::weak_ptr<sim::IReceiver> get_receiver() const final;
 
 private:
-    std::shared_ptr<sim::IReceiver> m_receiver;
+    std::weak_ptr<sim::IReceiver> m_receiver;
 };
 
 }  // namespace test

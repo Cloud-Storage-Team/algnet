@@ -91,8 +91,12 @@ Time Receiver::process() {
     LOG_INFO("Processing packet from link on receiver. Packet: " +
              data_packet.to_string());
 
-    std::shared_ptr<IRoutingDevice> destination = data_packet.get_destination();
-    if (data_packet.type == DATA && destination.get() == this) {
+    std::weak_ptr<IRoutingDevice> destination = data_packet.get_destination();
+    if (destination.expired()) {
+        LOG_WARN("Destination device has been deleted");
+        return total_processing_time;
+    }
+    if (data_packet.type == DATA && destination.lock().get() == this) {
         // TODO: think about processing time
         // Not sure if we want to send ack before processing or after it
         total_processing_time += send_ack(data_packet);
@@ -118,7 +122,7 @@ Time Receiver::send_ack(Packet data_packet) {
     Packet ack = {PacketType::ACK, 1, data_packet.flow};
 
     auto destination = ack.get_destination();
-    if (destination == nullptr) {
+    if (destination.expired()) {
         LOG_ERROR("Ack destination does not exists");
         return processing_time;
     }

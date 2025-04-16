@@ -78,7 +78,11 @@ Time Switch::process() {
         LOG_WARN("No flow in packet");
         return total_processing_time;
     }
-    std::shared_ptr<IRoutingDevice> destination = packet.get_destination();
+    std::weak_ptr<IRoutingDevice> destination = packet.get_destination();
+    if (destination.expired()) {
+        LOG_WARN("Destination device has been deleted");
+        return total_processing_time;
+    }
 
     std::weak_ptr<ILink> next_link = get_link_to_destination(destination);
 

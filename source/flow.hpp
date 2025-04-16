@@ -17,8 +17,8 @@ public:
     // Update the internal state according to some congestion control algorithm
     // Call try_to_generate upon the update
     virtual void update() = 0;
-    virtual std::shared_ptr<ISender> get_sender() const = 0;
-    virtual std::shared_ptr<IReceiver> get_receiver() const = 0;
+    virtual std::weak_ptr<ISender> get_sender() const = 0;
+    virtual std::weak_ptr<IReceiver> get_receiver() const = 0;
 };
 
 class Flow : public IFlow, public std::enable_shared_from_this<Flow> {
@@ -41,15 +41,15 @@ public:
     void update() final;
     std::uint32_t get_updates_number() const;
 
-    std::shared_ptr<ISender> get_sender() const final;
-    std::shared_ptr<IReceiver> get_receiver() const final;
+    std::weak_ptr<ISender> get_sender() const final;
+    std::weak_ptr<IReceiver> get_receiver() const final;
 
 private:
     void schedule_packet_generation(Time time);
     void generate_packet();
 
-    std::shared_ptr<ISender> m_src;
-    std::shared_ptr<IReceiver> m_dest;
+    std::weak_ptr<ISender> m_src;
+    std::weak_ptr<IReceiver> m_dest;
     Size m_packet_size;
     Time m_delay_between_packets;
     std::uint32_t m_updates_number;
