@@ -23,6 +23,7 @@ private:
 
 class Identifiable {
 public:
+    virtual ~Identifiable() = default;
     virtual Id get_id() const = 0;
 };
 

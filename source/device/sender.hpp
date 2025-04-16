@@ -44,7 +44,7 @@ public:
 
     void enqueue_packet(Packet packet) final;
     
-    Id get_id() const;
+    Id get_id() const final;
 
 private:
     std::queue<Packet> m_flow_buffer;

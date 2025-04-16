@@ -57,7 +57,7 @@ public:
     std::shared_ptr<IRoutingDevice> get_from() const final;
     std::shared_ptr<IRoutingDevice> get_to() const final;
 
-    Id get_id() const;
+    Id get_id() const final;
 
 private:
     Time get_transmission_time(const Packet& packet) const;

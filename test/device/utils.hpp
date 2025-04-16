@@ -26,7 +26,7 @@ public:
     std::shared_ptr<sim::IRoutingDevice> get_from() const final;
     std::shared_ptr<sim::IRoutingDevice> get_to() const final;
 
-    Id get_id() const;
+    Id get_id() const final;
 
 private:
     std::shared_ptr<sim::IRoutingDevice> src;

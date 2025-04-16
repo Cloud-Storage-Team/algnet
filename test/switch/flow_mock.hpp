@@ -16,7 +16,7 @@ public:
     std::shared_ptr<sim::ISender> get_sender() const final;
     std::shared_ptr<sim::IReceiver> get_receiver() const final;
 
-    Id get_id() const;
+    Id get_id() const final;
 
 private:
     std::shared_ptr<sim::IReceiver> m_receiver;

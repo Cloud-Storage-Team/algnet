@@ -45,7 +45,7 @@ public:
     std::shared_ptr<ISender> get_sender() const final;
     std::shared_ptr<IReceiver> get_receiver() const final;
 
-    Id get_id() const;
+    Id get_id() const final;
 
 private:
     void schedule_packet_generation(Time time);

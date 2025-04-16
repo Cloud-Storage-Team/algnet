@@ -35,7 +35,7 @@ public:
     // The iterator over ingress buffers is stored in m_next_link.
     Time process() final;
     
-    Id get_id() const;
+    Id get_id() const final;
 
 private:
     std::unique_ptr<RoutingModule> m_router;
