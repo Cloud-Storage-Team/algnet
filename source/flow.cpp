@@ -15,7 +15,8 @@ Flow::Flow(std::shared_ptr<ISender> a_src, std::shared_ptr<IReceiver> a_dest,
       m_packet_size(a_packet_size),
       m_delay_between_packets(a_delay_between_packets),
       m_updates_number(0),
-      m_packets_to_send(a_packets_to_send) {}
+      m_packets_to_send(a_packets_to_send),
+      m_id(IdentifierFactory::get_instance().generate_id()) {}
 
 void Flow::schedule_packet_generation(Time time) {
     auto generate_event_ptr =
@@ -49,5 +50,7 @@ Time Flow::try_to_generate() {
 std::shared_ptr<ISender> Flow::get_sender() const { return m_src; }
 
 std::shared_ptr<IReceiver> Flow::get_receiver() const { return m_dest; }
+
+Id Flow::get_id() const { return m_id; }
 
 }  // namespace sim
