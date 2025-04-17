@@ -9,10 +9,10 @@ void FlowMock::start(std::uint32_t time) {}
 Time FlowMock::try_to_generate() { return 0; }
 
 void FlowMock::update() {}
-std::shared_ptr<sim::ISender> FlowMock::get_sender() const {
-    return nullptr;
+std::weak_ptr<sim::ISender> FlowMock::get_sender() const {
+    return {};
 }
-std::shared_ptr<sim::IReceiver> FlowMock::get_receiver() const {
+std::weak_ptr<sim::IReceiver> FlowMock::get_receiver() const {
     return m_receiver;
 }
 

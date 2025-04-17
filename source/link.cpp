@@ -1,5 +1,6 @@
 #include "link.hpp"
 
+#include "device/device.hpp"
 #include "event.hpp"
 #include "logger/logger.hpp"
 #include "scheduler.hpp"
@@ -70,22 +71,22 @@ std::optional<Packet> Link::get_packet() {
     return packet;
 };
 
-std::shared_ptr<IRoutingDevice> Link::get_from() const {
+std::weak_ptr<IRoutingDevice> Link::get_from() const {
     if (m_from.expired()) {
         LOG_WARN("Source device pointer is expired");
-        return nullptr;
+        return std::weak_ptr<IRoutingDevice>();
     }
 
-    return m_from.lock();
+    return m_from;
 };
 
-std::shared_ptr<IRoutingDevice> Link::get_to() const {
+std::weak_ptr<IRoutingDevice> Link::get_to() const {
     if (m_to.expired()) {
         LOG_WARN("Destination device pointer is expired");
-        return nullptr;
+        return std::weak_ptr<IRoutingDevice>();
     }
 
-    return m_to.lock();
+    return m_to;
 };
 
 Id Link::get_id() const { return m_id; }

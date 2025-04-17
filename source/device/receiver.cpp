@@ -1,9 +1,12 @@
 #include "receiver.hpp"
 
+#include <memory>
+
 #include "event.hpp"
 #include "link.hpp"
 #include "logger/logger.hpp"
 #include "utils/identifier_factory.hpp"
+#include "utils/validation.hpp"
 
 namespace sim {
 
@@ -12,25 +15,22 @@ Receiver::Receiver()
       m_id(IdentifierFactory::get_instance().generate_id()) {}
 
 bool Receiver::add_inlink(std::shared_ptr<ILink> link) {
-    if (link == nullptr) {
-        LOG_WARN("Passed link is null");
+    if (!is_valid_link(link)) {
         return false;
     }
-
-    if (this != link->get_to().get()) {
-        LOG_WARN("Link destination device is incorrect (expected current device)");
+    if (this != link->get_to().lock().get()) {
+        LOG_WARN(
+            "Link destination device is incorrect (expected current device)");
         return false;
     }
     return m_router->add_inlink(link);
 }
 
 bool Receiver::add_outlink(std::shared_ptr<ILink> link) {
-    if (link == nullptr) {
-        LOG_WARN("Add nullptr outlink to receiver device");
+    if (!is_valid_link(link)) {
         return false;
     }
-
-    if (this != link->get_from().get()) {
+    if (this != link->get_from().lock().get()) {
         LOG_WARN("Outlink source is not our device");
         return false;
     }
@@ -39,44 +39,41 @@ bool Receiver::add_outlink(std::shared_ptr<ILink> link) {
 
 bool Receiver::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                     std::shared_ptr<ILink> link) {
-    if (link == nullptr) {
-        LOG_WARN("Passed link is null");
-        return false;
-    }
-
     if (dest == nullptr) {
         LOG_WARN("Passed destination is null");
         return false;
     }
-
-    if (this != link->get_from().get()) {
+    if (!is_valid_link(link)) {
+        return false;
+    }
+    if (this != link->get_from().lock().get()) {
         LOG_WARN("Link source device is incorrect (expected current device)");
         return false;
     }
     return m_router->update_routing_table(dest, link);
 }
 
-std::shared_ptr<ILink> Receiver::next_inlink() {
+std::weak_ptr<ILink> Receiver::next_inlink() {
     return m_router->next_inlink();
 };
 
-std::shared_ptr<ILink> Receiver::get_link_to_destination(
-    std::shared_ptr<IRoutingDevice> dest) const {
+std::weak_ptr<ILink> Receiver::get_link_to_destination(
+    std::weak_ptr<IRoutingDevice> dest) const {
     return m_router->get_link_to_destination(dest);
 };
 
 DeviceType Receiver::get_type() const { return DeviceType::RECEIVER; }
 
 Time Receiver::process() {
-    std::shared_ptr<ILink> current_inlink = m_router->next_inlink();
+    std::weak_ptr<ILink> current_inlink = m_router->next_inlink();
     Time total_processing_time = 1;
 
-    if (current_inlink == nullptr) {
+    if (current_inlink.expired()) {
         LOG_WARN("No available inlinks for device");
         return total_processing_time;
     }
 
-    std::optional<Packet> opt_data_packet = current_inlink->get_packet();
+    std::optional<Packet> opt_data_packet = current_inlink.lock()->get_packet();
     if (!opt_data_packet.has_value()) {
         LOG_WARN("No available packets from inlink for device");
         return total_processing_time;
@@ -92,8 +89,12 @@ Time Receiver::process() {
     LOG_INFO("Processing packet from link on receiver. Packet: " +
              data_packet.to_string());
 
-    std::shared_ptr<IRoutingDevice> destination = data_packet.get_destination();
-    if (data_packet.type == DATA && destination.get() == this) {
+    std::weak_ptr<IRoutingDevice> destination = data_packet.get_destination();
+    if (destination.expired()) {
+        LOG_WARN("Destination device pointer is expired");
+        return total_processing_time;
+    }
+    if (data_packet.type == DATA && destination.lock().get() == this) {
         // TODO: think about processing time
         // Not sure if we want to send ack before processing or after it
         total_processing_time += send_ack(data_packet);
@@ -101,13 +102,13 @@ Time Receiver::process() {
         LOG_WARN(
             "Packet arrived to Receiver that is not its destination; using "
             "routing table to send it further");
-        std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
+        std::weak_ptr<ILink> next_link = get_link_to_destination(destination);
 
-        if (next_link == nullptr) {
+        if (next_link.expired()) {
             LOG_WARN("No link corresponds to destination device");
             return total_processing_time;
         }
-        next_link->schedule_arrival(data_packet);
+        next_link.lock()->schedule_arrival(data_packet);
         // TODO: think about redirecting time
     }
 
@@ -119,14 +120,14 @@ Time Receiver::send_ack(Packet data_packet) {
     Packet ack = {PacketType::ACK, 1, data_packet.flow};
 
     auto destination = ack.get_destination();
-    if (destination == nullptr) {
+    if (destination.expired()) {
         LOG_ERROR("Ack destination does not exists");
         return processing_time;
     }
 
-    std::shared_ptr<ILink> link_to_dest =
+    std::weak_ptr<ILink> link_to_dest =
         m_router->get_link_to_destination(destination);
-    if (link_to_dest == nullptr) {
+    if (link_to_dest.expired()) {
         LOG_ERROR("Link to send ack does not exist");
         return processing_time;
     }
@@ -135,11 +136,12 @@ Time Receiver::send_ack(Packet data_packet) {
     LOG_INFO("Sent ack after processing packet on receiver. Data packet: " +
              data_packet.to_string() + ". Ack packet: " + ack.to_string());
 
-    link_to_dest->schedule_arrival(ack);
+    link_to_dest.lock()->schedule_arrival(ack);
     return processing_time;
 }
 
-std::set<std::shared_ptr<ILink>> Receiver::get_outlinks() const {
+std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
+Receiver::get_outlinks() const {
     return m_router->get_outlinks();
 }
 

@@ -17,7 +17,7 @@ struct Packet {
 
     bool operator==(const Packet& packet) const;
     std::string to_string() const;
-    std::shared_ptr<IRoutingDevice> get_destination() const;
+    std::weak_ptr<IRoutingDevice> get_destination() const;
 
     PacketType type;
     Size size;
