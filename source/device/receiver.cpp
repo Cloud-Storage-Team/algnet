@@ -5,11 +5,14 @@
 #include "event.hpp"
 #include "link.hpp"
 #include "logger/logger.hpp"
+#include "utils/identifier_factory.hpp"
 #include "utils/validation.hpp"
 
 namespace sim {
 
-Receiver::Receiver() : m_router(std::make_unique<RoutingModule>()) {}
+Receiver::Receiver()
+    : m_router(std::make_unique<RoutingModule>()),
+      m_id(IdentifierFactory::get_instance().generate_id()) {}
 
 bool Receiver::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
@@ -141,5 +144,7 @@ std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
 Receiver::get_outlinks() const {
     return m_router->get_outlinks();
 }
+
+Id Receiver::get_id() const { return m_id; }
 
 }  // namespace sim

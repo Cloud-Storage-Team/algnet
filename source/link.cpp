@@ -1,8 +1,10 @@
 #include "link.hpp"
+
 #include "device/device.hpp"
-#include "logger/logger.hpp"
 #include "event.hpp"
+#include "logger/logger.hpp"
 #include "scheduler.hpp"
+#include "utils/identifier_factory.hpp"
 
 namespace sim {
 
@@ -13,7 +15,8 @@ Link::Link(std::weak_ptr<IRoutingDevice> a_from,
       m_to(a_to),
       m_speed_mbps(a_speed_mbps),
       m_src_egress_delay(0),
-      m_transmission_delay(a_delay) {
+      m_transmission_delay(a_delay),
+      m_id(IdentifierFactory::get_instance().generate_id()) {
     if (a_from.expired() || a_to.expired()) {
         LOG_WARN("Passed link to device is expired");
     } else if (a_speed_mbps == 0) {
@@ -85,5 +88,7 @@ std::weak_ptr<IRoutingDevice> Link::get_to() const {
 
     return m_to;
 };
+
+Id Link::get_id() const { return m_id; }
 
 }  // namespace sim

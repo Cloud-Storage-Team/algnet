@@ -3,12 +3,15 @@
 
 #include "packet.hpp"
 #include "routing_module.hpp"
+#include "utils/identifier_factory.hpp"
 
 namespace sim {
 
 struct Packet;
 
-class IReceiver : public IRoutingDevice, public IProcessingDevice {
+class IReceiver : public IRoutingDevice,
+                  public IProcessingDevice,
+                  public Identifiable {
 public:
     virtual ~IReceiver() = default;
 };
@@ -38,9 +41,12 @@ public:
     // The iterator over ingress buffers is stored in m_next_link.
     Time process() final;
 
+    Id get_id() const final;
+
 private:
     Time send_ack(Packet data_packet);
     std::unique_ptr<RoutingModule> m_router;
+    Id m_id;
 };
 
 }  // namespace sim

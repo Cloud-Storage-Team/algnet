@@ -36,4 +36,6 @@ ReceiverMock::get_outlinks() const {
     return {};
 }
 
+Id ReceiverMock::get_id() const { return 42; }
+
 }  // namespace test

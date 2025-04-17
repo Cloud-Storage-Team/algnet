@@ -26,3 +26,5 @@ std::optional<sim::Packet> LinkMock::get_packet() { return m_ingress_packet; }
 std::vector<sim::Packet> LinkMock::get_arrived_packets() const {
     return m_arrived_packets;
 }
+
+Id LinkMock::get_id() const { return 42; }

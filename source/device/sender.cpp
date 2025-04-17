@@ -9,7 +9,9 @@
 
 namespace sim {
 
-Sender::Sender() : m_router(std::make_unique<RoutingModule>()) {}
+Sender::Sender()
+    : m_router(std::make_unique<RoutingModule>()),
+      m_id(IdentifierFactory::get_instance().generate_id()) {}
 
 bool Sender::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
@@ -152,5 +154,7 @@ std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
 Sender::get_outlinks() const {
     return m_router->get_outlinks();
 }
+
+Id Sender::get_id() const { return m_id; }
 
 }  // namespace sim

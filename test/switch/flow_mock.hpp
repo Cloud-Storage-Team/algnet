@@ -16,6 +16,8 @@ public:
     std::weak_ptr<sim::ISender> get_sender() const final;
     std::weak_ptr<sim::IReceiver> get_receiver() const final;
 
+    Id get_id() const final;
+
 private:
     std::weak_ptr<sim::IReceiver> m_receiver;
 };

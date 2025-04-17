@@ -26,6 +26,8 @@ public:
     std::weak_ptr<sim::IRoutingDevice> get_from() const final;
     std::weak_ptr<sim::IRoutingDevice> get_to() const final;
 
+    Id get_id() const final;
+
 private:
     std::weak_ptr<sim::IRoutingDevice> src;
     std::weak_ptr<sim::IRoutingDevice> dst;

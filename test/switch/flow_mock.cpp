@@ -16,4 +16,6 @@ std::weak_ptr<sim::IReceiver> FlowMock::get_receiver() const {
     return m_receiver;
 }
 
+Id FlowMock::get_id() const { return 42; }
+
 }  // namespace test
