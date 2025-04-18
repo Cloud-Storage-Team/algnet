@@ -1,12 +1,13 @@
 #pragma once
 #include <cstdint>
+#include <memory>
 
 #include "receiver.hpp"
 #include "sender.hpp"
 
 namespace sim {
 
-class IFlow {
+class IFlow : public std::enable_shared_from_this<IFlow>{
 public:
     // Start at time
     virtual void start(std::uint32_t time) = 0;
@@ -25,13 +26,12 @@ public:
     virtual ~IFlow() = default;
 };
 
-class Flow : public IFlow {  // Fixed inheritance
+class Flow : public IFlow {
 public:
     Flow(ISender* a_src, IReceiver* a_dest, uint32_t a_packet_size);
-    void start(std::uint32_t time) override = 0;
-    bool try_to_generate(std::uint32_t packet_size) override = 0;
-    void update(std::uint32_t delay) override = 0;
-
+    void start(std::uint32_t time) override;
+    bool try_to_generate(std::uint32_t packet_size) override;
+    void update(std::uint32_t delay) override;
     ISender* get_sender() const noexcept override;
     IReceiver* get_receiver() const noexcept override;
 
