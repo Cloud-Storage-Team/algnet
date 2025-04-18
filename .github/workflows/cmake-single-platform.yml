@@ -18,9 +18,18 @@ jobs:
 
     - name: Set up Clang Format
       run: sudo apt-get install clang-format
-    
+
+    - name: Collect files for Clang
+      run:
+        files_for_clang="
+        main.cpp
+        $(
+          find source -type f -name "*.cpp" -o -name "*.hpp";
+          find test -type f -name "*.cpp" -o -name "*.hpp"
+        )"
     - name: Clang format
-      run: clang-format --dry-run -Werror source/*.hpp test/*.cpp main.cpp
+      run:
+        clang-format --dry-run -Werror $files_for_clang
   build:
     runs-on: ubuntu-latest
     steps:
@@ -47,7 +56,7 @@ jobs:
 
     - name: Build tests
       run: cmake --build build --config Debug
-    
+
     - name: Run tests
       working-directory: build
       run: ./test_simulator

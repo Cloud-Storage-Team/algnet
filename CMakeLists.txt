@@ -24,6 +24,7 @@ if(BUILD_TESTS)
 
     set(TEST_NAME "test_simulator")
     add_executable(${TEST_NAME} ${src} ${tests})
+    target_include_directories(${TEST_NAME} PUBLIC "source")
     target_link_libraries(${TEST_NAME} gtest gtest_main)
     enable_testing()
     add_test(NAME MyTests COMMAND ${TEST_NAME})

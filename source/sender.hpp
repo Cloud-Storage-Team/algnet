@@ -18,9 +18,9 @@ public:
     Sender() = default;
     ~Sender() = default;
 
-    void add_inlink(std::shared_ptr<Link> link) final;
+    void add_inlink(std::shared_ptr<ILink> link) final;
     void update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                              std::shared_ptr<Link> link) final;
+                              std::shared_ptr<ILink> link) final;
 
     DeviceType get_type() const final;
     // Process an ACK by removing it from the ingress buffer,
