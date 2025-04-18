@@ -20,20 +20,20 @@ public:
     // Call try_to_generate upon the update
     virtual void update(std::uint32_t delay) = 0;
 
-    virtual ISender* get_sender() const noexcept = 0;
-    virtual IReceiver* get_receiver() const noexcept = 0;
+    virtual std::shared_ptr<ISender> get_source() const noexcept = 0;
+    virtual std::shared_ptr<IReceiver> get_destination() const noexcept = 0;
 
     virtual ~IFlow() = default;
 };
 
 class Flow : public IFlow {
 public:
-    Flow(ISender* a_src, IReceiver* a_dest, uint32_t a_packet_size);
-    void start(std::uint32_t time) override;
-    bool try_to_generate(std::uint32_t packet_size) override;
-    void update(std::uint32_t delay) override;
-    ISender* get_sender() const noexcept override;
-    IReceiver* get_receiver() const noexcept override;
+    Flow(std::shared_ptr<ISender> a_src, std::shared_ptr<IReceiver> a_dest, uint32_t a_packet_size);
+    void start(std::uint32_t time) override = 0;
+    bool try_to_generate(std::uint32_t packet_size) override = 0;
+    void update(std::uint32_t delay) override = 0;
+    std::shared_ptr<ISender> get_source() const noexcept override;
+    std::shared_ptr<IReceiver> get_destination() const noexcept override;
 
     ~Flow() override = default;
 
@@ -42,8 +42,8 @@ protected:
     void generate_packet();
 
 private:
-    ISender* m_src;
-    IReceiver* m_dest;
+    std::weak_ptr<ISender> m_src;
+    std::weak_ptr<IReceiver> m_dest;
     std::uint32_t m_packet_size;
 };
 

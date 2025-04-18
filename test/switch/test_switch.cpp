@@ -85,8 +85,8 @@ TEST_F(TestSwitch, test_no_packets_on_inlinks) {
 TEST_F(TestSwitch, test_no_destination_route) {
     auto switch_device = std::make_shared<sim::Switch>();
     auto receiver = std::make_shared<ReceiverMock>();
-    FlowMock flow(receiver);
-    sim::Packet packet(sim::PacketType::DATA, 0, &flow);
+    auto flow = std::make_shared<FlowMock>(receiver);
+    sim::Packet packet(sim::PacketType::DATA, 0, flow);
 
     std::shared_ptr<sim::IRoutingDevice> null_device(nullptr);
     std::shared_ptr<LinkMock> switch_inlink =
@@ -106,7 +106,7 @@ TEST_F(TestSwitch, test_no_destination_route) {
 }
 
 static bool compare_packets(const sim::Packet& p1, const sim::Packet& p2) {
-    return p1.flow < p2.flow;
+    return p1.flow.lock().get() < p2.flow.lock().get();
 }
 
 void test_senders(size_t senders_count) {
@@ -114,16 +114,16 @@ void test_senders(size_t senders_count) {
     auto switch_device = std::make_shared<sim::Switch>();
     std::shared_ptr<ReceiverMock> receiver = std::make_shared<ReceiverMock>();
     // create flows
-    std::vector<FlowMock> flows;
+    std::vector<std::shared_ptr<FlowMock>> flows;
     flows.reserve(senders_count);
     for (size_t i = 0; i < senders_count; i++) {
-        flows.push_back(FlowMock(receiver));
+        flows.push_back(std::make_shared<FlowMock>(receiver));
     }
 
     // create packets
     std::vector<sim::Packet> packets(senders_count);
     for (size_t i = 0; i < senders_count; i++) {
-        packets[i] = sim::Packet(sim::PacketType::DATA, i, &flows[i]);
+        packets[i] = sim::Packet(sim::PacketType::DATA, i, flows[i]);
     }
 
     // create links

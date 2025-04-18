@@ -69,11 +69,12 @@ void Switch::process() {
         return;
     }
     Packet packet = optional_packet.value();
-    if (packet.flow == nullptr) {
+    auto flow_ptr = packet.flow.lock();
+    if (!flow_ptr) {
         LOG_WARN("No flow in packet");
         return;
     }
-    std::shared_ptr<IReceiver> destination = packet.flow->get_destination();
+    std::shared_ptr<IReceiver> destination = flow_ptr->get_destination();
 
     std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
 

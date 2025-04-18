@@ -10,13 +10,13 @@ enum PacketType { ACK, DATA };
 
 struct Packet {
     Packet(PacketType a_type = PacketType::DATA, std::uint32_t a_size = 0,
-           IFlow* flow = nullptr);
+           std::weak_ptr<IFlow> a_flow = {});
 
     bool operator==(const Packet& packet) const;
 
     PacketType type;
     std::uint32_t size;
-    IFlow* flow;
+    std::weak_ptr<IFlow> flow;
 };
 
 }  // namespace sim
