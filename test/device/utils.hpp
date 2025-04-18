@@ -1,8 +1,8 @@
 #pragma once
 #include <gtest/gtest.h>
 
-#include "../../source/device.hpp"
-#include "../../source/link.hpp"
+#include "device/device.hpp"
+#include "link.hpp"
 
 namespace test {
     
@@ -25,6 +25,8 @@ public:
     std::optional<sim::Packet> get_packet() final;
     std::shared_ptr<sim::IRoutingDevice> get_from() const final;
     std::shared_ptr<sim::IRoutingDevice> get_to() const final;
+
+    Id get_id() const final;
 
 private:
     std::shared_ptr<sim::IRoutingDevice> src;

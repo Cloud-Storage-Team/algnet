@@ -1,5 +1,5 @@
 #pragma once
-#include "device.hpp"
+#include "device/device.hpp"
 #include "link.hpp"
 
 class LinkMock : public sim::ILink {
@@ -15,6 +15,8 @@ public:
 
     void set_ingress_packet(sim::Packet a_paket);
     std::vector<sim::Packet> get_arrived_packets() const;
+
+    Id get_id() const final;
 
 private:
     std::weak_ptr<sim::IRoutingDevice> m_from;

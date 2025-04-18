@@ -1,18 +1,21 @@
 #include "flow_mock.hpp"
 
 namespace test {
+
 FlowMock::FlowMock(std::shared_ptr<sim::IReceiver> m_receiver)
     : m_receiver(m_receiver) {}
 
 void FlowMock::start(std::uint32_t time) {}
-bool FlowMock::try_to_generate(std::uint32_t packet_size) { return false; }
+Time FlowMock::try_to_generate() { return 0; }
 
-void FlowMock::update(std::uint32_t delay) {}
-std::shared_ptr<sim::ISender> FlowMock::get_source() const noexcept { 
-    return nullptr; 
+void FlowMock::update() {}
+std::shared_ptr<sim::ISender> FlowMock::get_sender() const {
+    return nullptr;
 }
-std::shared_ptr<sim::IReceiver> FlowMock::get_destination() const noexcept { 
-    return m_receiver; 
+std::shared_ptr<sim::IReceiver> FlowMock::get_receiver() const {
+    return m_receiver;
 }
+
+Id FlowMock::get_id() const { return 42; }
 
 }  // namespace test

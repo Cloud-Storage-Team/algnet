@@ -1,7 +1,8 @@
-#include <spdlog/spdlog.h>
+#include "logger/logger.hpp"
 
 int main() {
-    spdlog::info("Hello, World!");
+    Logger::setupLogging();
+    Logger::logExample();
 
     return 0;
 }

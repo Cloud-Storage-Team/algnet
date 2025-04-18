@@ -5,6 +5,7 @@
 #include <queue>
 
 #include "packet.hpp"
+#include "utils/identifier_factory.hpp"
 
 namespace sim {
 
@@ -13,7 +14,7 @@ class RoutingModule;
 /**
  * Unidirectional link from the source to a_next
  */
-class ILink {
+class ILink : public Identifiable {
 public:
     virtual ~ILink() = default;
 
@@ -33,11 +34,11 @@ public:
     virtual std::shared_ptr<IRoutingDevice> get_to() const = 0;
 };
 
-class Link : public ILink {
+class Link : public ILink, public std::enable_shared_from_this<Link> {
 public:
     Link(std::weak_ptr<IRoutingDevice> a_from,
          std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_mbps = 1,
-         std::uint32_t a_delay = 0);
+         Time a_delay = 0);
     ~Link() = default;
 
     /**
@@ -49,21 +50,24 @@ public:
     /**
      * Removes packet from the source egress queue.
      */
-    virtual void process_arrival(Packet packet) final;
+    void process_arrival(Packet packet) final;
 
-    virtual std::optional<Packet> get_packet() final;
-    // TODO: discuss returning weak_ptrs instead of shared
-    virtual std::shared_ptr<IRoutingDevice> get_from() const final;
-    virtual std::shared_ptr<IRoutingDevice> get_to() const final;
+    std::optional<Packet> get_packet() final;
+
+    std::shared_ptr<IRoutingDevice> get_from() const final;
+    std::shared_ptr<IRoutingDevice> get_to() const final;
+
+    Id get_id() const final;
 
 private:
-    std::uint32_t get_transmission_time(const Packet& packet) const;
+    Time get_transmission_time(const Packet& packet) const;
 
     std::weak_ptr<IRoutingDevice> m_from;
     std::weak_ptr<IRoutingDevice> m_to;
     std::uint32_t m_speed_mbps;
-    std::uint32_t m_src_egress_delay;
-    std::uint32_t m_transmission_delay;
+    Time m_src_egress_delay;
+    Time m_transmission_delay;
+    Id m_id;
 
     // Queue at the ingress port of the m_next device
     std::queue<Packet> m_next_ingress;

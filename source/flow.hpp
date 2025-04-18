@@ -2,49 +2,63 @@
 #include <cstdint>
 #include <memory>
 
-#include "receiver.hpp"
-#include "sender.hpp"
+#include "device/receiver.hpp"
+#include "device/sender.hpp"
+#include "utils/identifier_factory.hpp"
 
 namespace sim {
 
-class IFlow : public std::enable_shared_from_this<IFlow>{
-public:
-    // Start at time
-    virtual void start(std::uint32_t time) = 0;
+class IReceiver;
+class ISender;
 
-    // Try to generate a new packet if the internal state allows to do so.
-    // Returns true if a generate_event was created and placed in scheduler
-    virtual bool try_to_generate(std::uint32_t packet_size) = 0;
+class IFlow : public Identifiable, public std::enable_shared_from_this<IFlow> {
+public:
+    virtual void start(Time time) = 0;
+    virtual Time try_to_generate() = 0;
 
     // Update the internal state according to some congestion control algorithm
     // Call try_to_generate upon the update
-    virtual void update(std::uint32_t delay) = 0;
-
-    virtual std::shared_ptr<ISender> get_source() const noexcept = 0;
-    virtual std::shared_ptr<IReceiver> get_destination() const noexcept = 0;
-
-    virtual ~IFlow() = default;
+    virtual void update() = 0;
+    virtual std::shared_ptr<ISender> get_sender() const = 0;
+    virtual std::shared_ptr<IReceiver> get_receiver() const = 0;
 };
 
 class Flow : public IFlow {
 public:
-    Flow(std::shared_ptr<ISender> a_src, std::shared_ptr<IReceiver> a_dest, uint32_t a_packet_size);
-    void start(std::uint32_t time) override = 0;
-    bool try_to_generate(std::uint32_t packet_size) override = 0;
-    void update(std::uint32_t delay) override = 0;
-    std::shared_ptr<ISender> get_source() const noexcept override;
-    std::shared_ptr<IReceiver> get_destination() const noexcept override;
+    Flow(std::shared_ptr<ISender> a_src, std::shared_ptr<IReceiver> a_dest,
+         Size a_packet_size, Time a_delay_between_packets,
+         std::uint32_t a_packets_to_send);
+    virtual ~Flow() = default;
 
-    ~Flow() override = default;
+    // Start at time
+    void start(Time time) final;
 
-protected:
-    void schedule_packet_generation(std::uint32_t time);
-    void generate_packet();
+    // Try to generate a new packet if the internal state allows to do so.
+    // by placing it into the flow buffer of the source node.
+    // Schedule the next generation event.
+    Time try_to_generate() final;
+
+    // Update the internal state according to some congestion control algorithm
+    // Call try_to_generate upon the update
+    void update() final;
+    std::uint32_t get_updates_number() const;
+
+    std::shared_ptr<ISender> get_sender() const final;
+    std::shared_ptr<IReceiver> get_receiver() const final;
+
+    Id get_id() const final;
 
 private:
+    void schedule_packet_generation(Time time);
+    void generate_packet();
+
     std::weak_ptr<ISender> m_src;
     std::weak_ptr<IReceiver> m_dest;
-    std::uint32_t m_packet_size;
+    Size m_packet_size;
+    Time m_delay_between_packets;
+    std::uint32_t m_updates_number;
+    std::uint32_t m_packets_to_send;
+    Id m_id;
 };
 
 }  // namespace sim
