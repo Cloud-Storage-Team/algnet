@@ -53,9 +53,9 @@ bool Receiver::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     return m_router->update_routing_table(dest, link);
 }
 
-std::shared_ptr<ILink> Receiver::next_inlink() {
-    return m_router->next_inlink();
-};
+// std::shared_ptr<ILink> Receiver::next_inlink() {
+//     return m_router->next_inlink();
+// };
 
 std::shared_ptr<ILink> Receiver::get_link_to_destination(
     std::shared_ptr<IRoutingDevice> dest) const {
@@ -64,16 +64,27 @@ std::shared_ptr<ILink> Receiver::get_link_to_destination(
 
 DeviceType Receiver::get_type() const { return DeviceType::RECEIVER; }
 
-Time Receiver::process() {
-    std::shared_ptr<ILink> current_inlink = m_router->next_inlink();
-    Time total_processing_time = 1;
 
-    if (current_inlink == nullptr) {
-        LOG_WARN("No available inlinks for device");
-        return total_processing_time;
+bool Receiver::put_packet(Packet packet) {
+    m_income_buffer.push(packet);
+    return true;
+};
+
+std::optional<Packet> Receiver::get_packet() {
+    if (m_income_buffer.empty()) {
+        return {};
     }
 
-    std::optional<Packet> opt_data_packet = current_inlink->get_packet();
+    Packet packet = m_income_buffer.front();
+    m_income_buffer.pop();
+
+    return packet;
+};
+
+Time Receiver::process() {
+    Time total_processing_time = 1;
+
+    std::optional<Packet> opt_data_packet = get_packet();
     if (!opt_data_packet.has_value()) {
         LOG_WARN("No available packets from inlink for device");
         return total_processing_time;

@@ -56,9 +56,9 @@ bool Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     return true;
 }
 
-// std::shared_ptr<ILink> Sender::next_inlink() {
-//     return m_router->next_inlink();
-// };
+std::shared_ptr<ILink> Sender::next_inlink() {
+    return m_router->next_inlink();
+};
 
 std::shared_ptr<ILink> Sender::get_link_to_destination(
     std::shared_ptr<IRoutingDevice> dest) const {
@@ -72,26 +72,16 @@ void Sender::enqueue_packet(Packet packet) {
     LOG_INFO("Packet {} arrived to sender", packet.to_string());
 }
 
-bool Sender::put_packet(Packet packet) {
-    m_income_buffer.push(packet);
-    return true;
-};
-
-std::optional<Packet> Sender::get_packet() {
-    if (m_income_buffer.empty()) {
-        return {};
-    }
-
-    Packet packet = m_income_buffer.top();
-    m_income_buffer.pop();
-
-    return packet;
-};
-
 Time Sender::process() {
+    std::shared_ptr<ILink> current_inlink = m_router->next_inlink();
     Time total_processing_time = 1;
 
-    std::optional<Packet> opt_packet = get_packet();
+    if (current_inlink == nullptr) {
+        LOG_WARN("No available inlinks for device");
+        return total_processing_time;
+    }
+
+    std::optional<Packet> opt_packet = current_inlink->get_packet();
     if (!opt_packet.has_value()) {
         LOG_WARN("No available packets from inlink for device");
         return total_processing_time;

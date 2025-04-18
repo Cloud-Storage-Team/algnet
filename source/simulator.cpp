@@ -78,6 +78,7 @@ static routing_table_t bfs(std::shared_ptr<IRoutingDevice>& start_device) {
         }
         used.insert(device);
         std::set<std::shared_ptr<ILink>> outlinks = device->get_outlinks();
+        // TODO: calculate all minimum cost paths instead of just one of them here
         for (std::shared_ptr<ILink> link : outlinks) {
             auto next_hop = link->get_to();
             auto curr_device = link->get_from();

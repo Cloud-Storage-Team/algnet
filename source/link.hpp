@@ -28,7 +28,7 @@ public:
      */
     virtual void process_arrival(Packet packet) = 0;
 
-    virtual std::optional<Packet> get_packet() = 0;
+    // virtual std::optional<Packet> get_packet() = 0;
     virtual std::shared_ptr<IRoutingDevice> get_from() const = 0;
     virtual std::shared_ptr<IRoutingDevice> get_to() const = 0;
 };
@@ -51,7 +51,7 @@ public:
      */
     void process_arrival(Packet packet) final;
 
-    std::optional<Packet> get_packet() final;
+    // std::optional<Packet> get_packet() final;
 
     std::shared_ptr<IRoutingDevice> get_from() const final;
     std::shared_ptr<IRoutingDevice> get_to() const final;
@@ -66,7 +66,7 @@ private:
     Time m_transmission_delay;
 
     // Queue at the ingress port of the m_next device
-    std::queue<Packet> m_next_ingress;
+    // std::queue<Packet> m_next_ingress;
 };
 
 }  // namespace sim

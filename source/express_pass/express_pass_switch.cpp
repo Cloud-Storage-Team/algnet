@@ -50,7 +50,7 @@ bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     return m_router->update_routing_table(dest, link);
 }
 
-// std::shared_ptr<ILink> Switch::next_inlink() { return m_router->next_inlink(); }
+std::shared_ptr<ILink> Switch::next_inlink() { return m_router->next_inlink(); }
 
 std::shared_ptr<ILink> Switch::get_link_to_destination(
     std::shared_ptr<IRoutingDevice> dest) const {
@@ -59,31 +59,16 @@ std::shared_ptr<ILink> Switch::get_link_to_destination(
 
 DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
 
-bool Switch::put_packet(Packet packet) {
-    if (m_income_buffer.size() == m_capacity) {
-        return false;
-    }
-    
-    m_income_buffer.push(packet);
-    return true;
-};
-
-std::optional<Packet> Switch::get_packet() {
-    if (m_income_buffer.empty()) {
-        return {};
-    }
-
-    Packet packet = m_income_buffer.front();
-    m_income_buffer.pop();
-
-    return packet;
-};
-
-
 Time Switch::process() {
     Time total_processing_time = 1;
+    std::shared_ptr<ILink> link = next_inlink();
 
-    std::optional<Packet> optional_packet = get_packet();
+    if (link == nullptr) {
+        LOG_WARN("No next inlink");
+        return total_processing_time;
+    }
+
+    std::optional<Packet> optional_packet = link->get_packet();
     if (!optional_packet.has_value()) {
         LOG_WARN("No packet in link");
         return total_processing_time;

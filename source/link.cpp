@@ -49,23 +49,28 @@ void Link::schedule_arrival(Packet packet) {
 };
 
 void Link::process_arrival(Packet packet) {
-    LOG_INFO("Packet arrived to link's egress queue. Packet: " + packet.to_string());
+    LOG_INFO("Packet arrived to device's buffer. Packet: " + packet.to_string());
 
     m_src_egress_delay -= get_transmission_time(packet);
-    m_next_ingress.push(packet);
-};
-
-std::optional<Packet> Link::get_packet() {
-    if (m_next_ingress.empty()) {
-        LOG_INFO("Ingress packet queue is empty");
-        return {};
+    
+    if (m_to.expired()) {
+        LOG_WARN("Destination device pointer is expired");
+        return;
     }
-
-    auto packet = m_next_ingress.front();
-    LOG_INFO("Taken packet from link. Packet: " + packet.to_string());
-    m_next_ingress.pop();
-    return packet;
+    m_to.lock()->put_packet(packet);
 };
+
+// std::optional<Packet> Link::get_packet() {
+//     if (m_next_ingress.empty()) {
+//         LOG_INFO("Ingress packet queue is empty");
+//         return {};
+//     }
+
+//     auto packet = m_next_ingress.front();
+//     LOG_INFO("Taken packet from link. Packet: " + packet.to_string());
+//     m_next_ingress.pop();
+//     return packet;
+// };
 
 std::shared_ptr<IRoutingDevice> Link::get_from() const {
     if (m_from.expired()) {

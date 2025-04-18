@@ -1,29 +1,22 @@
 #pragma once
 #include <queue>
 
-#include "device.hpp"
+#include "sender.hpp"
 
 namespace sim {
 
 struct Packet;
 
-class ISender : public IRoutingDevice, public IProcessingDevice {
+class ExpressPassSender : public ISender, public std::enable_shared_from_this<Sender> {
 public:
-    virtual ~ISender() = default;
-    virtual void enqueue_packet(Packet packet) = 0;
-    virtual Time send_data() = 0;
-};
-
-class Sender : public ISender, public std::enable_shared_from_this<Sender> {
-public:
-    Sender();
-    ~Sender() = default;
+    ExpressPassSender();
+    ~ExpressPassSender() = default;
 
     bool add_inlink(std::shared_ptr<ILink> link) final;
     bool add_outlink(std::shared_ptr<ILink> link) final;
     bool update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                               std::shared_ptr<ILink> link) final;
-    // std::shared_ptr<ILink> next_inlink() final;
+    std::shared_ptr<ILink> next_inlink() final;
     std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;
     std::set<std::shared_ptr<ILink>> get_outlinks() const final;
@@ -38,14 +31,11 @@ public:
     // The iterator over ingress buffers is stored in m_next_link.
     Time process() final;
     Time send_data() final;
-    bool put_packet(Packet packet) final;
-    std::optional<Packet> get_packet() final;
 
     void enqueue_packet(Packet packet) final;
 
 private:
     std::queue<Packet> m_flow_buffer;
-    std::queue<Packet> m_income_buffer;
     std::unique_ptr<IRoutingDevice> m_router;
 };
 

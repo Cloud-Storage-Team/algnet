@@ -48,14 +48,14 @@ std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
     return (*iterator).second;
 }
 
-std::shared_ptr<ILink> RoutingModule::next_inlink() {
-    if (m_inlinks.empty()) {
-        LOG_INFO("Inlinks storage is empty");
-        return nullptr;
-    }
+// std::shared_ptr<ILink> RoutingModule::next_inlink() {
+//     if (m_inlinks.empty()) {
+//         LOG_INFO("Inlinks storage is empty");
+//         return nullptr;
+//     }
 
-    return *m_next_inlink++;
-}
+//     return *m_next_inlink++;
+// }
 
 std::set<std::shared_ptr<ILink>> RoutingModule::get_outlinks() const {
     return m_outlinks;
