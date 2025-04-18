@@ -76,7 +76,8 @@ Time Switch::process() {
         return total_processing_time;
     }
     Packet packet = optional_packet.value();
-    if (packet.flow == nullptr) {
+    auto flow_ptr = packet.flow.lock();
+    if (!flow_ptr) {
         LOG_WARN("No flow in packet");
         return total_processing_time;
     }

@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <memory>
 
 #include "device/receiver.hpp"
 #include "device/sender.hpp"
@@ -10,7 +11,7 @@ namespace sim {
 class IReceiver;
 class ISender;
 
-class IFlow : public Identifiable {
+class IFlow : public Identifiable, public std::enable_shared_from_this<IFlow> {
 public:
     virtual void start(Time time) = 0;
     virtual Time try_to_generate() = 0;
@@ -22,7 +23,7 @@ public:
     virtual std::shared_ptr<IReceiver> get_receiver() const = 0;
 };
 
-class Flow : public IFlow, public std::enable_shared_from_this<Flow> {
+class Flow : public IFlow {
 public:
     Flow(std::shared_ptr<ISender> a_src, std::shared_ptr<IReceiver> a_dest,
          Size a_packet_size, Time a_delay_between_packets,
@@ -51,8 +52,8 @@ private:
     void schedule_packet_generation(Time time);
     void generate_packet();
 
-    std::shared_ptr<ISender> m_src;
-    std::shared_ptr<IReceiver> m_dest;
+    std::weak_ptr<ISender> m_src;
+    std::weak_ptr<IReceiver> m_dest;
     Size m_packet_size;
     Time m_delay_between_packets;
     std::uint32_t m_updates_number;

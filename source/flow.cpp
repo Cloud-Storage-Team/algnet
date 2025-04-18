@@ -1,7 +1,6 @@
-#include "flow.hpp"
-
 #include <memory>
 
+#include "flow.hpp"
 #include "device/receiver.hpp"
 #include "scheduler.hpp"
 
@@ -25,14 +24,13 @@ void Flow::schedule_packet_generation(Time time) {
 }
 
 void Flow::generate_packet() {
-    sim::Packet packet;
-    packet.type = sim::PacketType::DATA;
-    packet.size = m_packet_size;
-    packet.flow = this;
-    m_src->enqueue_packet(packet);
+    if (auto src = m_src.lock()) {
+        sim::Packet packet(PacketType::DATA, m_packet_size, weak_from_this());
+        src->enqueue_packet(packet);
+    }
 }
 
-void Flow::start(std::uint32_t time) { schedule_packet_generation(time); }
+void Flow::start(Time time) { schedule_packet_generation(time); }
 
 void Flow::update() { ++m_updates_number; }
 
@@ -47,9 +45,9 @@ Time Flow::try_to_generate() {
     return m_delay_between_packets;
 }
 
-std::shared_ptr<ISender> Flow::get_sender() const { return m_src; }
+std::shared_ptr<ISender> Flow::get_sender() const { return m_src.lock();  }
 
-std::shared_ptr<IReceiver> Flow::get_receiver() const { return m_dest; }
+std::shared_ptr<IReceiver> Flow::get_receiver() const { return m_dest.lock(); }
 
 Id Flow::get_id() const { return m_id; }
 

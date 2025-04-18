@@ -2,25 +2,30 @@
 #include <sstream>
 
 namespace sim {
-Packet::Packet(PacketType a_type, Size a_size, IFlow* a_flow)
+Packet::Packet(PacketType a_type, Size a_size, std::weak_ptr<IFlow> a_flow)
     : type(a_type), size(a_size), flow(a_flow) {}
 
 std::shared_ptr<IRoutingDevice> Packet::get_destination() const {
-    if (flow == nullptr) {
+    if (!flow.lock()) {
         return nullptr;
     }
     switch (type) {
         case ACK:
-            return flow->get_sender();
+            return flow.lock()->get_sender();
         case DATA:
-            return flow->get_receiver();
+            return flow.lock()->get_receiver();
         default:
             return nullptr;
     }
 };
 
 bool Packet::operator==(const Packet& packet) const {
-    return flow == packet.flow && size == packet.size && type == packet.type;
+    auto this_flow = flow.lock();
+    auto other_flow = packet.flow.lock();
+    
+    return this_flow == other_flow && 
+           size == packet.size && 
+           type == packet.type;
 }
 
 // TODO: think about some ID for packet (currently its impossible to distinguish packets)
@@ -35,7 +40,7 @@ std::string Packet::to_string() const {
     }
     
     oss << ", size: " << size;
-    oss << ", flow: " << (flow ? "set" : "null");
+    oss << ", flow: " << (flow.lock() ? "set" : "null");
     oss << "]";
     
     return oss.str();

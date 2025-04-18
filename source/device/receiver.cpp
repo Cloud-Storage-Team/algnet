@@ -83,7 +83,7 @@ Time Receiver::process() {
     }
 
     Packet data_packet = opt_data_packet.value();
-    if (data_packet.flow == nullptr) {
+    if (!data_packet.flow.lock()) {
         LOG_ERROR("Packet flow does not exist");
         return total_processing_time;
     }

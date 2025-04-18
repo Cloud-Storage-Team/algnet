@@ -90,7 +90,7 @@ Time Sender::process() {
     }
 
     Packet packet = opt_packet.value();
-    if (packet.flow == nullptr) {
+    if (!packet.flow.lock()) {
         LOG_ERROR("Packet flow does not exist");
         return total_processing_time;
     }
@@ -101,7 +101,7 @@ Time Sender::process() {
 
     auto destination = packet.get_destination();
     if (packet.type == PacketType::ACK && destination.get() == this) {
-        packet.flow->update();
+        packet.flow.lock()->update();
     } else {
         LOG_WARN(
             "Packet arrived to Sender that is not its destination; use routing "
