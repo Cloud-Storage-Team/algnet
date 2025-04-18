@@ -99,7 +99,7 @@ Time Sender::process() {
 
     auto destination = packet.get_destination();
     if (packet.type == PacketType::ACK && destination.get() == this) {
-        packet.flow->update();
+        packet.flow->update(packet, get_type());
     } else {
         LOG_WARN(
             "Packet arrived to Sender that is not its destination; use routing "
