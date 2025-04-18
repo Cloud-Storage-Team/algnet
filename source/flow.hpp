@@ -16,6 +16,7 @@ public:
     // Uses event Generate
     virtual Time create_new_data_packet() = 0;
     // Puts data on corresponding device sending buffer according to the internal state
+    // Can be scheduled by event or called on some condition
     virtual Time add_data_to_device() = 0;
 
     // Update the internal state according to some congestion control algorithm
