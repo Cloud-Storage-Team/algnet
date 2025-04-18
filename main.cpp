@@ -2,9 +2,12 @@
 #include <spdlog/spdlog.h>
 
 #include "source/simulator.hpp"
-#include "topology_parser/parser.hpp"
+#include "parser.hpp"
 
-int main(int argc, char** argv) {
+
+#include <yaml-cpp/yaml.h>
+
+int main(const int argc, char** argv) {
     spdlog::info("Hello, World!");
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " <config.yaml>\n";

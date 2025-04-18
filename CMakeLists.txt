@@ -15,9 +15,12 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/spdlog/include/
 )
 
+add_subdirectory(${CMAKE_SOURCE_DIR}/yaml-cpp/)
+
 if (BUILD_PROJECT)
     set(TARGET_NAME "${PROJECT_NAME}")
     add_executable(${TARGET_NAME} main.cpp ${src})
+    target_link_libraries(${TARGET_NAME} yaml-cpp)
     target_compile_options(${TARGET_NAME} PRIVATE -Wall -Werror -Wextra)
 endif()
 
