@@ -1,8 +1,12 @@
 #include "logger.hpp"
 
+#include <spdlog/common.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
+
+#include <source_location>
+#include <filesystem>
 
 std::shared_ptr<spdlog::logger> Logger::logger;
 
@@ -30,14 +34,30 @@ void Logger::logExample() {
     CRITICAL("This is a critical message.");
 }
 
-void Logger::TRACE(std::string msg) { SPDLOG_TRACE(msg); }
+static std::string parse_filename(std::string_view str) {
+    return std::filesystem::path(str).filename().string();
+}
 
-void Logger::DEBUG(std::string msg) { SPDLOG_DEBUG(msg); }
+void Logger::TRACE(std::string msg, std::source_location loc) {
+    SPDLOG_TRACE("[{}:{}] {}", parse_filename(loc.file_name()), loc.line(), msg);
+}
 
-void Logger::INFO(std::string msg) { SPDLOG_INFO(msg); }
+void Logger::DEBUG(std::string msg, std::source_location loc) {
+    SPDLOG_DEBUG("[{}:{}] {}", parse_filename(loc.file_name()), loc.line(), msg);
+}
 
-void Logger::WARN(std::string msg) { SPDLOG_WARN(msg); }
+void Logger::INFO(std::string msg, std::source_location loc) {
+    SPDLOG_INFO("[{}:{}] {}", parse_filename(loc.file_name()), loc.line(), msg);
+}
 
-void Logger::ERROR(std::string msg) { SPDLOG_ERROR(msg); }
+void Logger::WARN(std::string msg, std::source_location loc) {
+    SPDLOG_WARN("[{}:{}] {}", parse_filename(loc.file_name()), loc.line(), msg);
+}
 
-void Logger::CRITICAL(std::string msg) { SPDLOG_CRITICAL(msg); }
+void Logger::ERROR(std::string msg, std::source_location loc) {
+    SPDLOG_ERROR("[{}:{}] {}", parse_filename(loc.file_name()), loc.line(), msg);
+}
+
+void Logger::CRITICAL(std::string msg, std::source_location loc) {
+    SPDLOG_CRITICAL("[{}:{}] {}", parse_filename(loc.file_name()), loc.line(), msg);
+}
