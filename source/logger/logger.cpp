@@ -20,7 +20,7 @@ void Logger::setupLogging() {
 
     logger = std::make_shared<spdlog::logger>(
         "multi_sink", spdlog::sinks_init_list{console_sink, file_sink});
-    logger->set_pattern("[%H:%M:%S] [%^%l%$] [%s:%#] [%!] %v");
+    logger->set_pattern("[%H:%M:%S] [%^%l%$] [%!] %v");
     logger->set_level(spdlog::level::trace);
     spdlog::set_default_logger(logger);
 }
