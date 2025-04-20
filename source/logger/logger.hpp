@@ -2,22 +2,24 @@
 
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
+#include <memory>
 
-#define LOG_TRACE(...) SPDLOG_TRACE(__VA_ARGS__)
-#define LOG_DEBUG(...) SPDLOG_DEBUG(__VA_ARGS__)
-#define LOG_INFO(...) SPDLOG_INFO(__VA_ARGS__)
-#define LOG_WARN(...) SPDLOG_WARN(__VA_ARGS__)
-#define LOG_ERROR(...) SPDLOG_ERROR(__VA_ARGS__)
-#define LOG_CRITICAL(...) SPDLOG_CRITICAL(__VA_ARGS__)
-
+namespace spdlog {
+    class logger;
+} // namespace spdlog
 
 class Logger {
 public:
     static void logExample();
     static void setupLogging();
+
+    static void TRACE(std::string msg);
+    static void DEBUG(std::string msg);
+    static void INFO(std::string msg);
+    static void WARN(std::string msg);
+    static void ERROR(std::string msg);
+    static void CRITICAL(std::string msg);
+
 private:
     static std::shared_ptr<spdlog::logger> logger;
 };

@@ -18,7 +18,7 @@ public:
 
     value_ref_t operator*() const {
         if (m_begin == m_end) {
-            LOG_CRITICAL(
+            Logger::CRITICAL(
                 "Loop's begin iterator equals to end iterator while "
                 "dereferencing");
         }
@@ -28,7 +28,7 @@ public:
 
     LoopIterator& operator++() {
         if (m_begin == m_end) {
-            LOG_ERROR("Loop's begin iterator equals to end iterator");
+            Logger::ERROR("Loop's begin iterator equals to end iterator");
             return *this;
         }
 
@@ -40,7 +40,7 @@ public:
 
     LoopIterator operator++(int) {
         if (m_begin == m_end) {
-            LOG_ERROR("Loop's begin iterator equals to end iterator");
+            Logger::ERROR("Loop's begin iterator equals to end iterator");
             return *this;
         }
 
