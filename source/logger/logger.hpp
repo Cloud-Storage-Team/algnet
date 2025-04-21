@@ -11,10 +11,7 @@ class logger;
 
 class Logger {
 public:
-    static Logger& get_instance() {
-        static Logger instance;
-        return instance;
-    }
+    static Logger& get_instance();
 
     void logExample();
 
@@ -35,8 +32,6 @@ private:
     Logger();
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
-
-    void setupLogging();
 
     std::shared_ptr<spdlog::logger> logger;
 };

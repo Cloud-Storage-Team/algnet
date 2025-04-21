@@ -8,11 +8,12 @@
 #include <source_location>
 #include <filesystem>
 
-Logger::Logger() {
-    setupLogging();
+Logger& Logger::get_instance() {
+    static Logger instance;
+    return instance;
 }
 
-void Logger::setupLogging() {
+Logger::Logger() {
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     console_sink->set_level(spdlog::level::warn);
 
@@ -24,7 +25,7 @@ void Logger::setupLogging() {
         "multi_sink", spdlog::sinks_init_list{console_sink, file_sink});
     logger->set_pattern("[%H:%M:%S] [%^%l%$] [%!] %v");
     logger->set_level(spdlog::level::trace);
-    spdlog::set_default_logger(logger);
+    spdlog::set_default_logger(logger);   
 }
 
 void Logger::logExample() {
