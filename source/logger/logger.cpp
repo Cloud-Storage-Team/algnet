@@ -5,7 +5,6 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
-#include <memory>
 #include <source_location>
 #include <filesystem>
 
@@ -22,7 +21,7 @@ Logger::Logger() {
         "logs/simulator_logs.txt", true);
     file_sink->set_level(spdlog::level::trace);
 
-    logger = std::make_unique<spdlog::logger>(
+    logger = std::make_shared<spdlog::logger>(
         "multi_sink", spdlog::sinks_init_list{console_sink, file_sink});
     logger->set_pattern("[%H:%M:%S] [%^%l%$] [%!] %v");
     logger->set_level(spdlog::level::trace);
