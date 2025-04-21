@@ -11,22 +11,39 @@ class logger;
 
 class Logger {
 public:
-    static void logExample();
-    static void setupLogging();
+    static Logger& get_instance() {
+        static Logger instance;
+        return instance;
+    }
 
-    static void TRACE(std::string msg, std::source_location loc =
+    void logExample();
+
+    void TRACE(std::string msg, std::source_location loc =
                                            std::source_location::current());
-    static void DEBUG(std::string msg, std::source_location loc =
+    void DEBUG(std::string msg, std::source_location loc =
                                            std::source_location::current());
-    static void INFO(std::string msg, std::source_location loc =
+    void INFO(std::string msg, std::source_location loc =
                                           std::source_location::current());
-    static void WARN(std::string msg, std::source_location loc =
+    void WARN(std::string msg, std::source_location loc =
                                           std::source_location::current());
-    static void ERROR(std::string msg, std::source_location loc =
+    void ERROR(std::string msg, std::source_location loc =
                                            std::source_location::current());
-    static void CRITICAL(std::string msg, std::source_location loc =
+    void CRITICAL(std::string msg, std::source_location loc =
                                               std::source_location::current());
 
 private:
-    static std::shared_ptr<spdlog::logger> logger;
+    Logger();
+    Logger(const Logger&) = delete;
+    Logger& operator=(const Logger&) = delete;
+
+    void setupLogging();
+
+    std::shared_ptr<spdlog::logger> logger;
 };
+
+#define LOG_TRACE(...) Logger::get_instance().TRACE(__VA_ARGS__)
+#define LOG_DEBUG(...) Logger::get_instance().DEBUG(__VA_ARGS__)
+#define LOG_INFO(...) Logger::get_instance().INFO(__VA_ARGS__)
+#define LOG_WARN(...) Logger::get_instance().WARN(__VA_ARGS__)
+#define LOG_ERROR(...) Logger::get_instance().ERROR(__VA_ARGS__)
+#define LOG_CRITICAL(...) Logger::get_instance().CRITICAL(__VA_ARGS__)

@@ -7,7 +7,7 @@ namespace sim {
 
 bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
     if (m_inlinks.contains(link)) {
-        Logger::WARN("Unexpected already added inlink");
+        LOG_WARN("Unexpected already added inlink");
         return false;
     }
     m_inlinks.insert(link);
@@ -18,7 +18,7 @@ bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
 
 bool RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
     if (m_outlinks.contains(link)) {
-        Logger::WARN("Unexpected already added outlink");
+        LOG_WARN("Unexpected already added outlink");
         return false;
     }
     m_outlinks.insert(link);
@@ -28,7 +28,7 @@ bool RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
 bool RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                          std::shared_ptr<ILink> link) {
     if (link == nullptr) {
-        Logger::WARN("Unexpected nullptr link");
+        LOG_WARN("Unexpected nullptr link");
         return false;
     }
     auto link_dest = link->get_to();
@@ -50,7 +50,7 @@ std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
 
 std::shared_ptr<ILink> RoutingModule::next_inlink() {
     if (m_inlinks.empty()) {
-        Logger::INFO("Inlinks storage is empty");
+        LOG_INFO("Inlinks storage is empty");
         return nullptr;
     }
 

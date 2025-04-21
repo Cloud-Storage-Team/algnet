@@ -13,11 +13,11 @@ Switch::Switch()
 
 bool Switch::add_inlink(std::shared_ptr<ILink> link) {
     if (link == nullptr) {
-        Logger::WARN("Add nullptr inlink to switch device");
+        LOG_WARN("Add nullptr inlink to switch device");
         return false;
     }
     if (link->get_to().get() != this) {
-        Logger::WARN("Inlink destination is not our device");
+        LOG_WARN("Inlink destination is not our device");
         return false;
     }
     return m_router->add_inlink(link);
@@ -25,11 +25,11 @@ bool Switch::add_inlink(std::shared_ptr<ILink> link) {
 
 bool Switch::add_outlink(std::shared_ptr<ILink> link) {
     if (link == nullptr) {
-        Logger::WARN("Add nullptr outlink to switch device");
+        LOG_WARN("Add nullptr outlink to switch device");
         return false;
     }
     if (link->get_from().get() != this) {
-        Logger::WARN("Outlink source is not our device");
+        LOG_WARN("Outlink source is not our device");
         return false;
     }
     return m_router->add_outlink(link);
@@ -38,15 +38,15 @@ bool Switch::add_outlink(std::shared_ptr<ILink> link) {
 bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                   std::shared_ptr<ILink> link) {
     if (dest == nullptr) {
-        Logger::WARN("Destination device does not exist");
+        LOG_WARN("Destination device does not exist");
         return false;
     }
     if (link == nullptr) {
-        Logger::WARN("Link does not exist");
+        LOG_WARN("Link does not exist");
         return false;
     }
     if (link->get_from().get() != this) {
-        Logger::WARN("Link source is not our device");
+        LOG_WARN("Link source is not our device");
         return false;
     }
     return m_router->update_routing_table(dest, link);
@@ -66,18 +66,18 @@ Time Switch::process() {
     std::shared_ptr<ILink> link = next_inlink();
 
     if (link == nullptr) {
-        Logger::WARN("No next inlink");
+        LOG_WARN("No next inlink");
         return total_processing_time;
     }
 
     std::optional<Packet> optional_packet = link->get_packet();
     if (!optional_packet.has_value()) {
-        Logger::WARN("No packet in link");
+        LOG_WARN("No packet in link");
         return total_processing_time;
     }
     Packet packet = optional_packet.value();
     if (packet.flow == nullptr) {
-        Logger::WARN("No flow in packet");
+        LOG_WARN("No flow in packet");
         return total_processing_time;
     }
     std::shared_ptr<IRoutingDevice> destination = packet.get_destination();
@@ -85,12 +85,12 @@ Time Switch::process() {
     std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
 
     if (next_link == nullptr) {
-        Logger::WARN("No link corresponds to destination device");
+        LOG_WARN("No link corresponds to destination device");
         return total_processing_time;
     }
 
     // TODO: add some switch ID for easier packet path tracing
-    Logger::INFO("Processing packet from link on switch. Packet: " +
+    LOG_INFO("Processing packet from link on switch. Packet: " +
                  packet.to_string());
 
     // TODO: increase total_processing_time correctly

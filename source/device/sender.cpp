@@ -14,12 +14,12 @@ Sender::Sender()
 
 bool Sender::add_inlink(std::shared_ptr<ILink> link) {
     if (link == nullptr) {
-        Logger::WARN("Passed link is null");
+        LOG_WARN("Passed link is null");
         return false;
     }
 
     if (this != link->get_to().get()) {
-        Logger::WARN(
+        LOG_WARN(
             "Link destination device is incorrect (expected current device)");
         return false;
     }
@@ -28,12 +28,12 @@ bool Sender::add_inlink(std::shared_ptr<ILink> link) {
 
 bool Sender::add_outlink(std::shared_ptr<ILink> link) {
     if (link == nullptr) {
-        Logger::WARN("Add nullptr outlink to sender device");
+        LOG_WARN("Add nullptr outlink to sender device");
         return false;
     }
 
     if (this != link->get_from().get()) {
-        Logger::WARN("Outlink source is not our device");
+        LOG_WARN("Outlink source is not our device");
         return false;
     }
     m_router->add_outlink(link);
@@ -43,17 +43,17 @@ bool Sender::add_outlink(std::shared_ptr<ILink> link) {
 bool Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                   std::shared_ptr<ILink> link) {
     if (link == nullptr) {
-        Logger::WARN("Passed link is null");
+        LOG_WARN("Passed link is null");
         return false;
     }
 
     if (dest == nullptr) {
-        Logger::WARN("Passed destination is null");
+        LOG_WARN("Passed destination is null");
         return false;
     }
 
     if (this != link->get_from().get()) {
-        Logger::WARN(
+        LOG_WARN(
             "Link source device is incorrect (expected current device)");
         return false;
     }
@@ -74,7 +74,7 @@ DeviceType Sender::get_type() const { return DeviceType::SENDER; }
 
 void Sender::enqueue_packet(Packet packet) {
     m_flow_buffer.push(packet);
-    Logger::INFO(
+    LOG_INFO(
         fmt::format("Packet {} arrived to sender", packet.to_string()));
 }
 
@@ -83,37 +83,37 @@ Time Sender::process() {
     Time total_processing_time = 1;
 
     if (current_inlink == nullptr) {
-        Logger::WARN("No available inlinks for device");
+        LOG_WARN("No available inlinks for device");
         return total_processing_time;
     }
 
     std::optional<Packet> opt_packet = current_inlink->get_packet();
     if (!opt_packet.has_value()) {
-        Logger::WARN("No available packets from inlink for device");
+        LOG_WARN("No available packets from inlink for device");
         return total_processing_time;
     }
 
     Packet packet = opt_packet.value();
     if (packet.flow == nullptr) {
-        Logger::ERROR("Packet flow does not exist");
+        LOG_ERROR("Packet flow does not exist");
         return total_processing_time;
     }
 
     // TODO: add some sender ID for easier packet path tracing
-    Logger::INFO("Processing packet from link on sender. Packet: " +
+    LOG_INFO("Processing packet from link on sender. Packet: " +
                  packet.to_string());
 
     auto destination = packet.get_destination();
     if (packet.type == PacketType::ACK && destination.get() == this) {
         packet.flow->update();
     } else {
-        Logger::WARN(
+        LOG_WARN(
             "Packet arrived to Sender that is not its destination; use routing "
             "table to send it further");
         std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
 
         if (next_link == nullptr) {
-            Logger::WARN("No link corresponds to destination device");
+            LOG_WARN("No link corresponds to destination device");
             return total_processing_time;
         }
         next_link->schedule_arrival(packet);
@@ -128,25 +128,25 @@ Time Sender::send_data() {
 
     // TODO: wrap packet getting into some method (?)
     if (m_flow_buffer.empty()) {
-        Logger::WARN("No packets to send");
+        LOG_WARN("No packets to send");
         return total_processing_time;
     }
     Packet data_packet = m_flow_buffer.front();
     m_flow_buffer.pop();
 
     // TODO: add some sender ID for easier packet path tracing
-    Logger::INFO("Taken new data packet on sender. Packet: " +
+    LOG_INFO("Taken new data packet on sender. Packet: " +
                  data_packet.to_string());
 
     auto next_link =
         m_router->get_link_to_destination(data_packet.get_destination());
     if (next_link == nullptr) {
-        Logger::WARN("Link to send data packet does not exist");
+        LOG_WARN("Link to send data packet does not exist");
         return total_processing_time;
     }
 
     // TODO: add some sender ID for easier packet path tracing
-    Logger::INFO("Sent new data packet from sender. Data packet: " +
+    LOG_INFO("Sent new data packet from sender. Data packet: " +
                  data_packet.to_string());
 
     next_link->schedule_arrival(data_packet);

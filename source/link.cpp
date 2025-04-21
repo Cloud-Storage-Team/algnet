@@ -17,15 +17,15 @@ Link::Link(std::weak_ptr<IRoutingDevice> a_from,
       m_transmission_delay(a_delay),
       m_id(IdentifierFactory::get_instance().generate_id()) {
     if (a_from.expired() || a_to.expired()) {
-        Logger::WARN("Passed link to device is expired");
+        LOG_WARN("Passed link to device is expired");
     } else if (a_speed_mbps == 0) {
-        Logger::WARN("Passed zero link speed");
+        LOG_WARN("Passed zero link speed");
     }
 }
 
 Time Link::get_transmission_time(const Packet& packet) const {
     if (m_speed_mbps == 0) {
-        Logger::WARN("Passed zero link speed");
+        LOG_WARN("Passed zero link speed");
         return 0;
     }
     return (packet.size + m_speed_mbps - 1) / m_speed_mbps +
@@ -34,11 +34,11 @@ Time Link::get_transmission_time(const Packet& packet) const {
 
 void Link::schedule_arrival(Packet packet) {
     if (m_to.expired()) {
-        Logger::WARN("Destination device pointer is expired");
+        LOG_WARN("Destination device pointer is expired");
         return;
     }
 
-    Logger::INFO("Packet arrived to link's ingress queue. Packet: " + packet.to_string());
+    LOG_INFO("Packet arrived to link's ingress queue. Packet: " + packet.to_string());
 
     unsigned int transmission_time = get_transmission_time(packet);
     unsigned int total_delay = m_src_egress_delay + transmission_time;
@@ -52,7 +52,7 @@ void Link::schedule_arrival(Packet packet) {
 };
 
 void Link::process_arrival(Packet packet) {
-    Logger::INFO("Packet arrived to link's egress queue. Packet: " + packet.to_string());
+    LOG_INFO("Packet arrived to link's egress queue. Packet: " + packet.to_string());
 
     m_src_egress_delay -= get_transmission_time(packet);
     m_next_ingress.push(packet);
@@ -60,19 +60,19 @@ void Link::process_arrival(Packet packet) {
 
 std::optional<Packet> Link::get_packet() {
     if (m_next_ingress.empty()) {
-        Logger::INFO("Ingress packet queue is empty");
+        LOG_INFO("Ingress packet queue is empty");
         return {};
     }
 
     auto packet = m_next_ingress.front();
-    Logger::INFO("Taken packet from link. Packet: " + packet.to_string());
+    LOG_INFO("Taken packet from link. Packet: " + packet.to_string());
     m_next_ingress.pop();
     return packet;
 };
 
 std::shared_ptr<IRoutingDevice> Link::get_from() const {
     if (m_from.expired()) {
-        Logger::WARN("Source device pointer is expired");
+        LOG_WARN("Source device pointer is expired");
         return nullptr;
     }
 
@@ -81,7 +81,7 @@ std::shared_ptr<IRoutingDevice> Link::get_from() const {
 
 std::shared_ptr<IRoutingDevice> Link::get_to() const {
     if (m_to.expired()) {
-        Logger::WARN("Destination device pointer is expired");
+        LOG_WARN("Destination device pointer is expired");
         return nullptr;
     }
 
