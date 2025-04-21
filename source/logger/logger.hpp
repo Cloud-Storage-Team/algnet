@@ -32,8 +32,6 @@ private:
     Logger();
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
-
-    std::shared_ptr<spdlog::logger> logger;
 };
 
 #define LOG_TRACE(...) Logger::get_instance().TRACE(__VA_ARGS__)
