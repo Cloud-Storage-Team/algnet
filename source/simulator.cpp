@@ -11,7 +11,7 @@
 namespace sim {
 
 using routing_table_t =
-    std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<ILink>>;
+    std::unordered_map<std::shared_ptr<IRoutingDevice>, std::unordered_map<std::shared_ptr<ILink>, int>>;
 
 std::shared_ptr<Sender> Simulator::add_sender(std::string name) {
     if (m_senders.contains(name)) {
@@ -66,32 +66,43 @@ void Simulator::add_link(std::shared_ptr<IRoutingDevice> a_from,
 // returns start device routing table
 static routing_table_t bfs(std::shared_ptr<IRoutingDevice>& start_device) {
     routing_table_t routing_table;
+
     std::queue<std::shared_ptr<IRoutingDevice>> queue;
     std::set<std::shared_ptr<IRoutingDevice>> used;
-    queue.push(start_device);
-
-    while (!queue.empty()) {
-        std::shared_ptr<IRoutingDevice> device = queue.front();
-        queue.pop();
-        if (used.contains(device)) {
-            continue;
+    std::set<std::shared_ptr<IRoutingDevice>> wave_front;
+    wave_front.insert(start_device);
+    
+    while (!wave_front.empty()) {
+        for (auto device: wave_front) {
+            queue.push(device);
+            used.insert(device);
         }
-        used.insert(device);
-        std::set<std::shared_ptr<ILink>> outlinks = device->get_outlinks();
-        for (std::shared_ptr<ILink> link : outlinks) {
-            auto next_hop = link->get_to();
-            auto curr_device = link->get_from();
-            if (used.contains(next_hop)) {
-                continue;
+        wave_front.clear();
+
+        while (!queue.empty()) {
+            std::shared_ptr<IRoutingDevice> device = queue.front();
+            queue.pop();
+
+            std::set<std::shared_ptr<ILink>> outlinks = device->get_outlinks();
+            for (std::shared_ptr<ILink> link : outlinks) {
+                auto next_hop = link->get_to();
+                auto curr_device = link->get_from();
+                if (used.contains(next_hop)) {
+                    continue;
+                }
+                wave_front.insert(next_hop);
+
+                if (curr_device == start_device) {
+                    routing_table[next_hop][link] = 1;
+                } else {
+                    for (auto link_and_paths: routing_table[curr_device]) {
+                        routing_table[next_hop][link_and_paths.first] += link_and_paths.second;
+                    }
+                }
             }
-            if (curr_device == start_device) {
-                routing_table[next_hop] = link;
-            } else if (!routing_table.contains(next_hop)) {
-                routing_table[next_hop] = routing_table[curr_device];
-            }
-            queue.push(next_hop);
         }
     }
+
     return routing_table;
 };
 
@@ -114,8 +125,8 @@ std::vector<std::shared_ptr<IRoutingDevice>> Simulator::get_devices() const {
 void Simulator::recalculate_paths() {
     for (auto src_device : get_devices()) {
         routing_table_t routing_table = bfs(src_device);
-        for (auto [dest_device, link] : routing_table) {
-            src_device->update_routing_table(dest_device, link);
+        for (auto [dest_device, paths] : routing_table) {
+            src_device->update_routing_table(dest_device, paths);
         }
     }
 }

@@ -52,6 +52,25 @@ bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     return m_router->update_routing_table(dest, link);
 }
 
+bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
+                                  std::unordered_map<std::shared_ptr<ILink>, int> paths) {
+    if (dest == nullptr) {
+        LOG_WARN("Destination device does not exist");
+        return false;
+    }
+
+    if (paths.empty()) {
+        LOG_WARN("Link does not exist");
+        return false;
+    }
+
+    // if (link->get_from().get() != this) {
+    //     LOG_WARN("Link source is not our device");
+    //     return false;
+    // }
+    return m_router->update_routing_table(dest, paths);
+}
+
 std::shared_ptr<ILink> Switch::next_inlink() { return m_router->next_inlink(); }
 
 std::shared_ptr<ILink> Switch::get_link_to_destination(

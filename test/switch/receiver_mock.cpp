@@ -15,6 +15,11 @@ bool ReceiverMock::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     return false;
 }
 
+bool ReceiverMock::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
+    std::unordered_map<std::shared_ptr<sim::ILink>, int> paths) {
+    return false;
+}
+
 std::shared_ptr<sim::ILink> ReceiverMock::next_inlink() { return nullptr; }
 
 std::shared_ptr<sim::ILink> ReceiverMock::get_link_to_destination(

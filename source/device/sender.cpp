@@ -58,6 +58,26 @@ bool Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     return true;
 }
 
+bool Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
+                                  std::unordered_map<std::shared_ptr<ILink>, int> paths) {
+    if (paths.empty()) {
+        LOG_WARN("Passed link is null");
+        return false;
+    }
+
+    if (dest == nullptr) {
+        LOG_WARN("Passed destination is null");
+        return false;
+    }
+
+    // if (this != link->get_from().get()) {
+    //     LOG_WARN("Link source device is incorrect (expected current device)");
+    //     return false;
+    // }
+    m_router->update_routing_table(dest, paths);
+    return true;
+}
+
 std::shared_ptr<ILink> Sender::next_inlink() {
     return m_router->next_inlink();
 };
