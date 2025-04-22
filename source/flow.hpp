@@ -3,13 +3,14 @@
 
 #include "device/receiver.hpp"
 #include "device/sender.hpp"
+#include "utils/identifier_factory.hpp"
 
 namespace sim {
 
 class IReceiver;
 class ISender;
 
-class IFlow {
+class IFlow : public Identifiable {
 public:
     virtual void start(Time time) = 0;
     // Represents process of appearing data on Sender
@@ -47,6 +48,8 @@ public:
     std::shared_ptr<ISender> get_sender() const final;
     std::shared_ptr<IReceiver> get_receiver() const final;
 
+    Id get_id() const final;
+
 private:
     void schedule_packet_generation(Time time);
     Packet generate_packet();
@@ -59,6 +62,7 @@ private:
     std::uint32_t m_packets_to_send;
 
     std::queue<Packet> m_flow_data;
+    Id m_id;
 };
 
 }  // namespace sim

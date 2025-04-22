@@ -20,6 +20,8 @@ public:
 
     Time process() final;
     sim::DeviceType get_type() const final;
+
+    Id get_id() const final;
 };
 
 }  // namespace test

@@ -3,10 +3,13 @@
 #include "event.hpp"
 #include "link.hpp"
 #include "logger/logger.hpp"
+#include "utils/identifier_factory.hpp"
 
 namespace sim {
 
-Receiver::Receiver() : m_router(std::make_unique<RoutingModule>()) {}
+Receiver::Receiver()
+    : m_router(std::make_unique<RoutingModule>()),
+      m_id(IdentifierFactory::get_instance().generate_id()) {}
 
 bool Receiver::add_inlink(std::shared_ptr<ILink> link) {
     if (link == nullptr) {
@@ -139,5 +142,7 @@ Time Receiver::send_ack(Packet data_packet) {
 std::set<std::shared_ptr<ILink>> Receiver::get_outlinks() const {
     return m_router->get_outlinks();
 }
+
+Id Receiver::get_id() const { return m_id; }
 
 }  // namespace sim
