@@ -1,6 +1,7 @@
 #include "parser.hpp"
 
 #include <yaml-cpp/yaml.h>
+#include <spdlog/fmt/fmt.h>
 
 #include <memory>
 #include <stdexcept>
@@ -12,12 +13,13 @@
 
 namespace sim {
 
-void YamlParser::parse_configs(const std::string &topology_filename,
+Time YamlParser::parse_configs(const std::string &topology_filename,
                                const std::string &simulation_filename,
                                Simulator &simulator) {
     parse_topology_config(topology_filename, simulator);
     parse_simulation_config(simulation_filename, simulator);
-    m_devices_map.clear();
+    m_devices.clear();
+    return m_simulation_time;
 }
 
 void YamlParser::parse_topology_config(const std::string &filename,
@@ -32,6 +34,7 @@ void YamlParser::parse_simulation_config(const std::string &filename,
                                          Simulator &simulator) {
     const YAML::Node config = YAML::LoadFile(filename);
     process_flows(config, simulator);
+    parse_simulation_time(config);
 }
 
 uint32_t YamlParser::parse_throughput(const std::string &throughput_str) {
@@ -77,9 +80,9 @@ void YamlParser::process_hosts(const YAML::Node &config, Simulator &simulator) {
         const auto name = val_node["name"].as<std::string>();
 
         if (type_str == "sender") {
-            m_devices_map[key] = simulator.add_sender(name);
+            m_devices[key] = simulator.add_sender(name);
         } else if (type_str == "receiver") {
-            m_devices_map[key] = simulator.add_receiver(name);
+            m_devices[key] = simulator.add_receiver(name);
         } else {
             throw std::runtime_error("Invalid host type: " + type_str);
         }
@@ -96,7 +99,7 @@ void YamlParser::process_switches(const YAML::Node &config,
     for (auto it = switches.begin(); it != switches.end(); ++it) {
         auto key = it->first.as<std::string>();
         const auto name = it->second["name"].as<std::string>();
-        m_devices_map[key] = simulator.add_switch(name);
+        m_devices[key] = simulator.add_switch(name);
     }
 }
 
@@ -116,12 +119,12 @@ void YamlParser::process_links(const YAML::Node &config,
         const uint32_t speed =
             parse_throughput(link["throughput"].as<std::string>());
 
-        auto from_it = m_devices_map.find(from);
-        auto to_it = m_devices_map.find(to);
-        if (from_it == m_devices_map.end()) {
+        auto from_it = m_devices.find(from);
+        auto to_it = m_devices.find(to);
+        if (from_it == m_devices.end()) {
             throw std::runtime_error("Unknown device in 'from': " + from);
         }
-        if (to_it == m_devices_map.end()) {
+        if (to_it == m_devices.end()) {
             throw std::runtime_error("Unknown device in 'to': " + to);
         }
 
@@ -132,7 +135,7 @@ void YamlParser::process_links(const YAML::Node &config,
                                      " or " + to);
         }
 
-        simulator.add_link(m_devices_map.at(from), m_devices_map.at(to), speed,
+        simulator.add_link(m_devices.at(from), m_devices.at(to), speed,
                            latency);
     }
 }
@@ -153,12 +156,20 @@ void YamlParser::process_flows(const YAML::Node &config,
         Time packet_interval = it->second["packet_interval"].as<Time>();
 
         std::shared_ptr<ISender> sender =
-            std::dynamic_pointer_cast<ISender>(m_devices_map.at(sender_id));
+            std::dynamic_pointer_cast<ISender>(m_devices.at(sender_id));
         std::shared_ptr<IReceiver> receiver =
-            std::dynamic_pointer_cast<IReceiver>(m_devices_map.at(receiver_id));
+            std::dynamic_pointer_cast<IReceiver>(m_devices.at(receiver_id));
 
         simulator.add_flow(sender, receiver, packet_size, packet_interval, 0);
     }
+}
+
+void YamlParser::parse_simulation_time(const YAML::Node& config) {
+    if (!config["simulation_time"]) {
+        LOG_ERROR("No simulation time in simulation config");
+        return;
+    }
+    m_simulation_time = config["simulation_time"].as<Time>();
 }
 
 }  // namespace sim

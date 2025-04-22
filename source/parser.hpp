@@ -7,17 +7,19 @@
 #include <string>
 
 #include "simulator.hpp"
+#include "types.hpp"
 
 namespace sim {
 
 class YamlParser {
-public:  // TODO: replace void with vector<SimulationInfo>
-    void parse_configs(const std::string& topology_filename,
+public:
+    Time parse_configs(const std::string& topology_filename,
                        const std::string& simulation_filename,
                        Simulator& simulator);
 
 private:
-    std::map<std::string, std::shared_ptr<IRoutingDevice>> m_devices_map;
+    std::map<std::string, std::shared_ptr<IRoutingDevice>> m_devices;
+    Time m_simulation_time;
 
     static uint32_t parse_throughput(const std::string& throughput_str);
     static uint32_t parse_latency(const std::string& latency_str);
@@ -32,6 +34,7 @@ private:
     void process_links(const YAML::Node& config, Simulator& simulator) const;
 
     void process_flows(const YAML::Node& config, Simulator& simulator) const;
+    void parse_simulation_time(const YAML::Node& config);
 };
 
 }  // namespace sim
