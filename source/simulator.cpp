@@ -64,11 +64,15 @@ void Simulator::add_link(std::shared_ptr<IRoutingDevice> a_from,
 }
 
 // returns start device routing table
+// Unlike standard BFS that processes nodes one by one, this processes all nodes at the current distance level together.
+// So each iteration is a processing of all all devices at a certain distance (wavefront)
 static routing_table_t bfs(std::shared_ptr<IRoutingDevice>& start_device) {
     routing_table_t routing_table;
 
     std::queue<std::shared_ptr<IRoutingDevice>> queue;
+    // All devices with known distance
     std::set<std::shared_ptr<IRoutingDevice>> used;
+    // Current wavefront
     std::set<std::shared_ptr<IRoutingDevice>> wave_front;
     wave_front.insert(start_device);
     
@@ -95,6 +99,8 @@ static routing_table_t bfs(std::shared_ptr<IRoutingDevice>& start_device) {
                 if (curr_device == start_device) {
                     routing_table[next_hop][link] = 1;
                 } else {
+                    // Here we get all ways to get to the previous device and add them to next hop
+                    // This part might be called several times for same device
                     for (auto link_and_paths: routing_table[curr_device]) {
                         routing_table[next_hop][link_and_paths.first] += link_and_paths.second;
                     }

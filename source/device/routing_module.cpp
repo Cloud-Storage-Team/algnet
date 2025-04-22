@@ -67,6 +67,7 @@ std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
         total_weight += weight;
     }
 
+    // TODO: instead of rand use packet header hash (so packets of the same flow go the same path)
     int random_value = rand() % total_weight;
 
     int cumulative_weight = 0;
