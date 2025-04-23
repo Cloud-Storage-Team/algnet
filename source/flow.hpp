@@ -37,7 +37,7 @@ public:
     void start(Time time) final;
 
     Time create_new_data_packet() final;
-    Time add_data_to_device() final;
+    Time put_data_to_device() final;
 
     // Update the internal state according to some congestion control algorithm
     // Call try_to_generate upon the update
