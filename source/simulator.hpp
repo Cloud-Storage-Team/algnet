@@ -135,7 +135,9 @@ public:
     }
 
     // Clear all events in the Scheduler
-    void clear() {}
+    void clear() {
+        Scheduler::get_instance()->clear();
+    }
     // BFS to update the routing table
     void recalculate_paths() {
         for (auto src_device : get_devices()) {
