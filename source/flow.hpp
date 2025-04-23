@@ -13,8 +13,8 @@ class ISender;
 class IFlow : public Identifiable {
 public:
     virtual void start(Time time) = 0;
-    // Represents process of appearing data on Sender
-    // Uses event Generate
+    // Adds new packet to sending queue
+    // Used in event Generate
     virtual Time create_new_data_packet() = 0;
     // Puts data on corresponding device sending buffer according to the internal state
     // Can be scheduled by event or called on some condition
