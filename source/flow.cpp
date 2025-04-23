@@ -34,7 +34,11 @@ Packet Flow::generate_packet() {
 
 void Flow::start(std::uint32_t time) { schedule_packet_generation(time); }
 
-void Flow::update(Packet packet, DeviceType type) { ++m_updates_number; }
+void Flow::update(Packet packet, DeviceType type) { 
+    (void)packet;
+    (void)type;
+    ++m_updates_number; 
+}
 
 std::uint32_t Flow::get_updates_number() const { return m_updates_number; }
 

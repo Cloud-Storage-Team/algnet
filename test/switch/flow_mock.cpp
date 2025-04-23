@@ -6,9 +6,16 @@ FlowMock::FlowMock(std::shared_ptr<sim::IReceiver> m_receiver)
     : m_receiver(m_receiver) {}
 
 void FlowMock::start(std::uint32_t time) {}
-Time FlowMock::try_to_generate() { return 0; }
+Time FlowMock::create_new_data_packet() {
+    return 1;
+};
+Time FlowMock::add_data_to_device() {
+    return 1;
+};
 
-void FlowMock::update() {}
+void FlowMock::update(sim::Packet packet, sim::DeviceType type) {
+    
+};
 std::shared_ptr<sim::ISender> FlowMock::get_sender() const {
     return nullptr;
 }
