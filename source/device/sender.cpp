@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include <spdlog/fmt/fmt.h>
+
 #include "event.hpp"
 #include "link.hpp"
 #include "logger/logger.hpp"
@@ -67,7 +69,8 @@ DeviceType Sender::get_type() const { return DeviceType::SENDER; }
 
 void Sender::enqueue_packet(Packet packet) {
     m_flow_buffer.push(packet);
-    LOG_INFO("Packet {} arrived to sender", packet.to_string());
+    LOG_INFO(
+        fmt::format("Packet {} arrived to sender", packet.to_string()));
 }
 
 Time Sender::process() {
@@ -93,7 +96,7 @@ Time Sender::process() {
 
     // TODO: add some sender ID for easier packet path tracing
     LOG_INFO("Processing packet from link on sender. Packet: " +
-             packet.to_string());
+                 packet.to_string());
 
     auto destination = packet.get_destination();
     if (destination.expired()) {
@@ -132,7 +135,7 @@ Time Sender::send_data() {
 
     // TODO: add some sender ID for easier packet path tracing
     LOG_INFO("Taken new data packet on sender. Packet: " +
-             data_packet.to_string());
+                 data_packet.to_string());
 
     auto next_link =
         m_router->get_link_to_destination(data_packet.get_destination());
@@ -143,7 +146,7 @@ Time Sender::send_data() {
 
     // TODO: add some sender ID for easier packet path tracing
     LOG_INFO("Sent new data packet from sender. Data packet: " +
-             data_packet.to_string());
+                 data_packet.to_string());
 
     next_link.lock()->schedule_arrival(data_packet);
     // total_processing_time += sending_data_time;

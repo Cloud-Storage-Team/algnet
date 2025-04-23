@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+
 #include "device.hpp"
 #include "types.hpp"
 #include "utils/loop_iterator.hpp"

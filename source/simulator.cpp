@@ -1,5 +1,8 @@
 #include "simulator.hpp"
 
+#include <spdlog/fmt/fmt.h>
+
+#include <algorithm>
 #include <memory>
 #include <set>
 
@@ -15,8 +18,8 @@ using routing_table_t =
 
 std::shared_ptr<Sender> Simulator::add_sender(std::string name) {
     if (m_senders.contains(name)) {
-        LOG_WARN("add_sender failed: device with name {} already exists.",
-                 name);
+        LOG_WARN(fmt::format(
+            "add_sender failed: device with name {} already exists.", name));
         return nullptr;
     }
     m_senders[name] = std::make_shared<Sender>();
@@ -25,8 +28,8 @@ std::shared_ptr<Sender> Simulator::add_sender(std::string name) {
 
 std::shared_ptr<Receiver> Simulator::add_receiver(std::string name) {
     if (m_receivers.contains(name)) {
-        LOG_WARN("add_receiver failed: device with name {} already exists.",
-                 name);
+        LOG_WARN(fmt::format(
+            "add_receiver failed: device with name {} already exists.", name));
         return nullptr;
     }
     m_receivers[name] = std::make_shared<Receiver>();
@@ -35,8 +38,8 @@ std::shared_ptr<Receiver> Simulator::add_receiver(std::string name) {
 
 std::shared_ptr<Switch> Simulator::add_switch(std::string name) {
     if (m_switches.contains(name)) {
-        LOG_WARN("add_switch failed: device with name {} already exists.",
-                 name);
+        LOG_WARN(fmt::format(
+            "add_switch failed: device with name {} already exists.", name));
         return nullptr;
     }
     m_switches[name] = std::make_shared<Switch>();
