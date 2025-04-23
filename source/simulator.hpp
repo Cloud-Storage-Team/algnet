@@ -20,7 +20,7 @@
 
 namespace sim {
 
-using routing_table_t =
+using RoutingTable =
     std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<ILink>>;
 
 static routing_table_t bfs(std::shared_ptr<IRoutingDevice>& start_device) {
