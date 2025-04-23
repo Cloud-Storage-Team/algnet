@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <concepts>
 #include <memory>
-#include <queue>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -102,8 +101,7 @@ public:
         return result;
     }
 
-    // Clear all events in the Scheduler
-    // BFS to update the routing table
+    // Calls BFS for each device to build the routing table
     void recalculate_paths() {
         for (auto src_device : get_devices()) {
             RoutingTable routing_table = bfs(src_device);
@@ -115,7 +113,6 @@ public:
     // Create a Stop event at a_stop_time and start simulation
     void start(Time a_stop_time) {
         recalculate_paths();
-        clear();
         Scheduler::get_instance().add(std::make_unique<Stop>(a_stop_time));
         constexpr Time start_time = 0;
 
