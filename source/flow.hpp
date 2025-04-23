@@ -21,7 +21,7 @@ public:
     virtual Time add_data_to_device() = 0;
 
     // Update the internal state according to some congestion control algorithm
-    // Puts data available for sending on corresponding device
+    // Calls when data available for sending on corresponding device
     virtual void update(Packet packet, DeviceType type) = 0;
     virtual std::shared_ptr<ISender> get_sender() const = 0;
     virtual std::shared_ptr<IReceiver> get_receiver() const = 0;
