@@ -29,6 +29,9 @@ void Flow::generate_packet() {
     packet.type = sim::PacketType::DATA;
     packet.size = m_packet_size;
     packet.flow = this;
+    packet.source_id = m_src->get_id();
+    packet.dest_id = m_dest->get_id();
+    packet.RTT = 0;
     m_src->enqueue_packet(packet);
 }
 

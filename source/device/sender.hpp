@@ -14,7 +14,7 @@ class ISender : public IRoutingDevice,
 public:
     virtual ~ISender() = default;
     virtual void enqueue_packet(Packet packet) = 0;
-    virtual Time send_data() = 0;
+    virtual Time send_data(Time current_time) = 0;
 };
 
 class Sender : public ISender, public std::enable_shared_from_this<Sender> {
@@ -39,8 +39,8 @@ public:
     // and move it to the egress port (link)
     // ACKs are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
-    Time process() final;
-    Time send_data() final;
+    Time process(Time current_time) final;
+    Time send_data(Time current_time) final;
 
     void enqueue_packet(Packet packet) final;
     

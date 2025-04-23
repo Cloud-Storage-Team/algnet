@@ -74,7 +74,8 @@ void Sender::enqueue_packet(Packet packet) {
     LOG_INFO("Packet {} arrived to sender", packet.to_string());
 }
 
-Time Sender::process() {
+Time Sender::process(Time current_time) {
+    (void)current_time;
     std::shared_ptr<ILink> current_inlink = m_router->next_inlink();
     Time total_processing_time = 1;
 
@@ -119,7 +120,8 @@ Time Sender::process() {
     return total_processing_time;
 }
 
-Time Sender::send_data() {
+Time Sender::send_data(Time current_time) {
+    (void)current_time;
     Time total_processing_time = 1;
 
     // TODO: wrap packet getting into some method (?)

@@ -47,7 +47,7 @@ void Process::operator()() {
     if (m_device.expired()) {
         return;
     }
-    Time process_time = m_device.lock()->process();
+    Time process_time = m_device.lock()->process(m_time);
 
     std::unique_ptr<Event> next_process_event = std::make_unique<Process>(m_time + process_time, m_device);
     Scheduler::get_instance().add(std::move(next_process_event));
@@ -59,7 +59,7 @@ void SendData::operator()() {
     if (m_device.expired()) {
         return;
     }
-    Time process_time = m_device.lock()->send_data();
+    Time process_time = m_device.lock()->send_data(m_time);
 
     std::unique_ptr<Event> next_process_event = std::make_unique<SendData>(m_time + process_time, m_device);
     Scheduler::get_instance().add(std::move(next_process_event));

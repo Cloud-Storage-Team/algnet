@@ -55,7 +55,7 @@ TEST_F(TestSwitch, test_no_senders) {
     auto switch_device = std::make_shared<sim::Switch>();
     // TODO: replace with ASSERT_FALSE when process returns bool instead of
     // void
-    switch_device->process();
+    switch_device->process(0);
 }
 
 TEST_F(TestSwitch, test_no_packets_on_inlinks) {
@@ -68,7 +68,7 @@ TEST_F(TestSwitch, test_no_packets_on_inlinks) {
 
     switch_device->add_inlink(switch_inlink);
 
-    switch_device->process();
+    switch_device->process(0);
     // TODO: add ASSERT_FALSE when process returns bool instead of void
 }
 
@@ -76,7 +76,7 @@ TEST_F(TestSwitch, test_no_destination_route) {
     auto switch_device = std::make_shared<sim::Switch>();
     auto receiver = std::make_shared<ReceiverMock>();
     FlowMock flow(receiver);
-    sim::Packet packet(sim::PacketType::DATA, 0, &flow);
+    sim::Packet packet(sim::PacketType::DATA, 0, 0, 0, 0, &flow);
 
     std::shared_ptr<sim::IRoutingDevice> null_device(nullptr);
     std::shared_ptr<LinkMock> switch_inlink =
@@ -89,7 +89,7 @@ TEST_F(TestSwitch, test_no_destination_route) {
     // no update of switch routing table
 
     // TODO: add ASSERT_FALSE when process returns bool instead of void
-    switch_device->process();
+    switch_device->process(0);
 
     ASSERT_EQ(switch_reciever_link->get_arrived_packets(),
               std::vector<sim::Packet>());
@@ -113,7 +113,7 @@ void test_senders(size_t senders_count) {
     // create packets
     std::vector<sim::Packet> packets(senders_count);
     for (size_t i = 0; i < senders_count; i++) {
-        packets[i] = sim::Packet(sim::PacketType::DATA, i, &flows[i]);
+        packets[i] = sim::Packet(sim::PacketType::DATA, i, 0, 0, 0, &flows[i]);
     }
 
     // create links
@@ -139,7 +139,7 @@ void test_senders(size_t senders_count) {
     }
 
     for (size_t i = 0; i < senders_count; i++) {
-        switch_device->process();
+        switch_device->process(0);
     }
     std::vector<sim::Packet> arrived_packets =
         switch_reciever_link->get_arrived_packets();

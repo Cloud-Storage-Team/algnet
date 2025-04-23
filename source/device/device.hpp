@@ -19,7 +19,7 @@ public:
     // One step of device work cycle;
     // e.g. see next inlink, take one packet from it,
     // and do smth with it (send further, send ask etc)
-    virtual Time process() = 0;
+    virtual Time process(Time current_time) = 0;
 
     virtual DeviceType get_type() const = 0;
 };
