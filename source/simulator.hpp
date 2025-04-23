@@ -17,49 +17,17 @@
 #include "link.hpp"
 #include "logger/logger.hpp"
 #include "scheduler.hpp"
+#include "utils/algorithms.hpp"
 
 namespace sim {
 
-using RoutingTable =
-    std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<ILink>>;
-
-static routing_table_t bfs(std::shared_ptr<IRoutingDevice>& start_device) {
-    routing_table_t routing_table;
-    std::queue<std::shared_ptr<IRoutingDevice>> queue;
-    std::set<std::shared_ptr<IRoutingDevice>> used;
-    queue.push(start_device);
-
-    while (!queue.empty()) {
-        std::shared_ptr<IRoutingDevice> device = queue.front();
-        queue.pop();
-        if (used.contains(device)) {
-            continue;
-        }
-        used.insert(device);
-        std::set<std::shared_ptr<ILink>> outlinks = device->get_outlinks();
-        for (std::shared_ptr<ILink> link : outlinks) {
-            auto next_hop = link->get_to();
-            auto curr_device = link->get_from();
-            if (used.contains(next_hop)) {
-                continue;
-            }
-            if (curr_device == start_device) {
-                routing_table[next_hop] = link;
-            } else if (!routing_table.contains(next_hop)) {
-                routing_table[next_hop] = routing_table[curr_device];
-            }
-            queue.push(next_hop);
-        }
-    }
-    return routing_table;
-};
-
 template <typename TSender, typename TSwitch, typename TReceiver,
-          typename TFlow>
+          typename TFlow, typename TLink>
 requires std::derived_from<TSender, ISender> &&
          std::derived_from<TSwitch, ISwitch> &&
          std::derived_from<TReceiver, IReceiver> &&
-         std::derived_from<TFlow, IFlow>
+         std::derived_from<TFlow, IFlow> &&
+         std::derived_from<TLink, ILink>
 class Simulator {
 public:
     Simulator() = default;
@@ -112,7 +80,7 @@ public:
     void add_link(std::shared_ptr<IRoutingDevice> a_from,
                   std::shared_ptr<IRoutingDevice> a_to,
                   std::uint32_t a_speed_mbps, Time a_delay) {
-        auto link = std::make_shared<Link>(a_from, a_to, a_speed_mbps, a_delay);
+        auto link = std::make_shared<TLink>(a_from, a_to, a_speed_mbps, a_delay);
         m_links.emplace_back(link);
         a_from->add_outlink(link);
         a_to->add_inlink(link);
@@ -136,12 +104,12 @@ public:
 
     // Clear all events in the Scheduler
     void clear() {
-        Scheduler::get_instance()->clear();
+        Scheduler::get_instance().clear();
     }
     // BFS to update the routing table
     void recalculate_paths() {
         for (auto src_device : get_devices()) {
-            routing_table_t routing_table = bfs(src_device);
+            RoutingTable routing_table = bfs(src_device);
             for (auto [dest_device, link] : routing_table) {
                 src_device->update_routing_table(dest_device, link);
             }
@@ -153,7 +121,7 @@ public:
         Scheduler::get_instance().add(std::make_unique<Stop>(a_stop_time));
         constexpr Time start_time = 0;
 
-        for (std::shared_ptr<IFlow> flow : m_flows) {
+        for (auto flow : m_flows) {
             flow->start(start_time);
         }
 
@@ -185,6 +153,6 @@ private:
     std::vector<std::shared_ptr<ILink>> m_links;
 };
 
-using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow>;
+using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;
 
 }  // namespace sim
