@@ -49,10 +49,10 @@ Time Flow::create_new_data_packet() {
     --m_packets_to_send;
     Packet data = generate_packet();
     m_sending_buffer.push(data);
-    return add_data_to_device();
+    return put_data_to_device();
 }
 
-Time Flow::add_data_to_device() {
+Time Flow::put_data_to_device() {
     m_src->enqueue_packet(m_sending_buffer.front());
     m_sending_buffer.pop();
     return m_delay_between_packets;
