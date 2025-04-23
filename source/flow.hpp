@@ -60,7 +60,7 @@ private:
     std::uint32_t m_updates_number;
     std::uint32_t m_packets_to_send;
 
-    std::queue<Packet> m_flow_data;
+    std::queue<Packet> m_sending_buffer;
     Id m_id;
 };
 
