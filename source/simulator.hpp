@@ -118,6 +118,7 @@ public:
     // Create a Stop event at a_stop_time and start simulation
     void start(Time a_stop_time) {
         recalculate_paths();
+        clear();
         Scheduler::get_instance().add(std::make_unique<Stop>(a_stop_time));
         constexpr Time start_time = 0;
 
