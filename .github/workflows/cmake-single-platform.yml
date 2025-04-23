@@ -1,0 +1,63 @@
+name: CMake Ubuntu latest
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "*" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  clang-format:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Clang Format
+      run: sudo apt-get install clang-format
+
+    - name: Collect files for Clang
+      run:
+        files_for_clang="
+        main.cpp
+        $(
+          find source -type f -name "*.cpp" -o -name "*.hpp";
+          find test -type f -name "*.cpp" -o -name "*.hpp"
+        )"
+    - name: Clang format
+      run:
+        clang-format --dry-run -Werror $files_for_clang
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Update submodules
+      run: git submodule update --init --recursive
+
+    - name: Configure CMake for building project
+      run: cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF
+
+    - name: Build project
+      run: cmake --build build --config Debug
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Update submodules
+      run: git submodule update --init --recursive
+
+    - name: Configure CMake for building tests
+      run: cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_PROJECT=OFF -DBUILD_TESTS=ON
+
+    - name: Build tests
+      run: cmake --build build --config Debug
+
+    - name: Run tests
+      working-directory: build
+      run: ./test_simulator
+
