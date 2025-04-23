@@ -16,9 +16,8 @@ public:
     // Adds new packet to sending queue
     // Used in event Generate
     virtual Time create_new_data_packet() = 0;
-    // Puts data on corresponding device sending buffer according to the internal state
-    // Can be scheduled by event or called on some condition
-    virtual Time add_data_to_device() = 0;
+    // Puts some pakets from sending buffer to sender's buffer according to the internal state
+    virtual Time put_data_to_device() = 0;
 
     // Update the internal state according to some congestion control algorithm
     // Calls when data available for sending on corresponding device
