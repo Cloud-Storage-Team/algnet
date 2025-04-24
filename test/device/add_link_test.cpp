@@ -33,9 +33,9 @@ TEST_F(AddLink, LinkIsPresent) {
 }
 
 TEST_F(AddLink, SameLinkMultipleTimes) {
-    int NUMBER_OF_NEIGHBOURS = 5;
-    int MAX_LINKS = 3;
-    int NUMBER_OF_LOOPS = 3;
+    size_t NUMBER_OF_NEIGHBOURS = 5;
+    size_t MAX_LINKS = 3;
+    size_t NUMBER_OF_LOOPS = 3;
 
     auto neighbour_devices = createRoutingModules(NUMBER_OF_NEIGHBOURS);
     auto dest = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
@@ -55,7 +55,7 @@ TEST_F(AddLink, SameLinkMultipleTimes) {
         auto inlink = std::make_shared<TestLink>(device, dest);
         auto outlink = std::make_shared<TestLink>(source, device);
 
-        int links_to_add = dis(gen);
+        size_t links_to_add = dis(gen);
         for (size_t i = 0; i < links_to_add; ++i) {
             dest->add_inlink(inlink);
             source->add_outlink(outlink);

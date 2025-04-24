@@ -25,32 +25,39 @@ void Flow::schedule_packet_generation(Time time) {
     Scheduler::get_instance().add(std::move(generate_event_ptr));
 }
 
-void Flow::generate_packet() {
+Packet Flow::generate_packet() {
     sim::Packet packet;
     packet.type = sim::PacketType::DATA;
     packet.size = m_packet_size;
     packet.flow = this;
-    if (m_src.expired()) {
-        LOG_WARN("Failed to generate packet, source device has been deleted");
-        return;
-    }
-    m_src.lock()->enqueue_packet(packet);
+    return packet;
 }
 
 void Flow::start(std::uint32_t time) { schedule_packet_generation(time); }
 
-void Flow::update() { ++m_updates_number; }
+void Flow::update(Packet packet, DeviceType type) { 
+    (void)packet;
+    (void)type;
+    ++m_updates_number; 
+}
 
 std::uint32_t Flow::get_updates_number() const { return m_updates_number; }
 
-Time Flow::try_to_generate() {
+Time Flow::create_new_data_packet() {
     if (m_packets_to_send == 0) {
         return 0;
     }
     --m_packets_to_send;
-    generate_packet();
-    return m_delay_between_packets;
+    Packet data = generate_packet();
+    m_sending_buffer.push(data);
+    return put_data_to_device();
 }
+
+Time Flow::put_data_to_device() {
+    m_src.lock()->enqueue_packet(m_sending_buffer.front());
+    m_sending_buffer.pop();
+    return m_delay_between_packets;
+}   
 
 std::weak_ptr<ISender> Flow::get_sender() const { return m_src; }
 
