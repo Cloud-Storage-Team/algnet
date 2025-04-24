@@ -3,10 +3,13 @@
 #include <memory>
 
 #include "routing_module.hpp"
+#include "utils/identifier_factory.hpp"
 
 namespace sim {
 
-class ISwitch : public IRoutingDevice, public IProcessingDevice {
+class ISwitch : public IRoutingDevice,
+                public IProcessingDevice,
+                public Identifiable {
 public:
     virtual ~ISwitch() = default;
 };
@@ -33,11 +36,13 @@ public:
     Time process() final;
     bool put_packet(Packet packet) final;
     std::optional<Packet> get_packet() final;
+    Id get_id() const final;
 
 private:
     std::unique_ptr<RoutingModule> m_router;
     std::queue<Packet> m_income_buffer;
     std::uint32_t m_capacity;
+    Id m_id;
 };
 
 }  // namespace sim

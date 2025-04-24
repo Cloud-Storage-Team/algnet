@@ -7,7 +7,9 @@
 
 namespace sim {
 
-Switch::Switch() : m_router(std::make_unique<RoutingModule>()) {}
+Switch::Switch()
+    : m_router(std::make_unique<RoutingModule>()),
+      m_id(IdentifierFactory::get_instance().generate_id()) {}
 
 bool Switch::add_inlink(std::shared_ptr<ILink> link) {
     if (link == nullptr) {
@@ -101,9 +103,10 @@ Time Switch::process() {
         LOG_WARN("No link corresponds to destination device");
         return total_processing_time;
     }
-    
+
     // TODO: add some switch ID for easier packet path tracing
-    LOG_INFO("Processing packet from link on switch. Packet: " + packet.to_string());
+    LOG_INFO("Processing packet from link on switch. Packet: " +
+                 packet.to_string());
 
     // TODO: increase total_processing_time correctly
     next_link->schedule_arrival(packet);
@@ -113,5 +116,7 @@ Time Switch::process() {
 std::set<std::shared_ptr<ILink>> Switch::get_outlinks() const {
     return m_router->get_outlinks();
 }
+
+Id Switch::get_id() const { return m_id; }
 
 }  // namespace sim

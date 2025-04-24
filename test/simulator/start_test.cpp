@@ -12,7 +12,7 @@ public:
 };
 
 TEST_F(Start, TrivialTopology) {
-    sim::Simulator sim;
+    sim::BasicSimulator sim;
     auto sender = sim.add_sender("sender");
     auto swtch = sim.add_switch("switch");
     auto receiver = sim.add_receiver("receiver");
@@ -33,7 +33,7 @@ TEST_F(Start, TrivialTopology) {
 }
 
 TEST_F(Start, ThreeToOneTopology) {
-    sim::Simulator sim;
+    sim::BasicSimulator sim;
     auto sender1 = sim.add_sender("sender1");
     auto sender2 = sim.add_sender("sender2");
     auto sender3 = sim.add_sender("sender3");
@@ -67,7 +67,7 @@ TEST_F(Start, ThreeToOneTopology) {
 }
 
 TEST_F(Start, StopTime) {
-    sim::Simulator sim;
+    sim::BasicSimulator sim;
     auto sender1 = sim.add_sender("sender1");
     auto sender2 = sim.add_sender("sender2");
     auto sender3 = sim.add_sender("sender3");

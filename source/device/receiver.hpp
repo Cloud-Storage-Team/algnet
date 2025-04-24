@@ -3,12 +3,15 @@
 
 #include "packet.hpp"
 #include "routing_module.hpp"
+#include "utils/identifier_factory.hpp"
 
 namespace sim {
 
 struct Packet;
 
-class IReceiver : public IRoutingDevice, public IProcessingDevice {
+class IReceiver : public IRoutingDevice,
+                  public IProcessingDevice,
+                  public Identifiable {
 public:
     virtual ~IReceiver() = default;
 };
@@ -39,10 +42,13 @@ public:
     bool put_packet(Packet packet) final;
     std::optional<Packet> get_packet() final;
 
+    Id get_id() const final;
+
 private:
     Time send_ack(Packet data_packet);
     std::queue<Packet> m_income_buffer;
     std::unique_ptr<RoutingModule> m_router;
+    Id m_id;
 };
 
 }  // namespace sim

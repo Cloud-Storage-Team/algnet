@@ -1,0 +1,84 @@
+hosts:
+  sender1:
+    type: sender
+    name: sender1
+  sender2:
+    type: sender
+    name: sender2
+  receiver1:
+    type: receiver
+    name: receiver1
+  receiver2:
+    type: receiver
+    name: receiver2
+
+switches:
+  leaf1:
+    type: switch
+    name: leaf_switch1
+  leaf2:
+    type: switch
+    name: leaf_switch2
+  spine1:
+    type: switch
+    name: spine_switch1
+  spine2:
+    type: switch
+    name: spine_switch2
+
+links:
+  # Hosts to Leaf Layer (1Gbps)
+  link1:
+    from: sender1
+    to: leaf1
+    latency: 1ms
+    throughput: 1Gbps
+  link2:
+    from: sender2
+    to: leaf1
+    latency: 1ms
+    throughput: 1Gbps
+  link3:
+    from: leaf2
+    to: receiver1
+    latency: 1ms
+    throughput: 1Gbps
+  link4:
+    from: leaf2
+    to: receiver2
+    latency: 1ms
+    throughput: 1Gbps
+
+  # Leaf to Spine Layer (10Gbps, full bipartite)
+  link5:
+    from: leaf1
+    to: spine1
+    latency: 1ms
+    throughput: 10Gbps
+  link6:
+    from: leaf1
+    to: spine2
+    latency: 1ms
+    throughput: 10Gbps
+  link7:
+    from: leaf2
+    to: spine1
+    latency: 1ms
+    throughput: 10Gbps
+  link8:
+    from: leaf2
+    to: spine2
+    latency: 1ms
+    throughput: 10Gbps
+
+  # Spine to Leaf (return paths)
+  link9:
+    from: spine1
+    to: leaf2
+    latency: 1ms
+    throughput: 10Gbps
+  link10:
+    from: spine2
+    to: leaf2
+    latency: 1ms
+    throughput: 10Gbps

@@ -2,12 +2,15 @@
 #include <queue>
 
 #include "device.hpp"
+#include "utils/identifier_factory.hpp"
 
 namespace sim {
 
 struct Packet;
 
-class ISender : public IRoutingDevice, public IProcessingDevice {
+class ISender : public IRoutingDevice,
+                public IProcessingDevice,
+                public Identifiable {
 public:
     virtual ~ISender() = default;
     virtual void enqueue_packet(Packet packet) = 0;
@@ -42,11 +45,14 @@ public:
     std::optional<Packet> get_packet() final;
 
     void enqueue_packet(Packet packet) final;
+    
+    Id get_id() const final;
 
 private:
     std::queue<Packet> m_flow_buffer;
     std::queue<Packet> m_income_buffer;
     std::unique_ptr<IRoutingDevice> m_router;
+    Id m_id;
 };
 
 }  // namespace sim
