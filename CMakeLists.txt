@@ -12,7 +12,7 @@ file(GLOB_RECURSE tests "test/*.cpp")
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/source/
-    ${CMAKE_SOURCE_DIR}/spdlog/include/
+    ${CMAKE_SOURCE_DIR}/external/spdlog/include/
     ${CMAKE_SOURCE_DIR}external/yaml-cpp/
 )
 
@@ -26,7 +26,7 @@ endif()
 option(BUILD_TESTS "Build tests" ON)
 
 if(BUILD_TESTS)
-    add_subdirectory(googletest)
+    add_subdirectory(external/googletest)
 
     set(TEST_NAME "test_simulator")
     add_executable(${TEST_NAME} ${src} ${tests})
