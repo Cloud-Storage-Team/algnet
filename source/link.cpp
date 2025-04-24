@@ -71,22 +71,22 @@ std::optional<Packet> Link::get_packet() {
     return packet;
 };
 
-std::weak_ptr<IRoutingDevice> Link::get_from() const {
+std::shared_ptr<IRoutingDevice> Link::get_from() const {
     if (m_from.expired()) {
         LOG_WARN("Source device pointer is expired");
-        return std::weak_ptr<IRoutingDevice>();
+        return nullptr;
     }
 
-    return m_from;
+    return m_from.lock();
 };
 
-std::weak_ptr<IRoutingDevice> Link::get_to() const {
+std::shared_ptr<IRoutingDevice> Link::get_to() const {
     if (m_to.expired()) {
         LOG_WARN("Destination device pointer is expired");
-        return std::weak_ptr<IRoutingDevice>();
+        return nullptr;
     }
 
-    return m_to;
+    return m_to.lock();
 };
 
 Id Link::get_id() const { return m_id; }

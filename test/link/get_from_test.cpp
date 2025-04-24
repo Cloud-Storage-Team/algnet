@@ -11,7 +11,7 @@ TEST_F(LinkTest, SimpleFrom) {
         std::make_shared<DeviceMock>(DeviceMock());
 
     auto link = std::make_shared<sim::Link>(src, dst);
-    ASSERT_EQ(link->get_from().lock(), src);
+    ASSERT_EQ(link->get_from(), src);
 }
 
 TEST_F(LinkTest, FromExpiredAfterCreation) {
@@ -22,7 +22,7 @@ TEST_F(LinkTest, FromExpiredAfterCreation) {
     auto link = std::make_shared<sim::Link>(src, dst);
 
     src.reset();
-    ASSERT_EQ(link->get_from().lock(), nullptr);
+    ASSERT_EQ(link->get_from(), nullptr);
 }
 
 TEST_F(LinkTest, FromExpiredBeforeCreation) {
@@ -33,7 +33,7 @@ TEST_F(LinkTest, FromExpiredBeforeCreation) {
     src.reset();
 
     auto link = std::make_shared<sim::Link>(src, dst);
-    ASSERT_EQ(link->get_from().lock(), nullptr);
+    ASSERT_EQ(link->get_from(), nullptr);
 }
 
 }  // namespace test

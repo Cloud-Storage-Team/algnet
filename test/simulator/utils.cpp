@@ -19,7 +19,7 @@ static std::shared_ptr<sim::IRoutingDevice> get_next_device(
     if (next_link.expired()) {
         return nullptr;
     }
-    return next_link.lock()->get_to().lock();
+    return next_link.lock()->get_to();
 }
 
 bool check_reachability(std::shared_ptr<sim::IRoutingDevice> src_device,

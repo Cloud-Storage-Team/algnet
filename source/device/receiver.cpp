@@ -18,7 +18,7 @@ bool Receiver::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
         return false;
     }
-    if (this != link->get_to().lock().get()) {
+    if (this != link->get_to().get()) {
         LOG_WARN(
             "Link destination device is incorrect (expected current device)");
         return false;
@@ -30,7 +30,7 @@ bool Receiver::add_outlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
         return false;
     }
-    if (this != link->get_from().lock().get()) {
+    if (this != link->get_from().get()) {
         LOG_WARN("Outlink source is not our device");
         return false;
     }
@@ -46,7 +46,7 @@ bool Receiver::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     if (!is_valid_link(link)) {
         return false;
     }
-    if (this != link->get_from().lock().get()) {
+    if (this != link->get_from().get()) {
         LOG_WARN("Link source device is incorrect (expected current device)");
         return false;
     }

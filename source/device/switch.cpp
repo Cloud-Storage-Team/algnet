@@ -16,7 +16,7 @@ bool Switch::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
         return false;
     }
-    if (link->get_to().lock().get() != this) {
+    if (link->get_to().get() != this) {
         LOG_WARN("Inlink destination is not our device");
         return false;
     }
@@ -27,7 +27,7 @@ bool Switch::add_outlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
         return false;
     }
-    if (link->get_from().lock().get() != this) {
+    if (link->get_from().get() != this) {
         LOG_WARN("Outlink source is not our device");
         return false;
     }
@@ -43,7 +43,7 @@ bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     if (!is_valid_link(link)) {
         return false;
     }
-    if (link->get_from().lock().get() != this) {
+    if (link->get_from().get() != this) {
         LOG_WARN("Link source is not our device");
         return false;
     }
