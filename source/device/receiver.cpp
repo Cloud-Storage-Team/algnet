@@ -18,7 +18,8 @@ bool Receiver::add_inlink(std::shared_ptr<ILink> link) {
     }
 
     if (this != link->get_to().get()) {
-        LOG_WARN("Link destination device is incorrect (expected current device)");
+        LOG_WARN(
+            "Link destination device is incorrect (expected current device)");
         return false;
     }
     return m_router->add_inlink(link);
@@ -50,7 +51,8 @@ bool Receiver::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     }
 
     if (this != link->get_from().get()) {
-        LOG_WARN("Link source device is incorrect (expected current device)");
+        LOG_WARN(
+            "Link source device is incorrect (expected current device)");
         return false;
     }
     return m_router->update_routing_table(dest, link);
@@ -109,7 +111,7 @@ Time Receiver::process() {
 
     // TODO: add some receiver ID for easier packet path tracing
     LOG_INFO("Processing packet from link on receiver. Packet: " +
-             data_packet.to_string());
+                 data_packet.to_string());
 
     std::shared_ptr<IRoutingDevice> destination = data_packet.get_destination();
     if (data_packet.type == DATA && destination.get() == this) {
@@ -152,7 +154,7 @@ Time Receiver::send_ack(Packet data_packet) {
 
     // TODO: add some receiver ID for easier packet path tracing
     LOG_INFO("Sent ack after processing packet on receiver. Data packet: " +
-             data_packet.to_string() + ". Ack packet: " + ack.to_string());
+                 data_packet.to_string() + ". Ack packet: " + ack.to_string());
 
     link_to_dest->schedule_arrival(ack);
     return processing_time;

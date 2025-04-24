@@ -2,22 +2,41 @@
 
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
+#include <memory>
+#include <source_location>
 
-#define LOG_TRACE(...) SPDLOG_TRACE(__VA_ARGS__)
-#define LOG_DEBUG(...) SPDLOG_DEBUG(__VA_ARGS__)
-#define LOG_INFO(...) SPDLOG_INFO(__VA_ARGS__)
-#define LOG_WARN(...) SPDLOG_WARN(__VA_ARGS__)
-#define LOG_ERROR(...) SPDLOG_ERROR(__VA_ARGS__)
-#define LOG_CRITICAL(...) SPDLOG_CRITICAL(__VA_ARGS__)
-
+namespace spdlog {
+class logger;
+}  // namespace spdlog
 
 class Logger {
 public:
-    static void logExample();
-    static void setupLogging();
+    static Logger& get_instance();
+
+    void logExample();
+
+    void TRACE(std::string msg, std::source_location loc =
+                                           std::source_location::current());
+    void DEBUG(std::string msg, std::source_location loc =
+                                           std::source_location::current());
+    void INFO(std::string msg, std::source_location loc =
+                                          std::source_location::current());
+    void WARN(std::string msg, std::source_location loc =
+                                          std::source_location::current());
+    void ERROR(std::string msg, std::source_location loc =
+                                           std::source_location::current());
+    void CRITICAL(std::string msg, std::source_location loc =
+                                              std::source_location::current());
+
 private:
-    static std::shared_ptr<spdlog::logger> logger;
+    Logger();
+    Logger(const Logger&) = delete;
+    Logger& operator=(const Logger&) = delete;
 };
+
+#define LOG_TRACE(...) Logger::get_instance().TRACE(__VA_ARGS__)
+#define LOG_DEBUG(...) Logger::get_instance().DEBUG(__VA_ARGS__)
+#define LOG_INFO(...) Logger::get_instance().INFO(__VA_ARGS__)
+#define LOG_WARN(...) Logger::get_instance().WARN(__VA_ARGS__)
+#define LOG_ERROR(...) Logger::get_instance().ERROR(__VA_ARGS__)
+#define LOG_CRITICAL(...) Logger::get_instance().CRITICAL(__VA_ARGS__)
