@@ -9,10 +9,14 @@ public:
     ~FlowMock() = default;
     FlowMock(std::shared_ptr<sim::IReceiver> a_receiver);
 
-    void start(std::uint32_t time) final;
-    Time try_to_generate() final;
+    void start(Time time) final;
 
-    void update() final;
+    Time create_new_data_packet() final;
+    Time put_data_to_device() final;
+
+    void update(sim::Packet packet, sim::DeviceType type) final;
+    std::uint32_t get_updates_number() const;
+
     std::shared_ptr<sim::ISender> get_sender() const final;
     std::shared_ptr<sim::IReceiver> get_receiver() const final;
 

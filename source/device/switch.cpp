@@ -89,9 +89,10 @@ Time Switch::process(Time current_time) {
         LOG_WARN("No link corresponds to destination device");
         return total_processing_time;
     }
-    
+
     // TODO: add some switch ID for easier packet path tracing
-    LOG_INFO("Processing packet from link on switch. Packet: " + packet.to_string());
+    LOG_INFO("Processing packet from link on switch. Packet: " +
+                 packet.to_string());
 
     // TODO: increase total_processing_time correctly
     next_link->schedule_arrival(packet);
