@@ -15,7 +15,8 @@ Flow::Flow(std::shared_ptr<ISender> a_src, std::shared_ptr<IReceiver> a_dest,
       m_packet_size(a_packet_size),
       m_delay_between_packets(a_delay_between_packets),
       m_updates_number(0),
-      m_packets_to_send(a_packets_to_send) {}
+      m_packets_to_send(a_packets_to_send),
+      m_id(IdentifierFactory::get_instance().generate_id()) {}
 
 void Flow::schedule_packet_generation(Time time) {
     auto generate_event_ptr =
@@ -23,31 +24,44 @@ void Flow::schedule_packet_generation(Time time) {
     Scheduler::get_instance().add(std::move(generate_event_ptr));
 }
 
-void Flow::generate_packet() {
+Packet Flow::generate_packet() {
     sim::Packet packet;
     packet.type = sim::PacketType::DATA;
     packet.size = m_packet_size;
     packet.flow = this;
-    m_src->enqueue_packet(packet);
+    return packet;
 }
 
 void Flow::start(std::uint32_t time) { schedule_packet_generation(time); }
 
-void Flow::update() { ++m_updates_number; }
+void Flow::update(Packet packet, DeviceType type) { 
+    (void)packet;
+    (void)type;
+    ++m_updates_number; 
+}
 
 std::uint32_t Flow::get_updates_number() const { return m_updates_number; }
 
-Time Flow::try_to_generate() {
+Time Flow::create_new_data_packet() {
     if (m_packets_to_send == 0) {
         return 0;
     }
     --m_packets_to_send;
-    generate_packet();
-    return m_delay_between_packets;
+    Packet data = generate_packet();
+    m_sending_buffer.push(data);
+    return put_data_to_device();
 }
+
+Time Flow::put_data_to_device() {
+    m_src->enqueue_packet(m_sending_buffer.front());
+    m_sending_buffer.pop();
+    return m_delay_between_packets;
+}   
 
 std::shared_ptr<ISender> Flow::get_sender() const { return m_src; }
 
 std::shared_ptr<IReceiver> Flow::get_receiver() const { return m_dest; }
+
+Id Flow::get_id() const { return m_id; }
 
 }  // namespace sim

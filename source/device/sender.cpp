@@ -1,12 +1,16 @@
 #include "sender.hpp"
 
+#include <spdlog/fmt/fmt.h>
+
 #include "event.hpp"
 #include "link.hpp"
 #include "logger/logger.hpp"
 
 namespace sim {
 
-Sender::Sender() : m_router(std::make_unique<RoutingModule>()) {}
+Sender::Sender()
+    : m_router(std::make_unique<RoutingModule>()),
+      m_id(IdentifierFactory::get_instance().generate_id()) {}
 
 bool Sender::add_inlink(std::shared_ptr<ILink> link) {
     if (link == nullptr) {
@@ -49,7 +53,8 @@ bool Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     }
 
     if (this != link->get_from().get()) {
-        LOG_WARN("Link source device is incorrect (expected current device)");
+        LOG_WARN(
+            "Link source device is incorrect (expected current device)");
         return false;
     }
     m_router->update_routing_table(dest, link);
@@ -69,7 +74,8 @@ DeviceType Sender::get_type() const { return DeviceType::SENDER; }
 
 void Sender::enqueue_packet(Packet packet) {
     m_flow_buffer.push(packet);
-    LOG_INFO("Packet {} arrived to sender", packet.to_string());
+    LOG_INFO(
+        fmt::format("Packet {} arrived to sender", packet.to_string()));
 }
 
 Time Sender::process() {
@@ -95,11 +101,11 @@ Time Sender::process() {
 
     // TODO: add some sender ID for easier packet path tracing
     LOG_INFO("Processing packet from link on sender. Packet: " +
-             packet.to_string());
+                 packet.to_string());
 
     auto destination = packet.get_destination();
     if (packet.type == PacketType::ACK && destination.get() == this) {
-        packet.flow->update();
+        packet.flow->update(packet, get_type());
     } else {
         LOG_WARN(
             "Packet arrived to Sender that is not its destination; use routing "
@@ -130,7 +136,7 @@ Time Sender::send_data() {
 
     // TODO: add some sender ID for easier packet path tracing
     LOG_INFO("Taken new data packet on sender. Packet: " +
-             data_packet.to_string());
+                 data_packet.to_string());
 
     auto next_link =
         m_router->get_link_to_destination(data_packet.get_destination());
@@ -141,7 +147,7 @@ Time Sender::send_data() {
 
     // TODO: add some sender ID for easier packet path tracing
     LOG_INFO("Sent new data packet from sender. Data packet: " +
-             data_packet.to_string());
+                 data_packet.to_string());
 
     next_link->schedule_arrival(data_packet);
     // total_processing_time += sending_data_time;
@@ -151,5 +157,7 @@ Time Sender::send_data() {
 std::set<std::shared_ptr<ILink>> Sender::get_outlinks() const {
     return m_router->get_outlinks();
 }
+
+Id Sender::get_id() const { return m_id; }
 
 }  // namespace sim

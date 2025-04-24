@@ -5,6 +5,7 @@
 #include <queue>
 
 #include "packet.hpp"
+#include "utils/identifier_factory.hpp"
 
 namespace sim {
 
@@ -13,7 +14,7 @@ class RoutingModule;
 /**
  * Unidirectional link from the source to a_next
  */
-class ILink {
+class ILink : public Identifiable {
 public:
     virtual ~ILink() = default;
 
@@ -56,6 +57,8 @@ public:
     std::shared_ptr<IRoutingDevice> get_from() const final;
     std::shared_ptr<IRoutingDevice> get_to() const final;
 
+    Id get_id() const final;
+
 private:
     Time get_transmission_time(const Packet& packet) const;
 
@@ -64,6 +67,7 @@ private:
     std::uint32_t m_speed_mbps;
     Time m_src_egress_delay;
     Time m_transmission_delay;
+    Id m_id;
 
     // Queue at the ingress port of the m_next device
     std::queue<Packet> m_next_ingress;
