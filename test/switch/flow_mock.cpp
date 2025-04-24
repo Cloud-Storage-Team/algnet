@@ -9,7 +9,7 @@ void FlowMock::start(std::uint32_t time) {}
 Time FlowMock::create_new_data_packet() {
     return 1;
 };
-Time FlowMock::add_data_to_device() {
+Time FlowMock::put_data_to_device() {
     return 1;
 };
 
