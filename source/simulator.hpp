@@ -21,12 +21,12 @@
 namespace sim {
 
 template <typename TSender, typename TSwitch, typename TReceiver,
-          typename TFlow, typename TLink>
+          typename TLink /*, typename TFlow,*/>
 requires std::derived_from<TSender, ISender> &&
-         std::derived_from<TSwitch, ISwitch> &&
-         std::derived_from<TReceiver, IReceiver> &&
-         std::derived_from<TFlow, IFlow> &&
-         std::derived_from<TLink, ILink>
+    std::derived_from<TSwitch, ISwitch> &&
+    std::derived_from<TReceiver, IReceiver> &&
+    //  std::derived_from<TFlow, IFlow> &&
+    std::derived_from<TLink, ILink>
 class Simulator {
 public:
     Simulator() = default;
@@ -64,22 +64,23 @@ public:
         return m_switches[name];
     }
 
-    std::shared_ptr<TFlow> add_flow(std::shared_ptr<ISender> sender,
-                                    std::shared_ptr<IReceiver> receiver,
-                                    Size packet_size,
-                                    Time delay_between_packets,
-                                    std::uint32_t packets_to_send) {
-        auto flow =
-            std::make_shared<Flow>(sender, receiver, packet_size,
-                                   delay_between_packets, packets_to_send);
-        m_flows.emplace_back(flow);
-        return flow;
-    }
+    // std::shared_ptr<TFlow> add_flow(std::shared_ptr<ISender> sender,
+    //                                 std::shared_ptr<IReceiver> receiver,
+    //                                 Size packet_size,
+    //                                 Time delay_between_packets,
+    //                                 std::uint32_t packets_to_send) {
+    //     auto flow =
+    //         std::make_shared<Flow>(sender, receiver, packet_size,
+    //                                delay_between_packets, packets_to_send);
+    //     m_flows.emplace_back(flow);
+    //     return flow;
+    // }
 
     void add_link(std::shared_ptr<IRoutingDevice> a_from,
                   std::shared_ptr<IRoutingDevice> a_to,
                   std::uint32_t a_speed_mbps, Time a_delay) {
-        auto link = std::make_shared<TLink>(a_from, a_to, a_speed_mbps, a_delay);
+        auto link =
+            std::make_shared<TLink>(a_from, a_to, a_speed_mbps, a_delay);
         m_links.emplace_back(link);
         a_from->add_outlink(link);
         a_to->add_inlink(link);
@@ -116,9 +117,9 @@ public:
         Scheduler::get_instance().add(std::make_unique<Stop>(a_stop_time));
         constexpr Time start_time = 0;
 
-        for (auto flow : m_flows) {
-            flow->start(start_time);
-        }
+        // for (auto flow : m_flows) {
+        //     flow->start(start_time);
+        // }
 
         for (auto [name, sender] : m_senders) {
             Scheduler::get_instance().add(
@@ -144,10 +145,10 @@ private:
     std::unordered_map<std::string, std::shared_ptr<TSender>> m_senders;
     std::unordered_map<std::string, std::shared_ptr<TReceiver>> m_receivers;
     std::unordered_map<std::string, std::shared_ptr<TSwitch>> m_switches;
-    std::vector<std::shared_ptr<IFlow>> m_flows;
-    std::vector<std::shared_ptr<ILink>> m_links;
+    // std::vector<std::shared_ptr<IFlow>> m_flows;
+    std::vector<std::shared_ptr<TLink>> m_links;
 };
 
-using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;
+using BasicSimulator = Simulator<Sender, Switch, Receiver, Link /*, Flow,*/>;
 
 }  // namespace sim

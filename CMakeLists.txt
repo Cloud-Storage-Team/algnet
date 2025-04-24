@@ -13,12 +13,14 @@ file(GLOB_RECURSE tests "test/*.cpp")
 include_directories(
     ${CMAKE_SOURCE_DIR}/source/
     ${CMAKE_SOURCE_DIR}/external/spdlog/include/
-    ${CMAKE_SOURCE_DIR}external/yaml-cpp/
+    ${CMAKE_SOURCE_DIR}/external/yaml-cpp/include/
 )
 
+add_subdirectory(external/yaml-cpp)
 if (BUILD_PROJECT)
     set(TARGET_NAME "${PROJECT_NAME}")
     add_executable(${TARGET_NAME} main.cpp ${src})
+    target_link_libraries(${TARGET_NAME} PRIVATE yaml-cpp)
     target_compile_options(${TARGET_NAME} PRIVATE -Wall -Werror -Wextra)
 endif()
 
