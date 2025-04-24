@@ -8,10 +8,9 @@
 
 
 namespace sim {
-
 	class YamlParser {
 	public:
-		void parseConfig(const std::string& filename, Simulator& simulator);
+		BasicSimulator parseConfig(const std::string& filename);
 
 	private:
 		std::map<std::string, std::shared_ptr<IRoutingDevice>> devices_map;
@@ -19,9 +18,8 @@ namespace sim {
 		static uint32_t parseThroughput(const std::string& throughput_str);
 		static uint32_t parseLatency(const std::string& latency_str);
 
-		void processHosts(const YAML::Node& config, Simulator& simulator);
-		void processSwitches(const YAML::Node& config, Simulator& simulator);
-		void processLinks(const YAML::Node& config, Simulator& simulator) const;
+		void processHosts(const YAML::Node& config, BasicSimulator& simulator);
+		void processSwitches(const YAML::Node& config, BasicSimulator& simulator);
+		void processLinks(const YAML::Node& config, BasicSimulator& simulator) const;
 	};
-
 } // namespace sim

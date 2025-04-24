@@ -2,14 +2,17 @@
 #include <stdexcept>
 #include <string>
 #include <yaml-cpp/yaml.h>
+#include "logger/logger.hpp"
 
 namespace sim {
-	void YamlParser::parseConfig(const std::string &filename, Simulator &simulator) {
+	BasicSimulator YamlParser::parseConfig(const std::string &filename) {
+		BasicSimulator simulator;
 		const YAML::Node config = YAML::LoadFile(filename);
 		processHosts(config, simulator);
 		processSwitches(config, simulator);
 		processLinks(config, simulator);
-		simulator.recalculate_paths();
+		devices_map.clear();
+		return simulator;
 	}
 
 	uint32_t YamlParser::parseThroughput(const std::string &throughput_str) {
@@ -35,11 +38,15 @@ namespace sim {
 		throw std::runtime_error("Unsupported latency unit: " + unit);
 	}
 
-	void YamlParser::processHosts(const YAML::Node &config, Simulator &simulator) {
-		if (!config["hosts"]) return;
+	void YamlParser::processHosts(
+		const YAML::Node &config, BasicSimulator &simulator) {
+		if (!config["hosts"]) {
+			LOG_WARN("No hosts specified in the configuration");
+			return;
+		}
 		for (auto it = config["hosts"].begin(); it != config["hosts"].end(); ++it) {
-			const YAML::Node& key_node = it->first;
-			const YAML::Node& val_node = it->second;
+			const YAML::Node &key_node = it->first;
+			const YAML::Node &val_node = it->second;
 
 			auto key = key_node.as<std::string>();
 			auto type_str = val_node["type"].as<std::string>();
@@ -55,10 +62,12 @@ namespace sim {
 		}
 	}
 
-	void YamlParser::processSwitches(const YAML::Node &config, Simulator &simulator) {
-		if (!config["switches"]) return;
+	void YamlParser::processSwitches(const YAML::Node &config, BasicSimulator &simulator) {
+		if (!config["switches"]) {
+			LOG_WARN("No switches specified in the configuration");
+		}
 
-		const YAML::Node& switches = config["switches"];
+		const YAML::Node &switches = config["switches"];
 		for (auto it = switches.begin(); it != switches.end(); ++it) {
 			auto key = it->first.as<std::string>();
 			const auto name = it->second["name"].as<std::string>();
@@ -66,12 +75,14 @@ namespace sim {
 		}
 	}
 
-	void YamlParser::processLinks(const YAML::Node &config, Simulator &simulator) const {
-		if (!config["links"]) return;
+	void YamlParser::processLinks(const YAML::Node &config, BasicSimulator &simulator) const {
+		if (!config["links"]) {
+			LOG_WARN("No links specified in the configuration");
+		}
 
-		const YAML::Node& links = config["links"];
+		const YAML::Node &links = config["links"];
 		for (auto it = links.begin(); it != links.end(); ++it) {
-			const YAML::Node& link = it->second;
+			const YAML::Node &link = it->second;
 			auto from = link["from"].as<std::string>();
 			auto to = link["to"].as<std::string>();
 			const uint32_t latency = parseLatency(link["latency"].as<std::string>());
