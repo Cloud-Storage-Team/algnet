@@ -5,9 +5,9 @@ namespace sim {
 Packet::Packet(PacketType a_type, Size a_size, IFlow* a_flow)
     : type(a_type), size(a_size), flow(a_flow) {}
 
-std::weak_ptr<IRoutingDevice> Packet::get_destination() const {
+std::shared_ptr<IRoutingDevice> Packet::get_destination() const {
     if (flow == nullptr) {
-        return std::weak_ptr<IRoutingDevice>();
+        return nullptr;
     }
     switch (type) {
         case ACK:
@@ -15,7 +15,7 @@ std::weak_ptr<IRoutingDevice> Packet::get_destination() const {
         case DATA:
             return flow->get_receiver();
         default:
-            return std::weak_ptr<IRoutingDevice>();
+            return nullptr;
     }
 };
 

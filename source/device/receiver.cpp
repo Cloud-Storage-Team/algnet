@@ -57,8 +57,8 @@ std::weak_ptr<ILink> Receiver::next_inlink() {
     return m_router->next_inlink();
 };
 
-std::weak_ptr<ILink> Receiver::get_link_to_destination(
-    std::weak_ptr<IRoutingDevice> dest) const {
+std::shared_ptr<ILink> Receiver::get_link_to_destination(
+    std::shared_ptr<IRoutingDevice> dest) const {
     return m_router->get_link_to_destination(dest);
 };
 
@@ -89,12 +89,12 @@ Time Receiver::process() {
     LOG_INFO("Processing packet from link on receiver. Packet: " +
                  data_packet.to_string());
 
-    std::weak_ptr<IRoutingDevice> destination = data_packet.get_destination();
-    if (destination.expired()) {
+    std::shared_ptr<IRoutingDevice> destination = data_packet.get_destination();
+    if (destination == nullptr) {
         LOG_WARN("Destination device pointer is expired");
         return total_processing_time;
     }
-    if (data_packet.type == DATA && destination.lock().get() == this) {
+    if (data_packet.type == DATA && destination.get() == this) {
         // TODO: think about processing time
         // Not sure if we want to send ack before processing or after it
         total_processing_time += send_ack(data_packet);
@@ -102,13 +102,13 @@ Time Receiver::process() {
         LOG_WARN(
             "Packet arrived to Receiver that is not its destination; using "
             "routing table to send it further");
-        std::weak_ptr<ILink> next_link = get_link_to_destination(destination);
+        std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
 
-        if (next_link.expired()) {
+        if (next_link == nullptr) {
             LOG_WARN("No link corresponds to destination device");
             return total_processing_time;
         }
-        next_link.lock()->schedule_arrival(data_packet);
+        next_link->schedule_arrival(data_packet);
         // TODO: think about redirecting time
     }
 
@@ -120,7 +120,7 @@ Time Receiver::send_ack(Packet data_packet) {
     Packet ack = {PacketType::ACK, 1, data_packet.flow};
 
     auto destination = ack.get_destination();
-    if (destination.expired()) {
+    if (destination == nullptr) {
         LOG_ERROR("Ack destination does not exists");
         return processing_time;
     }

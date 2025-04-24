@@ -42,11 +42,11 @@ bool RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     return true;
 }
 
-std::weak_ptr<ILink> RoutingModule::get_link_to_destination(
-    std::weak_ptr<IRoutingDevice> device) const {
+std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
+    std::shared_ptr<IRoutingDevice> device) const {
     auto iterator = m_routing_table.find(device);
     if (iterator == m_routing_table.end()) {
-        return std::weak_ptr<ILink>();
+        return nullptr;
     }
 
     return (*iterator).second;
@@ -55,9 +55,11 @@ std::weak_ptr<ILink> RoutingModule::get_link_to_destination(
 std::weak_ptr<ILink> RoutingModule::next_inlink() {
     if (m_inlinks.empty()) {
         LOG_INFO("Inlinks storage is empty");
-        return std::weak_ptr<ILink>();
+        return {};
     }
-
+    // auto inlink = *m_next_inlink;
+    // m_next_inlink++;
+    // return inlink.lock();
     return *m_next_inlink++;
 }
 

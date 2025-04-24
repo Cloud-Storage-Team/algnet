@@ -16,11 +16,11 @@ Time FlowMock::put_data_to_device() {
 void FlowMock::update(sim::Packet packet, sim::DeviceType type) {
     
 };
-std::weak_ptr<sim::ISender> FlowMock::get_sender() const {
-    return {};
+std::shared_ptr<sim::ISender> FlowMock::get_sender() const {
+    return nullptr;
 }
-std::weak_ptr<sim::IReceiver> FlowMock::get_receiver() const {
-    return m_receiver;
+std::shared_ptr<sim::IReceiver> FlowMock::get_receiver() const {
+    return m_receiver.lock();
 }
 
 Id FlowMock::get_id() const { return 42; }

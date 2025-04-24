@@ -21,9 +21,9 @@ bool ReceiverMock::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
 
 std::weak_ptr<sim::ILink> ReceiverMock::next_inlink() { return {}; }
 
-std::weak_ptr<sim::ILink> ReceiverMock::get_link_to_destination(
-    std::weak_ptr<IRoutingDevice> device) const {
-    return {};
+std::shared_ptr<sim::ILink> ReceiverMock::get_link_to_destination(
+    std::shared_ptr<IRoutingDevice> device) const {
+    return nullptr;
 }
 
 std::uint32_t ReceiverMock::process() { return 1; }

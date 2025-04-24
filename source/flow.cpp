@@ -59,9 +59,9 @@ Time Flow::put_data_to_device() {
     return m_delay_between_packets;
 }   
 
-std::weak_ptr<ISender> Flow::get_sender() const { return m_src; }
+std::shared_ptr<ISender> Flow::get_sender() const { return m_src.lock(); }
 
-std::weak_ptr<IReceiver> Flow::get_receiver() const { return m_dest; }
+std::shared_ptr<IReceiver> Flow::get_receiver() const { return m_dest.lock(); }
 
 Id Flow::get_id() const { return m_id; }
 

@@ -18,8 +18,8 @@ public:
                               std::shared_ptr<ILink> link) final;
     // returns next inlink and moves inlinks set iterator forward
     std::weak_ptr<ILink> next_inlink() final;
-    std::weak_ptr<ILink> get_link_to_destination(
-        std::weak_ptr<IRoutingDevice> dest) const final;
+    std::shared_ptr<ILink> get_link_to_destination(
+        std::shared_ptr<IRoutingDevice> dest) const final;
     std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
     get_outlinks() const final;
 

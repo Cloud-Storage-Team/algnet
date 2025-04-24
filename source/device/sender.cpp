@@ -60,8 +60,8 @@ std::weak_ptr<ILink> Sender::next_inlink() {
     return m_router->next_inlink();
 };
 
-std::weak_ptr<ILink> Sender::get_link_to_destination(
-    std::weak_ptr<IRoutingDevice> dest) const {
+std::shared_ptr<ILink> Sender::get_link_to_destination(
+    std::shared_ptr<IRoutingDevice> dest) const {
     return m_router->get_link_to_destination(dest);
 };
 
@@ -99,11 +99,11 @@ Time Sender::process() {
                  packet.to_string());
 
     auto destination = packet.get_destination();
-    if (destination.expired()) {
+    if (destination == nullptr) {
         LOG_WARN("Destination device pointer is expired");
         return total_processing_time;
     }
-    if (packet.type == PacketType::ACK && destination.lock().get() == this) {
+    if (packet.type == PacketType::ACK && destination.get() == this) {
         packet.flow->update(packet, get_type());
     } else {
         LOG_WARN(
@@ -139,7 +139,7 @@ Time Sender::send_data() {
 
     auto next_link =
         m_router->get_link_to_destination(data_packet.get_destination());
-    if (next_link.expired()) {
+    if (next_link == nullptr) {
         LOG_WARN("Link to send data packet does not exist");
         return total_processing_time;
     }
@@ -148,7 +148,7 @@ Time Sender::send_data() {
     LOG_INFO("Sent new data packet from sender. Data packet: " +
                  data_packet.to_string());
 
-    next_link.lock()->schedule_arrival(data_packet);
+    next_link->schedule_arrival(data_packet);
     // total_processing_time += sending_data_time;
     return total_processing_time;
 }

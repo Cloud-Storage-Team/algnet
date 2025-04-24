@@ -16,10 +16,10 @@ static std::shared_ptr<sim::IRoutingDevice> get_next_device(
     std::shared_ptr<sim::IRoutingDevice> curr_device,
     std::shared_ptr<sim::IRoutingDevice> dest_device) {
     auto next_link = curr_device->get_link_to_destination(dest_device);
-    if (next_link.expired()) {
+    if (next_link == nullptr) {
         return nullptr;
     }
-    return next_link.lock()->get_to();
+    return next_link->get_to();
 }
 
 bool check_reachability(std::shared_ptr<sim::IRoutingDevice> src_device,

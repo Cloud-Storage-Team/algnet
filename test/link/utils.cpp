@@ -24,9 +24,9 @@ DeviceMock::get_outlinks() const {
     return {};
 }
 
-std::weak_ptr<sim::ILink> DeviceMock::get_link_to_destination(
-    std::weak_ptr<IRoutingDevice> device) const {
-    return {};
+std::shared_ptr<sim::ILink> DeviceMock::get_link_to_destination(
+    std::shared_ptr<IRoutingDevice> device) const {
+    return nullptr;
 }
 
 std::weak_ptr<sim::ILink> DeviceMock::next_inlink() { return {}; }
