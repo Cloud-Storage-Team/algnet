@@ -57,9 +57,7 @@ std::weak_ptr<ILink> RoutingModule::next_inlink() {
         LOG_INFO("Inlinks storage is empty");
         return {};
     }
-    // auto inlink = *m_next_inlink;
-    // m_next_inlink++;
-    // return inlink.lock();
+
     return *m_next_inlink++;
 }
 
