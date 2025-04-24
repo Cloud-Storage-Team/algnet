@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 #include <cstdint>
-#include <yaml-cpp/node/node.h>
+#include <yaml-cpp/yaml.h>
 
 
 namespace sim {

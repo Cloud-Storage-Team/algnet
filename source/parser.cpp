@@ -45,8 +45,8 @@ namespace sim {
 			return;
 		}
 		for (auto it = config["hosts"].begin(); it != config["hosts"].end(); ++it) {
-			const YAML::Node &key_node = it->first;
-			const YAML::Node &val_node = it->second;
+			const YAML::Node key_node = it->first;
+			const YAML::Node val_node = it->second;
 
 			auto key = key_node.as<std::string>();
 			auto type_str = val_node["type"].as<std::string>();
@@ -67,7 +67,7 @@ namespace sim {
 			LOG_WARN("No switches specified in the configuration");
 		}
 
-		const YAML::Node &switches = config["switches"];
+		const YAML::Node switches = config["switches"];
 		for (auto it = switches.begin(); it != switches.end(); ++it) {
 			auto key = it->first.as<std::string>();
 			const auto name = it->second["name"].as<std::string>();
@@ -80,9 +80,9 @@ namespace sim {
 			LOG_WARN("No links specified in the configuration");
 		}
 
-		const YAML::Node &links = config["links"];
+		const YAML::Node links = config["links"];
 		for (auto it = links.begin(); it != links.end(); ++it) {
-			const YAML::Node &link = it->second;
+			const YAML::Node link = it->second;
 			auto from = link["from"].as<std::string>();
 			auto to = link["to"].as<std::string>();
 			const uint32_t latency = parseLatency(link["latency"].as<std::string>());
@@ -97,9 +97,8 @@ namespace sim {
 				throw std::runtime_error("Unknown device in 'to': " + to);
 			}
 
-			auto from_dev = from_it->second;
-			auto to_dev = to_it->second;
-			if (!from_dev || !to_dev) {
+			const auto from_dev = from_it->second;
+			if (const auto to_dev = to_it->second; !from_dev || !to_dev) {
 				throw std::runtime_error("Device pointer is null for " + from + " or " + to);
 			}
 
