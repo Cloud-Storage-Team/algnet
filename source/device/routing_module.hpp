@@ -16,6 +16,8 @@ public:
     bool add_outlink(std::shared_ptr<ILink> link) final;
     bool update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                               std::shared_ptr<ILink> link) final;
+    bool update_routing_table(std::shared_ptr<IRoutingDevice> dest,
+                              std::unordered_map<std::shared_ptr<ILink>, int> paths) final;
     // returns next inlink and moves inlinks set iterator forward
     std::shared_ptr<ILink> next_inlink() final;
     std::shared_ptr<ILink> get_link_to_destination(
@@ -29,7 +31,7 @@ private:
     std::set<std::shared_ptr<ILink>> m_outlinks;
 
     // A routing table: maps the final destination to a specific link
-    std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<ILink>>
+    std::unordered_map<std::shared_ptr<IRoutingDevice>, std::unordered_map<std::shared_ptr<ILink>, int>>
         m_routing_table;
 
     // Iterator for the next ingress to process
