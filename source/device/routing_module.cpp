@@ -66,11 +66,12 @@ std::shared_ptr<ILink> RoutingModule::next_inlink() {
     return inlink.lock();
 }
 
-std::set<std::shared_ptr<ILink>> RoutingModule::get_outlinks() const {
+std::set<std::shared_ptr<ILink>> RoutingModule::get_outlinks() {
+    correctify_outlinks();
     std::set<std::shared_ptr<ILink>> shared_outlinks;
-    for (auto weak_outlink : m_outlinks) {
-        shared_outlinks.insert(weak_outlink.lock());
-    }
+    std::transform(m_outlinks.begin(), m_outlinks.end(),
+                   std::inserter(shared_outlinks, shared_outlinks.begin()),
+                   [](auto link) { return link.lock(); });
     return shared_outlinks;
 }
 
@@ -82,6 +83,15 @@ void RoutingModule::correctify_inlinks() {
                  [](std::weak_ptr<ILink> link) { return !link.expired(); });
     m_inlinks.swap(correct_inlinks);
     m_next_inlink = LoopIterator(m_inlinks.begin(), m_inlinks.end());
+}
+
+void RoutingModule::correctify_outlinks() {
+    std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
+        correct_outlinks;
+    std::copy_if(m_outlinks.begin(), m_outlinks.end(),
+                 std::inserter(correct_outlinks, correct_outlinks.begin()),
+                 [](std::weak_ptr<ILink> link) { return !link.expired(); });
+    m_outlinks.swap(correct_outlinks);
 }
 
 }  // namespace sim

@@ -139,7 +139,7 @@ Time Receiver::send_ack(Packet data_packet) {
     return processing_time;
 }
 
-std::set<std::shared_ptr<ILink>> Receiver::get_outlinks() const {
+std::set<std::shared_ptr<ILink>> Receiver::get_outlinks() {
     return m_router->get_outlinks();
 }
 

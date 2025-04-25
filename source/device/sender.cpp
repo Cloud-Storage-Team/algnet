@@ -151,7 +151,7 @@ Time Sender::send_data() {
     return total_processing_time;
 }
 
-std::set<std::shared_ptr<ILink>> Sender::get_outlinks() const {
+std::set<std::shared_ptr<ILink>> Sender::get_outlinks() {
     return m_router->get_outlinks();
 }
 

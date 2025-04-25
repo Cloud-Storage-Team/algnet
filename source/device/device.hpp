@@ -34,7 +34,7 @@ public:
     virtual std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> device) const = 0;
     virtual std::shared_ptr<ILink> next_inlink() = 0;
-    virtual std::set<std::shared_ptr<ILink>>get_outlinks() const = 0;
+    virtual std::set<std::shared_ptr<ILink>>get_outlinks() = 0;
 };
 
 }  // namespace sim
