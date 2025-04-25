@@ -22,7 +22,7 @@ TEST_F(LinkToDevice, RoundRobin) {
             std::make_shared<TestLink>(TestLink(sources[i], dest)));
     }
 
-    EXPECT_EQ(dest->next_inlink().lock(), nullptr);
+    EXPECT_EQ(dest->next_inlink(), nullptr);
     for (int i = 0; i < NUMBER_OF_LINKS; i++) {
         dest->add_inlink(links[i]);
     }

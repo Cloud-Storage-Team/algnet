@@ -50,7 +50,7 @@ bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     return m_router->update_routing_table(dest, link);
 }
 
-std::weak_ptr<ILink> Switch::next_inlink() { return m_router->next_inlink(); }
+std::shared_ptr<ILink> Switch::next_inlink() { return m_router->next_inlink(); }
 
 std::shared_ptr<ILink> Switch::get_link_to_destination(
     std::shared_ptr<IRoutingDevice> dest) const {

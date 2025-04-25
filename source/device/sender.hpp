@@ -27,7 +27,7 @@ public:
     bool add_outlink(std::shared_ptr<ILink> link) final;
     bool update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                               std::shared_ptr<ILink> link) final;
-    std::weak_ptr<ILink> next_inlink() final;
+    std::shared_ptr<ILink> next_inlink() final;
     std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;
     std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>

@@ -56,7 +56,7 @@ bool Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     return true;
 }
 
-std::weak_ptr<ILink> Sender::next_inlink() {
+std::shared_ptr<ILink> Sender::next_inlink() {
     return m_router->next_inlink();
 };
 

@@ -22,9 +22,9 @@ TEST_F(AddLink, LinkIsPresent) {
     auto dest = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
     auto link = std::make_shared<TestLink>(TestLink(source, dest));
 
-    EXPECT_EQ(dest->next_inlink().lock(), nullptr);
+    EXPECT_EQ(dest->next_inlink(), nullptr);
     dest->add_inlink(link);
-    EXPECT_EQ(dest->next_inlink().lock(), link);
+    EXPECT_EQ(dest->next_inlink(), link);
 
     EXPECT_TRUE(source->get_outlinks().empty());
     source->add_outlink(link);
@@ -45,12 +45,8 @@ TEST_F(AddLink, SameLinkMultipleTimes) {
     std::mt19937 gen(RANDOM_SEED);
     std::uniform_int_distribution<> dis(1, MAX_LINKS);
 
-    std::map<std::weak_ptr<sim::ILink>, int,
-             std::owner_less<std::weak_ptr<sim::ILink>>>
-        number_of_inlink_appearances;
-    std::map<std::weak_ptr<sim::ILink>, int,
-             std::owner_less<std::weak_ptr<sim::ILink>>>
-        number_of_outlink_appearances;
+    std::map<std::shared_ptr<sim::ILink>, int> number_of_inlink_appearances;
+    std::map<std::shared_ptr<sim::ILink>, int> number_of_outlink_appearances;
 
     for (auto device : neighbour_devices) {
         auto inlink = std::make_shared<TestLink>(device, dest);
@@ -76,7 +72,7 @@ TEST_F(AddLink, SameLinkMultipleTimes) {
             auto current_inlink = dest->next_inlink();
             number_of_inlink_appearances[current_inlink]++;
             auto current_outlink = *outlink_it++;
-            number_of_outlink_appearances[current_outlink]++;
+            number_of_outlink_appearances[current_outlink.lock()]++;
         }
     }
     for (auto appearances : number_of_inlink_appearances) {

@@ -29,6 +29,6 @@ std::shared_ptr<sim::ILink> DeviceMock::get_link_to_destination(
     return nullptr;
 }
 
-std::weak_ptr<sim::ILink> DeviceMock::next_inlink() { return {}; }
+std::shared_ptr<sim::ILink> DeviceMock::next_inlink() { return {}; }
 
 }  // namespace test

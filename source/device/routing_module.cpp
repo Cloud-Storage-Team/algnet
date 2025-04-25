@@ -52,13 +52,13 @@ std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
     return (*iterator).second;
 }
 
-std::weak_ptr<ILink> RoutingModule::next_inlink() {
+std::shared_ptr<ILink> RoutingModule::next_inlink() {
     if (m_inlinks.empty()) {
         LOG_INFO("Inlinks storage is empty");
-        return {};
+        return nullptr;
     }
-
-    return *m_next_inlink++;
+    auto inlink = *m_next_inlink++;
+    return inlink.lock();
 }
 
 std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
