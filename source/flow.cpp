@@ -54,6 +54,10 @@ Time Flow::create_new_data_packet() {
 }
 
 Time Flow::put_data_to_device() {
+    if (m_src.expired()) {
+        LOG_ERROR("Flow source was deleted; can not put data to it");
+        return 0;
+    }
     m_src.lock()->enqueue_packet(m_sending_buffer.front());
     m_sending_buffer.pop();
     return m_delay_between_packets;
