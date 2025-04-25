@@ -23,9 +23,9 @@ RoutingTable bfs(std::shared_ptr<IRoutingDevice>& start_device) {
         }
         used.insert(device);
         auto outlinks = device->get_outlinks();
-        for (std::weak_ptr<ILink> link : outlinks) {
-            auto next_hop = link.lock()->get_to();
-            auto curr_device = link.lock()->get_from();
+        for (std::shared_ptr<ILink> link : outlinks) {
+            auto next_hop = link->get_to();
+            auto curr_device = link->get_from();
             if (used.contains(next_hop)) {
                 continue;
             }
