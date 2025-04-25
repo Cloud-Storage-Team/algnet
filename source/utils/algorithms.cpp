@@ -30,7 +30,7 @@ RoutingTable bfs(std::shared_ptr<IRoutingDevice>& start_device) {
                 continue;
             }
             if (curr_device == start_device) {
-                routing_table[next_hop] = link.lock();
+                routing_table[next_hop] = link;
             } else if (!routing_table.contains(next_hop)) {
                 routing_table[next_hop] = routing_table[curr_device];
             }
