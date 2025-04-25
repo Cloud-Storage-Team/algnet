@@ -22,6 +22,8 @@ public:
         std::shared_ptr<IRoutingDevice> dest) const final;
     std::set<std::shared_ptr<ILink>> get_outlinks() const final;
 
+    void correctify_inlinks();
+
 private:
     // Ordered set as we need to iterate over the ingress buffers
     std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>

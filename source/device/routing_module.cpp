@@ -1,5 +1,6 @@
 #include "routing_module.hpp"
 
+#include <algorithm>
 #include <memory>
 
 #include "link.hpp"
@@ -58,6 +59,10 @@ std::shared_ptr<ILink> RoutingModule::next_inlink() {
         return nullptr;
     }
     auto inlink = *m_next_inlink++;
+    if (inlink.expired()) {
+        correctify_inlinks();
+        return next_inlink();
+    }
     return inlink.lock();
 }
 
@@ -67,6 +72,16 @@ std::set<std::shared_ptr<ILink>> RoutingModule::get_outlinks() const {
         shared_outlinks.insert(weak_outlink.lock());
     }
     return shared_outlinks;
+}
+
+void RoutingModule::correctify_inlinks() {
+    std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
+        correct_inlinks;
+    std::copy_if(m_inlinks.begin(), m_inlinks.end(),
+                 std::inserter(correct_inlinks, correct_inlinks.begin()),
+                 [](std::weak_ptr<ILink> link) { return !link.expired(); });
+    m_inlinks.swap(correct_inlinks);
+    m_next_inlink = LoopIterator(m_inlinks.begin(), m_inlinks.end());
 }
 
 }  // namespace sim
