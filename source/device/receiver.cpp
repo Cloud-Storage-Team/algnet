@@ -65,7 +65,7 @@ std::shared_ptr<ILink> Receiver::get_link_to_destination(
 DeviceType Receiver::get_type() const { return DeviceType::RECEIVER; }
 
 Time Receiver::process() {
-    std::weak_ptr<ILink> current_inlink = m_router->next_inlink();
+    std::shared_ptr<ILink> current_inlink = next_inlink();
     Time total_processing_time = 1;
 
     if (current_inlink.expired()) {
