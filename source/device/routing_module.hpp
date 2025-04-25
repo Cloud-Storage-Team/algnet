@@ -20,8 +20,7 @@ public:
     std::shared_ptr<ILink> next_inlink() final;
     std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;
-    std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
-    get_outlinks() const final;
+    std::set<std::shared_ptr<ILink>> get_outlinks() const final;
 
 private:
     // Ordered set as we need to iterate over the ingress buffers
@@ -32,7 +31,7 @@ private:
         m_outlinks;
 
     // A routing table: maps the final destination to a specific link
-    std::map<std::weak_ptr<IRoutingDevice>, std::shared_ptr<ILink>,
+    std::map<std::weak_ptr<IRoutingDevice>, std::weak_ptr<ILink>,
              std::owner_less<std::weak_ptr<IRoutingDevice>>>
         m_routing_table;
 

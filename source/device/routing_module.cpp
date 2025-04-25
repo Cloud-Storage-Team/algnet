@@ -49,7 +49,7 @@ std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
         return nullptr;
     }
 
-    return (*iterator).second;
+    return (*iterator).second.lock();
 }
 
 std::shared_ptr<ILink> RoutingModule::next_inlink() {
@@ -61,9 +61,12 @@ std::shared_ptr<ILink> RoutingModule::next_inlink() {
     return inlink.lock();
 }
 
-std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
-RoutingModule::get_outlinks() const {
-    return m_outlinks;
+std::set<std::shared_ptr<ILink>> RoutingModule::get_outlinks() const {
+    std::set<std::shared_ptr<ILink>> shared_outlinks;
+    for (auto weak_outlink : m_outlinks) {
+        shared_outlinks.insert(weak_outlink.lock());
+    }
+    return shared_outlinks;
 }
 
 }  // namespace sim

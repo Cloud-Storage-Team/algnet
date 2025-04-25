@@ -87,7 +87,7 @@ Time Receiver::process() {
 
     // TODO: add some receiver ID for easier packet path tracing
     LOG_INFO("Processing packet from link on receiver. Packet: " +
-                 data_packet.to_string());
+             data_packet.to_string());
 
     std::shared_ptr<IRoutingDevice> destination = data_packet.get_destination();
     if (destination == nullptr) {
@@ -134,14 +134,13 @@ Time Receiver::send_ack(Packet data_packet) {
 
     // TODO: add some receiver ID for easier packet path tracing
     LOG_INFO("Sent ack after processing packet on receiver. Data packet: " +
-                 data_packet.to_string() + ". Ack packet: " + ack.to_string());
+             data_packet.to_string() + ". Ack packet: " + ack.to_string());
 
     link_to_dest.lock()->schedule_arrival(ack);
     return processing_time;
 }
 
-std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
-Receiver::get_outlinks() const {
+std::set<std::shared_ptr<ILink>> Receiver::get_outlinks() const {
     return m_router->get_outlinks();
 }
 

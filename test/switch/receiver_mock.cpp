@@ -31,8 +31,7 @@ sim::DeviceType ReceiverMock::get_type() const {
     return sim::DeviceType::RECEIVER;
 }
 
-std::set<std::weak_ptr<sim::ILink>, std::owner_less<std::weak_ptr<sim::ILink>>>
-ReceiverMock::get_outlinks() const {
+std::set<std::shared_ptr<sim::ILink>> ReceiverMock::get_outlinks() const {
     return {};
 }
 

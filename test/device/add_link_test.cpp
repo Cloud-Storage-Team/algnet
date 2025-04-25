@@ -30,7 +30,7 @@ TEST_F(AddLink, LinkIsPresent) {
     source->add_outlink(link);
     auto outlinks = source->get_outlinks();
     EXPECT_TRUE(outlinks.contains(link));
-    EXPECT_EQ((*outlinks.begin()).lock(), link);
+    EXPECT_EQ((*outlinks.begin()), link);
 }
 
 TEST_F(AddLink, SameLinkMultipleTimes) {
@@ -63,8 +63,7 @@ TEST_F(AddLink, SameLinkMultipleTimes) {
 
     auto outlinks = source->get_outlinks();
     sim::LoopIterator<
-        std::set<std::weak_ptr<sim::ILink>,
-                 std::owner_less<std::weak_ptr<sim::ILink>>>::iterator>
+        std::set<std::shared_ptr<sim::ILink>>::iterator>
         outlink_it(outlinks.begin(), outlinks.end());
 
     for (size_t loop = 0; loop < NUMBER_OF_LOOPS; loop++) {
@@ -72,7 +71,7 @@ TEST_F(AddLink, SameLinkMultipleTimes) {
             auto current_inlink = dest->next_inlink();
             number_of_inlink_appearances[current_inlink]++;
             auto current_outlink = *outlink_it++;
-            number_of_outlink_appearances[current_outlink.lock()]++;
+            number_of_outlink_appearances[current_outlink]++;
         }
     }
     for (auto appearances : number_of_inlink_appearances) {

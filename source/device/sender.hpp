@@ -30,8 +30,7 @@ public:
     std::shared_ptr<ILink> next_inlink() final;
     std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;
-    std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
-    get_outlinks() const final;
+    std::set<std::shared_ptr<ILink>> get_outlinks() const final;
 
     DeviceType get_type() const final;
     // Process an ACK by removing it from the ingress buffer,
@@ -45,7 +44,7 @@ public:
     Time send_data() final;
 
     void enqueue_packet(Packet packet) final;
-    
+
     Id get_id() const final;
 
 private:

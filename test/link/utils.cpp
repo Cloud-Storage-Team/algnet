@@ -19,8 +19,7 @@ bool DeviceMock::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     return false;
 }
 
-std::set<std::weak_ptr<sim::ILink>, std::owner_less<std::weak_ptr<sim::ILink>>>
-DeviceMock::get_outlinks() const {
+std::set<std::shared_ptr<sim::ILink>> DeviceMock::get_outlinks() const {
     return {};
 }
 

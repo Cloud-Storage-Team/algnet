@@ -100,8 +100,7 @@ Time Switch::process() {
     return total_processing_time;
 }
 
-std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
-Switch::get_outlinks() const {
+std::set<std::shared_ptr<ILink>> Switch::get_outlinks() const {
     return m_router->get_outlinks();
 }
 
