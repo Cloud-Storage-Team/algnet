@@ -61,14 +61,14 @@ DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
 
 Time Switch::process() {
     Time total_processing_time = 1;
-    std::weak_ptr<ILink> link = next_inlink();
+    std::shared_ptr<ILink> link = next_inlink();
 
-    if (link.expired()) {
+    if (link == nullptr) {
         LOG_WARN("No next inlink");
         return total_processing_time;
     }
 
-    std::optional<Packet> optional_packet = link.lock()->get_packet();
+    std::optional<Packet> optional_packet = link->get_packet();
     if (!optional_packet.has_value()) {
         LOG_WARN("No packet in link");
         return total_processing_time;

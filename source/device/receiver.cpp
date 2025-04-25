@@ -68,12 +68,12 @@ Time Receiver::process() {
     std::shared_ptr<ILink> current_inlink = next_inlink();
     Time total_processing_time = 1;
 
-    if (current_inlink.expired()) {
+    if (current_inlink == nullptr) {
         LOG_WARN("No available inlinks for device");
         return total_processing_time;
     }
 
-    std::optional<Packet> opt_data_packet = current_inlink.lock()->get_packet();
+    std::optional<Packet> opt_data_packet = current_inlink->get_packet();
     if (!opt_data_packet.has_value()) {
         LOG_WARN("No available packets from inlink for device");
         return total_processing_time;
@@ -125,9 +125,8 @@ Time Receiver::send_ack(Packet data_packet) {
         return processing_time;
     }
 
-    std::weak_ptr<ILink> link_to_dest =
-        m_router->get_link_to_destination(destination);
-    if (link_to_dest.expired()) {
+    std::shared_ptr<ILink> link_to_dest = get_link_to_destination(destination);
+    if (link_to_dest == nullptr) {
         LOG_ERROR("Link to send ack does not exist");
         return processing_time;
     }
@@ -136,7 +135,7 @@ Time Receiver::send_ack(Packet data_packet) {
     LOG_INFO("Sent ack after processing packet on receiver. Data packet: " +
              data_packet.to_string() + ". Ack packet: " + ack.to_string());
 
-    link_to_dest.lock()->schedule_arrival(ack);
+    link_to_dest->schedule_arrival(ack);
     return processing_time;
 }
 

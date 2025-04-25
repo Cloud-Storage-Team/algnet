@@ -73,15 +73,15 @@ void Sender::enqueue_packet(Packet packet) {
 }
 
 Time Sender::process() {
-    std::weak_ptr<ILink> current_inlink = m_router->next_inlink();
+    std::shared_ptr<ILink> current_inlink = next_inlink();
     Time total_processing_time = 1;
 
-    if (current_inlink.expired()) {
+    if (current_inlink == nullptr) {
         LOG_WARN("No available inlinks for device");
         return total_processing_time;
     }
 
-    std::optional<Packet> opt_packet = current_inlink.lock()->get_packet();
+    std::optional<Packet> opt_packet = current_inlink->get_packet();
     if (!opt_packet.has_value()) {
         LOG_WARN("No available packets from inlink for device");
         return total_processing_time;
@@ -108,13 +108,13 @@ Time Sender::process() {
         LOG_WARN(
             "Packet arrived to Sender that is not its destination; use routing "
             "table to send it further");
-        std::weak_ptr<ILink> next_link = get_link_to_destination(destination);
+        std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
 
-        if (next_link.expired()) {
+        if (next_link == nullptr) {
             LOG_WARN("No link corresponds to destination device");
             return total_processing_time;
         }
-        next_link.lock()->schedule_arrival(packet);
+        next_link->schedule_arrival(packet);
     }
     // total_processing_time += processing_ack_time;
 
@@ -136,8 +136,7 @@ Time Sender::send_data() {
     LOG_INFO("Taken new data packet on sender. Packet: " +
              data_packet.to_string());
 
-    auto next_link =
-        m_router->get_link_to_destination(data_packet.get_destination());
+    auto next_link = get_link_to_destination(data_packet.get_destination());
     if (next_link == nullptr) {
         LOG_WARN("Link to send data packet does not exist");
         return total_processing_time;
