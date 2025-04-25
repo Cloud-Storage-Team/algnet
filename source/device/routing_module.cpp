@@ -76,22 +76,16 @@ std::set<std::shared_ptr<ILink>> RoutingModule::get_outlinks() {
 }
 
 void RoutingModule::correctify_inlinks() {
-    std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
-        correct_inlinks;
-    std::copy_if(m_inlinks.begin(), m_inlinks.end(),
-                 std::inserter(correct_inlinks, correct_inlinks.begin()),
-                 [](std::weak_ptr<ILink> link) { return !link.expired(); });
-    m_inlinks.swap(correct_inlinks);
-    m_next_inlink = LoopIterator(m_inlinks.begin(), m_inlinks.end());
+    std::size_t erased_count = std::erase_if(
+        m_inlinks, [](std::weak_ptr<ILink> link) { return link.expired(); });
+    if (erased_count > 0) {
+        m_next_inlink = LoopIterator(m_inlinks.begin(), m_inlinks.end());
+    }
 }
 
 void RoutingModule::correctify_outlinks() {
-    std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
-        correct_outlinks;
-    std::copy_if(m_outlinks.begin(), m_outlinks.end(),
-                 std::inserter(correct_outlinks, correct_outlinks.begin()),
-                 [](std::weak_ptr<ILink> link) { return !link.expired(); });
-    m_outlinks.swap(correct_outlinks);
+    std::erase_if(m_outlinks,
+                  [](std::weak_ptr<ILink> link) { return link.expired(); });
 }
 
 }  // namespace sim
