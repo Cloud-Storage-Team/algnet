@@ -53,8 +53,8 @@ private:
     void schedule_packet_generation(Time time);
     Packet generate_packet();
 
-    std::shared_ptr<ISender> m_src;
-    std::shared_ptr<IReceiver> m_dest;
+    std::weak_ptr<ISender> m_src;
+    std::weak_ptr<IReceiver> m_dest;
     Size m_packet_size;
     Time m_delay_between_packets;
     std::uint32_t m_updates_number;

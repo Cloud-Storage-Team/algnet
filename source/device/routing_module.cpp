@@ -1,5 +1,8 @@
 #include "routing_module.hpp"
 
+#include <algorithm>
+#include <memory>
+
 #include "link.hpp"
 #include "logger/logger.hpp"
 
@@ -11,8 +14,10 @@ bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
         return false;
     }
     m_inlinks.insert(link);
-    m_next_inlink = LoopIterator<std::set<std::shared_ptr<ILink>>::iterator>(
-        m_inlinks.begin(), m_inlinks.end());
+    m_next_inlink =
+        LoopIterator<std::set<std::weak_ptr<ILink>,
+                              std::owner_less<std::weak_ptr<ILink>>>::iterator>(
+            m_inlinks.begin(), m_inlinks.end());
     return true;
 }
 
@@ -26,7 +31,7 @@ bool RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
 }
 
 bool RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                         std::shared_ptr<ILink> link) {
+                                         std::shared_ptr<ILink> link, int paths) {
     if (link == nullptr) {
         LOG_WARN("Unexpected nullptr link");
         return false;
@@ -34,19 +39,7 @@ bool RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     auto link_dest = link->get_to();
 
     // TODO: discuss storing weak_ptrs instead of shared
-    m_routing_table[dest][link] += 1;
-    return true;
-}
-
-bool RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                         std::unordered_map<std::shared_ptr<ILink>, int> paths) {
-    if (paths.empty()) {
-        LOG_WARN("Unexpected nullptr link");
-        return false;
-    }
-
-    // TODO: discuss storing weak_ptrs instead of shared
-    m_routing_table[dest] = paths;
+    m_routing_table[dest][link] += paths;
     return true;
 }
 
@@ -74,7 +67,7 @@ std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
     for (const auto& [link, weight] : link_map) {
         cumulative_weight += weight;
         if (random_value < cumulative_weight) {
-            return link;
+            return link.lock();
         }
     }
 
@@ -86,12 +79,34 @@ std::shared_ptr<ILink> RoutingModule::next_inlink() {
         LOG_INFO("Inlinks storage is empty");
         return nullptr;
     }
-
-    return *m_next_inlink++;
+    auto inlink = *m_next_inlink++;
+    if (inlink.expired()) {
+        correctify_inlinks();
+        return next_inlink();
+    }
+    return inlink.lock();
 }
 
-std::set<std::shared_ptr<ILink>> RoutingModule::get_outlinks() const {
-    return m_outlinks;
+std::set<std::shared_ptr<ILink>> RoutingModule::get_outlinks() {
+    correctify_outlinks();
+    std::set<std::shared_ptr<ILink>> shared_outlinks;
+    std::transform(m_outlinks.begin(), m_outlinks.end(),
+                   std::inserter(shared_outlinks, shared_outlinks.begin()),
+                   [](auto link) { return link.lock(); });
+    return shared_outlinks;
+}
+
+void RoutingModule::correctify_inlinks() {
+    std::size_t erased_count = std::erase_if(
+        m_inlinks, [](std::weak_ptr<ILink> link) { return link.expired(); });
+    if (erased_count > 0) {
+        m_next_inlink = LoopIterator(m_inlinks.begin(), m_inlinks.end());
+    }
+}
+
+void RoutingModule::correctify_outlinks() {
+    std::erase_if(m_outlinks,
+                  [](std::weak_ptr<ILink> link) { return link.expired(); });
 }
 
 }  // namespace sim

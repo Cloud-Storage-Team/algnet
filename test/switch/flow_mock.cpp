@@ -20,7 +20,7 @@ std::shared_ptr<sim::ISender> FlowMock::get_sender() const {
     return nullptr;
 }
 std::shared_ptr<sim::IReceiver> FlowMock::get_receiver() const {
-    return m_receiver;
+    return m_receiver.lock();
 }
 
 Id FlowMock::get_id() const { return 42; }

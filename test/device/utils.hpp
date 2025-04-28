@@ -29,8 +29,8 @@ public:
     Id get_id() const final;
 
 private:
-    std::shared_ptr<sim::IRoutingDevice> src;
-    std::shared_ptr<sim::IRoutingDevice> dst;
+    std::weak_ptr<sim::IRoutingDevice> src;
+    std::weak_ptr<sim::IRoutingDevice> dst;
     sim::Packet packet;
 };
 

@@ -3,6 +3,7 @@
 #include "link.hpp"
 
 #include <queue>
+#include <set>
 
 namespace sim {
 
@@ -21,7 +22,7 @@ RoutingTable bfs(std::shared_ptr<IRoutingDevice>& start_device) {
             continue;
         }
         used.insert(device);
-        std::set<std::shared_ptr<ILink>> outlinks = device->get_outlinks();
+        auto outlinks = device->get_outlinks();
         for (std::shared_ptr<ILink> link : outlinks) {
             auto next_hop = link->get_to();
             auto curr_device = link->get_from();

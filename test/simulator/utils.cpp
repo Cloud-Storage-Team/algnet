@@ -1,6 +1,5 @@
 #include "utils.hpp"
 
-#include "logger/logger.hpp"
 #include "simulator.hpp"
 
 namespace test {
