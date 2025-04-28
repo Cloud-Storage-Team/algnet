@@ -105,8 +105,10 @@ public:
     void recalculate_paths() {
         for (auto src_device : get_devices()) {
             RoutingTable routing_table = bfs(src_device);
-            for (auto [dest_device, link] : routing_table) {
-                src_device->update_routing_table(dest_device, link);
+            for (auto [dest_device, links] : routing_table) {
+                for (auto [link, paths]: links) {
+                    src_device->update_routing_table(dest_device, link, paths);
+                }
             }
         }
     }

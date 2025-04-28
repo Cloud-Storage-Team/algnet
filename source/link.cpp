@@ -1,5 +1,6 @@
 #include "link.hpp"
 
+#include "device/device.hpp"
 #include "event.hpp"
 #include "logger/logger.hpp"
 #include "scheduler.hpp"

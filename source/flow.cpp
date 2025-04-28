@@ -29,13 +29,13 @@ Packet Flow::generate_packet() {
     packet.type = sim::PacketType::DATA;
     packet.size = m_packet_size;
     packet.flow = this;
-    packet.source_id = m_src->get_id();
-    packet.dest_id = m_dest->get_id();
+    packet.source_id = m_src.lock()->get_id();
+    packet.dest_id = m_dest.lock()->get_id();
     packet.RTT = 0;
     return packet;
 }
 
-void Flow::start(std::uint32_t time) { schedule_packet_generation(time); }
+void Flow::start(Time time) { schedule_packet_generation(time); }
 
 void Flow::update(Packet packet, DeviceType type) { 
     (void)packet;
@@ -56,14 +56,14 @@ Time Flow::create_new_data_packet() {
 }
 
 Time Flow::put_data_to_device() {
-    m_src->enqueue_packet(m_sending_buffer.front());
+    m_src.lock()->enqueue_packet(m_sending_buffer.front());
     m_sending_buffer.pop();
     return m_delay_between_packets;
 }   
 
-std::shared_ptr<ISender> Flow::get_sender() const { return m_src; }
+std::shared_ptr<ISender> Flow::get_sender() const { return m_src.lock(); }
 
-std::shared_ptr<IReceiver> Flow::get_receiver() const { return m_dest; }
+std::shared_ptr<IReceiver> Flow::get_receiver() const { return m_dest.lock(); }
 
 Id Flow::get_id() const { return m_id; }
 

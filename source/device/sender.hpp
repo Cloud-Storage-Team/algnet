@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <queue>
 
 #include "device.hpp"
@@ -25,13 +26,11 @@ public:
     bool add_inlink(std::shared_ptr<ILink> link) final;
     bool add_outlink(std::shared_ptr<ILink> link) final;
     bool update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                              std::shared_ptr<ILink> link) final;
-    bool update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                              std::unordered_map<std::shared_ptr<ILink>, int> paths) final;
+                              std::shared_ptr<ILink> link, int paths = 1) final;
     std::shared_ptr<ILink> next_inlink() final;
     std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;
-    std::set<std::shared_ptr<ILink>> get_outlinks() const final;
+    std::set<std::shared_ptr<ILink>> get_outlinks() final;
 
     DeviceType get_type() const final;
     // Process an ACK by removing it from the ingress buffer,
@@ -45,7 +44,7 @@ public:
     Time send_data(Time current_time) final;
 
     void enqueue_packet(Packet packet) final;
-    
+
     Id get_id() const final;
 
 private:

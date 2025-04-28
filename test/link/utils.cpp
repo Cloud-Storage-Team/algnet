@@ -1,5 +1,7 @@
 #include "utils.hpp"
 
+#include <memory>
+
 #include "scheduler.hpp"
 
 namespace test {
@@ -13,17 +15,11 @@ bool DeviceMock::add_inlink(std::shared_ptr<sim::ILink> link) { return false; }
 bool DeviceMock::add_outlink(std::shared_ptr<sim::ILink> link) { return false; }
 
 bool DeviceMock::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                      std::shared_ptr<sim::ILink> link) {
+                                      std::shared_ptr<sim::ILink> link, int paths) {
     return false;
 }
 
-
-bool DeviceMock::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                      std::unordered_map<std::shared_ptr<sim::ILink>, int> paths) {
-    return false;
-}
-
-std::set<std::shared_ptr<sim::ILink>> DeviceMock::get_outlinks() const {
+std::set<std::shared_ptr<sim::ILink>> DeviceMock::get_outlinks() {
     return {};
 }
 
@@ -32,6 +28,6 @@ std::shared_ptr<sim::ILink> DeviceMock::get_link_to_destination(
     return nullptr;
 }
 
-std::shared_ptr<sim::ILink> DeviceMock::next_inlink() { return nullptr; }
+std::shared_ptr<sim::ILink> DeviceMock::next_inlink() { return {}; }
 
 }  // namespace test

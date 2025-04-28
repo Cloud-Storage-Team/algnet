@@ -1,5 +1,9 @@
 #include "receiver_mock.hpp"
 
+#include <memory>
+
+#include "link.hpp"
+
 namespace test {
 
 bool ReceiverMock::add_inlink(std::shared_ptr<sim::ILink> link) {
@@ -11,12 +15,7 @@ bool ReceiverMock::add_outlink(std::shared_ptr<sim::ILink> link) {
 }
 
 bool ReceiverMock::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                        std::shared_ptr<sim::ILink> link) {
-    return false;
-}
-
-bool ReceiverMock::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-    std::unordered_map<std::shared_ptr<sim::ILink>, int> paths) {
+                                        std::shared_ptr<sim::ILink> link, int paths) {
     return false;
 }
 
@@ -32,7 +31,7 @@ sim::DeviceType ReceiverMock::get_type() const {
     return sim::DeviceType::RECEIVER;
 }
 
-std::set<std::shared_ptr<sim::ILink>> ReceiverMock::get_outlinks() const {
+std::set<std::shared_ptr<sim::ILink>> ReceiverMock::get_outlinks() {
     return {};
 }
 

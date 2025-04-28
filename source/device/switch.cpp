@@ -4,6 +4,7 @@
 
 #include "link.hpp"
 #include "logger/logger.hpp"
+#include "utils/validation.hpp"
 
 namespace sim {
 
@@ -12,8 +13,7 @@ Switch::Switch()
       m_id(IdentifierFactory::get_instance().generate_id()) {}
 
 bool Switch::add_inlink(std::shared_ptr<ILink> link) {
-    if (link == nullptr) {
-        LOG_WARN("Add nullptr inlink to switch device");
+    if (!is_valid_link(link)) {
         return false;
     }
     if (link->get_to().get() != this) {
@@ -24,8 +24,7 @@ bool Switch::add_inlink(std::shared_ptr<ILink> link) {
 }
 
 bool Switch::add_outlink(std::shared_ptr<ILink> link) {
-    if (link == nullptr) {
-        LOG_WARN("Add nullptr outlink to switch device");
+    if (!is_valid_link(link)) {
         return false;
     }
     if (link->get_from().get() != this) {
@@ -36,39 +35,19 @@ bool Switch::add_outlink(std::shared_ptr<ILink> link) {
 }
 
 bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                  std::shared_ptr<ILink> link) {
+                                  std::shared_ptr<ILink> link, int paths) {
     if (dest == nullptr) {
         LOG_WARN("Destination device does not exist");
         return false;
     }
-    if (link == nullptr) {
-        LOG_WARN("Link does not exist");
+    if (!is_valid_link(link)) {
         return false;
     }
     if (link->get_from().get() != this) {
         LOG_WARN("Link source is not our device");
         return false;
     }
-    return m_router->update_routing_table(dest, link);
-}
-
-bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                  std::unordered_map<std::shared_ptr<ILink>, int> paths) {
-    if (dest == nullptr) {
-        LOG_WARN("Destination device does not exist");
-        return false;
-    }
-
-    if (paths.empty()) {
-        LOG_WARN("Link does not exist");
-        return false;
-    }
-
-    // if (link->get_from().get() != this) {
-    //     LOG_WARN("Link source is not our device");
-    //     return false;
-    // }
-    return m_router->update_routing_table(dest, paths);
+    return m_router->update_routing_table(dest, link, paths);
 }
 
 std::shared_ptr<ILink> Switch::next_inlink() { return m_router->next_inlink(); }
@@ -101,6 +80,10 @@ Time Switch::process(Time current_time) {
         return total_processing_time;
     }
     std::shared_ptr<IRoutingDevice> destination = packet.get_destination();
+    if (destination == nullptr) {
+        LOG_WARN("Destination device pointer is expired");
+        return total_processing_time;
+    }
 
     std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
 
@@ -111,14 +94,14 @@ Time Switch::process(Time current_time) {
 
     // TODO: add some switch ID for easier packet path tracing
     LOG_INFO("Processing packet from link on switch. Packet: " +
-                 packet.to_string());
+             packet.to_string());
 
     // TODO: increase total_processing_time correctly
     next_link->schedule_arrival(packet);
     return total_processing_time;
 }
 
-std::set<std::shared_ptr<ILink>> Switch::get_outlinks() const {
+std::set<std::shared_ptr<ILink>> Switch::get_outlinks() {
     return m_router->get_outlinks();
 }
 

@@ -1,14 +1,15 @@
 #include <gtest/gtest.h>
 
+#include <memory>
 #include <vector>
 
 #include "device/device.hpp"
+#include "device/switch.hpp"
 #include "flow_mock.hpp"
 #include "link.hpp"
 #include "link_mock.hpp"
 #include "packet.hpp"
 #include "receiver_mock.hpp"
-#include "device/switch.hpp"
 
 namespace test {
 
@@ -120,9 +121,10 @@ void test_senders(size_t senders_count) {
     std::vector<std::shared_ptr<LinkMock> > links;
     links.reserve(senders_count);
 
-    std::shared_ptr<sim::IRoutingDevice> null_device(nullptr);
+    std::shared_ptr<sim::IRoutingDevice> device_mock =
+        std::make_shared<ReceiverMock>();
     for (size_t i = 0; i < senders_count; i++) {
-        links.push_back(std::make_shared<LinkMock>(null_device, switch_device));
+        links.push_back(std::make_shared<LinkMock>(device_mock, switch_device));
     }
     std::shared_ptr<LinkMock> switch_reciever_link =
         std::make_shared<LinkMock>(switch_device, receiver);
