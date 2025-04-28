@@ -9,7 +9,7 @@ namespace sim {
 
 class IFlow;
 
-enum PacketType { ACK, DATA };
+enum PacketType { ACK, DATA, CREDIT_REQUEST, CREDIT, CREDIT_STOP };
 
 struct Packet {
     Packet(PacketType a_type = PacketType::DATA, Id a_source_id = 0, Id a_dest_id = 0, Time a_RTT = 0, Size a_size = 0,
@@ -19,6 +19,7 @@ struct Packet {
     std::string to_string() const;
     std::shared_ptr<IRoutingDevice> get_destination() const;
 
+    std::uint32_t packet_num;
     PacketType type;
     Id source_id;
     Id dest_id;
