@@ -38,9 +38,13 @@ static void check_pairwise_reachability(
 TEST_F(RecalculatePaths, TrivialTopology) {
     sim::BasicSimulator sim;
 
-    auto sender = sim.add_sender("sender");
-    auto swtch = sim.add_switch("switch");
-    auto receiver = sim.add_receiver("receiver");
+    sim.add_sender("sender");
+    sim.add_switch("switch");
+    sim.add_receiver("receiver");
+
+    auto sender = sim.get_sender("sender");
+    auto swtch = sim.get_switch("switch");
+    auto receiver = sim.get_receiver("receiver");
 
     add_two_way_links(sim, {{sender, swtch}, {swtch, receiver}});
     sim.recalculate_paths();
@@ -63,11 +67,16 @@ TEST_F(RecalculatePaths, TrivialTopology) {
 TEST_F(RecalculatePaths, SimpleTopology) {
     sim::BasicSimulator sim;
 
-    auto sender1 = sim.add_sender("sender1");
-    auto sender2 = sim.add_sender("sender2");
-    auto swtch = sim.add_switch("switch");
-    auto receiver = sim.add_receiver("receiver");
+    sim.add_sender("sender1");
+    sim.add_sender("sender2");
+    sim.add_switch("switch");
+    sim.add_receiver("receiver");
     
+    auto sender1 = sim.get_sender("sender1");
+    auto sender2 = sim.get_sender("sender2");
+    auto swtch = sim.get_switch("switch");
+    auto receiver = sim.get_receiver("receiver");
+
     add_two_way_links(sim,
                       {{sender1, swtch}, {sender2, swtch}, {swtch, receiver}});
 
@@ -95,14 +104,24 @@ receiver1 receiver2  receiver3
 TEST_F(RecalculatePaths, MeshTopology) {
     sim::BasicSimulator sim;
 
-    auto sender1 = sim.add_sender("sender1");
-    auto sender2 = sim.add_sender("sender2");
-    auto sender3 = sim.add_sender("sender3");
-    auto swtch1 = sim.add_switch("switch1");
-    auto swtch2 = sim.add_switch("switch2");
-    auto receiver1 = sim.add_receiver("receiver1");
-    auto receiver2 = sim.add_receiver("receiver2");
-    auto receiver3 = sim.add_receiver("receiver3");
+    sim.add_sender("sender1");
+    sim.add_sender("sender2");
+    sim.add_sender("sender3");
+    sim.add_switch("switch1");
+    sim.add_switch("switch2");
+    sim.add_receiver("receiver1");
+    sim.add_receiver("receiver2");
+    sim.add_receiver("receiver3");
+
+    auto sender1 = sim.get_sender("sender1");
+    auto sender2 = sim.get_sender("sender2");
+    auto sender3 = sim.get_sender("sender3");
+    auto swtch1 = sim.get_switch("switch1");
+    auto swtch2 = sim.get_switch("switch2");
+    auto receiver1 = sim.get_receiver("receiver1");
+    auto receiver2 = sim.get_receiver("receiver2");
+    auto receiver3 = sim.get_receiver("receiver3");
+
 
     add_two_way_links(sim, {{sender1, swtch1},
                             {sender2, swtch1},
@@ -136,17 +155,29 @@ TEST_F(RecalculatePaths, MeshTopology) {
 TEST_F(RecalculatePaths, LoopTopology) {
     sim::BasicSimulator sim;
 
-    auto sender1 = sim.add_sender("sender1");
-    auto sender2 = sim.add_sender("sender2");
-    auto sender3 = sim.add_sender("sender3");
-    auto swtch1 = sim.add_switch("switch1");
-    auto swtch2 = sim.add_switch("switch2");
-    auto swtch3 = sim.add_switch("switch3");
-    auto swtch4 = sim.add_switch("switch4");
-    auto swtch5 = sim.add_switch("switch5");
-    auto receiver1 = sim.add_receiver("receiver1");
-    auto receiver2 = sim.add_receiver("receiver2");
-    auto receiver3 = sim.add_receiver("receiver3");
+    sim.add_sender("sender1");
+    sim.add_sender("sender2");
+    sim.add_sender("sender3");
+    sim.add_switch("switch1");
+    sim.add_switch("switch2");
+    sim.add_switch("switch3");
+    sim.add_switch("switch4");
+    sim.add_switch("switch5");
+    sim.add_receiver("receiver1");
+    sim.add_receiver("receiver2");
+    sim.add_receiver("receiver3");
+
+    auto sender1 = sim.get_sender("sender1");
+    auto sender2 = sim.get_sender("sender2");
+    auto sender3 = sim.get_sender("sender3");
+    auto swtch1 = sim.get_switch("switch1");
+    auto swtch2 = sim.get_switch("switch2");
+    auto swtch3 = sim.get_switch("switch3");
+    auto swtch4 = sim.get_switch("switch4");
+    auto swtch5 = sim.get_switch("switch5");
+    auto receiver1 = sim.get_receiver("receiver1");
+    auto receiver2 = sim.get_receiver("receiver2");
+    auto receiver3 = sim.get_receiver("receiver3");
 
     add_two_way_links(sim, {
                                {sender1, swtch1},

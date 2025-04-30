@@ -13,9 +13,13 @@ public:
 
 TEST_F(Start, TrivialTopology) {
     sim::BasicSimulator sim;
-    auto sender = sim.add_sender("sender");
-    auto swtch = sim.add_switch("switch");
-    auto receiver = sim.add_receiver("receiver");
+    sim.add_sender("sender");
+    sim.add_switch("switch");
+    sim.add_receiver("receiver");
+
+    auto sender = sim.get_sender("sender");
+    auto swtch = sim.get_switch("switch");
+    auto receiver = sim.get_receiver("receiver");
 
     constexpr Time delay_between_packets = 100;
     constexpr Time stop_time = 1000;
@@ -34,11 +38,17 @@ TEST_F(Start, TrivialTopology) {
 
 TEST_F(Start, ThreeToOneTopology) {
     sim::BasicSimulator sim;
-    auto sender1 = sim.add_sender("sender1");
-    auto sender2 = sim.add_sender("sender2");
-    auto sender3 = sim.add_sender("sender3");
-    auto swtch = sim.add_switch("switch");
-    auto receiver = sim.add_receiver("receiver");
+    sim.add_sender("sender1");
+    sim.add_sender("sender2");
+    sim.add_sender("sender3");
+    sim.add_switch("switch");
+    sim.add_receiver("receiver");
+
+    auto sender1 = sim.get_sender("sender1");
+    auto sender2 = sim.get_sender("sender2");
+    auto sender3 = sim.get_sender("sender3");
+    auto swtch = sim.get_switch("switch");
+    auto receiver = sim.get_receiver("receiver");
 
     add_two_way_links(sim, {{sender1, swtch},
                             {sender2, swtch},
@@ -68,11 +78,17 @@ TEST_F(Start, ThreeToOneTopology) {
 
 TEST_F(Start, StopTime) {
     sim::BasicSimulator sim;
-    auto sender1 = sim.add_sender("sender1");
-    auto sender2 = sim.add_sender("sender2");
-    auto sender3 = sim.add_sender("sender3");
-    auto swtch = sim.add_switch("switch");
-    auto receiver = sim.add_receiver("receiver");
+    sim.add_sender("sender1");
+    sim.add_sender("sender2");
+    sim.add_sender("sender3");
+    sim.add_switch("switch");
+    sim.add_receiver("receiver");
+
+    auto sender1 = sim.get_sender("sender1");
+    auto sender2 = sim.get_sender("sender2");
+    auto sender3 = sim.get_sender("sender3");
+    auto swtch = sim.get_switch("switch");
+    auto receiver = sim.get_receiver("receiver");
 
     add_two_way_links(sim, {{sender1, swtch},
                             {sender2, swtch},
