@@ -10,7 +10,7 @@
 int main(const int argc, char **argv) {
 	LOG_INFO("Hello, World!");
 	if (argc != 2) {
-		std::cerr << "Usage: " << argv[0] << " <config.yaml>\n";
+		LOG_ERROR(fmt::format("Usage: {} <config.yaml>", argv[0]));
 		return 1;
 	}
 
@@ -20,7 +20,7 @@ int main(const int argc, char **argv) {
 				parseConfig(argv[1]);
 		simulator.start(1000); // Run simulation for 1000 time units
 	} catch (const std::exception &e) {
-		std::cerr << "Error: " << e.what() << "\n";
+		LOG_ERROR(fmt::format("Error: {}", e.what()));
 		return 1;
 	}
 	return 0;

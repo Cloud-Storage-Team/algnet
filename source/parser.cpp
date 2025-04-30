@@ -34,7 +34,7 @@ namespace sim {
 		}
 		const uint32_t value = std::stoul(latency_str.substr(0, unit_pos));
 		const std::string unit = latency_str.substr(unit_pos);
-		if (unit == "ms") return value;
+		if (unit == "ns") return value;
 		throw std::runtime_error("Unsupported latency unit: " + unit);
 	}
 
@@ -65,6 +65,7 @@ namespace sim {
 	void YamlParser::processSwitches(const YAML::Node &config, BasicSimulator &simulator) {
 		if (!config["switches"]) {
 			LOG_WARN("No switches specified in the configuration");
+			return;
 		}
 
 		const YAML::Node switches = config["switches"];
@@ -78,6 +79,7 @@ namespace sim {
 	void YamlParser::processLinks(const YAML::Node &config, BasicSimulator &simulator) const {
 		if (!config["links"]) {
 			LOG_WARN("No links specified in the configuration");
+			return;
 		}
 
 		const YAML::Node links = config["links"];
