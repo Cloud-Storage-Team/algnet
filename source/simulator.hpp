@@ -59,7 +59,7 @@ public:
         return m_switches[name]->get_id();
     }
 
-    std::shared_ptr<TFlow> add_flow(std::shared_ptr<ISender> sender,
+    Id add_flow(std::shared_ptr<ISender> sender,
                 std::shared_ptr<IReceiver> receiver,
                 Size packet_size,
                 Time delay_between_packets,
@@ -68,10 +68,10 @@ public:
             std::make_shared<Flow>(sender, receiver, packet_size,
                                    delay_between_packets, packets_to_send);
         m_flows.emplace_back(flow);
-        return flow;
+        return flow->get_id();
     }
 
-    void add_link(std::shared_ptr<IRoutingDevice> a_from,
+    Id add_link(std::shared_ptr<IRoutingDevice> a_from,
                   std::shared_ptr<IRoutingDevice> a_to,
                   std::uint32_t a_speed_mbps, Time a_delay) {
         auto link =
@@ -79,6 +79,7 @@ public:
         m_links.emplace_back(link);
         a_from->add_outlink(link);
         a_to->add_inlink(link);
+        return link->get_id();
     }
 
     std::shared_ptr<TSender> get_sender(std::string name) {
@@ -105,7 +106,16 @@ public:
         return m_switches[name];
     }
 
-
+    std::shared_ptr<TFlow> get_flow(Id id) {
+        const auto it = std::find_if(
+            m_flows.begin(), m_flows.end(), 
+            [id](const auto& flow){ return flow->get_id() == id; });
+        if (it != m_flows.end()) {
+            return *it;
+        }
+        LOG_WARN(fmt::format("flow with id {} does not exist.", id));
+        return nullptr;
+    }
 
     std::vector<std::shared_ptr<IRoutingDevice>> get_devices() const {
         std::vector<std::shared_ptr<IRoutingDevice>> result;
@@ -166,8 +176,8 @@ private:
     std::unordered_map<std::string, std::shared_ptr<TSender>> m_senders;
     std::unordered_map<std::string, std::shared_ptr<TReceiver>> m_receivers;
     std::unordered_map<std::string, std::shared_ptr<TSwitch>> m_switches;
-    std::vector<std::shared_ptr<IFlow>> m_flows;
-    std::vector<std::shared_ptr<ILink>> m_links;
+    std::vector<std::shared_ptr<TFlow>> m_flows;
+    std::vector<std::shared_ptr<TLink>> m_links;
 };
 
 using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;
