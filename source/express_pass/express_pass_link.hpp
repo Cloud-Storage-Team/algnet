@@ -24,7 +24,7 @@ public:
      * Update the source egress delay and schedule the arrival event
      * based on the egress queueing and transmission delays.
      */
-    void schedule_arrival(Packet packet) final;
+    void schedule_arrival(Time current_time, Packet packet) final;
 
     /**
      * Removes packet from the source egress queue.
@@ -48,6 +48,9 @@ private:
     Time m_transmission_delay;
     Id m_id;
 
+    std::uint32_t m_max_credit_queue_capacity = 8;
+    std::uint32_t m_current_credit_queue_capacity = 0;
+    Time m_next_credit_can_be_sent = 0;
     // Queue at the ingress port of the m_next device
     std::queue<Packet> m_next_ingress;
 };

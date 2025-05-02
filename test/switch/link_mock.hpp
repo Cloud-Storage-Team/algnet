@@ -7,7 +7,7 @@ public:
     LinkMock(std::weak_ptr<sim::IRoutingDevice> a_from,
              std::weak_ptr<sim::IRoutingDevice> a_to);
     ~LinkMock() = default;
-    virtual void schedule_arrival(sim::Packet a_packet) final;
+    virtual void schedule_arrival(Time current_time, sim::Packet a_packet) final;
     virtual void process_arrival(sim::Packet packet) final;
     virtual std::optional<sim::Packet> get_packet() final;
     virtual std::shared_ptr<sim::IRoutingDevice> get_from() const final;

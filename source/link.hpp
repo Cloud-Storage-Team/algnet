@@ -23,7 +23,7 @@ public:
      * Update the source egress delay and schedule the arrival event
      * based on the egress queueing and transmission delays.
      */
-    virtual void schedule_arrival(Packet packet) = 0;
+    virtual void schedule_arrival(Time current_time, Packet packet) = 0;
 
     /**
      * Removes packet from the source egress queue.
@@ -46,7 +46,7 @@ public:
      * Update the source egress delay and schedule the arrival event
      * based on the egress queueing and transmission delays.
      */
-    void schedule_arrival(Packet packet) final;
+    void schedule_arrival(Time current_time, Packet packet) final;
 
     /**
      * Removes packet from the source egress queue.

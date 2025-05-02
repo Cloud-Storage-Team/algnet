@@ -2,6 +2,7 @@
 #include <cstdint>
 
 #include "flow.hpp"
+#include "packet.hpp"
 #include "express_pass/express_pass_receiver.hpp"
 #include "express_pass/express_pass_sender.hpp"
 #include "utils/identifier_factory.hpp"
@@ -12,14 +13,14 @@ class IReceiver;
 class ISender;
 
 enum SenderStatus {
-    CREDIT_STOP,
+    CREDIT_STOP_S,
     CREQ_SENT,
     CREDIT_RECEIVING,
     CSTOP_SENT
 };
 
 enum ReceiverStatus {
-    CREDIT_STOP,
+    CREDIT_STOP_R,
     CREDIT_SENDING
 };
 
@@ -38,33 +39,35 @@ public:
 
     // Update the internal state according to some congestion control algorithm
     // Call try_to_generate upon the update
-    void update(Packet packet, DeviceType type) final;
+    void update(Time time, Packet packet, DeviceType type) final;
 
     std::shared_ptr<ISender> get_sender() const final;
     std::shared_ptr<IReceiver> get_receiver() const final;
 
-    Time ExpressPassFlow::send_credit(Time time);
+    Time send_credit(Time time);
 
     Id get_id() const final;
 
 private:
     void schedule_packet_generation(Time time);
-    Packet generate_data_packet();
+    Packet generate_packet(PacketType type, bool from_receiver = false, std::uint32_t packet_num = 0, Time RTT = 0);
     void sender_send_stop();
     std::uint32_t get_next_packet_num();
 
-    std::shared_ptr<ExpressPassSender> m_src;
-    std::shared_ptr<IReceiver> m_dest;
+    std::weak_ptr<ExpressPassSender> m_src;
+    std::weak_ptr<ExpressPassReceiver> m_dest;
     SenderStatus m_sender_status;
     ReceiverStatus m_receiver_status;
 
     Size m_packet_size;
     Time m_delay_between_packets;
     std::uint32_t m_packets_to_send;
+    double m_max_rate;
 
     bool m_stopped = false;
+    int m_last_received_credit = 0;
     std::uint32_t m_current_packet_num = 0;
-    bool m_system_packet_size = 64;
+    Size m_system_packet_size = 64;
     double m_current_rate = 1.0 / 8.0;
     double w = 1.0 / 2.0;
 

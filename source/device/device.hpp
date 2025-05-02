@@ -7,6 +7,7 @@
 
 namespace sim {
 
+struct Packet;
 class ILink;
 
 enum DeviceType { SWITCH, SENDER, RECEIVER };
@@ -31,8 +32,7 @@ public:
     virtual bool add_outlink(std::shared_ptr<ILink> link) = 0;
     virtual bool update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                                       std::shared_ptr<ILink> link, int paths = 1) = 0;
-    virtual std::shared_ptr<ILink> get_link_to_destination(
-        std::shared_ptr<IRoutingDevice> device) const = 0;
+    virtual std::shared_ptr<ILink> get_link_to_destination(Packet packet) const = 0;
     virtual std::shared_ptr<ILink> next_inlink() = 0;
     virtual std::set<std::shared_ptr<ILink>>get_outlinks() = 0;
 };

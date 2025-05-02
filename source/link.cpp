@@ -33,7 +33,7 @@ Time Link::get_transmission_time(const Packet& packet) const {
            m_transmission_delay;
 };
 
-void Link::schedule_arrival(Packet packet) {
+void Link::schedule_arrival(Time current_time, Packet packet) {
     if (m_to.expired()) {
         LOG_WARN("Destination device pointer is expired");
         return;
@@ -49,7 +49,7 @@ void Link::schedule_arrival(Packet packet) {
 
     // TODO: put correct event time. Arrive happens in current time + total_delay.
     Scheduler::get_instance().add(
-        std::make_unique<Arrive>(Arrive(total_delay, weak_from_this(), packet)));
+        std::make_unique<Arrive>(Arrive(current_time + total_delay, weak_from_this(), packet)));
 };
 
 void Link::process_arrival(Packet packet) {

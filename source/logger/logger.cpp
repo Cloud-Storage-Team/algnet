@@ -20,7 +20,7 @@ Logger::Logger() {
 
     auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
         "logs/simulator_logs.txt", true);
-    file_sink->set_level(spdlog::level::trace);
+    file_sink->set_level(spdlog::level::info);
 
     auto logger = std::make_shared<spdlog::logger>(
         "multi_sink", spdlog::sinks_init_list{console_sink, file_sink});

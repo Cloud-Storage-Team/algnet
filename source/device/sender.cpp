@@ -4,8 +4,10 @@
 
 #include <memory>
 
+#include <optional>
 #include "event.hpp"
 #include "link.hpp"
+#include "packet.hpp"
 #include "logger/logger.hpp"
 #include "utils/validation.hpp"
 
@@ -60,9 +62,8 @@ std::shared_ptr<ILink> Sender::next_inlink() {
     return m_router->next_inlink();
 };
 
-std::shared_ptr<ILink> Sender::get_link_to_destination(
-    std::shared_ptr<IRoutingDevice> dest) const {
-    return m_router->get_link_to_destination(dest);
+std::shared_ptr<ILink> Sender::get_link_to_destination(Packet packet) const {
+    return m_router->get_link_to_destination(packet);
 };
 
 DeviceType Sender::get_type() const { return DeviceType::SENDER; }
@@ -104,18 +105,18 @@ Time Sender::process(Time current_time) {
         return total_processing_time;
     }
     if (packet.type == PacketType::ACK && destination.get() == this) {
-        packet.flow->update(packet, get_type());
+        packet.flow->update(current_time, packet, get_type());
     } else {
         LOG_WARN(
             "Packet arrived to Sender that is not its destination; use routing "
             "table to send it further");
-        std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
+        std::shared_ptr<ILink> next_link = get_link_to_destination(packet);
 
         if (next_link == nullptr) {
             LOG_WARN("No link corresponds to destination device");
             return total_processing_time;
         }
-        next_link->schedule_arrival(packet);
+        next_link->schedule_arrival(current_time, packet);
     }
     // total_processing_time += processing_ack_time;
 
@@ -138,7 +139,7 @@ Time Sender::send_data(Time current_time) {
     LOG_INFO("Taken new data packet on sender. Packet: " +
              data_packet.to_string());
 
-    auto next_link = get_link_to_destination(data_packet.get_destination());
+    auto next_link = get_link_to_destination(data_packet);
     if (next_link == nullptr) {
         LOG_WARN("Link to send data packet does not exist");
         return total_processing_time;
@@ -148,7 +149,7 @@ Time Sender::send_data(Time current_time) {
     LOG_INFO("Sent new data packet from sender. Data packet: " +
              data_packet.to_string());
 
-    next_link->schedule_arrival(data_packet);
+    next_link->schedule_arrival(current_time, data_packet);
     // total_processing_time += sending_data_time;
     return total_processing_time;
 }

@@ -64,13 +64,13 @@ public:
         return m_switches[name];
     }
 
-    std::shared_ptr<TFlow> add_flow(std::shared_ptr<ISender> sender,
-                                    std::shared_ptr<IReceiver> receiver,
+    std::shared_ptr<TFlow> add_flow(std::shared_ptr<TSender> sender,
+                                    std::shared_ptr<TReceiver> receiver,
                                     Size packet_size,
                                     Time delay_between_packets,
                                     std::uint32_t packets_to_send) {
         auto flow =
-            std::make_shared<Flow>(sender, receiver, packet_size,
+            std::make_shared<TFlow>(sender, receiver, packet_size,
                                    delay_between_packets, packets_to_send);
         m_flows.emplace_back(flow);
         return flow;

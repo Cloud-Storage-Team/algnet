@@ -3,11 +3,13 @@
 #include <map>
 #include <unordered_map>
 
-#include "device.hpp"
+#include "device/device.hpp"
 #include "types.hpp"
 #include "utils/loop_iterator.hpp"
 
 namespace sim {
+
+struct Packet;
 
 class RoutingModule : public IRoutingDevice {
 public:
@@ -19,8 +21,7 @@ public:
                               std::shared_ptr<ILink> link, int paths = 1) final;
     // returns next inlink and moves inlinks set iterator forward
     std::shared_ptr<ILink> next_inlink() final;
-    std::shared_ptr<ILink> get_link_to_destination(
-        std::shared_ptr<IRoutingDevice> dest) const final;
+    std::shared_ptr<ILink> get_link_to_destination(Packet packet) const final;
     std::set<std::shared_ptr<ILink>> get_outlinks() final;
 
     void correctify_inlinks();

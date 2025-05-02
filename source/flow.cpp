@@ -37,9 +37,10 @@ Packet Flow::generate_packet() {
 
 void Flow::start(Time time) { schedule_packet_generation(time); }
 
-void Flow::update(Packet packet, DeviceType type) { 
+void Flow::update(Time time, Packet packet, DeviceType type) { 
     (void)packet;
     (void)type;
+    (void)time;
     ++m_updates_number; 
 }
 

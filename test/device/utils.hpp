@@ -20,7 +20,7 @@ public:
              sim::Packet packet_to_return = sim::Packet());
     ~TestLink() = default;
 
-    void schedule_arrival(sim::Packet packet) final;
+    void schedule_arrival(Time current_time, sim::Packet packet) final;
     void process_arrival(sim::Packet packet) final;
     std::optional<sim::Packet> get_packet() final;
     std::shared_ptr<sim::IRoutingDevice> get_from() const final;

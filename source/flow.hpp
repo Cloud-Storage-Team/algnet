@@ -21,7 +21,7 @@ public:
 
     // Update the internal state according to some congestion control algorithm
     // Calls when data available for sending on corresponding device
-    virtual void update(Packet packet, DeviceType type) = 0;
+    virtual void update(Time time, Packet packet, DeviceType type) = 0;
     virtual std::shared_ptr<ISender> get_sender() const = 0;
     virtual std::shared_ptr<IReceiver> get_receiver() const = 0;
 };
@@ -41,7 +41,7 @@ public:
 
     // Update the internal state according to some congestion control algorithm
     // Call try_to_generate upon the update
-    void update(Packet packet, DeviceType type) final;
+    void update(Time time, Packet packet, DeviceType type) final;
     std::uint32_t get_updates_number() const;
 
     std::shared_ptr<ISender> get_sender() const final;

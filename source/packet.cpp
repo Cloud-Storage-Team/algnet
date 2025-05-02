@@ -1,4 +1,5 @@
 #include "packet.hpp"
+#include "device/device.hpp"
 #include <sstream>
 
 namespace sim {
@@ -7,16 +8,15 @@ Packet::Packet(PacketType a_type, Id a_source_id, Id a_dest_id, Time a_RTT, Size
     : type(a_type), source_id(a_source_id), dest_id(a_dest_id), RTT(a_RTT), size(a_size), flow(a_flow) {}
 
 std::shared_ptr<IRoutingDevice> Packet::get_destination() const {
-    if (flow == nullptr) {
+    if (flow == nullptr || flow->get_sender() == nullptr || flow->get_receiver() == nullptr) {
         return nullptr;
     }
-    switch (type) {
-        case ACK:
-            return flow->get_sender();
-        case DATA:
-            return flow->get_receiver();
-        default:
-            return nullptr;
+    if (dest_id == flow->get_sender()->get_id()) {
+        return flow->get_sender();
+    } else if (dest_id == flow->get_receiver()->get_id()) {
+        return flow->get_receiver();
+    } else {
+        return nullptr;
     }
 };
 
@@ -32,11 +32,17 @@ std::string Packet::to_string() const {
     switch (type) {
         case PacketType::ACK: oss << "ACK"; break;
         case PacketType::DATA: oss << "DATA"; break;
+        case PacketType::CREDIT: oss << "CREDIT"; break;
+        case PacketType::CREDIT_REQUEST: oss << "CREQ"; break;
+        case PacketType::CREDIT_STOP_P: oss << "CSTOP"; break;
         default: oss << "UNKNOWN"; break;
     }
     
+    oss << ", source_id: " << source_id;
+    oss << ", dest_id: " << dest_id;
+    oss << ", packet_num: " << packet_num;
     oss << ", size: " << size;
-    oss << ", flow: " << (flow ? "set" : "null");
+    oss << ", flow: " << (flow ? std::to_string(flow->get_id()) : "null");
     oss << "]";
     
     return oss.str();

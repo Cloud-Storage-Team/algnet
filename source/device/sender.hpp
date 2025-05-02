@@ -2,12 +2,12 @@
 #include <memory>
 #include <queue>
 
-#include "device.hpp"
+#include "device/routing_module.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
 
-struct Packet;
+// struct Packet;
 
 class ISender : public IRoutingDevice,
                 public IProcessingDevice,
@@ -28,8 +28,7 @@ public:
     bool update_routing_table(std::shared_ptr<IRoutingDevice> dest,
                               std::shared_ptr<ILink> link, int paths = 1) final;
     std::shared_ptr<ILink> next_inlink() final;
-    std::shared_ptr<ILink> get_link_to_destination(
-        std::shared_ptr<IRoutingDevice> dest) const final;
+    std::shared_ptr<ILink> get_link_to_destination(Packet packet) const final;
     std::set<std::shared_ptr<ILink>> get_outlinks() final;
 
     DeviceType get_type() const final;

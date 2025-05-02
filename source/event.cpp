@@ -1,6 +1,7 @@
 #include "event.hpp"
 
 #include "scheduler.hpp"
+#include <string>
 
 namespace sim {
 
@@ -21,6 +22,7 @@ void Generate::operator()() {
         return;
     }
 
+    // LOG_WARN("Created data packet at: " + std::to_string(m_time));
     Time generate_delay = m_flow.lock()->create_new_data_packet();
     if (generate_delay == 0) {
         return;
@@ -38,6 +40,7 @@ void Arrive::operator()() {
         return;
     }
     
+    // LOG_WARN("Packet arrived at: " + std::to_string(m_time));
     m_link.lock()->process_arrival(m_packet); 
 };
 
@@ -47,6 +50,7 @@ void Process::operator()() {
     if (m_device.expired()) {
         return;
     }
+    // LOG_WARN("Packet processed at: " + std::to_string(m_time));
     Time process_time = m_device.lock()->process(m_time);
 
     std::unique_ptr<Event> next_process_event = std::make_unique<Process>(m_time + process_time, m_device);
@@ -59,6 +63,7 @@ void SendData::operator()() {
     if (m_device.expired()) {
         return;
     }
+    // LOG_WARN("Packet sent at: " + std::to_string(m_time));
     Time process_time = m_device.lock()->send_data(m_time);
 
     std::unique_ptr<Event> next_process_event = std::make_unique<SendData>(m_time + process_time, m_device);

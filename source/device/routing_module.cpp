@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "link.hpp"
+#include "packet.hpp"
 #include "logger/logger.hpp"
 
 namespace sim {
@@ -43,8 +44,13 @@ bool RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     return true;
 }
 
-std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
-    std::shared_ptr<IRoutingDevice> device) const {
+std::shared_ptr<ILink> RoutingModule::get_link_to_destination(Packet packet) const {
+    auto device = packet.get_destination();
+    if (device == nullptr) {
+        LOG_WARN("Destination device pointer is expired");
+        return nullptr;
+    }
+
     auto iterator = m_routing_table.find(device);
     if (iterator == m_routing_table.end()) {
         return nullptr;

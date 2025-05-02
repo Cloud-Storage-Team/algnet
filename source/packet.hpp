@@ -2,14 +2,14 @@
 #include <cstdint>
 #include <string>
 
-#include "device/device.hpp"
 #include "flow.hpp"
 
 namespace sim {
 
 class IFlow;
+class IRoutingDevice;
 
-enum PacketType { ACK, DATA, CREDIT_REQUEST, CREDIT, CREDIT_STOP };
+enum PacketType { ACK, DATA, CREDIT_REQUEST, CREDIT, CREDIT_STOP_P };
 
 struct Packet {
     Packet(PacketType a_type = PacketType::DATA, Id a_source_id = 0, Id a_dest_id = 0, Time a_RTT = 0, Size a_size = 0,

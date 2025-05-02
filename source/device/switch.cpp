@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "link.hpp"
+#include "packet.hpp"
 #include "logger/logger.hpp"
 #include "utils/validation.hpp"
 
@@ -52,9 +53,8 @@ bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
 
 std::shared_ptr<ILink> Switch::next_inlink() { return m_router->next_inlink(); }
 
-std::shared_ptr<ILink> Switch::get_link_to_destination(
-    std::shared_ptr<IRoutingDevice> dest) const {
-    return m_router->get_link_to_destination(dest);
+std::shared_ptr<ILink> Switch::get_link_to_destination(Packet packet) const {
+    return m_router->get_link_to_destination(packet);
 }
 
 DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
@@ -71,7 +71,7 @@ Time Switch::process(Time current_time) {
 
     std::optional<Packet> optional_packet = link->get_packet();
     if (!optional_packet.has_value()) {
-        LOG_WARN("No packet in link");
+        LOG_TRACE("No packet in link");
         return total_processing_time;
     }
     Packet packet = optional_packet.value();
@@ -79,13 +79,8 @@ Time Switch::process(Time current_time) {
         LOG_WARN("No flow in packet");
         return total_processing_time;
     }
-    std::shared_ptr<IRoutingDevice> destination = packet.get_destination();
-    if (destination == nullptr) {
-        LOG_WARN("Destination device pointer is expired");
-        return total_processing_time;
-    }
 
-    std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
+    std::shared_ptr<ILink> next_link = get_link_to_destination(packet);
 
     if (next_link == nullptr) {
         LOG_WARN("No link corresponds to destination device");
@@ -97,7 +92,7 @@ Time Switch::process(Time current_time) {
              packet.to_string());
 
     // TODO: increase total_processing_time correctly
-    next_link->schedule_arrival(packet);
+    next_link->schedule_arrival(current_time, packet);
     return total_processing_time;
 }
 

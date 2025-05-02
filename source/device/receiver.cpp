@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "event.hpp"
+#include "packet.hpp"
 #include "link.hpp"
 #include "logger/logger.hpp"
 #include "utils/identifier_factory.hpp"
@@ -57,9 +58,8 @@ std::shared_ptr<ILink> Receiver::next_inlink() {
     return m_router->next_inlink();
 };
 
-std::shared_ptr<ILink> Receiver::get_link_to_destination(
-    std::shared_ptr<IRoutingDevice> dest) const {
-    return m_router->get_link_to_destination(dest);
+std::shared_ptr<ILink> Receiver::get_link_to_destination(Packet packet) const {
+    return m_router->get_link_to_destination(packet);
 };
 
 DeviceType Receiver::get_type() const { return DeviceType::RECEIVER; }
@@ -98,35 +98,29 @@ Time Receiver::process(Time current_time) {
     if (data_packet.type == DATA && destination.get() == this) {
         // TODO: think about processing time
         // Not sure if we want to send ack before processing or after it
-        total_processing_time += send_ack(data_packet);
+        total_processing_time += send_ack(current_time, data_packet);
     } else {
         LOG_WARN(
             "Packet arrived to Receiver that is not its destination; using "
             "routing table to send it further");
-        std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
+        std::shared_ptr<ILink> next_link = get_link_to_destination(data_packet);
 
         if (next_link == nullptr) {
             LOG_WARN("No link corresponds to destination device");
             return total_processing_time;
         }
-        next_link->schedule_arrival(data_packet);
+        next_link->schedule_arrival(current_time, data_packet);
         // TODO: think about redirecting time
     }
 
     return total_processing_time;
 }
 
-Time Receiver::send_ack(Packet data_packet) {
+Time Receiver::send_ack(Time current_time, Packet data_packet) {
     Time processing_time = 1;
     Packet ack = Packet(PacketType::ACK, data_packet.flow->get_receiver()->get_id(), data_packet.flow->get_sender()->get_id(), 0, 1, data_packet.flow);
 
-    auto destination = ack.get_destination();
-    if (destination == nullptr) {
-        LOG_ERROR("Ack destination does not exists");
-        return processing_time;
-    }
-
-    std::shared_ptr<ILink> link_to_dest = get_link_to_destination(destination);
+    std::shared_ptr<ILink> link_to_dest = get_link_to_destination(ack);
     if (link_to_dest == nullptr) {
         LOG_ERROR("Link to send ack does not exist");
         return processing_time;
@@ -136,7 +130,7 @@ Time Receiver::send_ack(Packet data_packet) {
     LOG_INFO("Sent ack after processing packet on receiver. Data packet: " +
              data_packet.to_string() + ". Ack packet: " + ack.to_string());
 
-    link_to_dest->schedule_arrival(ack);
+    link_to_dest->schedule_arrival(current_time, ack);
     return processing_time;
 }
 

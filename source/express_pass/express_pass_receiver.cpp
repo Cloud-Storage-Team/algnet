@@ -4,6 +4,7 @@
 #include "link.hpp"
 #include "logger/logger.hpp"
 #include "utils/identifier_factory.hpp"
+#include "utils/validation.hpp"
 
 namespace sim {
 
@@ -12,8 +13,7 @@ ExpressPassReceiver::ExpressPassReceiver()
       m_id(IdentifierFactory::get_instance().generate_id()) {}
 
 bool ExpressPassReceiver::add_inlink(std::shared_ptr<ILink> link) {
-    if (link == nullptr) {
-        LOG_WARN("Passed link is null");
+    if (!is_valid_link(link)) {
         return false;
     }
 
@@ -26,8 +26,7 @@ bool ExpressPassReceiver::add_inlink(std::shared_ptr<ILink> link) {
 }
 
 bool ExpressPassReceiver::add_outlink(std::shared_ptr<ILink> link) {
-    if (link == nullptr) {
-        LOG_WARN("Add nullptr outlink to receiver device");
+    if (!is_valid_link(link)) {
         return false;
     }
 
@@ -39,51 +38,29 @@ bool ExpressPassReceiver::add_outlink(std::shared_ptr<ILink> link) {
 }
 
 bool ExpressPassReceiver::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                    std::shared_ptr<ILink> link) {
-    if (link == nullptr) {
-        LOG_WARN("Passed link is null");
+                                    std::shared_ptr<ILink> link, int paths) {
+    if (dest == nullptr) {
+        LOG_WARN("Passed destination is null");
         return false;
     }
 
-    if (dest == nullptr) {
-        LOG_WARN("Passed destination is null");
+    if (!is_valid_link(link)) {
         return false;
     }
 
     if (this != link->get_from().get()) {
-        LOG_WARN(
-            "Link source device is incorrect (expected current device)");
+        LOG_WARN("Link source device is incorrect (expected current device)");
         return false;
     }
-    return m_router->update_routing_table(dest, link);
-}
-
-bool ExpressPassReceiver::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                    std::unordered_map<std::shared_ptr<ILink>, int> paths) {
-    if (paths.empty()) {
-        LOG_WARN("Passed link is null");
-        return false;
-    }
-
-    if (dest == nullptr) {
-        LOG_WARN("Passed destination is null");
-        return false;
-    }
-
-    // if (this != link->get_from().get()) {
-    //     LOG_WARN("Link source device is incorrect (expected current device)");
-    //     return false;
-    // }
-    return m_router->update_routing_table(dest, paths);
+    return m_router->update_routing_table(dest, link, paths);
 }
 
 std::shared_ptr<ILink> ExpressPassReceiver::next_inlink() {
     return m_router->next_inlink();
 };
 
-std::shared_ptr<ILink> ExpressPassReceiver::get_link_to_destination(
-    std::shared_ptr<IRoutingDevice> dest) const {
-    return m_router->get_link_to_destination(dest);
+std::shared_ptr<ILink> ExpressPassReceiver::get_link_to_destination(Packet packet) const {
+    return m_router->get_link_to_destination(packet);
 };
 
 DeviceType ExpressPassReceiver::get_type() const { return DeviceType::RECEIVER; }
@@ -98,70 +75,66 @@ Time ExpressPassReceiver::process(Time current_time) {
         return total_processing_time;
     }
 
-    std::optional<Packet> opt_data_packet = current_inlink->get_packet();
-    if (!opt_data_packet.has_value()) {
-        LOG_WARN("No available packets from inlink for device");
+    std::optional<Packet> opt_packet = current_inlink->get_packet();
+    if (!opt_packet.has_value()) {
+        LOG_TRACE("No available packets from inlink for device");
         return total_processing_time;
     }
 
-    Packet data_packet = opt_data_packet.value();
-    if (data_packet.flow == nullptr) {
+    Packet packet = opt_packet.value();
+    if (packet.flow == nullptr) {
         LOG_ERROR("Packet flow does not exist");
         return total_processing_time;
     }
 
     // TODO: add some receiver ID for easier packet path tracing
     LOG_INFO("Processing packet from link on receiver. Packet: " +
-                 data_packet.to_string());
+        packet.to_string() + ". Receiver id: " + std::to_string(get_id()) + ". Time: " + std::to_string(current_time));
 
-    std::shared_ptr<IRoutingDevice> destination = data_packet.get_destination();
-    if (data_packet.type == DATA && destination.get() == this) {
+    std::shared_ptr<IRoutingDevice> destination = packet.get_destination();
+    if (destination == nullptr) {
+        LOG_WARN("Destination device pointer is expired");
+        return total_processing_time;
+    }
+    if (destination.get() == this) {
         // TODO: think about processing time
-        // Not sure if we want to send ack before processing or after it
-        total_processing_time += send_ack(data_packet);
+        packet.flow->update(current_time, packet, get_type());
     } else {
         LOG_WARN(
             "Packet arrived to ExpressPassReceiver that is not its destination; using "
             "routing table to send it further");
-        std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
+        std::shared_ptr<ILink> next_link = get_link_to_destination(packet);
 
         if (next_link == nullptr) {
             LOG_WARN("No link corresponds to destination device");
             return total_processing_time;
         }
-        next_link->schedule_arrival(data_packet);
+        next_link->schedule_arrival(current_time, packet);
         // TODO: think about redirecting time
     }
 
     return total_processing_time;
 }
 
-Time ExpressPassReceiver::send_ack(Packet data_packet) {
-    Time processing_time = 1;
-    Packet ack = Packet(PacketType::ACK, data_packet.flow->get_receiver()->get_id(), data_packet.flow->get_sender()->get_id(), 0, 1, data_packet.flow);
+Time ExpressPassReceiver::send_system_packet(Time current_time, Packet packet) {
+    Time total_processing_time = 1;
 
-    auto destination = ack.get_destination();
-    if (destination == nullptr) {
-        LOG_ERROR("Ack destination does not exists");
-        return processing_time;
+    auto next_link = get_link_to_destination(packet);
+    if (next_link == nullptr) {
+        LOG_WARN("Link to send packet does not exist. Packet: " + packet.to_string());
+        return total_processing_time;
     }
 
-    std::shared_ptr<ILink> link_to_dest =
-        m_router->get_link_to_destination(destination);
-    if (link_to_dest == nullptr) {
-        LOG_ERROR("Link to send ack does not exist");
-        return processing_time;
-    }
+    // TODO: add some sender ID for easier packet path tracing
+    LOG_INFO("Sent new system packet from receiver. Data packet: " +
+        packet.to_string() + ". Receiver id: " + std::to_string(get_id()) + ". Time: " + std::to_string(current_time));
 
-    // TODO: add some receiver ID for easier packet path tracing
-    LOG_INFO("Sent ack after processing packet on receiver. Data packet: " +
-                 data_packet.to_string() + ". Ack packet: " + ack.to_string());
-
-    link_to_dest->schedule_arrival(ack);
-    return processing_time;
+    next_link->schedule_arrival(current_time, packet);
+    // total_processing_time += sending_data_time;
+    return total_processing_time;
 }
 
-std::set<std::shared_ptr<ILink>> ExpressPassReceiver::get_outlinks() const {
+std::set<std::shared_ptr<ILink>> ExpressPassReceiver::get_outlinks() {
     return m_router->get_outlinks();
 }
 
