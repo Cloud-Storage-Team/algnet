@@ -36,7 +36,7 @@ static void check_pairwise_reachability(
 }
 
 TEST_F(RecalculatePaths, TrivialTopology) {
-    sim::BasicSimulator sim;
+    TestSimulator sim;
 
     Id sender_id = sim.add_sender("sender");
     Id switch_id = sim.add_switch("switch");
@@ -65,7 +65,7 @@ TEST_F(RecalculatePaths, TrivialTopology) {
 */
 
 TEST_F(RecalculatePaths, SimpleTopology) {
-    sim::BasicSimulator sim;
+    TestSimulator sim;
 
     Id sender1_id = sim.add_sender("sender1");
     Id sender2_id = sim.add_sender("sender2");
@@ -102,7 +102,7 @@ receiver1 receiver2  receiver3
 */
 
 TEST_F(RecalculatePaths, MeshTopology) {
-    sim::BasicSimulator sim;
+    TestSimulator sim;
 
     Id sender1_id = sim.add_sender("sender1");
     Id sender2_id = sim.add_sender("sender2");
@@ -153,7 +153,7 @@ TEST_F(RecalculatePaths, MeshTopology) {
 */
 
 TEST_F(RecalculatePaths, LoopTopology) {
-    sim::BasicSimulator sim;
+    TestSimulator sim;
 
     Id sender1_id = sim.add_sender("sender1");
     Id sender2_id = sim.add_sender("sender2");
