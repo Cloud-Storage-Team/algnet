@@ -19,8 +19,7 @@ public:
     std::shared_ptr<sim::Flow> get_flow(Id id);
 };
 
-using two_way_link_t = std::pair<std::shared_ptr<sim::Identifiable>,
-                                 std::shared_ptr<sim::Identifiable>>;
+using two_way_link_t = std::pair<std::string, std::string>;
 
 void add_two_way_links(sim::BasicSimulator& sim,
                        std::initializer_list<two_way_link_t> links);

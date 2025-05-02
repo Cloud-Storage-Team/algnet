@@ -46,7 +46,7 @@ TEST_F(RecalculatePaths, TrivialTopology) {
     auto swtch = sim.get_switch(switch_id);
     auto receiver = sim.get_receiver(receiver_id);
 
-    add_two_way_links(sim, {{sender, swtch}, {swtch, receiver}});
+    add_two_way_links(sim, {{"sender", "switch"}, {"switch", "receiver"}});
     sim.recalculate_paths();
 
     check_pairwise_reachability({sender, swtch, receiver});
@@ -78,7 +78,7 @@ TEST_F(RecalculatePaths, SimpleTopology) {
     auto receiver = sim.get_receiver(receiver_id);
 
     add_two_way_links(sim,
-                      {{sender1, swtch}, {sender2, swtch}, {swtch, receiver}});
+                      {{"sender1", "switch"}, {"sender2", "switch"}, {"switch", "receiver"}});
 
     sim.recalculate_paths();
 
@@ -123,14 +123,14 @@ TEST_F(RecalculatePaths, MeshTopology) {
     auto receiver3 = sim.get_receiver(receiver3_id);
 
 
-    add_two_way_links(sim, {{sender1, swtch1},
-                            {sender2, swtch1},
-                            {sender3, swtch2},
-                            {swtch1, receiver1},
-                            {swtch1, receiver2},
-                            {swtch1, swtch2},
-                            {swtch2, receiver2},
-                            {swtch2, receiver3}});
+    add_two_way_links(sim, {{"sender1", "switch1"},
+                            {"sender2", "switch1"},
+                            {"sender3", "switch2"},
+                            {"switch1", "receiver1"},
+                            {"switch1", "receiver2"},
+                            {"switch1", "switch2"},
+                            {"switch2", "receiver2"},
+                            {"switch2", "receiver3"}});
 
     sim.recalculate_paths();
 
@@ -180,17 +180,17 @@ TEST_F(RecalculatePaths, LoopTopology) {
     auto receiver3 = sim.get_receiver(receiver3_id);
 
     add_two_way_links(sim, {
-                               {sender1, swtch1},
-                               {sender2, swtch2},
-                               {sender3, swtch3},
-                               {swtch1, swtch2},
-                               {swtch2, swtch3},
-                               {swtch3, swtch5},
-                               {swtch4, swtch5},
-                               {swtch1, swtch4},
-                               {receiver1, swtch4},
-                               {receiver2, swtch5},
-                               {receiver3, swtch5},
+                               {"sender1", "switch1"},
+                               {"sender2", "switch2"},
+                               {"sender3", "switch3"},
+                               {"switch1", "switch2"},
+                               {"switch2", "switch3"},
+                               {"switch3", "switch5"},
+                               {"switch4", "switch5"},
+                               {"switch1", "switch4"},
+                               {"receiver1", "switch4"},
+                               {"receiver2", "switch5"},
+                               {"receiver3", "switch5"},
                            });
 
     sim.recalculate_paths();

@@ -74,18 +74,18 @@ public:
         return switch_id;
     }
 
-    Id add_flow(Id sender_id, Id receiver_id,
+    Id add_flow(std::string sender_name, std::string receiver_name,
                 Size packet_size, Time delay_between_packets,
                 std::uint32_t packets_to_send) {
-        auto sender_it = m_senders.find(sender_id);
+        auto sender_it = m_senders.find(m_name_to_id[sender_name]);
         if (sender_it == m_senders.end()) {
             throw std::runtime_error(fmt::format(
-                "sender with name {} does not exist.", m_id_to_name[sender_id]));
+                "sender with name {} does not exist.", sender_name));
         }
-        auto receiver_it = m_receivers.find(receiver_id);
+        auto receiver_it = m_receivers.find(m_name_to_id[receiver_name]);
         if (receiver_it == m_receivers.end()) {
             throw std::runtime_error(fmt::format(
-                "receiver with name {} does not exist.", m_id_to_name[receiver_id]));
+                "receiver with name {} does not exist.", receiver_name));
         }
         auto flow =
             std::make_shared<Flow>(sender_it->second, receiver_it->second, packet_size,
@@ -94,11 +94,11 @@ public:
         return flow->get_id();
     }
 
-    Id add_link(Id from_id,
-                  Id to_id,
+    Id add_link(std::string from_name,
+                std::string to_name,
                   std::uint32_t a_speed_mbps, Time a_delay) {
-        auto from_device = find_device(from_id);
-        auto to_device = find_device(to_id);
+        auto from_device = find_device(m_name_to_id[from_name]);
+        auto to_device = find_device(m_name_to_id[to_name]);
         auto link =
             std::make_shared<TLink>(from_device, to_device, a_speed_mbps, a_delay);
         m_links.emplace_back(link);
