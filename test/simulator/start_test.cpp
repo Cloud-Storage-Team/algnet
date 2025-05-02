@@ -13,20 +13,20 @@ public:
 
 TEST_F(Start, TrivialTopology) {
     sim::BasicSimulator sim;
-    sim.add_sender("sender");
-    sim.add_switch("switch");
-    sim.add_receiver("receiver");
+    Id sender_id = sim.add_sender("sender");
+    Id switch_id = sim.add_switch("switch");
+    Id receiver_id = sim.add_receiver("receiver");
 
-    auto sender = sim.get_sender("sender");
-    auto swtch = sim.get_switch("switch");
-    auto receiver = sim.get_receiver("receiver");
+    auto sender = sim.get_sender(sender_id);
+    auto swtch = sim.get_switch(switch_id);
+    auto receiver = sim.get_receiver(receiver_id);
 
     constexpr Time delay_between_packets = 100;
     constexpr Time stop_time = 1000;
     constexpr Size packet_size = 1024;
     constexpr std::uint32_t packets_to_send = 1;
 
-    auto flow_id = sim.add_flow(sender, receiver, packet_size,
+    auto flow_id = sim.add_flow("sender", "receiver", packet_size,
                              delay_between_packets, packets_to_send);
 
     add_two_way_links(sim, {{sender, swtch}, {swtch, receiver}});
@@ -38,17 +38,17 @@ TEST_F(Start, TrivialTopology) {
 
 TEST_F(Start, ThreeToOneTopology) {
     sim::BasicSimulator sim;
-    sim.add_sender("sender1");
-    sim.add_sender("sender2");
-    sim.add_sender("sender3");
-    sim.add_switch("switch");
-    sim.add_receiver("receiver");
+    Id sender1_id = sim.add_sender("sender1");
+    Id sender2_id = sim.add_sender("sender2");
+    Id sender3_id = sim.add_sender("sender3");
+    Id switch_id = sim.add_switch("switch");
+    Id receiver_id = sim.add_receiver("receiver");
 
-    auto sender1 = sim.get_sender("sender1");
-    auto sender2 = sim.get_sender("sender2");
-    auto sender3 = sim.get_sender("sender3");
-    auto swtch = sim.get_switch("switch");
-    auto receiver = sim.get_receiver("receiver");
+    auto sender1 = sim.get_sender(sender1_id);
+    auto sender2 = sim.get_sender(sender2_id);
+    auto sender3 = sim.get_sender(sender3_id);
+    auto swtch = sim.get_switch(switch_id);
+    auto receiver = sim.get_receiver(receiver_id);
 
     add_two_way_links(sim, {{sender1, swtch},
                             {sender2, swtch},
@@ -62,11 +62,11 @@ TEST_F(Start, ThreeToOneTopology) {
     constexpr std::uint32_t packets_to_send_by_flow2 = 50;
     constexpr std::uint32_t packets_to_send_by_flow3 = 100;
 
-    auto flow1_id = sim.add_flow(sender1, receiver, packet_size,
+    auto flow1_id = sim.add_flow("sender1", "receiver", packet_size,
                               delay_between_packets, packets_to_send_by_flow1);
-    auto flow2_id = sim.add_flow(sender2, receiver, packet_size,
+    auto flow2_id = sim.add_flow("sender2", "receiver", packet_size,
                               delay_between_packets, packets_to_send_by_flow2);
-    auto flow3_id = sim.add_flow(sender3, receiver, packet_size,
+    auto flow3_id = sim.add_flow("sender3", "receiver", packet_size,
                               delay_between_packets, packets_to_send_by_flow3);
 
     sim.start(stop_time);
@@ -78,17 +78,17 @@ TEST_F(Start, ThreeToOneTopology) {
 
 TEST_F(Start, StopTime) {
     sim::BasicSimulator sim;
-    sim.add_sender("sender1");
-    sim.add_sender("sender2");
-    sim.add_sender("sender3");
-    sim.add_switch("switch");
-    sim.add_receiver("receiver");
+    Id sender1_id = sim.add_sender("sender1");
+    Id sender2_id = sim.add_sender("sender2");
+    Id sender3_id = sim.add_sender("sender3");
+    Id switch_id = sim.add_switch("switch");
+    Id receiver_id = sim.add_receiver("receiver");
 
-    auto sender1 = sim.get_sender("sender1");
-    auto sender2 = sim.get_sender("sender2");
-    auto sender3 = sim.get_sender("sender3");
-    auto swtch = sim.get_switch("switch");
-    auto receiver = sim.get_receiver("receiver");
+    auto sender1 = sim.get_sender(sender1_id);
+    auto sender2 = sim.get_sender(sender2_id);
+    auto sender3 = sim.get_sender(sender3_id);
+    auto swtch = sim.get_switch(switch_id);
+    auto receiver = sim.get_receiver(receiver_id);
 
     add_two_way_links(sim, {{sender1, swtch},
                             {sender2, swtch},
@@ -102,11 +102,11 @@ TEST_F(Start, StopTime) {
     constexpr std::uint32_t packets_to_send_by_flow2 = 50;
     constexpr std::uint32_t packets_to_send_by_flow3 = 100;
 
-    auto flow1_id = sim.add_flow(sender1, receiver, packet_size,
+    auto flow1_id = sim.add_flow("sender1", "receiver", packet_size,
                               delay_between_packets, packets_to_send_by_flow1);
-    auto flow2_id = sim.add_flow(sender2, receiver, packet_size,
+    auto flow2_id = sim.add_flow("sender2", "receiver", packet_size,
                               delay_between_packets, packets_to_send_by_flow2);
-    auto flow3_id = sim.add_flow(sender3, receiver, packet_size,
+    auto flow3_id = sim.add_flow("sender3", "receiver", packet_size,
                               delay_between_packets, packets_to_send_by_flow3);
 
     sim.start(stop_time);
