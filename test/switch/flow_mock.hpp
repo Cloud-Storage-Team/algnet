@@ -23,7 +23,7 @@ public:
     Id get_id() const final;
 
 private:
-    std::shared_ptr<sim::IReceiver> m_receiver;
+    std::weak_ptr<sim::IReceiver> m_receiver;
 };
 
 }  // namespace test

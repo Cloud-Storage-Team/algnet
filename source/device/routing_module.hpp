@@ -1,6 +1,6 @@
 #pragma once
 
-#include <unordered_map>
+#include <map>
 
 #include "device.hpp"
 #include "types.hpp"
@@ -20,20 +20,28 @@ public:
     std::shared_ptr<ILink> next_inlink() final;
     std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;
-    std::set<std::shared_ptr<ILink>> get_outlinks() const final;
+    std::set<std::shared_ptr<ILink>> get_outlinks() final;
+
+    void correctify_inlinks();
+    void correctify_outlinks();
 
 private:
     // Ordered set as we need to iterate over the ingress buffers
-    std::set<std::shared_ptr<ILink>> m_inlinks;
+    std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
+        m_inlinks;
 
-    std::set<std::shared_ptr<ILink>> m_outlinks;
+    std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
+        m_outlinks;
 
     // A routing table: maps the final destination to a specific link
-    std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<ILink>>
+    std::map<std::weak_ptr<IRoutingDevice>, std::weak_ptr<ILink>,
+             std::owner_less<std::weak_ptr<IRoutingDevice>>>
         m_routing_table;
 
     // Iterator for the next ingress to process
-    LoopIterator<std::set<std::shared_ptr<ILink>>::iterator> m_next_inlink;
+    LoopIterator<std::set<std::weak_ptr<ILink>,
+                          std::owner_less<std::weak_ptr<ILink>>>::iterator>
+        m_next_inlink;
 };
 
 }  // namespace sim
