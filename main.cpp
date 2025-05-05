@@ -1,4 +1,3 @@
-#include <iostream>
 #include "logger/logger.hpp"
 
 #include "source/simulator.hpp"
