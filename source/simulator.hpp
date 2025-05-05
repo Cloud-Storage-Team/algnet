@@ -31,74 +31,80 @@ class Simulator {
 public:
     Simulator() = default;
     ~Simulator() = default;
-    std::shared_ptr<TSender> add_sender(std::string name) {
-        if (m_senders.contains(name)) {
-            LOG_WARN(fmt::format(
-                "add_sender failed: device with name {} already exists.",
-                name));
-            return nullptr;
+    Id add_sender(std::string name) {
+        if (m_name_to_id.contains(name)) {
+            throw std::runtime_error(
+                fmt::format("device with name {} already exists.", name));
         }
-        m_senders[name] = std::make_shared<TSender>();
-        return m_senders[name];
+        auto sender = std::make_shared<TSender>();
+        Id sender_id = sender->get_id();
+        
+        m_senders[sender_id] = sender;
+        m_id_to_name[sender_id] = name;
+        m_name_to_id[name] = sender_id;
+        return sender_id;
     }
 
-    std::shared_ptr<TReceiver> add_receiver(std::string name) {
-        if (m_receivers.contains(name)) {
-            LOG_WARN(fmt::format(
-                "add_receiver failed: device with name {} already exists.",
-                name));
-            return nullptr;
+    Id add_receiver(std::string name) {
+        if (m_name_to_id.contains(name)) {
+            throw std::runtime_error(
+                fmt::format("device with name {} already exists.", name));
         }
-        m_receivers[name] = std::make_shared<TReceiver>();
-        return m_receivers[name];
+        auto receiver = std::make_shared<TReceiver>();
+        Id receiver_id = receiver->get_id();
+        
+        m_receivers[receiver_id] = receiver;
+        m_id_to_name[receiver_id] = name;
+        m_name_to_id[name] = receiver_id;
+        return receiver_id;
     }
 
-    std::shared_ptr<TSwitch> add_switch(std::string name) {
-        if (m_switches.contains(name)) {
-            LOG_WARN(fmt::format(
-                "add_switch failed: device with name {} already exists.",
+    Id add_switch(std::string name) {
+        if (m_name_to_id.contains(name)) {
+            throw std::runtime_error(fmt::format(
+                "device with name {} already exists.",
                 name));
-            return nullptr;
         }
-        m_switches[name] = std::make_shared<TSwitch>();
-        return m_switches[name];
+        auto swtch = std::make_shared<TSwitch>();
+        Id switch_id = swtch->get_id();
+        
+        m_switches[switch_id] = swtch;
+        m_id_to_name[switch_id] = name;
+        m_name_to_id[name] = switch_id;
+        return switch_id;
     }
 
-    std::shared_ptr<TFlow> add_flow(std::shared_ptr<ISender> sender,
-                                    std::shared_ptr<IReceiver> receiver,
-                                    Size packet_size,
-                                    Time delay_between_packets,
-                                    std::uint32_t packets_to_send) {
+    Id add_flow(std::string sender_name, std::string receiver_name,
+                Size packet_size, Time delay_between_packets,
+                std::uint32_t packets_to_send) {
+        auto sender_it = m_senders.find(m_name_to_id[sender_name]);
+        if (sender_it == m_senders.end()) {
+            throw std::runtime_error(fmt::format(
+                "sender with name {} does not exist.", sender_name));
+        }
+        auto receiver_it = m_receivers.find(m_name_to_id[receiver_name]);
+        if (receiver_it == m_receivers.end()) {
+            throw std::runtime_error(fmt::format(
+                "receiver with name {} does not exist.", receiver_name));
+        }
         auto flow =
-            std::make_shared<Flow>(sender, receiver, packet_size,
+            std::make_shared<Flow>(sender_it->second, receiver_it->second, packet_size,
                                    delay_between_packets, packets_to_send);
         m_flows.emplace_back(flow);
-        return flow;
+        return flow->get_id();
     }
 
-    void add_link(std::shared_ptr<IRoutingDevice> a_from,
-                  std::shared_ptr<IRoutingDevice> a_to,
+    Id add_link(std::string from_name,
+                std::string to_name,
                   std::uint32_t a_speed_mbps, Time a_delay) {
-        auto link = std::make_shared<TLink>(a_from, a_to, a_speed_mbps, a_delay);
+        auto from_device = find_device(m_name_to_id[from_name]);
+        auto to_device = find_device(m_name_to_id[to_name]);
+        auto link =
+            std::make_shared<TLink>(from_device, to_device, a_speed_mbps, a_delay);
         m_links.emplace_back(link);
-        a_from->add_outlink(link);
-        a_to->add_inlink(link);
-    }
-
-    std::vector<std::shared_ptr<IRoutingDevice>> get_devices() const {
-        std::vector<std::shared_ptr<IRoutingDevice>> result;
-        std::transform(m_senders.begin(), m_senders.end(),
-                       std::back_inserter(result),
-                       [](const auto& pair) { return pair.second; });
-
-        std::transform(m_receivers.begin(), m_receivers.end(),
-                       std::back_inserter(result),
-                       [](const auto& pair) { return pair.second; });
-
-        std::transform(m_switches.begin(), m_switches.end(),
-                       std::back_inserter(result),
-                       [](const auto& pair) { return pair.second; });
-        return result;
+        from_device->add_outlink(link);
+        to_device->add_inlink(link);
+        return link->get_id();
     }
 
     // Calls BFS for each device to build the routing table
@@ -140,12 +146,81 @@ public:
         }
     }
 
+protected:
+    std::shared_ptr<TSender> _get_sender(Id id) {
+        if (!m_senders.contains(id)) {
+            LOG_WARN(fmt::format("device with name {} does not exist.", m_id_to_name[id]));
+            return nullptr;
+        }
+        return m_senders[id];
+    }
+
+    std::shared_ptr<TReceiver> _get_receiver(Id id) {
+        if (!m_receivers.contains(id)) {
+            LOG_WARN(fmt::format("device with name {} does not exist.", m_id_to_name[id]));
+            return nullptr;
+        }
+        return m_receivers[id];
+    }
+
+    std::shared_ptr<TSwitch> _get_switch(Id id) {
+        if (!m_switches.contains(id)) {
+            LOG_WARN(fmt::format("device with name {} does not exist.", m_id_to_name[id]));
+            return nullptr;
+        }
+        return m_switches[id];
+    }
+
+    std::shared_ptr<TFlow> _get_flow(Id id) {
+        const auto it = std::find_if(
+            m_flows.begin(), m_flows.end(),
+            [id](const auto& flow) { return flow->get_id() == id; });
+        if (it != m_flows.end()) {
+            return *it;
+        }
+        LOG_WARN(fmt::format("flow with id {} does not exist.", id));
+        return nullptr;
+    }
+
 private:
-    std::unordered_map<std::string, std::shared_ptr<TSender>> m_senders;
-    std::unordered_map<std::string, std::shared_ptr<TReceiver>> m_receivers;
-    std::unordered_map<std::string, std::shared_ptr<TSwitch>> m_switches;
-    std::vector<std::shared_ptr<IFlow>> m_flows;
-    std::vector<std::shared_ptr<ILink>> m_links;
+    std::unordered_map<Id, std::shared_ptr<TSender>> m_senders;
+    std::unordered_map<Id, std::shared_ptr<TReceiver>> m_receivers;
+    std::unordered_map<Id, std::shared_ptr<TSwitch>> m_switches;
+    std::vector<std::shared_ptr<TFlow>> m_flows;
+    std::vector<std::shared_ptr<TLink>> m_links;
+
+    std::unordered_map<Id, std::string> m_id_to_name;
+    std::unordered_map<std::string, Id> m_name_to_id;
+
+    std::vector<std::shared_ptr<IRoutingDevice>> get_devices() const {
+        std::vector<std::shared_ptr<IRoutingDevice>> result;
+        std::transform(m_senders.begin(), m_senders.end(),
+                       std::back_inserter(result),
+                       [](const auto& pair) { return pair.second; });
+
+        std::transform(m_receivers.begin(), m_receivers.end(),
+                       std::back_inserter(result),
+                       [](const auto& pair) { return pair.second; });
+
+        std::transform(m_switches.begin(), m_switches.end(),
+                       std::back_inserter(result),
+                       [](const auto& pair) { return pair.second; });
+        return result;
+    }
+
+    std::shared_ptr<IRoutingDevice> find_device(Id id) {
+        if (m_senders.contains(id)) {
+            return m_senders[id];
+        }
+        if (m_receivers.contains(id)) {
+            return m_receivers[id];
+        }
+        if (m_switches.contains(id)) {
+            return m_switches[id];
+        }
+        throw std::runtime_error(
+            fmt::format("device with id {} does not exist.", id));
+    }
 };
 
 using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;

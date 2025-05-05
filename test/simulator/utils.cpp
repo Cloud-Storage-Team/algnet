@@ -4,6 +4,22 @@
 
 namespace test {
 
+std::shared_ptr<sim::Sender> TestSimulator::get_sender(Id id) {
+    return _get_sender(id);
+}
+
+std::shared_ptr<sim::Switch> TestSimulator::get_switch(Id id) {
+    return _get_switch(id);
+}
+
+std::shared_ptr<sim::Receiver> TestSimulator::get_receiver(Id id) {
+    return _get_receiver(id);
+}
+
+std::shared_ptr<sim::Flow> TestSimulator::get_flow(Id id) {
+    return _get_flow(id);
+}
+
 void add_two_way_links(sim::BasicSimulator& sim,
                        std::initializer_list<two_way_link_t> links) {
     for (auto& l : links) {
