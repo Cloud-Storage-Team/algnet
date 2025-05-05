@@ -12,10 +12,10 @@ file(GLOB_RECURSE tests "test/*.cpp")
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/source/
-    ${CMAKE_SOURCE_DIR}/spdlog/include/
+    ${CMAKE_SOURCE_DIR}/external/spdlog/include/
 )
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/yaml-cpp/)
+add_subdirectory(${CMAKE_SOURCE_DIR}/external/yaml-cpp/)
 
 if (BUILD_PROJECT)
     set(TARGET_NAME "${PROJECT_NAME}")
@@ -28,10 +28,10 @@ endif()
 option(BUILD_TESTS "Build tests" ON)
 
 if(BUILD_TESTS)
-    add_subdirectory(googletest)
+    add_subdirectory(external/googletest)
     set(TEST_NAME "test_simulator")
     add_executable(${TEST_NAME} ${src} ${tests})
-    target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/yaml-cpp/include)
+    target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/external/yaml-cpp/include)
     target_compile_options(${TEST_NAME} PRIVATE -Wall -Wextra)
     target_include_directories(${TEST_NAME} PUBLIC "source")
     target_link_libraries(${TEST_NAME} gtest gtest_main yaml-cpp)
