@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "device/receiver.hpp"
+#include "logger/logger.hpp"
 #include "scheduler.hpp"
 
 namespace sim {
@@ -53,14 +54,18 @@ Time Flow::create_new_data_packet() {
 }
 
 Time Flow::put_data_to_device() {
-    m_src->enqueue_packet(m_sending_buffer.front());
+    if (m_src.expired()) {
+        LOG_ERROR("Flow source was deleted; can not put data to it");
+        return 0;
+    }
+    m_src.lock()->enqueue_packet(m_sending_buffer.front());
     m_sending_buffer.pop();
     return m_delay_between_packets;
 }   
 
-std::shared_ptr<ISender> Flow::get_sender() const { return m_src; }
+std::shared_ptr<ISender> Flow::get_sender() const { return m_src.lock(); }
 
-std::shared_ptr<IReceiver> Flow::get_receiver() const { return m_dest; }
+std::shared_ptr<IReceiver> Flow::get_receiver() const { return m_dest.lock(); }
 
 Id Flow::get_id() const { return m_id; }
 
