@@ -4,6 +4,7 @@
 
 #include "link.hpp"
 #include "logger/logger.hpp"
+#include "utils/validation.hpp"
 
 namespace sim {
 
@@ -12,8 +13,7 @@ Switch::Switch()
       m_id(IdentifierFactory::get_instance().generate_id()) {}
 
 bool Switch::add_inlink(std::shared_ptr<ILink> link) {
-    if (link == nullptr) {
-        LOG_WARN("Add nullptr inlink to switch device");
+    if (!is_valid_link(link)) {
         return false;
     }
     if (link->get_to().get() != this) {
@@ -24,8 +24,7 @@ bool Switch::add_inlink(std::shared_ptr<ILink> link) {
 }
 
 bool Switch::add_outlink(std::shared_ptr<ILink> link) {
-    if (link == nullptr) {
-        LOG_WARN("Add nullptr outlink to switch device");
+    if (!is_valid_link(link)) {
         return false;
     }
     if (link->get_from().get() != this) {
@@ -41,8 +40,7 @@ bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
         LOG_WARN("Destination device does not exist");
         return false;
     }
-    if (link == nullptr) {
-        LOG_WARN("Link does not exist");
+    if (!is_valid_link(link)) {
         return false;
     }
     if (link->get_from().get() != this) {
@@ -81,6 +79,10 @@ Time Switch::process() {
         return total_processing_time;
     }
     std::shared_ptr<IRoutingDevice> destination = packet.get_destination();
+    if (destination == nullptr) {
+        LOG_WARN("Destination device pointer is expired");
+        return total_processing_time;
+    }
 
     std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
 
@@ -88,16 +90,17 @@ Time Switch::process() {
         LOG_WARN("No link corresponds to destination device");
         return total_processing_time;
     }
-    
+
     // TODO: add some switch ID for easier packet path tracing
-    LOG_INFO("Processing packet from link on switch. Packet: " + packet.to_string());
+    LOG_INFO("Processing packet from link on switch. Packet: " +
+             packet.to_string());
 
     // TODO: increase total_processing_time correctly
     next_link->schedule_arrival(packet);
     return total_processing_time;
 }
 
-std::set<std::shared_ptr<ILink>> Switch::get_outlinks() const {
+std::set<std::shared_ptr<ILink>> Switch::get_outlinks() {
     return m_router->get_outlinks();
 }
 

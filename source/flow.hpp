@@ -13,11 +13,15 @@ class ISender;
 class IFlow : public Identifiable {
 public:
     virtual void start(Time time) = 0;
-    virtual Time try_to_generate() = 0;
+    // Adds new packet to sending queue
+    // Used in event Generate
+    virtual Time create_new_data_packet() = 0;
+    // Puts some pakets from sending buffer to sender's buffer according to the internal state
+    virtual Time put_data_to_device() = 0;
 
     // Update the internal state according to some congestion control algorithm
-    // Call try_to_generate upon the update
-    virtual void update() = 0;
+    // Calls when data available for sending on corresponding device
+    virtual void update(Packet packet, DeviceType type) = 0;
     virtual std::shared_ptr<ISender> get_sender() const = 0;
     virtual std::shared_ptr<IReceiver> get_receiver() const = 0;
 };
@@ -32,14 +36,12 @@ public:
     // Start at time
     void start(Time time) final;
 
-    // Try to generate a new packet if the internal state allows to do so.
-    // by placing it into the flow buffer of the source node.
-    // Schedule the next generation event.
-    Time try_to_generate() final;
+    Time create_new_data_packet() final;
+    Time put_data_to_device() final;
 
     // Update the internal state according to some congestion control algorithm
     // Call try_to_generate upon the update
-    void update() final;
+    void update(Packet packet, DeviceType type) final;
     std::uint32_t get_updates_number() const;
 
     std::shared_ptr<ISender> get_sender() const final;
@@ -49,14 +51,16 @@ public:
 
 private:
     void schedule_packet_generation(Time time);
-    void generate_packet();
+    Packet generate_packet();
 
-    std::shared_ptr<ISender> m_src;
-    std::shared_ptr<IReceiver> m_dest;
+    std::weak_ptr<ISender> m_src;
+    std::weak_ptr<IReceiver> m_dest;
     Size m_packet_size;
     Time m_delay_between_packets;
     std::uint32_t m_updates_number;
     std::uint32_t m_packets_to_send;
+
+    std::queue<Packet> m_sending_buffer;
     Id m_id;
 };
 

@@ -1,22 +1,27 @@
 #include "source/logger/logger.hpp"
 #include "source/parser.hpp"
 
-int main(int argc, char* argv[]) {
-    Logger::setupLogging();
-    if (argc != 3) {
-        LOG_ERROR(fmt::format("Usage: {} <topology.yaml> <simulation.yaml>", argv[0]));
-        return 1;
-    }
+#include "source/simulator.hpp"
+#include "parser.hpp"
 
-    try {
-        sim::Simulator simulator;
-        sim::YamlParser parser;
-        Time stop_time = parser.parse_configs(argv[1], argv[2], simulator);
-        simulator.start(stop_time);
-    } catch (const std::exception& e) {
-        LOG_ERROR(fmt::format("Error: {}", e.what()));
-        return 1;
-    }
 
-    return 0;
+#include <yaml-cpp/yaml.h>
+
+int main(const int argc, char **argv) {
+	LOG_INFO("Hello, World!");
+	if (argc != 2) {
+		LOG_ERROR(fmt::format("Usage: {} <config.yaml>", argv[0]));
+		return 1;
+	}
+
+	try {
+		sim::YamlParser parser;
+		sim::BasicSimulator simulator = parser.
+				parseConfig(argv[1]);
+		simulator.start(1000); // Run simulation for 1000 time units
+	} catch (const std::exception &e) {
+		LOG_ERROR(fmt::format("Error: {}", e.what()));
+		return 1;
+	}
+	return 0;
 }

@@ -5,6 +5,7 @@
 
 #include "device/device.hpp"
 #include "link.hpp"
+#include "logger/logger.hpp"
 #include "utils.hpp"
 #include "utils/loop_iterator.hpp"
 
@@ -29,13 +30,13 @@ TEST_F(AddLink, LinkIsPresent) {
     source->add_outlink(link);
     auto outlinks = source->get_outlinks();
     EXPECT_TRUE(outlinks.contains(link));
-    EXPECT_EQ(*outlinks.begin(), link);
+    EXPECT_EQ((*outlinks.begin()), link);
 }
 
 TEST_F(AddLink, SameLinkMultipleTimes) {
-    int NUMBER_OF_NEIGHBOURS = 5;
-    int MAX_LINKS = 3;
-    int NUMBER_OF_LOOPS = 3;
+    size_t NUMBER_OF_NEIGHBOURS = 5;
+    size_t MAX_LINKS = 3;
+    size_t NUMBER_OF_LOOPS = 3;
 
     auto neighbour_devices = createRoutingModules(NUMBER_OF_NEIGHBOURS);
     auto dest = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
@@ -44,14 +45,14 @@ TEST_F(AddLink, SameLinkMultipleTimes) {
     std::mt19937 gen(RANDOM_SEED);
     std::uniform_int_distribution<> dis(1, MAX_LINKS);
 
-    std::unordered_map<std::shared_ptr<sim::ILink>, int> number_of_inlink_appearances;
-    std::unordered_map<std::shared_ptr<sim::ILink>, int> number_of_outlink_appearances;
-    
+    std::map<std::shared_ptr<sim::ILink>, int> number_of_inlink_appearances;
+    std::map<std::shared_ptr<sim::ILink>, int> number_of_outlink_appearances;
+
     for (auto device : neighbour_devices) {
         auto inlink = std::make_shared<TestLink>(device, dest);
         auto outlink = std::make_shared<TestLink>(source, device);
 
-        int links_to_add = dis(gen);
+        size_t links_to_add = dis(gen);
         for (size_t i = 0; i < links_to_add; ++i) {
             dest->add_inlink(inlink);
             source->add_outlink(outlink);
@@ -61,7 +62,8 @@ TEST_F(AddLink, SameLinkMultipleTimes) {
     }
 
     auto outlinks = source->get_outlinks();
-    sim::LoopIterator<std::set<std::shared_ptr<sim::ILink>>::iterator>
+    sim::LoopIterator<
+        std::set<std::shared_ptr<sim::ILink>>::iterator>
         outlink_it(outlinks.begin(), outlinks.end());
 
     for (size_t loop = 0; loop < NUMBER_OF_LOOPS; loop++) {

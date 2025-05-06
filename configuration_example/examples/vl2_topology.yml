@@ -1,0 +1,104 @@
+hosts:
+  sender1:
+    type: sender
+    name: sender1
+  sender2:
+    type: sender
+    name: sender2
+  receiver1:
+    type: receiver
+    name: receiver1
+  receiver2:
+    type: receiver
+    name: receiver2
+
+switches:
+  edge1:
+    type: switch
+    name: edge_switch1 (ToR)
+  edge2:
+    type: switch
+    name: edge_switch2 (ToR)
+  aggr1:
+    type: switch
+    name: aggregate_switch1
+  aggr2:
+    type: switch
+    name: aggregate_switch2
+  core1:
+    type: switch
+    name: core_switch1
+  core2:
+    type: switch
+    name: core_switch2
+
+links:
+  # Hosts to Edge Layer (1Gbps)
+  link1:
+    from: sender1
+    to: edge1
+    latency: 1ns
+    throughput: 1Gbps
+  link2:
+    from: sender2
+    to: edge1
+    latency: 1ns
+    throughput: 1Gbps
+  link3:
+    from: edge2
+    to: receiver1
+    latency: 1ns
+    throughput: 1Gbps
+  link4:
+    from: edge2
+    to: receiver2
+    latency: 1ns
+    throughput: 1Gbps
+
+  # Edge to Aggregation Layer (10Gbps)
+  link5:
+    from: edge1
+    to: aggr1
+    latency: 1ns
+    throughput: 10Gbps
+  link6:
+    from: edge1
+    to: aggr2
+    latency: 1ns
+    throughput: 10Gbps
+
+  # Aggregation to Core Layer (10Gbps)
+  link7:
+    from: aggr1
+    to: core1
+    latency: 1ns
+    throughput: 10Gbps
+  link8:
+    from: aggr2
+    to: core2
+    latency: 1ns
+    throughput: 10Gbps
+
+  # Core to Downstream Aggregation (10Gbps)
+  link9:
+    from: core1
+    to: aggr2
+    latency: 1ns
+    throughput: 10Gbps
+  link10:
+    from: core2
+    to: aggr1
+    latency: 1ns
+    throughput: 10Gbps
+
+  # Aggregation to Edge (Downstream)
+  link11:
+    from: aggr2
+    to: edge2
+    latency: 1ns
+    throughput: 10Gbps
+  link12:
+    from: aggr1
+    to: edge2
+    latency: 1ns
+    throughput: 10Gbps

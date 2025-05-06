@@ -1,0 +1,90 @@
+hosts:
+  sender1:
+    type: sender
+    name: sender1
+  sender2:
+    type: sender
+    name: sender2
+  receiver1:
+    type: receiver
+    name: receiver1
+  receiver2:
+    type: receiver
+    name: receiver2
+switches:
+  core1:
+    type: switch
+    name: core1
+  aggregation1:
+    type: switch
+    name: aggregation1
+  aggregation2:
+    type: switch
+    name: aggregation2
+  access1:
+    type: switch
+    name: access1
+  access2:
+    type: switch
+    name: access2
+links:
+  link1:
+    from: sender1
+    to: access1
+    latency: 2ns
+    throughput: 1Gbps
+  link2:
+    from: sender2
+    to: access2
+    latency: 2ns
+    throughput: 1Gbps
+  link3:
+    from: access1
+    to: aggregation1
+    latency: 1ns
+    throughput: 10Gbps
+  link4:
+    from: access2
+    to: aggregation2
+    latency: 1ns
+    throughput: 10Gbps
+  link5:
+    from: aggregation1
+    to: core1
+    latency: 1ns
+    throughput: 40Gbps
+  link6:
+    from: aggregation2
+    to: core1
+    latency: 1ns
+    throughput: 40Gbps
+  link7:
+    from: core1
+    to: aggregation1
+    latency: 1ns
+    throughput: 40Gbps
+  link8:
+    from: core1
+    to: aggregation2
+    latency: 1ns
+    throughput: 40Gbps
+  link9:
+    from: aggregation1
+    to: access1
+    latency: 1ns
+    throughput: 10Gbps
+  link10:
+    from: aggregation2
+    to: access2
+    latency: 1ns
+    throughput: 10Gbps
+  link11:
+    from: access1
+    to: receiver1
+    latency: 2ns
+    throughput: 1Gbps
+  link12:
+    from: access2
+    to: receiver2
+    latency: 2ns
+    throughput: 1Gbps
