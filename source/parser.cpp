@@ -10,11 +10,12 @@
 
 namespace sim {
 
-BasicSimulator YamlParser::buildSimulatorFromConfig(
+SimulatorVariant YamlParser::buildSimulatorFromConfig(
     const std::filesystem::path &path) {
     BasicSimulator simulator;
     const YAML::Node simulation_config = YAML::LoadFile(path);
-    m_topology_config_path = path.parent_path() / parse_topology_config_path(simulation_config);
+    m_topology_config_path =
+        path.parent_path() / parse_topology_config_path(simulation_config);
     const YAML::Node topology_config = YAML::LoadFile(m_topology_config_path);
 
     process_hosts(topology_config, simulator);

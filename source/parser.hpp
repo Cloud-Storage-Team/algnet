@@ -13,7 +13,7 @@ namespace sim {
 
 class YamlParser {
 public:
-    BasicSimulator buildSimulatorFromConfig(
+    SimulatorVariant buildSimulatorFromConfig(
         const std::filesystem::path& path);
     Time get_simulation_time() const;
 

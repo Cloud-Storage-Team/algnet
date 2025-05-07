@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 #include "device/device.hpp"
@@ -151,5 +152,7 @@ private:
 };
 
 using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;
+
+using SimulatorVariant = std::variant<BasicSimulator>;
 
 }  // namespace sim
