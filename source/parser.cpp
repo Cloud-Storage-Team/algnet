@@ -11,10 +11,10 @@
 namespace sim {
 
 BasicSimulator YamlParser::buildSimulatorFromConfig(
-    const std::string &filename) {
+    const std::filesystem::path &path) {
     BasicSimulator simulator;
-    const YAML::Node simulation_config = YAML::LoadFile(filename);
-    m_topology_config_path = parse_topology_config_path(simulation_config);
+    const YAML::Node simulation_config = YAML::LoadFile(path);
+    m_topology_config_path = path.parent_path() / parse_topology_config_path(simulation_config);
     const YAML::Node topology_config = YAML::LoadFile(m_topology_config_path);
 
     process_hosts(topology_config, simulator);
@@ -27,18 +27,26 @@ BasicSimulator YamlParser::buildSimulatorFromConfig(
     return simulator;
 }
 
-std::string YamlParser::parse_topology_config_path(const YAML::Node &config) {
+Time YamlParser::get_simulation_time() const {
+    if (m_simulation_time == 0) {
+        LOG_ERROR("Simulation time is 0");
+    }
+    return m_simulation_time;
+}
+
+std::filesystem::path YamlParser::parse_topology_config_path(
+    const YAML::Node &config) {
     if (!config["topology_config_path"]) {
         throw std::runtime_error("No topology_config_path provided");
     }
     return config["topology_config_path"].as<std::string>();
 }
 
-Time YamlParser::parse_simulation_time(const YAML::Node &config) {
+void YamlParser::parse_simulation_time(const YAML::Node &config) {
     if (!config["simulation_time"]) {
         throw std::runtime_error("No simulation time provided");
     }
-    return config["simulation_time"].as<Time>();
+    m_simulation_time = config["simulation_time"].as<Time>();
 }
 
 uint32_t YamlParser::parse_throughput(const std::string &throughput_str) {
@@ -71,7 +79,7 @@ uint32_t YamlParser::parse_latency(const std::string &latency_str) {
 }
 
 void YamlParser::process_hosts(const YAML::Node &config,
-                              BasicSimulator &simulator) {
+                               BasicSimulator &simulator) {
     if (!config["hosts"]) {
         LOG_WARN("No hosts specified in the configuration");
         return;
@@ -95,7 +103,7 @@ void YamlParser::process_hosts(const YAML::Node &config,
 }
 
 void YamlParser::process_switches(const YAML::Node &config,
-                                 BasicSimulator &simulator) {
+                                  BasicSimulator &simulator) {
     if (!config["switches"]) {
         LOG_WARN("No switches specified in the configuration");
         return;
@@ -110,7 +118,7 @@ void YamlParser::process_switches(const YAML::Node &config,
 }
 
 void YamlParser::process_links(const YAML::Node &config,
-                              BasicSimulator &simulator) const {
+                               BasicSimulator &simulator) const {
     if (!config["links"]) {
         LOG_WARN("No links specified in the configuration");
         return;
