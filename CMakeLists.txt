@@ -14,7 +14,6 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/source/
     ${CMAKE_SOURCE_DIR}/external/spdlog/include/
 )
-add_subdirectory(${CMAKE_SOURCE_DIR}/yaml-cpp/)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/yaml-cpp/)
 
