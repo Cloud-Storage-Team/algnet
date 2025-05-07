@@ -1,7 +1,5 @@
 #include <yaml-cpp/yaml.h>
 
-#include <variant>
-
 #include "parser.hpp"
 #include "source/logger/logger.hpp"
 #include "source/parser.hpp"

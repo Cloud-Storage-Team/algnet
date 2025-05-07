@@ -155,4 +155,6 @@ using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;
 
 using SimulatorVariant = std::variant<BasicSimulator>;
 
+SimulatorVariant create_simulator(std::string_view algorithm);
+
 }  // namespace sim

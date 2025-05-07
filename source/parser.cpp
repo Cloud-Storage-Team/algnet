@@ -12,8 +12,10 @@ namespace sim {
 
 SimulatorVariant YamlParser::buildSimulatorFromConfig(
     const std::filesystem::path &path) {
-    BasicSimulator simulator;
     const YAML::Node simulation_config = YAML::LoadFile(path);
+    std::string algorithm = parse_algorithm(simulation_config);
+    SimulatorVariant simulator = create_simulator(algorithm);
+
     m_topology_config_path =
         path.parent_path() / parse_topology_config_path(simulation_config);
     const YAML::Node topology_config = YAML::LoadFile(m_topology_config_path);
@@ -26,21 +28,6 @@ SimulatorVariant YamlParser::buildSimulatorFromConfig(
     parse_simulation_time(simulation_config);
     m_devices.clear();
     return simulator;
-}
-
-Time YamlParser::get_simulation_time() const {
-    if (m_simulation_time == 0) {
-        LOG_ERROR("Simulation time is 0");
-    }
-    return m_simulation_time;
-}
-
-std::filesystem::path YamlParser::parse_topology_config_path(
-    const YAML::Node &config) {
-    if (!config["topology_config_path"]) {
-        throw std::runtime_error("No topology_config_path provided");
-    }
-    return config["topology_config_path"].as<std::string>();
 }
 
 void YamlParser::parse_simulation_time(const YAML::Node &config) {
@@ -80,7 +67,7 @@ uint32_t YamlParser::parse_latency(const std::string &latency_str) {
 }
 
 void YamlParser::process_hosts(const YAML::Node &config,
-                               BasicSimulator &simulator) {
+                               SimulatorVariant &simulator) {
     if (!config["hosts"]) {
         LOG_WARN("No hosts specified in the configuration");
         return;
@@ -94,9 +81,13 @@ void YamlParser::process_hosts(const YAML::Node &config,
         const auto name = val_node["name"].as<std::string>();
 
         if (type_str == "sender") {
-            m_devices[key] = simulator.add_sender(name);
+            m_devices[key] = std::visit(
+                [&name](auto &sim) { return sim.add_sender(name); }, simulator);
         } else if (type_str == "receiver") {
-            m_devices[key] = simulator.add_receiver(name);
+            m_devices[key] = std::visit(
+                [&name](auto &sim) { return sim.add_receiver(name); },
+                simulator);
+
         } else {
             throw std::runtime_error("Invalid host type: " + type_str);
         }
@@ -104,7 +95,7 @@ void YamlParser::process_hosts(const YAML::Node &config,
 }
 
 void YamlParser::process_switches(const YAML::Node &config,
-                                  BasicSimulator &simulator) {
+                                  SimulatorVariant &simulator) {
     if (!config["switches"]) {
         LOG_WARN("No switches specified in the configuration");
         return;
@@ -114,12 +105,13 @@ void YamlParser::process_switches(const YAML::Node &config,
     for (auto it = switches.begin(); it != switches.end(); ++it) {
         auto key = it->first.as<std::string>();
         const auto name = it->second["name"].as<std::string>();
-        m_devices[key] = simulator.add_switch(name);
+        m_devices[key] = std::visit(
+            [&name](auto &sim) { return sim.add_switch(name); }, simulator);
     }
 }
 
 void YamlParser::process_links(const YAML::Node &config,
-                               BasicSimulator &simulator) const {
+                               SimulatorVariant &simulator) const {
     if (!config["links"]) {
         LOG_WARN("No links specified in the configuration");
         return;
@@ -150,13 +142,17 @@ void YamlParser::process_links(const YAML::Node &config,
                                      " or " + to);
         }
 
-        simulator.add_link(m_devices.at(from), m_devices.at(to), speed,
-                           latency);
+        std::visit(
+            [&](auto &sim) {
+                sim.add_link(m_devices.at(from), m_devices.at(to), speed,
+                             latency);
+            },
+            simulator);
     }
 }
 
 void YamlParser::process_flows(const YAML::Node &config,
-                               BasicSimulator &simulator) const {
+                               SimulatorVariant &simulator) const {
     if (!config["flows"]) {
         LOG_ERROR("No flows in simulation config");
         return;
@@ -175,8 +171,34 @@ void YamlParser::process_flows(const YAML::Node &config,
         std::shared_ptr<IReceiver> receiver =
             std::dynamic_pointer_cast<IReceiver>(m_devices.at(receiver_id));
 
-        simulator.add_flow(sender, receiver, packet_size, packet_interval, 0);
+        std::visit(
+            [&](auto &sim) {
+                sim.add_flow(sender, receiver, packet_size, packet_interval, 0);
+            },
+            simulator);
     }
+}
+
+std::filesystem::path YamlParser::parse_topology_config_path(
+    const YAML::Node &config) {
+    if (!config["topology_config_path"]) {
+        throw std::runtime_error("No topology_config_path provided");
+    }
+    return config["topology_config_path"].as<std::string>();
+}
+
+std::string YamlParser::parse_algorithm(const YAML::Node &config) const {
+    if (!config["algorithm"]) {
+        throw std::runtime_error("No algorithm provided");
+    }
+    return config["algorithm"].as<std::string>();
+}
+
+Time YamlParser::get_simulation_time() const {
+    if (m_simulation_time == 0) {
+        LOG_ERROR("Simulation time is 0");
+    }
+    return m_simulation_time;
 }
 
 }  // namespace sim
