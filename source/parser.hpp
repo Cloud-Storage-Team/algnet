@@ -14,7 +14,8 @@ public:
     BasicSimulator parseConfig(const std::string& filename);
 
 private:
-    std::map<std::string, std::shared_ptr<IRoutingDevice>> devices_map;
+    std::map<std::string, std::shared_ptr<IRoutingDevice>> m_devices_map;
+    std::string m_topology_config_path;
 
     static uint32_t parseThroughput(const std::string& throughput_str);
     static uint32_t parseLatency(const std::string& latency_str);
@@ -23,5 +24,12 @@ private:
     void processSwitches(const YAML::Node& config, BasicSimulator& simulator);
     void processLinks(const YAML::Node& config,
                       BasicSimulator& simulator) const;
+    void process_flows(const YAML::Node& config,
+                       BasicSimulator& simulator) const;
+
+    void parse_simulation_config(const std::string& filename,
+                                 BasicSimulator& simulator);
+    std::string parse_topology_config_path(const YAML::Node& config);
+    Time parse_simulation_time(const YAML::Node& config);
 };
 }  // namespace sim
