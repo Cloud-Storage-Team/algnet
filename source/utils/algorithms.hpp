@@ -8,7 +8,7 @@
 namespace sim {
 
 using RoutingTable =
-    std::unordered_map<std::shared_ptr<IRoutingDevice>, std::shared_ptr<ILink>>;
+    std::unordered_map<std::shared_ptr<IRoutingDevice>, std::unordered_map<std::shared_ptr<ILink>, int>>;
 
 // Builds routing table using BFS algorithm starting from start_device,
 // for each device stores the first link that leads to it from the start

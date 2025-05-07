@@ -15,7 +15,7 @@ bool DeviceMock::add_inlink(std::shared_ptr<sim::ILink> link) { return false; }
 bool DeviceMock::add_outlink(std::shared_ptr<sim::ILink> link) { return false; }
 
 bool DeviceMock::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                      std::shared_ptr<sim::ILink> link) {
+                                      std::shared_ptr<sim::ILink> link, int paths) {
     return false;
 }
 
