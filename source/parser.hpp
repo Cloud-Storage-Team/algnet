@@ -2,7 +2,6 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <cstdint>
 #include <filesystem>
 #include <map>
 #include <string>

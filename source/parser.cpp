@@ -32,7 +32,7 @@ SimulatorVariant YamlParser::buildSimulatorFromConfig(
 
 void YamlParser::parse_simulation_time(const YAML::Node &config) {
     if (!config["simulation_time"]) {
-        throw std::runtime_error("No simulation time provided");
+        throw std::runtime_error("No simulation time specified in the simulation config");
     }
     m_simulation_time = config["simulation_time"].as<Time>();
 }
@@ -69,7 +69,7 @@ uint32_t YamlParser::parse_latency(const std::string &latency_str) {
 void YamlParser::process_hosts(const YAML::Node &config,
                                SimulatorVariant &simulator) {
     if (!config["hosts"]) {
-        LOG_WARN("No hosts specified in the configuration");
+        LOG_WARN("No hosts specified in the topology config");
         return;
     }
     for (auto it = config["hosts"].begin(); it != config["hosts"].end(); ++it) {
@@ -97,7 +97,7 @@ void YamlParser::process_hosts(const YAML::Node &config,
 void YamlParser::process_switches(const YAML::Node &config,
                                   SimulatorVariant &simulator) {
     if (!config["switches"]) {
-        LOG_WARN("No switches specified in the configuration");
+        LOG_WARN("No switches specified in the topology config");
         return;
     }
 
@@ -113,7 +113,7 @@ void YamlParser::process_switches(const YAML::Node &config,
 void YamlParser::process_links(const YAML::Node &config,
                                SimulatorVariant &simulator) const {
     if (!config["links"]) {
-        LOG_WARN("No links specified in the configuration");
+        LOG_WARN("No links specified in the topology config");
         return;
     }
 
@@ -154,7 +154,7 @@ void YamlParser::process_links(const YAML::Node &config,
 void YamlParser::process_flows(const YAML::Node &config,
                                SimulatorVariant &simulator) const {
     if (!config["flows"]) {
-        LOG_ERROR("No flows in simulation config");
+        LOG_ERROR("No flows specified in the simulation config");
         return;
     }
 
@@ -162,7 +162,14 @@ void YamlParser::process_flows(const YAML::Node &config,
     for (auto it = flows.begin(); it != flows.end(); ++it) {
         std::string key = it->first.as<std::string>();
         std::string sender_id = it->second["sender_id"].as<std::string>();
+        if (!m_devices.contains(sender_id)) {
+            throw std::runtime_error("Unknown device in 'sender_id': " + sender_id);
+        }
         std::string receiver_id = it->second["receiver_id"].as<std::string>();
+        if (!m_devices.contains(receiver_id)) {
+            throw std::runtime_error("Unknown device in 'receiver_id': " + receiver_id);
+        }
+
         Size packet_size = it->second["packet_size"].as<Size>();
         Time packet_interval = it->second["packet_interval"].as<Time>();
 
@@ -182,14 +189,14 @@ void YamlParser::process_flows(const YAML::Node &config,
 std::filesystem::path YamlParser::parse_topology_config_path(
     const YAML::Node &config) {
     if (!config["topology_config_path"]) {
-        throw std::runtime_error("No topology_config_path provided");
+        throw std::runtime_error("No topology_config_path specified in the simulation config");
     }
     return config["topology_config_path"].as<std::string>();
 }
 
 std::string YamlParser::parse_algorithm(const YAML::Node &config) const {
     if (!config["algorithm"]) {
-        throw std::runtime_error("No algorithm provided");
+        throw std::runtime_error("No algorithm specified in the simulation config");
     }
     return config["algorithm"].as<std::string>();
 }
