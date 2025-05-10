@@ -31,54 +31,54 @@ links:
   link1:
     from: sender1
     to: leaf1
-    latency: 1ms
+    latency: 1ns
     throughput: 1Gbps
   link2:
     from: sender2
     to: leaf1
-    latency: 1ms
+    latency: 1ns
     throughput: 1Gbps
   link3:
     from: leaf2
     to: receiver1
-    latency: 1ms
+    latency: 1ns
     throughput: 1Gbps
   link4:
     from: leaf2
     to: receiver2
-    latency: 1ms
+    latency: 1ns
     throughput: 1Gbps
 
   # Leaf to Spine Layer (10Gbps, full bipartite)
   link5:
     from: leaf1
     to: spine1
-    latency: 1ms
+    latency: 1ns
     throughput: 10Gbps
   link6:
     from: leaf1
     to: spine2
-    latency: 1ms
+    latency: 1ns
     throughput: 10Gbps
   link7:
     from: leaf2
     to: spine1
-    latency: 1ms
+    latency: 1ns
     throughput: 10Gbps
   link8:
     from: leaf2
     to: spine2
-    latency: 1ms
+    latency: 1ns
     throughput: 10Gbps
 
   # Spine to Leaf (return paths)
   link9:
     from: spine1
     to: leaf2
-    latency: 1ms
+    latency: 1ns
     throughput: 10Gbps
   link10:
     from: spine2
     to: leaf2
-    latency: 1ms
+    latency: 1ns
     throughput: 10Gbps

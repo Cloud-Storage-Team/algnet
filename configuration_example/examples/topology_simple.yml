@@ -19,20 +19,20 @@ links:
   link1:
     from: sender1
     to: switch1
-    latency: 5ms
+    latency: 5ns
     throughput: 1Gbps
   link2:
     from: sender2
     to: switch1
-    latency: 5ms
+    latency: 5ns
     throughput: 1Gbps
   link3:
     from: switch1
     to: receiver1
-    latency: 5ms
+    latency: 5ns
     throughput: 1Gbps
   link4:
     from: switch1
     to: receiver2
-    latency: 5ms
+    latency: 5ns
     throughput: 1Gbps
