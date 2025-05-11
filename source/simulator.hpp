@@ -108,7 +108,7 @@ public:
     }
 
     // Calls BFS for each device to build the routing table
-    void recalculate_paths() {
+    void recalculate_paths() const {
         for (auto src_device : get_devices()) {
             RoutingTable routing_table = bfs(src_device);
             for (auto [dest_device, link] : routing_table) {
@@ -116,6 +116,7 @@ public:
             }
         }
     }
+
     // Create a Stop event at a_stop_time and start simulation
     void start(Time a_stop_time) {
         recalculate_paths();
