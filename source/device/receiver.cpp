@@ -10,9 +10,9 @@
 
 namespace sim {
 
-Receiver::Receiver()
+Receiver::Receiver(const std::string& a_name)
     : m_router(std::make_unique<RoutingModule>()),
-      m_id(IdentifierFactory::get_instance().generate_id()) {}
+      m_id(a_name) {}
 
 bool Receiver::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {

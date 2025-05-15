@@ -28,7 +28,7 @@ public:
 
 class Flow : public IFlow, public std::enable_shared_from_this<Flow> {
 public:
-    Flow(std::shared_ptr<ISender> a_src, std::shared_ptr<IReceiver> a_dest,
+    Flow(const std::string& a_name, std::shared_ptr<ISender> a_src, std::shared_ptr<IReceiver> a_dest,
          Size a_packet_size, Time a_delay_between_packets,
          std::uint32_t a_packets_to_send);
     virtual ~Flow() = default;

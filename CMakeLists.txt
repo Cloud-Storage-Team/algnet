@@ -5,7 +5,7 @@ project(simulator)
 
 # main part of project
 
-option(BUILD_PROJECT "Build tests" ON)
+option(BUILD_PROJECT "Build project" ON)
 
 file(GLOB_RECURSE src "source/*.cpp")
 file(GLOB_RECURSE tests "test/*.cpp")

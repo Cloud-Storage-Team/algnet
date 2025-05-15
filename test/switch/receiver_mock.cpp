@@ -35,6 +35,6 @@ std::set<std::shared_ptr<sim::ILink>> ReceiverMock::get_outlinks() {
     return {};
 }
 
-Id ReceiverMock::get_id() const { return 42; }
+Id ReceiverMock::get_id() const { return "42"; }
 
 }  // namespace test
