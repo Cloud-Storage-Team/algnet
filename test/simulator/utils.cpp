@@ -22,9 +22,13 @@ std::shared_ptr<sim::Flow> TestSimulator::get_flow(Id id) {
 
 void add_two_way_links(sim::BasicSimulator& sim,
                        std::initializer_list<two_way_link_t> links) {
+    static int counter = 1;
+    const std::string link_name = "test_link";
     for (auto& l : links) {
-        sim.add_link(l.first, l.second, 0, 0);
-        sim.add_link(l.second, l.first, 0, 0);
+        sim.add_link(fmt::format("{}_{}", link_name, counter++), l.first,
+                     l.second, 0, 0);
+        sim.add_link(fmt::format("{}_{}", link_name, counter++), l.second,
+                     l.first, 0, 0);
     }
 }
 

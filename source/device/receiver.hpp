@@ -19,7 +19,7 @@ public:
 class Receiver : public IReceiver,
                  public std::enable_shared_from_this<Receiver> {
 public:
-    Receiver();
+    Receiver(const std::string& a_name);
     ~Receiver() = default;
 
     bool add_inlink(std::shared_ptr<ILink> link) final;

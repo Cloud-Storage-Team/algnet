@@ -16,7 +16,7 @@ public:
 
 class Switch : public ISwitch, public std::enable_shared_from_this<Switch> {
 public:
-    Switch();
+    Switch(const std::string& a_name);
     ~Switch() = default;
 
     bool add_inlink(std::shared_ptr<ILink> link) final;

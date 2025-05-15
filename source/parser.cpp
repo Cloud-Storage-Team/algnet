@@ -89,6 +89,7 @@ void YamlParser::processLinks(const YAML::Node &config,
 
     const YAML::Node links = config["links"];
     for (auto it = links.begin(); it != links.end(); ++it) {
+        auto link_name = it->first.as<std::string>();
         const YAML::Node link = it->second;
         auto from = link["from"].as<std::string>();
         auto to = link["to"].as<std::string>();
@@ -97,7 +98,7 @@ void YamlParser::processLinks(const YAML::Node &config,
         const uint32_t speed =
             parseThroughput(link["throughput"].as<std::string>());
 
-        simulator.add_link(from, to, speed, latency);
+        simulator.add_link(link_name, from, to, speed, latency);
     }
 }
 

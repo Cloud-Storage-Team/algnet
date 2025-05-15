@@ -12,6 +12,8 @@ class LinkTest : public testing::Test {
 public:
     void TearDown() override;
     void SetUp() override;
+
+    const std::string link_name = "test_link";
 };
 
 class DeviceMock : public sim::IRoutingDevice {
