@@ -14,7 +14,7 @@ int main(const int argc, char **argv) {
     try {
         sim::YamlParser parser;
         sim::BasicSimulator simulator = parser.parseConfig(argv[1]);
-        simulator.start(1000, true);  // Run simulation for 1000 time units
+        simulator.start(1000, true, true);  // Run simulation for 1000 time units
     } catch (const std::exception &e) {
         LOG_ERROR(fmt::format("Error: {}", e.what()));
         return 1;

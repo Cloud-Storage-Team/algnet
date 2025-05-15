@@ -16,11 +16,12 @@ include_directories(
 )
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/yaml-cpp/)
+add_subdirectory(${CMAKE_SOURCE_DIR}/external/matplotplusplus/)
 
 if (BUILD_PROJECT)
     set(TARGET_NAME "${PROJECT_NAME}")
     add_executable(${TARGET_NAME} main.cpp ${src})
-    target_link_libraries(${TARGET_NAME} yaml-cpp)
+    target_link_libraries(${TARGET_NAME} yaml-cpp matplot)
     target_compile_options(${TARGET_NAME} PRIVATE -Wall -Werror -Wextra)
 endif()
 
@@ -34,7 +35,7 @@ if(BUILD_TESTS)
     target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/external/yaml-cpp/include)
     target_compile_options(${TEST_NAME} PRIVATE -Wall -Wextra)
     target_include_directories(${TEST_NAME} PUBLIC "source")
-    target_link_libraries(${TEST_NAME} gtest gtest_main yaml-cpp)
+    target_link_libraries(${TEST_NAME} gtest gtest_main yaml-cpp matplot)
     enable_testing()
     add_test(NAME MyTests COMMAND ${TEST_NAME})
 endif()

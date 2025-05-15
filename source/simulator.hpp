@@ -112,7 +112,7 @@ public:
         }
     }
     // Create a Stop event at a_stop_time and start simulation
-    void start(Time a_stop_time, bool export_metrics = false) {
+    void start(Time a_stop_time, bool export_metrics = false, bool draw_plots = false) {
         recalculate_paths();
         Scheduler::get_instance().add(std::make_unique<Stop>(a_stop_time));
         constexpr Time start_time = 0;
@@ -142,6 +142,9 @@ public:
 
         if (export_metrics) {
             MetricsCollector::get_instance().export_metrics_to_files();
+        }
+        if (draw_plots) {
+            MetricsCollector::get_instance().draw_metric_plots();
         }
     }
 

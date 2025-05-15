@@ -17,7 +17,7 @@ public:
     void add_RTT(Id device_id, Id flow_id, Time value);
 
     void export_metrics_to_files() const;
-
+    void draw_metric_plots() const;
 
 private:
     MetricsCollector() {}
