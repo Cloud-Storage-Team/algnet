@@ -21,7 +21,7 @@ void Generate::operator()() {
         return;
     }
 
-    Time generate_delay = m_flow.lock()->create_new_data_packet();
+    Time generate_delay = m_flow.lock()->create_new_data_packet(m_time);
     if (generate_delay == 0) {
         return;
     }
@@ -47,7 +47,7 @@ void Process::operator()() {
     if (m_device.expired()) {
         return;
     }
-    Time process_time = m_device.lock()->process();
+    Time process_time = m_device.lock()->process(m_time);
 
     std::unique_ptr<Event> next_process_event = std::make_unique<Process>(m_time + process_time, m_device);
     Scheduler::get_instance().add(std::move(next_process_event));

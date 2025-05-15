@@ -20,6 +20,8 @@ public:
     void SetUp() override {};
 };
 
+const Time process_time = 1;
+
 TEST_F(TestSwitch, test_add_nullptr_link) {
     auto switch_device = std::make_shared<sim::Switch>();
     ASSERT_FALSE(switch_device->add_inlink(nullptr));
@@ -57,7 +59,7 @@ TEST_F(TestSwitch, test_no_senders) {
     auto switch_device = std::make_shared<sim::Switch>();
     // TODO: replace with ASSERT_FALSE when process returns bool instead of
     // void
-    switch_device->process();
+    switch_device->process(process_time);
 }
 
 TEST_F(TestSwitch, test_no_packets_on_inlinks) {
@@ -70,7 +72,7 @@ TEST_F(TestSwitch, test_no_packets_on_inlinks) {
 
     switch_device->add_inlink(switch_inlink);
 
-    switch_device->process();
+    switch_device->process(process_time);
     // TODO: add ASSERT_FALSE when process returns bool instead of void
 }
 
@@ -91,7 +93,7 @@ TEST_F(TestSwitch, test_no_destination_route) {
     // no update of switch routing table
 
     // TODO: add ASSERT_FALSE when process returns bool instead of void
-    switch_device->process();
+    switch_device->process(process_time);
 
     ASSERT_EQ(switch_reciever_link->get_arrived_packets(),
               std::vector<sim::Packet>());
@@ -142,7 +144,7 @@ void test_senders(size_t senders_count) {
     }
 
     for (size_t i = 0; i < senders_count; i++) {
-        switch_device->process();
+        switch_device->process(process_time);
     }
     std::vector<sim::Packet> arrived_packets =
         switch_reciever_link->get_arrived_packets();

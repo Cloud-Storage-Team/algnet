@@ -40,7 +40,7 @@ public:
     // and move it to the egress port (link)
     // ACKs are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
-    Time process() final;
+    Time process(Time current_time) final;
     Time send_data() final;
 
     void enqueue_packet(Packet packet) final;

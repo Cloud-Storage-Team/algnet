@@ -20,7 +20,7 @@ public:
         std::shared_ptr<IRoutingDevice> dest) const final;
     std::set<std::shared_ptr<sim::ILink>> get_outlinks() final;
 
-    Time process() final;
+    Time process(Time current_time) final;
     sim::DeviceType get_type() const final;
 
     Id get_id() const final;

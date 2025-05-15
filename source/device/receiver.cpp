@@ -64,7 +64,8 @@ std::shared_ptr<ILink> Receiver::get_link_to_destination(
 
 DeviceType Receiver::get_type() const { return DeviceType::RECEIVER; }
 
-Time Receiver::process() {
+Time Receiver::process(Time current_time) {
+    (void)current_time;
     std::shared_ptr<ILink> current_inlink = next_inlink();
     Time total_processing_time = 1;
 
@@ -117,7 +118,8 @@ Time Receiver::process() {
 
 Time Receiver::send_ack(Packet data_packet) {
     Time processing_time = 1;
-    Packet ack = {PacketType::ACK, 1, data_packet.flow};
+    Packet ack = {PacketType::ACK, 1, data_packet.flow,
+                  data_packet.sending_time};
 
     auto destination = ack.get_destination();
     if (destination == nullptr) {

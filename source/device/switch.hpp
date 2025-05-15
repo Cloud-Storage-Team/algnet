@@ -33,7 +33,7 @@ public:
     // and schedule next process event after a delay.
     // Packets are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
-    Time process() final;
+    Time process(Time current_time) final;
 
     Id get_id() const final;
 
