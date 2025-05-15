@@ -4,6 +4,7 @@
 
 #include <memory>
 
+#include "device/device.hpp"
 #include "event.hpp"
 #include "link.hpp"
 #include "logger/logger.hpp"
@@ -72,7 +73,7 @@ void Sender::enqueue_packet(Packet packet) {
     LOG_INFO(fmt::format("Packet {} arrived to sender", packet.to_string()));
 }
 
-Time Sender::process() {
+Time Sender::process(Time current_time) {
     std::shared_ptr<ILink> current_inlink = next_inlink();
     Time total_processing_time = 1;
 
@@ -103,7 +104,7 @@ Time Sender::process() {
         return total_processing_time;
     }
     if (packet.type == PacketType::ACK && destination.get() == this) {
-        packet.flow->update(packet, get_type());
+        packet.flow->update(current_time, packet, get_type());
     } else {
         LOG_WARN(
             "Packet arrived to Sender that is not its destination; use routing "

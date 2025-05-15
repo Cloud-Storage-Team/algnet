@@ -13,7 +13,7 @@ enum PacketType { ACK, DATA };
 
 struct Packet {
     Packet(PacketType a_type = PacketType::DATA, Size a_size = 0,
-           IFlow* flow = nullptr);
+           IFlow* flow = nullptr, Time a_sending_time = 0);
 
     bool operator==(const Packet& packet) const;
     std::string to_string() const;
@@ -22,6 +22,7 @@ struct Packet {
     PacketType type;
     Size size;
     IFlow* flow;
+    Time sending_time;
 };
 
 }  // namespace sim
