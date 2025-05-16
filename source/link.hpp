@@ -38,8 +38,8 @@ public:
 class Link : public ILink, public std::enable_shared_from_this<Link> {
 public:
     Link(std::weak_ptr<IRoutingDevice> a_from,
-         std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_mbps = 1,
-         Time a_delay = 0);
+         std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_mbps,
+         Time a_delay, size_t max_ingress_buffer_size);
     ~Link() = default;
 
     /**
@@ -72,6 +72,7 @@ private:
 
     // Queue at the ingress port of the m_next device
     std::queue<Packet> m_next_ingress;
+    size_t m_max_ingress_buffer_size;
 };
 
 }  // namespace sim

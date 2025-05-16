@@ -10,13 +10,15 @@ namespace sim {
 
 Link::Link(std::weak_ptr<IRoutingDevice> a_from,
            std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_mbps,
-           Time a_delay)
+           Time a_delay, size_t max_ingress_buffer_size)
     : m_from(a_from),
       m_to(a_to),
       m_speed_mbps(a_speed_mbps),
       m_src_egress_delay(0),
       m_transmission_delay(a_delay),
-      m_id(IdentifierFactory::get_instance().generate_id()) {
+      m_id(IdentifierFactory::get_instance().generate_id()),
+      m_next_ingress(),
+      m_max_ingress_buffer_size(max_ingress_buffer_size) {
     if (a_from.expired() || a_to.expired()) {
         LOG_WARN("Passed link to device is expired");
     } else if (a_speed_mbps == 0) {
@@ -39,23 +41,30 @@ void Link::schedule_arrival(Packet packet) {
         return;
     }
 
-    LOG_INFO("Packet arrived to link's ingress queue. Packet: " + packet.to_string());
+    LOG_INFO("Packet arrived to link's ingress queue. Packet: " +
+             packet.to_string());
 
     unsigned int transmission_time = get_transmission_time(packet);
     unsigned int total_delay = m_src_egress_delay + transmission_time;
-    (void) total_delay; // unused variable stub
+    (void)total_delay;  // unused variable stub
 
     m_src_egress_delay += transmission_time;
 
-    // TODO: put correct event time. Arrive happens in current time + total_delay.
-    Scheduler::get_instance().add(
-        std::make_unique<Arrive>(Arrive(total_delay, weak_from_this(), packet)));
+    // TODO: put correct event time. Arrive happens in current time +
+    // total_delay.
+    Scheduler::get_instance().add(std::make_unique<Arrive>(
+        Arrive(total_delay, weak_from_this(), packet)));
 };
 
 void Link::process_arrival(Packet packet) {
-    LOG_INFO("Packet arrived to link's egress queue. Packet: " + packet.to_string());
-
     m_src_egress_delay -= get_transmission_time(packet);
+    if (m_next_ingress.size() >= m_max_ingress_buffer_size) {
+        LOG_ERROR("Buffer on link is full; " + packet.to_string() + " lost");
+        return;
+    }
+    LOG_INFO("Packet arrived to link's egress queue. Packet: " +
+             packet.to_string());
+
     m_next_ingress.push(packet);
 };
 
