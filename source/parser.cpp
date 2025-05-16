@@ -11,7 +11,8 @@
 namespace sim {
 
 SimulatorVariant YamlParser::buildSimulatorFromConfig(
-    const std::filesystem::path &path) {
+    const std::filesystem::path &path)
+{
     const YAML::Node simulation_config = YAML::LoadFile(path);
     std::string algorithm = parse_algorithm(simulation_config);
     SimulatorVariant simulator = create_simulator(algorithm);
