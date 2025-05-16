@@ -22,7 +22,6 @@ SimulatorVariant YamlParser::buildSimulatorFromConfig(
     const YAML::Node topology_config = YAML::LoadFile(m_topology_config_path);
 
     process_devices(topology_config, simulator);
-    // process_switches(topology_config, simulator);
     process_links(topology_config, simulator);
 
     process_flows(simulation_config, simulator);
