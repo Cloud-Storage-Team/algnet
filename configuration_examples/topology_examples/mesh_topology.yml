@@ -1,29 +1,21 @@
-hosts:
+devices:
   sender1:
     type: sender
-    name: sender1
   sender2:
     type: sender
-    name: sender2
   sender3:
     type: sender
-    name: sender3
   receiver1:
     type: receiver
-    name: receiver1
   receiver2:
     type: receiver
-    name: receiver2
   receiver3:
     type: receiver
-    name: receiver3
-switches:
   switch1:
     type: switch
-    name: switch1
   switch2:
     type: switch
-    name: switch2
+
 links:
   link1:
     from: sender1

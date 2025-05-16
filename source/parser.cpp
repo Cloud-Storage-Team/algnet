@@ -20,8 +20,8 @@ SimulatorVariant YamlParser::buildSimulatorFromConfig(
         path.parent_path() / parse_topology_config_path(simulation_config);
     const YAML::Node topology_config = YAML::LoadFile(m_topology_config_path);
 
-    process_hosts(topology_config, simulator);
-    process_switches(topology_config, simulator);
+    process_devices(topology_config, simulator);
+    // process_switches(topology_config, simulator);
     process_links(topology_config, simulator);
 
     process_flows(simulation_config, simulator);
@@ -32,7 +32,8 @@ SimulatorVariant YamlParser::buildSimulatorFromConfig(
 
 void YamlParser::parse_simulation_time(const YAML::Node &config) {
     if (!config["simulation_time"]) {
-        throw std::runtime_error("No simulation time specified in the simulation config");
+        throw std::runtime_error(
+            "No simulation time specified in the simulation config");
     }
     m_simulation_time = config["simulation_time"].as<Time>();
 }
@@ -66,47 +67,40 @@ uint32_t YamlParser::parse_latency(const std::string &latency_str) {
     throw std::runtime_error("Unsupported latency unit: " + unit);
 }
 
-void YamlParser::process_hosts(const YAML::Node &config,
-                               SimulatorVariant &simulator) {
-    if (!config["hosts"]) {
-        LOG_WARN("No hosts specified in the topology config");
+void YamlParser::process_devices(const YAML::Node &config,
+                                 SimulatorVariant &simulator) {
+    if (!config["devices"]) {
+        LOG_WARN("No devices specified in the topology config");
         return;
     }
-    for (auto it = config["hosts"].begin(); it != config["hosts"].end(); ++it) {
+    for (auto it = config["devices"].begin(); it != config["devices"].end(); ++it) {
         const YAML::Node key_node = it->first;
         const YAML::Node val_node = it->second;
 
-        auto key = key_node.as<std::string>();
-        auto type_str = val_node["type"].as<std::string>();
-        const auto name = val_node["name"].as<std::string>();
+        auto device_name = key_node.as<std::string>();
+        auto device_type = val_node["type"].as<std::string>();
 
-        if (type_str == "sender") {
-            m_devices[key] = std::visit(
-                [&name](auto &sim) { return sim.add_sender(name); }, simulator);
-        } else if (type_str == "receiver") {
-            m_devices[key] = std::visit(
-                [&name](auto &sim) { return sim.add_receiver(name); },
+        if (device_type == "sender") {
+            m_devices[device_name] = std::visit(
+                [&device_name](auto &sim) {
+                    return sim.add_sender(device_name);
+                },
                 simulator);
-
+        } else if (device_type == "receiver") {
+            m_devices[device_name] = std::visit(
+                [&device_name](auto &sim) {
+                    return sim.add_receiver(device_name);
+                },
+                simulator);
+        } else if (device_type == "switch") {
+            m_devices[device_name] = std::visit(
+                [&device_name](auto &sim) {
+                    return sim.add_switch(device_name);
+                },
+                simulator);
         } else {
-            throw std::runtime_error("Invalid host type: " + type_str);
+            throw std::runtime_error("Invalid host type: " + device_type);
         }
-    }
-}
-
-void YamlParser::process_switches(const YAML::Node &config,
-                                  SimulatorVariant &simulator) {
-    if (!config["switches"]) {
-        LOG_WARN("No switches specified in the topology config");
-        return;
-    }
-
-    const YAML::Node switches = config["switches"];
-    for (auto it = switches.begin(); it != switches.end(); ++it) {
-        auto key = it->first.as<std::string>();
-        const auto name = it->second["name"].as<std::string>();
-        m_devices[key] = std::visit(
-            [&name](auto &sim) { return sim.add_switch(name); }, simulator);
     }
 }
 
@@ -163,11 +157,13 @@ void YamlParser::process_flows(const YAML::Node &config,
         std::string key = it->first.as<std::string>();
         std::string sender_id = it->second["sender_id"].as<std::string>();
         if (!m_devices.contains(sender_id)) {
-            throw std::runtime_error("Unknown device in 'sender_id': " + sender_id);
+            throw std::runtime_error("Unknown device in 'sender_id': " +
+                                     sender_id);
         }
         std::string receiver_id = it->second["receiver_id"].as<std::string>();
         if (!m_devices.contains(receiver_id)) {
-            throw std::runtime_error("Unknown device in 'receiver_id': " + receiver_id);
+            throw std::runtime_error("Unknown device in 'receiver_id': " +
+                                     receiver_id);
         }
 
         Size packet_size = it->second["packet_size"].as<Size>();
@@ -189,14 +185,16 @@ void YamlParser::process_flows(const YAML::Node &config,
 std::filesystem::path YamlParser::parse_topology_config_path(
     const YAML::Node &config) {
     if (!config["topology_config_path"]) {
-        throw std::runtime_error("No topology_config_path specified in the simulation config");
+        throw std::runtime_error(
+            "No topology_config_path specified in the simulation config");
     }
     return config["topology_config_path"].as<std::string>();
 }
 
 std::string YamlParser::parse_algorithm(const YAML::Node &config) const {
     if (!config["algorithm"]) {
-        throw std::runtime_error("No algorithm specified in the simulation config");
+        throw std::runtime_error(
+            "No algorithm specified in the simulation config");
     }
     return config["algorithm"].as<std::string>();
 }

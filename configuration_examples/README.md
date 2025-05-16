@@ -8,47 +8,25 @@ switches, and links between them.
 The topology file is divided into multiple sections, each representing a different network topology. Each topology
 consists of:
 
-- `hosts`: Defines sender and receiver devices.
-
-- `switches`: Defines network switches.
+- `devices`: Defines devices: senders, receivers and switches.
 
 - `links`: Specifies connections between devices with network parameters.
 
 ## Sections
 
-### Hosts
+### Devices
 
-Each host entry represents either a sender or a receiver:
-
-```yaml
-hosts:
-  host_id:
-    type: [ sender | receiver ]
-    name: <device_name>
-```
-
-- `host_id`: Unique identifier for the host.
-
-- `type`: Defines whether the device is a sender or receiver.
-
-- `name`: Descriptive name for the device.
-
-### Switches
-
-Switches serve as interconnects between hosts:
+Each host entry represents a device:
 
 ```yaml
-switches:
-  switch_id:
-    type: switch
-    name: <switch_name>
+devices:
+  device_name:
+    type: [ sender | receiver | switch ]
 ```
 
-- `switch_id`: Unique identifier for the switch.
+- `device_name`: Unique identifier for the device.
 
-- `type`: Always set to switch.
-
-- `name`: Descriptive name for the switch.
+- `type`: Defines device type.
 
 ### Links
 
@@ -65,11 +43,11 @@ links:
 
 - `link_id`: Unique identifier for the link.
 
-- `from`: Source device (host or switch).
+- `from`: Source device.
 
-- `to`: Destination device (host or switch).
+- `to`: Destination device.
 
-- `latency`: Transmission delay (e.g., 5ms).
+- `latency`: Transmission delay (e.g., 5ns).
 
 - `throughput`: Link bandwidth (e.g., 1Gbps).
 

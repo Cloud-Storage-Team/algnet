@@ -24,9 +24,7 @@ private:
     static uint32_t parse_throughput(const std::string& throughput_str);
     static uint32_t parse_latency(const std::string& latency_str);
 
-    void process_hosts(const YAML::Node& config, SimulatorVariant& simulator);
-    void process_switches(const YAML::Node& config,
-                          SimulatorVariant& simulator);
+    void process_devices(const YAML::Node& config, SimulatorVariant& simulator);
     void process_links(const YAML::Node& config,
                        SimulatorVariant& simulator) const;
     void process_flows(const YAML::Node& config,
