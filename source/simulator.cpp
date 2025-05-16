@@ -8,7 +8,7 @@ SimulatorVariant create_simulator(std::string_view algorithm) {
     if (algorithm == "basic") {
         return BasicSimulator();
     }
-    throw std::invalid_argument("Unknown algorithm");
+    throw std::invalid_argument("Unknown algorithm: " + algorithm);
 }
 
 }  // namespace sim
