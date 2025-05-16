@@ -15,27 +15,26 @@ std::pair<SimulatorVariant, Time> YamlParser::buildSimulatorFromConfig(
 {
     const YAML::Node simulation_config = YAML::LoadFile(path);
     std::string algorithm = parseAlgorithm(simulation_config);
-    SimulatorVariant simulator = create_simulator(algorithm);
+    m_simulator = create_simulator(algorithm);
 
     m_topology_config_path =
         path.parent_path() / parseTopologyConfigPath(simulation_config);
     const YAML::Node topology_config = YAML::LoadFile(m_topology_config_path);
 
-    processDevices(topology_config, simulator);
-    processLinks(topology_config, simulator);
+    processDevices(topology_config);
+    processLinks(topology_config);
 
-    processFlows(simulation_config, simulator);
-    parseSimulationTime(simulation_config);
+    processFlows(simulation_config);
     m_devices.clear();
-    return {simulator, m_simulation_time};
+    return {m_simulator, parseSimulationTime(simulation_config)};
 }
 
-void YamlParser::parseSimulationTime(const YAML::Node &config) {
+Time YamlParser::parseSimulationTime(const YAML::Node &config) {
     if (!config["simulation_time"]) {
         throw std::runtime_error(
             "No simulation time specified in the simulation config");
     }
-    m_simulation_time = config["simulation_time"].as<Time>();
+    return config["simulation_time"].as<Time>();
 }
 
 uint32_t YamlParser::parseThroughput(const std::string &throughput_str) {
@@ -67,8 +66,7 @@ uint32_t YamlParser::parseLatency(const std::string &latency_str) {
     throw std::runtime_error("Unsupported latency unit: " + unit);
 }
 
-void YamlParser::processDevices(const YAML::Node &config,
-                                 SimulatorVariant &simulator) {
+void YamlParser::processDevices(const YAML::Node &config) {
     if (!config["devices"]) {
         LOG_WARN("No devices specified in the topology config");
         return;
@@ -86,27 +84,26 @@ void YamlParser::processDevices(const YAML::Node &config,
                 [&device_name](auto &sim) {
                     return sim.add_sender(device_name);
                 },
-                simulator);
+                m_simulator);
         } else if (device_type == "receiver") {
             m_devices[device_name] = std::visit(
                 [&device_name](auto &sim) {
                     return sim.add_receiver(device_name);
                 },
-                simulator);
+                m_simulator);
         } else if (device_type == "switch") {
             m_devices[device_name] = std::visit(
                 [&device_name](auto &sim) {
                     return sim.add_switch(device_name);
                 },
-                simulator);
+                m_simulator);
         } else {
             throw std::runtime_error("Invalid host type: " + device_type);
         }
     }
 }
 
-void YamlParser::processLinks(const YAML::Node &config,
-                               SimulatorVariant &simulator) const {
+void YamlParser::processLinks(const YAML::Node &config) {
     if (!config["links"]) {
         LOG_WARN("No links specified in the topology config");
         return;
@@ -142,12 +139,11 @@ void YamlParser::processLinks(const YAML::Node &config,
                 sim.add_link(m_devices.at(from), m_devices.at(to), speed,
                              latency);
             },
-            simulator);
+            m_simulator);
     }
 }
 
-void YamlParser::processFlows(const YAML::Node &config,
-                               SimulatorVariant &simulator) const {
+void YamlParser::processFlows(const YAML::Node &config) {
     if (!config["flows"]) {
         LOG_ERROR("No flows specified in the simulation config");
         return;
@@ -179,7 +175,7 @@ void YamlParser::processFlows(const YAML::Node &config,
             [&](auto &sim) {
                 sim.add_flow(sender, receiver, packet_size, packet_interval, 0);
             },
-            simulator);
+            m_simulator);
     }
 }
 
@@ -192,7 +188,7 @@ std::filesystem::path YamlParser::parseTopologyConfigPath(
     return config["topology_config_path"].as<std::string>();
 }
 
-std::string YamlParser::parseAlgorithm(const YAML::Node &config) const {
+std::string YamlParser::parseAlgorithm(const YAML::Node &config) {
     if (!config["algorithm"]) {
         throw std::runtime_error(
             "No algorithm specified in the simulation config");
