@@ -13,21 +13,21 @@ namespace sim {
 
 class YamlParser {
 public:
-    std::pair<SimulatorVariant, Time> buildSimulatorFromConfig(
+    std::pair<SimulatorVariant, Time> build_simulator_from_config(
         const std::filesystem::path& path);
 
 private:
-    static uint32_t parseThroughput(const std::string& throughput_str);
-    static uint32_t parseLatency(const std::string& latency_str);
+    static uint32_t parse_throughput(const std::string& throughput);
+    static uint32_t parse_latency(const std::string& latency);
 
-    static std::filesystem::path parseTopologyConfigPath(
+    static std::filesystem::path parse_topology_config_path(
         const YAML::Node& config);
-    static std::string parseAlgorithm(const YAML::Node& config);
-    static Time parseSimulationTime(const YAML::Node& config);
+    static std::string parse_algorithm(const YAML::Node& config);
+    static Time parse_simulation_time(const YAML::Node& config);
 
-    void processDevices(const YAML::Node& config);
-    void processLinks(const YAML::Node& config);
-    void processFlows(const YAML::Node& config);
+    void process_devices(const YAML::Node& config);
+    void process_links(const YAML::Node& config);
+    void process_flows(const YAML::Node& config);
 
     SimulatorVariant m_simulator;
     std::map<std::string, std::shared_ptr<IRoutingDevice>> m_devices;

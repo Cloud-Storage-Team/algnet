@@ -10,26 +10,26 @@
 
 namespace sim {
 
-std::pair<SimulatorVariant, Time> YamlParser::buildSimulatorFromConfig(
+std::pair<SimulatorVariant, Time> YamlParser::build_simulator_from_config(
     const std::filesystem::path &path) 
 {
     const YAML::Node simulation_config = YAML::LoadFile(path);
-    std::string algorithm = parseAlgorithm(simulation_config);
+    std::string algorithm = parse_algorithm(simulation_config);
     m_simulator = create_simulator(algorithm);
 
     m_topology_config_path =
-        path.parent_path() / parseTopologyConfigPath(simulation_config);
+        path.parent_path() / parse_topology_config_path(simulation_config);
     const YAML::Node topology_config = YAML::LoadFile(m_topology_config_path);
 
-    processDevices(topology_config);
-    processLinks(topology_config);
+    process_devices(topology_config);
+    process_links(topology_config);
 
-    processFlows(simulation_config);
+    process_flows(simulation_config);
     m_devices.clear();
-    return {m_simulator, parseSimulationTime(simulation_config)};
+    return {m_simulator, parse_simulation_time(simulation_config)};
 }
 
-Time YamlParser::parseSimulationTime(const YAML::Node &config) {
+Time YamlParser::parse_simulation_time(const YAML::Node &config) {
     if (!config["simulation_time"]) {
         throw std::runtime_error(
             "No simulation time specified in the simulation config");
@@ -37,13 +37,13 @@ Time YamlParser::parseSimulationTime(const YAML::Node &config) {
     return config["simulation_time"].as<Time>();
 }
 
-uint32_t YamlParser::parseThroughput(const std::string &throughput_str) {
-    const size_t unit_pos = throughput_str.find_first_not_of("0123456789");
+uint32_t YamlParser::parse_throughput(const std::string& throughput) {
+    const size_t unit_pos = throughput.find_first_not_of("0123456789");
     if (unit_pos == std::string::npos) {
-        throw std::runtime_error("Invalid throughput: " + throughput_str);
+        throw std::runtime_error("Invalid throughput: " + throughput);
     }
-    const uint32_t value = std::stoul(throughput_str.substr(0, unit_pos));
-    const std::string unit = throughput_str.substr(unit_pos);
+    const uint32_t value = std::stoul(throughput.substr(0, unit_pos));
+    const std::string unit = throughput.substr(unit_pos);
     if (unit == "Gbps") {
         return value * 1000;  // Convert to Mbps
     }
@@ -53,20 +53,20 @@ uint32_t YamlParser::parseThroughput(const std::string &throughput_str) {
     throw std::runtime_error("Unsupported throughput unit: " + unit);
 }
 
-uint32_t YamlParser::parseLatency(const std::string &latency_str) {
-    const size_t unit_pos = latency_str.find_first_not_of("0123456789");
+uint32_t YamlParser::parse_latency(const std::string& latency) {
+    const size_t unit_pos = latency.find_first_not_of("0123456789");
     if (unit_pos == std::string::npos) {
-        throw std::runtime_error("Invalid latency: " + latency_str);
+        throw std::runtime_error("Invalid latency: " + latency);
     }
-    const uint32_t value = std::stoul(latency_str.substr(0, unit_pos));
-    const std::string unit = latency_str.substr(unit_pos);
+    const uint32_t value = std::stoul(latency.substr(0, unit_pos));
+    const std::string unit = latency.substr(unit_pos);
     if (unit == "ns") {
         return value;
     }
     throw std::runtime_error("Unsupported latency unit: " + unit);
 }
 
-void YamlParser::processDevices(const YAML::Node &config) {
+void YamlParser::process_devices(const YAML::Node &config) {
     if (!config["devices"]) {
         LOG_WARN("No devices specified in the topology config");
         return;
@@ -103,7 +103,7 @@ void YamlParser::processDevices(const YAML::Node &config) {
     }
 }
 
-void YamlParser::processLinks(const YAML::Node &config) {
+void YamlParser::process_links(const YAML::Node &config) {
     if (!config["links"]) {
         LOG_WARN("No links specified in the topology config");
         return;
@@ -115,9 +115,9 @@ void YamlParser::processLinks(const YAML::Node &config) {
         auto from = link["from"].as<std::string>();
         auto to = link["to"].as<std::string>();
         const uint32_t latency =
-            parseLatency(link["latency"].as<std::string>());
+            parse_latency(link["latency"].as<std::string>());
         const uint32_t speed =
-            parseThroughput(link["throughput"].as<std::string>());
+            parse_throughput(link["throughput"].as<std::string>());
 
         auto from_it = m_devices.find(from);
         auto to_it = m_devices.find(to);
@@ -143,7 +143,7 @@ void YamlParser::processLinks(const YAML::Node &config) {
     }
 }
 
-void YamlParser::processFlows(const YAML::Node &config) {
+void YamlParser::process_flows(const YAML::Node &config) {
     if (!config["flows"]) {
         LOG_ERROR("No flows specified in the simulation config");
         return;
@@ -179,7 +179,7 @@ void YamlParser::processFlows(const YAML::Node &config) {
     }
 }
 
-std::filesystem::path YamlParser::parseTopologyConfigPath(
+std::filesystem::path YamlParser::parse_topology_config_path(
     const YAML::Node &config) {
     if (!config["topology_config_path"]) {
         throw std::runtime_error(
@@ -188,7 +188,7 @@ std::filesystem::path YamlParser::parseTopologyConfigPath(
     return config["topology_config_path"].as<std::string>();
 }
 
-std::string YamlParser::parseAlgorithm(const YAML::Node &config) {
+std::string YamlParser::parse_algorithm(const YAML::Node &config) {
     if (!config["algorithm"]) {
         throw std::runtime_error(
             "No algorithm specified in the simulation config");

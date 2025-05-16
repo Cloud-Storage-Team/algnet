@@ -14,7 +14,7 @@ int main(const int argc, char **argv) {
     try {
         sim::YamlParser parser;
         auto [simulator, simulation_time] =
-            parser.buildSimulatorFromConfig(argv[1]);
+            parser.build_simulator_from_config(argv[1]);
         std::visit([&](auto &sim) { sim.start(simulation_time); }, simulator);
     } catch (const std::exception &e) {
         LOG_ERROR(fmt::format("Error: {}", e.what()));
