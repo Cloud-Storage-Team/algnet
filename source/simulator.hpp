@@ -137,7 +137,7 @@ public:
             Scheduler::get_instance().add(
                 std::make_unique<Process>(start_time, swtch));
         }
-        LOG_WARN("Simulation started");
+        LOG_INFO("Simulation started");
         while (Scheduler::get_instance().tick()) {
         }
         LOG_WARN("Simulation finished");
