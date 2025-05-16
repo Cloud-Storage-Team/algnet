@@ -105,12 +105,11 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
 
 
 """
-Usage exaple:
+Usage example:
 python3 generator.py plots ../topology_examples/bus_topology.yml
 """
 
 if __name__ == "__main__":
-    print(sys.argv)
     if len(sys.argv) < 3:
         print(f"Usage: python {sys.argv[0]} <output-directory> <filenames>...")
         exit(1)
