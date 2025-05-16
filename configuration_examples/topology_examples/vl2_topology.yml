@@ -1,36 +1,24 @@
-hosts:
+devices:
   sender1:
     type: sender
-    name: sender1
   sender2:
     type: sender
-    name: sender2
   receiver1:
     type: receiver
-    name: receiver1
   receiver2:
     type: receiver
-    name: receiver2
-
-switches:
   edge1:
     type: switch
-    name: edge_switch1 (ToR)
   edge2:
     type: switch
-    name: edge_switch2 (ToR)
   aggr1:
     type: switch
-    name: aggregate_switch1
   aggr2:
     type: switch
-    name: aggregate_switch2
   core1:
     type: switch
-    name: core_switch1
   core2:
     type: switch
-    name: core_switch2
 
 links:
   # Hosts to Edge Layer (1Gbps)

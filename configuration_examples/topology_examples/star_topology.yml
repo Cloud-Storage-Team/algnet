@@ -1,20 +1,15 @@
-hosts:
+devices:
   central:
     type: sender
-    name: central_sender
   receiver1:
     type: receiver
-    name: receiver1
   receiver2:
     type: receiver
-    name: receiver2
   receiver3:
     type: receiver
-    name: receiver3
-switches:
   switch1:
     type: switch
-    name: switch1
+
 links:
   link1:
     from: central

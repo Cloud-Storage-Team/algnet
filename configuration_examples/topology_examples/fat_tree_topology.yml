@@ -1,35 +1,25 @@
-hosts:
+devices:
   sender1:
     type: sender
-    name: sender1
   sender2:
     type: sender
-    name: sender2
   receiver1:
     type: receiver
-    name: receiver1
   receiver2:
     type: receiver
-    name: receiver2
-switches:
   core1:
     type: switch
-    name: core1
   core2:
     type: switch
-    name: core2
   aggregation1:
     type: switch
-    name: aggregation1
   aggregation2:
     type: switch
-    name: aggregation2
   access1:
     type: switch
-    name: access1
   access2:
     type: switch
-    name: access2
+    
 links:
   link1:
     from: sender1

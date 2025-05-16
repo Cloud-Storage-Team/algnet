@@ -1,25 +1,37 @@
 #pragma once
 
-#include "../source/simulator.hpp"
-#include <map>
-#include <string>
-#include <cstdint>
 #include <yaml-cpp/yaml.h>
 
+#include <filesystem>
+#include <map>
+#include <string>
+#include <utility>
+
+#include "simulator.hpp"
 
 namespace sim {
-	class YamlParser {
-	public:
-		BasicSimulator parseConfig(const std::string& filename);
 
-	private:
-		std::map<std::string, std::shared_ptr<IRoutingDevice>> devices_map;
+class YamlParser {
+public:
+    std::pair<SimulatorVariant, Time> build_simulator_from_config(
+        const std::filesystem::path& path);
 
-		static uint32_t parseThroughput(const std::string& throughput_str);
-		static uint32_t parseLatency(const std::string& latency_str);
+private:
+    static uint32_t parse_throughput(const std::string& throughput);
+    static uint32_t parse_latency(const std::string& latency);
 
-		void processHosts(const YAML::Node& config, BasicSimulator& simulator);
-		void processSwitches(const YAML::Node& config, BasicSimulator& simulator);
-		void processLinks(const YAML::Node& config, BasicSimulator& simulator) const;
-	};
-} // namespace sim
+    static std::filesystem::path parse_topology_config_path(
+        const YAML::Node& config);
+    static std::string parse_algorithm(const YAML::Node& config);
+    static Time parse_simulation_time(const YAML::Node& config);
+
+    void process_devices(const YAML::Node& config);
+    void process_links(const YAML::Node& config);
+    void process_flows(const YAML::Node& config);
+
+    SimulatorVariant m_simulator;
+    std::map<std::string, std::shared_ptr<IRoutingDevice>> m_devices;
+    std::filesystem::path m_topology_config_path;
+};
+
+}  // namespace sim

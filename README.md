@@ -9,7 +9,27 @@ git submodule update --init --recursive
 
 `CmakeFileLists.txt` have two options: `BUILD_MAIN` and `BUILD_TEST` (both are enabled by default). First one controles building of main executable `simulator`, second one - building tests for it (`test_simulator`).
 
+Build project with tests:
+
+```bash
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=ON
+cmake --build build
+```
+
 It is assumed that build files locates in `build` directory. You may do it the way you wish, but using `launch.json`, `tasks.json` and others from `.vscode_template` is recommended.
+
+Run tests:
+
+```bash
+./build/test_simulator
+```
+
+Run simulator:
+
+```bash
+                  # path to simulation config
+./build/simulator configuration_example/simulation_examples/basic_simulation.yml
+```
 
 # Smart pointers
 
