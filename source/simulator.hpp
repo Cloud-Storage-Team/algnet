@@ -140,7 +140,7 @@ public:
         LOG_INFO("Simulation started");
         while (Scheduler::get_instance().tick()) {
         }
-        LOG_WARN("Simulation finished");
+        LOG_INFO("Simulation finished");
     }
 
 private:
