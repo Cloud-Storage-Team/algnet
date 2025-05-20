@@ -9,6 +9,10 @@
 
 namespace sim {
 
+template <typename K, typename V>
+using MapWeakPtr =
+    std::map<std::weak_ptr<K>, V, std::owner_less<std::weak_ptr<K>>>;
+    
 class RoutingModule : public IRoutingDevice {
 public:
     ~RoutingModule() = default;
@@ -35,8 +39,7 @@ private:
         m_outlinks;
 
     // A routing table: maps the final destination to a specific link
-    std::map<std::weak_ptr<IRoutingDevice>, std::map<std::weak_ptr<ILink>, int, std::owner_less<std::weak_ptr<ILink>>>, std::owner_less<std::weak_ptr<IRoutingDevice>>>
-        m_routing_table;
+    MapWeakPtr<IRoutingDevice, MapWeakPtr<ILink, int>> m_routing_table;
 
     // Iterator for the next ingress to process
     LoopIterator<std::set<std::weak_ptr<ILink>,
