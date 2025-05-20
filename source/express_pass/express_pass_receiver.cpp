@@ -68,7 +68,7 @@ DeviceType ExpressPassReceiver::get_type() const { return DeviceType::RECEIVER; 
 Time ExpressPassReceiver::process(Time current_time) {
     (void) current_time;
     std::shared_ptr<ILink> current_inlink = m_router->next_inlink();
-    Time total_processing_time = 1;
+    Time total_processing_time = 1000;
 
     if (current_inlink == nullptr) {
         LOG_WARN("No available inlinks for device");

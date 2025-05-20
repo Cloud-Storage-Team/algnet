@@ -38,6 +38,7 @@ private:
     std::priority_queue<std::unique_ptr<Event>,
                         std::vector<std::unique_ptr<Event>>, EventComparator>
         m_events;
+    int m_cnt = 0;
 };
 
 }  // namespace sim

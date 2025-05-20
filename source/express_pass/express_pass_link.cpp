@@ -5,6 +5,8 @@
 #include "scheduler.hpp"
 #include "utils/identifier_factory.hpp"
 
+#include <iostream>
+
 namespace sim {
 
 ExpressPassLink::ExpressPassLink(std::weak_ptr<IRoutingDevice> a_from,
@@ -28,7 +30,7 @@ Time ExpressPassLink::get_transmission_time(const Packet& packet) const {
         LOG_WARN("Passed zero link speed");
         return 0;
     }
-    return (packet.size + m_speed_mbps - 1) / m_speed_mbps +
+    return (packet.size * 8 + m_speed_mbps - 1) / m_speed_mbps +
            m_transmission_delay;
 };
 
@@ -52,14 +54,21 @@ void ExpressPassLink::schedule_arrival(Time current_time, Packet packet) {
         m_current_credit_queue_capacity++;
         total_delay = std::max(m_next_credit_can_be_sent, current_time);
         // TODO: make sure to calculate speed in GBe
-        m_next_credit_can_be_sent = total_delay + (packet.size + 1538) / m_speed_mbps;
+        m_next_credit_can_be_sent = total_delay + (packet.size * 8 + 1538 * 8) / m_speed_mbps;
         LOG_INFO("Next credit can be sent: " + std::to_string(m_next_credit_can_be_sent));
 
+        m_total_transmission += packet.size;
     } else {
         m_src_egress_delay += transmission_time;
         total_delay = current_time + m_src_egress_delay;
+        if (packet.type == PacketType::DATA) {
+            m_total_transmission += packet.size;
+            m_data_transmission += packet.size;
+        }
     }
 
+    // std::cout << "Link id: " << get_id() << ", total_trans: " << m_total_transmission << ", data_trans: " << m_data_transmission << ", Time: " << total_delay << "." << std::endl;
+    // std::cout << "Link id: " << get_id() << ", delay: " << m_src_egress_delay << "." << std::endl;
     Scheduler::get_instance().add(
         std::make_unique<Arrive>(Arrive(total_delay, weak_from_this(), packet)));
 };

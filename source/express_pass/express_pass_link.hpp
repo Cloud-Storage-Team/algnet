@@ -37,6 +37,7 @@ public:
     std::shared_ptr<IRoutingDevice> get_to() const final;
 
     Id get_id() const final;
+    Size get_transmission() { return m_total_transmission; };
 
 private:
     Time get_transmission_time(const Packet& packet) const;
@@ -53,6 +54,9 @@ private:
     Time m_next_credit_can_be_sent = 0;
     // Queue at the ingress port of the m_next device
     std::queue<Packet> m_next_ingress;
+
+    Size m_total_transmission = 0;
+    Size m_data_transmission = 0;
 };
 
 }  // namespace sim

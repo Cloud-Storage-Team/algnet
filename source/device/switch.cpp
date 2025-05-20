@@ -61,7 +61,7 @@ DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
 
 Time Switch::process(Time current_time) {
     (void)current_time;
-    Time total_processing_time = 1;
+    Time total_processing_time = 2;
     std::shared_ptr<ILink> link = next_inlink();
 
     if (link == nullptr) {

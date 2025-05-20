@@ -77,7 +77,7 @@ void ExpressPassSender::enqueue_packet(Packet packet) {
 Time ExpressPassSender::process(Time current_time) {
     (void)current_time;
     std::shared_ptr<ILink> current_inlink = m_router->next_inlink();
-    Time total_processing_time = 1;
+    Time total_processing_time = 1000;
 
     if (current_inlink == nullptr) {
         LOG_WARN("No available inlinks for device");
@@ -125,7 +125,7 @@ Time ExpressPassSender::process(Time current_time) {
 
 Time ExpressPassSender::send_data(Time current_time) {
     (void)current_time;
-    Time total_processing_time = 1;
+    Time total_processing_time = 1000;
 
     // TODO: wrap packet getting into some method (?)
     if (m_flow_buffer.empty()) {

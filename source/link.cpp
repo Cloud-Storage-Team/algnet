@@ -29,7 +29,7 @@ Time Link::get_transmission_time(const Packet& packet) const {
         LOG_WARN("Passed zero link speed");
         return 0;
     }
-    return (packet.size + m_speed_mbps - 1) / m_speed_mbps +
+    return (packet.size * 8 + m_speed_mbps - 1) / m_speed_mbps +
            m_transmission_delay;
 };
 

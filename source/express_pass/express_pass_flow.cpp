@@ -67,7 +67,7 @@ Time ExpressPassFlow::send_credit(Time time) {
     auto packet = generate_packet(PacketType::CREDIT, true, get_next_packet_num(), time);
     m_dest.lock()->send_system_packet(time, packet);
     int rnd_part = (std::rand() % 209) - 104;
-    std::cout << get_id() << ": " << packet.packet_num << " jitter: " << rnd_part << std::endl;
+    // std::cout << get_id() << ": " << packet.packet_num << " jitter: " << rnd_part << std::endl;
 
     return m_max_rate + rnd_part; //m_current_rate * m_max_rate;
 
