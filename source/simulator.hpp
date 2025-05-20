@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 #include "device/device.hpp"
@@ -138,8 +139,10 @@ public:
             Scheduler::get_instance().add(
                 std::make_unique<Process>(start_time, swtch));
         }
+        LOG_INFO("Simulation started");
         while (Scheduler::get_instance().tick()) {
         }
+        LOG_INFO("Simulation finished");
     }
 
 private:
@@ -151,5 +154,9 @@ private:
 };
 
 using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;
+
+using SimulatorVariant = std::variant<BasicSimulator>;
+
+SimulatorVariant create_simulator(std::string_view algorithm);
 
 }  // namespace sim

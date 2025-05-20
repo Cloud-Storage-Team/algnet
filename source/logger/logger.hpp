@@ -15,18 +15,18 @@ public:
 
     void logExample();
 
-    void TRACE(std::string msg, std::source_location loc =
-                                           std::source_location::current());
-    void DEBUG(std::string msg, std::source_location loc =
-                                           std::source_location::current());
-    void INFO(std::string msg, std::source_location loc =
-                                          std::source_location::current());
-    void WARN(std::string msg, std::source_location loc =
-                                          std::source_location::current());
-    void ERROR(std::string msg, std::source_location loc =
-                                           std::source_location::current());
-    void CRITICAL(std::string msg, std::source_location loc =
-                                              std::source_location::current());
+    void trace(std::string msg,
+               std::source_location loc = std::source_location::current());
+    void debug(std::string msg,
+               std::source_location loc = std::source_location::current());
+    void info(std::string msg,
+              std::source_location loc = std::source_location::current());
+    void warn(std::string msg,
+              std::source_location loc = std::source_location::current());
+    void error(std::string msg,
+               std::source_location loc = std::source_location::current());
+    void critical(std::string msg,
+                  std::source_location loc = std::source_location::current());
 
 private:
     Logger();
@@ -34,9 +34,9 @@ private:
     Logger& operator=(const Logger&) = delete;
 };
 
-#define LOG_TRACE(...) Logger::get_instance().TRACE(__VA_ARGS__)
-#define LOG_DEBUG(...) Logger::get_instance().DEBUG(__VA_ARGS__)
-#define LOG_INFO(...) Logger::get_instance().INFO(__VA_ARGS__)
-#define LOG_WARN(...) Logger::get_instance().WARN(__VA_ARGS__)
-#define LOG_ERROR(...) Logger::get_instance().ERROR(__VA_ARGS__)
-#define LOG_CRITICAL(...) Logger::get_instance().CRITICAL(__VA_ARGS__)
+#define LOG_TRACE(...) Logger::get_instance().trace(__VA_ARGS__)
+#define LOG_DEBUG(...) Logger::get_instance().debug(__VA_ARGS__)
+#define LOG_INFO(...) Logger::get_instance().info(__VA_ARGS__)
+#define LOG_WARN(...) Logger::get_instance().warn(__VA_ARGS__)
+#define LOG_ERROR(...) Logger::get_instance().error(__VA_ARGS__)
+#define LOG_CRITICAL(...) Logger::get_instance().critical(__VA_ARGS__)
