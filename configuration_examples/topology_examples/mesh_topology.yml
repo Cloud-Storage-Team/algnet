@@ -1,67 +1,59 @@
-hosts:
+devices:
   sender1:
     type: sender
-    name: sender1
   sender2:
     type: sender
-    name: sender2
   sender3:
     type: sender
-    name: sender3
   receiver1:
     type: receiver
-    name: receiver1
   receiver2:
     type: receiver
-    name: receiver2
   receiver3:
     type: receiver
-    name: receiver3
-switches:
   switch1:
     type: switch
-    name: switch1
   switch2:
     type: switch
-    name: switch2
+
 links:
   link1:
     from: sender1
     to: switch1
-    latency: 3ms
+    latency: 3ns
     throughput: 10Gbps
   link2:
     from: sender2
     to: switch1
-    latency: 3ms
+    latency: 3ns
     throughput: 10Gbps
   link3:
     from: sender3
     to: switch2
-    latency: 3ms
+    latency: 3ns
     throughput: 10Gbps
   link4:
     from: switch1
     to: switch2
-    latency: 2ms
+    latency: 2ns
     throughput: 40Gbps
   link5:
     from: switch1
     to: receiver1
-    latency: 3ms
+    latency: 3ns
     throughput: 10Gbps
   link6:
     from: switch1
     to: receiver2
-    latency: 3ms
+    latency: 3ns
     throughput: 10Gbps
   link7:
     from: switch2
     to: receiver2
-    latency: 3ms
+    latency: 3ns
     throughput: 10Gbps
   link8:
     from: switch2
     to: receiver3
-    latency: 3ms
+    latency: 3ns
     throughput: 10Gbps
