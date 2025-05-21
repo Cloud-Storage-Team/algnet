@@ -52,8 +52,10 @@ void Link::schedule_arrival(Packet packet) {
         std::make_unique<Arrive>(Arrive(total_delay, weak_from_this(), packet)));
 };
 
-void Link::process_arrival(Packet packet) {
+void Link::process_arrival(Time arrival_time, Packet packet) {
     LOG_INFO("Packet arrived to link's egress queue. Packet: " + packet.to_string());
+
+    m_to.lock()->notify_about_arrival(arrival_time);
 
     m_src_egress_delay -= get_transmission_time(packet);
     m_next_ingress.push(packet);

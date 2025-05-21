@@ -4,6 +4,8 @@
 
 #include "event.hpp"
 #include "link.hpp"
+#include "routing_module.hpp"
+#include "scheduling_module.hpp"
 #include "logger/logger.hpp"
 #include "utils/identifier_factory.hpp"
 #include "utils/validation.hpp"
@@ -12,6 +14,7 @@ namespace sim {
 
 Receiver::Receiver()
     : m_router(std::make_unique<RoutingModule>()),
+      m_scheduler(std::make_unique<SchedulingModule>()),
       m_id(IdentifierFactory::get_instance().generate_id()) {}
 
 bool Receiver::add_inlink(std::shared_ptr<ILink> link) {
@@ -62,9 +65,13 @@ std::shared_ptr<ILink> Receiver::get_link_to_destination(
     return m_router->get_link_to_destination(dest);
 };
 
+bool Receiver::notify_about_arrival(Time arrival_time) {
+    return m_scheduler->notify_about_arrival(arrival_time, weak_from_this());
+};
+
 DeviceType Receiver::get_type() const { return DeviceType::RECEIVER; }
 
-Time Receiver::process() {
+Time Receiver::process(Time start_time) {
     std::shared_ptr<ILink> current_inlink = next_inlink();
     Time total_processing_time = 1;
 
@@ -110,6 +117,10 @@ Time Receiver::process() {
         }
         next_link->schedule_arrival(data_packet);
         // TODO: think about redirecting time
+    }
+
+    if (m_scheduler->notify_about_processing_finished(start_time + total_processing_time)) {
+        return 0;
     }
 
     return total_processing_time;

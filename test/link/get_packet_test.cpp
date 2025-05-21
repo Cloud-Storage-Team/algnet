@@ -23,7 +23,7 @@ TEST_F(LinkTest, SimpleGetPacket) {
     auto link = std::make_shared<sim::Link>(src, dst);
 
     sim::Packet packet;
-    link->process_arrival(packet);
+    link->process_arrival(0, packet);
 
     ASSERT_EQ(link->get_packet().value(), packet);
 }

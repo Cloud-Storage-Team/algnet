@@ -38,7 +38,7 @@ void Arrive::operator()() {
         return;
     }
     
-    m_link.lock()->process_arrival(m_packet); 
+    m_link.lock()->process_arrival(m_time, m_packet); 
 };
 
 Process::Process(Time a_time, std::weak_ptr<IProcessingDevice> a_device): Event(a_time), m_device(a_device) {};
@@ -47,7 +47,12 @@ void Process::operator()() {
     if (m_device.expired()) {
         return;
     }
-    Time process_time = m_device.lock()->process();
+    Time process_time = m_device.lock()->process(m_time);
+
+    // TODO: think about better way of cancelling event rescheduling and signaling errors
+    if (process_time == 0) {
+        return;
+    }
 
     std::unique_ptr<Event> next_process_event = std::make_unique<Process>(m_time + process_time, m_device);
     Scheduler::get_instance().add(std::move(next_process_event));
@@ -61,6 +66,11 @@ void SendData::operator()() {
     }
     Time process_time = m_device.lock()->send_data();
 
+    // TODO: think about better way of cancelling event rescheduling
+    if (process_time == 0) {
+        return;
+    }
+    
     std::unique_ptr<Event> next_process_event = std::make_unique<SendData>(m_time + process_time, m_device);
     Scheduler::get_instance().add(std::move(next_process_event));
 };

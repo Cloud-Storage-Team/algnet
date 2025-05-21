@@ -88,4 +88,9 @@ void RoutingModule::correctify_outlinks() {
                   [](std::weak_ptr<ILink> link) { return link.expired(); });
 }
 
+bool RoutingModule::notify_about_arrival(Time arrival_time) { 
+    (void)arrival_time;
+    return false; 
+};
+
 }  // namespace sim

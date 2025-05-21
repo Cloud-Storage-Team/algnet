@@ -30,4 +30,7 @@ std::shared_ptr<sim::ILink> DeviceMock::get_link_to_destination(
 
 std::shared_ptr<sim::ILink> DeviceMock::next_inlink() { return {}; }
 
+bool DeviceMock::notify_about_arrival(Time arrival_time) {
+    return false;
+};
 }  // namespace test

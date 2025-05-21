@@ -17,7 +17,7 @@ TestLink::TestLink(std::shared_ptr<sim::IRoutingDevice> a_src,
     : src(a_src), dst(a_dest), packet(packet_to_return) {}
 
 void TestLink::schedule_arrival(sim::Packet packet) {};
-void TestLink::process_arrival(sim::Packet packet) {};
+void TestLink::process_arrival(Time arrival_time, sim::Packet packet) {};
 
 std::optional<sim::Packet> TestLink::get_packet() { return {packet}; };
 
