@@ -1,5 +1,7 @@
 #pragma once
 
+#include <variant>
+
 #include "device/device.hpp"
 #include "flow.hpp"
 #include "link.hpp"
@@ -90,5 +92,7 @@ public:
     virtual ~Stop() = default;
     void operator()() final;
 };
+
+using EventVariant = std::variant<Generate, Arrive, Process, SendData, Stop>;
 
 }  // namespace sim

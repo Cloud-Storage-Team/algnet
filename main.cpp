@@ -11,11 +11,13 @@ int main(const int argc, char **argv) {
         return 1;
     }
 
+    constexpr int sim_time = 100'000;
+
     try {
         sim::YamlParser parser;
-        auto [simulator, simulation_time] =
+        auto [simulator, _] =
             parser.build_simulator_from_config(argv[1]);
-        std::visit([&](auto &sim) { sim.start(simulation_time); }, simulator);
+        std::visit([&](auto &sim) { sim.start(sim_time); }, simulator);
     } catch (const std::exception &e) {
         LOG_ERROR(fmt::format("Error: {}", e.what()));
         return 1;

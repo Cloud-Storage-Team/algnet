@@ -11,20 +11,17 @@ bool Scheduler::tick() {
         return false;
     }
 
-    std::unique_ptr<Event> event =
-        std::move(const_cast<std::unique_ptr<Event>&>(m_events.top()));
+    EventVariant event = std::move(m_events.top());
     m_events.pop();
-    event->operator()();
+    // event->operator()();
+    std::visit([](auto& e) { e.operator()(); }, event);
     return true;
 }
 
-void Scheduler::add(std::unique_ptr<Event> event) {
-    m_events.emplace(std::move(event));
-}
+void Scheduler::add(EventVariant event) { m_events.emplace(std::move(event)); }
 
 void Scheduler::clear() {
-    m_events = std::priority_queue<std::unique_ptr<Event>,
-                                   std::vector<std::unique_ptr<Event>>,
+    m_events = std::priority_queue<EventVariant, std::vector<EventVariant>,
                                    EventComparator>();
 }
 

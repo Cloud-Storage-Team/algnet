@@ -173,7 +173,7 @@ void YamlParser::process_flows(const YAML::Node &config) {
 
         std::visit(
             [&](auto &sim) {
-                sim.add_flow(sender, receiver, packet_size, packet_interval, 0);
+                sim.add_flow(sender, receiver, packet_size, packet_interval, 10'000);
             },
             m_simulator);
     }

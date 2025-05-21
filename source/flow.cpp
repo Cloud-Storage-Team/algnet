@@ -21,7 +21,7 @@ Flow::Flow(std::shared_ptr<ISender> a_src, std::shared_ptr<IReceiver> a_dest,
 
 void Flow::schedule_packet_generation(Time time) {
     auto generate_event_ptr =
-        std::make_unique<Generate>(time, shared_from_this(), m_packet_size);
+        Generate(time, shared_from_this(), m_packet_size);
     Scheduler::get_instance().add(std::move(generate_event_ptr));
 }
 

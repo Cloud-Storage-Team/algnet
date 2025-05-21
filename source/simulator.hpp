@@ -114,7 +114,7 @@ public:
     // Create a Stop event at a_stop_time and start simulation
     void start(Time a_stop_time) {
         recalculate_paths();
-        Scheduler::get_instance().add(std::make_unique<Stop>(a_stop_time));
+        Scheduler::get_instance().add(Stop(a_stop_time));
         constexpr Time start_time = 0;
 
         for (auto flow : m_flows) {
@@ -123,24 +123,22 @@ public:
 
         for (auto [name, sender] : m_senders) {
             Scheduler::get_instance().add(
-                std::make_unique<Process>(start_time, sender));
+                Process(start_time, sender));
             Scheduler::get_instance().add(
-                std::make_unique<SendData>(start_time, sender));
+                SendData(start_time, sender));
         }
 
         for (auto [name, receiver] : m_receivers) {
             Scheduler::get_instance().add(
-                std::make_unique<Process>(start_time, receiver));
+                Process(start_time, receiver));
         }
 
         for (auto [name, swtch] : m_switches) {
             Scheduler::get_instance().add(
-                std::make_unique<Process>(start_time, swtch));
+                Process(start_time, swtch));
         }
-        LOG_INFO("Simulation started");
         while (Scheduler::get_instance().tick()) {
         }
-        LOG_INFO("Simulation finished");
     }
 
 private:
