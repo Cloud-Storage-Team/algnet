@@ -1,9 +1,8 @@
-#include "logger/logger.hpp"
 #include <initializer_list>
 #include <memory>
 #include <utility>
 #include <ctime>
-#include <cstdlib> 
+#include <cstdlib>
 
 #include "device/device.hpp"
 #include "express_pass/express_pass_flow.hpp"
@@ -12,9 +11,6 @@
 #include "express_pass/express_pass_sender.hpp"
 #include "simulator.hpp"
 
-
-#include <fstream>
-#include <iostream>
 
 namespace sim {
 
@@ -34,11 +30,6 @@ void add_two_way_links(sim::EPSimulator& sim,
 }
 
 int main() {
-    // std::ofstream outFile("results.txt");
-
-    // std::streambuf* coutBackup = std::cout.rdbuf();
-    // std::cout.rdbuf(outFile.rdbuf());
-
     std::srand(std::time(0));
 
     sim::EPSimulator sim;
@@ -71,10 +62,6 @@ int main() {
     }
     
     sim.start(stop_time);
-
-    // std::cout.rdbuf(coutBackup);
-    
-    // outFile.close();
 
     return 0;
 }

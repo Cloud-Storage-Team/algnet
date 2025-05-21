@@ -28,7 +28,7 @@ void Generate::operator()() {
         return;
     }
 
-    std::unique_ptr<Event> new_event = std::make_unique<Generate>(
+    EventVariant new_event = Generate(
         m_time + generate_delay, m_flow, m_packet_size);
     Scheduler::get_instance().add(std::move(new_event));
 }
@@ -53,7 +53,7 @@ void Process::operator()() {
     // LOG_WARN("Packet processed at: " + std::to_string(m_time));
     Time process_time = m_device.lock()->process(m_time);
 
-    std::unique_ptr<Event> next_process_event = std::make_unique<Process>(m_time + process_time, m_device);
+    EventVariant next_process_event = Process(m_time + process_time, m_device);
     Scheduler::get_instance().add(std::move(next_process_event));
 };
 
@@ -66,8 +66,25 @@ void SendData::operator()() {
     // LOG_WARN("Packet sent at: " + std::to_string(m_time));
     Time process_time = m_device.lock()->send_data(m_time);
 
-    std::unique_ptr<Event> next_process_event = std::make_unique<SendData>(m_time + process_time, m_device);
+    EventVariant next_process_event = SendData(m_time + process_time, m_device);
     Scheduler::get_instance().add(std::move(next_process_event));
 };
+
+SendCredit::SendCredit(Time a_time, std::weak_ptr<ExpressPassFlow> a_flow, Size a_packet_size) : Event(a_time), m_flow(a_flow), m_packet_size(a_packet_size) {}
+
+void SendCredit::operator()() {
+    if (m_flow.expired()) {
+        return;
+    }
+
+    Time sending_delay = m_flow.lock()->send_credit(m_time);
+    if (sending_delay == 0) {
+        return;
+    }
+
+    EventVariant new_event = SendCredit(
+        m_time + sending_delay, m_flow, m_packet_size);
+    Scheduler::get_instance().add(std::move(new_event));
+}
 
 }  // namespace sim

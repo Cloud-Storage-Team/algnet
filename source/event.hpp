@@ -1,6 +1,9 @@
 #pragma once
 
+#include <variant>
+
 #include "device/device.hpp"
+#include "express_pass/express_pass_flow.hpp"
 #include "flow.hpp"
 #include "link.hpp"
 #include "packet.hpp"
@@ -16,7 +19,7 @@ public:
     virtual void operator()() = 0;
 
     Time get_time() const;
-    bool operator>(const Event &other) const { return m_time > other.m_time; }
+    bool operator>(const Event& other) const { return m_time > other.m_time; }
 
 protected:
     Time m_time;
@@ -90,5 +93,20 @@ public:
     virtual ~Stop() = default;
     void operator()() final;
 };
+
+class SendCredit : public Event {
+public:
+    SendCredit(Time a_time, std::weak_ptr<ExpressPassFlow> a_flow,
+               Size a_packet_size);
+    virtual ~SendCredit() = default;
+    void operator()() final;
+
+private:
+    std::weak_ptr<ExpressPassFlow> m_flow;
+    Size m_packet_size;
+};
+
+using EventVariant =
+    std::variant<Generate, Arrive, Process, SendData, Stop, SendCredit>;
 
 }  // namespace sim

@@ -27,7 +27,7 @@ ExpressPassFlow::ExpressPassFlow(std::shared_ptr<ExpressPassSender> a_src, std::
 
 void ExpressPassFlow::schedule_packet_generation(Time time) {
     auto generate_event_ptr =
-        std::make_unique<Generate>(time, shared_from_this(), m_packet_size);
+        Generate(time, shared_from_this(), m_packet_size);
     Scheduler::get_instance().add(std::move(generate_event_ptr));
 }
 
@@ -79,7 +79,7 @@ void ExpressPassFlow::update(Time time, Packet packet, DeviceType type) {
     if (packet.type == PacketType::CREDIT_REQUEST && type == DeviceType::RECEIVER && m_receiver_status == ReceiverStatus::CREDIT_STOP_R) {
         m_receiver_status = ReceiverStatus::CREDIT_SENDING;
         auto send_credit_event_ptr =
-            std::make_unique<SendCredit>(time, shared_from_this(), m_system_packet_size);
+            SendCredit(time, shared_from_this(), m_system_packet_size);
         Scheduler::get_instance().add(std::move(send_credit_event_ptr));
     }
     else if (packet.type == PacketType::CREDIT_STOP_P && type == DeviceType::RECEIVER && m_receiver_status == ReceiverStatus::CREDIT_SENDING) {

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include <queue>
 
 #include "event.hpp"
@@ -8,9 +7,10 @@
 namespace sim {
 
 struct EventComparator {
-    bool operator()(const std::unique_ptr<Event>& lhs,
-                    const std::unique_ptr<Event>& rhs) const {
-        return (*lhs.get()) > (*rhs.get());
+    bool operator()(const EventVariant& lhs, const EventVariant& rhs) const {
+        return std::visit(
+            [](const auto& a, const auto& b) -> bool { return a > b; }, lhs,
+            rhs);
     }
 };
 
@@ -24,7 +24,7 @@ public:
         return instance;
     }
 
-    void add(std::unique_ptr<Event> event);
+    void add(EventVariant event);
     void clear();  // Clear all events
     bool tick();
 
@@ -35,10 +35,9 @@ private:
     Scheduler(const Scheduler&) = delete;
     Scheduler& operator=(const Scheduler&) = delete;
 
-    std::priority_queue<std::unique_ptr<Event>,
-                        std::vector<std::unique_ptr<Event>>, EventComparator>
+    std::priority_queue<EventVariant, std::vector<EventVariant>,
+                        EventComparator>
         m_events;
-    int m_cnt = 0;
 };
 
 }  // namespace sim

@@ -49,7 +49,7 @@ void Link::schedule_arrival(Time current_time, Packet packet) {
 
     // TODO: put correct event time. Arrive happens in current time + total_delay.
     Scheduler::get_instance().add(
-        std::make_unique<Arrive>(Arrive(current_time + total_delay, weak_from_this(), packet)));
+        Arrive(current_time + total_delay, weak_from_this(), packet));
 };
 
 void Link::process_arrival(Packet packet) {

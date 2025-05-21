@@ -70,7 +70,7 @@ void ExpressPassLink::schedule_arrival(Time current_time, Packet packet) {
     // std::cout << "Link id: " << get_id() << ", total_trans: " << m_total_transmission << ", data_trans: " << m_data_transmission << ", Time: " << total_delay << "." << std::endl;
     // std::cout << "Link id: " << get_id() << ", delay: " << m_src_egress_delay << "." << std::endl;
     Scheduler::get_instance().add(
-        std::make_unique<Arrive>(Arrive(total_delay, weak_from_this(), packet)));
+        Arrive(total_delay, weak_from_this(), packet));
 };
 
 void ExpressPassLink::process_arrival(Packet packet) {
