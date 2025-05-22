@@ -19,13 +19,14 @@ using Event = sim::Arrive;
 
 std::shared_ptr<DeviceMock> device = std::make_shared<DeviceMock>();
 std::shared_ptr<LinkMock> link = std::make_shared<LinkMock>(device, device);
+sim::Packet packet = sim::Packet{};
 
 TEST(TestScheduler, AddAndExecuteSingleEvent) {
     sim::Scheduler& scheduler = sim::Scheduler::get_instance();
     scheduler.clear();
 
     constexpr int event_time = 10;
-    scheduler.add(Event(event_time, link, sim::Packet{}));
+    scheduler.add(Event(event_time, link, packet));
 
     ASSERT_TRUE(scheduler.tick());
     ASSERT_EQ(scheduler.get_current_time(), event_time);
@@ -42,11 +43,11 @@ TEST(TestScheduler, ExecuteStopEvent) {
     constexpr int event4_time = 100;
     constexpr int stop_time = 40;
 
-    scheduler.add(Event(event1_time, link, sim::Packet{}));
-    scheduler.add(Event(event2_time, link, sim::Packet{}));
-    scheduler.add(Event(event3_time, link, sim::Packet{}));
+    scheduler.add(Event(event1_time, link, packet));
+    scheduler.add(Event(event2_time, link, packet));
+    scheduler.add(Event(event3_time, link, packet));
     scheduler.add(sim::Stop(stop_time));
-    scheduler.add(Event(event4_time, link, sim::Packet{}));
+    scheduler.add(Event(event4_time, link, packet));
 
     ASSERT_TRUE(scheduler.tick());
     ASSERT_EQ(scheduler.get_current_time(), event1_time);
@@ -58,6 +59,32 @@ TEST(TestScheduler, ExecuteStopEvent) {
     ASSERT_TRUE(scheduler.tick());
     ASSERT_EQ(scheduler.get_current_time(), stop_time);
 
+    ASSERT_FALSE(scheduler.tick());
+}
+
+TEST(TestScheduler, ClearTest) {
+    sim::Scheduler& scheduler = sim::Scheduler::get_instance();
+    scheduler.clear();
+
+    ASSERT_FALSE(scheduler.tick());
+
+    constexpr int event1_time = 10;
+    constexpr int event2_time = 20;
+    constexpr int event3_time = 30;
+    
+    scheduler.add(Event(event1_time, link, packet));
+    scheduler.add(Event(event2_time, link, packet));
+    scheduler.add(Event(event3_time, link, packet));
+
+    ASSERT_TRUE(scheduler.tick());
+    ASSERT_EQ(scheduler.get_current_time(), event1_time);
+    ASSERT_TRUE(scheduler.tick());
+    ASSERT_EQ(scheduler.get_current_time(), event2_time);
+
+    scheduler.clear();
+    ASSERT_FALSE(scheduler.tick());
+
+    scheduler.clear();
     ASSERT_FALSE(scheduler.tick());
 }
 
