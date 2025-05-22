@@ -14,8 +14,8 @@ bool Scheduler::tick() {
     std::unique_ptr<Event> event =
         std::move(const_cast<std::unique_ptr<Event>&>(m_events.top()));
     m_events.pop();
-    event->operator()();
     m_current_event_local_time = event->get_time();
+    event->operator()();
     return true;
 }
 
