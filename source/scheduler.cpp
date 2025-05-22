@@ -14,6 +14,7 @@ bool Scheduler::tick() {
     std::unique_ptr<Event> event =
         std::move(const_cast<std::unique_ptr<Event>&>(m_events.top()));
     m_events.pop();
+    m_current_event_local_time = event->get_time();
     event->operator()();
     return true;
 }
@@ -27,5 +28,9 @@ void Scheduler::clear() {
                                    std::vector<std::unique_ptr<Event>>,
                                    EventComparator>();
 }
+
+Time Scheduler::get_current_time() {
+    return m_current_event_local_time;
+};
 
 }  // namespace sim

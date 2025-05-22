@@ -27,6 +27,7 @@ public:
     void add(std::unique_ptr<Event> event);
     void clear();  // Clear all events
     bool tick();
+    Time get_current_time();
 
 private:
     // Private constructor to prevent instantiation
@@ -38,6 +39,8 @@ private:
     std::priority_queue<std::unique_ptr<Event>,
                         std::vector<std::unique_ptr<Event>>, EventComparator>
         m_events;
+
+    Time m_current_event_local_time;
 };
 
 }  // namespace sim
