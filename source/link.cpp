@@ -10,19 +10,19 @@ namespace sim {
 
 Link::Link(std::weak_ptr<IRoutingDevice> a_from,
            std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_gbps,
-           Time a_delay, Size max_src_egress_buffer_size_byte,
-           Size max_ingress_buffer_size)
+           Time a_delay, Size a_max_src_egress_buffer_size_byte,
+           Size a_max_ingress_buffer_size)
     : m_from(a_from),
       m_to(a_to),
       m_speed_gbps(a_speed_gbps),
       m_src_egress_buffer_size_byte(0),
-      m_max_src_egress_buffer_size_byte(max_src_egress_buffer_size_byte),
+      m_max_src_egress_buffer_size_byte(a_max_src_egress_buffer_size_byte),
       m_last_src_egress_pass_time(0),
       m_transmission_delay(a_delay),
       m_id(IdentifierFactory::get_instance().generate_id()),
       m_next_ingress(),
       m_ingress_buffer_size_byte(0),
-      m_max_ingress_buffer_size_byte(max_ingress_buffer_size) {
+      m_max_ingress_buffer_size_byte(a_max_ingress_buffer_size) {
     if (a_from.expired() || a_to.expired()) {
         LOG_WARN("Passed link to device is expired");
     } else if (a_speed_gbps == 0) {

@@ -39,8 +39,8 @@ class Link : public ILink, public std::enable_shared_from_this<Link> {
 public:
     Link(std::weak_ptr<IRoutingDevice> a_from,
          std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_gbps = 1,
-         Time a_delay = 0, Size max_src_egress_buffer_size_byte = 4096,
-         Size max_ingress_buffer_size_byte = 4096);
+         Time a_delay = 0, Size a_max_src_egress_buffer_size_byte = 4096,
+         Size a_max_ingress_buffer_size_byte = 4096);
     ~Link() = default;
 
     /**
