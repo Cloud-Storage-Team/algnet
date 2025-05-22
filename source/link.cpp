@@ -47,6 +47,13 @@ void Link::schedule_arrival(Packet packet) {
         return;
     }
 
+    if (m_src_egress_buffer_size_byte + packet.size_byte >
+        m_max_ingress_buffer_size) {
+        LOG_ERROR("Buffer in link overflowed; packet " + packet.to_string() +
+                  " lost");
+        return;
+    }
+
     LOG_INFO("Packet arrived to link's ingress queue. Packet: " +
              packet.to_string());
 
