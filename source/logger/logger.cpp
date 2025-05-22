@@ -20,12 +20,12 @@ Logger::Logger() {
 
     auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
         "logs/simulator_logs.txt", true);
-    file_sink->set_level(spdlog::level::trace);
+    file_sink->set_level(spdlog::level::err);
 
     auto logger = std::make_shared<spdlog::logger>(
         "multi_sink", spdlog::sinks_init_list{console_sink, file_sink});
     logger->set_pattern("[%H:%M:%S] [%^%l%$] [%!] %v");
-    logger->set_level(spdlog::level::trace);
+    logger->set_level(spdlog::level::err);
     spdlog::set_default_logger(logger);
 }
 

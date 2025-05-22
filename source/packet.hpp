@@ -12,7 +12,7 @@ class IFlow;
 enum PacketType { ACK, DATA };
 
 struct Packet {
-    Packet(PacketType a_type = PacketType::DATA, Size a_size = 0,
+    Packet(PacketType a_type = PacketType::DATA, Size a_size_byte = 0,
            IFlow* flow = nullptr);
 
     bool operator==(const Packet& packet) const;
@@ -20,7 +20,7 @@ struct Packet {
     std::shared_ptr<IRoutingDevice> get_destination() const;
 
     PacketType type;
-    Size size;
+    Size size_byte;
     IFlow* flow;
 };
 

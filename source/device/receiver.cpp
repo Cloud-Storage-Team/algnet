@@ -1,6 +1,7 @@
 #include "receiver.hpp"
 
 #include <memory>
+#include <iostream>
 
 #include "event.hpp"
 #include "link.hpp"
@@ -9,6 +10,8 @@
 #include "utils/validation.hpp"
 
 namespace sim {
+
+int cnt = 0;
 
 Receiver::Receiver()
     : m_router(std::make_unique<RoutingModule>()),
@@ -111,7 +114,8 @@ Time Receiver::process() {
         next_link->schedule_arrival(data_packet);
         // TODO: think about redirecting time
     }
-
+    cnt++;
+    std::cout << "Came: " << cnt << std::endl;
     return total_processing_time;
 }
 

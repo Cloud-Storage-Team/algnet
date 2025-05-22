@@ -28,7 +28,7 @@ void Flow::schedule_packet_generation(Time time) {
 Packet Flow::generate_packet() {
     sim::Packet packet;
     packet.type = sim::PacketType::DATA;
-    packet.size = m_packet_size;
+    packet.size_byte = m_packet_size;
     packet.flow = this;
     return packet;
 }
