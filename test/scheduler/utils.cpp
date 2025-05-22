@@ -17,6 +17,9 @@ void ComparatorEvent::operator()() {
     last_time = m_time;
 }
 
+TestStopEvent::TestStopEvent(std::uint32_t a_time): Event(a_time) {}
+void TestStopEvent::operator()() { Scheduler::get_instance().clear(); }
+
 template <typename T>
 void AddEvents(int number, std::shared_ptr<Time> event_time) {
     static_assert(std::is_base_of<sim::Event, T>::value,
@@ -27,19 +30,15 @@ void AddEvents(int number, std::shared_ptr<Time> event_time) {
     Time max_time = static_cast<Time>(1e9);
 
     while ((number--) > 0) {
-        std::unique_ptr<sim::Event> event_ptr;
-
         if (event_time == nullptr) {
-            event_ptr = std::make_unique<T>(rand() % (max_time - min_time + 1) + min_time);
+            Scheduler::get_instance().add(std::move(T(rand() % (max_time - min_time + 1) + min_time)));
         } else {
-            event_ptr = std::make_unique<T>(++(*event_time.get()));
+            Scheduler::get_instance().add(std::move(T(++(*event_time.get()))));
         }
-
-        sim::Scheduler::get_instance().add(std::move(event_ptr));
     }
 }
 
-template void AddEvents<sim::Stop>(int, std::shared_ptr<Time>);
+template void AddEvents<TestStopEvent>(int, std::shared_ptr<Time>);
 template void AddEvents<EmptyEvent>(int, std::shared_ptr<Time>);
 template void AddEvents<CountingEvent>(int, std::shared_ptr<Time>);
 template void AddEvents<ComparatorEvent>(int, std::shared_ptr<Time>);
