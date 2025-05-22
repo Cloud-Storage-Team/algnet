@@ -27,6 +27,8 @@ public:
     void add(EventVariant event);
     void clear();  // Clear all events
     bool tick();
+    Time get_current_time();
+    Time increase_current_time(Time offset);
 
 private:
     // Private constructor to prevent instantiation
@@ -38,6 +40,8 @@ private:
     std::priority_queue<EventVariant, std::vector<EventVariant>,
                         EventComparator>
         m_events;
+
+    Time m_current_event_local_time;
 };
 
 }  // namespace sim

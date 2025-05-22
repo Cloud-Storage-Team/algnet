@@ -42,10 +42,8 @@ void Link::schedule_arrival(Packet packet) {
     LOG_INFO("Packet arrived to link's ingress queue. Packet: " + packet.to_string());
 
     unsigned int transmission_time = get_transmission_time(packet);
-    unsigned int total_delay = m_src_egress_delay + transmission_time;
-    (void) total_delay; // unused variable stub
-
     m_src_egress_delay += transmission_time;
+    unsigned int total_delay = Scheduler::get_instance().get_current_time() + m_src_egress_delay;
 
     // TODO: put correct event time. Arrive happens in current time + total_delay.
     Scheduler::get_instance().add(

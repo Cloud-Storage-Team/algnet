@@ -70,10 +70,10 @@ def generate_simulation(
     topology_path,
     num_senders,
     num_receivers,
+    simulation_time,
+    algorithm,
     packet_size=1024,
     packet_interval=100,
-    algorithm="basic",
-    simulation_time=1000000,
 ):
     """
     Generate a simulation YAML structure with flows between senders and receivers.
@@ -114,6 +114,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Generate topology and simulation YAML files."
     )
+    parser.add_argument("--time", type=int, required=True, help="Simulation time in ns")
     parser.add_argument(
         "--senders", type=int, required=True, help="Number of sender devices"
     )
@@ -139,6 +140,11 @@ def parse_arguments():
         "--simulation-path",
         default="../simulation_examples/stress_simulation.yml",
         help="Path to topology file as referenced in simulation file",
+    )
+    parser.add_argument(
+        "--algorithm",
+        default="basic",
+        help="Congestion control algorithm to simulate",
     )
 
     args = parser.parse_args()
@@ -166,7 +172,9 @@ def main():
     )
 
     # Generate simulation
-    simulation = generate_simulation(args.topology_path, args.senders, args.receivers)
+    simulation = generate_simulation(
+        args.topology_path, args.senders, args.receivers, args.time, args.algorithm
+    )
     save_yaml(simulation, args.simulation_path)
     print(f"Simulation file saved as {args.simulation}")
 
