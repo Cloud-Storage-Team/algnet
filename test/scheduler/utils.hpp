@@ -40,6 +40,37 @@ struct ComparatorEvent : public sim::Event {
     virtual void operator()() final;
 };
 
+struct StopEvent : public sim::Event {
+    StopEvent(std::uint32_t a_time);
+    ~StopEvent() = default;
+    virtual void operator()() final;
+};
+
+struct TestEvent {
+    TestEvent(const EmptyEvent& e) : event(e) {}
+    TestEvent(const CountingEvent& e) : event(e) {}
+    TestEvent(const ComparatorEvent& e) : event(e) {}
+    TestEvent(const StopEvent& e) : event(e) {}
+
+    void operator()() {
+        std::visit([&](auto real_event) { real_event(); }, event);
+    }
+    bool operator>(const TestEvent& other) const {
+        return get_time() > other.get_time();
+    }
+    bool operator<(const TestEvent& other) const {
+        return get_time() < other.get_time();
+    }
+    Time get_time() const {
+        return std::visit(
+            [&](auto real_event) { return real_event.get_time(); }, event);
+    }
+
+    std::variant<EmptyEvent, CountingEvent, ComparatorEvent, StopEvent> event;
+};
+
+using Scheduler = sim::SchedulerTemplate<TestEvent>;
+
 template <typename T>
 void AddEvents(int number, std::shared_ptr<Time> event_time = nullptr);
 }  // namespace test

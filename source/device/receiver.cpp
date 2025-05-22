@@ -1,6 +1,7 @@
 #include "receiver.hpp"
 
 #include <memory>
+#include <iostream>
 
 #include "event.hpp"
 #include "link.hpp"
@@ -111,7 +112,6 @@ Time Receiver::process() {
         next_link->schedule_arrival(data_packet);
         // TODO: think about redirecting time
     }
-
     return total_processing_time;
 }
 

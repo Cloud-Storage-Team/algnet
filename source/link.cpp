@@ -67,8 +67,8 @@ void Link::schedule_arrival(Packet packet) {
         transmission_time;
     m_src_egress_buffer_size_byte += packet.size_byte;
 
-    Scheduler::get_instance().add(std::make_unique<Arrive>(
-        Arrive(m_last_src_egress_pass_time, weak_from_this(), packet)));
+    Scheduler::get_instance().add(
+        Arrive(m_last_src_egress_pass_time, weak_from_this(), packet));
 };
 
 void Link::process_arrival(Packet packet) {

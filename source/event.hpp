@@ -1,5 +1,7 @@
 #pragma once
 
+#include <variant>
+
 #include "device/device.hpp"
 #include "flow.hpp"
 #include "link.hpp"
@@ -16,7 +18,7 @@ public:
     virtual void operator()() = 0;
 
     Time get_time() const;
-    bool operator>(const Event &other) const { return m_time > other.m_time; }
+    bool operator>(const Event& other) const { return m_time > other.m_time; }
 
 protected:
     Time m_time;
@@ -89,6 +91,30 @@ public:
     Stop(Time a_time);
     virtual ~Stop() = default;
     void operator()() final;
+};
+
+struct BaseEvent {
+    BaseEvent(const Generate& e) : event(e) {}
+    BaseEvent(const Arrive& e) : event(e) {}
+    BaseEvent(const Process& e) : event(e) {}
+    BaseEvent(const SendData& e) : event(e) {}
+    BaseEvent(const Stop& e) : event(e) {}
+
+    void operator()() {
+        std::visit([&](auto real_event) { real_event(); }, event);
+    }
+    bool operator>(const BaseEvent& other) const {
+        return get_time() > other.get_time();
+    }
+    bool operator<(const BaseEvent& other) const {
+        return get_time() < other.get_time();
+    }
+    Time get_time() const {
+        return std::visit(
+            [&](auto real_event) { return real_event.get_time(); }, event);
+    }
+
+    std::variant<Generate, Arrive, Process, SendData, Stop> event;
 };
 
 }  // namespace sim
