@@ -11,8 +11,7 @@
 namespace sim {
 
 std::pair<SimulatorVariant, Time> YamlParser::build_simulator_from_config(
-    const std::filesystem::path &path) 
-{
+    const std::filesystem::path &path) {
     const YAML::Node simulation_config = YAML::LoadFile(path);
     std::string algorithm = parse_algorithm(simulation_config);
     m_simulator = create_simulator(algorithm);
@@ -37,7 +36,7 @@ Time YamlParser::parse_simulation_time(const YAML::Node &config) {
     return config["simulation_time"].as<Time>();
 }
 
-uint32_t YamlParser::parse_throughput(const std::string& throughput) {
+uint32_t YamlParser::parse_throughput(const std::string &throughput) {
     const size_t unit_pos = throughput.find_first_not_of("0123456789");
     if (unit_pos == std::string::npos) {
         throw std::runtime_error("Invalid throughput: " + throughput);
@@ -45,15 +44,15 @@ uint32_t YamlParser::parse_throughput(const std::string& throughput) {
     const uint32_t value = std::stoul(throughput.substr(0, unit_pos));
     const std::string unit = throughput.substr(unit_pos);
     if (unit == "Gbps") {
-        return value * 1000;  // Convert to Mbps
+        return value;
     }
     if (unit == "Mbps") {
-        return value;
+        return value / 1000;  // Convert to Gbps
     }
     throw std::runtime_error("Unsupported throughput unit: " + unit);
 }
 
-uint32_t YamlParser::parse_latency(const std::string& latency) {
+uint32_t YamlParser::parse_latency(const std::string &latency) {
     const size_t unit_pos = latency.find_first_not_of("0123456789");
     if (unit_pos == std::string::npos) {
         throw std::runtime_error("Invalid latency: " + latency);
@@ -165,6 +164,8 @@ void YamlParser::process_flows(const YAML::Node &config) {
 
         Size packet_size = it->second["packet_size"].as<Size>();
         Time packet_interval = it->second["packet_interval"].as<Time>();
+        std::uint32_t number_of_packets =
+            it->second["number_of_packets"].as<std::uint32_t>();
 
         std::shared_ptr<ISender> sender =
             std::dynamic_pointer_cast<ISender>(m_devices.at(sender_id));
@@ -173,7 +174,8 @@ void YamlParser::process_flows(const YAML::Node &config) {
 
         std::visit(
             [&](auto &sim) {
-                sim.add_flow(sender, receiver, packet_size, packet_interval, 0);
+                sim.add_flow(sender, receiver, packet_size, packet_interval,
+                             number_of_packets);
             },
             m_simulator);
     }

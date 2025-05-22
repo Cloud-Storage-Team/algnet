@@ -28,17 +28,17 @@ void Flow::schedule_packet_generation(Time time) {
 Packet Flow::generate_packet() {
     sim::Packet packet;
     packet.type = sim::PacketType::DATA;
-    packet.size = m_packet_size;
+    packet.size_byte = m_packet_size;
     packet.flow = this;
     return packet;
 }
 
 void Flow::start(std::uint32_t time) { schedule_packet_generation(time); }
 
-void Flow::update(Packet packet, DeviceType type) { 
+void Flow::update(Packet packet, DeviceType type) {
     (void)packet;
     (void)type;
-    ++m_updates_number; 
+    ++m_updates_number;
 }
 
 std::uint32_t Flow::get_updates_number() const { return m_updates_number; }
@@ -61,7 +61,7 @@ Time Flow::put_data_to_device() {
     m_src.lock()->enqueue_packet(m_sending_buffer.front());
     m_sending_buffer.pop();
     return m_delay_between_packets;
-}   
+}
 
 std::shared_ptr<ISender> Flow::get_sender() const { return m_src.lock(); }
 
