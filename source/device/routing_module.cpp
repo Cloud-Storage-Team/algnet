@@ -31,7 +31,7 @@ bool RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
 }
 
 bool RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                         std::shared_ptr<ILink> link) {
+                                         std::shared_ptr<ILink> link, size_t paths_count) {
     if (link == nullptr) {
         LOG_WARN("Unexpected nullptr link");
         return false;
@@ -39,7 +39,7 @@ bool RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     auto link_dest = link->get_to();
 
     // TODO: discuss storing weak_ptrs instead of shared
-    m_routing_table[dest] = link;
+    m_routing_table[dest][link] += paths_count;
     return true;
 }
 
@@ -50,7 +50,28 @@ std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
         return nullptr;
     }
 
-    return (*iterator).second.lock();
+    const auto& link_map = iterator->second;
+    if (link_map.empty()) {
+        return nullptr;
+    }
+
+    int total_weight = 0;
+    for (const auto& [link, weight] : link_map) {
+        total_weight += weight;
+    }
+
+    // TODO: instead of rand use packet header hash (so packets of the same flow go the same path)
+    int random_value = rand() % total_weight;
+
+    int cumulative_weight = 0;
+    for (const auto& [link, weight] : link_map) {
+        cumulative_weight += weight;
+        if (random_value < cumulative_weight) {
+            return link.lock();
+        }
+    }
+
+    return nullptr;
 }
 
 std::shared_ptr<ILink> RoutingModule::next_inlink() {

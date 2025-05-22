@@ -15,11 +15,11 @@ bool ReceiverMock::add_outlink(std::shared_ptr<sim::ILink> link) {
 }
 
 bool ReceiverMock::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                        std::shared_ptr<sim::ILink> link) {
+                                        std::shared_ptr<sim::ILink> link, size_t paths_count) {
     return false;
 }
 
-std::shared_ptr<sim::ILink> ReceiverMock::next_inlink() { return {}; }
+std::shared_ptr<sim::ILink> ReceiverMock::next_inlink() { return nullptr; }
 
 std::shared_ptr<sim::ILink> ReceiverMock::get_link_to_destination(
     std::shared_ptr<IRoutingDevice> device) const {
