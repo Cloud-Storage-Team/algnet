@@ -9,27 +9,33 @@
 namespace sim {
 
 Link::Link(std::weak_ptr<IRoutingDevice> a_from,
-           std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_mbps,
+           std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_gbps,
            Time a_delay)
     : m_from(a_from),
       m_to(a_to),
-      m_speed_mbps(a_speed_mbps),
+      m_speed_gbps(a_speed_gbps),
       m_src_egress_delay(0),
       m_transmission_delay(a_delay),
       m_id(IdentifierFactory::get_instance().generate_id()) {
     if (a_from.expired() || a_to.expired()) {
         LOG_WARN("Passed link to device is expired");
-    } else if (a_speed_mbps == 0) {
+    } else if (a_speed_gbps == 0) {
         LOG_WARN("Passed zero link speed");
     }
 }
 
 Time Link::get_transmission_time(const Packet& packet) const {
-    if (m_speed_mbps == 0) {
+    if (m_speed_gbps == 0) {
         LOG_WARN("Passed zero link speed");
         return 0;
     }
-    return (packet.size + m_speed_mbps - 1) / m_speed_mbps +
+    const std::uint32_t byte_to_bit_multiplier = 8;
+    const std::uint64_t gbit_to_bit_multiplier = 1024 * 1024 * 1024;
+    const std::uint64_t sec_to_ns_multiplier = 1000'000'000;
+
+    Size packet_size_bit = packet.size_byte * byte_to_bit_multiplier;
+    std::uint32_t transmission_speed = static_cast<std::uint64_t>(m_speed_gbps) * gbit_to_bit_multiplier / sec_to_ns_multiplier;
+    return (packet_size_bit + transmission_speed - 1) / transmission_speed +
            m_transmission_delay;
 };
 

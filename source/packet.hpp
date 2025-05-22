@@ -20,7 +20,7 @@ struct Packet {
     std::shared_ptr<IRoutingDevice> get_destination() const;
 
     PacketType type;
-    Size size;
+    Size size_byte;
     IFlow* flow;
 };
 
