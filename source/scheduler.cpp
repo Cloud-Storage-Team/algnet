@@ -33,9 +33,4 @@ Time Scheduler::get_current_time() {
     return m_current_event_local_time;
 };
 
-Time Scheduler::increase_current_time(Time offset) {
-    m_current_event_local_time += offset;
-    return m_current_event_local_time;
-};
-
 }  // namespace sim

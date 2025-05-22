@@ -28,7 +28,6 @@ public:
     void clear();  // Clear all events
     bool tick();
     Time get_current_time();
-    Time increase_current_time(Time offset);
 
 private:
     // Private constructor to prevent instantiation
