@@ -80,7 +80,7 @@ public:
                   std::shared_ptr<IRoutingDevice> a_to,
                   std::uint32_t a_speed_mbps, Time a_delay,
                   size_t max_ingress_buffer_size = 4096) {
-        auto link = std::make_shared<TLink>(a_from, a_to, a_speed_mbps, a_delay,
+        auto link = std::make_shared<TLink>(a_from, a_to, a_speed_gbps, a_delay,
                                             max_ingress_buffer_size);
         m_links.emplace_back(link);
         a_from->add_outlink(link);
