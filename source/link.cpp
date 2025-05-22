@@ -10,16 +10,19 @@ namespace sim {
 
 Link::Link(std::weak_ptr<IRoutingDevice> a_from,
            std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_gbps,
-           Time a_delay, size_t max_ingress_buffer_size)
+           Time a_delay, Size max_src_egress_buffer_size_byte,
+           Size max_ingress_buffer_size)
     : m_from(a_from),
       m_to(a_to),
       m_speed_gbps(a_speed_gbps),
       m_src_egress_buffer_size_byte(0),
+      m_max_src_egress_buffer_size_byte(max_src_egress_buffer_size_byte),
       m_last_src_egress_pass_time(0),
       m_transmission_delay(a_delay),
       m_id(IdentifierFactory::get_instance().generate_id()),
       m_next_ingress(),
-      m_max_egress_buffer_size(max_ingress_buffer_size) {
+      m_ingress_buffer_size_byte(0),
+      m_max_ingress_buffer_size_byte(max_ingress_buffer_size) {
     if (a_from.expired() || a_to.expired()) {
         LOG_WARN("Passed link to device is expired");
     } else if (a_speed_gbps == 0) {
@@ -48,7 +51,7 @@ void Link::schedule_arrival(Packet packet) {
     }
 
     if (m_src_egress_buffer_size_byte + packet.size_byte >
-        m_max_egress_buffer_size) {
+        m_max_src_egress_buffer_size_byte) {
         LOG_ERROR("Buffer in link overflowed; packet " + packet.to_string() +
                   " lost");
         return;
@@ -69,6 +72,14 @@ void Link::schedule_arrival(Packet packet) {
 };
 
 void Link::process_arrival(Packet packet) {
+    if (m_ingress_buffer_size_byte + packet.size_byte >
+        m_max_ingress_buffer_size_byte) {
+        LOG_ERROR("Ingress buffer on Link overflow; packet" +
+                  packet.to_string() + " lost");
+        return;
+    }
+    m_ingress_buffer_size_byte += packet.size_byte;
+
     LOG_INFO("Packet arrived to link's egress queue. Packet: " +
              packet.to_string());
 
@@ -85,6 +96,7 @@ std::optional<Packet> Link::get_packet() {
     auto packet = m_next_ingress.front();
     LOG_INFO("Taken packet from link. Packet: " + packet.to_string());
     m_next_ingress.pop();
+    m_ingress_buffer_size_byte -= packet.size_byte;
     return packet;
 };
 
