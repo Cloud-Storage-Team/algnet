@@ -12,6 +12,7 @@
 
 namespace sim {
 
+
 Receiver::Receiver()
     : m_router(std::make_unique<RoutingModule>()),
       m_scheduler(std::make_unique<SchedulingModule>()),
@@ -41,7 +42,7 @@ bool Receiver::add_outlink(std::shared_ptr<ILink> link) {
 }
 
 bool Receiver::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                    std::shared_ptr<ILink> link) {
+                                    std::shared_ptr<ILink> link, size_t paths_count) {
     if (dest == nullptr) {
         LOG_WARN("Passed destination is null");
         return false;
@@ -53,7 +54,7 @@ bool Receiver::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
         LOG_WARN("Link source device is incorrect (expected current device)");
         return false;
     }
-    return m_router->update_routing_table(dest, link);
+    return m_router->update_routing_table(dest, link, paths_count);
 }
 
 std::shared_ptr<ILink> Receiver::next_inlink() {

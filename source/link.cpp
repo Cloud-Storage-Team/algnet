@@ -9,27 +9,32 @@
 namespace sim {
 
 Link::Link(std::weak_ptr<IRoutingDevice> a_from,
-           std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_mbps,
+           std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_gbps,
            Time a_delay)
     : m_from(a_from),
       m_to(a_to),
-      m_speed_mbps(a_speed_mbps),
-      m_src_egress_delay(0),
+      m_speed_gbps(a_speed_gbps),
+      m_src_egress_buffer_size_byte(0),
+      m_last_src_egress_pass_time(0),
       m_transmission_delay(a_delay),
       m_id(IdentifierFactory::get_instance().generate_id()) {
     if (a_from.expired() || a_to.expired()) {
         LOG_WARN("Passed link to device is expired");
-    } else if (a_speed_mbps == 0) {
+    } else if (a_speed_gbps == 0) {
         LOG_WARN("Passed zero link speed");
     }
 }
 
 Time Link::get_transmission_time(const Packet& packet) const {
-    if (m_speed_mbps == 0) {
+    if (m_speed_gbps == 0) {
         LOG_WARN("Passed zero link speed");
         return 0;
     }
-    return (packet.size + m_speed_mbps - 1) / m_speed_mbps +
+    const std::uint32_t byte_to_bit_multiplier = 8;
+
+    Size packet_size_bit = packet.size_byte * byte_to_bit_multiplier;
+    std::uint32_t transmission_speed_bit_ns = m_speed_gbps;
+    return (packet_size_bit + transmission_speed_bit_ns - 1) / transmission_speed_bit_ns +
            m_transmission_delay;
 };
 
@@ -42,12 +47,11 @@ void Link::schedule_arrival(Packet packet) {
     LOG_INFO("Packet arrived to link's ingress queue. Packet: " + packet.to_string());
 
     unsigned int transmission_time = get_transmission_time(packet);
-    m_src_egress_delay += transmission_time;
-    unsigned int total_delay = Scheduler::get_instance().get_current_time() + m_src_egress_delay;
+    m_last_src_egress_pass_time = std::max(m_last_src_egress_pass_time, Scheduler::get_instance().get_current_time()) + transmission_time;
+    m_src_egress_buffer_size_byte += packet.size_byte;
 
-    // TODO: put correct event time. Arrive happens in current time + total_delay.
     Scheduler::get_instance().add(
-        std::make_unique<Arrive>(Arrive(total_delay, weak_from_this(), packet)));
+        std::make_unique<Arrive>(Arrive(m_last_src_egress_pass_time, weak_from_this(), packet)));
 };
 
 void Link::process_arrival(Time arrival_time, Packet packet) {
@@ -55,7 +59,7 @@ void Link::process_arrival(Time arrival_time, Packet packet) {
 
     m_to.lock()->notify_about_arrival(arrival_time);
 
-    m_src_egress_delay -= get_transmission_time(packet);
+    m_src_egress_buffer_size_byte -= packet.size_byte;
     m_next_ingress.push(packet);
 };
 

@@ -30,7 +30,7 @@ public:
     virtual bool add_inlink(std::shared_ptr<ILink> link) = 0;
     virtual bool add_outlink(std::shared_ptr<ILink> link) = 0;
     virtual bool update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                      std::shared_ptr<ILink> link) = 0;
+                                      std::shared_ptr<ILink> link, size_t paths_count = 1) = 0;
     virtual std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> device) const = 0;
     virtual std::shared_ptr<ILink> next_inlink() = 0;
