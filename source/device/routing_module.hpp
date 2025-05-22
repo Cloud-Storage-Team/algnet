@@ -8,10 +8,6 @@
 #include "utils/loop_iterator.hpp"
 
 namespace sim {
-
-template <typename K, typename V>
-using MapWeakPtr =
-    std::map<std::weak_ptr<K>, V, std::owner_less<std::weak_ptr<K>>>;
     
 class RoutingModule : public IRoutingDevice {
 public:
