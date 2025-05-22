@@ -1,4 +1,6 @@
 #include <cstdint>
+#include <map>
+#include <memory>
 
 // nanoseconds
 typedef std::uint32_t Time;
