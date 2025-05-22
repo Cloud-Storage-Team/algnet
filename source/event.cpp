@@ -26,7 +26,7 @@ void Generate::operator()() {
         return;
     }
 
-    EventVariant new_event =
+    BaseEvent new_event =
         Generate(m_time + generate_delay, m_flow, m_packet_size);
     Scheduler::get_instance().add(std::move(new_event));
 }
@@ -53,7 +53,7 @@ void Process::operator()() {
     // LOG_WARN("Packet processed at: " + std::to_string(m_time));
     Time process_time = m_device.lock()->process();
 
-    EventVariant next_process_event = Process(m_time + process_time, m_device);
+    BaseEvent next_process_event = Process(m_time + process_time, m_device);
     Scheduler::get_instance().add(std::move(next_process_event));
 };
 
@@ -67,7 +67,7 @@ void SendData::operator()() {
     // LOG_WARN("Packet sent at: " + std::to_string(m_time));
     Time process_time = m_device.lock()->send_data();
 
-    EventVariant next_process_event = SendData(m_time + process_time, m_device);
+    BaseEvent next_process_event = SendData(m_time + process_time, m_device);
     Scheduler::get_instance().add(std::move(next_process_event));
 };
 
