@@ -19,7 +19,7 @@ Link::Link(std::weak_ptr<IRoutingDevice> a_from,
       m_transmission_delay(a_delay),
       m_id(IdentifierFactory::get_instance().generate_id()),
       m_next_ingress(),
-      m_max_ingress_buffer_size(max_ingress_buffer_size) {
+      m_max_egress_buffer_size(max_ingress_buffer_size) {
     if (a_from.expired() || a_to.expired()) {
         LOG_WARN("Passed link to device is expired");
     } else if (a_speed_gbps == 0) {
@@ -48,7 +48,7 @@ void Link::schedule_arrival(Packet packet) {
     }
 
     if (m_src_egress_buffer_size_byte + packet.size_byte >
-        m_max_ingress_buffer_size) {
+        m_max_egress_buffer_size) {
         LOG_ERROR("Buffer in link overflowed; packet " + packet.to_string() +
                   " lost");
         return;
