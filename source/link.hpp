@@ -38,7 +38,7 @@ public:
 class Link : public ILink, public std::enable_shared_from_this<Link> {
 public:
     Link(std::weak_ptr<IRoutingDevice> a_from,
-         std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_mbps = 1,
+         std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_gbps = 1,
          Time a_delay = 0);
     ~Link() = default;
 
@@ -65,7 +65,7 @@ private:
 
     std::weak_ptr<IRoutingDevice> m_from;
     std::weak_ptr<IRoutingDevice> m_to;
-    std::uint32_t m_speed_mbps;
+    std::uint32_t m_speed_gbps;
     Time m_src_egress_delay;
     Time m_transmission_delay;
     Id m_id;

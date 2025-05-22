@@ -45,10 +45,10 @@ uint32_t YamlParser::parse_throughput(const std::string& throughput) {
     const uint32_t value = std::stoul(throughput.substr(0, unit_pos));
     const std::string unit = throughput.substr(unit_pos);
     if (unit == "Gbps") {
-        return value * 1000;  // Convert to Mbps
+        return value;
     }
     if (unit == "Mbps") {
-        return value;
+        return value / 1024;  // Convert to Gbps
     }
     throw std::runtime_error("Unsupported throughput unit: " + unit);
 }
