@@ -45,8 +45,8 @@ RoutingTable bfs(std::shared_ptr<IRoutingDevice>& start_device) {
                 } else {
                     // Here we get all ways to get to the previous device and add them to next hop
                     // This part might be called several times for same device
-                    for (auto link_and_paths: routing_table[curr_device]) {
-                        routing_table[next_hop][link_and_paths.first] += link_and_paths.second;
+                    for (auto [link, paths_count]: routing_table[curr_device]) {
+                        routing_table[next_hop][link] += paths_count;
                     }
                 }
             }
