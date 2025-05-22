@@ -17,16 +17,36 @@ links:
     latency: 1ns
     throughput: 1Gbps
   link2:
+    from: bus
+    to: sender1
+    latency: 1ns
+    throughput: 1Gbps
+  link3:
     from: sender2
     to: bus
     latency: 1ns
     throughput: 1Gbps
-  link3:
+  link4:
+    from: bus
+    to: sender2
+    latency: 1ns
+    throughput: 1Gbps
+  link5:
+    from: receiver1
+    to: bus
+    latency: 1ns
+    throughput: 1Gbps
+  link6:
     from: bus
     to: receiver1
     latency: 1ns
     throughput: 1Gbps
-  link4:
+  link7:
+    from: receiver2
+    to: bus
+    latency: 1ns
+    throughput: 1Gbps
+  link8:
     from: bus
     to: receiver2
     latency: 1ns

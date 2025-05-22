@@ -45,10 +45,10 @@ uint32_t YamlParser::parse_throughput(const std::string& throughput) {
     const uint32_t value = std::stoul(throughput.substr(0, unit_pos));
     const std::string unit = throughput.substr(unit_pos);
     if (unit == "Gbps") {
-        return value * 1000;  // Convert to Mbps
+        return value;
     }
     if (unit == "Mbps") {
-        return value;
+        return value / 1000;  // Convert to Gbps
     }
     throw std::runtime_error("Unsupported throughput unit: " + unit);
 }
@@ -165,6 +165,7 @@ void YamlParser::process_flows(const YAML::Node &config) {
 
         Size packet_size = it->second["packet_size"].as<Size>();
         Time packet_interval = it->second["packet_interval"].as<Time>();
+        std::uint32_t number_of_packets = it->second["number_of_packets"].as<std::uint32_t>();
 
         std::shared_ptr<ISender> sender =
             std::dynamic_pointer_cast<ISender>(m_devices.at(sender_id));
@@ -173,7 +174,7 @@ void YamlParser::process_flows(const YAML::Node &config) {
 
         std::visit(
             [&](auto &sim) {
-                sim.add_flow(sender, receiver, packet_size, packet_interval, 0);
+                sim.add_flow(sender, receiver, packet_size, packet_interval, number_of_packets);
             },
             m_simulator);
     }
