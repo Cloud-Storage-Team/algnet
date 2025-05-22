@@ -13,7 +13,8 @@ bool Scheduler::tick() {
 
     EventVariant event = std::move(m_events.top());
     m_events.pop();
-    m_current_event_local_time =  std::visit([](const auto& event){ return event.get_time(); }, event); 
+    m_current_event_local_time =
+        std::visit([](const auto& event) { return event.get_time(); }, event);
     std::visit([](auto& e) { e.operator()(); }, event);
     return true;
 }
@@ -26,11 +27,6 @@ void Scheduler::clear() {
 }
 
 Time Scheduler::get_current_time() {
-    return m_current_event_local_time;
-};
-
-Time Scheduler::increase_current_time(Time offset) {
-    m_current_event_local_time += offset;
     return m_current_event_local_time;
 };
 

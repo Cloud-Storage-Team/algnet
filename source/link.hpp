@@ -66,7 +66,8 @@ private:
     std::weak_ptr<IRoutingDevice> m_from;
     std::weak_ptr<IRoutingDevice> m_to;
     std::uint32_t m_speed_gbps;
-    Time m_src_egress_delay;
+    Size m_src_egress_buffer_size_byte;
+    Time m_last_src_egress_pass_time;
     Time m_transmission_delay;
     Id m_id;
 
