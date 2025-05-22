@@ -1,4 +1,5 @@
 #include "packet.hpp"
+
 #include <sstream>
 
 namespace sim {
@@ -20,24 +21,32 @@ std::shared_ptr<IRoutingDevice> Packet::get_destination() const {
 };
 
 bool Packet::operator==(const Packet& packet) const {
-    return flow == packet.flow && size_byte == packet.size_byte && type == packet.type;
+    return flow == packet.flow && size_byte == packet.size_byte &&
+           type == packet.type;
 }
 
-// TODO: think about some ID for packet (currently its impossible to distinguish packets)
+// TODO: think about some ID for packet (currently its impossible to distinguish
+// packets)
 std::string Packet::to_string() const {
     std::ostringstream oss;
     oss << "Packet[type: ";
-    
+
     switch (type) {
-        case PacketType::ACK: oss << "ACK"; break;
-        case PacketType::DATA: oss << "DATA"; break;
-        default: oss << "UNKNOWN"; break;
+        case PacketType::ACK:
+            oss << "ACK";
+            break;
+        case PacketType::DATA:
+            oss << "DATA";
+            break;
+        default:
+            oss << "UNKNOWN";
+            break;
     }
-    
+
     oss << ", size(byte): " << size_byte;
     oss << ", flow: " << (flow ? "set" : "null");
     oss << "]";
-    
+
     return oss.str();
 }
 

@@ -11,7 +11,6 @@
 
 namespace sim {
 
-
 Receiver::Receiver()
     : m_router(std::make_unique<RoutingModule>()),
       m_id(IdentifierFactory::get_instance().generate_id()) {}
