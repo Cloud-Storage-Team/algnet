@@ -38,7 +38,7 @@ bool Receiver::add_outlink(std::shared_ptr<ILink> link) {
 }
 
 bool Receiver::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                    std::shared_ptr<ILink> link, int paths) {
+                                    std::shared_ptr<ILink> link, size_t paths_count) {
     if (dest == nullptr) {
         LOG_WARN("Passed destination is null");
         return false;
@@ -50,7 +50,7 @@ bool Receiver::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
         LOG_WARN("Link source device is incorrect (expected current device)");
         return false;
     }
-    return m_router->update_routing_table(dest, link, paths);
+    return m_router->update_routing_table(dest, link, paths_count);
 }
 
 std::shared_ptr<ILink> Receiver::next_inlink() {

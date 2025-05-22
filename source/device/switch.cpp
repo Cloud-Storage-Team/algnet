@@ -35,7 +35,7 @@ bool Switch::add_outlink(std::shared_ptr<ILink> link) {
 }
 
 bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                  std::shared_ptr<ILink> link, int paths) {
+                                  std::shared_ptr<ILink> link, size_t paths_count) {
     if (dest == nullptr) {
         LOG_WARN("Destination device does not exist");
         return false;
@@ -47,7 +47,7 @@ bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
         LOG_WARN("Link source is not our device");
         return false;
     }
-    return m_router->update_routing_table(dest, link, paths);
+    return m_router->update_routing_table(dest, link, paths_count);
 }
 
 std::shared_ptr<ILink> Switch::next_inlink() { return m_router->next_inlink(); }

@@ -31,7 +31,7 @@ bool RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
 }
 
 bool RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                         std::shared_ptr<ILink> link, int paths) {
+                                         std::shared_ptr<ILink> link, size_t paths_count) {
     if (link == nullptr) {
         LOG_WARN("Unexpected nullptr link");
         return false;
@@ -39,7 +39,7 @@ bool RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
     auto link_dest = link->get_to();
 
     // TODO: discuss storing weak_ptrs instead of shared
-    m_routing_table[dest][link] += paths;
+    m_routing_table[dest][link] += paths_count;
     return true;
 }
 
