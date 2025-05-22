@@ -104,10 +104,10 @@ struct BaseEvent {
         std::visit([&](auto real_event) { real_event(); }, event);
     }
     bool operator>(const BaseEvent& other) const {
-        return this->get_time() > other.get_time();
+        return get_time() > other.get_time();
     }
     bool operator<(const BaseEvent& other) const {
-        return this->get_time() < other.get_time();
+        return get_time() < other.get_time();
     }
     Time get_time() const {
         return std::visit(
