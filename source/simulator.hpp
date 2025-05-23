@@ -124,20 +124,20 @@ public:
         }
 
         for (auto [name, sender] : m_senders) {
-            Scheduler::get_instance().add(
-                std::make_unique<Process>(start_time, sender));
-            Scheduler::get_instance().add(
-                std::make_unique<SendData>(start_time, sender));
+            // Scheduler::get_instance().add(
+            //     std::make_unique<Process>(start_time, sender));
+            // Scheduler::get_instance().add(
+            //     std::make_unique<SendData>(start_time, sender));
         }
 
         for (auto [name, receiver] : m_receivers) {
-            Scheduler::get_instance().add(
-                std::make_unique<Process>(start_time, receiver));
+            // Scheduler::get_instance().add(
+            //     std::make_unique<Process>(start_time, receiver));
         }
 
         for (auto [name, swtch] : m_switches) {
-            Scheduler::get_instance().add(
-                std::make_unique<Process>(start_time, swtch));
+            // Scheduler::get_instance().add(
+            //     std::make_unique<Process>(start_time, swtch));
         }
         LOG_INFO("Simulation started");
         while (Scheduler::get_instance().tick()) {

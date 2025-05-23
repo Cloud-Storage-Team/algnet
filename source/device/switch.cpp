@@ -5,6 +5,7 @@
 #include "link.hpp"
 #include "routing_module.hpp"
 #include "scheduling_module.hpp"
+#include "scheduler.hpp"
 #include "logger/logger.hpp"
 #include "utils/validation.hpp"
 
@@ -66,7 +67,7 @@ bool Switch::notify_about_arrival(Time arrival_time) {
 
 DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
 
-Time Switch::process(Time start_time) {
+Time Switch::process() {
     Time total_processing_time = 1;
     std::shared_ptr<ILink> link = next_inlink();
 
@@ -105,7 +106,7 @@ Time Switch::process(Time start_time) {
     // TODO: increase total_processing_time correctly
     next_link->schedule_arrival(packet);
 
-    if (m_scheduler->notify_about_processing_finished(start_time + total_processing_time)) {
+    if (m_scheduler->notify_about_processing_finished(Scheduler::get_instance().get_current_time() + total_processing_time)) {
         return 0;
     }
     

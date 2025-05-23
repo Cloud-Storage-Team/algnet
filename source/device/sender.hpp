@@ -31,7 +31,7 @@ public:
     std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;
     std::set<std::shared_ptr<ILink>> get_outlinks() final;
-    bool notify_about_arrival(Time arrival_time) final;
+    bool notify_about_arrival(Time arrive_time) final;
 
     DeviceType get_type() const final;
     // Process an ACK by removing it from the ingress buffer,
@@ -41,7 +41,7 @@ public:
     // and move it to the egress port (link)
     // ACKs are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
-    Time process(Time start_time) final;
+    Time process() final;
     Time send_data() final;
 
     void enqueue_packet(Packet packet) final;

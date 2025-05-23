@@ -1,17 +1,20 @@
 #include "receiver.hpp"
 
 #include <memory>
+#include <iostream>
 
 #include "event.hpp"
 #include "link.hpp"
 #include "routing_module.hpp"
 #include "scheduling_module.hpp"
+#include "scheduler.hpp"
 #include "logger/logger.hpp"
 #include "utils/identifier_factory.hpp"
 #include "utils/validation.hpp"
 
 namespace sim {
 
+int cnt = 0;
 
 Receiver::Receiver()
     : m_router(std::make_unique<RoutingModule>()),
@@ -72,7 +75,7 @@ bool Receiver::notify_about_arrival(Time arrival_time) {
 
 DeviceType Receiver::get_type() const { return DeviceType::RECEIVER; }
 
-Time Receiver::process(Time start_time) {
+Time Receiver::process() {
     std::shared_ptr<ILink> current_inlink = next_inlink();
     Time total_processing_time = 1;
 
@@ -120,7 +123,9 @@ Time Receiver::process(Time start_time) {
         // TODO: think about redirecting time
     }
 
-    if (m_scheduler->notify_about_processing_finished(start_time + total_processing_time)) {
+    std::cout << "Arrived currently: " << ++cnt << std::endl;
+
+    if (m_scheduler->notify_about_processing_finished(Scheduler::get_instance().get_current_time() + total_processing_time)) {
         return 0;
     }
 

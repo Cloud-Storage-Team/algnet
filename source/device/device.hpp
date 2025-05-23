@@ -8,6 +8,7 @@
 namespace sim {
 
 class ILink;
+class ISender;
 
 enum DeviceType { SWITCH, SENDER, RECEIVER };
 
@@ -18,7 +19,7 @@ public:
     // One step of device work cycle;
     // e.g. see next inlink, take one packet from it,
     // and do smth with it (send further, send ask etc)
-    virtual Time process(Time start_time) = 0;
+    virtual Time process() = 0;
 
     virtual DeviceType get_type() const = 0;
 };
@@ -45,7 +46,9 @@ public:
 
     virtual bool notify_about_processing_finished(Time finish_time) = 0;
     virtual bool notify_about_arrival(Time arrival_time, std::weak_ptr<IProcessingDevice> target) = 0;
-    virtual void reschedule_process(Time preferred_processing_time, std::weak_ptr<IProcessingDevice> target) = 0;
+    
+    virtual bool notify_about_sending_finished(Time finish_time) = 0;
+    virtual bool notify_about_new_packet_to_send(Time arrival_time, std::weak_ptr<ISender> target) = 0;
 };
 
 }  // namespace sim

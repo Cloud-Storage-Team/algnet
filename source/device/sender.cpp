@@ -8,6 +8,7 @@
 #include "link.hpp"
 #include "routing_module.hpp"
 #include "scheduling_module.hpp"
+#include "scheduler.hpp"
 #include "logger/logger.hpp"
 #include "utils/validation.hpp"
 
@@ -76,10 +77,11 @@ DeviceType Sender::get_type() const { return DeviceType::SENDER; }
 
 void Sender::enqueue_packet(Packet packet) {
     m_flow_buffer.push(packet);
+    m_scheduler->notify_about_new_packet_to_send(Scheduler::get_instance().get_current_time(), weak_from_this());
     LOG_INFO(fmt::format("Packet {} arrived to sender", packet.to_string()));
 }
 
-Time Sender::process(Time start_time) {
+Time Sender::process() {
     std::shared_ptr<ILink> current_inlink = next_inlink();
     Time total_processing_time = 1;
 
@@ -125,7 +127,7 @@ Time Sender::process(Time start_time) {
     }
     // total_processing_time += processing_ack_time;
     
-    if (m_scheduler->notify_about_processing_finished(start_time + total_processing_time)) {
+    if (m_scheduler->notify_about_processing_finished(Scheduler::get_instance().get_current_time() + total_processing_time)) {
         return 0;
     }
 
@@ -159,6 +161,10 @@ Time Sender::send_data() {
 
     next_link->schedule_arrival(data_packet);
     // total_processing_time += sending_data_time;
+    if (m_scheduler->notify_about_sending_finished(Scheduler::get_instance().get_current_time() + total_processing_time)) {
+        return 0;
+    }
+
     return total_processing_time;
 }
 
