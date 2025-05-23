@@ -24,10 +24,9 @@ namespace sim {
 template <typename TSender, typename TSwitch, typename TReceiver,
           typename TFlow, typename TLink>
 requires std::derived_from<TSender, ISender> &&
-         std::derived_from<TSwitch, ISwitch> &&
-         std::derived_from<TReceiver, IReceiver> &&
-         std::derived_from<TFlow, IFlow> &&
-         std::derived_from<TLink, ILink>
+    std::derived_from<TSwitch, ISwitch> &&
+    std::derived_from<TReceiver, IReceiver> &&
+    std::derived_from<TFlow, IFlow> && std::derived_from<TLink, ILink>
 class Simulator {
 public:
     Simulator() = default;
@@ -79,8 +78,10 @@ public:
 
     void add_link(std::shared_ptr<IRoutingDevice> a_from,
                   std::shared_ptr<IRoutingDevice> a_to,
-                  std::uint32_t a_speed_mbps, Time a_delay) {
-        auto link = std::make_shared<TLink>(a_from, a_to, a_speed_mbps, a_delay);
+                  std::uint32_t a_speed_gbps, Time a_delay,
+                  size_t max_ingress_buffer_size = 4096) {
+        auto link = std::make_shared<TLink>(a_from, a_to, a_speed_gbps, a_delay,
+                                            max_ingress_buffer_size);
         m_links.emplace_back(link);
         a_from->add_outlink(link);
         a_to->add_inlink(link);
