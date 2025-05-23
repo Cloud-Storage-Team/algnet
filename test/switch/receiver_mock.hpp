@@ -21,7 +21,7 @@ public:
     std::set<std::shared_ptr<sim::ILink>> get_outlinks() final;
     bool notify_about_arrival(Time arrival_time) final;
 
-    Time process(Time start_time) final;
+    Time process() final;
     sim::DeviceType get_type() const final;
 
     Id get_id() const final;

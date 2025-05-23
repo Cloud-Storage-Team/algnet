@@ -17,7 +17,7 @@ TEST_F(LinkTest, PacketArrived) {
 
     for (int i = 0; i < NUMBER_OF_PACKETS; i++) {
         packets.push_back(sim::Packet(sim::PacketType::DATA, i));
-        link->process_arrival(0, packets.back());
+        link->process_arrival(packets.back());
     }
 
     for (int i = 0; i < NUMBER_OF_PACKETS; i++) {

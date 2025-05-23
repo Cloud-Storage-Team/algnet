@@ -15,7 +15,7 @@ void LinkMock::schedule_arrival(sim::Packet a_packet) {
     m_arrived_packets.push_back(a_packet);
 }
 
-void LinkMock::process_arrival(Time arrival_time, sim::Packet a_packet) {}
+void LinkMock::process_arrival(sim::Packet a_packet) {}
 
 void LinkMock::set_ingress_packet(sim::Packet a_paket) {
     m_ingress_packet = a_paket;
