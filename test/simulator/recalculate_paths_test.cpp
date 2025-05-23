@@ -2,7 +2,9 @@
 
 #include "device/device.hpp"
 #include "simulator.hpp"
+#include "flow_mock.hpp"
 #include "utils.hpp"
+#include "logger/logger.hpp"
 
 namespace test {
 
@@ -29,7 +31,9 @@ static void check_pairwise_reachability(
     for (auto src : devices) {
         for (auto dest : devices) {
             if (src != dest) {
-                EXPECT_TRUE(check_reachability(src, dest));
+                // FlowMock fake_flow = FlowMock(dest);
+                sim::Packet packet_to_dest = sim::Packet(sim::PacketType::DATA, 0, nullptr, src->get_id(), dest->get_id());
+                EXPECT_TRUE(check_reachability(src, packet_to_dest));
             }
         }
     }

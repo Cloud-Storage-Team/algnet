@@ -11,6 +11,7 @@
 #include "link_mock.hpp"
 #include "packet.hpp"
 #include "receiver_mock.hpp"
+#include "../utils/fake_packet.hpp"
 
 namespace test {
 
@@ -33,24 +34,26 @@ TEST_F(TestSwitch, test_add_incorrect_inlink) {
     ASSERT_FALSE(switch_device->add_inlink(link));
 }
 
-TEST_F(TestSwitch, nullptr_destination_device) {
-    auto switch_device = std::make_shared<sim::Switch>();
-    auto temp_device = std::make_shared<test::ReceiverMock>();
-    auto link = std::make_shared<LinkMock>(switch_device, temp_device);
-    ASSERT_FALSE(switch_device->update_routing_table(nullptr, link));
-}
+// Real system does not know if another device exists or not, so this test is not correct at all
+// TEST_F(TestSwitch, nullptr_destination_device) {
+//     auto switch_device = std::make_shared<sim::Switch>();
+//     auto temp_device = std::make_shared<test::ReceiverMock>();
+//     auto link = std::make_shared<LinkMock>(switch_device, temp_device);
+//     ASSERT_FALSE(switch_device->update_routing_table(nullptr, link));
+// }
 
 TEST_F(TestSwitch, nullptr_outlink) {
     auto switch_device = std::make_shared<sim::Switch>();
     auto temp_device = std::make_shared<test::ReceiverMock>();
-    ASSERT_FALSE(switch_device->update_routing_table(temp_device, nullptr));
+    Id fake_id = temp_device->get_id() + switch_device->get_id();
+    ASSERT_FALSE(switch_device->update_routing_table(fake_id, nullptr));
 }
 
 TEST_F(TestSwitch, add_foreign_inlink) {
     auto switch_device = std::make_shared<sim::Switch>();
     auto temp_device = std::make_shared<test::ReceiverMock>();
     auto link = std::make_shared<LinkMock>(temp_device, switch_device);
-    ASSERT_FALSE(switch_device->update_routing_table(temp_device, link));
+    ASSERT_FALSE(switch_device->update_routing_table(temp_device->get_id(), link));
 }
 
 TEST_F(TestSwitch, test_no_senders) {
@@ -115,7 +118,7 @@ void test_senders(size_t senders_count) {
     // create packets
     std::vector<sim::Packet> packets(senders_count);
     for (size_t i = 0; i < senders_count; i++) {
-        packets[i] = sim::Packet(sim::PacketType::DATA, i, &flows[i]);
+        packets[i] = sim::Packet(sim::PacketType::DATA, i, &flows[i], 0, flows[i].get_receiver()->get_id());
     }
 
     // create links
@@ -129,7 +132,7 @@ void test_senders(size_t senders_count) {
     }
     std::shared_ptr<LinkMock> switch_reciever_link =
         std::make_shared<LinkMock>(switch_device, receiver);
-    switch_device->update_routing_table(receiver, switch_reciever_link);
+    switch_device->update_routing_table(receiver->get_id(), switch_reciever_link);
 
     // set ingress packets
     for (size_t i = 0; i < senders_count; i++) {

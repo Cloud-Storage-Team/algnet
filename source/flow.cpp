@@ -30,6 +30,9 @@ Packet Flow::generate_packet() {
     packet.type = sim::PacketType::DATA;
     packet.size_byte = m_packet_size;
     packet.flow = this;
+    packet.source_id = get_sender()->get_id();
+    packet.dest_id = get_receiver()->get_id();
+    packet.RTT = 0;
     return packet;
 }
 
