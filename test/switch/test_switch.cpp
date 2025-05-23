@@ -45,8 +45,7 @@ TEST_F(TestSwitch, test_add_incorrect_inlink) {
 TEST_F(TestSwitch, nullptr_outlink) {
     auto switch_device = std::make_shared<sim::Switch>();
     auto temp_device = std::make_shared<test::ReceiverMock>();
-    Id fake_id = temp_device->get_id() + switch_device->get_id();
-    ASSERT_FALSE(switch_device->update_routing_table(fake_id, nullptr));
+    ASSERT_FALSE(switch_device->update_routing_table(temp_device->get_id(), nullptr));
 }
 
 TEST_F(TestSwitch, add_foreign_inlink) {

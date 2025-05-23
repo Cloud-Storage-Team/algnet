@@ -65,13 +65,11 @@ bool RoutingModule::update_routing_table(Id dest_id, std::shared_ptr<ILink> link
 std::shared_ptr<ILink> RoutingModule::get_link_to_destination(Packet packet) const {
     auto iterator = m_routing_table.find(packet.dest_id);
     if (iterator == m_routing_table.end()) {
-        LOG_ERROR("1");
         return nullptr;
     }
 
     const auto& link_map = iterator->second;
     if (link_map.empty()) {
-        LOG_ERROR("2");
         return nullptr;
     }
 
@@ -91,7 +89,6 @@ std::shared_ptr<ILink> RoutingModule::get_link_to_destination(Packet packet) con
         }
     }
 
-    LOG_ERROR("3");
     return nullptr;
 }
 

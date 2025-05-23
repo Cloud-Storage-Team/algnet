@@ -8,7 +8,6 @@
 namespace sim {
 
 class IFlow;
-class IRoutingDevice;
 
 enum PacketType { ACK, DATA };
 
