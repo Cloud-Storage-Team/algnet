@@ -16,7 +16,6 @@ bool Scheduler::tick() {
     m_events.pop();
     m_current_event_local_time = event->get_time();
     event->operator()();
-    m_current_event_local_time = event->get_time();
     return true;
 }
 
