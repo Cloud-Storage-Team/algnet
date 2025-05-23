@@ -39,17 +39,23 @@ links:
     to: <destination_device>
     latency: <value><unit>
     throughput: <value><unit>
+    ingress_buffer_size: <value>B
+    egress_buffer_size: <value>B
 ```
 
 - `link_id`: Unique identifier for the link.
 
-- `from`: Source device.
+- `from`: Source device name.
 
-- `to`: Destination device.
+- `to`: Destination device name.
 
 - `latency`: Transmission delay (e.g., 5ns).
 
 - `throughput`: Link bandwidth (e.g., 1Gbps).
+
+- `ingress_buffer_size`: Link ingress buffer size in bytes (e.g., 1024B)
+
+- `egress_buffer_size`: Link egress buffer size in bytes (e.g., 1024B)
 
 ### Examples images
 
