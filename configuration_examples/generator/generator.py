@@ -53,7 +53,7 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
             raise ValueError(f"Unknown device type: {device_type}")
 
         label = f"""<
-            <table border="0" cellborder="0">Buffer size configFEAT: buffer sizes in topology configs
+            <table border="0" cellborder="0">
                 <tr><td><font face="Arial" point-size="14">{icon}</font></td></tr>
                 <tr><td><b>{device_id}</b></td></tr>
             </table>
