@@ -16,36 +16,50 @@ links:
     to: bus
     latency: 1ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
   link2:
     from: bus
     to: sender1
     latency: 1ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
   link3:
     from: sender2
     to: bus
     latency: 1ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
   link4:
     from: bus
     to: sender2
     latency: 1ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link5:
     from: receiver1
     to: bus
     latency: 1ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link6:
     from: bus
     to: receiver1
     latency: 1ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link7:
     from: receiver2
     to: bus
     latency: 1ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link8:
     from: bus
     to: receiver2

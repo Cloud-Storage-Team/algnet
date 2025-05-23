@@ -19,6 +19,7 @@ public:
 private:
     static uint32_t parse_throughput(const std::string& throughput);
     static uint32_t parse_latency(const std::string& latency);
+    static uint32_t parse_buffer_size(const std::string& buffer_size);
 
     static std::filesystem::path parse_topology_config_path(
         const YAML::Node& config);
