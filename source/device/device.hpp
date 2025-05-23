@@ -8,6 +8,7 @@
 namespace sim {
 
 class ILink;
+class ISender;
 
 enum DeviceType { SWITCH, SENDER, RECEIVER };
 
@@ -35,6 +36,19 @@ public:
         std::shared_ptr<IRoutingDevice> device) const = 0;
     virtual std::shared_ptr<ILink> next_inlink() = 0;
     virtual std::set<std::shared_ptr<ILink>>get_outlinks() = 0;
+    
+    virtual bool notify_about_arrival(Time arrival_time) = 0;
+};
+
+class ISchedulingModule {
+public:
+    virtual ~ISchedulingModule() = default;
+
+    virtual bool notify_about_processing_finished(Time finish_time) = 0;
+    virtual bool notify_about_arrival(Time arrival_time, std::weak_ptr<IProcessingDevice> target) = 0;
+    
+    virtual bool notify_about_sending_finished(Time finish_time) = 0;
+    virtual bool notify_about_new_packet_to_send(Time arrival_time, std::weak_ptr<ISender> target) = 0;
 };
 
 }  // namespace sim

@@ -28,7 +28,7 @@ Run simulator:
 
 ```bash
                   # path to simulation config
-./build/simulator configuration_example/simulation_examples/basic_simulation.yml
+./build/simulator configuration_examples/simulation_examples/basic_simulation.yml
 ```
 
 # Smart pointers

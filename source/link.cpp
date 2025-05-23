@@ -83,6 +83,8 @@ void Link::process_arrival(Packet packet) {
     LOG_INFO("Packet arrived to link's egress queue. Packet: " +
              packet.to_string());
 
+    m_to.lock()->notify_about_arrival(Scheduler::get_instance().get_current_time());
+
     m_src_egress_buffer_size_byte -= packet.size_byte;
     m_next_ingress.push(packet);
 };
