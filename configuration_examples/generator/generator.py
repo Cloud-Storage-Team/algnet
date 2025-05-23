@@ -53,7 +53,7 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
             raise ValueError(f"Unknown device type: {device_type}")
 
         label = f"""<
-            <table border="0" cellborder="0">
+            <table border="0" cellborder="0">Buffer size configFEAT: buffer sizes in topology configs
                 <tr><td><font face="Arial" point-size="14">{icon}</font></td></tr>
                 <tr><td><b>{device_id}</b></td></tr>
             </table>
@@ -73,7 +73,7 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
     for link_id, link_info in links.items():
         from_node = link_info["from"]
         to_node = link_info["to"]
-        label = f"⏱ {link_info['latency']}\n📶 {link_info['throughput']}"
+        label = f"⏱ {link_info['latency']}\n📶 {link_info['throughput']}\ningress {link_info['ingress_buffer_size']}\negress {link_info['egress_buffer_size']}"
 
         graph.edge(
             from_node,
