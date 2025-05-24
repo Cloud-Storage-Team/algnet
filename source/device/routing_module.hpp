@@ -12,10 +12,11 @@ namespace sim {
 
 struct Packet;
 class IHasher;
+class BaseHasher;
     
 class RoutingModule : public IRoutingDevice {
 public:
-    RoutingModule();
+    RoutingModule(std::unique_ptr<IHasher> a_hasher = std::make_unique<BaseHasher>());
     ~RoutingModule() = default;
 
     Id get_id() const final;
