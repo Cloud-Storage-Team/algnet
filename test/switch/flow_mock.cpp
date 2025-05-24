@@ -5,7 +5,7 @@ namespace test {
 FlowMock::FlowMock(std::shared_ptr<sim::IReceiver> m_receiver)
     : m_receiver(m_receiver) {}
 
-void FlowMock::start(std::uint32_t time) {}
+void FlowMock::start() {}
 Time FlowMock::create_new_data_packet() {
     return 1;
 };
