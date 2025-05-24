@@ -8,9 +8,9 @@
 
 namespace sim {
 
-RoutingModule::RoutingModule()
+RoutingModule::RoutingModule(std::unique_ptr<IHasher>&& a_hasher)
     : m_id(IdentifierFactory::get_instance().generate_id()),
-      m_hasher(std::make_unique<BaseHasher>()) {}
+      m_hasher(std::move(a_hasher)) {}
 
 Id RoutingModule::get_id() const {
     return m_id;
