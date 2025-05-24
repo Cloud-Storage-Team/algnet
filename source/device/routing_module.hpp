@@ -16,7 +16,7 @@ class BaseHasher;
     
 class RoutingModule : public IRoutingDevice {
 public:
-    RoutingModule(std::unique_ptr<IHasher> a_hasher = std::unique_ptr<IHasher>(new BaseHasher()));
+    RoutingModule(std::unique_ptr<IHasher> a_hasher = nullptr);
     ~RoutingModule() = default;
 
     Id get_id() const final;
