@@ -8,6 +8,7 @@
 namespace sim {
 
 struct Packet;
+class RoutingModule;
 
 class IReceiver : public IRoutingDevice,
                   public IProcessingDevice {

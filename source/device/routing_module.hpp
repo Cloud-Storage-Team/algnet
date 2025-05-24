@@ -9,6 +9,9 @@
 #include "utils/loop_iterator.hpp"
 
 namespace sim {
+
+struct Packet;
+class IHasher;
     
 class RoutingModule : public IRoutingDevice {
 public:
@@ -44,7 +47,7 @@ private:
         m_next_inlink;
 
     Id m_id;
-    BaseHasher m_hasher;
+    std::unique_ptr<IHasher> m_hasher;
 };
 
 }  // namespace sim

@@ -10,7 +10,7 @@ namespace sim {
 
 RoutingModule::RoutingModule()
     : m_id(IdentifierFactory::get_instance().generate_id()),
-      m_hasher() {}
+      m_hasher(std::make_unique<BaseHasher>()) {}
 
 Id RoutingModule::get_id() const {
     return m_id;
@@ -79,7 +79,7 @@ std::shared_ptr<ILink> RoutingModule::get_link_to_destination(Packet packet) con
         total_weight += weight;
     }
 
-    int random_value = m_hasher.get_hash(packet) % total_weight;
+    int random_value = m_hasher->get_hash(packet) % total_weight;
 
     int cumulative_weight = 0;
     for (const auto& [link, weight] : link_map) {
