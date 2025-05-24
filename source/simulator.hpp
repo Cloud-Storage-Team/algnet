@@ -70,7 +70,7 @@ public:
                                     Time delay_between_packets,
                                     std::uint32_t packets_to_send) {
         auto flow =
-            std::make_shared<Flow>(sender, receiver, packet_size,
+            std::make_shared<TFlow>(sender, receiver, packet_size,
                                    delay_between_packets, packets_to_send);
         m_flows.emplace_back(flow);
         return flow;

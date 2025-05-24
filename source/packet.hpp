@@ -9,7 +9,7 @@ namespace sim {
 
 class IFlow;
 
-enum PacketType { ACK, DATA };
+enum PacketType { ACK, DATA, CREDIT_REQUEST, CREDIT, CREDIT_STOP_P };
 
 struct Packet {
     Packet(PacketType a_type = PacketType::DATA, Size a_size_byte = 0,
