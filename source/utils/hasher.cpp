@@ -21,7 +21,7 @@ std::uint32_t SymmetricHasher::get_hash(Packet packet) const {
     std::string flow_id_str = ((packet.flow == nullptr) ? "0" : std::to_string(packet.flow->get_id()));
     
     std::hash<std::string> hasher;
-    std::string header_str = flow_id_str + " " + combined_id_str;
+    std::string header_str = fmt::format("{} {}", flow_id_str, combined_id_str);
     return static_cast<uint32_t>(hasher(header_str));
 };
 
