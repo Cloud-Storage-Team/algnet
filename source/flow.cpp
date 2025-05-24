@@ -33,7 +33,7 @@ Packet Flow::generate_packet() {
     return packet;
 }
 
-void Flow::start(std::uint32_t time) { schedule_packet_generation(time); }
+void Flow::start() { schedule_packet_generation(Scheduler::get_instance().get_current_time()); }
 
 void Flow::update(Packet packet, DeviceType type) {
     (void)packet;
