@@ -16,6 +16,6 @@ void add_two_way_links(sim::BasicSimulator& sim,
                std::initializer_list<two_way_link_t> links);
 
 bool check_reachability(std::shared_ptr<sim::IRoutingDevice> src_device,
-                       std::shared_ptr<sim::IRoutingDevice> dest_device);
+                       sim::Packet packet_to_dest);
 
 }  // namespace test
