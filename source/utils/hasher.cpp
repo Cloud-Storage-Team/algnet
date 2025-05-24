@@ -12,7 +12,7 @@ std::uint32_t BaseHasher::get_hash(Packet packet) const {
     std::string flow_id_str = ((packet.flow == nullptr) ? "0" : std::to_string(packet.flow->get_id()));
 
     std::hash<std::string> hasher;
-    std::string header_str = flow_id_str + " " + std::to_string(packet.source_id) + " " + std::to_string(packet.dest_id);
+    std::string header_str = fmt::format("{} {} {}", flow_id_str, packet.source_id, packet.dest_id);
     return static_cast<uint32_t>(hasher(header_str));
 };
 
