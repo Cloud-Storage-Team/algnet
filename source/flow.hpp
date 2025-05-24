@@ -12,7 +12,7 @@ class ISender;
 
 class IFlow : public Identifiable {
 public:
-    virtual void start(Time time) = 0;
+    virtual void start() = 0;
     // Adds new packet to sending queue
     // Used in event Generate
     virtual Time create_new_data_packet() = 0;
@@ -34,7 +34,7 @@ public:
     virtual ~Flow() = default;
 
     // Start at time
-    void start(Time time) final;
+    void start() final;
 
     Time create_new_data_packet() final;
     Time put_data_to_device() final;
