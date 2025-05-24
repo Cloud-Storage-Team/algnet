@@ -24,9 +24,9 @@ namespace sim {
 template <typename TSender, typename TSwitch, typename TReceiver,
           typename TFlow, typename TLink>
 requires std::derived_from<TSender, ISender> &&
-    std::derived_from<TSwitch, ISwitch> &&
-    std::derived_from<TReceiver, IReceiver> &&
-    std::derived_from<TFlow, IFlow> && std::derived_from<TLink, ILink>
+         std::derived_from<TSwitch, ISwitch> &&
+         std::derived_from<TReceiver, IReceiver> &&
+         std::derived_from<TFlow, IFlow> && std::derived_from<TLink, ILink>
 class Simulator {
 public:
     Simulator() = default;
@@ -79,8 +79,10 @@ public:
     void add_link(std::shared_ptr<IRoutingDevice> a_from,
                   std::shared_ptr<IRoutingDevice> a_to,
                   std::uint32_t a_speed_gbps, Time a_delay,
-                  size_t max_ingress_buffer_size = 4096) {
+                  Size max_egress_buffer_size = 4096,
+                  Size max_ingress_buffer_size = 4096) {
         auto link = std::make_shared<TLink>(a_from, a_to, a_speed_gbps, a_delay,
+                                            max_egress_buffer_size,
                                             max_ingress_buffer_size);
         m_links.emplace_back(link);
         a_from->add_outlink(link);
@@ -108,8 +110,9 @@ public:
         for (auto src_device : get_devices()) {
             RoutingTable routing_table = bfs(src_device);
             for (auto [dest_device, links] : routing_table) {
-                for (auto [link, paths_count]: links) {
-                    src_device->update_routing_table(dest_device, link, paths_count);
+                for (auto [link, paths_count] : links) {
+                    src_device->update_routing_table(dest_device, link,
+                                                     paths_count);
                 }
             }
         }

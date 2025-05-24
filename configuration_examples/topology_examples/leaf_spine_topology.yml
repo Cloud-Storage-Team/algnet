@@ -23,21 +23,29 @@ links:
     to: leaf1
     latency: 1ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link2:
     from: sender2
     to: leaf1
     latency: 1ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link3:
     from: leaf2
     to: receiver1
     latency: 1ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link4:
     from: leaf2
     to: receiver2
     latency: 1ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
 
   # Leaf to Spine Layer (10Gbps, full bipartite)
   link5:
@@ -45,21 +53,29 @@ links:
     to: spine1
     latency: 1ns
     throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link6:
     from: leaf1
     to: spine2
     latency: 1ns
     throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link7:
     from: leaf2
     to: spine1
     latency: 1ns
     throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link8:
     from: leaf2
     to: spine2
     latency: 1ns
     throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
 
   # Spine to Leaf (return paths)
   link9:
@@ -67,8 +83,12 @@ links:
     to: leaf2
     latency: 1ns
     throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link10:
     from: spine2
     to: leaf2
     latency: 1ns
     throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
