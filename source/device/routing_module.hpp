@@ -12,6 +12,7 @@ namespace sim {
 
 struct Packet;
 class IHasher;
+class BaseHasher;
     
 class RoutingModule : public IRoutingDevice {
 public:
