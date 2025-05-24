@@ -5,6 +5,7 @@
 
 #include "device.hpp"
 #include "types.hpp"
+#include "utils/hasher.hpp"
 #include "utils/loop_iterator.hpp"
 
 namespace sim {
@@ -43,6 +44,7 @@ private:
         m_next_inlink;
 
     Id m_id;
+    BaseHasher m_hasher;
 };
 
 }  // namespace sim

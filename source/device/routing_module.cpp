@@ -9,7 +9,8 @@
 namespace sim {
 
 RoutingModule::RoutingModule()
-    : m_id(IdentifierFactory::get_instance().generate_id()) {}
+    : m_id(IdentifierFactory::get_instance().generate_id()),
+      m_hasher() {}
 
 Id RoutingModule::get_id() const {
     return m_id;
@@ -78,8 +79,7 @@ std::shared_ptr<ILink> RoutingModule::get_link_to_destination(Packet packet) con
         total_weight += weight;
     }
 
-    // TODO: instead of rand use packet header hash (so packets of the same flow go the same path)
-    int random_value = rand() % total_weight;
+    int random_value = m_hasher.get_hash(packet) % total_weight;
 
     int cumulative_weight = 0;
     for (const auto& [link, weight] : link_map) {
