@@ -2,25 +2,14 @@
 #include <memory>
 #include <queue>
 
-#include "device.hpp"
-#include "utils/identifier_factory.hpp"
+#include "device/sender.hpp"
 
 namespace sim {
 
-struct Packet;
-
-class ISender : public IRoutingDevice,
-                public IProcessingDevice {
+class EPSender : public ISender, public std::enable_shared_from_this<EPSender> {
 public:
-    virtual ~ISender() = default;
-    virtual void enqueue_packet(Packet packet) = 0;
-    virtual Time send_data() = 0;
-};
-
-class Sender : public ISender, public std::enable_shared_from_this<Sender> {
-public:
-    Sender();
-    ~Sender() = default;
+    EPSender();
+    ~EPSender() = default;
 
     bool add_inlink(std::shared_ptr<ILink> link) final;
     bool add_outlink(std::shared_ptr<ILink> link) final;
@@ -39,6 +28,7 @@ public:
     // The iterator over ingress buffers is stored in m_next_link.
     Time process() final;
     Time send_data() final;
+    Time send_system_packet(Packet packet);
 
     void enqueue_packet(Packet packet) final;
 

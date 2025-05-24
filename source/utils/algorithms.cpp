@@ -41,12 +41,12 @@ RoutingTable bfs(std::shared_ptr<IRoutingDevice>& start_device) {
                 wave_front.insert(next_hop);
 
                 if (curr_device == start_device) {
-                    routing_table[next_hop][link] = 1;
+                    routing_table[next_hop->get_id()][link] = 1;
                 } else {
                     // Here we get all ways to get to the previous device and add them to next hop
                     // This part might be called several times for same device
-                    for (auto [link, paths_count]: routing_table[curr_device]) {
-                        routing_table[next_hop][link] += paths_count;
+                    for (auto [link, paths_count]: routing_table[curr_device->get_id()]) {
+                        routing_table[next_hop->get_id()][link] += paths_count;
                     }
                 }
             }

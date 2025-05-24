@@ -1,27 +1,28 @@
-#include "sender.hpp"
+#include "express_pass/ep_sender.hpp"
 
 #include <spdlog/fmt/fmt.h>
 
 #include <memory>
 
-#include "event.hpp"
-#include "link.hpp"
-#include "logger/logger.hpp"
+// #include "event.hpp"
+// #include "link.hpp"
+// #include "logger/logger.hpp"
+#include "scheduler.hpp"
 #include "utils/validation.hpp"
 
 namespace sim {
 
-Sender::Sender()
+EPSender::EPSender()
     : m_router(std::make_unique<RoutingModule>()) {}
 
-bool Sender::add_inlink(std::shared_ptr<ILink> link) {
+bool EPSender::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
         return false;
     }
     return m_router->add_inlink(link);
 }
 
-bool Sender::add_outlink(std::shared_ptr<ILink> link) {
+bool EPSender::add_outlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
         return false;
     }
@@ -29,7 +30,7 @@ bool Sender::add_outlink(std::shared_ptr<ILink> link) {
     return true;
 }
 
-bool Sender::update_routing_table(Id dest_id, std::shared_ptr<ILink> link, size_t paths_count) {
+bool EPSender::update_routing_table(Id dest_id, std::shared_ptr<ILink> link, size_t paths_count) {
     if (!is_valid_link(link)) {
         return false;
     }
@@ -37,22 +38,22 @@ bool Sender::update_routing_table(Id dest_id, std::shared_ptr<ILink> link, size_
     return true;
 }
 
-std::shared_ptr<ILink> Sender::next_inlink() {
+std::shared_ptr<ILink> EPSender::next_inlink() {
     return m_router->next_inlink();
 };
 
-std::shared_ptr<ILink> Sender::get_link_to_destination(Packet packet) const {
+std::shared_ptr<ILink> EPSender::get_link_to_destination(Packet packet) const {
     return m_router->get_link_to_destination(packet);
 };
 
-DeviceType Sender::get_type() const { return DeviceType::SENDER; }
+DeviceType EPSender::get_type() const { return DeviceType::SENDER; }
 
-void Sender::enqueue_packet(Packet packet) {
+void EPSender::enqueue_packet(Packet packet) {
     m_flow_buffer.push(packet);
     LOG_INFO(fmt::format("Packet {} arrived to sender", packet.to_string()));
 }
 
-Time Sender::process() {
+Time EPSender::process() {
     std::shared_ptr<ILink> current_inlink = next_inlink();
     Time total_processing_time = 1;
 
@@ -73,15 +74,14 @@ Time Sender::process() {
         return total_processing_time;
     }
 
-    // TODO: add some sender ID for easier packet path tracing
     LOG_INFO("Processing packet from link on sender. Packet: " +
-             packet.to_string());
+             packet.to_string() + ". Sender id: " + std::to_string(get_id()) + ". Time: " + std::to_string(Scheduler::get_instance().get_current_time()));
 
-    if (packet.type == PacketType::ACK && packet.dest_id == get_id()) {
+    if (packet.dest_id == get_id()) {
         packet.flow->update(packet, get_type());
     } else {
         LOG_WARN(
-            "Packet arrived to Sender that is not its destination; use routing "
+            "Packet arrived to EPSender that is not its destination; use routing "
             "table to send it further");
         std::shared_ptr<ILink> next_link = get_link_to_destination(packet);
 
@@ -96,7 +96,7 @@ Time Sender::process() {
     return total_processing_time;
 }
 
-Time Sender::send_data() {
+Time EPSender::send_data() {
     Time total_processing_time = 1;
 
     // TODO: wrap packet getting into some method (?)
@@ -107,9 +107,8 @@ Time Sender::send_data() {
     Packet data_packet = m_flow_buffer.front();
     m_flow_buffer.pop();
 
-    // TODO: add some sender ID for easier packet path tracing
     LOG_INFO("Taken new data packet on sender. Packet: " +
-             data_packet.to_string());
+             data_packet.to_string() + ". Sender id: " + std::to_string(get_id()) + ". Time: " + std::to_string(Scheduler::get_instance().get_current_time()));
 
     auto next_link = get_link_to_destination(data_packet);
     if (next_link == nullptr) {
@@ -117,19 +116,36 @@ Time Sender::send_data() {
         return total_processing_time;
     }
 
-    // TODO: add some sender ID for easier packet path tracing
     LOG_INFO("Sent new data packet from sender. Data packet: " +
-             data_packet.to_string());
+             data_packet.to_string() + ". Sender id: " + std::to_string(get_id()) + ". Time: " + std::to_string(Scheduler::get_instance().get_current_time()));
 
     next_link->schedule_arrival(data_packet);
     // total_processing_time += sending_data_time;
     return total_processing_time;
 }
 
-std::set<std::shared_ptr<ILink>> Sender::get_outlinks() {
+Time EPSender::send_system_packet(Packet packet) {
+    Time total_processing_time = 1;
+
+    auto next_link = get_link_to_destination(packet);
+    if (next_link == nullptr) {
+        LOG_WARN("Link to send packet does not exist");
+        return total_processing_time;
+    }
+
+    // TODO: add some sender ID for easier packet path tracing
+    LOG_INFO("Sent new system packet from sender. Data packet: " +
+        packet.to_string() + ". Sender id: " + std::to_string(get_id()) + ". Time: " + std::to_string(Scheduler::get_instance().get_current_time()));
+
+    next_link->schedule_arrival(packet);
+    // total_processing_time += sending_data_time;
+    return total_processing_time;
+}
+
+std::set<std::shared_ptr<ILink>> EPSender::get_outlinks() {
     return m_router->get_outlinks();
 }
 
-Id Sender::get_id() const { return m_router->get_id(); }
+Id EPSender::get_id() const { return m_router->get_id(); }
 
 }  // namespace sim

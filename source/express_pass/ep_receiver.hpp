@@ -1,26 +1,15 @@
 #pragma once
 #include <memory>
 
-#include "packet.hpp"
-#include "routing_module.hpp"
-#include "utils/identifier_factory.hpp"
+#include "device/receiver.hpp"
 
 namespace sim {
 
-struct Packet;
-class RoutingModule;
-
-class IReceiver : public IRoutingDevice,
-                  public IProcessingDevice {
+class EPReceiver : public IReceiver,
+                 public std::enable_shared_from_this<EPReceiver> {
 public:
-    virtual ~IReceiver() = default;
-};
-
-class Receiver : public IReceiver,
-                 public std::enable_shared_from_this<Receiver> {
-public:
-    Receiver();
-    ~Receiver() = default;
+    EPReceiver();
+    ~EPReceiver() = default;
 
     bool add_inlink(std::shared_ptr<ILink> link) final;
     bool add_outlink(std::shared_ptr<ILink> link) final;
@@ -37,6 +26,7 @@ public:
     // Packets are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
     Time process() final;
+    Time send_system_packet(Packet packet);
 
     Id get_id() const final;
 
