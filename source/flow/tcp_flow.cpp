@@ -34,30 +34,8 @@ Time TcpFlow::create_new_data_packet() {
     --m_packets_to_send;
     Packet data = generate_packet();
     m_sending_buffer.push(data);
-    return put_data_to_device();
-}
-
-Time TcpFlow::put_data_to_device() {
-    if (m_src.expired()) {
-        LOG_ERROR("Flow source was deleted; can not put data to it");
-        return 0;
-    }
-
-    if (m_packets_in_flight < m_cwnd) {
-        m_packets_in_flight++;
-
-        Packet packet = m_sending_buffer.front();
-        m_sending_buffer.pop();
-        packet.send_time = Scheduler::get_instance().get_current_time();
-
-        m_src.lock()->enqueue_packet(packet);
-        return 1;  // TODO: fix it
-    }
-
-    LOG_ERROR(
-        "Triggered TcpFlow::put_data_to_device when congestion window is full");
-
-    return 0;
+    try_to_put_data_to_device();
+    return m_delay_between_packets;
 }
 
 void TcpFlow::update(Packet packet, DeviceType type) {
@@ -103,7 +81,13 @@ Packet TcpFlow::generate_packet() {
 
 bool TcpFlow::try_to_put_data_to_device() {
     if (m_packets_in_flight < m_cwnd) {
-        return put_data_to_device() != 0;
+        m_packets_in_flight++;
+
+        Packet packet = m_sending_buffer.front();
+        m_sending_buffer.pop();
+        packet.send_time = Scheduler::get_instance().get_current_time();
+
+        m_src.lock()->enqueue_packet(packet);
     }
     return false;
 }

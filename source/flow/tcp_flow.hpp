@@ -11,7 +11,6 @@ public:
 
     void start() final;
     Time create_new_data_packet() final;
-    Time put_data_to_device() final;
 
     void update(Packet packet, DeviceType type) final;
     std::shared_ptr<ISender> get_sender() const final;

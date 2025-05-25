@@ -14,10 +14,9 @@ class IFlow : public Identifiable {
 public:
     virtual void start() = 0;
     // Adds new packet to sending queue
-    // Used in event Generate
+    // This packet will be send at some time in future (depends on concrete
+    // flow) Used in event Generate
     virtual Time create_new_data_packet() = 0;
-    // Puts some pakets from sending buffer to sender's buffer according to the internal state
-    virtual Time put_data_to_device() = 0;
 
     // Update the internal state according to some congestion control algorithm
     // Calls when data available for sending on corresponding device
@@ -37,7 +36,6 @@ public:
     void start() final;
 
     Time create_new_data_packet() final;
-    Time put_data_to_device() final;
 
     // Update the internal state according to some congestion control algorithm
     // Call try_to_generate upon the update
@@ -50,6 +48,7 @@ public:
     Id get_id() const final;
 
 private:
+    Time put_data_to_device();
     void schedule_packet_generation(Time time);
     Packet generate_packet();
 
@@ -57,7 +56,7 @@ private:
     std::weak_ptr<IReceiver> m_dest;
     Size m_packet_size;
     Time m_delay_between_packets;
-        std::uint32_t m_updates_number;
+    std::uint32_t m_updates_number;
     std::uint32_t m_packets_to_send;
 
     std::queue<Packet> m_sending_buffer;
