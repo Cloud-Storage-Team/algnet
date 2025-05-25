@@ -118,8 +118,7 @@ Time Receiver::process() {
 
 Time Receiver::send_ack(Packet data_packet) {
     Time processing_time = 1;
-    Packet ack =
-        Packet(PacketType::ACK, 1, data_packet.flow, data_packet.send_time);
+    Packet ack(PacketType::ACK, 1, data_packet.flow, data_packet.send_time);
 
     auto destination = ack.get_destination();
     if (destination == nullptr) {
