@@ -65,6 +65,19 @@ uint32_t YamlParser::parse_latency(const std::string &latency) {
     throw std::runtime_error("Unsupported latency unit: " + unit);
 }
 
+uint32_t YamlParser::parse_buffer_size(const std::string &buffer_size) {
+    const size_t unit_pos = buffer_size.find_first_not_of("0123456789");
+    if (unit_pos == std::string::npos) {
+        throw std::runtime_error("Invalid buffer_size: " + buffer_size);
+    }
+    const uint32_t value = std::stoul(buffer_size.substr(0, unit_pos));
+    const std::string unit = buffer_size.substr(unit_pos);
+    if (unit == "B") {
+        return value;
+    }
+    throw std::runtime_error("Unsupported latency unit: " + unit);
+}
+
 void YamlParser::process_devices(const YAML::Node &config) {
     if (!config["devices"]) {
         LOG_WARN("No devices specified in the topology config");
@@ -117,6 +130,10 @@ void YamlParser::process_links(const YAML::Node &config) {
             parse_latency(link["latency"].as<std::string>());
         const uint32_t speed =
             parse_throughput(link["throughput"].as<std::string>());
+        const uint32_t ingress_buffer_size =
+            parse_buffer_size(link["ingress_buffer_size"].as<std::string>());
+        const uint32_t egress_buffer_size =
+            parse_buffer_size(link["egress_buffer_size"].as<std::string>());
 
         auto from_it = m_devices.find(from);
         auto to_it = m_devices.find(to);
@@ -136,7 +153,7 @@ void YamlParser::process_links(const YAML::Node &config) {
         std::visit(
             [&](auto &sim) {
                 sim.add_link(m_devices.at(from), m_devices.at(to), speed,
-                             latency);
+                             latency, egress_buffer_size, ingress_buffer_size);
             },
             m_simulator);
     }
