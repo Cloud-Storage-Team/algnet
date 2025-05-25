@@ -27,10 +27,8 @@ void StopEvent::operator()() { Scheduler::get_instance().clear(); }
 template <typename T>
 void AddEvents(int number, std::shared_ptr<Time> event_time) {
     static_assert(
-        std::is_same_v<EmptyEvent, T> || std::is_same_v<StopEvent, T> ||
-            std::is_same_v<ComparatorEvent, T> ||
-            std::is_same_v<CountingEvent, T>,
-        "T must be in {sim::Stop, EmptyEvent, ComparatorEvent, CountingEvent}");
+        std::is_constructable_v<TestEvent, T>,
+        "T must be one ot the event enumerated in BaseEvent's std::variant");
 
     srand(static_cast<unsigned int>(time(0)));
     Time min_time = 1;
