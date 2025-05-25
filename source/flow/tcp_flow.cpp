@@ -1,25 +1,32 @@
 #include "tcp_flow.hpp"
 
-#include "event.hpp"
-#include "scheduler.hpp"
+#include <sstream>
 
+#include "event.hpp"
+#include "iostream"
+#include "scheduler.hpp"
+#include "utils/identifier_factory.hpp"
 namespace sim {
 
 TcpFlow::TcpFlow(std::shared_ptr<ISender> a_src,
                  std::shared_ptr<IReceiver> a_dest, Size a_packet_size,
                  Time a_delay_between_packets, std::uint32_t a_packets_to_send,
-                 Time a_delay_threshold)
+                 Time a_delay_threshold, std::uint32_t a_ssthresh)
     : m_src(a_src),
       m_dest(a_dest),
       m_packet_size(a_packet_size),
       m_delay_between_packets(a_delay_between_packets),
       m_packets_to_send(a_packets_to_send),
       m_delay_threshold(a_delay_threshold),
+      m_ssthresh(a_ssthresh),
       m_cwnd(1),
-      m_ssthresh(128),
-      m_linear_coeficient(2),
       m_packets_in_flight(0),
-      m_packets_acked(0) {}
+      m_packets_acked(0),
+      m_id(IdentifierFactory::get_instance().generate_id()) {
+    LOG_INFO(to_string());
+}
+
+TcpFlow::~TcpFlow() { LOG_INFO(to_string()); }
 
 void TcpFlow::start() {
     Generate generate_event(Scheduler::get_instance().get_current_time(),
@@ -31,10 +38,10 @@ Time TcpFlow::create_new_data_packet() {
     if (m_packets_to_send == 0) {
         return 0;
     }
-    --m_packets_to_send;
-    Packet data = generate_packet();
-    m_sending_buffer.push(data);
-    try_to_put_data_to_device();
+    if (try_to_put_data_to_device()) {
+        --m_packets_to_send;
+    }
+
     return m_delay_between_packets;
 }
 
@@ -49,24 +56,30 @@ void TcpFlow::update(Packet packet, DeviceType type) {
                   " sending time less that current time; ignored");
         return;
     }
+
     Time delay = current_time - packet.send_time;
 
-    if (delay < m_delay_threshold) {
-        m_packets_in_flight--;
-        if (m_cwnd < m_ssthresh) {
-            m_cwnd++;
-        } else {
-            m_packets_acked++;
-            if (m_packets_acked >= m_cwnd / m_linear_coeficient) {
-                m_cwnd++;
-            }
+    LOG_INFO("Packet " + packet.to_string() + " got in flow " + to_string() +
+             "; delay = " + std::to_string(delay));
+
+    if (delay < m_delay_threshold) {  // ask
+        if (m_packets_in_flight > 0) {
+            m_packets_in_flight--;
         }
+        m_packets_acked++;
+        if (m_cwnd < m_ssthresh) {
+            m_cwnd *= 2;
+        } else {
+            m_cwnd++;
+        }
+        try_to_put_data_to_device();
     } else {  // trigger_congestion
         m_ssthresh = m_cwnd / 2;
         m_cwnd = 1;
         m_packets_in_flight = 0;
-        m_packets_acked = 0;
     }
+
+    LOG_INFO("New flow: " + to_string());
 }
 
 std::shared_ptr<ISender> TcpFlow::get_sender() const { return m_src.lock(); }
@@ -75,20 +88,36 @@ std::shared_ptr<IReceiver> TcpFlow::get_receiver() const {
     return m_dest.lock();
 }
 
+Id TcpFlow::get_id() const { return m_id; }
+
+std::string TcpFlow::to_string() const {
+    std::ostringstream oss;
+    oss << "TcpFlow[";
+    oss << "Id: " << m_id;
+    oss << ", packet size: " << m_packet_size;
+    oss << ", to send packages: " << m_packets_to_send;
+    oss << ", delay: " << m_delay_between_packets;
+    oss << ", delay threshhold: " << m_delay_threshold;
+    oss << ", cwnd: " << m_cwnd;
+    oss << ", packets_in_flight: " << m_packets_in_flight;
+    oss << ", asked packges: " << m_packets_acked;
+    oss << "]";
+    return oss.str();
+}
+
 Packet TcpFlow::generate_packet() {
-    return Packet(PacketType::DATA, m_packet_size, this);
+    return Packet(PacketType::DATA, m_packet_size, this,
+                  Scheduler::get_instance().get_current_time());
 }
 
 bool TcpFlow::try_to_put_data_to_device() {
     if (m_packets_in_flight < m_cwnd) {
         m_packets_in_flight++;
-
-        Packet packet = m_sending_buffer.front();
-        m_sending_buffer.pop();
-        packet.send_time = Scheduler::get_instance().get_current_time();
-
+        Packet packet = generate_packet();
         m_src.lock()->enqueue_packet(packet);
+        return true;
     }
     return false;
 }
+
 }  // namespace sim
