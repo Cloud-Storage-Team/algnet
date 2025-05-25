@@ -38,7 +38,8 @@ bool Receiver::add_outlink(std::shared_ptr<ILink> link) {
 }
 
 bool Receiver::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                    std::shared_ptr<ILink> link, size_t paths_count) {
+                                    std::shared_ptr<ILink> link,
+                                    size_t paths_count) {
     if (dest == nullptr) {
         LOG_WARN("Passed destination is null");
         return false;
@@ -117,7 +118,7 @@ Time Receiver::process() {
 
 Time Receiver::send_ack(Packet data_packet) {
     Time processing_time = 1;
-    Packet ack = {PacketType::ACK, 1, data_packet.flow};
+    Packet ack(PacketType::ACK, 1, data_packet.flow, data_packet.send_time);
 
     auto destination = ack.get_destination();
     if (destination == nullptr) {
