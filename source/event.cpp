@@ -67,4 +67,21 @@ void SendData::operator()() {
     Scheduler::get_instance().add(std::move(next_process_event));
 };
 
+BaseEvent::BaseEvent(const Generate& e) : event(e) {}
+BaseEvent::BaseEvent(const Arrive& e) : event(e) {}
+BaseEvent::BaseEvent(const Process& e) : event(e) {}
+BaseEvent::BaseEvent(const SendData& e) : event(e) {}
+BaseEvent::BaseEvent(const Stop& e) : event(e) {}
+
+void BaseEvent::operator()() {
+    std::visit([&](auto real_event) { real_event(); }, event);
+}
+bool BaseEvent::operator>(const BaseEvent& other) const {
+    return get_time() > other.get_time();
+}
+Time BaseEvent::get_time() const {
+    return std::visit([&](auto real_event) { return real_event.get_time(); },
+                      event);
+}
+
 }  // namespace sim

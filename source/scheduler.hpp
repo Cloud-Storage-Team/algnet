@@ -31,8 +31,6 @@ public:
 
     // Clear all events
     void clear() {
-        // m_events =
-        //     std::priority_queue<TEvent, std::vector<TEvent>, std::greater<TEvent>>();
         std::priority_queue<TEvent, std::vector<TEvent>, std::greater<TEvent>>().swap(m_events);
     }
 

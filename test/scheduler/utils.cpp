@@ -27,7 +27,7 @@ void StopEvent::operator()() { Scheduler::get_instance().clear(); }
 template <typename T>
 void AddEvents(int number, std::shared_ptr<Time> event_time) {
     static_assert(
-        std::is_constructable_v<TestEvent, T>,
+        std::is_constructible_v<TestEvent, T>,
         "T must be one ot the event enumerated in BaseEvent's std::variant");
 
     srand(static_cast<unsigned int>(time(0)));

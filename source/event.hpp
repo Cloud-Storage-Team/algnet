@@ -94,25 +94,15 @@ public:
 };
 
 struct BaseEvent {
-    BaseEvent(const Generate& e) : event(e) {}
-    BaseEvent(const Arrive& e) : event(e) {}
-    BaseEvent(const Process& e) : event(e) {}
-    BaseEvent(const SendData& e) : event(e) {}
-    BaseEvent(const Stop& e) : event(e) {}
+    BaseEvent(const Generate& e);
+    BaseEvent(const Arrive& e);
+    BaseEvent(const Process& e);
+    BaseEvent(const SendData& e);
+    BaseEvent(const Stop& e);
 
-    void operator()() {
-        std::visit([&](auto real_event) { real_event(); }, event);
-    }
-    bool operator>(const BaseEvent& other) const {
-        return get_time() > other.get_time();
-    }
-    bool operator<(const BaseEvent& other) const {
-        return get_time() < other.get_time();
-    }
-    Time get_time() const {
-        return std::visit(
-            [&](auto real_event) { return real_event.get_time(); }, event);
-    }
+    void operator()();
+    bool operator>(const BaseEvent& other) const;
+    Time get_time() const;
 
     std::variant<Generate, Arrive, Process, SendData, Stop> event;
 };
