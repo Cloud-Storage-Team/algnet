@@ -3,7 +3,6 @@
 #include <gtest/gtest.h>
 
 #include <ctime>
-#include <type_traits>
 
 #include "event.hpp"
 #include "scheduler.hpp"
@@ -16,55 +15,63 @@ public:
     void SetUp() override {};
 };
 
-struct EmptyEvent : public sim::Event {
+struct EmptyEvent {
     EmptyEvent(std::uint32_t a_time);
     ~EmptyEvent() = default;
-    virtual void operator()() final;
+    void operator()();
+
+    Time get_time() const;
+
+private:
+    Time m_time;
 };
 
-struct CountingEvent : public sim::Event {
+struct CountingEvent {
     CountingEvent(std::uint32_t a_time);
     ~CountingEvent() = default;
 
     static int cnt;
 
-    virtual void operator()() final;
+    void operator()();
+    Time get_time() const;
+
+private:
+    Time m_time;
 };
 
-struct ComparatorEvent : public sim::Event {
+struct ComparatorEvent {
     ComparatorEvent(std::uint32_t a_time);
     ~ComparatorEvent() = default;
 
     static Time last_time;
 
-    virtual void operator()() final;
+    void operator()();
+    Time get_time() const;
+
+private:
+    Time m_time;
 };
 
-struct StopEvent : public sim::Event {
+struct StopEvent {
     StopEvent(std::uint32_t a_time);
     ~StopEvent() = default;
-    virtual void operator()() final;
+    void operator()();
+    Time get_time() const;
+
+private:
+    Time m_time;
 };
 
 struct TestEvent {
-    TestEvent(const EmptyEvent& e) : event(e) {}
-    TestEvent(const CountingEvent& e) : event(e) {}
-    TestEvent(const ComparatorEvent& e) : event(e) {}
-    TestEvent(const StopEvent& e) : event(e) {}
+    TestEvent(const EmptyEvent& e);
+    TestEvent(const CountingEvent& e);
+    TestEvent(const ComparatorEvent& e);
+    TestEvent(const StopEvent& e);
 
-    void operator()() {
-        std::visit([&](auto real_event) { real_event(); }, event);
-    }
-    bool operator>(const TestEvent& other) const {
-        return get_time() > other.get_time();
-    }
-    bool operator<(const TestEvent& other) const {
-        return get_time() < other.get_time();
-    }
-    Time get_time() const {
-        return std::visit(
-            [&](auto real_event) { return real_event.get_time(); }, event);
-    }
+    void operator()();
+    bool operator>(const TestEvent& other) const;
+    bool operator<(const TestEvent& other) const;
+    Time get_time() const;
 
     std::variant<EmptyEvent, CountingEvent, ComparatorEvent, StopEvent> event;
 };
