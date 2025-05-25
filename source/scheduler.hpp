@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <queue>
 
 #include "event.hpp"
@@ -30,8 +31,9 @@ public:
 
     // Clear all events
     void clear() {
-        m_events =
-            std::priority_queue<TEvent, std::vector<TEvent>, EventComparator>();
+        // m_events =
+        //     std::priority_queue<TEvent, std::vector<TEvent>, std::greater<TEvent>>();
+        std::priority_queue<TEvent, std::vector<TEvent>, std::greater<TEvent>>().swap(m_events);
     }
 
     bool tick() {
@@ -49,19 +51,13 @@ public:
     Time get_current_time() { return m_current_event_local_time; }
 
 private:
-    struct EventComparator {
-        bool operator()(const TEvent& lhs, const TEvent& rhs) const {
-            return lhs > rhs;
-        }
-    };
-
     // Private constructor to prevent instantiation
-    SchedulerTemplate() {}
+    SchedulerTemplate() : m_events(), m_current_event_local_time(0) {}
     // No copy constructor and assignment operators
     SchedulerTemplate(const SchedulerTemplate&) = delete;
     SchedulerTemplate& operator=(const SchedulerTemplate&) = delete;
 
-    std::priority_queue<TEvent, std::vector<TEvent>, EventComparator> m_events;
+    std::priority_queue<TEvent, std::vector<TEvent>, std::greater<TEvent>> m_events;
 
     Time m_current_event_local_time;
 };
