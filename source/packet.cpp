@@ -3,8 +3,12 @@
 #include <sstream>
 
 namespace sim {
-Packet::Packet(PacketType a_type, Size a_size_byte, IFlow* a_flow)
-    : type(a_type), size_byte(a_size_byte), flow(a_flow) {}
+Packet::Packet(PacketType a_type, Size a_size_byte, IFlow* a_flow,
+               Time a_send_time)
+    : type(a_type),
+      size_byte(a_size_byte),
+      flow(a_flow),
+      send_time(a_send_time) {}
 
 std::shared_ptr<IRoutingDevice> Packet::get_destination() const {
     if (flow == nullptr) {

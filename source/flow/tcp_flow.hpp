@@ -30,7 +30,6 @@ private:
     std::uint32_t m_packets_to_send;
     std::uint32_t m_delay_threshold;  // delay threshold for update
 
-    Time m_last_send_time;
     std::uint32_t m_cwnd;      // Congestion window
     std::uint32_t m_ssthresh;  // Slow start threshold
     std::uint32_t m_linear_coeficient;

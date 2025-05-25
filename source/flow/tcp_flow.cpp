@@ -15,7 +15,6 @@ TcpFlow::TcpFlow(std::shared_ptr<ISender> a_src,
       m_delay_between_packets(a_delay_between_packets),
       m_packets_to_send(a_packets_to_send),
       m_delay_threshold(a_delay_threshold),
-      m_last_send_time(0),
       m_cwnd(1),
       m_ssthresh(128),
       m_linear_coeficient(2),
@@ -23,9 +22,9 @@ TcpFlow::TcpFlow(std::shared_ptr<ISender> a_src,
       m_packets_acked(0) {}
 
 void TcpFlow::start() {
-    auto generate_event_ptr =
-        std::make_unique<Generate>(time, shared_from_this(), m_packet_size);
-    Scheduler::get_instance().add(std::move(generate_event_ptr));
+    Generate generate_event(Scheduler::get_instance().get_current_time(),
+                            shared_from_this(), m_packet_size);
+    Scheduler::get_instance().add(std::move(generate_event));
 }
 
 Time TcpFlow::create_new_data_packet() {
@@ -46,8 +45,12 @@ Time TcpFlow::put_data_to_device() {
 
     if (m_packets_in_flight < m_cwnd) {
         m_packets_in_flight++;
-        m_src.lock()->enqueue_packet(m_sending_buffer.front());
+
+        Packet packet = m_sending_buffer.front();
         m_sending_buffer.pop();
+        packet.send_time = Scheduler::get_instance().get_current_time();
+
+        m_src.lock()->enqueue_packet(packet);
         return 1;  // TODO: fix it
     }
 
@@ -63,32 +66,39 @@ void TcpFlow::update(Packet packet, DeviceType type) {
     }
 
     Time current_time = Scheduler::get_instance().get_current_time();
-    if (current_time < packet.)
+    if (current_time < packet.send_time) {
+        LOG_ERROR("Packet " + packet.to_string() +
+                  " sending time less that current time; ignored");
+        return;
+    }
+    Time delay = current_time - packet.send_time;
 
-        if (packet.< m_delay_threshold) {  // ack
-            m_packets_in_flight--;
-            if (m_cwnd < m_ssthresh) {
+    if (delay < m_delay_threshold) {
+        m_packets_in_flight--;
+        if (m_cwnd < m_ssthresh) {
+            m_cwnd++;
+        } else {
+            m_packets_acked++;
+            if (m_packets_acked >= m_cwnd / m_linear_coeficient) {
                 m_cwnd++;
-            } else {
-                m_packets_acked++;
-                if (m_packets_acked >= m_cwnd / m_linear_coeficient) {
-                    m_cwnd++;
-                    m_packets_acked = 0;
-                }
             }
-        } else {  // trigger_congestion
-            m_ssthresh = m_cwnd / 2;
-            m_cwnd = 1;
-            m_packets_in_flight = 0;
         }
+    } else {  // trigger_congestion
+        m_ssthresh = m_cwnd / 2;
+        m_cwnd = 1;
+        m_packets_in_flight = 0;
+        m_packets_acked = 0;
+    }
+}
+
+std::shared_ptr<ISender> TcpFlow::get_sender() const { return m_src.lock(); }
+
+std::shared_ptr<IReceiver> TcpFlow::get_receiver() const {
+    return m_dest.lock();
 }
 
 Packet TcpFlow::generate_packet() {
-    sim::Packet packet;
-    packet.type = sim::PacketType::DATA;
-    packet.size_byte = m_packet_size;
-    packet.flow = this;
-    return packet;
+    return Packet(PacketType::DATA, m_packet_size, this);
 }
 
 bool TcpFlow::try_to_put_data_to_device() {

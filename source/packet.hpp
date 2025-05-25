@@ -12,8 +12,8 @@ class IFlow;
 enum PacketType { ACK, DATA };
 
 struct Packet {
-    Packet(PacketType a_type = PacketType::DATA, Size a_size_byte,
-           IFlow* flow = nullptr, Time a_send_time);
+    Packet(PacketType a_type = PacketType::DATA, Size a_size_byte = 0,
+           IFlow* flow = nullptr, Time a_send_time = 0);
 
     bool operator==(const Packet& packet) const;
     std::string to_string() const;
