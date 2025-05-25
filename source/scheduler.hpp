@@ -16,7 +16,7 @@ class SchedulerTemplate {
     static_assert(
         std::is_constructible_v<bool, decltype(std::declval<TEvent>() >
                                                std::declval<TEvent>())>,
-        "Event must have operator <");
+        "Event must have operator >");
     static_assert(std::is_invocable_v<TEvent>, "Event must be invocable");
 
 public:
