@@ -80,6 +80,23 @@ private:
     Time m_time;
 };
 
+
+/**
+ * Run new flow at specified time
+ */
+class StartFlow {
+public:
+    StartFlow(Time a_time, std::weak_ptr<IFlow> a_flow);
+    ~StartFlow() = default;
+    void operator()();
+
+    Time get_time() const;
+
+private:
+    std::weak_ptr<IFlow> m_flow;
+    Time m_time;
+};
+
 /**
  * Stop simulation and clear all events remaining in the Scheduler
  */
@@ -101,12 +118,13 @@ struct BaseEvent {
     BaseEvent(const Process& e);
     BaseEvent(const SendData& e);
     BaseEvent(const Stop& e);
+    BaseEvent(const StartFlow& e);
 
     void operator()();
     bool operator>(const BaseEvent& other) const;
     Time get_time() const;
 
-    std::variant<Generate, Arrive, Process, SendData, Stop> event;
+    std::variant<Generate, Arrive, Process, SendData, Stop, StartFlow> event;
 };
 
 }  // namespace sim

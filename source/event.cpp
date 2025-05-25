@@ -71,11 +71,24 @@ void Stop::operator()() { Scheduler::get_instance().clear(); }
 
 Time Stop::get_time() const { return m_time; }
 
+StartFlow::StartFlow(Time a_time, std::weak_ptr<IFlow> a_flow) : m_flow(a_flow), m_time(a_time) {}
+
+Time StartFlow::get_time() const { return m_time; }
+
+void StartFlow::operator()() {
+    if (m_flow.expired()) {
+        return;
+    }
+
+    m_flow.lock()->start();
+}
+
 BaseEvent::BaseEvent(const Generate& e) : event(e) {}
 BaseEvent::BaseEvent(const Arrive& e) : event(e) {}
 BaseEvent::BaseEvent(const Process& e) : event(e) {}
 BaseEvent::BaseEvent(const SendData& e) : event(e) {}
 BaseEvent::BaseEvent(const Stop& e) : event(e) {}
+BaseEvent::BaseEvent(const StartFlow& e) : event(e) {}
 
 void BaseEvent::operator()() {
     std::visit([&](auto real_event) { real_event(); }, event);
