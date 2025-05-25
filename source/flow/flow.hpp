@@ -57,7 +57,7 @@ private:
     std::weak_ptr<IReceiver> m_dest;
     Size m_packet_size;
     Time m_delay_between_packets;
-    std::uint32_t m_updates_number;
+        std::uint32_t m_updates_number;
     std::uint32_t m_packets_to_send;
 
     std::queue<Packet> m_sending_buffer;

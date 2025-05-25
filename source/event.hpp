@@ -1,7 +1,7 @@
 #pragma once
 
 #include "device/device.hpp"
-#include "flow.hpp"
+#include "flow/flow.hpp"
 #include "link.hpp"
 #include "packet.hpp"
 #include "types.hpp"
@@ -80,7 +80,6 @@ public:
 private:
     std::weak_ptr<ISender> m_device;
 };
-
 
 /**
  * Run new flow at specified time
