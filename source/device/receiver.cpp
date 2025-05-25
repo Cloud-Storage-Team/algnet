@@ -111,6 +111,7 @@ Time Receiver::process() {
         next_link->schedule_arrival(data_packet);
         // TODO: think about redirecting time
     }
+
     return total_processing_time;
 }
 
