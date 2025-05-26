@@ -60,8 +60,7 @@ void TcpFlow::update(Packet packet, DeviceType type) {
 
     Time delay = current_time - packet.send_time;
 
-    LOG_INFO("Packet " + packet.to_string() + " got in flow " + to_string() +
-             "; delay = " + std::to_string(delay));
+    LOG_INFO(fmt::format("Packet {} got in flow; delay = {}", packet.to_string(), to_string(), delay);
 
     if (delay < m_delay_threshold) {  // ask
         if (m_packets_in_flight > 0) {
