@@ -1,38 +1,41 @@
-hosts:
+devices:
   sender1:
     type: sender
-    name: sender1
   sender2:
     type: sender
-    name: sender2
   receiver1:
     type: receiver
-    name: receiver1
   receiver2:
     type: receiver
-    name: receiver2
-switches:
   switch1:
     type: switch
-    name: switch1
+
 links:
   link1:
     from: sender1
     to: switch1
     latency: 5ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link2:
     from: sender2
     to: switch1
     latency: 5ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link3:
     from: switch1
     to: receiver1
     latency: 5ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link4:
     from: switch1
     to: receiver2
     latency: 5ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    

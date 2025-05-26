@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 #include "device/device.hpp"
@@ -26,8 +27,7 @@ template <typename TSender, typename TSwitch, typename TReceiver,
 requires std::derived_from<TSender, ISender> &&
          std::derived_from<TSwitch, ISwitch> &&
          std::derived_from<TReceiver, IReceiver> &&
-         std::derived_from<TFlow, IFlow> &&
-         std::derived_from<TLink, ILink>
+         std::derived_from<TFlow, IFlow> && std::derived_from<TLink, ILink>
 class Simulator {
 public:
     Simulator() = default;
@@ -79,8 +79,12 @@ public:
 
     void add_link(std::shared_ptr<IRoutingDevice> a_from,
                   std::shared_ptr<IRoutingDevice> a_to,
-                  std::uint32_t a_speed_mbps, Time a_delay) {
-        auto link = std::make_shared<TLink>(a_from, a_to, a_speed_mbps, a_delay);
+                  std::uint32_t a_speed_gbps, Time a_delay,
+                  Size max_egress_buffer_size = 4096,
+                  Size max_ingress_buffer_size = 4096) {
+        auto link = std::make_shared<TLink>(a_from, a_to, a_speed_gbps, a_delay,
+                                            max_egress_buffer_size,
+                                            max_ingress_buffer_size);
         m_links.emplace_back(link);
         a_from->add_outlink(link);
         a_to->add_inlink(link);
@@ -106,36 +110,40 @@ public:
     void recalculate_paths() {
         for (auto src_device : get_devices()) {
             RoutingTable routing_table = bfs(src_device);
-            for (auto [dest_device, link] : routing_table) {
-                src_device->update_routing_table(dest_device, link);
+            for (auto [dest_device, links] : routing_table) {
+                for (auto [link, paths_count] : links) {
+                    src_device->update_routing_table(dest_device, link,
+                                                     paths_count);
+                }
             }
         }
     }
     // Create a Stop event at a_stop_time and start simulation
     void start(Time a_stop_time, bool export_metrics = false, bool draw_plots = false) {
         recalculate_paths();
-        Scheduler::get_instance().add(std::make_unique<Stop>(a_stop_time));
+        Scheduler::get_instance().add(Stop(a_stop_time));
         constexpr Time start_time = 0;
 
         for (auto flow : m_flows) {
-            flow->start(start_time);
+            Scheduler::get_instance().add(
+                StartFlow(start_time, flow));
         }
 
         for (auto [name, sender] : m_senders) {
             Scheduler::get_instance().add(
-                std::make_unique<Process>(start_time, sender));
+                Process(start_time, sender));
             Scheduler::get_instance().add(
-                std::make_unique<SendData>(start_time, sender));
+                SendData(start_time, sender));
         }
 
         for (auto [name, receiver] : m_receivers) {
             Scheduler::get_instance().add(
-                std::make_unique<Process>(start_time, receiver));
+                Process(start_time, receiver));
         }
 
         for (auto [name, swtch] : m_switches) {
             Scheduler::get_instance().add(
-                std::make_unique<Process>(start_time, swtch));
+                Process(start_time, swtch));
         }
         while (Scheduler::get_instance().tick()) {
         }
@@ -157,5 +165,9 @@ private:
 };
 
 using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;
+
+using SimulatorVariant = std::variant<BasicSimulator>;
+
+SimulatorVariant create_simulator(std::string_view algorithm);
 
 }  // namespace sim

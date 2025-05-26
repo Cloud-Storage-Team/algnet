@@ -1,93 +1,107 @@
-hosts:
+devices:
   sender1:
     type: sender
-    name: sender1
   sender2:
     type: sender
-    name: sender2
   receiver1:
     type: receiver
-    name: receiver1
   receiver2:
     type: receiver
-    name: receiver2
-switches:
   core1:
     type: switch
-    name: core1
   core2:
     type: switch
-    name: core2
   aggregation1:
     type: switch
-    name: aggregation1
   aggregation2:
     type: switch
-    name: aggregation2
   access1:
     type: switch
-    name: access1
   access2:
     type: switch
-    name: access2
+    
 links:
   link1:
     from: sender1
     to: access1
     latency: 2ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link2:
     from: sender2
     to: access2
     latency: 2ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link3:
     from: access1
     to: aggregation1
     latency: 1ns
     throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link4:
     from: access1
     to: aggregation2
     latency: 1ns
     throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link5:
     from: access2
     to: aggregation1
     latency: 1ns
     throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link6:
     from: access2
     to: aggregation2
     latency: 1ns
     throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link7:
     from: aggregation1
     to: core1
     latency: 1ns
     throughput: 40Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link8:
     from: aggregation1
     to: core2
     latency: 1ns
     throughput: 40Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link9:
     from: aggregation2
     to: core1
     latency: 1ns
     throughput: 40Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link10:
     from: aggregation2
     to: core2
     latency: 1ns
     throughput: 40Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link11:
     from: access1
     to: receiver1
     latency: 2ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link12:
     from: access2
     to: receiver2
     latency: 2ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    

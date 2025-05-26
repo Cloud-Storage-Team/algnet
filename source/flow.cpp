@@ -21,23 +21,19 @@ Flow::Flow(std::shared_ptr<ISender> a_src, std::shared_ptr<IReceiver> a_dest,
       m_packets_to_send(a_packets_to_send),
       m_id(IdentifierFactory::get_instance().generate_id()) {}
 
-void Flow::schedule_packet_generation(Time time) {
-    auto generate_event_ptr =
-        std::make_unique<Generate>(time, shared_from_this(), m_packet_size);
-    Scheduler::get_instance().add(std::move(generate_event_ptr));
+void Flow::start() {
+    schedule_packet_generation(Scheduler::get_instance().get_current_time());
 }
 
 Packet Flow::generate_packet() {
     sim::Packet packet;
     packet.type = sim::PacketType::DATA;
-    packet.size = m_packet_size;
+    packet.size_byte = m_packet_size;
     packet.flow = this;
     return packet;
 }
 
-void Flow::start(std::uint32_t time) { schedule_packet_generation(time); }
-
-void Flow::update(Time time, Packet packet, DeviceType type) {
+void Flow::update(Packet packet, DeviceType type) {
     (void)type;
     ++m_updates_number;
 
@@ -46,23 +42,29 @@ void Flow::update(Time time, Packet packet, DeviceType type) {
         if (sender != nullptr) {
             MetricsCollector::get_instance().add_RTT(
                 sender->get_id(), packet.flow->get_id(),
-                time - packet.sending_time);
+                Scheduler::get_instance().get_current_time() - packet.send_time);
         }
     }
 }
 
 std::uint32_t Flow::get_updates_number() const { return m_updates_number; }
 
-Time Flow::create_new_data_packet(Time current_time) {
+Time Flow::create_new_data_packet() {
     if (m_packets_to_send == 0) {
         return 0;
     }
     --m_packets_to_send;
     Packet data = generate_packet();
-    data.sending_time = current_time;
+    data.send_time = Scheduler::get_instance().get_current_time();
     m_sending_buffer.push(data);
     return put_data_to_device();
 }
+
+std::shared_ptr<ISender> Flow::get_sender() const { return m_src.lock(); }
+
+std::shared_ptr<IReceiver> Flow::get_receiver() const { return m_dest.lock(); }
+
+Id Flow::get_id() const { return m_id; }
 
 Time Flow::put_data_to_device() {
     if (m_src.expired()) {
@@ -74,10 +76,9 @@ Time Flow::put_data_to_device() {
     return m_delay_between_packets;
 }
 
-std::shared_ptr<ISender> Flow::get_sender() const { return m_src.lock(); }
-
-std::shared_ptr<IReceiver> Flow::get_receiver() const { return m_dest.lock(); }
-
-Id Flow::get_id() const { return m_id; }
+void Flow::schedule_packet_generation(Time time) {
+    auto generate_event_ptr = Generate(time, shared_from_this(), m_packet_size);
+    Scheduler::get_instance().add(std::move(generate_event_ptr));
+}
 
 }  // namespace sim

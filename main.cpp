@@ -1,11 +1,11 @@
 #include <yaml-cpp/yaml.h>
 
-#include "logger/logger.hpp"
 #include "parser.hpp"
+#include "source/logger/logger.hpp"
+#include "source/parser.hpp"
 #include "source/simulator.hpp"
 
 int main(const int argc, char **argv) {
-    LOG_INFO("Hello, World!");
     if (argc != 2) {
         LOG_ERROR(fmt::format("Usage: {} <config.yaml>", argv[0]));
         return 1;
@@ -13,8 +13,9 @@ int main(const int argc, char **argv) {
 
     try {
         sim::YamlParser parser;
-        sim::BasicSimulator simulator = parser.parseConfig(argv[1]);
-        simulator.start(1000, true, true);  // Run simulation for 1000 time units
+        auto [simulator, simulation_time] =
+            parser.build_simulator_from_config(argv[1]);
+        std::visit([&](auto &sim) { sim.start(simulation_time); }, simulator);
     } catch (const std::exception &e) {
         LOG_ERROR(fmt::format("Error: {}", e.what()));
         return 1;

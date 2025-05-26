@@ -12,16 +12,15 @@ class ISender;
 
 class IFlow : public Identifiable {
 public:
-    virtual void start(Time time) = 0;
+    virtual void start() = 0;
     // Adds new packet to sending queue
-    // Used in event Generate
-    virtual Time create_new_data_packet(Time current_time) = 0;
-    // Puts some pakets from sending buffer to sender's buffer according to the internal state
-    virtual Time put_data_to_device() = 0;
+    // This packet will be send at some time in future (depends on concrete
+    // flow) Used in event Generate
+    virtual Time create_new_data_packet() = 0;
 
     // Update the internal state according to some congestion control algorithm
     // Calls when data available for sending on corresponding device
-    virtual void update(Time time, Packet packet, DeviceType type) = 0;
+    virtual void update(Packet packet, DeviceType type) = 0;
     virtual std::shared_ptr<ISender> get_sender() const = 0;
     virtual std::shared_ptr<IReceiver> get_receiver() const = 0;
 };
@@ -34,14 +33,13 @@ public:
     virtual ~Flow() = default;
 
     // Start at time
-    void start(Time time) final;
+    void start() final;
 
-    Time create_new_data_packet(Time current_time) final;
-    Time put_data_to_device() final;
+    Time create_new_data_packet() final;
 
     // Update the internal state according to some congestion control algorithm
     // Call try_to_generate upon the update
-    void update(Time time, Packet packet, DeviceType type) final;
+    void update(Packet packet, DeviceType type) final;
     std::uint32_t get_updates_number() const;
 
     std::shared_ptr<ISender> get_sender() const final;
@@ -50,6 +48,7 @@ public:
     Id get_id() const final;
 
 private:
+    Time put_data_to_device();
     void schedule_packet_generation(Time time);
     Packet generate_packet();
 

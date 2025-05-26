@@ -3,9 +3,12 @@
 #include <sstream>
 
 namespace sim {
-Packet::Packet(PacketType a_type, Size a_size, IFlow* a_flow,
-               Time a_sending_time)
-    : type(a_type), size(a_size), flow(a_flow), sending_time(a_sending_time) {}
+Packet::Packet(PacketType a_type, Size a_size_byte, IFlow* a_flow,
+               Time a_send_time)
+    : type(a_type),
+      size_byte(a_size_byte),
+      flow(a_flow),
+      send_time(a_send_time) {}
 
 std::shared_ptr<IRoutingDevice> Packet::get_destination() const {
     if (flow == nullptr) {
@@ -22,7 +25,8 @@ std::shared_ptr<IRoutingDevice> Packet::get_destination() const {
 };
 
 bool Packet::operator==(const Packet& packet) const {
-    return flow == packet.flow && size == packet.size && type == packet.type;
+    return flow == packet.flow && size_byte == packet.size_byte &&
+           type == packet.type;
 }
 
 // TODO: think about some ID for packet (currently its impossible to distinguish
@@ -43,8 +47,9 @@ std::string Packet::to_string() const {
             break;
     }
 
-    oss << ", size: " << size;
+    oss << ", size(byte): " << size_byte;
     oss << ", flow: " << (flow ? "set" : "null");
+    oss << ", send time: " << send_time;
     oss << "]";
 
     return oss.str();

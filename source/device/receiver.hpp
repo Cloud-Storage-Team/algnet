@@ -25,7 +25,7 @@ public:
     bool add_inlink(std::shared_ptr<ILink> link) final;
     bool add_outlink(std::shared_ptr<ILink> link) final;
     bool update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                              std::shared_ptr<ILink> link) final;
+                              std::shared_ptr<ILink> link, size_t paths_count = 1) final;
     std::shared_ptr<ILink> next_inlink() final;
     std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;
@@ -38,7 +38,7 @@ public:
     // Upon receiving send an ACK to the sender.
     // Packets are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
-    Time process(Time current_time) final;
+    Time process() final;
 
     Id get_id() const final;
 

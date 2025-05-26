@@ -1,30 +1,20 @@
-hosts:
+devices:
   sender1:
     type: sender
-    name: sender1
   sender2:
     type: sender
-    name: sender2
   receiver1:
     type: receiver
-    name: receiver1
   receiver2:
     type: receiver
-    name: receiver2
-
-switches:
   leaf1:
     type: switch
-    name: leaf_switch1
   leaf2:
     type: switch
-    name: leaf_switch2
   spine1:
     type: switch
-    name: spine_switch1
   spine2:
     type: switch
-    name: spine_switch2
 
 links:
   # Hosts to Leaf Layer (1Gbps)
@@ -33,21 +23,29 @@ links:
     to: leaf1
     latency: 1ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link2:
     from: sender2
     to: leaf1
     latency: 1ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link3:
     from: leaf2
     to: receiver1
     latency: 1ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link4:
     from: leaf2
     to: receiver2
     latency: 1ns
     throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
 
   # Leaf to Spine Layer (10Gbps, full bipartite)
   link5:
@@ -55,21 +53,29 @@ links:
     to: spine1
     latency: 1ns
     throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link6:
     from: leaf1
     to: spine2
     latency: 1ns
     throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link7:
     from: leaf2
     to: spine1
     latency: 1ns
     throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link8:
     from: leaf2
     to: spine2
     latency: 1ns
     throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
 
   # Spine to Leaf (return paths)
   link9:
@@ -77,8 +83,12 @@ links:
     to: leaf2
     latency: 1ns
     throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    
   link10:
     from: spine2
     to: leaf2
     latency: 1ns
     throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B    

@@ -41,7 +41,7 @@ bool Sender::add_outlink(std::shared_ptr<ILink> link) {
 }
 
 bool Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                  std::shared_ptr<ILink> link) {
+                                  std::shared_ptr<ILink> link, size_t paths_count) {
     if (dest == nullptr) {
         LOG_WARN("Passed destination is null");
         return false;
@@ -53,7 +53,7 @@ bool Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
         LOG_WARN("Link source device is incorrect (expected current device)");
         return false;
     }
-    m_router->update_routing_table(dest, link);
+    m_router->update_routing_table(dest, link, paths_count);
     return true;
 }
 
@@ -73,7 +73,7 @@ void Sender::enqueue_packet(Packet packet) {
     LOG_INFO(fmt::format("Packet {} arrived to sender", packet.to_string()));
 }
 
-Time Sender::process(Time current_time) {
+Time Sender::process() {
     std::shared_ptr<ILink> current_inlink = next_inlink();
     Time total_processing_time = 1;
 
@@ -104,7 +104,7 @@ Time Sender::process(Time current_time) {
         return total_processing_time;
     }
     if (packet.type == PacketType::ACK && destination.get() == this) {
-        packet.flow->update(current_time, packet, get_type());
+        packet.flow->update(packet, get_type());
     } else {
         LOG_WARN(
             "Packet arrived to Sender that is not its destination; use routing "
