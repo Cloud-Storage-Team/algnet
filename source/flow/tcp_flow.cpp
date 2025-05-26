@@ -1,5 +1,7 @@
 #include "tcp_flow.hpp"
 
+#include <spdlog/fmt/fmt.h>
+
 #include <sstream>
 
 #include "event.hpp"
@@ -60,7 +62,8 @@ void TcpFlow::update(Packet packet, DeviceType type) {
 
     Time delay = current_time - packet.send_time;
 
-    LOG_INFO(fmt::format("Packet {} got in flow; delay = {}", packet.to_string(), to_string(), delay);
+    LOG_INFO(fmt::format("Packet {} got in flow; delay = {}",
+                         packet.to_string(), to_string(), delay));
 
     if (delay < m_delay_threshold) {  // ask
         if (m_packets_in_flight > 0) {

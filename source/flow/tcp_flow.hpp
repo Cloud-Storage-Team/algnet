@@ -24,7 +24,7 @@ public:
     std::string to_string() const;
 
 private:
-    Packet generate_packet() const;
+    Packet generate_packet();
 
     bool try_to_put_data_to_device();
 
