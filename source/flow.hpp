@@ -27,9 +27,9 @@ public:
 
 class Flow : public IFlow, public std::enable_shared_from_this<Flow> {
 public:
-    Flow(std::shared_ptr<ISender> a_src, std::shared_ptr<IReceiver> a_dest,
-         Size a_packet_size, Time a_delay_between_packets,
-         std::uint32_t a_packets_to_send);
+    Flow(Id a_id, std::shared_ptr<ISender> a_src,
+         std::shared_ptr<IReceiver> a_dest, Size a_packet_size,
+         Time a_delay_between_packets, std::uint32_t a_packets_to_send);
     virtual ~Flow() = default;
 
     // Start at time
@@ -52,6 +52,7 @@ private:
     void schedule_packet_generation(Time time);
     Packet generate_packet();
 
+    Id m_id;
     std::weak_ptr<ISender> m_src;
     std::weak_ptr<IReceiver> m_dest;
     Size m_packet_size;
@@ -60,7 +61,6 @@ private:
     std::uint32_t m_packets_to_send;
 
     std::queue<Packet> m_sending_buffer;
-    Id m_id;
 };
 
 }  // namespace sim

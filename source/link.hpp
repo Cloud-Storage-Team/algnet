@@ -37,7 +37,7 @@ public:
 
 class Link : public ILink, public std::enable_shared_from_this<Link> {
 public:
-    Link(std::weak_ptr<IRoutingDevice> a_from,
+    Link(Id a_id, std::weak_ptr<IRoutingDevice> a_from,
          std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_gbps = 1,
          Time a_delay = 0, Size a_max_src_egress_buffer_size_byte = 4096,
          Size a_max_ingress_buffer_size_byte = 4096);
@@ -64,6 +64,7 @@ public:
 private:
     Time get_transmission_time(const Packet& packet) const;
 
+    Id m_id;
     std::weak_ptr<IRoutingDevice> m_from;
     std::weak_ptr<IRoutingDevice> m_to;
     std::uint32_t m_speed_gbps;
@@ -73,7 +74,6 @@ private:
     Time m_last_src_egress_pass_time;
 
     Time m_transmission_delay;
-    Id m_id;
 
     // Queue at the ingress port of the m_next device
     std::queue<Packet> m_next_ingress;

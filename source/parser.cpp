@@ -88,22 +88,28 @@ void YamlParser::process_devices(const YAML::Node &config) {
         const YAML::Node key_node = it->first;
         const YAML::Node val_node = it->second;
 
-        auto device_name = key_node.as<std::string>();
+        auto device_name = key_node.as<Id>();
         auto device_type = val_node["type"].as<std::string>();
 
         if (device_type == "sender") {
+            IdentifierFactory::get_instance().add_object(
+                std::make_unique<Sender>(device_name));
             m_devices[device_name] = std::visit(
                 [&device_name](auto &sim) {
                     return sim.add_sender(device_name);
                 },
                 m_simulator);
         } else if (device_type == "receiver") {
+            IdentifierFactory::get_instance().add_object(
+                std::make_unique<Receiver>(device_name));
             m_devices[device_name] = std::visit(
                 [&device_name](auto &sim) {
                     return sim.add_receiver(device_name);
                 },
                 m_simulator);
         } else if (device_type == "switch") {
+            IdentifierFactory::get_instance().add_object(
+                std::make_unique<Switch>(device_name));
             m_devices[device_name] = std::visit(
                 [&device_name](auto &sim) {
                     return sim.add_switch(device_name);
@@ -123,6 +129,8 @@ void YamlParser::process_links(const YAML::Node &config) {
 
     const YAML::Node links = config["links"];
     for (auto it = links.begin(); it != links.end(); ++it) {
+        const YAML::Node key_node = it->first;
+        Id link_name = key_node.as<Id>();
         const YAML::Node link = it->second;
         auto from = link["from"].as<std::string>();
         auto to = link["to"].as<std::string>();
@@ -152,8 +160,11 @@ void YamlParser::process_links(const YAML::Node &config) {
 
         std::visit(
             [&](auto &sim) {
-                sim.add_link(m_devices.at(from), m_devices.at(to), speed,
-                             latency, egress_buffer_size, ingress_buffer_size);
+                IdentifierFactory::get_instance().add_object(
+                    std::make_unique<Link>(
+                        link_name, m_devices.at(from), m_devices.at(to), speed,
+                        latency, egress_buffer_size, ingress_buffer_size));
+                sim.add_link(link_name);
             },
             m_simulator);
     }
@@ -167,7 +178,7 @@ void YamlParser::process_flows(const YAML::Node &config) {
 
     const YAML::Node &flows = config["flows"];
     for (auto it = flows.begin(); it != flows.end(); ++it) {
-        std::string key = it->first.as<std::string>();
+        Id id = it->first.as<Id>();
         std::string sender_id = it->second["sender_id"].as<std::string>();
         if (!m_devices.contains(sender_id)) {
             throw std::runtime_error("Unknown device in 'sender_id': " +
@@ -191,8 +202,10 @@ void YamlParser::process_flows(const YAML::Node &config) {
 
         std::visit(
             [&](auto &sim) {
-                sim.add_flow(sender, receiver, packet_size, packet_interval,
-                             number_of_packets);
+                IdentifierFactory::get_instance().add_object(
+                    std::make_unique<Flow>(id, sender, receiver, packet_size,
+                                           packet_interval, number_of_packets));
+                sim.add_flow(id);
             },
             m_simulator);
     }
