@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <memory>
 
 #include "device/receiver.hpp"
@@ -9,7 +10,9 @@ class EPReceiver : public IReceiver,
                  public std::enable_shared_from_this<EPReceiver> {
 public:
     EPReceiver();
-    ~EPReceiver() = default;
+    ~EPReceiver() {
+        std::cout << "Receiver " << get_id() << " got " << m_cnt << " packets" << std::endl;
+    };
 
     bool add_inlink(std::shared_ptr<ILink> link) final;
     bool add_outlink(std::shared_ptr<ILink> link) final;
@@ -33,6 +36,7 @@ public:
 private:
     Time send_ack(Packet data_packet);
     std::unique_ptr<RoutingModule> m_router;
+    int m_cnt = 0;
 };
 
 }  // namespace sim

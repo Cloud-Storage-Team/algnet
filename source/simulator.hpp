@@ -15,6 +15,12 @@
 #include "device/sender.hpp"
 #include "device/switch.hpp"
 #include "link.hpp"
+
+#include "express_pass/ep_receiver.hpp"
+#include "express_pass/ep_sender.hpp"
+#include "express_pass/ep_link.hpp"
+#include "express_pass/ep_flow.hpp"
+
 #include "logger/logger.hpp"
 #include "scheduler.hpp"
 #include "utils/algorithms.hpp"
@@ -31,7 +37,7 @@ class Simulator {
 public:
     Simulator() = default;
     ~Simulator() = default;
-    std::shared_ptr<TSender> add_sender(std::string name) {
+    std::shared_ptr<ISender> add_sender(std::string name) {
         if (m_senders.contains(name)) {
             LOG_WARN(fmt::format(
                 "add_sender failed: device with name {} already exists.",
@@ -42,7 +48,7 @@ public:
         return m_senders[name];
     }
 
-    std::shared_ptr<TReceiver> add_receiver(std::string name) {
+    std::shared_ptr<IReceiver> add_receiver(std::string name) {
         if (m_receivers.contains(name)) {
             LOG_WARN(fmt::format(
                 "add_receiver failed: device with name {} already exists.",
@@ -53,7 +59,7 @@ public:
         return m_receivers[name];
     }
 
-    std::shared_ptr<TSwitch> add_switch(std::string name) {
+    std::shared_ptr<ISwitch> add_switch(std::string name) {
         if (m_switches.contains(name)) {
             LOG_WARN(fmt::format(
                 "add_switch failed: device with name {} already exists.",
@@ -64,7 +70,7 @@ public:
         return m_switches[name];
     }
 
-    std::shared_ptr<TFlow> add_flow(std::shared_ptr<ISender> sender,
+    std::shared_ptr<IFlow> add_flow(std::shared_ptr<ISender> sender,
                                     std::shared_ptr<IReceiver> receiver,
                                     Size packet_size,
                                     Time delay_between_packets,
@@ -79,7 +85,7 @@ public:
     void add_link(std::shared_ptr<IRoutingDevice> a_from,
                   std::shared_ptr<IRoutingDevice> a_to,
                   std::uint32_t a_speed_gbps, Time a_delay,
-                  size_t max_ingress_buffer_size = 4096) {
+                  size_t max_ingress_buffer_size = 32768) {
         auto link = std::make_shared<TLink>(a_from, a_to, a_speed_gbps, a_delay,
                                             max_ingress_buffer_size);
         m_links.emplace_back(link);
@@ -157,7 +163,9 @@ private:
 
 using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;
 
-using SimulatorVariant = std::variant<BasicSimulator>;
+using EPSimulator = Simulator<EPSender, Switch, EPReceiver, EPFlow, EPLink>;
+
+using SimulatorVariant = std::variant<BasicSimulator, EPSimulator>;
 
 SimulatorVariant create_simulator(std::string_view algorithm);
 

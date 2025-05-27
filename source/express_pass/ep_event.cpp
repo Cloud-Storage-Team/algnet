@@ -12,13 +12,30 @@ void SendCredit::operator()() {
         return;
     }
 
-    Time sending_delay = m_flow.lock()->send_credit(m_time);
+    Time sending_delay = m_flow.lock()->send_credit();
     if (sending_delay == 0) {
         return;
     }
 
     std::unique_ptr<Event> new_event = std::make_unique<SendCredit>(
         m_time + sending_delay, m_flow, m_packet_size);
+    Scheduler::get_instance().add(std::move(new_event));
+}
+
+RunFeedbackControlLoop::RunFeedbackControlLoop(Time a_time, std::weak_ptr<EPFlow> a_flow) : Event(a_time), m_flow(a_flow) {}
+
+void RunFeedbackControlLoop::operator()() {
+    if (m_flow.expired()) {
+        return;
+    }
+
+    Time rtt = m_flow.lock()->feedback_control_loop();
+    if (rtt == 0) {
+        return;
+    }
+
+    std::unique_ptr<Event> new_event = std::make_unique<RunFeedbackControlLoop>(
+        m_time + rtt, m_flow);
     Scheduler::get_instance().add(std::move(new_event));
 }
 

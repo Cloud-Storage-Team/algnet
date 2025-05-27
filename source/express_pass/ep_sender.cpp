@@ -4,9 +4,6 @@
 
 #include <memory>
 
-// #include "event.hpp"
-// #include "link.hpp"
-// #include "logger/logger.hpp"
 #include "scheduler.hpp"
 #include "utils/validation.hpp"
 
@@ -55,7 +52,7 @@ void EPSender::enqueue_packet(Packet packet) {
 
 Time EPSender::process() {
     std::shared_ptr<ILink> current_inlink = next_inlink();
-    Time total_processing_time = 1;
+    Time total_processing_time = 10;
 
     if (current_inlink == nullptr) {
         LOG_WARN("No available inlinks for device");

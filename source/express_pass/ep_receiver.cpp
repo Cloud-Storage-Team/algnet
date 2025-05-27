@@ -1,11 +1,8 @@
 #include "ep_receiver.hpp"
 
 #include <memory>
+#include <iostream>
 
-// #include "event.hpp"
-// #include "link.hpp"
-// #include "logger/logger.hpp"
-// #include "utils/identifier_factory.hpp"
 #include "scheduler.hpp"
 #include "utils/validation.hpp"
 
@@ -47,7 +44,7 @@ DeviceType EPReceiver::get_type() const { return DeviceType::RECEIVER; }
 
 Time EPReceiver::process() {
     std::shared_ptr<ILink> current_inlink = next_inlink();
-    Time total_processing_time = 1;
+    Time total_processing_time = 10;
 
     if (current_inlink == nullptr) {
         LOG_WARN("No available inlinks for device");
@@ -73,6 +70,8 @@ Time EPReceiver::process() {
     if (packet.dest_id == get_id()) {
         // TODO: think about processing time   
         packet.flow->update(packet, get_type());
+        m_cnt++;
+        // std::cout << "GOT: " << ++m_cnt <<  " TIME: " << Scheduler::get_instance().get_current_time() << std::endl;
     } else {
         LOG_WARN(
             "Packet arrived to EPReceiver that is not its destination; using "

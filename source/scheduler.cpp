@@ -29,6 +29,6 @@ void Scheduler::clear() {
                                    EventComparator>();
 }
 
-static Time Scheduler::get_current_time() { return m_current_event_local_time; };
+Time Scheduler::get_current_time() { return m_current_event_local_time; };
 
 }  // namespace sim

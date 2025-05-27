@@ -21,7 +21,7 @@ public:
     void operator()() final;
 
 private:
-    std::weak_ptr<IFlow> m_flow;
+    std::weak_ptr<EPFlow> m_flow;
 };
 
 } // namespace sim
