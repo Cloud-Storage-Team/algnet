@@ -36,19 +36,17 @@ void MetricsCollector::export_metrics_to_files() const {
             throw std::runtime_error("Failed to create metrics directory");
         }
     }
-    if (!m_RTT_storage.empty()) {
-        for (auto& [device_id, per_flow_map] : m_RTT_storage) {
-            for (auto& [flow_id, values] : per_flow_map) {
-                std::ofstream output_file(
-                    fmt::format("metrics/RTT_{}_{}.txt", device_id, flow_id));
-                if (!output_file) {
-                    throw std::runtime_error(
-                        "Failed to create file for RTT values");
-                }
-                std::ranges::copy(
-                    values, std::ostream_iterator<Time>(output_file, "\n"));
-                output_file.close();
+    for (auto& [device_id, per_flow_map] : m_RTT_storage) {
+        for (auto& [flow_id, values] : per_flow_map) {
+            std::ofstream output_file(
+                fmt::format("metrics/RTT_{}_{}.txt", device_id, flow_id));
+            if (!output_file) {
+                throw std::runtime_error(
+                    "Failed to create file for RTT values");
             }
+            std::ranges::copy(
+                values, std::ostream_iterator<Time>(output_file, "\n"));
+            output_file.close();
         }
     }
 }
