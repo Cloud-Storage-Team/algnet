@@ -26,12 +26,7 @@ void MetricsCollector::add_RTT(Id flow_id, Time value) {
 }
 
 void MetricsCollector::export_metrics_to_files() const {
-    if (bool created = fs::create_directory(metrics_dir_name); !created) {
-        if (bool is_dir_exists = fs::is_directory(metrics_dir_name);
-            !is_dir_exists) {
-            throw std::runtime_error("Failed to create metrics directory");
-        }
-    }
+    create_metrics_directory();
     for (auto& [flow_id, values] : m_RTT_storage) {
         std::ofstream output_file(fmt::format("metrics/RTT_{}.txt", flow_id));
         if (!output_file) {
@@ -44,12 +39,7 @@ void MetricsCollector::export_metrics_to_files() const {
 }
 
 void MetricsCollector::draw_metric_plots() const {
-    if (bool created = fs::create_directory(metrics_dir_name); !created) {
-        if (bool is_dir_exists = fs::is_directory(metrics_dir_name);
-            !is_dir_exists) {
-            throw std::runtime_error("Failed to create metrics directory");
-        }
-    }
+    create_metrics_directory();
     for (auto& [flow_id, values] : m_RTT_storage) {
         auto fig = matplot::figure(true);
         auto ax = fig->current_axes();
@@ -65,6 +55,16 @@ void MetricsCollector::draw_metric_plots() const {
         ax->title("RTT values");
 
         matplot::save(fmt::format("metrics/RTT_{}.png", flow_id));
+    }
+}
+
+void MetricsCollector::create_metrics_directory() const {
+    if (bool created = fs::create_directory(metrics_dir_name); !created) {
+        if (bool is_dir_exists = fs::is_directory(metrics_dir_name);
+            !is_dir_exists) {
+            throw std::runtime_error(
+                fmt::format("Failed to create {} directory", metrics_dir_name));
+        }
     }
 }
 
