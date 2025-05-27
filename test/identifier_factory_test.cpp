@@ -17,7 +17,7 @@ public:
 
 class Entity final : public sim::Identifiable {
 public:
-    Entity() : m_id(sim::IdentifierFactory::get_instance().generate_id()) {}
+    Entity(Id a_id) : m_id(a_id) {}
     Id get_id() const final { return m_id; }
 
 private:
@@ -26,20 +26,20 @@ private:
 
 TEST_F(TestIdentifierFactory, TestUniqueness) {
     constexpr std::uint32_t ENTITIES_NUMBER = 10;
-    std::vector<Entity> entities(ENTITIES_NUMBER);
+    std::vector<Id> entitiy_ids(ENTITIES_NUMBER);
+    {
+        size_t index = 0;
+        std::generate(entitiy_ids.begin(), entitiy_ids.end(),
+                      [&index] { return "id_" + std::to_string(index++); });
+    }
 
-    std::generate(entities.begin(), entities.end(),
-                  [] { return Entity(); });
-
-    std::set<Id> ids;
-    std::transform(entities.begin(), entities.end(),
-                   std::inserter(ids, ids.begin()),
-                   [](auto& e) { return e.get_id(); });
-
-    ASSERT_EQ(ids.size(), ENTITIES_NUMBER);
-
-    Entity e{};
-    ASSERT_TRUE(!ids.contains(e.get_id()));
+    for (Id id : entitiy_ids) {
+        ASSERT_TRUE(
+            sim::IdentifierFactory::get_instance().add_object<Entity>(id));
+        ASSERT_EQ(id, sim::IdentifierFactory::get_instance()
+                          .get_object<Entity>(id)
+                          ->get_id());
+    }
 }
 
 }  // namespace test

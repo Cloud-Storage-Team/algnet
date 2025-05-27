@@ -9,7 +9,7 @@
 namespace sim {
 
 Switch::Switch(Id a_id)
-    : m_router(std::make_unique<RoutingModule>()), m_id(a_id) {}
+    : m_router(std::make_unique<RoutingModule>(a_id)), m_id(a_id) {}
 
 bool Switch::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {

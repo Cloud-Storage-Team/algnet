@@ -7,9 +7,7 @@
 
 namespace sim {
 
-class ISwitch : public IRoutingDevice,
-                public IProcessingDevice,
-                public Identifiable {
+class ISwitch : public IRoutingDevice, public IProcessingDevice {
 public:
     virtual ~ISwitch() = default;
 };

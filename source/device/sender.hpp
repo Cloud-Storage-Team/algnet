@@ -3,22 +3,22 @@
 #include <queue>
 
 #include "device.hpp"
+#include "routing_module.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
 
 struct Packet;
 
-class ISender : public IRoutingDevice,
-                public IProcessingDevice,
-                public Identifiable {
+class ISender : public IRoutingDevice, public IProcessingDevice {
 public:
     virtual ~ISender() = default;
     virtual void enqueue_packet(Packet packet) = 0;
     virtual Time send_data() = 0;
 };
 
-class Sender : public ISender, public std::enable_shared_from_this<Sender> {
+class Sender : virtual public ISender,
+               public std::enable_shared_from_this<Sender> {
 public:
     Sender(Id a_id);
     ~Sender() = default;
@@ -50,7 +50,7 @@ public:
 
 private:
     std::queue<Packet> m_flow_buffer;
-    std::unique_ptr<IRoutingDevice> m_router;
+    std::unique_ptr<RoutingModule> m_router;
     Id m_id;
 };
 

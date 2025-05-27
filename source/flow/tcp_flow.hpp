@@ -11,8 +11,6 @@ public:
             Time a_delay_between_packets, std::uint32_t a_packets_to_send,
             Time a_delay_threshold = 2000, std::uint32_t a_ssthresh = 4);
 
-    ~TcpFlow();
-
     void start() final;
     Time create_new_data_packet() final;
 

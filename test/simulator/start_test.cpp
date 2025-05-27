@@ -7,7 +7,9 @@ namespace test {
 
 class Start : public testing::Test {
 public:
-    void TearDown() override {};
+    void TearDown() override {
+        sim::IdentifierFactory::get_instance().clear();
+    };
     void SetUp() override {};
 };
 
@@ -22,8 +24,12 @@ TEST_F(Start, TrivialTopology) {
     constexpr Size packet_size = 1024;
     constexpr std::uint32_t packets_to_send = 1;
 
-    auto flow = sim.add_flow(sender, receiver, packet_size,
-                             delay_between_packets, packets_to_send);
+    Id id = "flow";
+    ASSERT_TRUE(sim::IdentifierFactory::get_instance().add_object<sim::Flow>(
+        id, sender, receiver, packet_size, delay_between_packets,
+        packets_to_send));
+
+    auto flow = sim.add_flow(id);
 
     add_two_way_links(sim, {{sender, swtch}, {swtch, receiver}});
 
@@ -52,12 +58,24 @@ TEST_F(Start, ThreeToOneTopology) {
     constexpr std::uint32_t packets_to_send_by_flow2 = 50;
     constexpr std::uint32_t packets_to_send_by_flow3 = 100;
 
-    auto flow1 = sim.add_flow(sender1, receiver, packet_size,
-                              delay_between_packets, packets_to_send_by_flow1);
-    auto flow2 = sim.add_flow(sender2, receiver, packet_size,
-                              delay_between_packets, packets_to_send_by_flow2);
-    auto flow3 = sim.add_flow(sender3, receiver, packet_size,
-                              delay_between_packets, packets_to_send_by_flow3);
+    Id id_1 = "flow_1";
+    ASSERT_TRUE(sim::IdentifierFactory::get_instance().add_object<sim::Flow>(
+        id_1, sender1, receiver, packet_size, delay_between_packets,
+        packets_to_send_by_flow1));
+
+    auto flow1 = sim.add_flow(id_1);
+
+    Id id_2 = "flow_2";
+    ASSERT_TRUE(sim::IdentifierFactory::get_instance().add_object<sim::Flow>(
+        id_2, sender2, receiver, packet_size, delay_between_packets,
+        packets_to_send_by_flow2));
+    auto flow2 = sim.add_flow(id_2);
+
+    Id id_3 = "flow_3";
+    ASSERT_TRUE(sim::IdentifierFactory::get_instance().add_object<sim::Flow>(
+        id_3, sender3, receiver, packet_size, delay_between_packets,
+        packets_to_send_by_flow3));
+    auto flow3 = sim.add_flow(id_3);
 
     sim.start(stop_time);
 
@@ -86,12 +104,24 @@ TEST_F(Start, StopTime) {
     constexpr std::uint32_t packets_to_send_by_flow2 = 50;
     constexpr std::uint32_t packets_to_send_by_flow3 = 100;
 
-    auto flow1 = sim.add_flow(sender1, receiver, packet_size,
-                              delay_between_packets, packets_to_send_by_flow1);
-    auto flow2 = sim.add_flow(sender2, receiver, packet_size,
-                              delay_between_packets, packets_to_send_by_flow2);
-    auto flow3 = sim.add_flow(sender3, receiver, packet_size,
-                              delay_between_packets, packets_to_send_by_flow3);
+    Id id_1 = "flow_1";
+    ASSERT_TRUE(sim::IdentifierFactory::get_instance().add_object<sim::Flow>(
+        id_1, sender1, receiver, packet_size, delay_between_packets,
+        packets_to_send_by_flow1));
+    auto flow1 = sim.add_flow(id_1);
+
+    Id id_2 = "flow_2";
+    ASSERT_TRUE(sim::IdentifierFactory::get_instance().add_object<sim::Flow>(
+        id_2, sender2, receiver, packet_size, delay_between_packets,
+        packets_to_send_by_flow2));
+
+    auto flow2 = sim.add_flow(id_2);
+
+    Id id_3 = "flow_3";
+    ASSERT_TRUE(sim::IdentifierFactory::get_instance().add_object<sim::Flow>(
+        id_3, sender3, receiver, packet_size, delay_between_packets,
+        packets_to_send_by_flow3));
+    auto flow3 = sim.add_flow(id_3);
 
     sim.start(stop_time);
 

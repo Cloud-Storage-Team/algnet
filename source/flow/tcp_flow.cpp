@@ -29,8 +29,6 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<ISender> a_src,
     LOG_INFO(to_string());
 }
 
-TcpFlow::~TcpFlow() { LOG_INFO(to_string()); }
-
 void TcpFlow::start() {
     Generate generate_event(Scheduler::get_instance().get_current_time(),
                             shared_from_this(), m_packet_size);

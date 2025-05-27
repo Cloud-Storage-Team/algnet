@@ -3,15 +3,12 @@
 
 #include "packet.hpp"
 #include "routing_module.hpp"
-#include "utils/identifier_factory.hpp"
 
 namespace sim {
 
 struct Packet;
 
-class IReceiver : public IRoutingDevice,
-                  public IProcessingDevice,
-                  public Identifiable {
+class IReceiver : public IRoutingDevice, public IProcessingDevice {
 public:
     virtual ~IReceiver() = default;
 };

@@ -10,7 +10,7 @@ TEST_F(LinkTest, NoPacketToGet) {
         std::make_shared<DeviceMock>(DeviceMock());
     std::shared_ptr<sim::IRoutingDevice> dst =
         std::make_shared<DeviceMock>(DeviceMock());
-    auto link = std::make_shared<sim::Link>(src, dst);
+    auto link = std::make_shared<sim::Link>("", src, dst);
 
     ASSERT_FALSE(link->get_packet().has_value());
 }
@@ -20,7 +20,7 @@ TEST_F(LinkTest, SimpleGetPacket) {
         std::make_shared<DeviceMock>(DeviceMock());
     std::shared_ptr<sim::IRoutingDevice> dst =
         std::make_shared<DeviceMock>(DeviceMock());
-    auto link = std::make_shared<sim::Link>(src, dst);
+    auto link = std::make_shared<sim::Link>("", src, dst);
 
     sim::Packet packet;
     link->process_arrival(packet);

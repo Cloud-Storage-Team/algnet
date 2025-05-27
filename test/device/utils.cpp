@@ -6,7 +6,7 @@ std::vector<std::shared_ptr<sim::IRoutingDevice>> createRoutingModules(
     size_t count) {
     std::vector<std::shared_ptr<sim::IRoutingDevice>> modules;
     for (size_t i = 0; i < count; ++i) {
-        modules.emplace_back(std::make_shared<sim::RoutingModule>());
+        modules.emplace_back(std::make_shared<sim::RoutingModule>(""));
     }
     return modules;
 }
@@ -21,9 +21,13 @@ void TestLink::process_arrival(sim::Packet packet) {};
 
 std::optional<sim::Packet> TestLink::get_packet() { return {packet}; };
 
-std::shared_ptr<sim::IRoutingDevice> TestLink::get_from() const { return src.lock(); };
-std::shared_ptr<sim::IRoutingDevice> TestLink::get_to() const { return dst.lock(); };
+std::shared_ptr<sim::IRoutingDevice> TestLink::get_from() const {
+    return src.lock();
+};
+std::shared_ptr<sim::IRoutingDevice> TestLink::get_to() const {
+    return dst.lock();
+};
 
-Id TestLink::get_id() const { return 42; }
+Id TestLink::get_id() const { return ""; }
 
 }  // namespace test

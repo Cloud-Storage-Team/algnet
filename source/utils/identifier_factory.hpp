@@ -19,17 +19,16 @@ public:
         return instance;
     }
 
-    template <typename TObject>
-    bool add_object(std::unique_ptr<TObject> object) {
+    template <typename TObject, typename... Args>
+    bool add_object(Args... args) {
         static_assert(std::is_base_of_v<Identifiable, TObject>,
                       "TObject must implement Identifiable interface");
-        Id id = object->get_id();
-        auto it = m_id_table.lower_bound(id);
-        if (it == m_id_table.end()) {
+        auto ptr = std::make_shared<TObject>(args...);
+        Id id = ptr->get_id();
+        if (m_id_table.find(id) != m_id_table.end()) {
             return false;
         }
-        m_id_table.insert(it,
-                          {id, std::shared_ptr<TObject>(std::move(object))});
+        m_id_table[id] = ptr;
         return true;
     }
 
@@ -43,6 +42,8 @@ public:
         }
         return std::dynamic_pointer_cast<TObject>(it->second);
     }
+
+    void clear();
 
 private:
     IdentifierFactory() {}
