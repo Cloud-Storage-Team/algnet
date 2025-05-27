@@ -4,7 +4,6 @@
 
 #include <memory>
 
-#include "device/device.hpp"
 #include "event.hpp"
 #include "link.hpp"
 #include "logger/logger.hpp"
