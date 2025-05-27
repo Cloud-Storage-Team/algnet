@@ -17,7 +17,7 @@ public:
     virtual Time send_data() = 0;
 };
 
-class Sender : virtual public ISender,
+class Sender : public ISender,
                public std::enable_shared_from_this<Sender> {
 public:
     Sender(Id a_id);
