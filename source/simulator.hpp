@@ -119,7 +119,7 @@ public:
         }
     }
     // Create a Stop event at a_stop_time and start simulation
-    void start(Time a_stop_time, bool export_metrics = false, bool draw_plots = false) {
+    void start(Time a_stop_time, bool export_metrics = false, bool draw_plots = true) {
         recalculate_paths();
         Scheduler::get_instance().add(Stop(a_stop_time));
         constexpr Time start_time = 0;

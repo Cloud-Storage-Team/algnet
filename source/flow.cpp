@@ -53,7 +53,6 @@ Time Flow::create_new_data_packet() {
     }
     --m_packets_to_send;
     Packet data = generate_packet();
-    data.send_time = Scheduler::get_instance().get_current_time();
     m_sending_buffer.push(data);
     return put_data_to_device();
 }
@@ -69,6 +68,7 @@ Time Flow::put_data_to_device() {
         LOG_ERROR("Flow source was deleted; can not put data to it");
         return 0;
     }
+    m_sending_buffer.front().send_time = Scheduler::get_instance().get_current_time();
     m_src.lock()->enqueue_packet(m_sending_buffer.front());
     m_sending_buffer.pop();
     return m_delay_between_packets;
