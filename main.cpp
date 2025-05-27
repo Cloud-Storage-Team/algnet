@@ -1,4 +1,6 @@
 #include <yaml-cpp/yaml.h>
+#include <cstdlib>  
+#include <ctime>
 
 #include "parser.hpp"
 #include "source/logger/logger.hpp"
@@ -10,6 +12,7 @@ int main(const int argc, char **argv) {
         LOG_ERROR(fmt::format("Usage: {} <config.yaml>", argv[0]));
         return 1;
     }
+    srand(time(0));
 
     try {
         sim::YamlParser parser;
