@@ -27,4 +27,4 @@ std::vector<sim::Packet> LinkMock::get_arrived_packets() const {
     return m_arrived_packets;
 }
 
-Id LinkMock::get_id() const { return 42; }
+Id LinkMock::get_id() const { return ""; }
