@@ -2,7 +2,6 @@
 
 #include <spdlog/fmt/fmt.h>
 
-#include <algorithm>
 #include <concepts>
 #include <iostream>
 #include <memory>
