@@ -12,6 +12,11 @@ namespace fs = std::filesystem;
 
 namespace sim {
 
+MetricsCollector& MetricsCollector::get_instance() {
+    static MetricsCollector instance;
+    return instance;
+}
+
 void MetricsCollector::add_RTT(Id device_id, Id flow_id, Time value) {
     if (!m_RTT_storage.contains(device_id)) {
         m_RTT_storage[device_id] = std::unordered_map<Id, std::vector<Time>>{};
@@ -49,8 +54,6 @@ void MetricsCollector::export_metrics_to_files() const {
 }
 
 void MetricsCollector::draw_metric_plots() const {
-    const std::string metrics_dir_name = "metrics";
-
     if (bool created = fs::create_directory(metrics_dir_name); !created) {
         if (bool is_dir_exists = fs::is_directory(metrics_dir_name);
             !is_dir_exists) {

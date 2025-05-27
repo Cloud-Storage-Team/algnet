@@ -9,10 +9,7 @@ namespace sim {
 
 class MetricsCollector {
 public:
-    static MetricsCollector& get_instance() {
-        static MetricsCollector instance;
-        return instance;
-    }
+    static MetricsCollector& get_instance();
 
     void add_RTT(Id device_id, Id flow_id, Time value);
 
@@ -27,6 +24,8 @@ private:
     // device_ID x flow_ID --> vector of RTT values
     std::unordered_map<Id, std::unordered_map<Id, std::vector<Time>>>
         m_RTT_storage;
+
+    std::string metrics_dir_name = "metrics";    
 };
 
 }  // namespace sim
