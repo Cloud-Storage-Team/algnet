@@ -41,7 +41,7 @@ void Flow::update(Packet packet, DeviceType type) {
     ++m_updates_number;
 
     MetricsCollector::get_instance().add_RTT(
-        m_src->lock()->get_id(), packet.flow->get_id(),
+        packet.flow->get_id(),
         Scheduler::get_instance().get_current_time() - packet.send_time);
 }
 

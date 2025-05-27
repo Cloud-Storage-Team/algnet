@@ -11,7 +11,7 @@ class MetricsCollector {
 public:
     static MetricsCollector& get_instance();
 
-    void add_RTT(Id device_id, Id flow_id, Time value);
+    void add_RTT(Id flow_id, Time value);
 
     void export_metrics_to_files() const;
     void draw_metric_plots() const;
@@ -21,11 +21,10 @@ private:
     MetricsCollector(const MetricsCollector&) = delete;
     MetricsCollector& operator=(const MetricsCollector&) = delete;
 
-    // device_ID x flow_ID --> vector of RTT values
-    std::unordered_map<Id, std::unordered_map<Id, std::vector<Time>>>
-        m_RTT_storage;
+    // flow_ID --> vector of RTT values
+    std::unordered_map<Id, std::vector<Time>> m_RTT_storage;
 
-    std::string metrics_dir_name = "metrics";    
+    std::string metrics_dir_name = "metrics";
 };
 
 }  // namespace sim
