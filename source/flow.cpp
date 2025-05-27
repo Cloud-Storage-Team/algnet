@@ -34,6 +34,9 @@ Packet Flow::generate_packet() {
 }
 
 void Flow::update(Packet packet, DeviceType type) {
+    if (packet.type != PacketType::ACK || type != DeviceType::SENDER) {
+        return;
+    }
     (void)type;
     ++m_updates_number;
 
