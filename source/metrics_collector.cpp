@@ -13,6 +13,10 @@ namespace fs = std::filesystem;
 
 namespace sim {
 
+void MetricsCollector::init(const std::string& dir_name) {
+    get_instance().metrics_dir_name = dir_name;
+}
+
 MetricsCollector& MetricsCollector::get_instance() {
     static MetricsCollector instance;
     return instance;
@@ -28,7 +32,7 @@ void MetricsCollector::add_RTT(Id flow_id, Time value) {
 void MetricsCollector::export_metrics_to_files() const {
     create_metrics_directory();
     for (auto& [flow_id, values] : m_RTT_storage) {
-        std::ofstream output_file(fmt::format("metrics/RTT_{}.txt", flow_id));
+        std::ofstream output_file(fmt::format("{}/RTT_{}.txt", metrics_dir_name, flow_id));
         if (!output_file) {
             throw std::runtime_error("Failed to create file for RTT values");
         }
@@ -54,7 +58,7 @@ void MetricsCollector::draw_metric_plots() const {
         ax->ylabel("Value, ns");
         ax->title("RTT values");
 
-        matplot::save(fmt::format("metrics/RTT_{}.png", flow_id));
+        matplot::save(fmt::format("{}/RTT_{}.png", metrics_dir_name, flow_id));
     }
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -9,6 +10,7 @@ namespace sim {
 
 class MetricsCollector {
 public:
+    static void init(const std::string& dir_name);
     static MetricsCollector& get_instance();
 
     void add_RTT(Id flow_id, Time value);
