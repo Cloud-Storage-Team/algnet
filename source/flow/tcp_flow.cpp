@@ -8,6 +8,7 @@
 #include "iostream"
 #include "scheduler.hpp"
 #include "utils/identifier_factory.hpp"
+#include "metrics_collector.hpp"
 
 namespace sim {
 
@@ -62,6 +63,8 @@ void TcpFlow::update(Packet packet, DeviceType type) {
 
     LOG_INFO(fmt::format("Packet {} got in flow; delay = {}",
                          packet.to_string(), to_string(), delay));
+
+    MetricsCollector::get_instance().add_RTT(packet.flow->get_id(), delay);
 
     if (delay < m_delay_threshold) {  // ask
         if (m_packets_in_flight > 0) {
