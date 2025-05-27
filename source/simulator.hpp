@@ -121,7 +121,8 @@ public:
         constexpr Time start_time = 0;
 
         for (auto flow : m_flows) {
-            flow->start(start_time);
+            Scheduler::get_instance().add(
+                std::make_unique<StartFlow>(start_time, flow));
         }
 
         for (auto [name, sender] : m_senders) {

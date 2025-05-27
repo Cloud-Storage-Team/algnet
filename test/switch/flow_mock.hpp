@@ -9,7 +9,7 @@ public:
     ~FlowMock() = default;
     FlowMock(std::shared_ptr<sim::IReceiver> a_receiver);
 
-    void start(Time time) final;
+    void start() final;
 
     Time create_new_data_packet() final;
     Time put_data_to_device() final;

@@ -94,4 +94,14 @@ void SendData::operator()() {
     Scheduler::get_instance().add(std::move(next_process_event));
 };
 
+StartFlow::StartFlow(Time a_time, std::weak_ptr<IFlow> a_flow) : Event(a_time), m_flow(a_flow) {}
+
+void StartFlow::operator()() {
+    if (m_flow.expired()) {
+        return;
+    }
+
+    m_flow.lock()->start();
+}
+
 }  // namespace sim
