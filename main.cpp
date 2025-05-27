@@ -5,9 +5,6 @@
 #include "source/parser.hpp"
 #include "source/simulator.hpp"
 
-bool export_metrics_flag = false;
-bool draw_plots_flag = true;
-
 int main(const int argc, char **argv) {
     if (argc < 2) {
         LOG_ERROR(
@@ -17,6 +14,10 @@ int main(const int argc, char **argv) {
     } else if (argc > 2) {
         sim::MetricsCollector::init(argv[2]);
     }
+
+    bool export_metrics_flag = false;
+    bool draw_plots_flag = true;
+    
     for (auto i = 2; i < argc; ++i) {
         if (std::string(argv[i]) == "--export-metrics") {
             export_metrics_flag = true;
