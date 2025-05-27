@@ -40,14 +40,9 @@ void Flow::update(Packet packet, DeviceType type) {
     (void)type;
     ++m_updates_number;
 
-    if (packet.flow != nullptr) {
-        auto sender = packet.flow->get_sender();
-        if (sender != nullptr) {
-            MetricsCollector::get_instance().add_RTT(
-                sender->get_id(), packet.flow->get_id(),
-                Scheduler::get_instance().get_current_time() - packet.send_time);
-        }
-    }
+    MetricsCollector::get_instance().add_RTT(
+        m_src->lock()->get_id(), packet.flow->get_id(),
+        Scheduler::get_instance().get_current_time() - packet.send_time);
 }
 
 std::uint32_t Flow::get_updates_number() const { return m_updates_number; }
