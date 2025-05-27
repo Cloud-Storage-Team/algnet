@@ -1,6 +1,6 @@
 #pragma once
 #include "device/sender.hpp"
-#include "flow.hpp"
+#include "flow/flow.hpp"
 
 namespace test {
 

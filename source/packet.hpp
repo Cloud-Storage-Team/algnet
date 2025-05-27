@@ -3,7 +3,7 @@
 #include <string>
 
 #include "device/device.hpp"
-#include "flow.hpp"
+#include "flow/flow.hpp"
 
 namespace sim {
 

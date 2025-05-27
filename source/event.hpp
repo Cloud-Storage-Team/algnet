@@ -3,7 +3,7 @@
 #include <variant>
 
 #include "device/device.hpp"
-#include "flow.hpp"
+#include "flow/flow.hpp"
 #include "link.hpp"
 #include "packet.hpp"
 #include "types.hpp"
@@ -79,7 +79,6 @@ private:
     std::weak_ptr<ISender> m_device;
     Time m_time;
 };
-
 
 /**
  * Run new flow at specified time
