@@ -22,8 +22,8 @@ TEST_F(Start, TrivialTopology) {
     constexpr Size packet_size = 1024;
     constexpr std::uint32_t packets_to_send = 1;
 
-    auto flow = sim.add_flow(sender, receiver, packet_size,
-                             delay_between_packets, packets_to_send);
+    auto flow = std::dynamic_pointer_cast<sim::Flow>(sim.add_flow(sender, receiver, packet_size,
+                             delay_between_packets, packets_to_send));
 
     add_two_way_links(sim, {{sender, swtch}, {swtch, receiver}});
 
@@ -52,12 +52,12 @@ TEST_F(Start, ThreeToOneTopology) {
     constexpr std::uint32_t packets_to_send_by_flow2 = 50;
     constexpr std::uint32_t packets_to_send_by_flow3 = 100;
 
-    auto flow1 = sim.add_flow(sender1, receiver, packet_size,
-                              delay_between_packets, packets_to_send_by_flow1);
-    auto flow2 = sim.add_flow(sender2, receiver, packet_size,
-                              delay_between_packets, packets_to_send_by_flow2);
-    auto flow3 = sim.add_flow(sender3, receiver, packet_size,
-                              delay_between_packets, packets_to_send_by_flow3);
+    auto flow1 = std::dynamic_pointer_cast<sim::Flow>(sim.add_flow(sender1, receiver, packet_size,
+                              delay_between_packets, packets_to_send_by_flow1));
+    auto flow2 = std::dynamic_pointer_cast<sim::Flow>(sim.add_flow(sender2, receiver, packet_size,
+                              delay_between_packets, packets_to_send_by_flow2));
+    auto flow3 = std::dynamic_pointer_cast<sim::Flow>(sim.add_flow(sender3, receiver, packet_size,
+                              delay_between_packets, packets_to_send_by_flow3));
 
     sim.start(stop_time);
 
@@ -86,12 +86,12 @@ TEST_F(Start, StopTime) {
     constexpr std::uint32_t packets_to_send_by_flow2 = 50;
     constexpr std::uint32_t packets_to_send_by_flow3 = 100;
 
-    auto flow1 = sim.add_flow(sender1, receiver, packet_size,
-                              delay_between_packets, packets_to_send_by_flow1);
-    auto flow2 = sim.add_flow(sender2, receiver, packet_size,
-                              delay_between_packets, packets_to_send_by_flow2);
-    auto flow3 = sim.add_flow(sender3, receiver, packet_size,
-                              delay_between_packets, packets_to_send_by_flow3);
+    auto flow1 = std::dynamic_pointer_cast<sim::Flow>(sim.add_flow(sender1, receiver, packet_size,
+                              delay_between_packets, packets_to_send_by_flow1));
+    auto flow2 = std::dynamic_pointer_cast<sim::Flow>(sim.add_flow(sender2, receiver, packet_size,
+                              delay_between_packets, packets_to_send_by_flow2));
+    auto flow3 = std::dynamic_pointer_cast<sim::Flow>(sim.add_flow(sender3, receiver, packet_size,
+                              delay_between_packets, packets_to_send_by_flow3));
 
     sim.start(stop_time);
 
