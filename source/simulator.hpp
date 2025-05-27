@@ -14,6 +14,7 @@
 #include "device/receiver.hpp"
 #include "device/sender.hpp"
 #include "device/switch.hpp"
+#include "flow/tcp_flow.hpp"
 #include "link.hpp"
 #include "logger/logger.hpp"
 #include "scheduler.hpp"
@@ -25,9 +26,9 @@ namespace sim {
 template <typename TSender, typename TSwitch, typename TReceiver,
           typename TFlow, typename TLink>
 requires std::derived_from<TSender, ISender> &&
-    std::derived_from<TSwitch, ISwitch> &&
-    std::derived_from<TReceiver, IReceiver> &&
-    std::derived_from<TFlow, IFlow> && std::derived_from<TLink, ILink>
+         std::derived_from<TSwitch, ISwitch> &&
+         std::derived_from<TReceiver, IReceiver> &&
+         std::derived_from<TFlow, IFlow> && std::derived_from<TLink, ILink>
 class Simulator {
 public:
     using Sender_T = TSender;
@@ -175,8 +176,9 @@ private:
 };
 
 using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;
+using TcpSimulator = Simulator<Sender, Switch, Receiver, TcpFlow, Link>;
 
-using SimulatorVariant = std::variant<BasicSimulator>;
+using SimulatorVariant = std::variant<BasicSimulator, TcpSimulator>;
 
 SimulatorVariant create_simulator(std::string_view algorithm);
 

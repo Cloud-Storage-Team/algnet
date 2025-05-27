@@ -3,7 +3,7 @@
 #include <variant>
 
 #include "device/device.hpp"
-#include "flow.hpp"
+#include "flow/flow.hpp"
 #include "link.hpp"
 #include "packet.hpp"
 #include "types.hpp"
@@ -80,7 +80,6 @@ private:
     Time m_time;
 };
 
-
 /**
  * Run new flow at specified time
  */
@@ -109,7 +108,7 @@ public:
     Time get_time() const;
 
 private:
-    Time m_time;    
+    Time m_time;
 };
 
 struct BaseEvent {
