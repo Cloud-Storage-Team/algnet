@@ -21,9 +21,13 @@ void TestLink::process_arrival(sim::Packet packet) {};
 
 std::optional<sim::Packet> TestLink::get_packet() { return {packet}; };
 
-std::shared_ptr<sim::IRoutingDevice> TestLink::get_from() const { return src.lock(); };
-std::shared_ptr<sim::IRoutingDevice> TestLink::get_to() const { return dst.lock(); };
+std::shared_ptr<sim::IRoutingDevice> TestLink::get_from() const {
+    return src.lock();
+};
+std::shared_ptr<sim::IRoutingDevice> TestLink::get_to() const {
+    return dst.lock();
+};
 
-Id TestLink::get_id() const { return 42; }
+Id TestLink::get_id() const { return ""; }
 
 }  // namespace test

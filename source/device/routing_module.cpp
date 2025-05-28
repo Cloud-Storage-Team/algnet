@@ -8,6 +8,8 @@
 
 namespace sim {
 
+RoutingModule::RoutingModule(Id a_id) : m_id(a_id) {}
+
 bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
     if (m_inlinks.contains(link)) {
         LOG_WARN("Unexpected already added inlink");
@@ -31,7 +33,8 @@ bool RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
 }
 
 bool RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                         std::shared_ptr<ILink> link, size_t paths_count) {
+                                         std::shared_ptr<ILink> link,
+                                         size_t paths_count) {
     if (link == nullptr) {
         LOG_WARN("Unexpected nullptr link");
         return false;
@@ -60,7 +63,8 @@ std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
         total_weight += weight;
     }
 
-    // TODO: instead of rand use packet header hash (so packets of the same flow go the same path)
+    // TODO: instead of rand use packet header hash (so packets of the same flow
+    // go the same path)
     int random_value = rand() % total_weight;
 
     int cumulative_weight = 0;
@@ -95,6 +99,8 @@ std::set<std::shared_ptr<ILink>> RoutingModule::get_outlinks() {
                    [](auto link) { return link.lock(); });
     return shared_outlinks;
 }
+
+Id RoutingModule::get_id() const { return m_id; }
 
 void RoutingModule::correctify_inlinks() {
     std::size_t erased_count = std::erase_if(

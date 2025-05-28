@@ -8,26 +8,30 @@
 #include "utils/loop_iterator.hpp"
 
 namespace sim {
-    
+
 class RoutingModule : public IRoutingDevice {
 public:
+    RoutingModule(Id a_id = "");
     ~RoutingModule() = default;
 
     bool add_inlink(std::shared_ptr<ILink> link) final;
     bool add_outlink(std::shared_ptr<ILink> link) final;
     bool update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                              std::shared_ptr<ILink> link, size_t paths_count = 1) final;
+                              std::shared_ptr<ILink> link,
+                              size_t paths_count = 1) final;
     // returns next inlink and moves inlinks set iterator forward
     std::shared_ptr<ILink> next_inlink() final;
     std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;
     std::set<std::shared_ptr<ILink>> get_outlinks() final;
     bool notify_about_arrival(Time arrival_time) final;
+    Id get_id() const final;
 
     void correctify_inlinks();
     void correctify_outlinks();
 
 private:
+    Id m_id;
     // Ordered set as we need to iterate over the ingress buffers
     std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
         m_inlinks;

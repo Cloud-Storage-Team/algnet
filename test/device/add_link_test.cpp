@@ -39,8 +39,8 @@ TEST_F(AddLink, SameLinkMultipleTimes) {
     size_t NUMBER_OF_LOOPS = 3;
 
     auto neighbour_devices = createRoutingModules(NUMBER_OF_NEIGHBOURS);
-    auto dest = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
-    auto source = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
+    auto dest = std::make_shared<sim::RoutingModule>();
+    auto source = std::make_shared<sim::RoutingModule>();
 
     std::mt19937 gen(RANDOM_SEED);
     std::uniform_int_distribution<> dis(1, MAX_LINKS);
@@ -62,8 +62,7 @@ TEST_F(AddLink, SameLinkMultipleTimes) {
     }
 
     auto outlinks = source->get_outlinks();
-    sim::LoopIterator<
-        std::set<std::shared_ptr<sim::ILink>>::iterator>
+    sim::LoopIterator<std::set<std::shared_ptr<sim::ILink>>::iterator>
         outlink_it(outlinks.begin(), outlinks.end());
 
     for (size_t loop = 0; loop < NUMBER_OF_LOOPS; loop++) {

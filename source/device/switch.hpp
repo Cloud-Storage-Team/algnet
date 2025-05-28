@@ -7,22 +7,21 @@
 
 namespace sim {
 
-class ISwitch : public IRoutingDevice,
-                public IProcessingDevice,
-                public Identifiable {
+class ISwitch : public IRoutingDevice, public IProcessingDevice {
 public:
     virtual ~ISwitch() = default;
 };
 
 class Switch : public ISwitch, public std::enable_shared_from_this<Switch> {
 public:
-    Switch();
+    Switch(Id a_id);
     ~Switch() = default;
 
     bool add_inlink(std::shared_ptr<ILink> link) final;
     bool add_outlink(std::shared_ptr<ILink> link) final;
     bool update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                              std::shared_ptr<ILink> link, size_t paths_count = 1) final;
+                              std::shared_ptr<ILink> link,
+                              size_t paths_count = 1) final;
     std::shared_ptr<ILink> next_inlink() final;
     std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;

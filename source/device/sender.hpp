@@ -3,30 +3,31 @@
 #include <queue>
 
 #include "device.hpp"
+#include "routing_module.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
 
 struct Packet;
 
-class ISender : public IRoutingDevice,
-                public IProcessingDevice,
-                public Identifiable {
+class ISender : public IRoutingDevice, public IProcessingDevice {
 public:
     virtual ~ISender() = default;
     virtual void enqueue_packet(Packet packet) = 0;
     virtual Time send_data() = 0;
 };
 
-class Sender : public ISender, public std::enable_shared_from_this<Sender> {
+class Sender : public ISender,
+               public std::enable_shared_from_this<Sender> {
 public:
-    Sender();
+    Sender(Id a_id);
     ~Sender() = default;
 
     bool add_inlink(std::shared_ptr<ILink> link) final;
     bool add_outlink(std::shared_ptr<ILink> link) final;
     bool update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                              std::shared_ptr<ILink> link, size_t paths_count = 1) final;
+                              std::shared_ptr<ILink> link,
+                              size_t paths_count = 1) final;
     std::shared_ptr<ILink> next_inlink() final;
     std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;

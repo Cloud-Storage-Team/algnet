@@ -1,0 +1,57 @@
+topology_config_path: trivial_topology.yml # it's genious i think
+algorithm: basic
+simulation_time: 1000
+
+devices:
+  sender1:
+    type: sender
+  sender2:
+    type: sender
+  switch:
+    type: switch
+  receiver:
+    type: receiver
+
+links:
+  link1:
+    from: sender1
+    to: switch
+    latency: 1ns
+    throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link2:
+    from: switch
+    to: sender1
+    latency: 1ns
+    throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link3:
+    from: sender2
+    to: switch
+    latency: 1ns
+    throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link4:
+    from: switch
+    to: sender2
+    latency: 1ns
+    throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link5:
+    from: receiver
+    to: switch
+    latency: 1ns
+    throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link6:
+    from: switch
+    to: receiver
+    latency: 1ns
+    throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B

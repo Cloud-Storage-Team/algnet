@@ -13,7 +13,7 @@
 
 namespace sim {
 
-TcpFlow::TcpFlow(std::shared_ptr<ISender> a_src,
+TcpFlow::TcpFlow(Id a_id, std::shared_ptr<ISender> a_src,
                  std::shared_ptr<IReceiver> a_dest, Size a_packet_size,
                  Time a_delay_between_packets, std::uint32_t a_packets_to_send,
                  Time a_delay_threshold, std::uint32_t a_ssthresh)
@@ -27,11 +27,9 @@ TcpFlow::TcpFlow(std::shared_ptr<ISender> a_src,
       m_cwnd(1),
       m_packets_in_flight(0),
       m_packets_acked(0),
-      m_id(IdentifierFactory::get_instance().generate_id()) {
+      m_id(a_id) {
     LOG_INFO(to_string());
 }
-
-TcpFlow::~TcpFlow() { LOG_INFO(to_string()); }
 
 void TcpFlow::start() {
     auto generate_event = std::make_unique<Generate>(Scheduler::get_instance().get_current_time(),

@@ -2,11 +2,11 @@
 
 #include <spdlog/fmt/fmt.h>
 
-#include <algorithm>
 #include <concepts>
+#include <iostream>
 #include <memory>
-#include <string>
-#include <unordered_map>
+#include <string_view>
+#include <unordered_set>
 #include <variant>
 #include <vector>
 
@@ -20,6 +20,7 @@
 #include "metrics_collector.hpp"
 #include "scheduler.hpp"
 #include "utils/algorithms.hpp"
+#include "utils/identifier_factory.hpp"
 
 namespace sim {
 
@@ -31,79 +32,61 @@ requires std::derived_from<TSender, ISender> &&
          std::derived_from<TFlow, IFlow> && std::derived_from<TLink, ILink>
 class Simulator {
 public:
+    using Sender_T = TSender;
+    using Switch_T = TSwitch;
+    using Receiver_T = TReceiver;
+    using Flow_T = TFlow;
+    using Link_T = TLink;
     Simulator() = default;
     ~Simulator() = default;
-    std::shared_ptr<TSender> add_sender(std::string name) {
-        if (m_senders.contains(name)) {
-            LOG_WARN(fmt::format(
-                "add_sender failed: device with name {} already exists.",
-                name));
-            return nullptr;
+
+    bool add_sender(std::shared_ptr<TSender> sender) {
+        if (sender == nullptr) {
+            return false;
         }
-        m_senders[name] = std::make_shared<TSender>();
-        return m_senders[name];
+        return m_senders.insert(sender).second;
     }
 
-    std::shared_ptr<TReceiver> add_receiver(std::string name) {
-        if (m_receivers.contains(name)) {
-            LOG_WARN(fmt::format(
-                "add_receiver failed: device with name {} already exists.",
-                name));
-            return nullptr;
+    bool add_receiver(std::shared_ptr<TReceiver> receiver) {
+        if (receiver == nullptr) {
+            return false;
         }
-        m_receivers[name] = std::make_shared<TReceiver>();
-        return m_receivers[name];
+        return m_receivers.insert(receiver).second;
     }
 
-    std::shared_ptr<TSwitch> add_switch(std::string name) {
-        if (m_switches.contains(name)) {
-            LOG_WARN(fmt::format(
-                "add_switch failed: device with name {} already exists.",
-                name));
-            return nullptr;
+    bool add_switch(std::shared_ptr<TSwitch> switch_device) {
+        if (switch_device == nullptr) {
+            return false;
         }
-        m_switches[name] = std::make_shared<TSwitch>();
-        return m_switches[name];
+        return m_switches.insert(switch_device).second;
     }
 
-    std::shared_ptr<TFlow> add_flow(std::shared_ptr<ISender> sender,
-                                    std::shared_ptr<IReceiver> receiver,
-                                    Size packet_size,
-                                    Time delay_between_packets,
-                                    std::uint32_t packets_to_send) {
-        auto flow =
-            std::make_shared<TFlow>(sender, receiver, packet_size,
-                                    delay_between_packets, packets_to_send);
-        m_flows.emplace_back(flow);
-        return flow;
+    bool add_flow(std::shared_ptr<TFlow> flow) {
+        if (flow == nullptr) {
+            return false;
+        }
+        return m_flows.insert(flow).second;
     }
 
-    void add_link(std::shared_ptr<IRoutingDevice> a_from,
-                  std::shared_ptr<IRoutingDevice> a_to,
-                  std::uint32_t a_speed_gbps, Time a_delay,
-                  Size max_egress_buffer_size = 4096,
-                  Size max_ingress_buffer_size = 4096) {
-        auto link = std::make_shared<TLink>(a_from, a_to, a_speed_gbps, a_delay,
-                                            max_egress_buffer_size,
-                                            max_ingress_buffer_size);
-        m_links.emplace_back(link);
+    bool add_link(std::shared_ptr<TLink> link) {
+        if (link == nullptr) {
+            return false;
+        }
+        if (!m_links.insert(link).second) {
+            return false;
+        }
+        auto a_from = link->get_from();
+        auto a_to = link->get_to();
         a_from->add_outlink(link);
         a_to->add_inlink(link);
+        return true;
     }
 
     std::vector<std::shared_ptr<IRoutingDevice>> get_devices() const {
         std::vector<std::shared_ptr<IRoutingDevice>> result;
-        std::transform(m_senders.begin(), m_senders.end(),
-                       std::back_inserter(result),
-                       [](const auto& pair) { return pair.second; });
-
-        std::transform(m_receivers.begin(), m_receivers.end(),
-                       std::back_inserter(result),
-                       [](const auto& pair) { return pair.second; });
-
-        std::transform(m_switches.begin(), m_switches.end(),
-                       std::back_inserter(result),
-                       [](const auto& pair) { return pair.second; });
+        result.insert(result.end(), m_senders.begin(), m_senders.end());
+        result.insert(result.end(), m_receivers.begin(), m_receivers.end());
+        result.insert(result.end(), m_switches.begin(), m_switches.end());
         return result;
     }
 
@@ -115,6 +98,10 @@ public:
                 for (auto [link, paths_count] : links) {
                     src_device->update_routing_table(dest_device, link,
                                                      paths_count);
+                    std::cout << "route from " << src_device->get_id() << " to "
+                              << dest_device->get_id() << " by "
+                              << link->get_id() << "; count = " << paths_count
+                              << std::endl;
                 }
             }
         }
@@ -129,6 +116,21 @@ public:
             Scheduler::get_instance().add(std::make_unique<StartFlow>(start_time, flow));
         }
 
+<<<<<<< HEAD
+=======
+        for (auto sender : m_senders) {
+            Scheduler::get_instance().add(Process(start_time, sender));
+            Scheduler::get_instance().add(SendData(start_time, sender));
+        }
+
+        for (auto receiver : m_receivers) {
+            Scheduler::get_instance().add(Process(start_time, receiver));
+        }
+
+        for (auto swtch : m_switches) {
+            Scheduler::get_instance().add(Process(start_time, swtch));
+        }
+>>>>>>> origin/main
         while (Scheduler::get_instance().tick()) {
         }
 
@@ -141,11 +143,11 @@ public:
     }
 
 private:
-    std::unordered_map<std::string, std::shared_ptr<TSender>> m_senders;
-    std::unordered_map<std::string, std::shared_ptr<TReceiver>> m_receivers;
-    std::unordered_map<std::string, std::shared_ptr<TSwitch>> m_switches;
-    std::vector<std::shared_ptr<IFlow>> m_flows;
-    std::vector<std::shared_ptr<ILink>> m_links;
+    std::unordered_set<std::shared_ptr<TSender>> m_senders;
+    std::unordered_set<std::shared_ptr<TReceiver>> m_receivers;
+    std::unordered_set<std::shared_ptr<TSwitch>> m_switches;
+    std::unordered_set<std::shared_ptr<IFlow>> m_flows;
+    std::unordered_set<std::shared_ptr<ILink>> m_links;
 };
 
 using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;

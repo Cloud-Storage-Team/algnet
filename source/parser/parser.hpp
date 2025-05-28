@@ -17,10 +17,6 @@ public:
         const std::filesystem::path& path);
 
 private:
-    static uint32_t parse_throughput(const std::string& throughput);
-    static uint32_t parse_latency(const std::string& latency);
-    static uint32_t parse_buffer_size(const std::string& buffer_size);
-
     static std::filesystem::path parse_topology_config_path(
         const YAML::Node& config);
     static std::string parse_algorithm(const YAML::Node& config);
@@ -31,7 +27,6 @@ private:
     void process_flows(const YAML::Node& config);
 
     SimulatorVariant m_simulator;
-    std::map<std::string, std::shared_ptr<IRoutingDevice>> m_devices;
     std::filesystem::path m_topology_config_path;
 };
 

@@ -1,8 +1,7 @@
 #include <yaml-cpp/yaml.h>
 
-#include "parser.hpp"
 #include "source/logger/logger.hpp"
-#include "source/parser.hpp"
+#include "source/parser/parser.hpp"
 #include "source/simulator.hpp"
 
 int main(const int argc, char **argv) {

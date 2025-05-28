@@ -10,7 +10,7 @@ TEST_F(LinkTest, PacketArrived) {
         std::make_shared<DeviceMock>(DeviceMock());
     std::shared_ptr<sim::IRoutingDevice> dst =
         std::make_shared<DeviceMock>(DeviceMock());
-    auto link = std::make_shared<sim::Link>(src, dst);
+    auto link = std::make_shared<sim::Link>("", src, dst);
 
     int NUMBER_OF_PACKETS = 10;
     std::vector<sim::Packet> packets;
