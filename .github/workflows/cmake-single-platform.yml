@@ -68,8 +68,4 @@ jobs:
     - name: Run tests
       working-directory: build
       run: ./test_simulator
-  run:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
 
