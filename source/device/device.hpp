@@ -4,6 +4,7 @@
 #include <set>
 
 #include "types.hpp"
+#include "utils/identifier_factory.hpp"
 
 namespace sim {
 
