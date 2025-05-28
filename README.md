@@ -31,12 +31,14 @@ Run simulator:
 ./build/simulator configuration_example/simulation_examples/basic_simulation.yml \
     [metrics-output-dir-name] \
     [--no-plots] \
-    [--export-metrics]
+    [--export-metrics] \
+    [--no-logs]
 ```
 
 - `metrics-output-dir-name` -- directory name for metrics and plots ("metrics" by default).
 - `--export-metrics` -- exports simulation metrics to text files.
 - `--no-plots` -- disables generation of plots.
+- `--no-logs` -- disables logs.
 
 # Smart pointers
 
