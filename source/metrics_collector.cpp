@@ -8,6 +8,8 @@
 #include <fstream>
 
 #include "flow/flow.hpp"
+#include "device/receiver.hpp"
+#include "device/sender.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace fs = std::filesystem;
