@@ -6,13 +6,13 @@ flows:
     receiver_id: "receiver1"
     packet_size: 64
     packet_interval: 600
-    number_of_packets: 100
+    number_of_packets: 1000
   flow2:
     sender_id: "sender2"
     receiver_id: "receiver2"
     packet_size: 64
     packet_interval: 600
-    number_of_packets: 100
+    number_of_packets: 1000
 
 algorithm: tcp
 simulation_time: 100000
