@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
-#include <stdexcept>
 
 namespace fs = std::filesystem;
 
@@ -31,7 +30,8 @@ void MetricsCollector::add_RTT(Id flow_id, Time time, Time value) {
 void MetricsCollector::export_metrics_to_files() const {
     create_metrics_directory();
     for (auto& [flow_id, values] : m_RTT_storage) {
-        std::ofstream output_file(fmt::format("{}/RTT_{}.txt", metrics_dir_name, flow_id));
+        std::ofstream output_file(
+            fmt::format("{}/RTT_{}.txt", metrics_dir_name, flow_id));
         if (!output_file) {
             throw std::runtime_error("Failed to create file for RTT values");
         }
@@ -40,12 +40,26 @@ void MetricsCollector::export_metrics_to_files() const {
         }
         output_file.close();
     }
-    // TODO: Add queue size export
+
+    for (auto& [link_id, values] : m_queue_size_storage) {
+        std::ofstream output_file(
+            fmt::format("{}/queue_size_{}.txt", metrics_dir_name, link_id));
+        if (!output_file) {
+            throw std::runtime_error(
+                "Failed to create file for queue size values");
+        }
+        for (const auto& pair : values) {
+            output_file << pair.first << " " << pair.second << "\n";
+        }
+        output_file.close();
+    }
 }
 
-void MetricsCollector::add_queue_size(Id link_id, Time time, std::uint32_t value) {
+void MetricsCollector::add_queue_size(Id link_id, Time time,
+                                      std::uint32_t value) {
     if (!m_queue_size_storage.contains(link_id)) {
-        m_queue_size_storage[link_id] = std::vector<std::pair<Time, std::uint32_t>>{};
+        m_queue_size_storage[link_id] =
+            std::vector<std::pair<Time, std::uint32_t>>{};
     }
     m_queue_size_storage[link_id].emplace_back(time, value);
 }
@@ -57,14 +71,12 @@ void MetricsCollector::draw_metric_plots() const {
         auto ax = fig->current_axes();
 
         std::vector<double> x_data;
-        std::transform(begin(values), end(values),
-               std::back_inserter(x_data),
-               [](auto const& pair){ return pair.second; });        
-        
+        std::transform(begin(values), end(values), std::back_inserter(x_data),
+                       [](auto const& pair) { return pair.first; });
+
         std::vector<double> y_data;
-        std::transform(begin(values), end(values),
-               std::back_inserter(y_data),
-               [](auto const& pair){ return pair.second; });
+        std::transform(begin(values), end(values), std::back_inserter(y_data),
+                       [](auto const& pair) { return pair.second; });
 
         ax->plot(x_data, y_data, "-o")->line_width(1.5);
 
@@ -79,27 +91,22 @@ void MetricsCollector::draw_metric_plots() const {
         auto fig = matplot::figure(true);
         auto ax = fig->current_axes();
 
-        // std::vector<double> y_data(values.begin(), values.end());
-        // std::vector<double> x_data(y_data.size());
-        // std::iota(x_data.begin(), x_data.end(), 1.0);
-
         std::vector<double> x_data;
-        std::transform(begin(values), end(values),
-               std::back_inserter(x_data),
-               [](auto const& pair){ return pair.second; });        
-        
+        std::transform(begin(values), end(values), std::back_inserter(x_data),
+                       [](auto const& pair) { return pair.first; });
+
         std::vector<double> y_data;
-        std::transform(begin(values), end(values),
-               std::back_inserter(y_data),
-               [](auto const& pair){ return pair.second; });
+        std::transform(begin(values), end(values), std::back_inserter(y_data),
+                       [](auto const& pair) { return pair.second; });
 
         ax->plot(x_data, y_data, "-o")->line_width(1.5);
 
         ax->xlabel("Time, ns");
         ax->ylabel("Value, packets");
-        ax->title("Queue size");
+        ax->title(fmt::format("Queue size {}", link_id));
 
-        matplot::save(fmt::format("{}/queue_size_{}.png", metrics_dir_name, link_id));
+        matplot::save(
+            fmt::format("{}/queue_size_{}.png", metrics_dir_name, link_id));
     }
 }
 
