@@ -24,7 +24,7 @@ public:
     virtual DeviceType get_type() const = 0;
 };
 
-class IRoutingDevice: Identifiable {
+class IRoutingDevice: public Identifiable {
 public:
     virtual ~IRoutingDevice() = default;
 
