@@ -36,8 +36,8 @@ void Generate::operator()() {
         return;
     }
 
-    std::unique_ptr<Event> new_event = std::make_unique<Generate>(
-        m_time + generate_delay, m_flow, m_packet_size);
+    BaseEvent new_event =
+        Generate(m_time + generate_delay, m_flow, m_packet_size);
     Scheduler::get_instance().add(std::move(new_event));
 }
 
@@ -50,8 +50,8 @@ void Arrive::operator()() {
     if (m_link.expired()) {
         return;
     }
-    
-    m_link.lock()->process_arrival(m_packet); 
+
+    m_link.lock()->process_arrival(m_packet);
 };
 
 Process::Process(Time a_time, std::weak_ptr<IProcessingDevice> a_device): Event(a_time), m_device(a_device)  {
@@ -63,6 +63,7 @@ void Process::operator()() {
     if (m_device.expired()) {
         return;
     }
+
     Time process_time = m_device.lock()->process();
 
     // TODO: think about better way of cancelling event rescheduling and signaling errors
@@ -83,6 +84,7 @@ void SendData::operator()() {
     if (m_device.expired()) {
         return;
     }
+
     Time process_time = m_device.lock()->send_data();
 
     // TODO: think about better way of cancelling event rescheduling
@@ -93,6 +95,10 @@ void SendData::operator()() {
     std::unique_ptr<Event> next_process_event = std::make_unique<SendData>(m_time + process_time, m_device);
     Scheduler::get_instance().add(std::move(next_process_event));
 };
+
+Stop::Stop(Time a_time): Event(a_time) {}
+
+void Stop::operator()() { Scheduler::get_instance().clear(); }
 
 StartFlow::StartFlow(Time a_time, std::weak_ptr<IFlow> a_flow) : Event(a_time), m_flow(a_flow) {}
 

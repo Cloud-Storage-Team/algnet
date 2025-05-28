@@ -81,7 +81,6 @@ private:
     std::weak_ptr<ISender> m_device;
 };
 
-
 /**
  * Run new flow at specified time
  */
