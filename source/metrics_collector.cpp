@@ -79,7 +79,7 @@ void MetricsCollector::draw_metric_plots() const {
         ax->plot(x_data, y_data, "-o")->line_width(1.5);
 
         ax->xlabel("");
-        ax->ylabel("Value, ns");
+        ax->ylabel("Value, packets");
         ax->title("Queue size");
 
         matplot::save(fmt::format("{}/queue_size_{}.png", metrics_dir_name, link_id));

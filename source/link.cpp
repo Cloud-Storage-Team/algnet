@@ -51,6 +51,9 @@ void Link::schedule_arrival(Packet packet) {
         return;
     }
 
+    MetricsCollector::get_instance().add_queue_size(
+        get_id(), m_src_egress_buffer_size_byte / packet.size_byte);  
+
     if (m_src_egress_buffer_size_byte + packet.size_byte >
         m_max_src_egress_buffer_size_byte) {
         LOG_ERROR("Buffer in link overflowed; packet " + packet.to_string() +
@@ -87,8 +90,8 @@ void Link::process_arrival(Packet packet) {
     m_src_egress_buffer_size_byte -= packet.size_byte;
     m_next_ingress.push(packet);
 
-    MetricsCollector::get_instance().add_queue_size(
-        get_id(), m_next_ingress.size());
+    // MetricsCollector::get_instance().add_queue_size(
+    //     get_id(), m_next_ingress.size());
 };
 
 std::optional<Packet> Link::get_packet() {
