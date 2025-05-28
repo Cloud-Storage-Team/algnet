@@ -71,7 +71,6 @@ void MetricsCollector::draw_metric_plots() const {
     create_metrics_directory();
     for (auto& [flow_id, values] : m_RTT_storage) {
         auto fig = matplot::figure(true);
-        fig->color("white");
         auto ax = fig->current_axes();
 
         std::vector<double> x_data;
@@ -86,7 +85,6 @@ void MetricsCollector::draw_metric_plots() const {
 
         ax->xlabel("Time, ns");
         ax->ylabel("Value, ns");
-        ax->color("white");
 
         auto flow =
             IdentifierFactory::get_instance().get_object<IFlow>(flow_id);
@@ -99,7 +97,6 @@ void MetricsCollector::draw_metric_plots() const {
 
     for (auto& [link_id, values] : m_queue_size_storage) {
         auto fig = matplot::figure(true);
-        fig->color("white");
         auto ax = fig->current_axes();
 
         std::vector<double> x_data;

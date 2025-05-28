@@ -1,13 +1,5 @@
 import os
 import sys
-import cairosvg
-
-
-def convert_eps_to_svg(eps_path, svg_path):
-    try:
-        cairosvg.svg2svg(url=eps_path, write_to=svg_path)
-    except Exception as e:
-        print(f"Error converting {eps_path} to SVG: {e}")
 
 
 def generate_html(directory):
@@ -20,36 +12,36 @@ def generate_html(directory):
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{folder_name} - Image Gallery</title>
         <style>
-            body {{ 
-                font-family: Arial, sans-serif; 
-                text-align: center; 
-                margin: 0; 
-                padding: 20px; 
-                background-color: #f4f4f4; 
+            body {{
+                font-family: Arial, sans-serif;
+                text-align: center;
+                margin: 0;
+                padding: 20px;
+                background-color: #f4f4f4;
             }}
-            h1 {{ 
-                color: #333; 
-                font-size: 24px;  
-                margin-bottom: 10px;  
+            h1 {{
+                color: #333;
+                font-size: 24px;
+                margin-bottom: 10px;
             }}
-            h2 {{ 
-                color: #555; 
-                font-size: 20px;  
-                margin-top: 20px;  
+            h2 {{
+                color: #555;
+                font-size: 20px;
+                margin-top: 20px;
             }}
-            .gallery {{ 
-                display: flex; 
-                flex-wrap: wrap; 
-                justify-content: center; 
-                margin-top: 10px;  
+            .gallery {{
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-top: 10px;
             }}
-            .gallery img {{ 
-                max-width: 300px;  
-                height: auto; 
-                margin: 10px; 
-                border: 1px solid #ccc; 
-                border-radius: 5px; 
-                background-color: #fff; 
+            .gallery img {{
+                max-width: 300px;
+                height: auto;
+                margin: 10px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                background-color: #fff;
             }}
         </style>
     </head>
@@ -58,16 +50,13 @@ def generate_html(directory):
     """
 
     for root, dirs, files in os.walk(directory):
-        images = [f for f in files if f.lower().endswith(".eps")]
+        images = [f for f in files if f.lower().endswith(".svg")]
         if images:
             relative_path = os.path.relpath(root, directory)
             html_content += f"<h2>{relative_path}</h2><div class='gallery'>"
             for image in images:
-                eps_path = os.path.join(root, image)
-                svg_filename = f"{os.path.splitext(image)[0]}.svg"
-                svg_path = os.path.join(relative_path, svg_filename)
-                convert_eps_to_svg(eps_path, svg_path)
-                html_content += f"<img src='{svg_path}' alt='{svg_filename}'>"
+                image_path = os.path.join(relative_path, image)
+                html_content += f"<img src='{image_path}' alt='{image}'>"
             html_content += "</div>"
 
     html_content += """

@@ -56,9 +56,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install svg library
-      run: pip install cairosvg 
-      
     - name: Install gnuplot
       run: sudo apt install gnuplot
 
