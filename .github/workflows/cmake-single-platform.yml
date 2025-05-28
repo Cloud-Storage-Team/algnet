@@ -47,6 +47,9 @@ jobs:
     - name: Run simulation
       run: python3 run_simulations.py build/simulator configuration_examples/simulation_examples metrics
 
+    - name: find metrics
+      run: ls -R metrics
+
     - name: Upload metrics
       uses: actions/upload-artifact@v4
       with:
