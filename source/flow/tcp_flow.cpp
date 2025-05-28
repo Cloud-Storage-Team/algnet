@@ -80,7 +80,6 @@ void TcpFlow::update(Packet packet, DeviceType type) {
         } else {
             m_cwnd++;
         }
-        try_to_put_data_to_device();
     } else {  // trigger_congestion
         m_ssthresh = m_cwnd / 2;
         m_cwnd = 1;
