@@ -86,6 +86,7 @@ void MetricsCollector::draw_metric_plots() const {
 
         ax->xlabel("Time, ns");
         ax->ylabel("Value, ns");
+        ax->color("white");
 
         auto flow =
             IdentifierFactory::get_instance().get_object<IFlow>(flow_id);
@@ -93,7 +94,7 @@ void MetricsCollector::draw_metric_plots() const {
         ax->title(fmt::format("RTT values {} {}", flow->get_sender()->get_id(),
                               flow->get_receiver()->get_id()));
 
-        matplot::save(fmt::format("{}/RTT_{}.eps", metrics_dir_name, flow_id));
+        matplot::save(fmt::format("{}/RTT_{}.svg", metrics_dir_name, flow_id));
     }
 
     for (auto& [link_id, values] : m_queue_size_storage) {
@@ -114,9 +115,10 @@ void MetricsCollector::draw_metric_plots() const {
         ax->xlabel("Time, ns");
         ax->ylabel("Value, packets");
         ax->title(fmt::format("Queue size {}", link_id));
+        ax->color("white");
 
         matplot::save(
-            fmt::format("{}/queue_size_{}.eps", metrics_dir_name, link_id));
+            fmt::format("{}/queue_size_{}.svg", metrics_dir_name, link_id), "svg");
     }
 }
 
