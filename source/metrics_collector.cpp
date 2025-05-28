@@ -10,6 +10,7 @@
 #include "flow/flow.hpp"
 #include "device/receiver.hpp"
 #include "device/sender.hpp"
+#include "link.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace fs = std::filesystem;
@@ -91,7 +92,8 @@ void MetricsCollector::draw_metric_plots() const {
         auto flow =
             IdentifierFactory::get_instance().get_object<IFlow>(flow_id);
 
-        ax->title(fmt::format("RTT values from {} to {}", flow->get_sender()->get_id(),
+        ax->title(fmt::format("RTT values from {} to {}",
+                              flow->get_sender()->get_id(),
                               flow->get_receiver()->get_id()));
 
         matplot::save(fmt::format("{}/RTT_{}.svg", metrics_dir_name, flow_id));
@@ -112,12 +114,27 @@ void MetricsCollector::draw_metric_plots() const {
         ax->plot(x_data, y_data, "-o")->line_width(1.5);
 
         ax->xlabel("Time, ns");
-        ax->ylabel("Value, packets");
-        ax->title(fmt::format("Queue size at {}", link_id));
+        ax->ylabel("Value, bytes");
+
+        auto link =
+            IdentifierFactory::get_instance().get_object<ILink>(link_id);
+
+        auto limits = ax->xlim();
+        matplot::line(0, link->get_max_src_egress_buffer_size_byte(), limits[1],
+                      link->get_max_src_egress_buffer_size_byte())
+            ->line_width(1.5)
+            .color({1.f, 0.0f, 0.0f});
+
+        ax->xlim({0, limits[1]});    
+
+        ax->title(fmt::format("Queue size from {} to {}",
+                              link->get_from()->get_id(),
+                              link->get_to()->get_id()));
         ax->color("white");
 
         matplot::save(
-            fmt::format("{}/queue_size_{}.svg", metrics_dir_name, link_id), "svg");
+            fmt::format("{}/queue_size_{}.svg", metrics_dir_name, link_id),
+            "svg");
     }
 }
 
