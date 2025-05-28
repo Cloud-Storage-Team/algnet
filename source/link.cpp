@@ -3,9 +3,9 @@
 #include "device/device.hpp"
 #include "event.hpp"
 #include "logger/logger.hpp"
+#include "metrics_collector.hpp"
 #include "scheduler.hpp"
 #include "utils/identifier_factory.hpp"
-#include "metrics_collector.hpp"
 
 namespace sim {
 
@@ -52,7 +52,8 @@ void Link::schedule_arrival(Packet packet) {
     }
 
     MetricsCollector::get_instance().add_queue_size(
-        get_id(), m_src_egress_buffer_size_byte / packet.size_byte);  
+        get_id(), Scheduler::get_instance().get_current_time(),
+        m_src_egress_buffer_size_byte / packet.size_byte);
 
     if (m_src_egress_buffer_size_byte + packet.size_byte >
         m_max_src_egress_buffer_size_byte) {
@@ -89,9 +90,6 @@ void Link::process_arrival(Packet packet) {
 
     m_src_egress_buffer_size_byte -= packet.size_byte;
     m_next_ingress.push(packet);
-
-    // MetricsCollector::get_instance().add_queue_size(
-    //     get_id(), m_next_ingress.size());
 };
 
 std::optional<Packet> Link::get_packet() {

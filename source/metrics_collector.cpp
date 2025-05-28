@@ -3,10 +3,9 @@
 #include <matplot/matplot.h>
 #include <spdlog/fmt/fmt.h>
 
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
-#include <numeric>
-#include <ranges>
 #include <stdexcept>
 
 namespace fs = std::filesystem;
@@ -22,11 +21,11 @@ MetricsCollector& MetricsCollector::get_instance() {
     return instance;
 }
 
-void MetricsCollector::add_RTT(Id flow_id, Time value) {
+void MetricsCollector::add_RTT(Id flow_id, Time time, Time value) {
     if (!m_RTT_storage.contains(flow_id)) {
-        m_RTT_storage[flow_id] = std::vector<Time>{};
+        m_RTT_storage[flow_id] = std::vector<std::pair<Time, Time>>{};
     }
-    m_RTT_storage[flow_id].push_back(value);
+    m_RTT_storage[flow_id].emplace_back(time, value);
 }
 
 void MetricsCollector::export_metrics_to_files() const {
@@ -36,17 +35,19 @@ void MetricsCollector::export_metrics_to_files() const {
         if (!output_file) {
             throw std::runtime_error("Failed to create file for RTT values");
         }
-        std::ranges::copy(values,
-                          std::ostream_iterator<Time>(output_file, "\n"));
+        for (const auto& pair : values) {
+            output_file << pair.first << " " << pair.second << "\n";
+        }
         output_file.close();
     }
+    // TODO: Add queue size export
 }
 
-void MetricsCollector::add_queue_size(Id link_id, std::uint32_t value) {
+void MetricsCollector::add_queue_size(Id link_id, Time time, std::uint32_t value) {
     if (!m_queue_size_storage.contains(link_id)) {
-        m_queue_size_storage[link_id] = std::vector<std::uint32_t>{};
+        m_queue_size_storage[link_id] = std::vector<std::pair<Time, std::uint32_t>>{};
     }
-    m_queue_size_storage[link_id].push_back(value);
+    m_queue_size_storage[link_id].emplace_back(time, value);
 }
 
 void MetricsCollector::draw_metric_plots() const {
@@ -55,9 +56,15 @@ void MetricsCollector::draw_metric_plots() const {
         auto fig = matplot::figure(true);
         auto ax = fig->current_axes();
 
-        std::vector<double> y_data(values.begin(), values.end());
-        std::vector<double> x_data(y_data.size());
-        std::iota(x_data.begin(), x_data.end(), 1.0);
+        std::vector<double> x_data;
+        std::transform(begin(values), end(values),
+               std::back_inserter(x_data),
+               [](auto const& pair){ return pair.second; });        
+        
+        std::vector<double> y_data;
+        std::transform(begin(values), end(values),
+               std::back_inserter(y_data),
+               [](auto const& pair){ return pair.second; });
 
         ax->plot(x_data, y_data, "-o")->line_width(1.5);
 
@@ -72,9 +79,19 @@ void MetricsCollector::draw_metric_plots() const {
         auto fig = matplot::figure(true);
         auto ax = fig->current_axes();
 
-        std::vector<double> y_data(values.begin(), values.end());
-        std::vector<double> x_data(y_data.size());
-        std::iota(x_data.begin(), x_data.end(), 1.0);
+        // std::vector<double> y_data(values.begin(), values.end());
+        // std::vector<double> x_data(y_data.size());
+        // std::iota(x_data.begin(), x_data.end(), 1.0);
+
+        std::vector<double> x_data;
+        std::transform(begin(values), end(values),
+               std::back_inserter(x_data),
+               [](auto const& pair){ return pair.second; });        
+        
+        std::vector<double> y_data;
+        std::transform(begin(values), end(values),
+               std::back_inserter(y_data),
+               [](auto const& pair){ return pair.second; });
 
         ax->plot(x_data, y_data, "-o")->line_width(1.5);
 
