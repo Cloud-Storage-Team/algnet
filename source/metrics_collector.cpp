@@ -32,7 +32,8 @@ void MetricsCollector::add_RTT(Id flow_id, Time value) {
 void MetricsCollector::export_metrics_to_files() const {
     create_metrics_directory();
     for (auto& [flow_id, values] : m_RTT_storage) {
-        std::ofstream output_file(fmt::format("{}/RTT_{}.txt", metrics_dir_name, flow_id));
+        std::ofstream output_file(
+            fmt::format("{}/RTT_{}.txt", metrics_dir_name, flow_id));
         if (!output_file) {
             throw std::runtime_error("Failed to create file for RTT values");
         }
@@ -58,7 +59,10 @@ void MetricsCollector::draw_metric_plots() const {
         ax->ylabel("Value, ns");
         ax->title("RTT values");
 
-        matplot::save(fmt::format("{}/RTT_{}.png", metrics_dir_name, flow_id));
+        std::string path =
+            fmt::format("{}/RTT_{}.png", metrics_dir_name, flow_id);
+        std::cerr << "save metrics to " << path << std::endl;
+        matplot::save(path);
     }
 }
 
