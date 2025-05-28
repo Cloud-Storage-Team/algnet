@@ -1,5 +1,7 @@
 #include <cstdint>
 
+#include <spdlog/fmt/fmt.h>
+
 #include "hasher.hpp"
 
 namespace sim {
