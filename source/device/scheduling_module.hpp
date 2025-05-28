@@ -12,7 +12,7 @@ template<typename TDevice, typename TEvent>
 class SchedulingModule {
 public:
     // increment counter; return true if counter = 1
-    bool notify_about_arriving(Time arrival_time, std::weak_ptr<T> subject) {
+    bool notify_about_arriving(Time arrival_time, std::weak_ptr<TDevice> subject) {
         m_cnt++;
         bool result = (m_cnt == 1);
         if (result) {
@@ -35,10 +35,10 @@ public:
     };
 
 private:
-    void reschedule_event(Time preferred_processing_time, std::weak_ptr<T> target) {
+    void reschedule_event(Time preferred_processing_time, std::weak_ptr<TDevice> target) {
         m_earliest_possible_time = std::max(m_earliest_possible_time, preferred_processing_time);
 
-        std::unique_ptr<Event> new_event = std::make_unique<E>(m_earliest_possible_time, target);
+        std::unique_ptr<Event> new_event = std::make_unique<TDevice>(m_earliest_possible_time, target);
         Scheduler::get_instance().add(std::move(new_event));
     }
 
