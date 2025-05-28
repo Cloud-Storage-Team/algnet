@@ -99,10 +99,6 @@ public:
                 for (auto [link, paths_count] : links) {
                     src_device->update_routing_table(dest_device, link,
                                                      paths_count);
-                    // std::cout << "route from " << src_device->get_id() << " to "
-                    //           << dest_device->get_id() << " by "
-                    //           << link->get_id() << "; count = " << paths_count
-                    //           << std::endl;
                 }
             }
         }
