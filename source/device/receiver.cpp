@@ -10,8 +10,7 @@
 
 namespace sim {
 
-Receiver::Receiver(Id a_id)
-    : m_router(std::make_unique<RoutingModule>(a_id)), m_id(a_id) {}
+Receiver::Receiver(Id a_id) : m_router(std::make_unique<RoutingModule>(a_id)) {}
 
 bool Receiver::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
@@ -143,6 +142,6 @@ std::set<std::shared_ptr<ILink>> Receiver::get_outlinks() {
     return m_router->get_outlinks();
 }
 
-Id Receiver::get_id() const { return m_id; }
+Id Receiver::get_id() const { return m_router->get_id(); }
 
 }  // namespace sim

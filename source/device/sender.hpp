@@ -51,7 +51,6 @@ public:
 private:
     std::queue<Packet> m_flow_buffer;
     std::unique_ptr<RoutingModule> m_router;
-    Id m_id;
 };
 
 }  // namespace sim

@@ -8,8 +8,7 @@
 
 namespace sim {
 
-Switch::Switch(Id a_id)
-    : m_router(std::make_unique<RoutingModule>(a_id)), m_id(a_id) {}
+Switch::Switch(Id a_id) : m_router(std::make_unique<RoutingModule>(a_id)) {}
 
 bool Switch::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
@@ -104,6 +103,6 @@ std::set<std::shared_ptr<ILink>> Switch::get_outlinks() {
     return m_router->get_outlinks();
 }
 
-Id Switch::get_id() const { return m_id; }
+Id Switch::get_id() const { return m_router->get_id(); }
 
 }  // namespace sim

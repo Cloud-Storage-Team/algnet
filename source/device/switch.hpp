@@ -38,7 +38,6 @@ public:
 
 private:
     std::unique_ptr<RoutingModule> m_router;
-    Id m_id;
 };
 
 }  // namespace sim

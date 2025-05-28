@@ -43,7 +43,6 @@ public:
 private:
     Time send_ack(Packet data_packet);
     std::unique_ptr<RoutingModule> m_router;
-    Id m_id;
 };
 
 }  // namespace sim

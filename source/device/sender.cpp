@@ -11,8 +11,7 @@
 
 namespace sim {
 
-Sender::Sender(Id a_id)
-    : m_router(std::make_unique<RoutingModule>(a_id)), m_id(a_id) {}
+Sender::Sender(Id a_id) : m_router(std::make_unique<RoutingModule>(a_id)) {}
 
 bool Sender::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
@@ -155,6 +154,6 @@ std::set<std::shared_ptr<ILink>> Sender::get_outlinks() {
     return m_router->get_outlinks();
 }
 
-Id Sender::get_id() const { return m_id; }
+Id Sender::get_id() const { return m_router->get_id(); }
 
 }  // namespace sim
