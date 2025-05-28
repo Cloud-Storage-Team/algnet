@@ -1,6 +1,7 @@
 import os
 import sys
 
+
 def generate_html(directory):
     folder_name = os.path.basename(directory)
     html_content = f"""
@@ -49,7 +50,7 @@ def generate_html(directory):
     """
 
     for root, dirs, files in os.walk(directory):
-        images = [f for f in files if f.lower().endswith('.png')]
+        images = [f for f in files if f.lower().endswith(".svg")]
         if images:
             relative_path = os.path.relpath(root, directory)
             html_content += f"<h2>{relative_path}</h2><div class='gallery'>"
@@ -65,9 +66,11 @@ def generate_html(directory):
 
     return html_content
 
+
 def save_html_file(html_content, output_file):
-    with open(output_file, 'w') as f:
+    with open(output_file, "w") as f:
         f.write(html_content)
+
 
 if __name__ == "__main__":
     input_directory = sys.argv[1]
