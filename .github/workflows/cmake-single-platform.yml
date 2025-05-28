@@ -11,37 +11,6 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  create-artefacts:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Create artefact
-        run:
-          mkdir -p hello &&
-          echo "Hello, World!" > hello/hello.txt
-      - name: Deploy artefact
-        uses: actions/upload-artifact@v4
-        with:
-          name: hello-artifact
-          path: hello/hello.txt
-
-  upload-artefacts:
-    runs-on: ubuntu-latest
-    needs: create-artefacts
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: hello-artifact
-
-      - name: Print artefact
-        run: cat hello.txt
-
-
   clang-format:
     runs-on: ubuntu-latest
     steps:
@@ -106,11 +75,11 @@ jobs:
       with:
         name: metrics
         path: metrics/**
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: metrics
+    # - name: Deploy to GitHub Pages
+    #   uses: peaceiris/actions-gh-pages@v3
+    #   with:
+    #     github_token: ${{ secrets.GITHUB_TOKEN }}
+    #     publish_dir: metrics
 
   test:
     runs-on: ubuntu-latest
