@@ -2,7 +2,6 @@ import os
 import sys
 
 def generate_html(directory):
-    # Начинаем с создания базовой структуры HTML
     html_content = """
     <!DOCTYPE html>
     <html lang="en">
@@ -43,13 +42,10 @@ def generate_html(directory):
     <body>
     """
 
-    # Проходим по всем поддиректориям и файлам
     for root, dirs, files in os.walk(directory):
-        # Список для хранения изображений в текущей директории
         images = [f for f in files if f.lower().endswith('.png')]
 
         if images:
-            # Добавляем заголовок для текущей директории
             relative_path = os.path.relpath(root, directory)
             html_content += f"<h2>{relative_path}</h2><div class='gallery'>"
 
@@ -59,7 +55,6 @@ def generate_html(directory):
 
             html_content += "</div>"
 
-    # Закрываем HTML-теги
     html_content += """
     </body>
     </html>
