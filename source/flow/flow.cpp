@@ -5,6 +5,7 @@
 
 #include "device/sender.hpp"
 #include "device/receiver.hpp"
+#include "device/sender.hpp"
 #include "logger/logger.hpp"
 #include "metrics_collector.hpp"
 #include "packet.hpp"
