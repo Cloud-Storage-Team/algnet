@@ -25,7 +25,7 @@ def main(args):
         filepath = os.path.join(simulation_configs_dif, filename)
         print(f"Run {simulator_path} {filepath} {metrics_dir}")
 
-        subprocess.run([simulator_path, filepath, metrics_dir])
+        subprocess.run([simulator_path, filepath, metrics_dir], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 if __name__ == "__main__":

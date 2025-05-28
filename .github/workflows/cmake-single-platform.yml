@@ -48,7 +48,7 @@ jobs:
       run: python3 run_simulations.py build/simulator configuration_examples/simulation_examples metrics
 
     - name: Find metrics
-      run: ll -a metrics
+      run: ls -a metrics
 
     - uses: actions/upload-artifact@v4
       with:
