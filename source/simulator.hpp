@@ -122,7 +122,7 @@ public:
     // Create a Stop event at a_stop_time and start simulation
     void start(Time a_stop_time, bool export_metrics = false, bool draw_plots = true) {
         recalculate_paths();
-        Scheduler::get_instance().add(Stop(a_stop_time));
+        Scheduler::get_instance().add(std::make_unique<Stop>(a_stop_time));
         constexpr Time start_time = 0;
 
         for (auto flow : m_flows) {
