@@ -8,9 +8,9 @@ Packet::Packet(PacketType a_type, Size a_size_byte, IFlow* a_flow, Id a_source_i
       source_id(a_source_id),
       dest_id(a_dest_id),
       RTT(a_RTT),
-      send_time(a_send_time),
       size_byte(a_size_byte),
-      flow(a_flow) {}
+      flow(a_flow),
+      send_time(a_send_time) {}
 
 bool Packet::operator==(const Packet& packet) const {
     return flow == packet.flow && 
