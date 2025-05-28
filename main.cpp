@@ -7,7 +7,7 @@
 int main(const int argc, char **argv) {
     if (argc < 2) {
         LOG_ERROR(
-            fmt::format("Usage: {} <config.yaml> [output-dir] [--export-metrics] [--no-plots]",
+            fmt::format("Usage: {} <config.yaml> [output-dir] [--export-metrics] [--no-plots] [--no-logs]",
                         argv[0]));
         return 1;
     } else if (argc > 2) {

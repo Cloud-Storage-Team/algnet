@@ -42,6 +42,13 @@ void MetricsCollector::export_metrics_to_files() const {
     }
 }
 
+void MetricsCollector::add_queue_size(Id link_id, std::uint32_t value) {
+    if (!m_queue_size_storage.contains(link_id)) {
+        m_queue_size_storage[link_id] = std::vector<std::uint32_t>{};
+    }
+    m_queue_size_storage[link_id].push_back(value);
+}
+
 void MetricsCollector::draw_metric_plots() const {
     create_metrics_directory();
     for (auto& [flow_id, values] : m_RTT_storage) {
@@ -59,6 +66,23 @@ void MetricsCollector::draw_metric_plots() const {
         ax->title("RTT values");
 
         matplot::save(fmt::format("{}/RTT_{}.png", metrics_dir_name, flow_id));
+    }
+
+    for (auto& [link_id, values] : m_queue_size_storage) {
+        auto fig = matplot::figure(true);
+        auto ax = fig->current_axes();
+
+        std::vector<double> y_data(values.begin(), values.end());
+        std::vector<double> x_data(y_data.size());
+        std::iota(x_data.begin(), x_data.end(), 1.0);
+
+        ax->plot(x_data, y_data, "-o")->line_width(1.5);
+
+        ax->xlabel("");
+        ax->ylabel("Value, ns");
+        ax->title("Queue size");
+
+        matplot::save(fmt::format("{}/queue_size_{}.png", metrics_dir_name, link_id));
     }
 }
 

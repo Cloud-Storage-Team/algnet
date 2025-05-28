@@ -5,6 +5,7 @@
 #include "logger/logger.hpp"
 #include "scheduler.hpp"
 #include "utils/identifier_factory.hpp"
+#include "metrics_collector.hpp"
 
 namespace sim {
 
@@ -85,6 +86,9 @@ void Link::process_arrival(Packet packet) {
 
     m_src_egress_buffer_size_byte -= packet.size_byte;
     m_next_ingress.push(packet);
+
+    MetricsCollector::get_instance().add_queue_size(
+        get_id(), m_next_ingress.size());
 };
 
 std::optional<Packet> Link::get_packet() {
