@@ -52,10 +52,6 @@ void Link::schedule_arrival(Packet packet) {
         return;
     }
 
-    MetricsCollector::get_instance().add_queue_size(
-        get_id(), Scheduler::get_instance().get_current_time(),
-        m_src_egress_buffer_size_byte);
-
     if (m_src_egress_buffer_size_byte + packet.size_byte >
         m_max_src_egress_buffer_size_byte) {
         LOG_ERROR("Buffer in link overflowed; packet " + packet.to_string() +
@@ -65,6 +61,10 @@ void Link::schedule_arrival(Packet packet) {
 
     LOG_INFO("Packet arrived to link's ingress queue. Packet: " +
              packet.to_string());
+
+    MetricsCollector::get_instance().add_queue_size(
+        get_id(), Scheduler::get_instance().get_current_time(),
+        m_src_egress_buffer_size_byte);
 
     unsigned int transmission_time = get_transmission_time(packet);
     m_last_src_egress_pass_time =
@@ -92,6 +92,10 @@ void Link::process_arrival(Packet packet) {
     m_to.lock()->notify_about_arrival(Scheduler::get_instance().get_current_time());
 
     m_src_egress_buffer_size_byte -= packet.size_byte;
+
+    MetricsCollector::get_instance().add_queue_size(
+        get_id(), Scheduler::get_instance().get_current_time(),
+        m_src_egress_buffer_size_byte);
     m_next_ingress.push(packet);
 };
 
