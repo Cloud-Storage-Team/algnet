@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 
 #include "device/device.hpp"
+#include "device/routing_module.hpp"
 #include "packet.hpp"
 #include "link.hpp"
 

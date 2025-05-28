@@ -1,5 +1,4 @@
 #include "utils.hpp"
-#include "device/routing_module.hpp"
 
 namespace test {
 
