@@ -116,21 +116,6 @@ public:
             Scheduler::get_instance().add(std::make_unique<StartFlow>(start_time, flow));
         }
 
-<<<<<<< HEAD
-=======
-        for (auto sender : m_senders) {
-            Scheduler::get_instance().add(Process(start_time, sender));
-            Scheduler::get_instance().add(SendData(start_time, sender));
-        }
-
-        for (auto receiver : m_receivers) {
-            Scheduler::get_instance().add(Process(start_time, receiver));
-        }
-
-        for (auto swtch : m_switches) {
-            Scheduler::get_instance().add(Process(start_time, swtch));
-        }
->>>>>>> origin/main
         while (Scheduler::get_instance().tick()) {
         }
 
