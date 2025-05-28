@@ -8,8 +8,8 @@
 #include <fstream>
 
 #include "flow/flow.hpp"
-#include "utils/identifier_factory.hpp"
 #include "link.hpp"
+#include "utils/identifier_factory.hpp"
 
 namespace fs = std::filesystem;
 
@@ -117,7 +117,7 @@ void MetricsCollector::draw_metric_plots() const {
         auto link =
             IdentifierFactory::get_instance().get_object<ILink>(link_id);
 
-        ax->title(fmt::format("Queue size from {} to {}", link_id,
+        ax->title(fmt::format("Queue size from {} to {}",
                               link->get_from()->get_id(),
                               link->get_to()->get_id()));
         ax->color("white");
