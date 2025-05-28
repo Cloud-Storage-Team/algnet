@@ -1,18 +1,36 @@
-topology_config_path: ../topology_examples/bus_topology.yml
+topology_config_path: ../topology_examples/incast_topology.yml
 
 flows:
   flow1:
     sender_id: "sender1"
     receiver_id: "receiver1"
-    packet_size: 64
-    packet_interval: 600
+    packet_size: 1024
+    packet_interval: 100
     number_of_packets: 1000
   flow2:
     sender_id: "sender2"
-    receiver_id: "receiver2"
-    packet_size: 64
-    packet_interval: 600
+    receiver_id: "receiver1"
+    packet_size: 1024
+    packet_interval: 100
     number_of_packets: 1000
+  flow3:
+    sender_id: "sender3"
+    receiver_id: "receiver1"
+    packet_size: 1024
+    packet_interval: 100
+    number_of_packets: 1000   
+  flow4:
+    sender_id: "sender4"
+    receiver_id: "receiver1"
+    packet_size: 1024
+    packet_interval: 100
+    number_of_packets: 1000   
+  flow5:
+    sender_id: "sender5"
+    receiver_id: "receiver1"
+    packet_size: 1024
+    packet_interval: 100
+    number_of_packets: 1000   
 
 algorithm: tcp
 simulation_time: 100000

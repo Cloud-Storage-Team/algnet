@@ -11,14 +11,6 @@ devices:
     type: sender      
   receiver1:
     type: receiver
-  # receiver2:
-  #   type: receiver
-  # receiver3:
-  #   type: receiver
-  # receiver4:
-  #   type: receiver
-  # receiver5:
-  #   type: receiver
   bus:
     type: switch
 
@@ -65,64 +57,6 @@ links:
     throughput: 10Gbps
     ingress_buffer_size: 65536B
     egress_buffer_size: 65536B    
-  # link7:
-  #   from: sender3
-  #   to: bus
-  #   latency: 1ns
-  #   throughput: 1Gbps
-  #   ingress_buffer_size: 4096B
-  #   egress_buffer_size: 4096B  
-  # link8:
-  #   from: bus
-  #   to: sender3
-  #   latency: 1ns
-  #   throughput: 1Gbps
-  #   ingress_buffer_size: 4096B
-  #   egress_buffer_size: 4096B      
-  # link9:
-  #   from: sender4
-  #   to: bus
-  #   latency: 1ns
-  #   throughput: 1Gbps
-  #   ingress_buffer_size: 4096B
-  #   egress_buffer_size: 4096B  
-  # link10:
-  #   from: bus
-  #   to: sender4
-  #   latency: 1ns
-  #   throughput: 1Gbps
-  #   ingress_buffer_size: 4096B
-  #   egress_buffer_size: 4096B 
-  # link11:
-  #   from: sender5
-  #   to: bus
-  #   latency: 1ns
-  #   throughput: 1Gbps
-  #   ingress_buffer_size: 4096B
-  #   egress_buffer_size: 4096B  
-  # link12:
-  #   from: bus
-  #   to: sender5
-  #   latency: 1ns
-  #   throughput: 1Gbps
-  #   ingress_buffer_size: 4096B
-  #   egress_buffer_size: 4096B      
-  # link7:
-  #   from: receiver2
-  #   to: bus
-  #   latency: 1ns
-  #   throughput: 1Gbps
-  #   ingress_buffer_size: 4096B
-  #   egress_buffer_size: 4096B    
-  # link8:
-  #   from: bus
-  #   to: receiver2
-  #   latency: 1ns
-  #   throughput: 1Gbps
-  #   ingress_buffer_size: 4096B
-  #   egress_buffer_size: 4096B
-  
-  
   link9:
     from: sender3
     to: bus
