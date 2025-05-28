@@ -38,7 +38,7 @@ private:
     void reschedule_event(Time preferred_processing_time, std::weak_ptr<TDevice> target) {
         m_earliest_possible_time = std::max(m_earliest_possible_time, preferred_processing_time);
 
-        std::unique_ptr<Event> new_event = std::make_unique<TDevice>(m_earliest_possible_time, target);
+        std::unique_ptr<Event> new_event = std::make_unique<TEvent>(m_earliest_possible_time, target);
         Scheduler::get_instance().add(std::move(new_event));
     }
 
