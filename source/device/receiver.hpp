@@ -47,7 +47,6 @@ private:
     Time send_ack(Packet data_packet);
     std::unique_ptr<IRoutingDevice> m_router;
     std::unique_ptr<ISchedulingModule> m_scheduler;
-    Id m_id;
 };
 
 }  // namespace sim
