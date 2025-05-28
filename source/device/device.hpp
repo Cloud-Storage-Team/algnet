@@ -24,11 +24,10 @@ public:
     virtual DeviceType get_type() const = 0;
 };
 
-class IRoutingDevice {
+class IRoutingDevice: Identifiable {
 public:
     virtual ~IRoutingDevice() = default;
 
-    virtual Id get_id() const = 0;
     virtual bool add_inlink(std::shared_ptr<ILink> link) = 0;
     virtual bool add_outlink(std::shared_ptr<ILink> link) = 0;
     virtual bool update_routing_table(Id dest_id, std::shared_ptr<ILink> link, size_t paths_count = 1) = 0;
