@@ -30,7 +30,7 @@ jobs:
     - name: Clang format
       run:
         clang-format --dry-run -Werror $files_for_clang
-  build_and_run:
+  build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -47,6 +47,23 @@ jobs:
     - name: Build project
       run: cmake --build build --config Debug
 
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifact
+        path: build/simulator
+
+  run:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifact
+
     - name: Run simulation
       run: python3 run_simulations.py build/simulator configuration_examples/simulation_examples metrics
 
@@ -55,6 +72,7 @@ jobs:
       with:
         name: metrics
         path: metrics/**
+
   test:
     runs-on: ubuntu-latest
     steps:
