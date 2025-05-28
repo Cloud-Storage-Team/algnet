@@ -10,7 +10,7 @@ TEST_F(TestScheduler, AddExpectedAmountOfElements) {
     CountingEvent::cnt = 0;
     AddEvents<CountingEvent>(number_of_events);
 
-    while (sim::Scheduler::get_instance().tick()) {
+    while (Scheduler::get_instance().tick()) {
     }
 
     EXPECT_EQ(CountingEvent::cnt, number_of_events);

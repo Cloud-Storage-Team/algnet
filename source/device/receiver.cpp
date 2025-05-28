@@ -4,6 +4,7 @@
 
 #include "event.hpp"
 #include "link.hpp"
+#include "scheduler.hpp"
 #include "logger/logger.hpp"
 #include "utils/identifier_factory.hpp"
 #include "utils/validation.hpp"
@@ -92,7 +93,7 @@ Time Receiver::process() {
 
 Time Receiver::send_ack(Packet data_packet) {
     Time processing_time = 1;
-    Packet ack = Packet(PacketType::ACK, 1, data_packet.flow, data_packet.flow->get_receiver()->get_id(), data_packet.flow->get_sender()->get_id(), 0);
+    Packet ack(PacketType::ACK, 1, data_packet.flow, data_packet.flow->get_receiver()->get_id(), data_packet.flow->get_sender()->get_id(), data_packet.send_time, Scheduler::get_instance().get_current_time());
 
     std::shared_ptr<ILink> link_to_dest = get_link_to_destination(ack);
     if (link_to_dest == nullptr) {
