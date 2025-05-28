@@ -8,7 +8,7 @@
 
 namespace sim {
 
-template<typename T, typename E>
+template<typename TDevice, typename TEvent>
 class SchedulingModule {
 public:
     // increment counter; return true if counter = 1
