@@ -63,13 +63,12 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: build-artifact
-        path: build
 
     - name: Make Simulator executable
-      run: chmod +x build/simulator
+      run: chmod +x simulator
 
     - name: Run simulation
-      run: python3 run_simulations.py build/simulator configuration_examples/simulation_examples metrics
+      run: python3 run_simulations.py simulator configuration_examples/simulation_examples metrics
 
     - name: Upload metrics
       uses: actions/upload-artifact@v4
