@@ -39,6 +39,7 @@ public:
     virtual std::shared_ptr<ILink> next_inlink() = 0;
     virtual std::set<std::shared_ptr<ILink>>get_outlinks() = 0;
     
+    // Returns true if the total number of packets in inlinks change from 0 to 1 
     virtual bool notify_about_arrival(Time arrival_time) = 0;
 };
 
@@ -47,9 +48,11 @@ public:
     virtual ~ISchedulingModule() = default;
 
     virtual bool notify_about_processing_finished(Time finish_time) = 0;
+    // Returns true if the total number of packets in inlinks change from 0 to 1 
     virtual bool notify_about_arrival(Time arrival_time, std::weak_ptr<IProcessingDevice> target) = 0;
     
     virtual bool notify_about_sending_finished(Time finish_time) = 0;
+    // Returns true if the total number of packets in NIC buffer change from 0 to 1 
     virtual bool notify_about_new_packet_to_send(Time arrival_time, std::weak_ptr<ISender> target) = 0;
 };
 
