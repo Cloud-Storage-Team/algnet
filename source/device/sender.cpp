@@ -125,7 +125,8 @@ Time Sender::process() {
     }
     // total_processing_time += processing_ack_time;
     
-    if (m_process_scheduler.notify_about_finish(Scheduler::get_instance().get_current_time() + total_processing_time)) {
+    Time current_time = Scheduler::get_instance().get_current_time();
+    if (m_process_scheduler.notify_about_finish(current_time + total_processing_time)) {
         return 0;
     }
 
