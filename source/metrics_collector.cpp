@@ -89,7 +89,7 @@ void MetricsCollector::draw_metric_plots() const {
         auto flow =
             IdentifierFactory::get_instance().get_object<IFlow>(flow_id);
 
-        ax->title(fmt::format("RTT values {} {}", flow->get_sender()->get_id(),
+        ax->title(fmt::format("RTT values from {} to {}", flow->get_sender()->get_id(),
                               flow->get_receiver()->get_id()));
 
         matplot::save(fmt::format("{}/RTT_{}.svg", metrics_dir_name, flow_id));
@@ -111,7 +111,7 @@ void MetricsCollector::draw_metric_plots() const {
 
         ax->xlabel("Time, ns");
         ax->ylabel("Value, packets");
-        ax->title(fmt::format("Queue size {}", link_id));
+        ax->title(fmt::format("Queue size at {}", link_id));
         ax->color("white");
 
         matplot::save(
