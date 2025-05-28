@@ -9,6 +9,7 @@
 
 #include "flow/flow.hpp"
 #include "utils/identifier_factory.hpp"
+#include "link.hpp"
 
 namespace fs = std::filesystem;
 
@@ -89,7 +90,8 @@ void MetricsCollector::draw_metric_plots() const {
         auto flow =
             IdentifierFactory::get_instance().get_object<IFlow>(flow_id);
 
-        ax->title(fmt::format("RTT values from {} to {}", flow->get_sender()->get_id(),
+        ax->title(fmt::format("RTT values from {} to {}",
+                              flow->get_sender()->get_id(),
                               flow->get_receiver()->get_id()));
 
         matplot::save(fmt::format("{}/RTT_{}.svg", metrics_dir_name, flow_id));
@@ -111,11 +113,18 @@ void MetricsCollector::draw_metric_plots() const {
 
         ax->xlabel("Time, ns");
         ax->ylabel("Value, packets");
-        ax->title(fmt::format("Queue size at {}", link_id));
+
+        auto link =
+            IdentifierFactory::get_instance().get_object<ILink>(link_id);
+
+        ax->title(fmt::format("Queue size from {} to {}", link_id,
+                              link->get_from()->get_id(),
+                              link->get_to()->get_id()));
         ax->color("white");
 
         matplot::save(
-            fmt::format("{}/queue_size_{}.svg", metrics_dir_name, link_id), "svg");
+            fmt::format("{}/queue_size_{}.svg", metrics_dir_name, link_id),
+            "svg");
     }
 }
 
