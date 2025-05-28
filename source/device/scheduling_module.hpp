@@ -5,6 +5,7 @@
 
 #include "device.hpp"
 #include "scheduler.hpp"
+#include "logger/logger.hpp"
 
 namespace sim {
 
