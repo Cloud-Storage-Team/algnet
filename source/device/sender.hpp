@@ -53,7 +53,6 @@ private:
     std::queue<Packet> m_flow_buffer;
     std::unique_ptr<IRoutingDevice> m_router;
     std::unique_ptr<ISchedulingModule> m_scheduler;
-    Id m_id;
 };
 
 }  // namespace sim
