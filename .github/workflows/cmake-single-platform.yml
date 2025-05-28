@@ -66,9 +66,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install gnuplot
-      run: sudo apt install gnuplot
-
     - name: Update submodules
       run: git submodule update --init --recursive
 
@@ -90,13 +87,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Install gnuplot
+      run: sudo apt install gnuplot
+
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
         name: build-artifact
-
-    - name: find simulator
-      run: find -type f -name "simulator"
 
     - name: Make Simulator executable
       run: chmod +x simulator
@@ -109,6 +106,11 @@ jobs:
       with:
         name: metrics
         path: metrics/**
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: metrics
 
   test:
     runs-on: ubuntu-latest
