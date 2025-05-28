@@ -14,8 +14,6 @@
 
 namespace sim {
 
-int cnt = 0;
-
 Receiver::Receiver(Id a_id) : m_router(std::make_unique<RoutingModule>(a_id)) {}
 
 bool Receiver::add_inlink(std::shared_ptr<ILink> link) {
