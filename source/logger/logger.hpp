@@ -14,6 +14,7 @@ public:
     static Logger& get_instance();
 
     void logExample();
+    void disable_logs();
 
     void trace(std::string msg,
                std::source_location loc = std::source_location::current());
