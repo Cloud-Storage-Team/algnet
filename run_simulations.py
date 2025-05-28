@@ -15,7 +15,7 @@ def main(args):
     check_directory(corner_metrics_dir)
 
     for filename in os.listdir(simulation_configs_dif):
-        if not filename.endswith('.yml'):
+        if not filename.endswith('.yml') and not filename.endswith('.yaml'):
             continue
         no_extention_name = os.path.splitext(filename)[0]
 
