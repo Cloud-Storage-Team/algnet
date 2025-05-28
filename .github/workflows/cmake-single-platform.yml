@@ -65,6 +65,9 @@ jobs:
         name: build-artifact
         path: build
 
+    - name: Make Simulator executable
+      run: chmod +x build/simulator
+
     - name: Run simulation
       run: python3 run_simulations.py build/simulator configuration_examples/simulation_examples metrics
 
