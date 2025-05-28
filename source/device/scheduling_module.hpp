@@ -25,7 +25,7 @@ public:
     // decrement counter, update earliest_possible_time; return true if counter = 0
     bool notify_about_finish(Time finish_time) { 
         if (m_cnt == 0) {
-            // TODO warning, impossible situation
+            LOG_WARN("Impossible sittuation: notify_about_finish triggered, but counter is zero")
             return false;
         }
         m_cnt--;
