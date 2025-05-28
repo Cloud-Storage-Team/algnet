@@ -7,8 +7,8 @@ Packet::Packet(PacketType a_type, Size a_size_byte, IFlow* a_flow, Id a_source_i
     : type(a_type),
       source_id(a_source_id),
       dest_id(a_dest_id),
-      send_time(a_send_time),
       RTT(a_RTT),
+      send_time(a_send_time),
       size_byte(a_size_byte),
       flow(a_flow) {}
 
