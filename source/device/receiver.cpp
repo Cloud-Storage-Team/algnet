@@ -1,7 +1,6 @@
 #include "receiver.hpp"
 
 #include <memory>
-#include <iostream>
 
 #include "event.hpp"
 #include "link.hpp"
@@ -13,8 +12,6 @@
 #include "utils/validation.hpp"
 
 namespace sim {
-
-int cnt = 0;
 
 Receiver::Receiver()
     : m_router(std::make_unique<RoutingModule>()),
@@ -123,8 +120,6 @@ Time Receiver::process() {
         next_link->schedule_arrival(data_packet);
         // TODO: think about redirecting time
     }
-
-    std::cout << "Arrived currently: " << ++cnt << std::endl;
 
     if (m_scheduler->notify_about_processing_finished(Scheduler::get_instance().get_current_time() + total_processing_time)) {
         return 0;

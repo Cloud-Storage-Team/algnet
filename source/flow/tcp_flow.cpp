@@ -7,10 +7,7 @@
 #include "event.hpp"
 #include "iostream"
 #include "scheduler.hpp"
-<<<<<<< HEAD
 #include "logger/logger.hpp"
-=======
->>>>>>> origin/main
 #include "utils/identifier_factory.hpp"
 #include "metrics_collector.hpp"
 
