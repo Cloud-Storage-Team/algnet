@@ -22,6 +22,8 @@ int main(const int argc, char **argv) {
             export_metrics_flag = true;
         } else if (std::string(argv[i]) == "--no-plots") {
             draw_plots_flag = false;
+        } else if (std::string(argv[i]) == "--no-logs") {
+            Logger::get_instance().disable_logs();
         }
     }
 
