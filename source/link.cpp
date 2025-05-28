@@ -3,6 +3,7 @@
 #include "device/device.hpp"
 #include "event.hpp"
 #include "logger/logger.hpp"
+#include "metrics_collector.hpp"
 #include "scheduler.hpp"
 #include "utils/identifier_factory.hpp"
 
@@ -49,6 +50,10 @@ void Link::schedule_arrival(Packet packet) {
         LOG_WARN("Destination device pointer is expired");
         return;
     }
+
+    MetricsCollector::get_instance().add_queue_size(
+        get_id(), Scheduler::get_instance().get_current_time(),
+        m_src_egress_buffer_size_byte / packet.size_byte);
 
     if (m_src_egress_buffer_size_byte + packet.size_byte >
         m_max_src_egress_buffer_size_byte) {
