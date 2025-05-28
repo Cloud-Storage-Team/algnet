@@ -36,7 +36,7 @@ Run simulator:
 
 - `metrics-output-dir-name` -- directory name for metrics and plots ("metrics" by default).
 - `--export-metrics` -- exports simulation metrics to text files.
-- `--no-plots` -- disable generation of plots. 
+- `--no-plots` -- disables generation of plots.
 
 # Smart pointers
 
