@@ -17,12 +17,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Create artefact
-        run: echo "Hello, World!" > hello.txt
+        run:
+          mkdir -p hello
+          echo "Hello, World!" > hello/hello.txt
       - name: Deploy artefact
         uses: actions/upload-artifact@v4
         with:
           name: hello-artifact
-          path: hello.txt
+          path: hello/hello.txt
 
   upload-artefacts:
     runs-on: ubuntu-latest
