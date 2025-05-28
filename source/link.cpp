@@ -53,7 +53,7 @@ void Link::schedule_arrival(Packet packet) {
 
     MetricsCollector::get_instance().add_queue_size(
         get_id(), Scheduler::get_instance().get_current_time(),
-        m_src_egress_buffer_size_byte / packet.size_byte);
+        m_src_egress_buffer_size_byte);
 
     if (m_src_egress_buffer_size_byte + packet.size_byte >
         m_max_src_egress_buffer_size_byte) {
@@ -122,6 +122,10 @@ std::shared_ptr<IRoutingDevice> Link::get_to() const {
 
     return m_to.lock();
 };
+
+Size Link::get_max_src_egress_buffer_size_byte() const {
+    return m_max_src_egress_buffer_size_byte;
+}
 
 Id Link::get_id() const { return m_id; }
 

@@ -112,10 +112,15 @@ void MetricsCollector::draw_metric_plots() const {
         ax->plot(x_data, y_data, "-o")->line_width(1.5);
 
         ax->xlabel("Time, ns");
-        ax->ylabel("Value, packets");
+        ax->ylabel("Value, bytes");
 
         auto link =
             IdentifierFactory::get_instance().get_object<ILink>(link_id);
+
+        matplot::line(0, link->get_max_src_egress_buffer_size_byte(), 10000,
+                      link->get_max_src_egress_buffer_size_byte())
+            ->line_width(1.5)
+            .color({1.f, 0.0f, 0.0f});
 
         ax->title(fmt::format("Queue size from {} to {}",
                               link->get_from()->get_id(),
