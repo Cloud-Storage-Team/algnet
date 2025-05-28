@@ -7,7 +7,7 @@
 int main(const int argc, char **argv) {
     if (argc < 2) {
         LOG_ERROR(
-            fmt::format("Usage: {} <config.yaml> [output-dir] [--export-metrics] [--no-plots]",
+            fmt::format("Usage: {} <config.yaml> [output-dir] [--export-metrics] [--no-plots] [--no-logs]",
                         argv[0]));
         return 1;
     } else if (argc > 2) {
@@ -22,6 +22,8 @@ int main(const int argc, char **argv) {
             export_metrics_flag = true;
         } else if (std::string(argv[i]) == "--no-plots") {
             draw_plots_flag = false;
+        } else if (std::string(argv[i]) == "--no-logs") {
+            Logger::get_instance().disable_logs();
         }
     }
 
