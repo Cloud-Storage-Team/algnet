@@ -119,8 +119,6 @@ Time Receiver::process() {
         // TODO: think about redirecting time
     }
 
-    std::cout << "Arrived: " << ++cnt << std::endl;
-
     if (m_process_scheduler.notify_about_finish(Scheduler::get_instance().get_current_time() + total_processing_time)) {
         return 0;
     }
