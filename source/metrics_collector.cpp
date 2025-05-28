@@ -59,10 +59,7 @@ void MetricsCollector::draw_metric_plots() const {
         ax->ylabel("Value, ns");
         ax->title("RTT values");
 
-        std::string path =
-            fmt::format("{}/RTT_{}.png", metrics_dir_name, flow_id);
-        std::cerr << "save metrics to " << path << std::endl;
-        matplot::save(path);
+        matplot::save(fmt::format("{}/RTT_{}.png", metrics_dir_name, flow_id));
     }
 }
 
