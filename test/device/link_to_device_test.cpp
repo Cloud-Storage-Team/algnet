@@ -11,8 +11,8 @@ public:
 };
 
 TEST_F(LinkToDevice, NoLinkToDevice) {
-    auto source = std::make_shared<sim::RoutingModule>(sim::RoutingModule(""));
-    auto dest = std::make_shared<sim::RoutingModule>(sim::RoutingModule(""));
+    auto source = std::make_shared<sim::RoutingModule>();
+    auto dest = std::make_shared<sim::RoutingModule>();
     auto link = std::make_shared<TestLink>(source, dest);
     dest->add_inlink(link);
 
@@ -20,12 +20,10 @@ TEST_F(LinkToDevice, NoLinkToDevice) {
 }
 
 TEST_F(LinkToDevice, LinkIsPresent) {
-    auto source = std::make_shared<sim::RoutingModule>(sim::RoutingModule(""));
-    auto neighbour =
-        std::make_shared<sim::RoutingModule>(sim::RoutingModule(""));
-    auto dest = std::make_shared<sim::RoutingModule>(sim::RoutingModule(""));
-    auto another_dest =
-        std::make_shared<sim::RoutingModule>(sim::RoutingModule(""));
+    auto source = std::make_shared<sim::RoutingModule>();
+    auto neighbour = std::make_shared<sim::RoutingModule>();
+    auto dest = std::make_shared<sim::RoutingModule>();
+    auto another_dest = std::make_shared<sim::RoutingModule>();
 
     auto link_neighbour =
         std::make_shared<TestLink>(TestLink(source, neighbour));

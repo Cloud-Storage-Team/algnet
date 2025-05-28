@@ -6,7 +6,7 @@ std::vector<std::shared_ptr<sim::IRoutingDevice>> createRoutingModules(
     size_t count) {
     std::vector<std::shared_ptr<sim::IRoutingDevice>> modules;
     for (size_t i = 0; i < count; ++i) {
-        modules.emplace_back(std::make_shared<sim::RoutingModule>(""));
+        modules.emplace_back(std::make_shared<sim::RoutingModule>());
     }
     return modules;
 }

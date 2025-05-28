@@ -11,7 +11,7 @@ namespace sim {
 
 class RoutingModule : public IRoutingDevice {
 public:
-    RoutingModule(Id a_id);
+    RoutingModule(Id a_id = "");
     ~RoutingModule() = default;
 
     bool add_inlink(std::shared_ptr<ILink> link) final;
