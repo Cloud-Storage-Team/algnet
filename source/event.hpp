@@ -1,12 +1,13 @@
 #pragma once
 
 #include "device/device.hpp"
-#include "flow/flow.hpp"
 #include "link.hpp"
 #include "packet.hpp"
 #include "types.hpp"
 
 namespace sim {
+
+class IFlow;
 
 // Base class for event
 class Event {

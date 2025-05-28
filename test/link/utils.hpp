@@ -5,6 +5,8 @@
 
 #include "device/device.hpp"
 #include "link.hpp"
+#include "packet.hpp"
+#include "event.hpp"
 
 namespace test {
 

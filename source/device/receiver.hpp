@@ -2,7 +2,9 @@
 #include <memory>
 
 #include "packet.hpp"
+#include "event.hpp"
 #include "device.hpp"
+#include "scheduling_module.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
@@ -46,7 +48,7 @@ public:
 private:
     Time send_ack(Packet data_packet);
     std::unique_ptr<IRoutingDevice> m_router;
-    std::unique_ptr<ISchedulingModule> m_scheduler;
+    SchedulingModule<IReceiver, Process> m_process_scheduler;
 };
 
 }  // namespace sim

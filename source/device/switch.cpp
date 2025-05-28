@@ -11,8 +11,7 @@
 
 namespace sim {
 
-Switch::Switch(Id a_id) : m_router(std::make_unique<RoutingModule>(a_id)),
-      m_scheduler(std::make_unique<SchedulingModule>()) {}
+Switch::Switch(Id a_id) : m_router(std::make_unique<RoutingModule>(a_id)) {}
 
 bool Switch::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
@@ -61,7 +60,7 @@ std::shared_ptr<ILink> Switch::get_link_to_destination(
 }
 
 bool Switch::notify_about_arrival(Time arrival_time) {
-    return m_scheduler->notify_about_arrival(arrival_time, weak_from_this());
+    return m_process_scheduler.notify_about_arriving(arrival_time, weak_from_this());
 };
 
 DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
@@ -105,7 +104,7 @@ Time Switch::process() {
     // TODO: increase total_processing_time correctly
     next_link->schedule_arrival(packet);
 
-    if (m_scheduler->notify_about_processing_finished(Scheduler::get_instance().get_current_time() + total_processing_time)) {
+    if (m_process_scheduler.notify_about_finish(Scheduler::get_instance().get_current_time() + total_processing_time)) {
         return 0;
     }
     

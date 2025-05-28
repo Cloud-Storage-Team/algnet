@@ -15,6 +15,7 @@
 #include "device/sender.hpp"
 #include "device/switch.hpp"
 #include "flow/tcp_flow.hpp"
+#include "event.hpp"
 #include "link.hpp"
 #include "logger/logger.hpp"
 #include "metrics_collector.hpp"
@@ -98,10 +99,10 @@ public:
                 for (auto [link, paths_count] : links) {
                     src_device->update_routing_table(dest_device, link,
                                                      paths_count);
-                    std::cout << "route from " << src_device->get_id() << " to "
-                              << dest_device->get_id() << " by "
-                              << link->get_id() << "; count = " << paths_count
-                              << std::endl;
+                    // std::cout << "route from " << src_device->get_id() << " to "
+                    //           << dest_device->get_id() << " by "
+                    //           << link->get_id() << "; count = " << paths_count
+                    //           << std::endl;
                 }
             }
         }

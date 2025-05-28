@@ -4,25 +4,46 @@
 #include <set>
 
 #include "device.hpp"
+#include "scheduler.hpp"
 
 namespace sim {
 
-class SchedulingModule : public ISchedulingModule {
+template<typename T, typename E>
+class SchedulingModule {
 public:
-    ~SchedulingModule() = default;
+    // increment counter; return true if counter = 1
+    bool notify_about_arriving(Time arrival_time, std::weak_ptr<T> subject) {
+        m_cnt++;
+        bool result = (m_cnt == 1);
+        if (result) {
+            reschedule_event(arrival_time, subject);
+        }
 
-    bool notify_about_processing_finished(Time finish_time) final;
-    bool notify_about_arrival(Time arrival_time, std::weak_ptr<IProcessingDevice> target) final;
+        return result;
+    };
+    
+    // decrement counter, update earliest_possible_time; return true if counter = 0
+    bool notify_about_finish(Time finish_time) { 
+        if (m_cnt == 0) {
+            // TODO warning, impossible situation
+            return false;
+        }
+        m_cnt--;
+        m_earliest_possible_time = finish_time;
 
-    bool notify_about_sending_finished(Time finish_time) final;
-    bool notify_about_new_packet_to_send(Time arrival_time, std::weak_ptr<ISender> target) final;
+        return (m_cnt == 0);
+    };
 
 private:
-    std::uint32_t m_packet_cnt = 0;
-    Time m_earliest_possible_processing_time = 0;
+    void reschedule_event(Time preferred_processing_time, std::weak_ptr<T> target) {
+        m_earliest_possible_time = std::max(m_earliest_possible_time, preferred_processing_time);
 
-    std::uint32_t m_packet_to_send_cnt = 0;
-    Time m_earliest_possible_sending_time = 0;
+        std::unique_ptr<Event> new_event = std::make_unique<E>(m_earliest_possible_time, target);
+        Scheduler::get_instance().add(std::move(new_event));
+    }
+
+    std::uint32_t m_cnt = 0;
+    Time m_earliest_possible_time = 0;
 };
 
 }  // namespace sim

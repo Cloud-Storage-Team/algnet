@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 
-#include "device/device.hpp"
+#include "device/receiver.hpp"
 #include "link.hpp"
 
 namespace test {

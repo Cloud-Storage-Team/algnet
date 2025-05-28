@@ -1,5 +1,8 @@
 #include "packet.hpp"
 
+#include "device/sender.hpp"
+#include "device/receiver.hpp"
+
 #include <sstream>
 
 namespace sim {

@@ -3,12 +3,16 @@
 #include <queue>
 
 #include "device.hpp"
+#include "packet.hpp"
+#include "scheduling_module.hpp"
 #include "routing_module.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
 
 struct Packet;
+class Process;
+class SendData;
 
 class ISender : public IRoutingDevice, public IProcessingDevice {
 public:
@@ -52,7 +56,8 @@ public:
 private:
     std::queue<Packet> m_flow_buffer;
     std::unique_ptr<IRoutingDevice> m_router;
-    std::unique_ptr<ISchedulingModule> m_scheduler;
+    SchedulingModule<ISender, Process> m_process_scheduler;
+    SchedulingModule<ISender, SendData> m_send_data_scheduler;
 };
 
 }  // namespace sim

@@ -3,6 +3,8 @@
 #include <memory>
 
 #include "device.hpp"
+#include "event.hpp"
+#include "scheduling_module.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
@@ -39,7 +41,7 @@ public:
 
 private:
     std::unique_ptr<IRoutingDevice> m_router;
-    std::unique_ptr<ISchedulingModule> m_scheduler;
+    SchedulingModule<ISwitch, Process> m_process_scheduler;
 };
 
 }  // namespace sim

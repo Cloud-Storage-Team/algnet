@@ -3,9 +3,11 @@
 #include <memory>
 #include <string>
 
+#include "device/sender.hpp"
 #include "device/receiver.hpp"
 #include "logger/logger.hpp"
 #include "metrics_collector.hpp"
+#include "packet.hpp"
 #include "scheduler.hpp"
 
 namespace sim {

@@ -2,6 +2,7 @@
 
 #include "device/device.hpp"
 #include "event.hpp"
+#include "packet.hpp"
 #include "logger/logger.hpp"
 #include "metrics_collector.hpp"
 #include "scheduler.hpp"

@@ -1,5 +1,7 @@
 #include "validation.hpp"
 
+#include "logger/logger.hpp"
+
 namespace sim {
 
 bool is_valid_link(std::shared_ptr<ILink> link) {

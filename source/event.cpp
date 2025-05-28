@@ -1,6 +1,8 @@
 #include "event.hpp"
-
+#include "packet.hpp"
+#include "flow/flow.hpp"
 #include "scheduler.hpp"
+#include "device/sender.hpp"
 
 namespace sim {
 
