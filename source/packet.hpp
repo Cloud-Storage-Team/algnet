@@ -1,9 +1,9 @@
 #pragma once
-#include <cstdint>
+
 #include <string>
 
 #include "device/device.hpp"
-#include "flow.hpp"
+#include "flow/flow.hpp"
 
 namespace sim {
 
@@ -13,7 +13,7 @@ enum PacketType { ACK, DATA };
 
 struct Packet {
     Packet(PacketType a_type = PacketType::DATA, Size a_size_byte = 0,
-           IFlow* flow = nullptr);
+           IFlow* flow = nullptr, Time a_send_time = 0);
 
     bool operator==(const Packet& packet) const;
     std::string to_string() const;
@@ -22,6 +22,7 @@ struct Packet {
     PacketType type;
     Size size_byte;
     IFlow* flow;
+    Time send_time;
 };
 
 }  // namespace sim

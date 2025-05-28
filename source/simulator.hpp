@@ -14,8 +14,10 @@
 #include "device/receiver.hpp"
 #include "device/sender.hpp"
 #include "device/switch.hpp"
+#include "flow/tcp_flow.hpp"
 #include "link.hpp"
 #include "logger/logger.hpp"
+#include "metrics_collector.hpp"
 #include "scheduler.hpp"
 #include "utils/algorithms.hpp"
 
@@ -24,9 +26,9 @@ namespace sim {
 template <typename TSender, typename TSwitch, typename TReceiver,
           typename TFlow, typename TLink>
 requires std::derived_from<TSender, ISender> &&
-    std::derived_from<TSwitch, ISwitch> &&
-    std::derived_from<TReceiver, IReceiver> &&
-    std::derived_from<TFlow, IFlow> && std::derived_from<TLink, ILink>
+         std::derived_from<TSwitch, ISwitch> &&
+         std::derived_from<TReceiver, IReceiver> &&
+         std::derived_from<TFlow, IFlow> && std::derived_from<TLink, ILink>
 class Simulator {
 public:
     Simulator() = default;
@@ -70,8 +72,8 @@ public:
                                     Time delay_between_packets,
                                     std::uint32_t packets_to_send) {
         auto flow =
-            std::make_shared<Flow>(sender, receiver, packet_size,
-                                   delay_between_packets, packets_to_send);
+            std::make_shared<TFlow>(sender, receiver, packet_size,
+                                    delay_between_packets, packets_to_send);
         m_flows.emplace_back(flow);
         return flow;
     }
@@ -79,8 +81,10 @@ public:
     void add_link(std::shared_ptr<IRoutingDevice> a_from,
                   std::shared_ptr<IRoutingDevice> a_to,
                   std::uint32_t a_speed_gbps, Time a_delay,
-                  size_t max_ingress_buffer_size = 4096) {
+                  Size max_egress_buffer_size = 4096,
+                  Size max_ingress_buffer_size = 4096) {
         auto link = std::make_shared<TLink>(a_from, a_to, a_speed_gbps, a_delay,
+                                            max_egress_buffer_size,
                                             max_ingress_buffer_size);
         m_links.emplace_back(link);
         a_from->add_outlink(link);
@@ -108,43 +112,45 @@ public:
         for (auto src_device : get_devices()) {
             RoutingTable routing_table = bfs(src_device);
             for (auto [dest_device, links] : routing_table) {
-                for (auto [link, paths_count]: links) {
-                    src_device->update_routing_table(dest_device, link, paths_count);
+                for (auto [link, paths_count] : links) {
+                    src_device->update_routing_table(dest_device, link,
+                                                     paths_count);
                 }
             }
         }
     }
     // Create a Stop event at a_stop_time and start simulation
-    void start(Time a_stop_time) {
+    void start(Time a_stop_time, bool export_metrics = false, bool draw_plots = true) {
         recalculate_paths();
         Scheduler::get_instance().add(std::make_unique<Stop>(a_stop_time));
         constexpr Time start_time = 0;
 
         for (auto flow : m_flows) {
-            Scheduler::get_instance().add(
-                std::make_unique<StartFlow>(start_time, flow));
+            Scheduler::get_instance().add(std::make_unique<StartFlow>(start_time, flow));
         }
 
         for (auto [name, sender] : m_senders) {
-            // Scheduler::get_instance().add(
-            //     std::make_unique<Process>(start_time, sender));
-            // Scheduler::get_instance().add(
-            //     std::make_unique<SendData>(start_time, sender));
+            // Scheduler::get_instance().add(std::make_unique<Process>(start_time, sender));
+            // Scheduler::get_instance().add(std::make_unique<SendData>(start_time, sender));
         }
 
         for (auto [name, receiver] : m_receivers) {
-            // Scheduler::get_instance().add(
-            //     std::make_unique<Process>(start_time, receiver));
+            // Scheduler::get_instance().add(std::make_unique<Process>(start_time, receiver));
         }
 
         for (auto [name, swtch] : m_switches) {
-            // Scheduler::get_instance().add(
-            //     std::make_unique<Process>(start_time, swtch));
+            // Scheduler::get_instance().add(std::make_unique<Process>(start_time, swtch));
         }
-        LOG_INFO("Simulation started");
+        
         while (Scheduler::get_instance().tick()) {
         }
-        LOG_INFO("Simulation finished");
+
+        if (export_metrics) {
+            MetricsCollector::get_instance().export_metrics_to_files();
+        }
+        if (draw_plots) {
+            MetricsCollector::get_instance().draw_metric_plots();
+        }
     }
 
 private:
@@ -156,8 +162,9 @@ private:
 };
 
 using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;
+using TcpSimulator = Simulator<Sender, Switch, Receiver, TcpFlow, Link>;
 
-using SimulatorVariant = std::variant<BasicSimulator>;
+using SimulatorVariant = std::variant<BasicSimulator, TcpSimulator>;
 
 SimulatorVariant create_simulator(std::string_view algorithm);
 
