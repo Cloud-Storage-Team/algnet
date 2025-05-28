@@ -63,6 +63,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: build-artifact
+        path: build
 
     - name: Run simulation
       run: python3 run_simulations.py build/simulator configuration_examples/simulation_examples metrics
