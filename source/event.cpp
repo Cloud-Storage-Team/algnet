@@ -1,10 +1,12 @@
 #include "event.hpp"
 
+#include "metrics_collector.hpp"
 #include "scheduler.hpp"
 
 namespace sim {
 
-Generate::Generate(Time a_time, std::weak_ptr<IFlow> a_flow, Size a_packet_size) : m_flow(a_flow), m_packet_size(a_packet_size), m_time(a_time) {}
+Generate::Generate(Time a_time, std::weak_ptr<IFlow> a_flow, Size a_packet_size)
+    : m_flow(a_flow), m_packet_size(a_packet_size), m_time(a_time) {}
 
 void Generate::operator()() {
     if (m_flow.expired()) {
@@ -23,7 +25,8 @@ void Generate::operator()() {
 
 Time Generate::get_time() const { return m_time; }
 
-Arrive::Arrive(Time a_time, std::weak_ptr<ILink> a_link, Packet a_packet) : m_link(a_link), m_packet(a_packet), m_time(a_time) {};
+Arrive::Arrive(Time a_time, std::weak_ptr<ILink> a_link, Packet a_packet)
+    : m_link(a_link), m_packet(a_packet), m_time(a_time){};
 
 void Arrive::operator()() {
     if (m_link.expired()) {
@@ -35,7 +38,8 @@ void Arrive::operator()() {
 
 Time Arrive::get_time() const { return m_time; }
 
-Process::Process(Time a_time, std::weak_ptr<IProcessingDevice> a_device): m_device(a_device), m_time(a_time) {};
+Process::Process(Time a_time, std::weak_ptr<IProcessingDevice> a_device)
+    : m_device(a_device), m_time(a_time){};
 
 void Process::operator()() {
     if (m_device.expired()) {
@@ -50,7 +54,8 @@ void Process::operator()() {
 
 Time Process::get_time() const { return m_time; }
 
-SendData::SendData(Time a_time, std::weak_ptr<ISender> a_device): m_device(a_device), m_time(a_time) {};
+SendData::SendData(Time a_time, std::weak_ptr<ISender> a_device)
+    : m_device(a_device), m_time(a_time){};
 
 void SendData::operator()() {
     if (m_device.expired()) {
@@ -65,13 +70,14 @@ void SendData::operator()() {
 
 Time SendData::get_time() const { return m_time; }
 
-Stop::Stop(Time a_time): m_time(a_time) {}
+Stop::Stop(Time a_time) : m_time(a_time) {}
 
 void Stop::operator()() { Scheduler::get_instance().clear(); }
 
 Time Stop::get_time() const { return m_time; }
 
-StartFlow::StartFlow(Time a_time, std::weak_ptr<IFlow> a_flow) : m_flow(a_flow), m_time(a_time) {}
+StartFlow::StartFlow(Time a_time, std::weak_ptr<IFlow> a_flow)
+    : m_flow(a_flow), m_time(a_time) {}
 
 Time StartFlow::get_time() const { return m_time; }
 
@@ -83,12 +89,32 @@ void StartFlow::operator()() {
     m_flow.lock()->start();
 }
 
+TcpMetric::TcpMetric(Time a_time, std::weak_ptr<ITcpFlow> a_flow)
+    : m_time(a_time), m_flow(a_flow){};
+
+Time TcpMetric::get_time() const { return m_time; }
+
+void TcpMetric::operator()() {
+    if (m_flow.expired()) {
+        return;
+    }
+
+    auto flow = m_flow.lock();
+
+    std::uint32_t cwnd = flow->get_cwnd();
+    MetricsCollector::get_instance().add_cwnd(flow->get_id(), m_time, cwnd);
+
+    BaseEvent next_metrics_event = TcpMetric(m_time + DELAY, m_flow);
+    Scheduler::get_instance().add(std::move(next_metrics_event));
+}
+
 BaseEvent::BaseEvent(const Generate& e) : event(e) {}
 BaseEvent::BaseEvent(const Arrive& e) : event(e) {}
 BaseEvent::BaseEvent(const Process& e) : event(e) {}
 BaseEvent::BaseEvent(const SendData& e) : event(e) {}
 BaseEvent::BaseEvent(const Stop& e) : event(e) {}
 BaseEvent::BaseEvent(const StartFlow& e) : event(e) {}
+BaseEvent::BaseEvent(const TcpMetric& e) : event(e) {}
 
 void BaseEvent::operator()() {
     std::visit([&](auto real_event) { real_event(); }, event);

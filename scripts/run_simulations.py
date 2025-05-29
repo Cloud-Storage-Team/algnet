@@ -9,22 +9,6 @@ def check_directory(dirname: str):
     if not os.path.isdir(dirname):
         os.mkdir(dirname)
 
-
-def separate_files(metrics_dir: str):
-    link_dir = os.path.join(metrics_dir, "link")
-    flow_dir = os.path.join(metrics_dir, "flow")
-    check_directory(link_dir)
-    check_directory(flow_dir)
-
-    for filename in os.listdir(metrics_dir):
-        filepath = os.path.join(metrics_dir, filename)
-        if os.path.isfile(filepath):
-            if "link" in filename:
-                os.rename(filepath, os.path.join(link_dir, filename))
-            elif "flow" in filename:
-                os.rename(filepath, os.path.join(flow_dir, filename))
-
-
 def get_topology_name(config_path: str):
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
@@ -76,7 +60,7 @@ def main(args):
             [simulator_path, filepath, metrics_dir], stdout=subprocess.DEVNULL
         )
 
-        separate_files(metrics_dir)
+        # separate_files(metrics_dir)
 
 
 if __name__ == "__main__":
