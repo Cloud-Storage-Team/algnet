@@ -67,10 +67,14 @@ void Link::schedule_arrival(Packet packet) {
         std::max(m_last_src_egress_pass_time,
                  Scheduler::get_instance().get_current_time()) +
         transmission_time;
+    MetricsCollector::get_instance().add_queue_size(
+        get_id(), Scheduler::get_instance().get_current_time(),
+        m_src_egress_buffer_size_byte);
+
     m_src_egress_buffer_size_byte += packet.size_byte;
 
     MetricsCollector::get_instance().add_queue_size(
-        get_id(), Scheduler::get_instance().get_current_time(),
+        get_id(), Scheduler::get_instance().get_current_time() + 1,
         m_src_egress_buffer_size_byte);
 
     Scheduler::get_instance().add(
@@ -91,10 +95,14 @@ void Link::process_arrival(Packet packet) {
 
     m_to.lock()->notify_about_arrival(Scheduler::get_instance().get_current_time());
 
+    MetricsCollector::get_instance().add_queue_size(
+        get_id(), Scheduler::get_instance().get_current_time(),
+        m_src_egress_buffer_size_byte);
+
     m_src_egress_buffer_size_byte -= packet.size_byte;
 
     MetricsCollector::get_instance().add_queue_size(
-        get_id(), Scheduler::get_instance().get_current_time(),
+        get_id(), Scheduler::get_instance().get_current_time() + 1,
         m_src_egress_buffer_size_byte);
     m_next_ingress.push(packet);
 };
