@@ -1,6 +1,8 @@
 #pragma once
 #include <yaml-cpp/yaml.h>
 
+#include "flow/tcp_aimd_flow.hpp"
+#include "flow/tcp_flow.hpp"
 #include "device/receiver.hpp"
 #include "parse_primitives.hpp"
 #include "utils/identifier_factory.hpp"
@@ -143,6 +145,27 @@ Id parse_object<Flow>(const YAML::Node& key_node,
 
 template <>
 Id parse_object<TcpFlow>(const YAML::Node& key_node,
+                         const YAML::Node& value_node) {
+    Id id = key_node.as<Id>();
+    Id sender_id = value_node["sender_id"].as<Id>();
+    Id receiver_id = value_node["receiver_id"].as<Id>();
+    Size packet_size = value_node["packet_size"].as<Size>();
+    Time packet_interval = value_node["packet_interval"].as<Time>();
+    std::uint32_t number_of_packets =
+        value_node["number_of_packets"].as<std::uint32_t>();
+
+    std::shared_ptr<ISender> sender_ptr =
+        IdentifierFactory::get_instance().get_object<ISender>(sender_id);
+    std::shared_ptr<IReceiver> receiver_ptr =
+        IdentifierFactory::get_instance().get_object<IReceiver>(receiver_id);
+
+    parse_object_helper<TcpFlow>(id, sender_ptr, receiver_ptr, packet_size,
+                                 packet_interval, number_of_packets);
+    return id;
+}
+
+template <>
+Id parse_object<TcpAimdFlow>(const YAML::Node& key_node,
                          const YAML::Node& value_node) {
     Id id = key_node.as<Id>();
     Id sender_id = value_node["sender_id"].as<Id>();
