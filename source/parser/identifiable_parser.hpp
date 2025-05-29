@@ -180,7 +180,7 @@ Id parse_object<TcpAimdFlow>(const YAML::Node& key_node,
     std::shared_ptr<IReceiver> receiver_ptr =
         IdentifierFactory::get_instance().get_object<IReceiver>(receiver_id);
 
-    parse_object_helper<TcpFlow>(id, sender_ptr, receiver_ptr, packet_size,
+    parse_object_helper<TcpAimdFlow>(id, sender_ptr, receiver_ptr, packet_size,
                                  packet_interval, number_of_packets);
     return id;
 }
