@@ -21,6 +21,7 @@
 #include "metrics_collector.hpp"
 #include "scheduler.hpp"
 #include "utils/algorithms.hpp"
+#include "utils/validation.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
@@ -70,7 +71,7 @@ public:
     }
 
     bool add_link(std::shared_ptr<TLink> link) {
-        if (link == nullptr) {
+        if (!is_valid_link(link)) {
             return false;
         }
         if (!m_links.insert(link).second) {
