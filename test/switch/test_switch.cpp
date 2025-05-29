@@ -117,7 +117,7 @@ void test_senders(size_t senders_count) {
     // create packets
     std::vector<sim::Packet> packets(senders_count);
     for (size_t i = 0; i < senders_count; i++) {
-        packets[i] = sim::Packet(sim::PacketType::DATA, i, &flows[i], 0, flows[i].get_receiver()->get_id());
+        packets[i] = sim::Packet(sim::PacketType::DATA, i, &flows[i], "", flows[i].get_receiver()->get_id());
     }
 
     // create links
