@@ -76,6 +76,16 @@ Id parse_object<Link>(const YAML::Node& key_node,
     auto to_ptr =
         IdentifierFactory::get_instance().get_object<IRoutingDevice>(to_id);
 
+    if (from_ptr == nullptr) { 
+        LOG_ERROR("Failed to find link's source");
+        return "";
+    }
+    
+    if (to_ptr == nullptr) { 
+        LOG_ERROR("Failed to find link's destination");
+        return "";
+    }
+
     uint32_t latency = 0;
     if (value_node["latency"]) {
         latency = parse_latency(value_node["latency"].as<std::string>());

@@ -25,7 +25,7 @@ public:
                       "TObject must implement Identifiable interface");
         auto ptr = std::make_shared<TObject>(args...);
         Id id = ptr->get_id();
-        if (m_id_table.find(id) != m_id_table.end()) {
+        if (m_id_table.find(id) != m_id_table.end() || id == "") {
             return false;
         }
         m_id_table[id] = ptr;
