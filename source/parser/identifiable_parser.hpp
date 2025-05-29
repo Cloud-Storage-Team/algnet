@@ -174,7 +174,7 @@ Id parse_object<TcpAimdFlow>(const YAML::Node& key_node,
     Time packet_interval = value_node["packet_interval"].as<Time>();
     std::uint32_t number_of_packets =
         value_node["number_of_packets"].as<std::uint32_t>();
-    Time delay = value_node["delay"].as<Time>();
+    Time delay = value_node["max_delay"].as<Time>();
     std::uint32_t sstresh = value_node["sstresh"].as<std::uint32_t>();
     double beta = value_node["beta"].as<double>();
 

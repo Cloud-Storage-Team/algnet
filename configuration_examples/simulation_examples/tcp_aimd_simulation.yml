@@ -7,8 +7,8 @@ flows:
     packet_size: 64
     packet_interval: 600
     number_of_packets: 100
-    delay: 2000
-    sstresh: 4
+    max_delay: 4000
+    sstresh: 8
     beta: 0.5
   flow2:
     sender_id: "sender2"
@@ -16,8 +16,8 @@ flows:
     packet_size: 64
     packet_interval: 600
     number_of_packets: 100
-    delay: 2000
-    sstresh: 4
+    max_delay: 4000
+    sstresh: 8
     beta: 0.5
 
 algorithm: tcp_aimd
