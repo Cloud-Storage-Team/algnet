@@ -1,7 +1,6 @@
 #include "receiver.hpp"
 
 #include <memory>
-#include <iostream>
 
 #include "event.hpp"
 #include "link.hpp"

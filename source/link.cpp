@@ -1,7 +1,5 @@
 #include "link.hpp"
 
-#include <iostream>
-
 #include "device/device.hpp"
 #include "event.hpp"
 #include "packet.hpp"
@@ -56,8 +54,6 @@ void Link::schedule_arrival(Packet packet) {
 
     if (m_src_egress_buffer_size_byte + packet.size_byte >
         m_max_src_egress_buffer_size_byte) {
-        std::cout << "Speed: " << m_speed_gbps << std::endl;
-        std::cout << "Max size: " << m_max_src_egress_buffer_size_byte << std::endl;
         LOG_ERROR("Buffer in link overflowed; packet " + packet.to_string() +
                   " lost");
         return;
