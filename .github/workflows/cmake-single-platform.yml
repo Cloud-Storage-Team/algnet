@@ -56,8 +56,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Apt update
+      run: sudo apt update
+
     - name: Install gnuplot
-      run: sudo apt install gnuplot
+      run: sudo apt install --fix-missing gnuplot
 
     - name: Download artifact
       uses: actions/download-artifact@v4
