@@ -29,8 +29,6 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<ISender> a_src,
       m_cwnd(1),
       m_packets_in_flight(0),
       m_packets_acked(0),
-      m_next_expected_ack_num(0),
-      m_last_packet_num(0),
       m_id(a_id) {
     LOG_INFO(to_string());
 }
@@ -42,11 +40,14 @@ void TcpFlow::start() {
 }
 
 Time TcpFlow::create_new_data_packet() {
+
+    m_packets_for_sending.push(generate_packet());
+    
+    while (try_to_put_data_to_device()) { }
+
+    --m_packets_to_send;
     if (m_packets_to_send == 0) {
         return 0;
-    }
-    if (try_to_put_data_to_device()) {
-        --m_packets_to_send;
     }
 
     return m_delay_between_packets;
@@ -71,11 +72,9 @@ void TcpFlow::update(Packet packet, DeviceType type) {
 
     MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
                                              current_time, delay);
+    std::cout << "Delay: " << delay << std::endl;
 
-    std::uint32_t distance = packet.packet_num - m_next_expected_ack_num;
-    m_next_expected_ack_num += distance + 1;
-
-    if (distance == 0) {  // ask
+    if (delay < m_delay_threshold) {  // ask
         if (m_packets_in_flight > 0) {
             m_packets_in_flight--;
         }
@@ -90,6 +89,7 @@ void TcpFlow::update(Packet packet, DeviceType type) {
         m_cwnd = 1;
         m_packets_in_flight = 0;
     }
+    while (try_to_put_data_to_device()) { }
 
     LOG_INFO("New flow: " + to_string());
 }
@@ -118,17 +118,16 @@ std::string TcpFlow::to_string() const {
 }
 
 Packet TcpFlow::generate_packet() {
-    auto data_packet = Packet(PacketType::DATA, m_packet_size, this,
+    return Packet(PacketType::DATA, m_packet_size, this,
                   Scheduler::get_instance().get_current_time());
-    data_packet.packet_num = m_last_packet_num++;
-    return data_packet;
 }
 
 bool TcpFlow::try_to_put_data_to_device() {
-    if (m_packets_in_flight < m_cwnd) {
+    if (m_packets_in_flight < m_cwnd && !m_packets_for_sending.empty()) {
         m_packets_in_flight++;
-        Packet packet = generate_packet();
+        Packet packet = m_packets_for_sending.front();
         m_src.lock()->enqueue_packet(packet);
+        m_packets_for_sending.pop();
         return true;
     }
     return false;
