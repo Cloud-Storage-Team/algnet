@@ -29,7 +29,7 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<ISender> a_src,
       m_cwnd(1),
       m_packets_in_flight(0),
       m_packets_acked(0),
-      m_last_obtained_ack(0),
+      m_next_expected_ack_num(0),
       m_last_packet_num(0),
       m_id(a_id) {
     LOG_INFO(to_string());
@@ -71,9 +71,9 @@ void TcpFlow::update(Packet packet, DeviceType type) {
 
     MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
                                              current_time, delay);
-    std::cout << "Delay: " << delay << std::endl;
-    std::uint32_t distance = packet.packet_num - m_last_obtained_ack;
-    m_last_obtained_ack += distance + 1;
+
+    std::uint32_t distance = packet.packet_num - m_next_expected_ack_num;
+    m_next_expected_ack_num += distance + 1;
 
     if (distance == 0) {  // ask
         if (m_packets_in_flight > 0) {

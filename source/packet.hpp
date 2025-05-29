@@ -19,6 +19,7 @@ struct Packet {
     std::string to_string() const;
     std::shared_ptr<IRoutingDevice> get_destination() const;
 
+    std::uint32_t packet_num;
     PacketType type;
     Size size_byte;
     IFlow* flow;
