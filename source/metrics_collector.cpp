@@ -31,6 +31,13 @@ void MetricsCollector::add_RTT(Id flow_id, Time time, Time value) {
     m_RTT_storage[flow_id].emplace_back(time, value);
 }
 
+void MetricsCollector::add_cwnd(Id flow_id, Time time, std::uint32_t cwnd) {
+    if (!m_cwnd_stogare.contains(flow_id)) {
+        m_cwnd_stogare[flow_id] = {};
+    }
+    m_cwnd_stogare[flow_id].emplace_back(time, cwnd);
+}
+
 void MetricsCollector::export_metrics_to_files() const {
     create_metrics_directory();
     for (auto& [flow_id, values] : m_RTT_storage) {
@@ -48,6 +55,19 @@ void MetricsCollector::export_metrics_to_files() const {
     for (auto& [link_id, values] : m_queue_size_storage) {
         std::ofstream output_file(
             fmt::format("{}/queue_size_{}.txt", metrics_dir_name, link_id));
+        if (!output_file) {
+            throw std::runtime_error(
+                "Failed to create file for queue size values");
+        }
+        for (const auto& pair : values) {
+            output_file << pair.first << " " << pair.second << "\n";
+        }
+        output_file.close();
+    }
+
+    for (auto& [link_id, values] : m_cwnd_stogare) {
+        std::ofstream output_file(
+            fmt::format("{}/cwnd_{}.txt", metrics_dir_name, link_id));
         if (!output_file) {
             throw std::runtime_error(
                 "Failed to create file for queue size values");
@@ -123,7 +143,7 @@ void MetricsCollector::draw_metric_plots() const {
             ->line_width(1.5)
             .color({1.f, 0.0f, 0.0f});
 
-        ax->xlim({0, limits[1]});    
+        ax->xlim({0, limits[1]});
 
         ax->title(fmt::format("Queue size from {} to {}",
                               link->get_from()->get_id(),
@@ -133,6 +153,33 @@ void MetricsCollector::draw_metric_plots() const {
         matplot::save(
             fmt::format("{}/queue_size_{}.svg", metrics_dir_name, link_id),
             "svg");
+    }
+
+    for (auto& [flow_id, values] : m_cwnd_stogare) {
+        auto fig = matplot::figure(true);
+        auto ax = fig->current_axes();
+
+        std::vector<double> x_data;
+        std::transform(begin(values), end(values), std::back_inserter(x_data),
+                       [](auto const& pair) { return pair.first; });
+
+        std::vector<double> y_data;
+        std::transform(begin(values), end(values), std::back_inserter(y_data),
+                       [](auto const& pair) { return pair.second; });
+
+        ax->plot(x_data, y_data, "-o")->line_width(1.5);
+
+        ax->xlabel("Time, ns");
+        ax->ylabel("Value, packets");
+
+        auto flow =
+            IdentifierFactory::get_instance().get_object<IFlow>(flow_id);
+
+        ax->title(fmt::format("Cwnd values from {} to {}",
+                              flow->get_sender()->get_id(),
+                              flow->get_receiver()->get_id()));
+
+        matplot::save(fmt::format("{}/cwnd_{}.svg", metrics_dir_name, flow_id));
     }
 }
 

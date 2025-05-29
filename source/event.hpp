@@ -3,6 +3,7 @@
 #include <variant>
 
 #include "device/device.hpp"
+#include "flow/I_tcp_flow.hpp"
 #include "flow/flow.hpp"
 #include "link.hpp"
 #include "packet.hpp"
@@ -111,6 +112,19 @@ private:
     Time m_time;
 };
 
+class TcpMetric {
+public:
+    TcpMetric(Time a_time, std::weak_ptr<ITcpFlow> a_flow);
+
+    void operator()();
+    Time get_time() const;
+
+private:
+    const static Time DELAY = 200;
+    Time m_time;
+    std::weak_ptr<ITcpFlow> m_flow;
+};
+
 struct BaseEvent {
     BaseEvent(const Generate& e);
     BaseEvent(const Arrive& e);
@@ -118,12 +132,15 @@ struct BaseEvent {
     BaseEvent(const SendData& e);
     BaseEvent(const Stop& e);
     BaseEvent(const StartFlow& e);
+    BaseEvent(const TcpMetric& e);
 
     void operator()();
     bool operator>(const BaseEvent& other) const;
     Time get_time() const;
 
-    std::variant<Generate, Arrive, Process, SendData, Stop, StartFlow> event;
+    std::variant<Generate, Arrive, Process, SendData, Stop, StartFlow,
+                 TcpMetric>
+        event;
 };
 
 }  // namespace sim
