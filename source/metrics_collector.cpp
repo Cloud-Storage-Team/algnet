@@ -100,7 +100,7 @@ void MetricsCollector::add_queue_size(Id link_id, Time time,
 void MetricsCollector::draw_metric_plots() const {
     create_directory(metrics_dir_name);
 
-    std::string rtt_dir = fmt::format("{}/{}", metrics_dir_name, "link");
+    std::string rtt_dir = fmt::format("{}/{}", metrics_dir_name, "rtt");
     create_directory(rtt_dir);
     for (auto& [flow_id, values] : m_RTT_storage) {
         auto fig = matplot::figure(true);
