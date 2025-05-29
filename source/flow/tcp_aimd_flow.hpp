@@ -9,8 +9,8 @@ public:
     TcpAimdFlow(Id a_id, std::shared_ptr<ISender> a_src,
                 std::shared_ptr<IReceiver> a_dest, Size a_packet_size,
                 Time a_delay_between_packets, std::uint32_t a_packets_to_send,
-                Time a_delay_threshold = 2000, std::uint32_t a_ssthresh = 4,
-                double a_beta = 0.5);
+                Time a_delay_threshold, std::uint32_t a_ssthresh,
+                double a_beta);
 
     void start() final;
     Time create_new_data_packet() final;
@@ -19,7 +19,7 @@ public:
     std::shared_ptr<ISender> get_sender() const final;
     std::shared_ptr<IReceiver> get_receiver() const final;
     Id get_id() const final;
-    
+
     std::string to_string() const;
 
 private:
