@@ -32,9 +32,12 @@ TcpAimdFlow::TcpAimdFlow(Id a_id, std::shared_ptr<ISender> a_src,
 }
 
 void TcpAimdFlow::start() {
-    Generate generate_event(Scheduler::get_instance().get_current_time(),
-                            shared_from_this(), m_packet_size);
+    Time curr_time = Scheduler::get_instance().get_current_time();
+    Generate generate_event(curr_time, shared_from_this(), m_packet_size);
     Scheduler::get_instance().add(std::move(generate_event));
+
+    TcpMetric metrics_event(curr_time, shared_from_this());
+    Scheduler::get_instance().add(std::move(metrics_event));
 }
 
 Time TcpAimdFlow::create_new_data_packet() {
@@ -92,6 +95,8 @@ std::shared_ptr<IReceiver> TcpAimdFlow::get_receiver() const {
     return m_dest.lock();
 }
 Id TcpAimdFlow::get_id() const { return m_id; }
+
+std::uint32_t TcpAimdFlow::get_cwnd() const { return m_cwnd; }
 
 std::string TcpAimdFlow::to_string() const {
     std::ostringstream oss;

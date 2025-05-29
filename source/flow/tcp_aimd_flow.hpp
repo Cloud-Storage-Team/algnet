@@ -1,9 +1,9 @@
 #pragma once
-#include "flow.hpp"
+#include "I_tcp_flow.hpp"
 
 namespace sim {
 
-class TcpAimdFlow : public IFlow,
+class TcpAimdFlow : public ITcpFlow,
                     public std::enable_shared_from_this<TcpAimdFlow> {
 public:
     TcpAimdFlow(Id a_id, std::shared_ptr<ISender> a_src,
@@ -19,6 +19,8 @@ public:
     std::shared_ptr<ISender> get_sender() const final;
     std::shared_ptr<IReceiver> get_receiver() const final;
     Id get_id() const final;
+
+    std::uint32_t get_cwnd() const;
 
     std::string to_string() const;
 
