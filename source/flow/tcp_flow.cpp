@@ -121,8 +121,7 @@ Packet TcpFlow::generate_packet() {
     auto data_packet = Packet(PacketType::DATA, m_packet_size, this,
                   Scheduler::get_instance().get_current_time());
     data_packet.packet_num = m_last_packet_num++;
-    return Packet(PacketType::DATA, m_packet_size, this,
-                  Scheduler::get_instance().get_current_time());
+    return data_packet;
 }
 
 bool TcpFlow::try_to_put_data_to_device() {
