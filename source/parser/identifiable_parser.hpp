@@ -146,6 +146,16 @@ Id parse_object<Flow>(const YAML::Node& key_node,
     std::shared_ptr<IReceiver> receiver_ptr =
         IdentifierFactory::get_instance().get_object<IReceiver>(receiver_id);
 
+    if (sender_ptr == nullptr) { 
+        LOG_ERROR("Failed to find flow's sender");
+        return "";
+    }
+    
+    if (receiver_ptr == nullptr) { 
+        LOG_ERROR("Failed to find flow's receiver");
+        return "";
+    }
+
     parse_object_helper<Flow>(id, sender_ptr, receiver_ptr, packet_size,
                               packet_interval, number_of_packets);
     return id;
@@ -166,6 +176,16 @@ Id parse_object<TcpFlow>(const YAML::Node& key_node,
         IdentifierFactory::get_instance().get_object<ISender>(sender_id);
     std::shared_ptr<IReceiver> receiver_ptr =
         IdentifierFactory::get_instance().get_object<IReceiver>(receiver_id);
+
+    if (sender_ptr == nullptr) { 
+        LOG_ERROR("Failed to find flow's sender");
+        return "";
+    }
+    
+    if (receiver_ptr == nullptr) { 
+        LOG_ERROR("Failed to find flow's receiver");
+        return "";
+    }
 
     parse_object_helper<TcpFlow>(id, sender_ptr, receiver_ptr, packet_size,
                                  packet_interval, number_of_packets);
