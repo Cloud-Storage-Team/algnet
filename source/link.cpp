@@ -62,16 +62,16 @@ void Link::schedule_arrival(Packet packet) {
     LOG_INFO("Packet arrived to link's ingress queue. Packet: " +
              packet.to_string());
 
-    MetricsCollector::get_instance().add_queue_size(
-        get_id(), Scheduler::get_instance().get_current_time(),
-        m_src_egress_buffer_size_byte);
-
     unsigned int transmission_time = get_transmission_time(packet);
     m_last_src_egress_pass_time =
         std::max(m_last_src_egress_pass_time,
                  Scheduler::get_instance().get_current_time()) +
         transmission_time;
     m_src_egress_buffer_size_byte += packet.size_byte;
+
+    MetricsCollector::get_instance().add_queue_size(
+        get_id(), Scheduler::get_instance().get_current_time(),
+        m_src_egress_buffer_size_byte);
 
     Scheduler::get_instance().add(
         std::make_unique<Arrive>(m_last_src_egress_pass_time, weak_from_this(), packet));
