@@ -2,6 +2,7 @@
 
 #include <spdlog/fmt/fmt.h>
 
+#include <algorithm>
 #include <sstream>
 
 #include "event.hpp"
@@ -80,7 +81,7 @@ void TcpAimdFlow::update(Packet packet, DeviceType type) {
         try_to_put_data_to_device();
     } else {
         // Multiplicative Decrease
-        m_ssthresh = static_cast<std::uint32_t>(m_cwnd * m_beta);
+        m_ssthresh = std::max(1u, static_cast<std::uint32_t>(m_cwnd * m_beta));
         m_cwnd = m_ssthresh;
         m_packets_in_flight = 0;
     }
