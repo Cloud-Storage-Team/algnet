@@ -4,15 +4,15 @@ flows:
   flow1:
     sender_id: "sender1"
     receiver_id: "receiver1"
-    packet_size: 1024
-    packet_interval: 650
-    number_of_packets: 1000
+    packet_size: 64
+    packet_interval: 600
+    number_of_packets: 100
   flow2:
     sender_id: "sender2"
     receiver_id: "receiver2"
-    packet_size: 1024
-    packet_interval: 400
-    number_of_packets: 1000
+    packet_size: 64
+    packet_interval: 600
+    number_of_packets: 100
 
 algorithm: tcp
-simulation_time: 200000
+simulation_time: 100000

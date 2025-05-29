@@ -9,7 +9,7 @@ public:
     TcpFlow(Id a_id, std::shared_ptr<ISender> a_src,
             std::shared_ptr<IReceiver> a_dest, Size a_packet_size,
             Time a_delay_between_packets, std::uint32_t a_packets_to_send,
-            Time a_delay_threshold = 4000, std::uint32_t a_ssthresh = 4);
+            Time a_delay_threshold = 2000, std::uint32_t a_ssthresh = 4);
 
     void start() final;
     Time create_new_data_packet() final;
@@ -39,7 +39,6 @@ private:
     std::uint32_t m_packets_in_flight;
     std::uint32_t m_packets_acked;
 
-    std::queue<Packet> m_packets_for_sending;
     Id m_id;
 };
 }  // namespace sim

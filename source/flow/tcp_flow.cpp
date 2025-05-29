@@ -40,14 +40,11 @@ void TcpFlow::start() {
 }
 
 Time TcpFlow::create_new_data_packet() {
-
-    m_packets_for_sending.push(generate_packet());
-    
-    while (try_to_put_data_to_device()) { }
-
-    --m_packets_to_send;
     if (m_packets_to_send == 0) {
         return 0;
+    }
+    if (try_to_put_data_to_device()) {
+        --m_packets_to_send;
     }
 
     return m_delay_between_packets;
@@ -84,12 +81,12 @@ void TcpFlow::update(Packet packet, DeviceType type) {
         } else {
             m_cwnd++;
         }
+        try_to_put_data_to_device();
     } else {  // trigger_congestion
         m_ssthresh = m_cwnd / 2;
         m_cwnd = 1;
         m_packets_in_flight = 0;
     }
-    while (try_to_put_data_to_device()) { }
 
     LOG_INFO("New flow: " + to_string());
 }
@@ -123,11 +120,10 @@ Packet TcpFlow::generate_packet() {
 }
 
 bool TcpFlow::try_to_put_data_to_device() {
-    if (m_packets_in_flight < m_cwnd && !m_packets_for_sending.empty()) {
+    if (m_packets_in_flight < m_cwnd) {
         m_packets_in_flight++;
-        Packet packet = m_packets_for_sending.front();
+        Packet packet = generate_packet();
         m_src.lock()->enqueue_packet(packet);
-        m_packets_for_sending.pop();
         return true;
     }
     return false;
