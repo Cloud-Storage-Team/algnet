@@ -34,9 +34,13 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<ISender> a_src,
 }
 
 void TcpFlow::start() {
-    auto generate_event = std::make_unique<Generate>(Scheduler::get_instance().get_current_time(),
+    Time curr_time = Scheduler::get_instance().get_current_time();
+    auto generate_event = std::make_unique<Generate>(curr_time,
                             shared_from_this(), m_packet_size);
     Scheduler::get_instance().add(std::move(generate_event));
+
+    auto metrics_event = std::make_unique<TcpMetric>(curr_time, shared_from_this());
+    Scheduler::get_instance().add(std::move(metrics_event));
 }
 
 Time TcpFlow::create_new_data_packet() {
@@ -128,5 +132,7 @@ bool TcpFlow::try_to_put_data_to_device() {
     }
     return false;
 }
+
+std::uint32_t TcpFlow::get_cwnd() const { return m_cwnd; }
 
 }  // namespace sim

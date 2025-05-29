@@ -1,6 +1,7 @@
 #include "event.hpp"
 #include "packet.hpp"
-#include "flow/flow.hpp"
+
+#include "metrics_collector.hpp"
 #include "scheduler.hpp"
 #include "device/sender.hpp"
 
@@ -87,6 +88,22 @@ void StartFlow::operator()() {
     }
 
     m_flow.lock()->start();
+}
+
+TcpMetric::TcpMetric(Time a_time, std::weak_ptr<ITcpFlow> a_flow) : Event(a_time), m_flow(a_flow){};
+
+void TcpMetric::operator()() {
+    if (m_flow.expired()) {
+        return;
+    }
+
+    auto flow = m_flow.lock();
+
+    std::uint32_t cwnd = flow->get_cwnd();
+    MetricsCollector::get_instance().add_cwnd(flow->get_id(), m_time, cwnd);
+
+    auto next_metrics_event = std::make_unique<TcpMetric>(m_time + DELAY, m_flow);
+    Scheduler::get_instance().add(std::move(next_metrics_event));
 }
 
 }  // namespace sim

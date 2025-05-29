@@ -1,6 +1,8 @@
 #pragma once
 
 #include "device/device.hpp"
+#include "flow/I_tcp_flow.hpp"
+#include "flow/flow.hpp"
 #include "link.hpp"
 #include "packet.hpp"
 #include "types.hpp"
@@ -103,6 +105,18 @@ public:
     Stop(Time a_time);
     virtual ~Stop() = default;
     void operator()() final;
+};
+
+class TcpMetric : public Event  {
+public:
+    TcpMetric(Time a_time, std::weak_ptr<ITcpFlow> a_flow);
+    virtual ~TcpMetric() = default;
+
+    void operator()();
+
+private:
+    const static Time DELAY = 200;
+    std::weak_ptr<ITcpFlow> m_flow;
 };
 
 }  // namespace sim
