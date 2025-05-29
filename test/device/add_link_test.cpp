@@ -62,8 +62,7 @@ TEST_F(AddLink, SameLinkMultipleTimes) {
     }
 
     auto outlinks = source->get_outlinks();
-    sim::LoopIterator<
-        std::set<std::shared_ptr<sim::ILink>>::iterator>
+    sim::LoopIterator<std::set<std::shared_ptr<sim::ILink>>::iterator>
         outlink_it(outlinks.begin(), outlinks.end());
 
     for (size_t loop = 0; loop < NUMBER_OF_LOOPS; loop++) {

@@ -1,25 +1,29 @@
 #include "link.hpp"
 
+#include <iostream>
+
 #include "device/device.hpp"
 #include "event.hpp"
+#include "packet.hpp"
 #include "logger/logger.hpp"
+#include "metrics_collector.hpp"
 #include "scheduler.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
 
-Link::Link(std::weak_ptr<IRoutingDevice> a_from,
+Link::Link(Id a_id, std::weak_ptr<IRoutingDevice> a_from,
            std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_gbps,
            Time a_delay, Size a_max_src_egress_buffer_size_byte,
            Size a_max_ingress_buffer_size)
-    : m_from(a_from),
+    : m_id(a_id),
+      m_from(a_from),
       m_to(a_to),
       m_speed_gbps(a_speed_gbps),
       m_src_egress_buffer_size_byte(0),
       m_max_src_egress_buffer_size_byte(a_max_src_egress_buffer_size_byte),
       m_last_src_egress_pass_time(0),
       m_transmission_delay(a_delay),
-      m_id(IdentifierFactory::get_instance().generate_id()),
       m_next_ingress(),
       m_ingress_buffer_size_byte(0),
       m_max_ingress_buffer_size_byte(a_max_ingress_buffer_size) {
@@ -52,6 +56,8 @@ void Link::schedule_arrival(Packet packet) {
 
     if (m_src_egress_buffer_size_byte + packet.size_byte >
         m_max_src_egress_buffer_size_byte) {
+        std::cout << "Speed: " << m_speed_gbps << std::endl;
+        std::cout << "Max size: " << m_max_src_egress_buffer_size_byte << std::endl;
         LOG_ERROR("Buffer in link overflowed; packet " + packet.to_string() +
                   " lost");
         return;
@@ -65,10 +71,18 @@ void Link::schedule_arrival(Packet packet) {
         std::max(m_last_src_egress_pass_time,
                  Scheduler::get_instance().get_current_time()) +
         transmission_time;
+    MetricsCollector::get_instance().add_queue_size(
+        get_id(), Scheduler::get_instance().get_current_time(),
+        m_src_egress_buffer_size_byte);
+
     m_src_egress_buffer_size_byte += packet.size_byte;
 
+    MetricsCollector::get_instance().add_queue_size(
+        get_id(), Scheduler::get_instance().get_current_time() + 1,
+        m_src_egress_buffer_size_byte);
+
     Scheduler::get_instance().add(
-        Arrive(m_last_src_egress_pass_time, weak_from_this(), packet));
+        std::make_unique<Arrive>(m_last_src_egress_pass_time, weak_from_this(), packet));
 };
 
 void Link::process_arrival(Packet packet) {
@@ -83,7 +97,17 @@ void Link::process_arrival(Packet packet) {
     LOG_INFO("Packet arrived to link's egress queue. Packet: " +
              packet.to_string());
 
+    m_to.lock()->notify_about_arrival(Scheduler::get_instance().get_current_time());
+
+    MetricsCollector::get_instance().add_queue_size(
+        get_id(), Scheduler::get_instance().get_current_time(),
+        m_src_egress_buffer_size_byte);
+
     m_src_egress_buffer_size_byte -= packet.size_byte;
+
+    MetricsCollector::get_instance().add_queue_size(
+        get_id(), Scheduler::get_instance().get_current_time() + 1,
+        m_src_egress_buffer_size_byte);
     m_next_ingress.push(packet);
 };
 
@@ -117,6 +141,10 @@ std::shared_ptr<IRoutingDevice> Link::get_to() const {
 
     return m_to.lock();
 };
+
+Size Link::get_max_src_egress_buffer_size_byte() const {
+    return m_max_src_egress_buffer_size_byte;
+}
 
 Id Link::get_id() const { return m_id; }
 

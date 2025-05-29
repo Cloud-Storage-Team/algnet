@@ -1,15 +1,16 @@
 #include "algorithms.hpp"
 
-#include "link.hpp"
-
 #include <queue>
 #include <set>
+
+#include "link.hpp"
 
 namespace sim {
 
 // returns start device routing table
-// Unlike standard BFS that processes nodes one by one, this processes all nodes at the current distance level together.
-// So each iteration is a processing of all devices at a certain distance (wavefront)
+// Unlike standard BFS that processes nodes one by one, this processes all nodes
+// at the current distance level together. So each iteration is a processing of
+// all devices at a certain distance (wavefront)
 RoutingTable bfs(std::shared_ptr<IRoutingDevice>& start_device) {
     RoutingTable routing_table;
 
@@ -19,9 +20,8 @@ RoutingTable bfs(std::shared_ptr<IRoutingDevice>& start_device) {
     // Current wavefront
     std::set<std::shared_ptr<IRoutingDevice>> wave_front;
     wave_front.insert(start_device);
-    
     while (!wave_front.empty()) {
-        for (auto device: wave_front) {
+        for (auto device : wave_front) {
             queue.push(device);
             used.insert(device);
         }

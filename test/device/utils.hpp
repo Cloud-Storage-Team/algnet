@@ -2,6 +2,8 @@
 #include <gtest/gtest.h>
 
 #include "device/device.hpp"
+#include "device/routing_module.hpp"
+#include "packet.hpp"
 #include "link.hpp"
 
 namespace test {
@@ -25,6 +27,7 @@ public:
     std::optional<sim::Packet> get_packet() final;
     std::shared_ptr<sim::IRoutingDevice> get_from() const final;
     std::shared_ptr<sim::IRoutingDevice> get_to() const final;
+    Size get_max_src_egress_buffer_size_byte() const final;
 
     Id get_id() const final;
 

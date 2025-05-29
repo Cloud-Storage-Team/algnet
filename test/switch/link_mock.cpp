@@ -27,4 +27,8 @@ std::vector<sim::Packet> LinkMock::get_arrived_packets() const {
     return m_arrived_packets;
 }
 
-Id LinkMock::get_id() const { return 42; }
+Size LinkMock::get_max_src_egress_buffer_size_byte() const {
+    return 4096;
+}
+
+Id LinkMock::get_id() const { return ""; }

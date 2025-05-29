@@ -3,23 +3,26 @@
 #include <memory>
 #include <string>
 
+#include "device/sender.hpp"
 #include "device/receiver.hpp"
+#include "device/sender.hpp"
 #include "logger/logger.hpp"
 #include "metrics_collector.hpp"
+#include "packet.hpp"
 #include "scheduler.hpp"
 
 namespace sim {
 
-Flow::Flow(std::shared_ptr<ISender> a_src, std::shared_ptr<IReceiver> a_dest,
-           Size a_packet_size, Time a_delay_between_packets,
-           std::uint32_t a_packets_to_send)
-    : m_src(a_src),
+Flow::Flow(Id a_id, std::shared_ptr<ISender> a_src,
+           std::shared_ptr<IReceiver> a_dest, Size a_packet_size,
+           Time a_delay_between_packets, std::uint32_t a_packets_to_send)
+    : m_id(a_id),
+      m_src(a_src),
       m_dest(a_dest),
       m_packet_size(a_packet_size),
       m_delay_between_packets(a_delay_between_packets),
       m_updates_number(0),
-      m_packets_to_send(a_packets_to_send),
-      m_id(IdentifierFactory::get_instance().generate_id()) {}
+      m_packets_to_send(a_packets_to_send) {}
 
 void Flow::start() {
     schedule_packet_generation(Scheduler::get_instance().get_current_time());
@@ -33,6 +36,7 @@ Packet Flow::generate_packet() {
     packet.source_id = get_sender()->get_id();
     packet.dest_id = get_receiver()->get_id();
     packet.RTT = 0;
+    packet.send_time = Scheduler::get_instance().get_current_time();
     return packet;
 }
 
@@ -42,9 +46,11 @@ void Flow::update(Packet packet, DeviceType type) {
     }
     ++m_updates_number;
 
+    Time current_time = Scheduler::get_instance().get_current_time();
     MetricsCollector::get_instance().add_RTT(
         packet.flow->get_id(),
-        Scheduler::get_instance().get_current_time() - packet.send_time);
+        current_time,
+        current_time - packet.send_time);
 }
 
 std::uint32_t Flow::get_updates_number() const { return m_updates_number; }
@@ -77,7 +83,7 @@ Time Flow::put_data_to_device() {
 }
 
 void Flow::schedule_packet_generation(Time time) {
-    auto generate_event_ptr = Generate(time, shared_from_this(), m_packet_size);
+    auto generate_event_ptr = std::make_unique<Generate>(time, shared_from_this(), m_packet_size);
     Scheduler::get_instance().add(std::move(generate_event_ptr));
 }
 

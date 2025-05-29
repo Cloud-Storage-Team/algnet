@@ -6,13 +6,16 @@
 
 #include "event.hpp"
 #include "iostream"
-#include "scheduler.hpp"
-#include "utils/identifier_factory.hpp"
 #include "metrics_collector.hpp"
+#include "scheduler.hpp"
+#include "logger/logger.hpp"
+#include "device/sender.hpp"
+#include "device/receiver.hpp"
+#include "utils/identifier_factory.hpp"
 
 namespace sim {
 
-TcpFlow::TcpFlow(std::shared_ptr<ISender> a_src,
+TcpFlow::TcpFlow(Id a_id, std::shared_ptr<ISender> a_src,
                  std::shared_ptr<IReceiver> a_dest, Size a_packet_size,
                  Time a_delay_between_packets, std::uint32_t a_packets_to_send,
                  Time a_delay_threshold, std::uint32_t a_ssthresh)
@@ -26,16 +29,18 @@ TcpFlow::TcpFlow(std::shared_ptr<ISender> a_src,
       m_cwnd(1),
       m_packets_in_flight(0),
       m_packets_acked(0),
-      m_id(IdentifierFactory::get_instance().generate_id()) {
+      m_id(a_id) {
     LOG_INFO(to_string());
 }
 
-TcpFlow::~TcpFlow() { LOG_INFO(to_string()); }
-
 void TcpFlow::start() {
-    Generate generate_event(Scheduler::get_instance().get_current_time(),
+    Time curr_time = Scheduler::get_instance().get_current_time();
+    auto generate_event = std::make_unique<Generate>(curr_time,
                             shared_from_this(), m_packet_size);
     Scheduler::get_instance().add(std::move(generate_event));
+
+    auto metrics_event = std::make_unique<TcpMetric>(curr_time, shared_from_this());
+    Scheduler::get_instance().add(std::move(metrics_event));
 }
 
 Time TcpFlow::create_new_data_packet() {
@@ -66,7 +71,8 @@ void TcpFlow::update(Packet packet, DeviceType type) {
     LOG_INFO(fmt::format("Packet {} got in flow; delay = {}",
                          packet.to_string(), to_string(), delay));
 
-    MetricsCollector::get_instance().add_RTT(packet.flow->get_id(), delay);
+    MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
+                                             current_time, delay);
 
     if (delay < m_delay_threshold) {  // ask
         if (m_packets_in_flight > 0) {
@@ -112,8 +118,15 @@ std::string TcpFlow::to_string() const {
 }
 
 Packet TcpFlow::generate_packet() {
-    return Packet(PacketType::DATA, m_packet_size, this,
-                  Scheduler::get_instance().get_current_time());
+    sim::Packet packet;
+    packet.type = sim::PacketType::DATA;
+    packet.size_byte = m_packet_size;
+    packet.flow = this;
+    packet.source_id = get_sender()->get_id();
+    packet.dest_id = get_receiver()->get_id();
+    packet.RTT = 0;
+    packet.send_time = Scheduler::get_instance().get_current_time();
+    return packet;
 }
 
 bool TcpFlow::try_to_put_data_to_device() {
@@ -125,5 +138,7 @@ bool TcpFlow::try_to_put_data_to_device() {
     }
     return false;
 }
+
+std::uint32_t TcpFlow::get_cwnd() const { return m_cwnd; }
 
 }  // namespace sim

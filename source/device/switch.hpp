@@ -2,20 +2,16 @@
 
 #include <memory>
 
-#include "routing_module.hpp"
+#include "device.hpp"
+#include "event.hpp"
+#include "scheduling_module.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
 
-class ISwitch : public IRoutingDevice,
-                public IProcessingDevice {
-public:
-    virtual ~ISwitch() = default;
-};
-
 class Switch : public ISwitch, public std::enable_shared_from_this<Switch> {
 public:
-    Switch();
+    Switch(Id a_id);
     ~Switch() = default;
 
     bool add_inlink(std::shared_ptr<ILink> link) final;
@@ -24,6 +20,7 @@ public:
     std::shared_ptr<ILink> next_inlink() final;
     std::shared_ptr<ILink> get_link_to_destination(Packet packet) const final;
     std::set<std::shared_ptr<ILink>> get_outlinks() final;
+    bool notify_about_arrival(Time arrival_time) final;
 
     DeviceType get_type() const final;
     // Process a packet by moving it from ingress to egress
@@ -35,7 +32,8 @@ public:
     Id get_id() const final;
 
 private:
-    std::unique_ptr<RoutingModule> m_router;
+    std::unique_ptr<IRoutingDevice> m_router;
+    SchedulingModule<ISwitch, Process> m_process_scheduler;
 };
 
 }  // namespace sim

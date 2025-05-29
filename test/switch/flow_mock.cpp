@@ -1,4 +1,5 @@
 #include "flow_mock.hpp"
+#include "event.hpp"
 
 namespace test {
 
@@ -15,6 +16,6 @@ std::shared_ptr<sim::IReceiver> FlowMock::get_receiver() const {
     return m_receiver.lock();
 }
 
-Id FlowMock::get_id() const { return 42; }
+Id FlowMock::get_id() const { return ""; }
 
 }  // namespace test

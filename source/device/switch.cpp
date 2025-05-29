@@ -3,13 +3,15 @@
 #include <memory>
 
 #include "link.hpp"
+#include "routing_module.hpp"
+#include "scheduling_module.hpp"
+#include "scheduler.hpp"
 #include "logger/logger.hpp"
 #include "utils/validation.hpp"
 
 namespace sim {
 
-Switch::Switch()
-    : m_router(std::make_unique<RoutingModule>()) {}
+Switch::Switch(Id a_id) : m_router(std::make_unique<RoutingModule>(a_id)) {}
 
 bool Switch::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
@@ -37,6 +39,10 @@ std::shared_ptr<ILink> Switch::next_inlink() { return m_router->next_inlink(); }
 std::shared_ptr<ILink> Switch::get_link_to_destination(Packet packet) const {
     return m_router->get_link_to_destination(packet);
 }
+
+bool Switch::notify_about_arrival(Time arrival_time) {
+    return m_process_scheduler.notify_about_arriving(arrival_time, weak_from_this());
+};
 
 DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
 
@@ -73,6 +79,11 @@ Time Switch::process() {
 
     // TODO: increase total_processing_time correctly
     next_link->schedule_arrival(packet);
+
+    if (m_process_scheduler.notify_about_finish(Scheduler::get_instance().get_current_time() + total_processing_time)) {
+        return 0;
+    }
+    
     return total_processing_time;
 }
 

@@ -1,9 +1,12 @@
 #include "receiver.hpp"
 
 #include <memory>
+#include <iostream>
 
 #include "event.hpp"
 #include "link.hpp"
+#include "routing_module.hpp"
+#include "scheduling_module.hpp"
 #include "scheduler.hpp"
 #include "logger/logger.hpp"
 #include "utils/identifier_factory.hpp"
@@ -11,8 +14,9 @@
 
 namespace sim {
 
-Receiver::Receiver()
-    : m_router(std::make_unique<RoutingModule>()) {}
+int cnt = 0;
+
+Receiver::Receiver(Id a_id) : m_router(std::make_unique<RoutingModule>(a_id)) {}
 
 bool Receiver::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
@@ -41,6 +45,10 @@ std::shared_ptr<ILink> Receiver::next_inlink() {
 
 std::shared_ptr<ILink> Receiver::get_link_to_destination(Packet packet) const {
     return m_router->get_link_to_destination(packet);
+};
+
+bool Receiver::notify_about_arrival(Time arrival_time) {
+    return m_process_scheduler.notify_about_arriving(arrival_time, weak_from_this());
 };
 
 DeviceType Receiver::get_type() const { return DeviceType::RECEIVER; }
@@ -86,6 +94,12 @@ Time Receiver::process() {
         }
         next_link->schedule_arrival(data_packet);
         // TODO: think about redirecting time
+    }
+
+    std::cout << "Arrive: " << ++cnt << std::endl;
+
+    if (m_process_scheduler.notify_about_finish(Scheduler::get_instance().get_current_time() + total_processing_time)) {
+        return 0;
     }
 
     return total_processing_time;

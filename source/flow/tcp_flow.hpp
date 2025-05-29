@@ -1,17 +1,15 @@
 #pragma once
-#include "flow.hpp"
+#include "I_tcp_flow.hpp"
 
 namespace sim {
 
-class TcpFlow : public IFlow, public std::enable_shared_from_this<TcpFlow> {
+class TcpFlow : public ITcpFlow, public std::enable_shared_from_this<TcpFlow> {
 public:
     // TODO: delete a_delay_threshold default value
-    TcpFlow(std::shared_ptr<ISender> a_src, std::shared_ptr<IReceiver> a_dest,
-            Size a_packet_size, Time a_delay_between_packets,
-            std::uint32_t a_packets_to_send, Time a_delay_threshold = 2000,
-            std::uint32_t a_ssthresh = 4);
-
-    ~TcpFlow();
+    TcpFlow(Id a_id, std::shared_ptr<ISender> a_src,
+            std::shared_ptr<IReceiver> a_dest, Size a_packet_size,
+            Time a_delay_between_packets, std::uint32_t a_packets_to_send,
+            Time a_delay_threshold = 4000, std::uint32_t a_ssthresh = 8);
 
     void start() final;
     Time create_new_data_packet() final;
@@ -20,6 +18,7 @@ public:
     std::shared_ptr<ISender> get_sender() const final;
     std::shared_ptr<IReceiver> get_receiver() const final;
     Id get_id() const final;
+    std::uint32_t get_cwnd() const final;
 
     std::string to_string() const;
 
