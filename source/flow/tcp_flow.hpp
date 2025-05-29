@@ -39,6 +39,9 @@ private:
     std::uint32_t m_packets_in_flight;
     std::uint32_t m_packets_acked;
 
+    std::uint32_t m_last_obtained_ack;
+    std::uint32_t m_last_packet_num;
+
     Id m_id;
 };
 }  // namespace sim
