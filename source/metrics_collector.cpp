@@ -32,10 +32,10 @@ void MetricsCollector::add_RTT(Id flow_id, Time time, Time value) {
 }
 
 void MetricsCollector::add_cwnd(Id flow_id, Time time, std::uint32_t cwnd) {
-    if (!m_cwnd_stogare.contains(flow_id)) {
-        m_cwnd_stogare[flow_id] = {};
+    if (!m_cwnd_storage.contains(flow_id)) {
+        m_cwnd_storage[flow_id] = {};
     }
-    m_cwnd_stogare[flow_id].emplace_back(time, cwnd);
+    m_cwnd_storage[flow_id].emplace_back(time, cwnd);
 }
 
 void MetricsCollector::export_metrics_to_files() const {
@@ -65,7 +65,7 @@ void MetricsCollector::export_metrics_to_files() const {
         output_file.close();
     }
 
-    for (auto& [link_id, values] : m_cwnd_stogare) {
+    for (auto& [link_id, values] : m_cwnd_storage) {
         std::ofstream output_file(
             fmt::format("{}/cwnd_{}.txt", metrics_dir_name, link_id));
         if (!output_file) {
@@ -155,7 +155,7 @@ void MetricsCollector::draw_metric_plots() const {
             "svg");
     }
 
-    for (auto& [flow_id, values] : m_cwnd_stogare) {
+    for (auto& [flow_id, values] : m_cwnd_storage) {
         auto fig = matplot::figure(true);
         auto ax = fig->current_axes();
 

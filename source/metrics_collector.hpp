@@ -34,7 +34,7 @@ private:
     std::unordered_map<Id, std::vector<std::pair<Time, std::uint32_t>>>
         m_queue_size_storage;
     std::unordered_map<Id, std::vector<std::pair<Time, std::uint32_t>>>
-        m_cwnd_stogare;
+        m_cwnd_storage;
 
     std::string metrics_dir_name = "metrics";
 };
