@@ -36,7 +36,7 @@ void TcpFlow::start() {
     Scheduler::get_instance().add(std::move(generate_event));
 
     TcpMetric metrics_event(curr_time, shared_from_this());
-    Scheduler::get_instance().add(std::move(generate_event));
+    Scheduler::get_instance().add(std::move(metrics_event));
 }
 
 Time TcpFlow::create_new_data_packet() {
