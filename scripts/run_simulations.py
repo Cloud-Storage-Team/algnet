@@ -80,7 +80,7 @@ def main(args):
             [simulator_path, filepath, metrics_dir], stdout=subprocess.DEVNULL
         )
 
-        separate_files(metrics_dir)
+        # separate_files(metrics_dir)
 
 
 if __name__ == "__main__":

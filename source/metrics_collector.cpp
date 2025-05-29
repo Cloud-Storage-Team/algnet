@@ -15,6 +15,15 @@ namespace fs = std::filesystem;
 
 namespace sim {
 
+void static create_directory(std::string dir_name) {
+    if (bool created = fs::create_directory(dir_name); !created) {
+        if (bool is_dir_exists = fs::is_directory(dir_name); !is_dir_exists) {
+            throw std::runtime_error(
+                fmt::format("Failed to create {} directory", dir_name));
+        }
+    }
+}
+
 void MetricsCollector::init(const std::string& dir_name) {
     get_instance().metrics_dir_name = dir_name;
 }
@@ -39,7 +48,7 @@ void MetricsCollector::add_cwnd(Id flow_id, Time time, std::uint32_t cwnd) {
 }
 
 void MetricsCollector::export_metrics_to_files() const {
-    create_metrics_directory();
+    create_directory(metrics_dir_name);
     for (auto& [flow_id, values] : m_RTT_storage) {
         std::ofstream output_file(
             fmt::format("{}/RTT_{}.txt", metrics_dir_name, flow_id));
@@ -89,7 +98,10 @@ void MetricsCollector::add_queue_size(Id link_id, Time time,
 }
 
 void MetricsCollector::draw_metric_plots() const {
-    create_metrics_directory();
+    create_directory(metrics_dir_name);
+
+    std::string rtt_dir = fmt::format("{}/{}", metrics_dir_name, "link");
+    create_directory(rtt_dir);
     for (auto& [flow_id, values] : m_RTT_storage) {
         auto fig = matplot::figure(true);
         auto ax = fig->current_axes();
@@ -114,9 +126,12 @@ void MetricsCollector::draw_metric_plots() const {
                               flow->get_sender()->get_id(),
                               flow->get_receiver()->get_id()));
 
-        matplot::save(fmt::format("{}/RTT_{}.svg", metrics_dir_name, flow_id));
+        matplot::save(fmt::format("{}/{}.svg", rtt_dir, flow_id));
     }
 
+    std::string queue_size_dir =
+        fmt::format("{}/{}", metrics_dir_name, "queue_size");
+    create_directory(queue_size_dir);
     for (auto& [link_id, values] : m_queue_size_storage) {
         auto fig = matplot::figure(true);
         auto ax = fig->current_axes();
@@ -150,11 +165,11 @@ void MetricsCollector::draw_metric_plots() const {
                               link->get_to()->get_id()));
         ax->color("white");
 
-        matplot::save(
-            fmt::format("{}/queue_size_{}.svg", metrics_dir_name, link_id),
-            "svg");
+        matplot::save(fmt::format("{}/{}.svg", queue_size_dir, link_id), "svg");
     }
 
+    std::string cwnd_dir = fmt::format("{}/{}", metrics_dir_name, "cwnd");
+    create_directory(cwnd_dir);
     for (auto& [flow_id, values] : m_cwnd_storage) {
         auto fig = matplot::figure(true);
         auto ax = fig->current_axes();
@@ -179,17 +194,7 @@ void MetricsCollector::draw_metric_plots() const {
                               flow->get_sender()->get_id(),
                               flow->get_receiver()->get_id()));
 
-        matplot::save(fmt::format("{}/cwnd_{}.svg", metrics_dir_name, flow_id));
-    }
-}
-
-void MetricsCollector::create_metrics_directory() const {
-    if (bool created = fs::create_directory(metrics_dir_name); !created) {
-        if (bool is_dir_exists = fs::is_directory(metrics_dir_name);
-            !is_dir_exists) {
-            throw std::runtime_error(
-                fmt::format("Failed to create {} directory", metrics_dir_name));
-        }
+        matplot::save(fmt::format("{}/{}.svg", cwnd_dir, flow_id));
     }
 }
 

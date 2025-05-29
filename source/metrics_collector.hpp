@@ -26,8 +26,6 @@ private:
     MetricsCollector(const MetricsCollector&) = delete;
     MetricsCollector& operator=(const MetricsCollector&) = delete;
 
-    void create_metrics_directory() const;
-
     // flow_ID --> vector of <time, RTT> values
     std::unordered_map<Id, std::vector<std::pair<Time, Time>>> m_RTT_storage;
     // link_ID --> vector of <time, queue size> values
