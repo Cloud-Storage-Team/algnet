@@ -58,7 +58,6 @@ bool RoutingModule::update_routing_table(Id dest_id, std::shared_ptr<ILink> link
     }
     auto link_dest = link->get_to();
 
-    // TODO: discuss storing weak_ptrs instead of shared
     m_routing_table[dest_id][link] += paths_count;
     return true;
 }
