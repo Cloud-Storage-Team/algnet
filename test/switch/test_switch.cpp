@@ -49,7 +49,7 @@ TEST_F(TestSwitch, nullptr_outlink) {
 }
 
 TEST_F(TestSwitch, add_foreign_inlink) {
-    auto switch_device = std::make_shared<sim::Switch>("");
+    auto switch_device = std::make_shared<sim::Switch>("test");
     auto temp_device = std::make_shared<test::ReceiverMock>();
     auto link = std::make_shared<LinkMock>(temp_device, switch_device);
     ASSERT_FALSE(switch_device->update_routing_table(temp_device->get_id(), link));
