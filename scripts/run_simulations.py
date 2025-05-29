@@ -13,8 +13,10 @@ def check_directory(dirname: str):
 def separate_files(metrics_dir: str):
     link_dir = os.path.join(metrics_dir, "link")
     flow_dir = os.path.join(metrics_dir, "flow")
+    cwnd_dir = os.path.join(metrics_dir, "cwnd")
     check_directory(link_dir)
     check_directory(flow_dir)
+    check_directory(cwnd_dir)
 
     for filename in os.listdir(metrics_dir):
         filepath = os.path.join(metrics_dir, filename)
@@ -23,6 +25,8 @@ def separate_files(metrics_dir: str):
                 os.rename(filepath, os.path.join(link_dir, filename))
             elif "flow" in filename:
                 os.rename(filepath, os.path.join(flow_dir, filename))
+            elif "cwnd" in filename:
+                os.rename(filepath, os.path.join(cwnd_dir, filename))
 
 
 def get_topology_name(config_path: str):
