@@ -40,6 +40,23 @@ Run simulator:
 - `--no-plots` -- disables generation of plots.
 - `--no-logs` -- disables logs.
 
+
+## Profiling
+
+To profile simulator run `CMake` with option `-DPROFILING=ON`:
+
+```console
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DPROFILING=ON ..
+cmake --build .
+
+# Run simulator as usual
+./simulator ../configuration_examples/simulation_examples/basic_simulation.yml metrics-dir
+
+# Run profiler gprof
+gprof simulator > profile.txt
+```
+
 # Smart pointers
 
 Some of classes (`Sender`, `Receiver`, `Switch`, `Flow` etc) are heir from `std::enable_shared_from_this`. That means if you try to create this objects on stack and after that call `shared_from_this`, you will get an error (double free same memory). So please, be carefully with this moment.
