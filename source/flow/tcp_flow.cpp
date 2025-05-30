@@ -66,7 +66,7 @@ void TcpFlow::update(Packet packet, DeviceType type) {
         return;
     }
 
-    Time delay = current_time - packet.RTT;
+    Time delay = packet.RTT + current_time - packet.send_time;
 
     LOG_INFO(fmt::format("Packet {} got in flow; delay = {}",
                          packet.to_string(), to_string(), delay));

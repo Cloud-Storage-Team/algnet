@@ -50,7 +50,7 @@ void Flow::update(Packet packet, DeviceType type) {
     MetricsCollector::get_instance().add_RTT(
         packet.flow->get_id(),
         current_time,
-        current_time - packet.RTT);
+        packet.RTT + current_time - packet.send_time);
 }
 
 std::uint32_t Flow::get_updates_number() const { return m_updates_number; }
