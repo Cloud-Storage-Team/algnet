@@ -5,12 +5,12 @@
 #include <optional>
 #include <queue>
 
-#include "packet.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
 
-class RoutingModule;
+struct Packet;
+class IRoutingDevice;
 
 /**
  * Unidirectional link from the source to a_next

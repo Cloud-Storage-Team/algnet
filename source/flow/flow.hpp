@@ -1,14 +1,15 @@
 #pragma once
 #include <cstdint>
+#include <queue>
 
-#include "device/receiver.hpp"
-#include "device/sender.hpp"
+#include "device/device.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
 
 class IReceiver;
 class ISender;
+struct Packet;
 
 class IFlow : public Identifiable {
 public:

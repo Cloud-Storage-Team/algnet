@@ -1,9 +1,13 @@
 #include "receiver.hpp"
 
 #include <memory>
+#include <iostream>
 
 #include "event.hpp"
 #include "link.hpp"
+#include "routing_module.hpp"
+#include "scheduling_module.hpp"
+#include "scheduler.hpp"
 #include "logger/logger.hpp"
 #include "utils/identifier_factory.hpp"
 #include "utils/validation.hpp"
@@ -61,6 +65,10 @@ std::shared_ptr<ILink> Receiver::get_link_to_destination(
     return m_router->get_link_to_destination(dest);
 };
 
+bool Receiver::notify_about_arrival(Time arrival_time) {
+    return m_process_scheduler.notify_about_arriving(arrival_time, weak_from_this());
+};
+
 DeviceType Receiver::get_type() const { return DeviceType::RECEIVER; }
 
 Time Receiver::process() {
@@ -109,6 +117,10 @@ Time Receiver::process() {
         }
         next_link->schedule_arrival(data_packet);
         // TODO: think about redirecting time
+    }
+
+    if (m_process_scheduler.notify_about_finish(Scheduler::get_instance().get_current_time() + total_processing_time)) {
+        return 0;
     }
 
     return total_processing_time;

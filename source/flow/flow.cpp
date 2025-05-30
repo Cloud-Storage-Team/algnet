@@ -3,9 +3,12 @@
 #include <memory>
 #include <string>
 
+#include "device/sender.hpp"
 #include "device/receiver.hpp"
+#include "device/sender.hpp"
 #include "logger/logger.hpp"
 #include "metrics_collector.hpp"
+#include "packet.hpp"
 #include "scheduler.hpp"
 
 namespace sim {
@@ -76,7 +79,7 @@ Time Flow::put_data_to_device() {
 }
 
 void Flow::schedule_packet_generation(Time time) {
-    auto generate_event_ptr = Generate(time, shared_from_this(), m_packet_size);
+    auto generate_event_ptr = std::make_unique<Generate>(time, shared_from_this(), m_packet_size);
     Scheduler::get_instance().add(std::move(generate_event_ptr));
 }
 

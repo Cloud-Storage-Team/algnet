@@ -8,6 +8,9 @@
 #include "iostream"
 #include "metrics_collector.hpp"
 #include "scheduler.hpp"
+#include "logger/logger.hpp"
+#include "device/sender.hpp"
+#include "device/receiver.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
@@ -32,10 +35,11 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<ISender> a_src,
 
 void TcpFlow::start() {
     Time curr_time = Scheduler::get_instance().get_current_time();
-    Generate generate_event(curr_time, shared_from_this(), m_packet_size);
+    auto generate_event = std::make_unique<Generate>(curr_time,
+                            shared_from_this(), m_packet_size);
     Scheduler::get_instance().add(std::move(generate_event));
 
-    TcpMetric metrics_event(curr_time, shared_from_this());
+    auto metrics_event = std::make_unique<TcpMetric>(curr_time, shared_from_this());
     Scheduler::get_instance().add(std::move(metrics_event));
 }
 
@@ -69,6 +73,7 @@ void TcpFlow::update(Packet packet, DeviceType type) {
 
     MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
                                              current_time, delay);
+    std::cout << "Delay: " << delay << std::endl;
 
     if (delay < m_delay_threshold) {  // ask
         if (m_packets_in_flight > 0) {

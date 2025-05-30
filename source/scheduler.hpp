@@ -1,65 +1,46 @@
 #pragma once
 
-#include <functional>
+#include <memory>
 #include <queue>
 
-#include "event.hpp"
+#include "types.hpp"
 
 namespace sim {
 
+class Event;
+
+struct EventComparator {
+    bool operator()(const std::unique_ptr<Event>& lhs,
+                    const std::unique_ptr<Event>& rhs) const;
+};
+
 // Scheduler is implemented as a Singleton class
 // which provides a global access to a single instance
-template <typename TEvent>
-requires requires(const TEvent& e) {
-    { e.get_time() } -> std::same_as<Time>;
-}
-class SchedulerTemplate {
-    static_assert(
-        std::is_constructible_v<bool, decltype(std::declval<TEvent>() >
-                                               std::declval<TEvent>())>,
-        "Event must have operator >");
-    static_assert(std::is_invocable_v<TEvent>, "Event must be invocable");
-
+class Scheduler {
 public:
     // Static method to get the instance
-    static SchedulerTemplate& get_instance() {
-        static SchedulerTemplate instance;
+    static Scheduler& get_instance() {
+        static Scheduler instance;
         return instance;
     }
 
-    void add(const TEvent& event) { m_events.emplace(event); }
-
-    // Clear all events
-    void clear() {
-        std::priority_queue<TEvent, std::vector<TEvent>, std::greater<TEvent>>().swap(m_events);
-    }
-
-    bool tick() {
-        if (m_events.empty()) {
-            return false;
-        }
-
-        TEvent event = m_events.top();
-        m_events.pop();
-        m_current_event_local_time = event.get_time(); 
-        event.operator()();
-        return true;
-    }
-
-    Time get_current_time() { return m_current_event_local_time; }
+    void add(std::unique_ptr<Event> event);
+    void clear();  // Clear all events
+    bool tick();
+    Time get_current_time();
 
 private:
     // Private constructor to prevent instantiation
-    SchedulerTemplate() : m_events(), m_current_event_local_time(0) {}
+    Scheduler() {}
     // No copy constructor and assignment operators
-    SchedulerTemplate(const SchedulerTemplate&) = delete;
-    SchedulerTemplate& operator=(const SchedulerTemplate&) = delete;
+    Scheduler(const Scheduler&) = delete;
+    Scheduler& operator=(const Scheduler&) = delete;
 
-    std::priority_queue<TEvent, std::vector<TEvent>, std::greater<TEvent>> m_events;
+    std::priority_queue<std::unique_ptr<Event>,
+                        std::vector<std::unique_ptr<Event>>, EventComparator>
+        m_events;
 
     Time m_current_event_local_time;
 };
-
-using Scheduler = SchedulerTemplate<BaseEvent>;
 
 }  // namespace sim

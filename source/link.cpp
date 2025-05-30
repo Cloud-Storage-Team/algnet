@@ -2,6 +2,7 @@
 
 #include "device/device.hpp"
 #include "event.hpp"
+#include "packet.hpp"
 #include "logger/logger.hpp"
 #include "metrics_collector.hpp"
 #include "scheduler.hpp"
@@ -51,10 +52,6 @@ void Link::schedule_arrival(Packet packet) {
         return;
     }
 
-    MetricsCollector::get_instance().add_queue_size(
-        get_id(), Scheduler::get_instance().get_current_time(),
-        m_src_egress_buffer_size_byte);
-
     if (m_src_egress_buffer_size_byte + packet.size_byte >
         m_max_src_egress_buffer_size_byte) {
         LOG_ERROR("Buffer in link overflowed; packet " + packet.to_string() +
@@ -70,10 +67,18 @@ void Link::schedule_arrival(Packet packet) {
         std::max(m_last_src_egress_pass_time,
                  Scheduler::get_instance().get_current_time()) +
         transmission_time;
+    MetricsCollector::get_instance().add_queue_size(
+        get_id(), Scheduler::get_instance().get_current_time(),
+        m_src_egress_buffer_size_byte);
+
     m_src_egress_buffer_size_byte += packet.size_byte;
 
+    MetricsCollector::get_instance().add_queue_size(
+        get_id(), Scheduler::get_instance().get_current_time() + 1,
+        m_src_egress_buffer_size_byte);
+
     Scheduler::get_instance().add(
-        Arrive(m_last_src_egress_pass_time, weak_from_this(), packet));
+        std::make_unique<Arrive>(m_last_src_egress_pass_time, weak_from_this(), packet));
 };
 
 void Link::process_arrival(Packet packet) {
@@ -88,7 +93,17 @@ void Link::process_arrival(Packet packet) {
     LOG_INFO("Packet arrived to link's egress queue. Packet: " +
              packet.to_string());
 
+    m_to.lock()->notify_about_arrival(Scheduler::get_instance().get_current_time());
+
+    MetricsCollector::get_instance().add_queue_size(
+        get_id(), Scheduler::get_instance().get_current_time(),
+        m_src_egress_buffer_size_byte);
+
     m_src_egress_buffer_size_byte -= packet.size_byte;
+
+    MetricsCollector::get_instance().add_queue_size(
+        get_id(), Scheduler::get_instance().get_current_time() + 1,
+        m_src_egress_buffer_size_byte);
     m_next_ingress.push(packet);
 };
 

@@ -8,6 +8,8 @@
 #include <fstream>
 
 #include "flow/flow.hpp"
+#include "device/receiver.hpp"
+#include "device/sender.hpp"
 #include "link.hpp"
 #include "utils/identifier_factory.hpp"
 

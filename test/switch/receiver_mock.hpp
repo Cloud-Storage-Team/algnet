@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 
-#include "device/device.hpp"
+#include "device/receiver.hpp"
 #include "link.hpp"
 
 namespace test {
@@ -19,6 +19,7 @@ public:
     std::shared_ptr<sim::ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;
     std::set<std::shared_ptr<sim::ILink>> get_outlinks() final;
+    bool notify_about_arrival(Time arrival_time) final;
 
     Time process() final;
     sim::DeviceType get_type() const final;

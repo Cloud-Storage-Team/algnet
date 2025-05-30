@@ -2,7 +2,10 @@
 #include <memory>
 
 #include "packet.hpp"
-#include "routing_module.hpp"
+#include "event.hpp"
+#include "device.hpp"
+#include "scheduling_module.hpp"
+#include "utils/identifier_factory.hpp"
 
 namespace sim {
 
@@ -29,6 +32,8 @@ public:
         std::shared_ptr<IRoutingDevice> dest) const final;
     std::set<std::shared_ptr<ILink>> get_outlinks() final;
 
+    bool notify_about_arrival(Time arrival_time) final;
+
     DeviceType get_type() const final;
     // Process a packet by removing it from the ingress buffer
     // Send an ACK to the egress buffer
@@ -42,7 +47,8 @@ public:
 
 private:
     Time send_ack(Packet data_packet);
-    std::unique_ptr<RoutingModule> m_router;
+    std::unique_ptr<IRoutingDevice> m_router;
+    SchedulingModule<IReceiver, Process> m_process_scheduler;
 };
 
 }  // namespace sim

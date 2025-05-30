@@ -1,7 +1,5 @@
 #pragma once
 
-#include <variant>
-
 #include "device/device.hpp"
 #include "flow/I_tcp_flow.hpp"
 #include "flow/flow.hpp"
@@ -11,136 +9,114 @@
 
 namespace sim {
 
+class IFlow;
+
+// Base class for event
+class Event {
+public:
+    Event(Time a_time);
+    virtual ~Event() = default;
+    virtual void operator()() = 0;
+
+    Time get_time() const;
+    bool operator>(const Event &other) const { return m_time > other.m_time; }
+
+protected:
+    Time m_time;
+};
+
 /**
  * Generate a packet in the flow and enqueue it in
  * the source node ingress buffer for processing.
  * Schedule the next packet generation event.
  */
-class Generate {
+class Generate : public Event {
 public:
     Generate(Time a_time, std::weak_ptr<IFlow> a_flow, Size a_packet_size);
-    ~Generate() = default;
-    void operator()();
-
-    Time get_time() const;
+    virtual ~Generate() = default;
+    void operator()() final;
 
 private:
     std::weak_ptr<IFlow> m_flow;
     Size m_packet_size;
-    Time m_time;
 };
 
 /**
  * Enqueue the packet to the ingress port of the next node
  */
-class Arrive {
+class Arrive : public Event {
 public:
     Arrive(Time a_time, std::weak_ptr<ILink> a_link, Packet a_packet);
-    ~Arrive() = default;
-    void operator()();
+    virtual ~Arrive() = default;
 
-    Time get_time() const;
+    void operator()() final;
 
 private:
     std::weak_ptr<ILink> m_link;
     Packet m_packet;
-    Time m_time;
 };
 
 /**
  * Dequeue a packet from the device ingress buffer
  * and start processing at the device.
  */
-class Process {
+class Process : public Event {
 public:
     Process(Time a_time, std::weak_ptr<IProcessingDevice> a_device);
     ~Process() = default;
-    void operator()();
-
-    Time get_time() const;
+    void operator()() final;
 
 private:
     std::weak_ptr<IProcessingDevice> m_device;
-    Time m_time;
 };
 
 /**
  * Dequeue a packet from the device ingress buffer
  * and start processing at the device.
  */
-class SendData {
+class SendData : public Event {
 public:
     SendData(Time a_time, std::weak_ptr<ISender> a_device);
     ~SendData() = default;
-    void operator()();
-
-    Time get_time() const;
+    void operator()() final;
 
 private:
     std::weak_ptr<ISender> m_device;
-    Time m_time;
 };
 
 /**
  * Run new flow at specified time
  */
-class StartFlow {
+class StartFlow : public Event {
 public:
     StartFlow(Time a_time, std::weak_ptr<IFlow> a_flow);
     ~StartFlow() = default;
-    void operator()();
-
-    Time get_time() const;
+    void operator()() final;
 
 private:
     std::weak_ptr<IFlow> m_flow;
-    Time m_time;
 };
 
 /**
  * Stop simulation and clear all events remaining in the Scheduler
  */
-class Stop {
+class Stop : public Event {
 public:
     Stop(Time a_time);
-    ~Stop() = default;
-    void operator()();
-
-    Time get_time() const;
-
-private:
-    Time m_time;
+    virtual ~Stop() = default;
+    void operator()() final;
 };
 
-class TcpMetric {
+class TcpMetric : public Event  {
 public:
     TcpMetric(Time a_time, std::weak_ptr<ITcpFlow> a_flow);
+    virtual ~TcpMetric() = default;
 
     void operator()();
-    Time get_time() const;
 
 private:
     const static Time DELAY = 200;
-    Time m_time;
     std::weak_ptr<ITcpFlow> m_flow;
-};
-
-struct BaseEvent {
-    BaseEvent(const Generate& e);
-    BaseEvent(const Arrive& e);
-    BaseEvent(const Process& e);
-    BaseEvent(const SendData& e);
-    BaseEvent(const Stop& e);
-    BaseEvent(const StartFlow& e);
-    BaseEvent(const TcpMetric& e);
-
-    void operator()();
-    bool operator>(const BaseEvent& other) const;
-    Time get_time() const;
-
-    std::variant<Generate, Arrive, Process, SendData, Stop, StartFlow,
-                 TcpMetric>
-        event;
 };
 
 }  // namespace sim

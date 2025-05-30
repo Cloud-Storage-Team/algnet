@@ -3,12 +3,16 @@
 #include <queue>
 
 #include "device.hpp"
+#include "packet.hpp"
+#include "scheduling_module.hpp"
 #include "routing_module.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
 
 struct Packet;
+class Process;
+class SendData;
 
 class ISender : public IRoutingDevice, public IProcessingDevice {
 public:
@@ -32,6 +36,7 @@ public:
     std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;
     std::set<std::shared_ptr<ILink>> get_outlinks() final;
+    bool notify_about_arrival(Time arrive_time) final;
 
     DeviceType get_type() const final;
     // Process an ACK by removing it from the ingress buffer,
@@ -50,7 +55,9 @@ public:
 
 private:
     std::queue<Packet> m_flow_buffer;
-    std::unique_ptr<RoutingModule> m_router;
+    std::unique_ptr<IRoutingDevice> m_router;
+    SchedulingModule<ISender, Process> m_process_scheduler;
+    SchedulingModule<ISender, SendData> m_send_data_scheduler;
 };
 
 }  // namespace sim

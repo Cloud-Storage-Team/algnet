@@ -2,7 +2,9 @@
 
 #include <memory>
 
-#include "routing_module.hpp"
+#include "device.hpp"
+#include "event.hpp"
+#include "scheduling_module.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
@@ -26,6 +28,7 @@ public:
     std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;
     std::set<std::shared_ptr<ILink>> get_outlinks() final;
+    bool notify_about_arrival(Time arrival_time) final;
 
     DeviceType get_type() const final;
     // Process a packet by moving it from ingress to egress
@@ -37,7 +40,8 @@ public:
     Id get_id() const final;
 
 private:
-    std::unique_ptr<RoutingModule> m_router;
+    std::unique_ptr<IRoutingDevice> m_router;
+    SchedulingModule<ISwitch, Process> m_process_scheduler;
 };
 
 }  // namespace sim

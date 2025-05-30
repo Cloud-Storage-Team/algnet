@@ -4,12 +4,11 @@
 #include <set>
 
 #include "types.hpp"
+#include "packet.hpp"
+#include "interfaces/link_interface.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
-
-class ILink;
-class ISender;
 
 enum DeviceType { SWITCH, SENDER, RECEIVER };
 
@@ -37,10 +36,24 @@ public:
     virtual std::shared_ptr<ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> device) const = 0;
     virtual std::shared_ptr<ILink> next_inlink() = 0;
-    virtual std::set<std::shared_ptr<ILink>>get_outlinks() = 0;
-    
-    // Returns true if the total number of packets in inlinks change from 0 to 1 
-    virtual bool notify_about_arrival(Time arrival_time) = 0;
+    virtual std::set<std::shared_ptr<ILink>> get_outlinks() = 0;
+};
+
+class IReceiver : public IRoutingDevice, public IProcessingDevice {
+public:
+    virtual ~IReceiver() = default;
+};
+
+class ISender : public IRoutingDevice, public IProcessingDevice {
+public:
+    virtual ~ISender() = default;
+    virtual void enqueue_packet(Packet packet) = 0;
+    virtual Time send_data() = 0;
+};
+
+class ISwitch : public IRoutingDevice, public IProcessingDevice {
+public:
+    virtual ~ISwitch() = default;
 };
 
 }  // namespace sim

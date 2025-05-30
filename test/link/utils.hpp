@@ -5,6 +5,8 @@
 
 #include "device/device.hpp"
 #include "link.hpp"
+#include "packet.hpp"
+#include "event.hpp"
 
 namespace test {
 
@@ -27,6 +29,7 @@ public:
     std::shared_ptr<sim::ILink> get_link_to_destination(
         std::shared_ptr<IRoutingDevice> dest) const final;
     std::set<std::shared_ptr<sim::ILink>> get_outlinks() final;
+    bool notify_about_arrival(Time arrival_time) final;
 
     Id get_id() const final;
 };

@@ -10,7 +10,7 @@ TEST_F(TestScheduler, ExpectedProcessingOrder) {
     ComparatorEvent::last_time = 0;
     AddEvents<ComparatorEvent>(number_of_events);
 
-    while (Scheduler::get_instance().tick()) {
+    while (sim::Scheduler::get_instance().tick()) {
     }
 }
 

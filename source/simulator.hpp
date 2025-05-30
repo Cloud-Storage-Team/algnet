@@ -16,11 +16,13 @@
 #include "device/switch.hpp"
 #include "flow/tcp_aimd_flow.hpp"
 #include "flow/tcp_flow.hpp"
+#include "event.hpp"
 #include "link.hpp"
 #include "logger/logger.hpp"
 #include "metrics_collector.hpp"
 #include "scheduler.hpp"
 #include "utils/algorithms.hpp"
+#include "utils/validation.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
@@ -70,7 +72,7 @@ public:
     }
 
     bool add_link(std::shared_ptr<TLink> link) {
-        if (link == nullptr) {
+        if (!is_valid_link(link)) {
             return false;
         }
         if (!m_links.insert(link).second) {
@@ -99,10 +101,6 @@ public:
                 for (auto [link, paths_count] : links) {
                     src_device->update_routing_table(dest_device, link,
                                                      paths_count);
-                    std::cout << "route from " << src_device->get_id() << " to "
-                              << dest_device->get_id() << " by "
-                              << link->get_id() << "; count = " << paths_count
-                              << std::endl;
                 }
             }
         }
@@ -111,25 +109,13 @@ public:
     void start(Time a_stop_time, bool export_metrics = false,
                bool draw_plots = false) {
         recalculate_paths();
-        Scheduler::get_instance().add(Stop(a_stop_time));
+        Scheduler::get_instance().add(std::make_unique<Stop>(a_stop_time));
         constexpr Time start_time = 0;
 
         for (auto flow : m_flows) {
-            Scheduler::get_instance().add(StartFlow(start_time, flow));
+            Scheduler::get_instance().add(std::make_unique<StartFlow>(start_time, flow));
         }
 
-        for (auto sender : m_senders) {
-            Scheduler::get_instance().add(Process(start_time, sender));
-            Scheduler::get_instance().add(SendData(start_time, sender));
-        }
-
-        for (auto receiver : m_receivers) {
-            Scheduler::get_instance().add(Process(start_time, receiver));
-        }
-
-        for (auto swtch : m_switches) {
-            Scheduler::get_instance().add(Process(start_time, swtch));
-        }
         while (Scheduler::get_instance().tick()) {
         }
 
