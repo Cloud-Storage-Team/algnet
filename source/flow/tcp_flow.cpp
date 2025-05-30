@@ -4,13 +4,13 @@
 
 #include <sstream>
 
+#include "device/receiver.hpp"
+#include "device/sender.hpp"
 #include "event.hpp"
 #include "iostream"
-#include "metrics_collector.hpp"
-#include "scheduler.hpp"
 #include "logger/logger.hpp"
-#include "device/sender.hpp"
-#include "device/receiver.hpp"
+#include "metrics/metrics_collector.hpp"
+#include "scheduler.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
@@ -35,11 +35,12 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<ISender> a_src,
 
 void TcpFlow::start() {
     Time curr_time = Scheduler::get_instance().get_current_time();
-    auto generate_event = std::make_unique<Generate>(curr_time,
-                            shared_from_this(), m_packet_size);
+    auto generate_event = std::make_unique<Generate>(
+        curr_time, shared_from_this(), m_packet_size);
     Scheduler::get_instance().add(std::move(generate_event));
 
-    auto metrics_event = std::make_unique<TcpMetric>(curr_time, shared_from_this());
+    auto metrics_event =
+        std::make_unique<TcpMetric>(curr_time, shared_from_this());
     Scheduler::get_instance().add(std::move(metrics_event));
 }
 
