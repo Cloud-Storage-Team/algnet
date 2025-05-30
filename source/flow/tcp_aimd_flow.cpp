@@ -5,7 +5,9 @@
 #include <algorithm>
 #include <sstream>
 
+#include "device/sender.hpp"
 #include "event.hpp"
+#include "logger/logger.hpp"
 #include "metrics_collector.hpp"
 #include "scheduler.hpp"
 
@@ -34,10 +36,12 @@ TcpAimdFlow::TcpAimdFlow(Id a_id, std::shared_ptr<ISender> a_src,
 
 void TcpAimdFlow::start() {
     Time curr_time = Scheduler::get_instance().get_current_time();
-    Generate generate_event(curr_time, shared_from_this(), m_packet_size);
+    std::unique_ptr<Event> generate_event = std::make_unique<Generate>(
+        curr_time, shared_from_this(), m_packet_size);
     Scheduler::get_instance().add(std::move(generate_event));
 
-    TcpMetric metrics_event(curr_time, shared_from_this());
+    std::unique_ptr<Event> metrics_event =
+        std::make_unique<TcpMetric>(curr_time, shared_from_this());
     Scheduler::get_instance().add(std::move(metrics_event));
 }
 
@@ -117,6 +121,7 @@ bool TcpAimdFlow::try_to_put_data_to_device() {
         m_packets_in_flight++;
         Packet packet = generate_packet();
         m_src.lock()->enqueue_packet(packet);
+        ;
         return true;
     }
     return false;
