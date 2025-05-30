@@ -50,6 +50,9 @@ mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DPROFILING=ON ..
 cmake --build .
 
+# Run simulator as usual
+./simulator ../configuration_examples/simulation_examples/basic_simulation.yml metrics-dir
+
 # Run profiler gprof
 gprof simulator > profile.txt
 ```
