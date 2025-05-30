@@ -7,9 +7,9 @@
 #include <filesystem>
 #include <fstream>
 
-#include "flow/flow.hpp"
 #include "device/receiver.hpp"
 #include "device/sender.hpp"
+#include "flow/flow.hpp"
 #include "link.hpp"
 #include "utils/identifier_factory.hpp"
 
@@ -17,142 +17,63 @@ namespace fs = std::filesystem;
 
 namespace sim {
 
-void static create_directory(std::string dir_name) {
-    if (bool created = fs::create_directory(dir_name); !created) {
-        if (bool is_dir_exists = fs::is_directory(dir_name); !is_dir_exists) {
-            throw std::runtime_error(
-                fmt::format("Failed to create {} directory", dir_name));
-        }
-    }
-}
-
-void MetricsCollector::init(const std::string& dir_name) {
-    get_instance().metrics_dir_name = dir_name;
-}
-
 MetricsCollector& MetricsCollector::get_instance() {
     static MetricsCollector instance;
     return instance;
 }
 
 void MetricsCollector::add_RTT(Id flow_id, Time time, Time value) {
-    if (!m_RTT_storage.contains(flow_id)) {
-        m_RTT_storage[flow_id] = std::vector<std::pair<Time, Time>>{};
-    }
-    m_RTT_storage[flow_id].emplace_back(time, value);
+    m_RTT_storage[flow_id].add_record(time, value);
 }
 
 void MetricsCollector::add_cwnd(Id flow_id, Time time, std::uint32_t cwnd) {
-    if (!m_cwnd_storage.contains(flow_id)) {
-        m_cwnd_storage[flow_id] = {};
-    }
-    m_cwnd_storage[flow_id].emplace_back(time, cwnd);
+    m_cwnd_storage[flow_id].add_record(time, cwnd);
 }
 
-void MetricsCollector::export_metrics_to_files() const {
-    create_directory(metrics_dir_name);
+void MetricsCollector::export_metrics_to_files(
+    std::filesystem::path metrics_dir) const {
     for (auto& [flow_id, values] : m_RTT_storage) {
-        std::ofstream output_file(
-            fmt::format("{}/RTT_{}.txt", metrics_dir_name, flow_id));
-        if (!output_file) {
-            throw std::runtime_error("Failed to create file for RTT values");
-        }
-        for (const auto& pair : values) {
-            output_file << pair.first << " " << pair.second << "\n";
-        }
-        output_file.close();
+        values.export_to_file(metrics_dir / fmt::format("rtt_{}.txt", flow_id));
     }
 
     for (auto& [link_id, values] : m_queue_size_storage) {
-        std::ofstream output_file(
-            fmt::format("{}/queue_size_{}.txt", metrics_dir_name, link_id));
-        if (!output_file) {
-            throw std::runtime_error(
-                "Failed to create file for queue size values");
-        }
-        for (const auto& pair : values) {
-            output_file << pair.first << " " << pair.second << "\n";
-        }
-        output_file.close();
+        values.export_to_file(metrics_dir /
+                              fmt::format("queue_size_{}.txt", link_id));
     }
 
     for (auto& [link_id, values] : m_cwnd_storage) {
-        std::ofstream output_file(
-            fmt::format("{}/cwnd_{}.txt", metrics_dir_name, link_id));
-        if (!output_file) {
-            throw std::runtime_error(
-                "Failed to create file for queue size values");
-        }
-        for (const auto& pair : values) {
-            output_file << pair.first << " " << pair.second << "\n";
-        }
-        output_file.close();
+        values.export_to_file(metrics_dir /
+                              fmt::format("cwnd_{}.txt", link_id));
     }
 }
 
 void MetricsCollector::add_queue_size(Id link_id, Time time,
                                       std::uint32_t value) {
-    if (!m_queue_size_storage.contains(link_id)) {
-        m_queue_size_storage[link_id] =
-            std::vector<std::pair<Time, std::uint32_t>>{};
-    }
-    m_queue_size_storage[link_id].emplace_back(time, value);
+    m_queue_size_storage[link_id].add_record(time, value);
 }
 
-void MetricsCollector::draw_metric_plots() const {
-    create_directory(metrics_dir_name);
-
-    std::string rtt_dir = fmt::format("{}/{}", metrics_dir_name, "rtt");
-    create_directory(rtt_dir);
+void MetricsCollector::draw_metric_plots(
+    std::filesystem::path metrics_dir) const {
     for (auto& [flow_id, values] : m_RTT_storage) {
-        auto fig = matplot::figure(true);
-        auto ax = fig->current_axes();
-
-        std::vector<double> x_data;
-        std::transform(begin(values), end(values), std::back_inserter(x_data),
-                       [](auto const& pair) { return pair.first; });
-
-        std::vector<double> y_data;
-        std::transform(begin(values), end(values), std::back_inserter(y_data),
-                       [](auto const& pair) { return pair.second; });
-
-        ax->plot(x_data, y_data, "-o")->line_width(1.5);
-
-        ax->xlabel("Time, ns");
-        ax->ylabel("Value, ns");
-
         auto flow =
             IdentifierFactory::get_instance().get_object<IFlow>(flow_id);
 
-        ax->title(fmt::format("RTT values from {} to {}",
-                              flow->get_sender()->get_id(),
-                              flow->get_receiver()->get_id()));
-
-        matplot::save(fmt::format("{}/{}.svg", rtt_dir, flow_id));
+        values.draw_plot(
+            metrics_dir / fmt::format("rtt/{}.svg", flow_id),
+            PlotMetadata{"Time, ns", "Value, ns",
+                         fmt::format("RTT values from {} to {}",
+                                     flow->get_sender()->get_id(),
+                                     flow->get_receiver()->get_id())});
     }
 
-    std::string queue_size_dir =
-        fmt::format("{}/{}", metrics_dir_name, "queue_size");
-    create_directory(queue_size_dir);
     for (auto& [link_id, values] : m_queue_size_storage) {
-        auto fig = matplot::figure(true);
-        auto ax = fig->current_axes();
-
-        std::vector<double> x_data;
-        std::transform(begin(values), end(values), std::back_inserter(x_data),
-                       [](auto const& pair) { return pair.first; });
-
-        std::vector<double> y_data;
-        std::transform(begin(values), end(values), std::back_inserter(y_data),
-                       [](auto const& pair) { return pair.second; });
-
-        ax->plot(x_data, y_data, "-o")->line_width(1.5);
-
-        ax->xlabel("Time, ns");
-        ax->ylabel("Value, bytes");
-
         auto link =
             IdentifierFactory::get_instance().get_object<ILink>(link_id);
+        auto fig = values.get_picture(
+            {"Time, ns", "Values, bytes",
+             fmt::format("Queue size from {} to {}", link->get_from()->get_id(),
+                         link->get_to()->get_id())});
+        auto ax = fig->current_axes();
 
         auto limits = ax->xlim();
         matplot::line(0, link->get_max_src_egress_buffer_size_byte(), limits[1],
@@ -162,41 +83,20 @@ void MetricsCollector::draw_metric_plots() const {
 
         ax->xlim({0, limits[1]});
 
-        ax->title(fmt::format("Queue size from {} to {}",
-                              link->get_from()->get_id(),
-                              link->get_to()->get_id()));
         ax->color("white");
 
-        matplot::save(fmt::format("{}/{}.svg", queue_size_dir, link_id), "svg");
+        matplot::save(fig,
+                      metrics_dir / fmt::format("queue_size/{}.svg", link_id));
     }
 
-    std::string cwnd_dir = fmt::format("{}/{}", metrics_dir_name, "cwnd");
-    create_directory(cwnd_dir);
     for (auto& [flow_id, values] : m_cwnd_storage) {
-        auto fig = matplot::figure(true);
-        auto ax = fig->current_axes();
-
-        std::vector<double> x_data;
-        std::transform(begin(values), end(values), std::back_inserter(x_data),
-                       [](auto const& pair) { return pair.first; });
-
-        std::vector<double> y_data;
-        std::transform(begin(values), end(values), std::back_inserter(y_data),
-                       [](auto const& pair) { return pair.second; });
-
-        ax->plot(x_data, y_data, "-o")->line_width(1.5);
-
-        ax->xlabel("Time, ns");
-        ax->ylabel("Value, packets");
-
         auto flow =
             IdentifierFactory::get_instance().get_object<IFlow>(flow_id);
-
-        ax->title(fmt::format("Cwnd values from {} to {}",
-                              flow->get_sender()->get_id(),
-                              flow->get_receiver()->get_id()));
-
-        matplot::save(fmt::format("{}/{}.svg", cwnd_dir, flow_id));
+        values.draw_plot(metrics_dir / fmt::format("cwnd/{}.svg", flow_id),
+                         {"Time, ns", "Values, packets",
+                          fmt::format("Cwnd values from {} to {}",
+                                      flow->get_sender()->get_id(),
+                                      flow->get_receiver()->get_id())});
     }
 }
 
