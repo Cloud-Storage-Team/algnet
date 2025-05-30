@@ -97,7 +97,7 @@ public:
             RoutingTable routing_table = bfs(src_device);
             for (auto [dest_device_id, links] : routing_table) {
                 for (auto [link, paths_count]: links) {
-                    src_device->update_routing_table(dest_device_id, link, paths_count);
+                    src_device->update_routing_table(dest_device_id, link.lock(), paths_count);
                 }
             }
         }

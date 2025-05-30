@@ -8,7 +8,7 @@
 namespace sim {
 
 using RoutingTable =
-    std::unordered_map<Id, std::unordered_map<std::shared_ptr<ILink>, int>>;
+    std::unordered_map<Id, MapWeakPtr<ILink, int>>;
 
 // returns start device routing table
 // Unlike standard BFS that processes nodes one by one, this processes all nodes at the current distance level together.
