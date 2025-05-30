@@ -6,7 +6,7 @@ project(simulator)
 # main part of project
 
 option(BUILD_PROJECT "Build project" ON)
-option(PROFILING "Add profiling flags" OFF)
+option(PROFILING "Add profiling flag" OFF)
 
 if (PROFILING)
     message(STATUS "Profiling enabled")
