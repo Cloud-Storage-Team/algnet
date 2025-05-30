@@ -3,11 +3,10 @@
 #include <memory>
 #include <string>
 
-#include "device/sender.hpp"
 #include "device/receiver.hpp"
 #include "device/sender.hpp"
 #include "logger/logger.hpp"
-#include "metrics_collector.hpp"
+#include "metrics/metrics_collector.hpp"
 #include "packet.hpp"
 #include "scheduler.hpp"
 
@@ -44,9 +43,7 @@ void Flow::update(Packet packet, DeviceType type) {
 
     Time current_time = Scheduler::get_instance().get_current_time();
     MetricsCollector::get_instance().add_RTT(
-        packet.flow->get_id(),
-        current_time,
-        current_time - packet.send_time);
+        packet.flow->get_id(), current_time, current_time - packet.send_time);
 }
 
 std::uint32_t Flow::get_updates_number() const { return m_updates_number; }
@@ -72,14 +69,16 @@ Time Flow::put_data_to_device() {
         LOG_ERROR("Flow source was deleted; can not put data to it");
         return 0;
     }
-    m_sending_buffer.front().send_time = Scheduler::get_instance().get_current_time();
+    m_sending_buffer.front().send_time =
+        Scheduler::get_instance().get_current_time();
     m_src.lock()->enqueue_packet(m_sending_buffer.front());
     m_sending_buffer.pop();
     return m_delay_between_packets;
 }
 
 void Flow::schedule_packet_generation(Time time) {
-    auto generate_event_ptr = std::make_unique<Generate>(time, shared_from_this(), m_packet_size);
+    auto generate_event_ptr =
+        std::make_unique<Generate>(time, shared_from_this(), m_packet_size);
     Scheduler::get_instance().add(std::move(generate_event_ptr));
 }
 

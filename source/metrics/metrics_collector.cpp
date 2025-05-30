@@ -1,4 +1,4 @@
-#include "metrics_collector.hpp"
+#include "metrics/metrics_collector.hpp"
 
 #include <matplot/matplot.h>
 #include <spdlog/fmt/fmt.h>
