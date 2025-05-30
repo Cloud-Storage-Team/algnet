@@ -121,7 +121,6 @@ bool TcpAimdFlow::try_to_put_data_to_device() {
         m_packets_in_flight++;
         Packet packet = generate_packet();
         m_src.lock()->enqueue_packet(packet);
-        ;
         return true;
     }
     return false;
