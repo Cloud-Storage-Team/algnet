@@ -112,8 +112,15 @@ std::string TcpAimdFlow::to_string() const {
 }
 
 Packet TcpAimdFlow::generate_packet() {
-    return Packet(PacketType::DATA, m_packet_size, this,
-                  Scheduler::get_instance().get_current_time());
+    sim::Packet packet;
+    packet.type = sim::PacketType::DATA;
+    packet.size_byte = m_packet_size;
+    packet.flow = this;
+    packet.source_id = get_sender()->get_id();
+    packet.dest_id = get_receiver()->get_id();
+    packet.RTT = 0;
+    packet.send_time = Scheduler::get_instance().get_current_time();
+    return packet;
 }
 
 bool TcpAimdFlow::try_to_put_data_to_device() {
