@@ -8,9 +8,20 @@
 
 namespace sim {
 
-RoutingModule::RoutingModule(Id a_id) : m_id(a_id) {}
+RoutingModule::RoutingModule(Id a_id, std::unique_ptr<IHasher> a_hasher)
+    : m_id(a_id),
+      m_hasher(std::move(a_hasher ? std::move(a_hasher) : std::make_unique<BaseHasher>())) {}
+
+Id RoutingModule::get_id() const {
+    return m_id;
+}
 
 bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
+    if (m_id != link->get_to()->get_id()) {
+       LOG_WARN(
+            "Link destination device is incorrect (expected current device)");
+        return false;
+    }
     if (m_inlinks.contains(link)) {
         LOG_WARN("Unexpected already added inlink");
         return false;
@@ -24,6 +35,10 @@ bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
 }
 
 bool RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
+    if (m_id != link->get_from()->get_id()) {
+        LOG_WARN("Outlink source is not our device");
+        return false;
+    }
     if (m_outlinks.contains(link)) {
         LOG_WARN("Unexpected already added outlink");
         return false;
@@ -32,23 +47,23 @@ bool RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
     return true;
 }
 
-bool RoutingModule::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                         std::shared_ptr<ILink> link,
-                                         size_t paths_count) {
+bool RoutingModule::update_routing_table(Id dest_id, std::shared_ptr<ILink> link, size_t paths_count) {
+    if (m_id != link->get_from()->get_id()) {
+        LOG_WARN("Link source device is incorrect (expected current device)");
+        return false;
+    }
     if (link == nullptr) {
         LOG_WARN("Unexpected nullptr link");
         return false;
     }
     auto link_dest = link->get_to();
 
-    // TODO: discuss storing weak_ptrs instead of shared
-    m_routing_table[dest][link] += paths_count;
+    m_routing_table[dest_id][link] += paths_count;
     return true;
 }
 
-std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
-    std::shared_ptr<IRoutingDevice> device) const {
-    auto iterator = m_routing_table.find(device);
+std::shared_ptr<ILink> RoutingModule::get_link_to_destination(Packet packet) const {
+    auto iterator = m_routing_table.find(packet.dest_id);
     if (iterator == m_routing_table.end()) {
         return nullptr;
     }
@@ -63,9 +78,7 @@ std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
         total_weight += weight;
     }
 
-    // TODO: instead of rand use packet header hash (so packets of the same flow
-    // go the same path)
-    int random_value = rand() % total_weight;
+    int random_value = m_hasher->get_hash(packet) % total_weight;
 
     int cumulative_weight = 0;
     for (const auto& [link, weight] : link_map) {
@@ -99,8 +112,6 @@ std::set<std::shared_ptr<ILink>> RoutingModule::get_outlinks() {
                    [](auto link) { return link.lock(); });
     return shared_outlinks;
 }
-
-Id RoutingModule::get_id() const { return m_id; }
 
 void RoutingModule::correctify_inlinks() {
     std::size_t erased_count = std::erase_if(

@@ -18,8 +18,8 @@ public:
 };
 
 TEST_F(AddLink, LinkIsPresent) {
-    auto source = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
-    auto dest = std::make_shared<sim::RoutingModule>(sim::RoutingModule());
+    auto source = std::make_shared<sim::RoutingModule>();
+    auto dest = std::make_shared<sim::RoutingModule>();
     auto link = std::make_shared<TestLink>(TestLink(source, dest));
 
     EXPECT_EQ(dest->next_inlink(), nullptr);

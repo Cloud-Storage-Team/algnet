@@ -20,11 +20,6 @@ bool Sender::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
         return false;
     }
-    if (this != link->get_to().get()) {
-        LOG_WARN(
-            "Link destination device is incorrect (expected current device)");
-        return false;
-    }
     return m_router->add_inlink(link);
 }
 
@@ -32,29 +27,15 @@ bool Sender::add_outlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
         return false;
     }
-    if (this != link->get_from().get()) {
-        LOG_WARN("Outlink source is not our device");
-        return false;
-    }
     m_router->add_outlink(link);
     return true;
 }
 
-bool Sender::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                  std::shared_ptr<ILink> link,
-                                  size_t paths_count) {
-    if (dest == nullptr) {
-        LOG_WARN("Passed destination is null");
-        return false;
-    }
+bool Sender::update_routing_table(Id dest_id, std::shared_ptr<ILink> link, size_t paths_count) {
     if (!is_valid_link(link)) {
         return false;
     }
-    if (this != link->get_from().get()) {
-        LOG_WARN("Link source device is incorrect (expected current device)");
-        return false;
-    }
-    m_router->update_routing_table(dest, link, paths_count);
+    m_router->update_routing_table(dest_id, link, paths_count);
     return true;
 }
 
@@ -62,9 +43,8 @@ std::shared_ptr<ILink> Sender::next_inlink() {
     return m_router->next_inlink();
 };
 
-std::shared_ptr<ILink> Sender::get_link_to_destination(
-    std::shared_ptr<IRoutingDevice> dest) const {
-    return m_router->get_link_to_destination(dest);
+std::shared_ptr<ILink> Sender::get_link_to_destination(Packet packet) const {
+    return m_router->get_link_to_destination(packet);
 };
 
 bool Sender::notify_about_arrival(Time arrival_time) {
@@ -104,18 +84,13 @@ Time Sender::process() {
     LOG_INFO("Processing packet from link on sender. Packet: " +
              packet.to_string());
 
-    auto destination = packet.get_destination();
-    if (destination == nullptr) {
-        LOG_WARN("Destination device pointer is expired");
-        return total_processing_time;
-    }
-    if (packet.type == PacketType::ACK && destination.get() == this) {
+    if (packet.type == PacketType::ACK && packet.dest_id == get_id()) {
         packet.flow->update(packet, get_type());
     } else {
         LOG_WARN(
             "Packet arrived to Sender that is not its destination; use routing "
             "table to send it further");
-        std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
+        std::shared_ptr<ILink> next_link = get_link_to_destination(packet);
 
         if (next_link == nullptr) {
             LOG_WARN("No link corresponds to destination device");
@@ -148,7 +123,7 @@ Time Sender::send_data() {
     LOG_INFO("Taken new data packet on sender. Packet: " +
              data_packet.to_string());
 
-    auto next_link = get_link_to_destination(data_packet.get_destination());
+    auto next_link = get_link_to_destination(data_packet);
     if (next_link == nullptr) {
         LOG_WARN("Link to send data packet does not exist");
         return total_processing_time;

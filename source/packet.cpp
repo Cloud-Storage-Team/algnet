@@ -6,29 +6,20 @@
 #include <sstream>
 
 namespace sim {
-Packet::Packet(PacketType a_type, Size a_size_byte, IFlow* a_flow,
-               Time a_send_time)
+Packet::Packet(PacketType a_type, Size a_size_byte, IFlow* a_flow, Id a_source_id, Id a_dest_id, Time a_RTT, Time a_send_time)
     : type(a_type),
+      source_id(a_source_id),
+      dest_id(a_dest_id),
+      RTT(a_RTT),
       size_byte(a_size_byte),
       flow(a_flow),
       send_time(a_send_time) {}
 
-std::shared_ptr<IRoutingDevice> Packet::get_destination() const {
-    if (flow == nullptr) {
-        return nullptr;
-    }
-    switch (type) {
-        case ACK:
-            return flow->get_sender();
-        case DATA:
-            return flow->get_receiver();
-        default:
-            return nullptr;
-    }
-};
-
 bool Packet::operator==(const Packet& packet) const {
-    return flow == packet.flow && size_byte == packet.size_byte &&
+    return flow == packet.flow && 
+           source_id == packet.source_id && 
+           dest_id == packet.dest_id &&
+           size_byte == packet.size_byte && 
            type == packet.type;
 }
 
@@ -49,7 +40,10 @@ std::string Packet::to_string() const {
             oss << "UNKNOWN";
             break;
     }
-
+    
+    oss << ", source_id: " << source_id;
+    oss << ", dest_id: " << dest_id;
+    oss << ", packet_num: " << packet_num;
     oss << ", size(byte): " << size_byte;
     oss << ", flow: " << (flow ? "set" : "null");
     oss << ", send time: " << send_time;
