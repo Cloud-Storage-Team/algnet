@@ -13,6 +13,7 @@
 #include "device/receiver.hpp"
 #include "device/sender.hpp"
 #include "device/switch.hpp"
+#include "flow/tcp_aimd_flow.hpp"
 #include "flow/tcp_flow.hpp"
 #include "event.hpp"
 #include "link.hpp"
@@ -103,7 +104,8 @@ public:
         }
     }
     // Create a Stop event at a_stop_time and start simulation
-    void start(Time a_stop_time, bool export_metrics = false, bool draw_plots = false) {
+    void start(Time a_stop_time, bool export_metrics = false,
+               bool draw_plots = false) {
         recalculate_paths();
         Scheduler::get_instance().add(std::make_unique<Stop>(a_stop_time));
         constexpr Time start_time = 0;
@@ -133,8 +135,10 @@ private:
 
 using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;
 using TcpSimulator = Simulator<Sender, Switch, Receiver, TcpFlow, Link>;
+using TcpAimdSimulator = Simulator<Sender, Switch, Receiver, TcpAimdFlow, Link>;
 
-using SimulatorVariant = std::variant<BasicSimulator, TcpSimulator>;
+using SimulatorVariant =
+    std::variant<BasicSimulator, TcpSimulator, TcpAimdSimulator>;
 
 SimulatorVariant create_simulator(std::string_view algorithm);
 
