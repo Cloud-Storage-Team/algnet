@@ -98,8 +98,18 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: metrics
         destination_dir: ${{env.DEPLOY_DIR}}
-    - name: Print path to artifacts
-      run: echo Your artifacts are available at https://cloud-storage-team.github.io/algnet/${{env.DEPLOY_DIR}}
+    - name: Wait for artifacts to be avaliable
+      run: 
+        URL="https://cloud-storage-team.github.io/algnet/${{env.DEPLOY_DIR}}";
+        while true; do
+          if curl --output /dev/null --silent --head --fail "$URL"; then
+            echo "Artifacts are avaliable at $URL";
+            break;
+          else
+            echo "Waiting for page to be available...";
+            sleep 1;
+          fi
+        done
 
   test:
     runs-on: ubuntu-latest
