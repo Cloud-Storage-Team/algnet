@@ -15,6 +15,7 @@ if (PROFILING)
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
 endif()
 
+
 file(GLOB_RECURSE src "source/*.cpp")
 file(GLOB_RECURSE tests "test/*.cpp")
 

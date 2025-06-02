@@ -32,6 +32,10 @@ Packet Flow::generate_packet() {
     packet.type = sim::PacketType::DATA;
     packet.size_byte = m_packet_size;
     packet.flow = this;
+    packet.source_id = get_sender()->get_id();
+    packet.dest_id = get_receiver()->get_id();
+    packet.RTT = 0;
+    packet.send_time = Scheduler::get_instance().get_current_time();
     return packet;
 }
 
@@ -43,7 +47,9 @@ void Flow::update(Packet packet, DeviceType type) {
 
     Time current_time = Scheduler::get_instance().get_current_time();
     MetricsCollector::get_instance().add_RTT(
-        packet.flow->get_id(), current_time, current_time - packet.send_time);
+        packet.flow->get_id(),
+        current_time,
+        packet.RTT + current_time - packet.send_time);
 }
 
 std::uint32_t Flow::get_updates_number() const { return m_updates_number; }

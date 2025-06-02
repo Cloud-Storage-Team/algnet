@@ -17,10 +17,6 @@ bool Switch::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
         return false;
     }
-    if (link->get_to().get() != this) {
-        LOG_WARN("Inlink destination is not our device");
-        return false;
-    }
     return m_router->add_inlink(link);
 }
 
@@ -28,35 +24,20 @@ bool Switch::add_outlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
         return false;
     }
-    if (link->get_from().get() != this) {
-        LOG_WARN("Outlink source is not our device");
-        return false;
-    }
     return m_router->add_outlink(link);
 }
 
-bool Switch::update_routing_table(std::shared_ptr<IRoutingDevice> dest,
-                                  std::shared_ptr<ILink> link,
-                                  size_t paths_count) {
-    if (dest == nullptr) {
-        LOG_WARN("Destination device does not exist");
-        return false;
-    }
+bool Switch::update_routing_table(Id dest_id, std::shared_ptr<ILink> link, size_t paths_count) {
     if (!is_valid_link(link)) {
         return false;
     }
-    if (link->get_from().get() != this) {
-        LOG_WARN("Link source is not our device");
-        return false;
-    }
-    return m_router->update_routing_table(dest, link, paths_count);
+    return m_router->update_routing_table(dest_id, link, paths_count);
 }
 
 std::shared_ptr<ILink> Switch::next_inlink() { return m_router->next_inlink(); }
 
-std::shared_ptr<ILink> Switch::get_link_to_destination(
-    std::shared_ptr<IRoutingDevice> dest) const {
-    return m_router->get_link_to_destination(dest);
+std::shared_ptr<ILink> Switch::get_link_to_destination(Packet packet) const {
+    return m_router->get_link_to_destination(packet);
 }
 
 bool Switch::notify_about_arrival(Time arrival_time) {
@@ -84,13 +65,8 @@ Time Switch::process() {
         LOG_WARN("No flow in packet");
         return total_processing_time;
     }
-    std::shared_ptr<IRoutingDevice> destination = packet.get_destination();
-    if (destination == nullptr) {
-        LOG_WARN("Destination device pointer is expired");
-        return total_processing_time;
-    }
 
-    std::shared_ptr<ILink> next_link = get_link_to_destination(destination);
+    std::shared_ptr<ILink> next_link = get_link_to_destination(packet);
 
     if (next_link == nullptr) {
         LOG_WARN("No link corresponds to destination device");
