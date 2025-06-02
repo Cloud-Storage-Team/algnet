@@ -24,7 +24,7 @@ void MetricsStorage::export_to_file(std::filesystem::path path) const {
     create_all_directories(path);
     std::ofstream output_file(path);
     if (!output_file) {
-        throw std::runtime_error("Failed to create file for RTT values");
+        throw std::runtime_error("Failed to create file for metric values");
     }
     for (const auto& pair : m_records) {
         output_file << pair.first << " " << pair.second << "\n";
