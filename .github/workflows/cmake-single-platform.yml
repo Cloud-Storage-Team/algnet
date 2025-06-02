@@ -88,6 +88,9 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: metrics
+        destination_dir: ${{ github.run_id }}
+    - name: Print path to artifacts
+      run: echo Your artifacts are available at https://cloud-storage-team.github.io/algnet/${{ github.run_id }}
 
   test:
     runs-on: ubuntu-latest
