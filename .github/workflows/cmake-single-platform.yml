@@ -86,10 +86,10 @@ jobs:
 
     - name: Calculate deploy destination directory
       run:
-        if [ "${{ github.event_name }}" == "push" ]; then
-          echo "DEPLOY_DIR=main" >> $GITHUB_ENV;
-        else
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
           echo "DEPLOY_DIR=${{ github.run_id }}" >> $GITHUB_ENV;
+        else
+          echo "DEPLOY_DIR=main" >> $GITHUB_ENV;
         fi
     
     - name: Deploy to GitHub Pages
