@@ -6,15 +6,13 @@
 #include "source/simulator.hpp"
 
 int main(const int argc, char **argv) {
-    std::string output_dir = "";
+    std::string output_dir = "metrics";
     if (argc < 2) {
         LOG_ERROR(
-            fmt::format("Usage: {} <config.yaml> [output-dir] "
+            fmt::format("Usage: {} <config.yaml> [--output-dir output-dir] "
                         "[--export-metrics] [--no-plots] [--no-logs]",
                         argv[0]));
         return 1;
-    } else if (argc > 2) {
-        output_dir = argv[2];
     }
 
     bool export_metrics_flag = false;
@@ -27,6 +25,13 @@ int main(const int argc, char **argv) {
             draw_plots_flag = false;
         } else if (std::string(argv[i]) == "--no-logs") {
             Logger::get_instance().disable_logs();
+        } else if (std::string(argv[i]) == "--output-dir") {
+            if (i < argc - 1) {
+                output_dir = argv[++i];
+            } else {
+                LOG_ERROR("No output directory specified after --output-dir");
+                return 1;
+            }
         }
     }
 
