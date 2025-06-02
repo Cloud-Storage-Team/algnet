@@ -13,15 +13,16 @@
 #include "device/receiver.hpp"
 #include "device/sender.hpp"
 #include "device/switch.hpp"
-#include "flow/tcp_flow.hpp"
 #include "event.hpp"
+#include "flow/tcp_aimd_flow.hpp"
+#include "flow/tcp_flow.hpp"
 #include "link.hpp"
 #include "logger/logger.hpp"
 #include "metrics_collector.hpp"
 #include "scheduler.hpp"
 #include "utils/algorithms.hpp"
-#include "utils/validation.hpp"
 #include "utils/identifier_factory.hpp"
+#include "utils/validation.hpp"
 
 namespace sim {
 
@@ -96,20 +97,23 @@ public:
         for (auto src_device : get_devices()) {
             RoutingTable routing_table = bfs(src_device);
             for (auto [dest_device_id, links] : routing_table) {
-                for (auto [link, paths_count]: links) {
-                    src_device->update_routing_table(dest_device_id, link.lock(), paths_count);
+                for (auto [link, paths_count] : links) {
+                    src_device->update_routing_table(dest_device_id,
+                                                     link.lock(), paths_count);
                 }
             }
         }
     }
     // Create a Stop event at a_stop_time and start simulation
-    void start(Time a_stop_time, bool export_metrics = false, bool draw_plots = false) {
+    void start(Time stop_time, bool export_metrics = false,
+               bool draw_plots = false) {
         recalculate_paths();
-        Scheduler::get_instance().add(std::make_unique<Stop>(a_stop_time));
+        Scheduler::get_instance().add(std::make_unique<Stop>(stop_time));
         constexpr Time start_time = 0;
 
         for (auto flow : m_flows) {
-            Scheduler::get_instance().add(std::make_unique<StartFlow>(start_time, flow));
+            Scheduler::get_instance().add(
+                std::make_unique<StartFlow>(start_time, flow));
         }
 
         while (Scheduler::get_instance().tick()) {
@@ -133,8 +137,10 @@ private:
 
 using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;
 using TcpSimulator = Simulator<Sender, Switch, Receiver, TcpFlow, Link>;
+using TcpAimdSimulator = Simulator<Sender, Switch, Receiver, TcpAimdFlow, Link>;
 
-using SimulatorVariant = std::variant<BasicSimulator, TcpSimulator>;
+using SimulatorVariant =
+    std::variant<BasicSimulator, TcpSimulator, TcpAimdSimulator>;
 
 SimulatorVariant create_simulator(std::string_view algorithm);
 
