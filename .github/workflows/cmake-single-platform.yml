@@ -83,14 +83,23 @@ jobs:
       with:
         name: metrics
         path: metrics/**
+
+    - name: Calculate deploy destination directory
+      run:
+        if [ "${{ github.event_name }}" == "push" ]; then
+          echo "DEPLOY_DIR=main" >> $GITHUB_ENV
+        else
+        echo "DEPLOY_DIR=${{ github.run_id }}" >> $GITHUB_ENV
+        fi
+    
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: metrics
-        destination_dir: ${{ github.run_id }}
+        destination_dir: ${{env.DEPLOY_DIR}}
     - name: Print path to artifacts
-      run: echo Your artifacts are available at https://cloud-storage-team.github.io/algnet/${{ github.run_id }}
+      run: echo Your artifacts are available at https://cloud-storage-team.github.io/algnet/${{env.DEPLOY_DIR}}
 
   test:
     runs-on: ubuntu-latest
