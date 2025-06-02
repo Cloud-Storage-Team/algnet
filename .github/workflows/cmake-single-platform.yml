@@ -53,6 +53,8 @@ jobs:
   run-simulations:
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@v4
 
@@ -81,11 +83,33 @@ jobs:
       with:
         name: metrics
         path: metrics/**
-    # - name: Deploy to GitHub Pages
-    #   uses: peaceiris/actions-gh-pages@v3
-    #   with:
-    #     github_token: ${{ secrets.GITHUB_TOKEN }}
-    #     publish_dir: metrics
+
+    - name: Calculate deploy destination directory
+      run:
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          echo "DEPLOY_DIR=workflows/${{ github.run_id }}" >> $GITHUB_ENV;
+        else
+          echo "DEPLOY_DIR=" >> $GITHUB_ENV;
+        fi
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: metrics
+        destination_dir: ${{env.DEPLOY_DIR}}
+    - name: Wait for artifacts to be avaliable
+      run: 
+        URL="https://cloud-storage-team.github.io/algnet/${{env.DEPLOY_DIR}}";
+        while true; do
+          if curl --output /dev/null --silent --head --fail "$URL"; then
+            echo "Artifacts are avaliable at $URL";
+            break;
+          else
+            echo "Waiting for page to be available...";
+            sleep 1;
+          fi
+        done
 
   test:
     runs-on: ubuntu-latest
