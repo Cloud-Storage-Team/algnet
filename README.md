@@ -29,7 +29,7 @@ Run simulator:
 ```bash
                   # path to simulation config
 ./build/simulator configuration_examples/simulation_examples/basic_simulation.yml \
-    [metrics-output-dir-name] \
+    [--output-dir output-dir-name] \
     [--no-plots] \
     [--export-metrics] \
     [--no-logs]
@@ -45,7 +45,7 @@ Run simulator:
 
 To profile simulator run `CMake` with option `-DPROFILING=ON`:
 
-```console
+```bash
 mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DPROFILING=ON ..
 cmake --build .
