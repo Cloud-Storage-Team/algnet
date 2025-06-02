@@ -2,18 +2,13 @@
 
 #include <matplot/matplot.h>
 #include <spdlog/fmt/fmt.h>
-
-#include <algorithm>
 #include <filesystem>
-#include <fstream>
 
 #include "device/receiver.hpp"
 #include "device/sender.hpp"
 #include "flow/flow.hpp"
 #include "link.hpp"
 #include "utils/identifier_factory.hpp"
-
-namespace fs = std::filesystem;
 
 namespace sim {
 
@@ -41,9 +36,9 @@ void MetricsCollector::export_metrics_to_files(
                               fmt::format("queue_size_{}.txt", link_id));
     }
 
-    for (auto& [link_id, values] : m_cwnd_storage) {
+    for (auto& [flow_id, values] : m_cwnd_storage) {
         values.export_to_file(metrics_dir /
-                              fmt::format("cwnd_{}.txt", link_id));
+                              fmt::format("cwnd_{}.txt", flow_id));
     }
 }
 
@@ -60,7 +55,7 @@ void MetricsCollector::draw_metric_plots(
 
         values.draw_plot(
             metrics_dir / fmt::format("rtt/{}.svg", flow_id),
-            PlotMetadata{"Time, ns", "Value, ns",
+            PlotMetadata{"Time, ns", "Values, ns",
                          fmt::format("RTT values from {} to {}",
                                      flow->get_sender()->get_id(),
                                      flow->get_receiver()->get_id())});
