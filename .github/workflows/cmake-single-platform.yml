@@ -65,7 +65,7 @@ jobs:
       id: cache-gnuplot
       uses: actions/cache@v4
       with:
-        path: /usr/local/bin/gnuplot
+        path: /usr/bin/gnuplot
         key: gnuplot-${{ runner.os }}
 
     - name: Install gnuplot
@@ -76,6 +76,9 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: build-artifact
+
+    - name: Make Simulator executable
+      run: chmod +x simulator
 
     - name: Run simulation
       run: python3 scripts/run_simulations.py ./simulator configuration_examples/simulation_examples ./metrics
