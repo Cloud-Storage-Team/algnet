@@ -75,7 +75,7 @@ def save_html_file(html_content, output_file):
 if __name__ == "__main__":
     input_directory = sys.argv[1]
     folder_name = os.path.basename(input_directory)
-    output_file = os.path.join(input_directory, f"{folder_name}.html")
+    output_file = os.path.join(input_directory, "index.html")
     html_content = generate_html(input_directory)
     save_html_file(html_content, output_file)
     print(f"HTML file successfully created and put to {output_file}.")

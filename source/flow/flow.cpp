@@ -3,11 +3,10 @@
 #include <memory>
 #include <string>
 
-#include "device/sender.hpp"
 #include "device/receiver.hpp"
 #include "device/sender.hpp"
 #include "logger/logger.hpp"
-#include "metrics_collector.hpp"
+#include "metrics/metrics_collector.hpp"
 #include "packet.hpp"
 #include "scheduler.hpp"
 
@@ -76,14 +75,16 @@ Time Flow::put_data_to_device() {
         LOG_ERROR("Flow source was deleted; can not put data to it");
         return 0;
     }
-    m_sending_buffer.front().send_time = Scheduler::get_instance().get_current_time();
+    m_sending_buffer.front().send_time =
+        Scheduler::get_instance().get_current_time();
     m_src.lock()->enqueue_packet(m_sending_buffer.front());
     m_sending_buffer.pop();
     return m_delay_between_packets;
 }
 
 void Flow::schedule_packet_generation(Time time) {
-    auto generate_event_ptr = std::make_unique<Generate>(time, shared_from_this(), m_packet_size);
+    auto generate_event_ptr =
+        std::make_unique<Generate>(time, shared_from_this(), m_packet_size);
     Scheduler::get_instance().add(std::move(generate_event_ptr));
 }
 
