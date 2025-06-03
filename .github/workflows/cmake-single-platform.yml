@@ -62,16 +62,15 @@ jobs:
       run: sudo apt update
 
     - name: Cache gnuplot
-      uses: actions/cache@v2
+      id: cache-gnuplot
+      uses: actions/cache@v4
       with:
         path: /usr/local/bin/gnuplot
         key: gnuplot-${{ runner.os }}
 
     - name: Install gnuplot
-      run: |
-        if ! command -v gnuplot &> /dev/null; then
-          sudo apt-get update && sudo apt-get install -y gnuplot
-        fi
+      if: steps.cache-gnuplot.outputs.cache-hit != 'true'
+      run: sudo apt install --fix-missing gnuplot
 
     - name: Download artifact
       uses: actions/download-artifact@v4
