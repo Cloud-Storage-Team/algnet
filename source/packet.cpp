@@ -1,10 +1,19 @@
 #include "packet.hpp"
 
+#include "device/sender.hpp"
+#include "device/receiver.hpp"
+
 #include <sstream>
 
 namespace sim {
-Packet::Packet(PacketType a_type, Size a_size_byte, IFlow* a_flow, Id a_source_id, Id a_dest_id, Time a_RTT)
-    : type(a_type), source_id(a_source_id), dest_id(a_dest_id), RTT(a_RTT), size_byte(a_size_byte), flow(a_flow) {}
+Packet::Packet(PacketType a_type, Size a_size_byte, IFlow* a_flow, Id a_source_id, Id a_dest_id, Time a_RTT, Time a_send_time)
+    : type(a_type),
+      source_id(a_source_id),
+      dest_id(a_dest_id),
+      RTT(a_RTT),
+      size_byte(a_size_byte),
+      flow(a_flow),
+      send_time(a_send_time) {}
 
 bool Packet::operator==(const Packet& packet) const {
     return flow == packet.flow && 
@@ -45,7 +54,8 @@ std::string Packet::to_string() const {
     oss << ", dest_id: " << dest_id;
     oss << ", packet_num: " << packet_num;
     oss << ", size(byte): " << size_byte;
-    oss << ", flow: " << (flow ? std::to_string(flow->get_id()) : "null");
+    oss << ", flow: " << (flow ? flow->get_id() : "null");
+    oss << ", send time: " << send_time;
     oss << "]";
 
     return oss.str();

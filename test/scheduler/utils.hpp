@@ -3,7 +3,6 @@
 #include <gtest/gtest.h>
 
 #include <ctime>
-#include <type_traits>
 
 #include "event.hpp"
 #include "scheduler.hpp"

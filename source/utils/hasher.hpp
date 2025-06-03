@@ -16,7 +16,7 @@ class RandomHasher : public IHasher {
 public:
     ~RandomHasher() = default;
 
-    std::uint32_t get_hash(Packet) const final;
+    std::uint32_t get_hash(Packet packet) const final;
 };
 
 class BaseHasher : public IHasher {

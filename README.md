@@ -28,7 +28,33 @@ Run simulator:
 
 ```bash
                   # path to simulation config
-./build/simulator configuration_example/simulation_examples/basic_simulation.yml
+./build/simulator configuration_examples/simulation_examples/basic_simulation.yml \
+    [metrics-output-dir-name] \
+    [--no-plots] \
+    [--export-metrics] \
+    [--no-logs]
+```
+
+- `metrics-output-dir-name` -- directory name for metrics and plots ("metrics" by default).
+- `--export-metrics` -- exports simulation metrics to text files.
+- `--no-plots` -- disables generation of plots.
+- `--no-logs` -- disables logs.
+
+
+## Profiling
+
+To profile simulator run `CMake` with option `-DPROFILING=ON`:
+
+```console
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DPROFILING=ON ..
+cmake --build .
+
+# Run simulator as usual
+./simulator ../configuration_examples/simulation_examples/basic_simulation.yml metrics-dir
+
+# Run profiler gprof
+gprof simulator > profile.txt
 ```
 
 # Smart pointers

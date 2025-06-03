@@ -8,8 +8,8 @@
 
 namespace sim {
 
-RoutingModule::RoutingModule(std::unique_ptr<IHasher> a_hasher)
-    : m_id(IdentifierFactory::get_instance().generate_id()),
+RoutingModule::RoutingModule(Id a_id, std::unique_ptr<IHasher> a_hasher)
+    : m_id(a_id),
       m_hasher(std::move(a_hasher ? std::move(a_hasher) : std::make_unique<BaseHasher>())) {}
 
 Id RoutingModule::get_id() const {
@@ -58,7 +58,6 @@ bool RoutingModule::update_routing_table(Id dest_id, std::shared_ptr<ILink> link
     }
     auto link_dest = link->get_to();
 
-    // TODO: discuss storing weak_ptrs instead of shared
     m_routing_table[dest_id][link] += paths_count;
     return true;
 }
@@ -126,5 +125,10 @@ void RoutingModule::correctify_outlinks() {
     std::erase_if(m_outlinks,
                   [](std::weak_ptr<ILink> link) { return link.expired(); });
 }
+
+bool RoutingModule::notify_about_arrival(Time arrival_time) { 
+    (void)arrival_time;
+    return false; 
+};
 
 }  // namespace sim

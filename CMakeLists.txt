@@ -5,7 +5,16 @@ project(simulator)
 
 # main part of project
 
-option(BUILD_PROJECT "Build tests" ON)
+option(BUILD_PROJECT "Build project" ON)
+option(PROFILING "Add profiling flag" OFF)
+
+if (PROFILING)
+    message(STATUS "Profiling enabled")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
+endif()
+
 
 file(GLOB_RECURSE src "source/*.cpp")
 file(GLOB_RECURSE tests "test/*.cpp")
@@ -16,11 +25,12 @@ include_directories(
 )
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/yaml-cpp/)
+add_subdirectory(${CMAKE_SOURCE_DIR}/external/matplotplusplus/)
 
 if (BUILD_PROJECT)
     set(TARGET_NAME "${PROJECT_NAME}")
     add_executable(${TARGET_NAME} main.cpp ${src})
-    target_link_libraries(${TARGET_NAME} yaml-cpp)
+    target_link_libraries(${TARGET_NAME} yaml-cpp matplot)
     target_compile_options(${TARGET_NAME} PRIVATE -Wall -Werror -Wextra)
 endif()
 
@@ -34,7 +44,7 @@ if(BUILD_TESTS)
     target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/external/yaml-cpp/include)
     target_compile_options(${TEST_NAME} PRIVATE -Wall -Wextra)
     target_include_directories(${TEST_NAME} PUBLIC "source")
-    target_link_libraries(${TEST_NAME} gtest gtest_main yaml-cpp)
+    target_link_libraries(${TEST_NAME} gtest gtest_main yaml-cpp matplot)
     enable_testing()
     add_test(NAME MyTests COMMAND ${TEST_NAME})
 endif()

@@ -4,14 +4,16 @@
 
 #include "event.hpp"
 #include "link.hpp"
+#include "routing_module.hpp"
+#include "scheduling_module.hpp"
+#include "scheduler.hpp"
 #include "logger/logger.hpp"
 #include "utils/identifier_factory.hpp"
 #include "utils/validation.hpp"
 
 namespace sim {
 
-Receiver::Receiver()
-    : m_router(std::make_unique<RoutingModule>()) {}
+Receiver::Receiver(Id a_id) : m_router(std::make_unique<RoutingModule>(a_id)) {}
 
 bool Receiver::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
@@ -40,6 +42,10 @@ std::shared_ptr<ILink> Receiver::next_inlink() {
 
 std::shared_ptr<ILink> Receiver::get_link_to_destination(Packet packet) const {
     return m_router->get_link_to_destination(packet);
+};
+
+bool Receiver::notify_about_arrival(Time arrival_time) {
+    return m_process_scheduler.notify_about_arriving(arrival_time, weak_from_this());
 };
 
 DeviceType Receiver::get_type() const { return DeviceType::RECEIVER; }
@@ -87,12 +93,19 @@ Time Receiver::process() {
         // TODO: think about redirecting time
     }
 
+
+    if (m_process_scheduler.notify_about_finish(Scheduler::get_instance().get_current_time() + total_processing_time)) {
+        return 0;
+    }
+
     return total_processing_time;
 }
 
 Time Receiver::send_ack(Packet data_packet) {
     Time processing_time = 1;
-    Packet ack = Packet(PacketType::ACK, 1, data_packet.flow, data_packet.flow->get_receiver()->get_id(), data_packet.flow->get_sender()->get_id(), 0);
+    Time current_time = Scheduler::get_instance().get_current_time();
+    Time RTT = data_packet.RTT + current_time -  data_packet.send_time;
+    Packet ack(PacketType::ACK, 1, data_packet.flow, data_packet.flow->get_receiver()->get_id(), data_packet.flow->get_sender()->get_id(), RTT, current_time);
 
     std::shared_ptr<ILink> link_to_dest = get_link_to_destination(ack);
     if (link_to_dest == nullptr) {

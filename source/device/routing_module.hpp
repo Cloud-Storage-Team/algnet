@@ -16,7 +16,7 @@ class BaseHasher;
     
 class RoutingModule : public IRoutingDevice {
 public:
-    RoutingModule(std::unique_ptr<IHasher> a_hasher = nullptr);
+    RoutingModule(Id a_id = "", std::unique_ptr<IHasher> a_hasher = nullptr);
     ~RoutingModule() = default;
 
     Id get_id() const final;
@@ -27,11 +27,15 @@ public:
     std::shared_ptr<ILink> next_inlink() final;
     std::shared_ptr<ILink> get_link_to_destination(Packet packet) const final;
     std::set<std::shared_ptr<ILink>> get_outlinks() final;
+    bool notify_about_arrival(Time arrival_time) final;
 
     void correctify_inlinks();
     void correctify_outlinks();
 
 private:
+    Id m_id;
+    std::unique_ptr<IHasher> m_hasher;
+
     // Ordered set as we need to iterate over the ingress buffers
     std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
         m_inlinks;
@@ -46,9 +50,6 @@ private:
     LoopIterator<std::set<std::weak_ptr<ILink>,
                           std::owner_less<std::weak_ptr<ILink>>>::iterator>
         m_next_inlink;
-
-    Id m_id;
-    std::unique_ptr<IHasher> m_hasher;
 };
 
 }  // namespace sim

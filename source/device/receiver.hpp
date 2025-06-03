@@ -2,7 +2,9 @@
 #include <memory>
 
 #include "packet.hpp"
-#include "routing_module.hpp"
+#include "event.hpp"
+#include "device.hpp"
+#include "scheduling_module.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
@@ -10,16 +12,10 @@ namespace sim {
 struct Packet;
 class RoutingModule;
 
-class IReceiver : public IRoutingDevice,
-                  public IProcessingDevice {
-public:
-    virtual ~IReceiver() = default;
-};
-
 class Receiver : public IReceiver,
                  public std::enable_shared_from_this<Receiver> {
 public:
-    Receiver();
+    Receiver(Id a_id);
     ~Receiver() = default;
 
     bool add_inlink(std::shared_ptr<ILink> link) final;
@@ -28,6 +24,8 @@ public:
     std::shared_ptr<ILink> next_inlink() final;
     std::shared_ptr<ILink> get_link_to_destination(Packet packet) const final;
     std::set<std::shared_ptr<ILink>> get_outlinks() final;
+
+    bool notify_about_arrival(Time arrival_time) final;
 
     DeviceType get_type() const final;
     // Process a packet by removing it from the ingress buffer
@@ -42,7 +40,8 @@ public:
 
 private:
     Time send_ack(Packet data_packet);
-    std::unique_ptr<RoutingModule> m_router;
+    std::unique_ptr<IRoutingDevice> m_router;
+    SchedulingModule<IReceiver, Process> m_process_scheduler;
 };
 
 }  // namespace sim

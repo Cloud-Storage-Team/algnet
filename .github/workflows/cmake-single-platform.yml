@@ -42,7 +42,51 @@ jobs:
       run: cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF
 
     - name: Build project
-      run: cmake --build build --config Debug
+      run: cmake --build build --config Debug -j $(nproc)
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifact
+        path: build/**
+
+  run-simulations:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Apt update
+      run: sudo apt update
+
+    - name: Install gnuplot
+      run: sudo apt install --fix-missing gnuplot
+
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifact
+
+    - name: Make Simulator executable
+      run: chmod +x simulator
+
+    - name: Run simulation
+      run: python3 scripts/run_simulations.py ./simulator configuration_examples/simulation_examples ./metrics
+
+    - name: Create html
+      run: python3 scripts/generate-html.py ./metrics
+
+    - name: Upload metrics
+      uses: actions/upload-artifact@v4
+      with:
+        name: metrics
+        path: metrics/**
+    # - name: Deploy to GitHub Pages
+    #   uses: peaceiris/actions-gh-pages@v3
+    #   with:
+    #     github_token: ${{ secrets.GITHUB_TOKEN }}
+    #     publish_dir: metrics
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -55,7 +99,7 @@ jobs:
       run: cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_PROJECT=OFF -DBUILD_TESTS=ON
 
     - name: Build tests
-      run: cmake --build build --config Debug
+      run: cmake --build build --config Debug -j $(nproc)
 
     - name: Run tests
       working-directory: build

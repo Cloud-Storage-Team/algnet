@@ -6,6 +6,11 @@
 
 namespace sim {
 
+bool EventComparator::operator()(const std::unique_ptr<Event>& lhs,
+                    const std::unique_ptr<Event>& rhs) const {
+    return (*lhs.get()) > (*rhs.get());
+}
+
 bool Scheduler::tick() {
     if (m_events.empty()) {
         return false;
