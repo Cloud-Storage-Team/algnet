@@ -23,8 +23,8 @@ Link::Link(Id a_id, std::weak_ptr<IRoutingDevice> a_from,
       m_last_src_egress_pass_time(0),
       m_transmission_delay(a_delay),
       m_next_ingress(),
-      m_ingress_buffer_size_byte(0),
-      m_max_ingress_buffer_size_byte(a_max_ingress_buffer_size) {
+      m_next_ingress_buffer_size_byte(0),
+      m_max_next_ingress_buffer_size_byte(a_max_ingress_buffer_size) {
     if (a_from.expired() || a_to.expired()) {
         LOG_WARN("Passed link to device is expired");
     } else if (a_speed_gbps == 0) {
@@ -54,27 +54,23 @@ void Link::schedule_arrival(Packet packet) {
 
     if (m_src_egress_buffer_size_byte + packet.size_byte >
         m_max_src_egress_buffer_size_byte) {
-        LOG_ERROR("Buffer in link overflowed; packet " + packet.to_string() +
+        LOG_ERROR("Egress buffer overflow; packet " + packet.to_string() +
                   " lost");
         return;
     }
 
-    LOG_INFO("Packet arrived to link's ingress queue. Packet: " +
-             packet.to_string());
+    LOG_INFO("Packet is assigned to the link. Packet: " + packet.to_string());
 
     unsigned int transmission_time = get_transmission_time(packet);
     m_last_src_egress_pass_time =
         std::max(m_last_src_egress_pass_time,
                  Scheduler::get_instance().get_current_time()) +
         transmission_time;
-    MetricsCollector::get_instance().add_queue_size(
-        get_id(), Scheduler::get_instance().get_current_time(),
-        m_src_egress_buffer_size_byte);
 
+    Size old_value = m_src_egress_buffer_size_byte;
     m_src_egress_buffer_size_byte += packet.size_byte;
-
     MetricsCollector::get_instance().add_queue_size(
-        get_id(), Scheduler::get_instance().get_current_time() + 1,
+        get_id(), Scheduler::get_instance().get_current_time(), old_value,
         m_src_egress_buffer_size_byte);
 
     Scheduler::get_instance().add(std::make_unique<Arrive>(
@@ -82,30 +78,27 @@ void Link::schedule_arrival(Packet packet) {
 };
 
 void Link::process_arrival(Packet packet) {
-    if (m_ingress_buffer_size_byte + packet.size_byte >
-        m_max_ingress_buffer_size_byte) {
-        LOG_ERROR("Ingress buffer on Link overflow; packet" +
-                  packet.to_string() + " lost");
+    if (m_next_ingress_buffer_size_byte + packet.size_byte >
+        m_max_next_ingress_buffer_size_byte) {
+        LOG_ERROR("Ingress buffer overflow; packet" + packet.to_string() +
+                  " lost");
         return;
     }
-    m_ingress_buffer_size_byte += packet.size_byte;
 
-    LOG_INFO("Packet arrived to link's egress queue. Packet: " +
-             packet.to_string());
+    // Remove packet from egress queue
+    Size old_value = m_src_egress_buffer_size_byte;
+    m_src_egress_buffer_size_byte -= packet.size_byte;
+    MetricsCollector::get_instance().add_queue_size(
+        get_id(), Scheduler::get_instance().get_current_time(), old_value,
+        m_src_egress_buffer_size_byte);
 
+    // Add packet to the next ingress queue
+    m_next_ingress.push(packet);
+    m_next_ingress_buffer_size_byte += packet.size_byte;
     m_to.lock()->notify_about_arrival(
         Scheduler::get_instance().get_current_time());
-
-    MetricsCollector::get_instance().add_queue_size(
-        get_id(), Scheduler::get_instance().get_current_time(),
-        m_src_egress_buffer_size_byte);
-
-    m_src_egress_buffer_size_byte -= packet.size_byte;
-
-    MetricsCollector::get_instance().add_queue_size(
-        get_id(), Scheduler::get_instance().get_current_time() + 1,
-        m_src_egress_buffer_size_byte);
-    m_next_ingress.push(packet);
+    LOG_INFO("Packet arrived to the next device. Packet: " +
+             packet.to_string());
 };
 
 std::optional<Packet> Link::get_packet() {
@@ -115,9 +108,9 @@ std::optional<Packet> Link::get_packet() {
     }
 
     auto packet = m_next_ingress.front();
-    LOG_INFO("Taken packet from link. Packet: " + packet.to_string());
+    LOG_INFO("Packet is taken from the link. Packet: " + packet.to_string());
     m_next_ingress.pop();
-    m_ingress_buffer_size_byte -= packet.size_byte;
+    m_next_ingress_buffer_size_byte -= packet.size_byte;
     return packet;
 };
 

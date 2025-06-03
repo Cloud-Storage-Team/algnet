@@ -79,8 +79,10 @@ private:
 
     // Queue at the ingress port of the m_next device
     std::queue<Packet> m_next_ingress;
-    Size m_ingress_buffer_size_byte;
-    Size m_max_ingress_buffer_size_byte;
+    // We keep track of m_next_ingress size in bytes
+    // to account for packet variations
+    Size m_next_ingress_buffer_size_byte;
+    Size m_max_next_ingress_buffer_size_byte;
 };
 
 }  // namespace sim

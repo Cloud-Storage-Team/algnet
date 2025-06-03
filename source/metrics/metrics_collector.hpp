@@ -14,7 +14,8 @@ public:
     static MetricsCollector& get_instance();
 
     void add_RTT(Id flow_id, Time time, Time value);
-    void add_queue_size(Id link_id, Time time, std::uint32_t value);
+    void add_queue_size(Id link_id, Time time, std::uint32_t old_value,
+                        std::uint32_t new_value);
 
     void add_cwnd(Id flow_id, Time time, std::uint32_t cwnd);
 
@@ -28,8 +29,9 @@ private:
 
     // flow_ID --> vector of <time, RTT> values
     std::unordered_map<Id, MetricsStorage> m_RTT_storage;
-    // link_ID --> vector of <time, queue size> values
-    std::unordered_map<Id, MetricsStorage> m_queue_size_storage;
+    // link_ID --> vector of <time, old queue size, new queue size> values
+    std::unordered_map<Id, std::pair<MetricsStorage, MetricsStorage>>
+        m_queue_size_storage;
     std::unordered_map<Id, MetricsStorage> m_cwnd_storage;
 };
 
