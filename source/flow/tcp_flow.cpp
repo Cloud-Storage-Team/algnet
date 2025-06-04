@@ -34,7 +34,7 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<ISender> a_src,
         throw std::invalid_argument("Sender for TcpFlow is nullptr");
     }
     if (m_dest.lock() == nullptr) {
-        throw std::runtime_error("Receiver for TcpFlow is nullptr");
+        throw std::invalid_argument("Receiver for TcpFlow is nullptr");
     }
 }
 
