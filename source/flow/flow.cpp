@@ -21,7 +21,14 @@ Flow::Flow(Id a_id, std::shared_ptr<ISender> a_src,
       m_packet_size(a_packet_size),
       m_delay_between_packets(a_delay_between_packets),
       m_updates_number(0),
-      m_packets_to_send(a_packets_to_send) {}
+      m_packets_to_send(a_packets_to_send) {
+    if (m_src.lock() == nullptr) {
+        throw std::invalid_argument("Sender for Flow is nullptr");
+    }
+    if (m_dest.lock() == nullptr) {
+        throw std::invalid_argument("Receiver for Flow is nullptr");
+    }
+}
 
 void Flow::start() {
     schedule_packet_generation(Scheduler::get_instance().get_current_time());

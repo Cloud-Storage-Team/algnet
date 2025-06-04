@@ -130,66 +130,55 @@ Id parse_object<Link>(const YAML::Node& key_node,
     return id;
 }
 
+struct FlowCommon{
+    Id id;
+    std::shared_ptr<ISender> sender_ptr;
+    std::shared_ptr<IReceiver> receiver_ptr;
+    Size packet_size;
+    Time packet_interval;
+    std::uint32_t number_of_packets;
+};
+
+static FlowCommon parse_flow_common(const YAML::Node& key_node,
+                                    const YAML::Node& value_node) {
+    FlowCommon result;
+    result.id = key_node.as<Id>();
+
+    Id sender_id = value_node["sender_id"].as<Id>();
+    result.sender_ptr = IdentifierFactory::get_instance().get_object<ISender>(sender_id);
+    
+    Id receiver_id = value_node["receiver_id"].as<Id>();
+    result.receiver_ptr = IdentifierFactory::get_instance().get_object<IReceiver>(receiver_id);
+    
+    result.packet_size = value_node["packet_size"].as<Size>();
+    result.number_of_packets =
+        value_node["number_of_packets"].as<std::uint32_t>();
+    result.packet_interval = value_node["packet_interval"].as<Time>();
+
+    return result;
+}
+
 template <>
 Id parse_object<Flow>(const YAML::Node& key_node,
                       const YAML::Node& value_node) {
-    Id id = key_node.as<Id>();
-    Id sender_id = value_node["sender_id"].as<Id>();
-    Id receiver_id = value_node["receiver_id"].as<Id>();
-    Size packet_size = value_node["packet_size"].as<Size>();
-    Time packet_interval = value_node["packet_interval"].as<Time>();
-    std::uint32_t number_of_packets =
-        value_node["number_of_packets"].as<std::uint32_t>();
+    FlowCommon flow_common = parse_flow_common(key_node, value_node);
 
-    std::shared_ptr<ISender> sender_ptr =
-        IdentifierFactory::get_instance().get_object<ISender>(sender_id);
-    std::shared_ptr<IReceiver> receiver_ptr =
-        IdentifierFactory::get_instance().get_object<IReceiver>(receiver_id);
-
-    if (sender_ptr == nullptr) { 
-        LOG_ERROR("Failed to find flow's sender");
-        return "";
-    }
-    
-    if (receiver_ptr == nullptr) { 
-        LOG_ERROR("Failed to find flow's receiver");
-        return "";
-    }
-
-    parse_object_helper<Flow>(id, sender_ptr, receiver_ptr, packet_size,
-                              packet_interval, number_of_packets);
-    return id;
+    parse_object_helper<Flow>(flow_common.id, flow_common.sender_ptr, flow_common.receiver_ptr, 
+                              flow_common.packet_size, flow_common.packet_interval,
+                              flow_common.number_of_packets);
+    return flow_common.id;
 }
 
 template <>
 Id parse_object<TcpFlow>(const YAML::Node& key_node,
                          const YAML::Node& value_node) {
-    Id id = key_node.as<Id>();
-    Id sender_id = value_node["sender_id"].as<Id>();
-    Id receiver_id = value_node["receiver_id"].as<Id>();
-    Size packet_size = value_node["packet_size"].as<Size>();
-    Time packet_interval = value_node["packet_interval"].as<Time>();
-    std::uint32_t number_of_packets =
-        value_node["number_of_packets"].as<std::uint32_t>();
-
-    std::shared_ptr<ISender> sender_ptr =
-        IdentifierFactory::get_instance().get_object<ISender>(sender_id);
-    std::shared_ptr<IReceiver> receiver_ptr =
-        IdentifierFactory::get_instance().get_object<IReceiver>(receiver_id);
-
-    if (sender_ptr == nullptr) { 
-        LOG_ERROR("Failed to find flow's sender");
-        return "";
-    }
     
-    if (receiver_ptr == nullptr) { 
-        LOG_ERROR("Failed to find flow's receiver");
-        return "";
-    }
+    FlowCommon flow_common = parse_flow_common(key_node, value_node);
 
-    parse_object_helper<TcpFlow>(id, sender_ptr, receiver_ptr, packet_size,
-                                 packet_interval, number_of_packets);
-    return id;
+    parse_object_helper<TcpFlow>(flow_common.id, flow_common.sender_ptr, flow_common.receiver_ptr, 
+                              flow_common.packet_size, flow_common.packet_interval,
+                              flow_common.number_of_packets);
+    return flow_common.id;
 }
 
 }  // namespace sim

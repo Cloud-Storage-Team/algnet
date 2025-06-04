@@ -2,13 +2,19 @@
 
 #include <stdexcept>
 
-uint32_t parse_throughput(const std::string &throughput) {
-    const size_t unit_pos = throughput.find_first_not_of("0123456789");
+static std::pair<uint32_t, std::string> parse_value_unit(
+    const std::string &value_with_unit) {
+    const size_t unit_pos = value_with_unit.find_first_not_of("0123456789");
     if (unit_pos == std::string::npos) {
-        throw std::runtime_error("Invalid throughput: " + throughput);
+        throw std::runtime_error("Can not find unit : " + value_with_unit);
     }
-    const uint32_t value = std::stoul(throughput.substr(0, unit_pos));
-    const std::string unit = throughput.substr(unit_pos);
+    const uint32_t value = std::stoul(value_with_unit.substr(0, unit_pos));
+    const std::string unit = value_with_unit.substr(unit_pos);
+    return std::make_pair(value, unit);
+}
+
+uint32_t parse_throughput(const std::string &throughput) {
+    auto [value, unit] = parse_value_unit(throughput);
     if (unit == "Gbps") {
         return value;
     }
@@ -19,12 +25,7 @@ uint32_t parse_throughput(const std::string &throughput) {
 }
 
 uint32_t parse_latency(const std::string &latency) {
-    const size_t unit_pos = latency.find_first_not_of("0123456789");
-    if (unit_pos == std::string::npos) {
-        throw std::runtime_error("Invalid latency: " + latency);
-    }
-    const uint32_t value = std::stoul(latency.substr(0, unit_pos));
-    const std::string unit = latency.substr(unit_pos);
+    auto [value, unit] = parse_value_unit(latency);
     if (unit == "ns") {
         return value;
     }
@@ -32,12 +33,7 @@ uint32_t parse_latency(const std::string &latency) {
 }
 
 uint32_t parse_buffer_size(const std::string &buffer_size) {
-    const size_t unit_pos = buffer_size.find_first_not_of("0123456789");
-    if (unit_pos == std::string::npos) {
-        throw std::runtime_error("Invalid buffer_size: " + buffer_size);
-    }
-    const uint32_t value = std::stoul(buffer_size.substr(0, unit_pos));
-    const std::string unit = buffer_size.substr(unit_pos);
+    auto [value, unit] = parse_value_unit(buffer_size);
     if (unit == "B") {
         return value;
     }
