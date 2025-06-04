@@ -2,7 +2,6 @@
 #include <matplot/matplot.h>
 
 #include <filesystem>
-#include <tuple>
 #include <vector>
 
 #include "types.hpp"

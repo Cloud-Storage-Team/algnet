@@ -2,7 +2,6 @@
 
 #include <matplot/matplot.h>
 #include <spdlog/fmt/fmt.h>
-
 #include <filesystem>
 
 #include "device/receiver.hpp"
