@@ -2,6 +2,7 @@
 
 #include <matplot/matplot.h>
 #include <spdlog/fmt/fmt.h>
+
 #include <filesystem>
 
 #include "device/receiver.hpp"
@@ -71,8 +72,8 @@ void MetricsCollector::draw_metric_plots(
         auto ax = fig->current_axes();
 
         auto limits = ax->xlim();
-        matplot::line(0, link->get_max_src_egress_buffer_size_byte(), limits[1],
-                      link->get_max_src_egress_buffer_size_byte())
+        matplot::line(0, link->get_max_from_egress_buffer_size(), limits[1],
+                      link->get_max_from_egress_buffer_size())
             ->line_width(1.5)
             .color({1.f, 0.0f, 0.0f});
 
