@@ -66,13 +66,13 @@ void TcpFlow::update(Packet packet, DeviceType type) {
     }
 
     Time current_time = Scheduler::get_instance().get_current_time();
-    if (current_time < packet.send_time) {
+    if (current_time < packet.sent_time) {
         LOG_ERROR("Packet " + packet.to_string() +
                   " sending time less that current time; ignored");
         return;
     }
 
-    Time delay = packet.RTT + current_time - packet.send_time;
+    Time delay = current_time - packet.sent_time;
 
     LOG_INFO(fmt::format("Packet {} got in flow; delay = {}",
                          packet.to_string(), to_string(), delay));
@@ -130,8 +130,7 @@ Packet TcpFlow::generate_packet() {
     packet.flow = this;
     packet.source_id = get_sender()->get_id();
     packet.dest_id = get_receiver()->get_id();
-    packet.RTT = 0;
-    packet.send_time = Scheduler::get_instance().get_current_time();
+    packet.sent_time = Scheduler::get_instance().get_current_time();
     return packet;
 }
 
