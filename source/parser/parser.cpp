@@ -1,9 +1,6 @@
 #include "parser.hpp"
 
-#include <yaml-cpp/yaml.h>
-
 #include <stdexcept>
-#include <string>
 
 #include "identifiable_parser.hpp"
 #include "logger/logger.hpp"
