@@ -33,8 +33,8 @@ void MetricsCollector::export_metrics_to_files(
     }
 
     for (auto& [link_id, values] : m_queue_size_storage) {
-        values.first.export_to_file(metrics_dir /
-                                    fmt::format("queue_size_{}.txt", link_id));
+        values.export_to_file(metrics_dir /
+                              fmt::format("queue_size_{}.txt", link_id));
     }
 
     for (auto& [flow_id, values] : m_cwnd_storage) {
@@ -44,10 +44,8 @@ void MetricsCollector::export_metrics_to_files(
 }
 
 void MetricsCollector::add_queue_size(Id link_id, Time time,
-                                      std::uint32_t old_value,
-                                      std::uint32_t new_value) {
-    m_queue_size_storage[link_id].first.add_record(time, old_value);
-    m_queue_size_storage[link_id].second.add_record(time, new_value);
+                                      std::uint32_t value) {
+    m_queue_size_storage[link_id].add_record(time, value);
 }
 
 void MetricsCollector::draw_metric_plots(
@@ -67,7 +65,7 @@ void MetricsCollector::draw_metric_plots(
     for (auto& [link_id, values] : m_queue_size_storage) {
         auto link =
             IdentifierFactory::get_instance().get_object<ILink>(link_id);
-        auto fig = values.first.get_picture(
+        auto fig = values.get_picture(
             {"Time, ns", "Values, bytes",
              fmt::format("Queue size from {} to {}", link->get_from()->get_id(),
                          link->get_to()->get_id())});

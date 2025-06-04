@@ -59,18 +59,15 @@ void Link::schedule_arrival(Packet packet) {
         return;
     }
 
-    LOG_INFO("Packet is assigned to the link. Packet: " + packet.to_string());
-
     unsigned int transmission_time = get_transmission_time(packet);
     m_last_src_egress_pass_time =
         std::max(m_last_src_egress_pass_time,
                  Scheduler::get_instance().get_current_time()) +
         transmission_time;
 
-    Size old_value = m_src_egress_buffer_size_byte;
     m_src_egress_buffer_size_byte += packet.size_byte;
     MetricsCollector::get_instance().add_queue_size(
-        get_id(), Scheduler::get_instance().get_current_time(), old_value,
+        get_id(), Scheduler::get_instance().get_current_time(),
         m_src_egress_buffer_size_byte);
 
     Scheduler::get_instance().add(std::make_unique<Arrive>(
@@ -85,16 +82,17 @@ void Link::process_arrival(Packet packet) {
         return;
     }
 
-    // Remove packet from egress queue
-    Size old_value = m_src_egress_buffer_size_byte;
+    // Remove packet from the source egress queue
     m_src_egress_buffer_size_byte -= packet.size_byte;
+
     MetricsCollector::get_instance().add_queue_size(
-        get_id(), Scheduler::get_instance().get_current_time(), old_value,
+        get_id(), Scheduler::get_instance().get_current_time(),
         m_src_egress_buffer_size_byte);
 
-    // Add packet to the next ingress queue
+    // Add packet to the next device ingress queue
     m_next_ingress.push(packet);
     m_next_ingress_buffer_size_byte += packet.size_byte;
+
     m_to.lock()->notify_about_arrival(
         Scheduler::get_instance().get_current_time());
     LOG_INFO("Packet arrived to the next device. Packet: " +
