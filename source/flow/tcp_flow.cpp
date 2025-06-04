@@ -30,7 +30,12 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<ISender> a_src,
       m_packets_in_flight(0),
       m_packets_acked(0),
       m_id(a_id) {
-    LOG_INFO(to_string());
+    if (m_src.lock() == nullptr) {
+        throw std::runtime_error("Sender for TcpFlow is nullptr");
+    }
+    if (m_dest.lock() == nullptr) {
+        throw std::runtime_error("Receiver for TcpFlow is nullptr");
+    }
 }
 
 void TcpFlow::start() {
