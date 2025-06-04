@@ -45,6 +45,7 @@ public:
 class IReceiver : public IRoutingDevice, public IProcessingDevice {
 public:
     virtual ~IReceiver() = default;
+    virtual Time send_system_packet(Packet packet) = 0;
 };
 
 class ISender : public IRoutingDevice, public IProcessingDevice {
@@ -52,6 +53,7 @@ public:
     virtual ~ISender() = default;
     virtual void enqueue_packet(Packet packet) = 0;
     virtual Time send_data() = 0;
+    virtual Time send_system_packet(Packet packet) = 0;
 };
 
 class ISwitch : public IRoutingDevice,

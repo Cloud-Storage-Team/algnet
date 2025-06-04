@@ -21,11 +21,11 @@ void Logger::disable_logs() {
 
 Logger::Logger() {
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    console_sink->set_level(spdlog::level::warn);
+    console_sink->set_level(spdlog::level::err);
 
     auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
         "logs/simulator_logs.txt", true);
-    file_sink->set_level(spdlog::level::trace);
+    file_sink->set_level(spdlog::level::err);
 
     auto logger = std::make_shared<spdlog::logger>(
         "multi_sink", spdlog::sinks_init_list{console_sink, file_sink});

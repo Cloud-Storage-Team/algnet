@@ -20,8 +20,8 @@
 
 // #include "express_pass/ep_receiver.hpp"
 // #include "express_pass/ep_sender.hpp"
-// #include "express_pass/ep_link.hpp"
-// #include "express_pass/ep_flow.hpp"
+#include "express_pass/ep_link.hpp"
+#include "express_pass/ep_flow.hpp"
 
 #include "logger/logger.hpp"
 #include "metrics/metrics_collector.hpp"
@@ -134,9 +134,9 @@ private:
 
 using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;
 using TcpSimulator = Simulator<Sender, Switch, Receiver, TcpFlow, Link>;
-// using EPSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;//Simulator<EPSender, Switch, EPReceiver, EPFlow, EPLink>;
+using EPSimulator = Simulator<Sender, Switch, Receiver, EPFlow, EPLink>;//Simulator<EPSender, Switch, EPReceiver, EPFlow, EPLink>;
 
-using SimulatorVariant = std::variant<BasicSimulator, TcpSimulator>;
+using SimulatorVariant = std::variant<BasicSimulator, TcpSimulator, EPSimulator>;
 
 SimulatorVariant create_simulator(std::string_view algorithm);
 
