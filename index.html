@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>metrics - Image Gallery</title>
+        <title>Metrics</title>
         <style>
             body {
                 font-family: Arial, sans-serif;
@@ -16,32 +16,35 @@
             h1 {
                 color: #333;
                 font-size: 24px;
-                margin-bottom: 10px;
+                margin-bottom: 20px;
             }
-            h2 {
-                color: #555;
-                font-size: 20px;
-                margin-top: 20px;
-            }
-            .gallery {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                margin-top: 10px;
-            }
-            .gallery img {
-                max-width: 300px;
-                height: auto;
-                margin: 10px;
-                border: 1px solid #ccc;
+            .button {
+                display: block;
+                padding: 10px 20px;
+                margin: 10px auto;
+                font-size: 16px;
+                color: white;
+                background-color: #007BFF;
+                border: none;
                 border-radius: 5px;
-                background-color: #fff;
+                text-decoration: none;
+                transition: background-color 0.3s;
+                width: 200px;
+            }
+            .button:hover {
+                background-color: #0056b3;
             }
         </style>
     </head>
     <body>
-        <h1>metrics</h1>
-    <h2>basic_simulation</h2><div class='gallery'><img src='basic_simulation/bus_topology.svg' alt='bus_topology.svg'></div><h2>basic_simulation/rtt</h2><div class='gallery'><img src='basic_simulation/rtt/flow2.svg' alt='flow2.svg'><img src='basic_simulation/rtt/flow1.svg' alt='flow1.svg'></div><h2>basic_simulation/queue_size</h2><div class='gallery'><img src='basic_simulation/queue_size/link6.svg' alt='link6.svg'><img src='basic_simulation/queue_size/link1.svg' alt='link1.svg'><img src='basic_simulation/queue_size/link8.svg' alt='link8.svg'><img src='basic_simulation/queue_size/link4.svg' alt='link4.svg'><img src='basic_simulation/queue_size/link3.svg' alt='link3.svg'><img src='basic_simulation/queue_size/link5.svg' alt='link5.svg'><img src='basic_simulation/queue_size/link2.svg' alt='link2.svg'><img src='basic_simulation/queue_size/link7.svg' alt='link7.svg'></div><h2>tcp_simulation</h2><div class='gallery'><img src='tcp_simulation/bus_topology.svg' alt='bus_topology.svg'></div><h2>tcp_simulation/rtt</h2><div class='gallery'><img src='tcp_simulation/rtt/flow2.svg' alt='flow2.svg'><img src='tcp_simulation/rtt/flow1.svg' alt='flow1.svg'></div><h2>tcp_simulation/cwnd</h2><div class='gallery'><img src='tcp_simulation/cwnd/flow2.svg' alt='flow2.svg'><img src='tcp_simulation/cwnd/flow1.svg' alt='flow1.svg'></div><h2>tcp_simulation/queue_size</h2><div class='gallery'><img src='tcp_simulation/queue_size/link6.svg' alt='link6.svg'><img src='tcp_simulation/queue_size/link1.svg' alt='link1.svg'><img src='tcp_simulation/queue_size/link8.svg' alt='link8.svg'><img src='tcp_simulation/queue_size/link4.svg' alt='link4.svg'><img src='tcp_simulation/queue_size/link3.svg' alt='link3.svg'><img src='tcp_simulation/queue_size/link5.svg' alt='link5.svg'><img src='tcp_simulation/queue_size/link2.svg' alt='link2.svg'><img src='tcp_simulation/queue_size/link7.svg' alt='link7.svg'></div>
+        <h1>Metrics</h1>
+    <a href='main/index.html' class='button'>main</a>
+<a href='ci-cd-fix/15461917186/index.html' class='button'>ci-cd-fix > 15461917186</a>
+<a href='fix-ci-cd/15462056457/index.html' class='button'>fix-ci-cd > 15462056457</a>
+<a href='fix-ci-cd-push-main/15461824741/index.html' class='button'>fix-ci-cd-push-main > 15461824741</a>
+<a href='fixup-pull-pipeline/15461174574/index.html' class='button'>fixup-pull-pipeline > 15461174574</a>
+<a href='workflows/15442502763/index.html' class='button'>workflows > 15442502763</a>
+
     </body>
     </html>
     
