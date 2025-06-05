@@ -3,19 +3,21 @@ import subprocess
 import shutil
 
 def get_git_branches():
-    """Получает список названий веток в текущем Git-репозитории."""
+    """Gets a list of branch names in remote repository."""
     try:
-        branches = subprocess.check_output(
-            ['git', 'branch', '--format=%(refname:short)'],
-            stderr=subprocess.STDOUT
-        ).decode('utf-8').splitlines()
-        return set(branches)
+        subprocess.run(['git', 'fetch', '--prune'], check=True)
+
+        remote_branches = subprocess.check_output(['git', 'branch', '-r', '--format=%(refname:short)'], stderr=subprocess.STDOUT)
+        remote_branches = remote_branches.decode('utf-8').splitlines()
+        remote_branches = [branch.strip().replace('origin/', '') for branch in remote_branches]
+
+        return set(remote_branches)
     except subprocess.CalledProcessError as e:
-        print("Ошибка при получении веток:", e.output.decode())
+        print("Error while retrieving branches:", e.output.decode())
         return set()
 
 def clean_directory(branches):
-    """Удаляет файлы и директории, кроме тех, что соответствуют названиям веток."""
+    """Removes files and directories except those that match branch names."""
     current_dir = os.getcwd()
 
     for item in os.listdir(current_dir):
@@ -27,12 +29,12 @@ def clean_directory(branches):
             try:
                 if os.path.isdir(item_path):
                     shutil.rmtree(item_path)
-                    print(f"Remove directory: {item_path}")
+                    print(f"Removed directory: {item_path}")
                 else:
                     os.remove(item_path)
-                    print(f"Remove file: {item_path}")
+                    print(f"Removed file: {item_path}")
             except Exception as e:
-                print(f"Can not delete {item_path}: {e}")
+                print(f"Cannot delete {item_path}: {e}")
 
 if __name__ == "__main__":
     branches = get_git_branches()
