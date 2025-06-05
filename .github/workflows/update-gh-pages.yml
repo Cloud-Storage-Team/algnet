@@ -31,6 +31,7 @@ jobs:
       - name: Commit changes
         run: |
           git add -u
+          git add index.html
           git commit -m "Add changes from GitHub Actions" || echo "No changes to commit"
 
       - name: Push changes
