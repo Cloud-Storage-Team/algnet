@@ -100,7 +100,6 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: metrics
         destination_dir: ${{env.DEPLOY_DIR}}
-        exclude_assets: ''
     - name: Wait for artifacts to be avaliable
       run:
         URL="https://cloud-storage-team.github.io/algnet/${{env.DEPLOY_DIR}}";
