@@ -6,6 +6,8 @@ on:
       - Build and run project
     types:
       - completed
+  pull_request:
+    branches: [ "*" ]
 
 jobs:
   run_second_job:
