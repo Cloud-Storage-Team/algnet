@@ -20,7 +20,7 @@ jobs:
 
       - name: Generate new index.html
         run: 
-          SCRIPT_DIR="temp-dir"
+          SCRIPT_DIR="temp-dir";
           python3 .scripts/generate-root-html.py ${SCRIPT_DIR}
     
       - name: Deploy new index.html GitHub Pages
