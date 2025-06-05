@@ -16,11 +16,13 @@ jobs:
           ref: 'gh-pages'
 
       - name: Generate new index.html
-        run: python3 scripts/generate-root-html.py temp-dir
+        run: 
+          SCRIPT_DIR="temp-dir"
+          python3 .scripts/generate-root-html.py ${SCRIPT_DIR}
     
       - name: Deploy new index.html GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: temp-dir
+          publish_dir: ${SCRIPT_DIR}
           keep_files: true
