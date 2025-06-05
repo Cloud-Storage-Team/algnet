@@ -5,9 +5,6 @@ on:
     branches:
       gh-pages
 
-env:
-  PUBLISH_DIR: temp-dir
-
 jobs:
   rewrite-root-index:
     runs-on: ubuntu-latest
@@ -19,13 +16,25 @@ jobs:
         with:
           ref: 'gh-pages'
 
-      - name: Generate new index.html
-        run:
-          python3 .scripts/generate-root-html.py ${{env.PUBLISH_DIR}}
+      - name: Remove redundant files
+        run: python3 .scripts/delete-useless-files.py
+        continue-on-error: true
 
-      - name: Deploy new index.html GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{env.PUBLISH_DIR}}
-          keep_files: true
+      - name: Generate new index.html
+        run: python3 .scripts/generate-root-html.py index.html
+
+      - name: Configure Git
+        run: |
+          git config --local user.name "Your Name"
+          git config --local user.email "your-email@example.com"
+
+      - name: Commit changes
+        run: |
+          git add -u
+          git commit -m "Add changes from GitHub Actions" || echo "No changes to commit"
+
+      - name: Push changes
+        run: |
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
