@@ -2,7 +2,8 @@ name: Update root index.html
 
 on:
   workflow_run:
-    workflows: [Build and run project]
+    workflows: 
+      - Build and run project
     types:
       - completed
 
@@ -12,8 +13,8 @@ jobs:
     steps:
       - name: Checkout to gh-pages
         uses: actions/checkout@v2
-        # with:
-        #   ref: 'gh-pages'
+        with:
+          ref: 'gh-pages'
 
       - name: Generate new index.html
         run: 
