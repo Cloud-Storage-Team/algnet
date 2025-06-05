@@ -1,6 +1,8 @@
 name: Update root index.html
 
 on:
+  workflow_dispatch:
+    
   workflow_run:
     workflows: [Run]
     types:
