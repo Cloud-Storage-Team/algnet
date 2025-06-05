@@ -1,14 +1,7 @@
-#include "receiver.hpp"
+#include "device/receiver.hpp"
 
-#include <memory>
-
-#include "event.hpp"
-#include "link.hpp"
-#include "routing_module.hpp"
-#include "scheduling_module.hpp"
-#include "scheduler.hpp"
 #include "logger/logger.hpp"
-#include "utils/identifier_factory.hpp"
+#include "device/routing_module.hpp"
 #include "utils/validation.hpp"
 
 namespace sim {

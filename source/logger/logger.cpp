@@ -1,4 +1,4 @@
-#include "logger.hpp"
+#include "logger/logger.hpp"
 
 #include <spdlog/common.h>
 #include <spdlog/sinks/basic_file_sink.h>
@@ -6,7 +6,6 @@
 #include <spdlog/spdlog.h>
 
 #include <filesystem>
-#include <memory>
 #include <source_location>
 
 Logger& Logger::get_instance() {

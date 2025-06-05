@@ -1,12 +1,8 @@
-#include "link.hpp"
+#include "link/link.hpp"
 
-#include "device/device.hpp"
-#include "event.hpp"
 #include "logger/logger.hpp"
 #include "metrics/metrics_collector.hpp"
-#include "packet.hpp"
 #include "scheduler.hpp"
-#include "utils/identifier_factory.hpp"
 
 namespace sim {
 

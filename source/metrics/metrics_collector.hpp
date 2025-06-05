@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "metrics_storage.hpp"
+#include "metrics/metrics_storage.hpp"
 #include "types.hpp"
 
 namespace sim {

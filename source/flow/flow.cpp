@@ -1,13 +1,8 @@
-#include "flow.hpp"
+#include "flow/flow.hpp"
 
-#include <memory>
-#include <string>
-
-#include "device/receiver.hpp"
-#include "device/sender.hpp"
+#include "event.hpp"
 #include "logger/logger.hpp"
 #include "metrics/metrics_collector.hpp"
-#include "packet.hpp"
 #include "scheduler.hpp"
 
 namespace sim {

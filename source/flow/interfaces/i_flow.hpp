@@ -1,8 +1,8 @@
 #pragma once
 
-#include <memory>
-
-#include "interfaces/device_interface.hpp"
+#include "device/interfaces/i_sender.hpp"
+#include "device/interfaces/i_receiver.hpp"
+#include "utils/identifier_factory.hpp"
 
 namespace sim {
 
@@ -21,4 +21,4 @@ public:
     virtual std::shared_ptr<IReceiver> get_receiver() const = 0;
 };
 
-} // namespace sim
+}  // namespace sim

@@ -2,12 +2,9 @@
 
 #include <string>
 
-#include "device/device.hpp"
-#include "flow/flow.hpp"
+#include "flow/interfaces/i_flow.hpp"
 
 namespace sim {
-
-class IFlow;
 
 enum PacketType { ACK, DATA };
 

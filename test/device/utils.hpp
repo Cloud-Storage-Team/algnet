@@ -1,16 +1,15 @@
 #pragma once
 #include <gtest/gtest.h>
 
-#include "device/device.hpp"
+// #include "device/device.hpp"
+// #include "device/interfaces/i_routing_module.hpp"
 #include "device/routing_module.hpp"
-#include "link.hpp"
+#include "link/interfaces/i_link.hpp"
 #include "packet.hpp"
 
 namespace test {
 
 const unsigned RANDOM_SEED = 42;
-
-class Link;
 
 std::vector<std::shared_ptr<sim::IRoutingDevice>> createRoutingModules(
     size_t count);

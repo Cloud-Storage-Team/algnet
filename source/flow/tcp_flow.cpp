@@ -1,17 +1,11 @@
-#include "tcp_flow.hpp"
+#include "flow/tcp_flow.hpp"
 
 #include <spdlog/fmt/fmt.h>
 
-#include <sstream>
-
-#include "device/receiver.hpp"
-#include "device/sender.hpp"
 #include "event.hpp"
-#include "iostream"
 #include "logger/logger.hpp"
 #include "metrics/metrics_collector.hpp"
 #include "scheduler.hpp"
-#include "utils/identifier_factory.hpp"
 
 namespace sim {
 

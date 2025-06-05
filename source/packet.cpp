@@ -1,11 +1,9 @@
 #include "packet.hpp"
 
-#include "device/sender.hpp"
-#include "device/receiver.hpp"
-
 #include <sstream>
 
 namespace sim {
+
 Packet::Packet(PacketType a_type, Size a_size_byte, IFlow* a_flow, Id a_source_id, Id a_dest_id, Time a_RTT, Time a_send_time)
     : type(a_type),
       source_id(a_source_id),

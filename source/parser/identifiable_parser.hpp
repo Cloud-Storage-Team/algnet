@@ -1,8 +1,7 @@
 #pragma once
 #include <yaml-cpp/yaml.h>
 
-#include "device/receiver.hpp"
-#include "parse_primitives.hpp"
+#include "parser/parse_primitives.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
