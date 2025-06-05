@@ -2,15 +2,11 @@ name: Update root index.html
 
 on:
   workflow_dispatch:
-    
+
   workflow_run:
-    workflows: [Run]
+    workflows: [Build and run project]
     types:
       - completed
-    branches:
-      [ "*" ]
-  # pull_request:
-  #   branches: [ "*" ]
 
 env:
   PUBLISH_DIR: temp-dir
