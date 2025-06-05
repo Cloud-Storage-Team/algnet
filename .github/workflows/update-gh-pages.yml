@@ -2,7 +2,7 @@ name: Update root index.html
 
 on:
   workflow_run:
-    workflows: ["Build and run project"]
+    workflows: [Build and run project]
     types:
       - completed
 
