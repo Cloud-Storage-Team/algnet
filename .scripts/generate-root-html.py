@@ -43,7 +43,7 @@ def generate_html(dir="."):
     <body>
         <h1>Metrics</h1>
     """
-    
+
     buttons = []
 
     for root, dirs, files in os.walk(dir):
@@ -72,11 +72,12 @@ def save_html_file(html_content, output_file):
         f.write(html_content)
 
 if __name__ == "__main__":
-    destination_dir = sys.argv[1]
-    os.makedirs(destination_dir, exist_ok=True)
-    output_file = os.path.join(destination_dir, "index.html")
+    output_file = sys.argv[1]
 
     html_content = generate_html()
+
+    dirpath = os.path.pardir(output_file)
+    os.makedirs(dirpath, exist_ok=True)
     save_html_file(html_content, output_file)
-    
+
     print(f"HTML file successfully created and saved to {output_file}.")
