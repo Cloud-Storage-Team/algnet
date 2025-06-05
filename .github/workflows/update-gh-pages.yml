@@ -9,6 +9,9 @@ on:
   pull_request:
     branches: [ "*" ]
 
+env:
+  PUBLISH_DIR: temp-dir
+
 jobs:
   run_second_job:
     runs-on: ubuntu-latest
@@ -22,12 +25,11 @@ jobs:
 
       - name: Generate new index.html
         run: 
-          SCRIPT_DIR="temp-dir";
-          python3 .scripts/generate-root-html.py ${SCRIPT_DIR}
+          python3 .scripts/generate-root-html.py ${{env.PUBLISH_DIR}}
     
       - name: Deploy new index.html GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${SCRIPT_DIR}
+          publish_dir: ${{env.PUBLISH_DIR}}
           keep_files: true
