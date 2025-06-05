@@ -27,8 +27,7 @@ jobs:
           find test -type f -name "*.cpp" -o -name "*.hpp"
         )"
     - name: Clang format
-      run:
-        clang-format --dry-run -Werror $files_for_clang
+      run: clang-format --dry-run -Werror $files_for_clang
   build:
     runs-on: ubuntu-latest
     steps:
