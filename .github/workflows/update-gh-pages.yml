@@ -5,6 +5,8 @@ on:
     workflows: [Run]
     types:
       - completed
+    branches:
+      [add-root-html-gen]
   # pull_request:
   #   branches: [ "*" ]
 
