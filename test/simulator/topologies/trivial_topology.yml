@@ -7,6 +7,7 @@ devices:
     type: sender
   switch:
     type: switch
+    threshold: 0.7
   receiver:
     type: receiver
 

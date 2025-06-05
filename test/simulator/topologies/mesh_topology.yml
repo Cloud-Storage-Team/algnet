@@ -11,8 +11,10 @@ devices:
     type: sender
   switch1:
     type: switch
+    threshold: 0.7
   switch2:
     type: switch
+    threshold: 0.7
   receiver1:
     type: receiver
   receiver2:

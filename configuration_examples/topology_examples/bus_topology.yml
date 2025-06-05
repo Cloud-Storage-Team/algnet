@@ -9,6 +9,7 @@ devices:
     type: receiver
   bus:
     type: switch
+    threshold: 0.7
 
 links:
   link1:

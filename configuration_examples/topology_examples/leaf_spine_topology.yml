@@ -9,12 +9,16 @@ devices:
     type: receiver
   leaf1:
     type: switch
+    threshold: 0.7
   leaf2:
     type: switch
+    threshold: 0.7
   spine1:
     type: switch
+    threshold: 0.7
   spine2:
     type: switch
+    threshold: 0.7
 
 links:
   # Hosts to Leaf Layer (1Gbps)

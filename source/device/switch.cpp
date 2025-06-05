@@ -1,6 +1,7 @@
 #include "switch.hpp"
 
 #include <memory>
+#include <iostream>
 
 #include "link.hpp"
 #include "routing_module.hpp"
@@ -11,7 +12,10 @@
 
 namespace sim {
 
-Switch::Switch(Id a_id) : m_router(std::make_unique<RoutingModule>(a_id)) {}
+Switch::Switch(Id a_id, bool a_is_ecn_enabled, double a_ecn_threshold) : 
+                m_is_ecn_enabled(a_is_ecn_enabled),
+                m_ecn_threshold(a_ecn_threshold),
+                m_router(std::make_unique<RoutingModule>(a_id)) {}
 
 bool Switch::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
@@ -78,6 +82,10 @@ Time Switch::process() {
              packet.to_string());
 
     // TODO: increase total_processing_time correctly
+    double current_threshold = static_cast<double>(next_link->get_current_from_egress_buffer_size()) / static_cast<double>(next_link->get_max_from_egress_buffer_size());
+    if (current_threshold >= m_ecn_threshold && packet.is_ecn_enabled) {
+        packet.detected_congestion = true;
+    }
     next_link->schedule_arrival(packet);
 
     if (m_process_scheduler.notify_about_finish(Scheduler::get_instance().get_current_time() + total_processing_time)) {

@@ -6,14 +6,15 @@
 #include <sstream>
 
 namespace sim {
-Packet::Packet(PacketType a_type, Size a_size_byte, IFlow* a_flow, Id a_source_id, Id a_dest_id, Time a_RTT, Time a_send_time)
+Packet::Packet(PacketType a_type, Size a_size_byte, IFlow* a_flow, Id a_source_id, Id a_dest_id, Time a_RTT, Time a_send_time, bool a_is_ecn_enabled)
     : type(a_type),
       source_id(a_source_id),
       dest_id(a_dest_id),
       RTT(a_RTT),
       size_byte(a_size_byte),
       flow(a_flow),
-      send_time(a_send_time) {}
+      send_time(a_send_time),
+      is_ecn_enabled(a_is_ecn_enabled) {}
 
 bool Packet::operator==(const Packet& packet) const {
     return flow == packet.flow && 

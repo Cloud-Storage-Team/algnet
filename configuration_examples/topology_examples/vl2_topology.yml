@@ -9,16 +9,22 @@ devices:
     type: receiver
   edge1:
     type: switch
+    threshold: 0.7
   edge2:
     type: switch
+    threshold: 0.7
   aggr1:
     type: switch
+    threshold: 0.7
   aggr2:
     type: switch
+    threshold: 0.7
   core1:
     type: switch
+    threshold: 0.7
   core2:
     type: switch
+    threshold: 0.7
 
 links:
   # Hosts to Edge Layer (1Gbps)

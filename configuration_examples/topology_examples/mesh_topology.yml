@@ -13,8 +13,10 @@ devices:
     type: receiver
   switch1:
     type: switch
+    threshold: 0.7
   switch2:
     type: switch
+    threshold: 0.7
 
 links:
   link1:
