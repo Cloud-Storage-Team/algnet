@@ -2,18 +2,17 @@ name: Update root index.html
 
 on:
   workflow_run:
-    workflows: 
-      - Build and run project
+    workflows: [Run]
     types:
       - completed
-  pull_request:
-    branches: [ "*" ]
+  # pull_request:
+  #   branches: [ "*" ]
 
 env:
   PUBLISH_DIR: temp-dir
 
 jobs:
-  run_second_job:
+  rewrite-root-index:
     runs-on: ubuntu-latest
     permissions:
       contents: write
