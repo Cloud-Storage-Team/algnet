@@ -3,45 +3,45 @@ import sys
 
 def generate_html(dir="."):
     html_content = f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Metrics</title>
-        <style>
-            body {{
-                font-family: Arial, sans-serif;
-                text-align: center;
-                margin: 0;
-                padding: 20px;
-                background-color: #f4f4f4;
-            }}
-            h1 {{
-                color: #333;
-                font-size: 24px;
-                margin-bottom: 20px;
-            }}
-            .button {{
-                display: block;
-                padding: 10px 20px;
-                margin: 10px auto;
-                font-size: 16px;
-                color: white;
-                background-color: #007BFF;
-                border: none;
-                border-radius: 5px;
-                text-decoration: none;
-                transition: background-color 0.3s;
-                width: 200px;
-            }}
-            .button:hover {{
-                background-color: #0056b3;
-            }}
-        </style>
-    </head>
-    <body>
-        <h1>Metrics</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metrics</title>
+    <style>
+        body {{
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }}
+        h1 {{
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }}
+        .button {{
+            display: block;
+            padding: 10px 20px;
+            margin: 10px auto;
+            font-size: 16px;
+            color: white;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            width: 200px;
+        }}
+        .button:hover {{
+            background-color: #0056b3;
+        }}
+    </style>
+</head>
+<body>
+    <h1>Metrics</h1>
     """
 
     buttons = []
@@ -76,8 +76,9 @@ if __name__ == "__main__":
 
     html_content = generate_html()
 
-    dirpath = os.path.pardir(output_file)
-    os.makedirs(dirpath, exist_ok=True)
+    dirpath = os.path.dirname(output_file)
+    if (dirpath != ''):
+        os.makedirs(dirpath, exist_ok=True)
     save_html_file(html_content, output_file)
 
     print(f"HTML file successfully created and saved to {output_file}.")
