@@ -12,8 +12,8 @@ jobs:
     steps:
       - name: Checkout to gh-pages
         uses: actions/checkout@v2
-        with:
-          ref: 'gh-pages'
+        # with:
+        #   ref: 'gh-pages'
 
       - name: Generate new index.html
         run: 
