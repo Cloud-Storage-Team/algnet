@@ -1,6 +1,7 @@
 import os
 import sys
 
+
 def generate_html(dir="."):
     html_content = f"""
 <!DOCTYPE html>
