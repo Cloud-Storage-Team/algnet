@@ -90,7 +90,7 @@ jobs:
           echo "DEPLOY_DIR=${{github.head_ref}}/${{ github.run_id }}" >> $GITHUB_ENV;
         elif [ "${{ github.event_name }}" == "push" ]; then
           branch_name="${{ github.ref }}";
-          branch_name=${branch_name#refs/heads/};
+          branch_name=${branch_name#"refs/heads/"};
           echo "DEPLOY_DIR=${branch_name}/" >> $GITHUB_ENV;
         fi
     
