@@ -12,6 +12,8 @@ on:
 jobs:
   run_second_job:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout to gh-pages
         uses: actions/checkout@v2
