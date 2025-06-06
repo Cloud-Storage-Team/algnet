@@ -130,6 +130,73 @@ Id parse_object<Link>(const YAML::Node& key_node,
     return id;
 }
 
+
+template <>
+Id parse_object<EPLink>(const YAML::Node& key_node,
+                      const YAML::Node& value_node) {
+    Id id = key_node.as<Id>();
+    Id from_id = value_node["from"].as<Id>();
+    Id to_id = value_node["to"].as<Id>();
+    auto from_ptr =
+        IdentifierFactory::get_instance().get_object<IRoutingDevice>(from_id);
+    auto to_ptr =
+        IdentifierFactory::get_instance().get_object<IRoutingDevice>(to_id);
+
+    if (from_ptr == nullptr) { 
+        LOG_ERROR("Failed to find link's source");
+        return "";
+    }
+    
+    if (to_ptr == nullptr) { 
+        LOG_ERROR("Failed to find link's destination");
+        return "";
+    }
+
+    uint32_t latency = 0;
+    if (value_node["latency"]) {
+        latency = parse_latency(value_node["latency"].as<std::string>());
+    } else {
+        LOG_WARN(fmt::format(
+            "latency does not set for link {}; use default value {}", id,
+            latency));
+    }
+
+    uint32_t speed = 1;
+    if (value_node["throughput"]) {
+        speed = parse_throughput(value_node["throughput"].as<std::string>());
+    } else {
+        LOG_WARN(fmt::format(
+            "speed does not set for link {}; use default value {}", id, speed));
+    }
+
+    uint32_t ingress_buffer_size = 4096;
+    if (value_node["ingress_buffer_size"]) {
+        ingress_buffer_size = parse_buffer_size(
+            value_node["ingress_buffer_size"].as<std::string>());
+    } else {
+        LOG_WARN(
+            fmt::format("ingress buffer size does not set for link {}; use "
+                        "default value {}",
+                        id, ingress_buffer_size));
+    }
+
+    uint32_t egress_buffer_size = 4096;
+    if (value_node["egress_buffer_size"]) {
+        egress_buffer_size = parse_buffer_size(
+            value_node["egress_buffer_size"].as<std::string>());
+    } else {
+        LOG_WARN(fmt::format(
+            "egress buffer size does not set for link {}; use default value {}",
+            id, egress_buffer_size));
+    }
+
+    parse_object_helper<EPLink>(id, from_ptr, to_ptr, speed, latency,
+                              egress_buffer_size, ingress_buffer_size);
+
+    return id;
+
+}
+
 struct FlowCommon{
     Id id;
     std::shared_ptr<ISender> sender_ptr;
@@ -176,6 +243,17 @@ Id parse_object<TcpFlow>(const YAML::Node& key_node,
     FlowCommon flow_common = parse_flow_common(key_node, value_node);
 
     parse_object_helper<TcpFlow>(flow_common.id, flow_common.sender_ptr, flow_common.receiver_ptr, 
+                              flow_common.packet_size, flow_common.packet_interval,
+                              flow_common.number_of_packets);
+    return flow_common.id;
+}
+
+template <>
+Id parse_object<EPFlow>(const YAML::Node& key_node,
+                         const YAML::Node& value_node) {
+    FlowCommon flow_common = parse_flow_common(key_node, value_node);
+
+    parse_object_helper<EPFlow>(flow_common.id, flow_common.sender_ptr, flow_common.receiver_ptr, 
                               flow_common.packet_size, flow_common.packet_interval,
                               flow_common.number_of_packets);
     return flow_common.id;

@@ -59,7 +59,10 @@ void Link::schedule_arrival(Packet packet) {
         return;
     }
 
-    unsigned int transmission_time = get_transmission_time(packet);
+    LOG_INFO("Packet arrived to link's ingress queue. Packet: " +
+             packet.to_string());
+
+    Time transmission_time = get_transmission_time(packet);
     m_arrival_time =
         std::max(m_arrival_time, Scheduler::get_instance().get_current_time()) +
         transmission_time;

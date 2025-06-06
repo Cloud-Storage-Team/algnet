@@ -1,4 +1,6 @@
 #include <yaml-cpp/yaml.h>
+#include <cstdlib>  
+#include <ctime>
 
 #include "logger/logger.hpp"
 #include "metrics/metrics_collector.hpp"
@@ -29,6 +31,7 @@ int main(const int argc, char **argv) {
             Logger::get_instance().disable_logs();
         }
     }
+    srand(time(0));
 
     try {
         sim::YamlParser parser;

@@ -38,6 +38,7 @@ public:
     // The iterator over ingress buffers is stored in m_next_link.
     Time process() final;
     Time send_data() final;
+    Time send_system_packet(Packet packet) final;
 
     void enqueue_packet(Packet packet) final;
 

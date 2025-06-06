@@ -36,6 +36,15 @@ std::string Packet::to_string() const {
         case PacketType::DATA:
             oss << "DATA";
             break;
+        case PacketType::CREDIT: 
+            oss << "CREDIT"; 
+            break;
+        case PacketType::CREDIT_REQUEST: 
+            oss << "CREQ"; 
+            break;
+        case PacketType::CREDIT_STOP_P: 
+            oss << "CSTOP"; 
+            break;
         default:
             oss << "UNKNOWN";
             break;
@@ -45,7 +54,7 @@ std::string Packet::to_string() const {
     oss << ", dest_id: " << dest_id;
     oss << ", packet_num: " << packet_num;
     oss << ", size(byte): " << size_byte;
-    oss << ", flow: " << (flow ? "set" : "null");
+    oss << ", flow: " << (flow ? flow->get_id() : "null");
     oss << ", send time: " << send_time;
     oss << "]";
 

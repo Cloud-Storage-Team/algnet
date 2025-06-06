@@ -30,6 +30,7 @@ class IRoutingDevice : public Identifiable {
 public:
     virtual ~IRoutingDevice() = default;
 
+    virtual Id get_id() const = 0;
     virtual bool add_inlink(std::shared_ptr<ILink> link) = 0;
     virtual bool add_outlink(std::shared_ptr<ILink> link) = 0;
     virtual bool update_routing_table(Id dest_id, std::shared_ptr<ILink> link, size_t paths_count = 1) = 0;
@@ -44,6 +45,7 @@ public:
 class IReceiver : public IRoutingDevice, public IProcessingDevice {
 public:
     virtual ~IReceiver() = default;
+    virtual Time send_system_packet(Packet packet) = 0;
 };
 
 class ISender : public IRoutingDevice, public IProcessingDevice {
@@ -51,6 +53,7 @@ public:
     virtual ~ISender() = default;
     virtual void enqueue_packet(Packet packet) = 0;
     virtual Time send_data() = 0;
+    virtual Time send_system_packet(Packet packet) = 0;
 };
 
 class ISwitch : public IRoutingDevice,

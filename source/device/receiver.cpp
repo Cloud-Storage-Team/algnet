@@ -75,10 +75,15 @@ Time Receiver::process() {
     LOG_INFO("Processing packet from link on receiver. Packet: " +
              data_packet.to_string());
 
-    if (data_packet.type == DATA && data_packet.dest_id == get_id()) {
+    if (data_packet.dest_id == get_id()) {
         // TODO: think about processing time
         // Not sure if we want to send ack before processing or after it
+        // TODO: move to TCP flow
         total_processing_time += send_ack(data_packet);
+        data_packet.flow->update(data_packet, get_type());
+        if (data_packet.type == PacketType::DATA) {
+            ++m_cnt;
+        }
     } else {
         LOG_WARN(
             "Packet arrived to Receiver that is not its destination; using "
@@ -98,6 +103,24 @@ Time Receiver::process() {
         return 0;
     }
 
+    return total_processing_time;
+}
+
+Time Receiver::send_system_packet(Packet packet) {
+    Time total_processing_time = 1;
+
+    auto next_link = get_link_to_destination(packet);
+    if (next_link == nullptr) {
+        LOG_WARN("Link to send packet does not exist. Packet: " + packet.to_string());
+        return total_processing_time;
+    }
+
+    // TODO: add some sender ID for easier packet path tracing
+    LOG_INFO("Sent new system packet from receiver. Data packet: " +
+        packet.to_string() + ". Receiver id: " + get_id() + " Time: " + std::to_string(Scheduler::get_instance().get_current_time()));
+
+    next_link->schedule_arrival(packet);
+    // total_processing_time += sending_data_time;
     return total_processing_time;
 }
 

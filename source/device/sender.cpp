@@ -84,7 +84,7 @@ Time Sender::process() {
     LOG_INFO("Processing packet from link on sender. Packet: " +
              packet.to_string());
 
-    if (packet.type == PacketType::ACK && packet.dest_id == get_id()) {
+    if (packet.dest_id == get_id()) {
         packet.flow->update(packet, get_type());
     } else {
         LOG_WARN(
@@ -139,6 +139,24 @@ Time Sender::send_data() {
         return 0;
     }
 
+    return total_processing_time;
+}
+
+Time Sender::send_system_packet(Packet packet) {
+    Time total_processing_time = 1;
+
+    auto next_link = get_link_to_destination(packet);
+    if (next_link == nullptr) {
+        LOG_WARN("Link to send packet does not exist");
+        return total_processing_time;
+    }
+
+    // TODO: add some sender ID for easier packet path tracing
+    LOG_INFO("Sent new system packet from sender. Data packet: " +
+        packet.to_string() + ". Sender id: " + get_id() + ". Time: " + std::to_string(Scheduler::get_instance().get_current_time()));
+
+    next_link->schedule_arrival(packet);
+    // total_processing_time += sending_data_time;
     return total_processing_time;
 }
 

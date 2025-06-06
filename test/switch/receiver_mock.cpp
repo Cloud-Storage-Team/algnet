@@ -40,4 +40,8 @@ std::set<std::shared_ptr<sim::ILink>> ReceiverMock::get_outlinks() {
 
 Id ReceiverMock::get_id() const { return ""; }
 
+Time ReceiverMock::send_system_packet(sim::Packet packet) {
+    return 1;
+};
+
 }  // namespace test
