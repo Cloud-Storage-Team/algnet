@@ -9,16 +9,22 @@ devices:
     type: receiver
   core1:
     type: switch
+    threshold: 0.7
   core2:
     type: switch
+    threshold: 0.7
   aggregation1:
     type: switch
+    threshold: 0.7
   aggregation2:
     type: switch
+    threshold: 0.7
   access1:
     type: switch
+    threshold: 0.7
   access2:
     type: switch
+    threshold: 0.7
     
 links:
   link1:
