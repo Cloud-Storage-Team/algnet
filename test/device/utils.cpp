@@ -28,9 +28,7 @@ std::shared_ptr<sim::IRoutingDevice> TestLink::get_to() const {
     return dst.lock();
 };
 
-Size TestLink::get_max_src_egress_buffer_size_byte() const {
-    return 4096;
-}
+Size TestLink::get_max_from_egress_buffer_size() const { return 4096; }
 
 Id TestLink::get_id() const { return ""; }
 

@@ -2,10 +2,10 @@
 #include <cstdlib>  
 #include <ctime>
 
-#include "source/logger/logger.hpp"
-#include "source/metrics/metrics_collector.hpp"
-#include "source/parser/parser.hpp"
-#include "source/simulator.hpp"
+#include "logger/logger.hpp"
+#include "metrics/metrics_collector.hpp"
+#include "parser/parser.hpp"
+#include "simulator.hpp"
 
 int main(const int argc, char **argv) {
     std::string output_dir = "";

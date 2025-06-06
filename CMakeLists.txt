@@ -17,6 +17,7 @@ endif()
 
 
 file(GLOB_RECURSE src "source/*.cpp")
+list(REMOVE_ITEM src "${CMAKE_CURRENT_SOURCE_DIR}/source/main.cpp")
 file(GLOB_RECURSE tests "test/*.cpp")
 
 include_directories(
@@ -29,7 +30,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/external/matplotplusplus/)
 
 if (BUILD_PROJECT)
     set(TARGET_NAME "${PROJECT_NAME}")
-    add_executable(${TARGET_NAME} main.cpp ${src})
+    add_executable(${TARGET_NAME} ${src} source/main.cpp)
     target_link_libraries(${TARGET_NAME} yaml-cpp matplot)
     target_compile_options(${TARGET_NAME} PRIVATE -Wall -Werror -Wextra)
 endif()
