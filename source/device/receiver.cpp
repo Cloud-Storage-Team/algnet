@@ -78,7 +78,8 @@ Time Receiver::process() {
     if (data_packet.dest_id == get_id()) {
         // TODO: think about processing time
         // Not sure if we want to send ack before processing or after it
-        // total_processing_time += send_ack(data_packet);
+        // TODO: move to TCP flow
+        total_processing_time += send_ack(data_packet);
         data_packet.flow->update(data_packet, get_type());
         if (data_packet.type == PacketType::DATA) {
             ++m_cnt;
