@@ -3,9 +3,9 @@
 #include <memory>
 #include <set>
 
-#include "types.hpp"
-#include "packet.hpp"
 #include "interfaces/link_interface.hpp"
+#include "packet.hpp"
+#include "types.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
@@ -18,7 +18,7 @@ public:
 
     // One step of device work cycle;
     // e.g. see next inlink, take one packet from it,
-    // and do smth with it (send further, send ask etc)
+    // and do smth with it (send further, send ACK etc.)
     virtual Time process() = 0;
 
     virtual DeviceType get_type() const = 0;
