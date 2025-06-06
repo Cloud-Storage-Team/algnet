@@ -159,7 +159,7 @@ std::shared_ptr<IRoutingDevice> EPLink::get_to() const {
     return m_to.lock();
 };
 
-Size EPLink::get_max_src_egress_buffer_size_byte() const {
+Size EPLink::get_max_from_egress_buffer_size() const {
     return m_max_src_egress_buffer_size_byte;
 }
 
