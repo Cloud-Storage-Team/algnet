@@ -42,11 +42,22 @@ Time EPLink::get_transmission_time(const Packet& packet) const {
            m_transmission_delay;
 };
 
+void EPLink::update_token_bucket() {
+    Time passed = Scheduler::get_instance().get_current_time() - m_last_token_update;
+    Size tokens_income = passed * (double)m_speed_gbps * m_token_getting_speed * 8;
+    
+    m_token_bucket_size = std::min(m_token_bucket_size + tokens_income, m_max_token_bucket_size);
+
+    m_last_token_update = Scheduler::get_instance().get_current_time();
+}
+
 void EPLink::schedule_arrival(Packet packet) {
     if (m_to.expired()) {
         LOG_WARN("Destination device pointer is expired");
         return;
     }
+    
+    update_token_bucket();
 
     Time total_delay;
 
@@ -57,6 +68,11 @@ void EPLink::schedule_arrival(Packet packet) {
             // LOG_ERROR("Dropped credit: " + packet.to_string() + " Time: " + std::to_string(Scheduler::get_instance().get_current_time()));
             return;
         }
+
+        if (packet.size_byte > m_token_bucket_size) {
+            return;
+        }
+        m_token_bucket_size -= packet.size_byte;
 
         m_current_credit_queue_capacity += packet.size_byte;
         total_delay = std::max(m_next_credit_can_be_sent, Scheduler::get_instance().get_current_time());

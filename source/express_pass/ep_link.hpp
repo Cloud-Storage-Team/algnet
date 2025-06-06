@@ -36,6 +36,7 @@ public:
 
 private:
     Time get_transmission_time(const Packet& packet) const;
+    void update_token_bucket();
 
     Id m_id;
     std::weak_ptr<IRoutingDevice> m_from;
@@ -57,6 +58,11 @@ private:
     std::uint32_t m_max_credit_queue_capacity = 8 * 84;
     std::uint32_t m_current_credit_queue_capacity = 0;
     Time m_next_credit_can_be_sent = 0;
+
+    Size m_max_token_bucket_size = 2 * 84;
+    Size m_token_bucket_size = 2 * 84;
+    Time m_last_token_update = 0;
+    double m_token_getting_speed = 0.0517;
     
     // Debug
     Size m_max_buffer_size = 0;
