@@ -3,7 +3,6 @@
 #include <filesystem>
 
 #include "parser/parser.hpp"
-#include "simulator.hpp"
 #include "utils.hpp"
 #include "logger/logger.hpp"
 
