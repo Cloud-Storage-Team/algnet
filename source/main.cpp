@@ -1,9 +1,6 @@
-#include <yaml-cpp/yaml.h>
-
 #include "logger/logger.hpp"
 #include "metrics/metrics_collector.hpp"
 #include "parser/parser.hpp"
-#include "simulator.hpp"
 
 int main(const int argc, char **argv) {
     std::string output_dir = "";
