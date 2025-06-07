@@ -1,10 +1,5 @@
 
-#include <cstdint>
-#include "packet.hpp"
-#include <cstdlib>
-#include <string>
-#include <functional>
-#include "spdlog/fmt/bundled/format.h"
+#include <spdlog/fmt/fmt.h>
 
 #include "utils/hasher.hpp"
 

@@ -1,25 +1,15 @@
 #include "device/routing_module.hpp"
 
 #include <algorithm>
-#include <memory>
-#include <utility>
-#include <set>
-#include <cstddef>
-#include <iterator>
-#include <vector>
 
-#include "device/interfaces/i_processing_device.hpp"
 #include "link/interfaces/i_link.hpp"
 #include "logger/logger.hpp"
-#include "utils/hasher.hpp"
-#include "utils/loop_iterator.hpp"
-#include "packet.hpp"
 
 namespace sim {
 
 RoutingModule::RoutingModule(Id a_id, std::unique_ptr<IHasher> a_hasher)
     : m_id(a_id),
-      m_hasher(a_hasher ? std::move(a_hasher) : std::make_unique<BaseHasher>()) {}
+      m_hasher(std::move(a_hasher ? std::move(a_hasher) : std::make_unique<BaseHasher>())) {}
 
 Id RoutingModule::get_id() const {
     return m_id;

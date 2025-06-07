@@ -1,16 +1,9 @@
 #include "device/sender.hpp"
 
-#include <memory>
-#include <cstddef>
-#include <optional>
-#include <set>
+#include <spdlog/fmt/fmt.h>
 
-#include "device/interfaces/i_processing_device.hpp"
-#include "link/interfaces/i_link.hpp"
 #include "logger/logger.hpp"
 #include "device/routing_module.hpp"
-#include "packet.hpp"
-#include "spdlog/fmt/bundled/format.h"
 #include "utils/validation.hpp"
 
 namespace sim {

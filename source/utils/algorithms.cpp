@@ -1,10 +1,6 @@
 #include "utils/algorithms.hpp"
 
-#include <memory>
 #include <queue>
-#include "device/interfaces/i_routing_device.hpp"
-#include <set>
-#include "link/interfaces/i_link.hpp"
 
 namespace sim {
 

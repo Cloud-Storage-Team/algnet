@@ -1,14 +1,12 @@
 #include "metrics/metrics_collector.hpp"
 
+#include <matplot/matplot.h>
+#include <spdlog/fmt/fmt.h>
 
-#include <cstdint>
 #include <filesystem>
 
 #include "flow/interfaces/i_flow.hpp"
 #include "link/interfaces/i_link.hpp"
-#include "spdlog/fmt/bundled/format.h"
-#include "metrics/metrics_storage.hpp"
-#include "matplot/freestanding/plot.h"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {

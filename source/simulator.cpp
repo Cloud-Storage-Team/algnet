@@ -1,8 +1,6 @@
 #include "simulator.hpp"
 
 #include <stdexcept>
-#include <string_view>
-#include <string>
 
 namespace sim {
 

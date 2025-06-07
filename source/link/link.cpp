@@ -1,14 +1,7 @@
 #include "link/link.hpp"
-#include <memory>
-#include <cstdint>
-#include <algorithm>
-#include <optional>
 
-#include "device/interfaces/i_routing_device.hpp"
-#include "event.hpp"
 #include "logger/logger.hpp"
 #include "metrics/metrics_collector.hpp"
-#include "packet.hpp"
 #include "scheduler.hpp"
 
 namespace sim {
