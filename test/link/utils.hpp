@@ -3,10 +3,10 @@
 
 #include <memory>
 
-#include "device/device.hpp"
-#include "link.hpp"
+#include "device/interfaces/i_routing_device.hpp"
+#include "link/link.hpp"
 #include "packet.hpp"
-#include "event.hpp"
+#include "scheduler.hpp"
 
 namespace test {
 

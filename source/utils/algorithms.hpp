@@ -1,9 +1,9 @@
 #pragma once
 
-#include <memory>
 #include <unordered_map>
 
-#include "device/routing_module.hpp"
+#include "link/interfaces/i_link.hpp"
+#include "device/interfaces/i_routing_device.hpp"
 
 namespace sim {
 

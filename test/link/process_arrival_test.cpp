@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "packet.hpp"
 #include "utils.hpp"
 
 namespace test {

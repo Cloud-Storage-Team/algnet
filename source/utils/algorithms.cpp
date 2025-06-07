@@ -1,9 +1,6 @@
-#include "algorithms.hpp"
+#include "utils/algorithms.hpp"
 
 #include <queue>
-#include <set>
-
-#include "link.hpp"
 
 namespace sim {
 

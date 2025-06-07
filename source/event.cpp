@@ -1,8 +1,6 @@
 #include "event.hpp"
 
-#include "device/sender.hpp"
 #include "metrics/metrics_collector.hpp"
-#include "packet.hpp"
 #include "scheduler.hpp"
 
 namespace sim {

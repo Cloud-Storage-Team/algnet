@@ -5,10 +5,8 @@
 
 #include <filesystem>
 
-#include "device/receiver.hpp"
-#include "device/sender.hpp"
-#include "flow/flow.hpp"
-#include "link.hpp"
+#include "flow/interfaces/i_flow.hpp"
+#include "link/interfaces/i_link.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {

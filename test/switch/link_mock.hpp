@@ -1,6 +1,8 @@
 #pragma once
-#include "device/device.hpp"
-#include "link.hpp"
+
+#include <vector>
+
+#include "link/interfaces/i_link.hpp"
 #include "packet.hpp"
 
 class LinkMock : public sim::ILink {

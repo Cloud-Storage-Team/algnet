@@ -1,8 +1,9 @@
 #pragma once
 #include <memory>
 
-#include "device/receiver.hpp"
-#include "link.hpp"
+#include "packet.hpp"
+#include "device/interfaces/i_receiver.hpp"
+#include "link/interfaces/i_link.hpp"
 
 namespace test {
 

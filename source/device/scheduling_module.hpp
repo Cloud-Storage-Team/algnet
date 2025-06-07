@@ -1,9 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <set>
-
-#include "device.hpp"
 #include "scheduler.hpp"
 #include "logger/logger.hpp"
 

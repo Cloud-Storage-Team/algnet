@@ -1,16 +1,10 @@
 #pragma once
-#include <memory>
 
-#include "packet.hpp"
 #include "event.hpp"
-#include "device.hpp"
-#include "scheduling_module.hpp"
-#include "utils/identifier_factory.hpp"
+#include "device/scheduling_module.hpp"
+#include "device/interfaces/i_receiver.hpp"
 
 namespace sim {
-
-struct Packet;
-class RoutingModule;
 
 class Receiver : public IReceiver,
                  public std::enable_shared_from_this<Receiver> {

@@ -1,11 +1,8 @@
 #pragma once
 
-#include <memory>
-
-#include "device.hpp"
 #include "event.hpp"
-#include "scheduling_module.hpp"
-#include "utils/identifier_factory.hpp"
+#include "device/scheduling_module.hpp"
+#include "device/interfaces/i_switch.hpp"
 
 namespace sim {
 

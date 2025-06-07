@@ -1,9 +1,8 @@
-#include "routing_module.hpp"
+#include "device/routing_module.hpp"
 
 #include <algorithm>
-#include <memory>
 
-#include "link.hpp"
+#include "link/interfaces/i_link.hpp"
 #include "logger/logger.hpp"
 
 namespace sim {
