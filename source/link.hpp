@@ -33,15 +33,15 @@ public:
     virtual std::optional<Packet> get_packet() = 0;
     virtual std::shared_ptr<IRoutingDevice> get_from() const = 0;
     virtual std::shared_ptr<IRoutingDevice> get_to() const = 0;
-    virtual Size get_max_src_egress_buffer_size_byte() const = 0;
+    virtual Size get_max_from_egress_buffer_size() const = 0;
 };
 
 class Link : public ILink, public std::enable_shared_from_this<Link> {
 public:
     Link(Id a_id, std::weak_ptr<IRoutingDevice> a_from,
          std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_gbps = 1,
-         Time a_delay = 0, Size a_max_src_egress_buffer_size_byte = 4096,
-         Size a_max_ingress_buffer_size_byte = 4096);
+         Time a_delay = 0, Size a_max_from_egress_buffer_size = 4096,
+         Size a_max_to_ingress_buffer_size = 4096);
     ~Link() = default;
 
     /**
@@ -59,7 +59,7 @@ public:
 
     std::shared_ptr<IRoutingDevice> get_from() const final;
     std::shared_ptr<IRoutingDevice> get_to() const final;
-    Size get_max_src_egress_buffer_size_byte() const final;
+    Size get_max_from_egress_buffer_size() const final;
 
     Id get_id() const final;
 
@@ -71,16 +71,18 @@ private:
     std::weak_ptr<IRoutingDevice> m_to;
     std::uint32_t m_speed_gbps;
 
-    Size m_src_egress_buffer_size_byte;
-    Size m_max_src_egress_buffer_size_byte;
-    Time m_last_src_egress_pass_time;
+    Size m_from_egress_buffer_size;
+    Size m_max_from_egress_buffer_size;
+    Time m_arrival_time;
 
     Time m_transmission_delay;
 
-    // Queue at the ingress port of the m_next device
-    std::queue<Packet> m_next_ingress;
-    Size m_ingress_buffer_size_byte;
-    Size m_max_ingress_buffer_size_byte;
+    // Queue at the ingress port of the m_to device
+    std::queue<Packet> m_to_ingress;
+    // We keep track of m_to_ingress size in bytes
+    // to account for packet size variations
+    Size m_to_ingress_buffer_size;
+    Size m_max_to_ingress_buffer_size;
 };
 
 }  // namespace sim
