@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "metrics/metrics_storage.hpp"
-#include "types.hpp"
 
 namespace sim {
 
