@@ -1,6 +1,9 @@
 #include "packet.hpp"
 
 #include <sstream>
+#include "device/interfaces/i_processing_device.hpp"
+#include "flow/interfaces/i_flow.hpp"
+#include <string>
 
 namespace sim {
 

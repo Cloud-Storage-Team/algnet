@@ -1,5 +1,7 @@
 #include "utils/validation.hpp"
+#include <memory>
 
+#include "link/interfaces/i_link.hpp"
 #include "logger/logger.hpp"
 
 namespace sim {

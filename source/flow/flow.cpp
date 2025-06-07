@@ -1,8 +1,16 @@
 #include "flow/flow.hpp"
+#include <memory>
+#include <cstdint>
+#include <stdexcept>
+#include <utility>
 
+#include "device/interfaces/i_sender.hpp"
+#include "device/interfaces/i_receiver.hpp"
+#include "device/interfaces/i_processing_device.hpp"
 #include "event.hpp"
 #include "logger/logger.hpp"
 #include "metrics/metrics_collector.hpp"
+#include "packet.hpp"
 #include "scheduler.hpp"
 
 namespace sim {

@@ -6,7 +6,9 @@
 #include <spdlog/spdlog.h>
 
 #include <filesystem>
+#include <memory>
 #include <source_location>
+#include <string_view>
 
 Logger& Logger::get_instance() {
     static Logger instance;

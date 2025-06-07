@@ -1,6 +1,10 @@
 #include "parser/parse_primitives.hpp"
 
+#include <cstdint>
+#include <cstddef>
 #include <stdexcept>
+#include <utility>
+#include <string>
 
 static std::pair<uint32_t, std::string> parse_value_unit(
     const std::string &value_with_unit) {

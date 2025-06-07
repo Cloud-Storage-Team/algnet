@@ -1,6 +1,14 @@
 #include "metrics_storage.hpp"
 
-#include <spdlog/fmt/fmt.h>
+#include <filesystem>
+#include <stdexcept>
+#include "spdlog/fmt/bundled/format.h"
+#include <fstream>
+#include "matplot/core/figure_registry.h"
+#include <vector>
+#include <algorithm>
+#include <iterator>
+#include "matplot/freestanding/plot.h"
 
 namespace sim {
 

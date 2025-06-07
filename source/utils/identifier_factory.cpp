@@ -1,4 +1,6 @@
 #include "utils/identifier_factory.hpp"
+#include <map>
+#include <memory>
 
 namespace sim {
 

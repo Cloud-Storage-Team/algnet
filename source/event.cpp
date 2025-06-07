@@ -1,6 +1,15 @@
 #include "event.hpp"
+#include <memory>
+#include <utility>
+#include <cstdint>
 
+#include "flow/interfaces/i_flow.hpp"
+#include "link/interfaces/i_link.hpp"
+#include "device/interfaces/i_processing_device.hpp"
+#include "device/interfaces/i_sender.hpp"
+#include "flow/interfaces/i_tcp_flow.hpp"
 #include "metrics/metrics_collector.hpp"
+#include "packet.hpp"
 #include "scheduler.hpp"
 
 namespace sim {
