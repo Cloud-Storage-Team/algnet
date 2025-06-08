@@ -9,7 +9,7 @@
 #include <iostream>
 
 int main(const int argc, char **argv) {
-    cxxopts::Options options("./simulator", "Discrete-event based simulator");
+    cxxopts::Options options("simulator", "Discrete-event based simulator");
     options.add_options()
         ("c,config", "Path to the simulation configuration file", cxxopts::value<std::string>())
         ("output-dir", "Output directory for metrics and plots", cxxopts::value<std::string>()->default_value("metrics"))
