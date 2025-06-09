@@ -94,10 +94,12 @@ def main(args):
         if parsed_args.no_plots:
             simulator_args.append("--no-plots")
 
-        subprocess.run(
-            simulator_args,
-            stdout=subprocess.DEVNULL,
-        )
+        result = subprocess.run(simulator_args, capture_output=True)
+        if result.returncode != 0:
+            print(
+                f"Error running simulator on {filepath}.\nSimulator output: {result.stderr.decode()}"
+            )
+            exit(1)
 
         # separate_files(metrics_dir)
 
