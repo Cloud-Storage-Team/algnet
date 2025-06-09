@@ -57,7 +57,7 @@ def main(args):
         "--no-plots", action="store_true", help="Disable plots generation"
     )
 
-    parsed_args = parser.parse_args(args[1:])
+    parsed_args = parser.parse_args(args)
 
     simulator_path = parsed_args.simulator
     simulation_configs_dir = parsed_args.config
