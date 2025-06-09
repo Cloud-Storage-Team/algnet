@@ -96,9 +96,8 @@ def main(args):
 
         result = subprocess.run(simulator_args, capture_output=True)
         if result.returncode != 0:
-            print(
-                f"Error running simulator on {filepath}.\nSimulator output: {result.stderr.decode()}"
-            )
+            print(f"Error running simulator on {filepath}.")
+            print(f"Simulator output: {result.stderr.decode()}")
             exit(1)
 
         # separate_files(metrics_dir)
