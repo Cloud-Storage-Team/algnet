@@ -2,8 +2,7 @@ name: Update root index.html
 
 on:
   push:
-    branches:
-      gh-pages
+    branches: ["gh-pages"]
 
 jobs:
   rewrite-root-index:
