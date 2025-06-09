@@ -1,0 +1,34 @@
+topology_config_path: ../topology_examples/bottleneck_topology.yml
+flows:
+  flow0:
+    sender_id: sender0
+    receiver_id: receiver0
+    packet_size: 1500
+    packet_interval: 120
+    number_of_packets: 100
+  flow1:
+    sender_id: sender1
+    receiver_id: receiver0
+    packet_size: 1500
+    packet_interval: 120
+    number_of_packets: 100
+  flow2:
+    sender_id: sender2
+    receiver_id: receiver0
+    packet_size: 1500
+    packet_interval: 120
+    number_of_packets: 100
+  flow3:
+    sender_id: sender3
+    receiver_id: receiver0
+    packet_size: 1500
+    packet_interval: 120
+    number_of_packets: 100
+  flow4:
+    sender_id: sender4
+    receiver_id: receiver0
+    packet_size: 1500
+    packet_interval: 120
+    number_of_packets: 100
+algorithm: basic
+simulation_time: 10000
