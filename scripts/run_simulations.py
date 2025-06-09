@@ -3,6 +3,7 @@ import os
 import subprocess
 import yaml
 import shutil
+import argparse
 
 
 def check_directory(dirname: str):
@@ -35,10 +36,32 @@ def copy_topology_image(topology_name: str, metrics_dir: str):
 
 
 def main(args):
-    assert len(args) >= 6
-    simulator_path = args[1]
-    simulation_configs_dir = args[3]
-    corner_metrics_dir = args[5]
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-s", "--simulator", help="Path to the simulator executable", required=True
+    )
+    parser.add_argument(
+        "-c",
+        "--config",
+        help="Path to the simulation configuration file",
+        required=True,
+    )
+    parser.add_argument(
+        "--output-dir", help="Directory to export simulation results", default="metrics"
+    )
+    parser.add_argument(
+        "--export-metrics", action="store_true", help="Export simulation metrics"
+    )
+    parser.add_argument("--no-logs", action="store_true", help="Disable logging")
+    parser.add_argument(
+        "--no-plots", action="store_true", help="Disable plots generation"
+    )
+
+    parsed_args = parser.parse_args(args[1:])
+
+    simulator_path = parsed_args.simulator
+    simulation_configs_dir = parsed_args.config
+    corner_metrics_dir = parsed_args.output_dir
 
     check_directory(corner_metrics_dir)
 
@@ -57,8 +80,18 @@ def main(args):
 
         print(f"Run {simulator_path} {filepath} {metrics_dir}")
 
+        simulator_args = [simulator_path, "--config", filepath]
+        if parsed_args.export_metrics:
+            simulator_args.append("--export-metrics")
+        if parsed_args.no_logs:
+            simulator_args.append("--no-logs")
+        if parsed_args.no_plots:
+            simulator_args.append("--no-plots")
+        if parsed_args.output_dir:
+            simulator_args.extend(["--output-dir", metrics_dir])
+
         subprocess.run(
-            [simulator_path, "-c", filepath, "--output-dir", metrics_dir],
+            simulator_args,
             stdout=subprocess.DEVNULL,
         )
 
