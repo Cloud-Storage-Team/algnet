@@ -97,7 +97,7 @@ jobs:
       if: ${{env.DEPLOY_DIR}} != ''
       uses: peaceiris/actions-gh-pages@v3
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.PUSH_TOKEN }}
         publish_dir: metrics
         destination_dir: ${{env.DEPLOY_DIR}}
     - name: Wait for artifacts to be avaliable
