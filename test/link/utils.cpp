@@ -2,8 +2,6 @@
 
 #include <memory>
 
-#include "scheduler.hpp"
-
 namespace test {
 
 void LinkTest::SetUp() {}

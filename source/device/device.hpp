@@ -20,7 +20,7 @@ public:
 
     // One step of device work cycle;
     // e.g. see next inlink, take one packet from it,
-    // and do smth with it (send further, send ask etc)
+    // and do smth with it (send further, send ACK etc.)
     virtual Time process() = 0;
 
     virtual DeviceType get_type() const = 0;
@@ -32,12 +32,14 @@ public:
 
     virtual bool add_inlink(std::shared_ptr<ILink> link) = 0;
     virtual bool add_outlink(std::shared_ptr<ILink> link) = 0;
-    virtual bool update_routing_table(Id dest_id, std::shared_ptr<ILink> link, size_t paths_count = 1) = 0;
-    virtual std::shared_ptr<ILink> get_link_to_destination(Packet packet) const = 0;
+    virtual bool update_routing_table(Id dest_id, std::shared_ptr<ILink> link,
+                                      size_t paths_count = 1) = 0;
+    virtual std::shared_ptr<ILink> get_link_to_destination(
+        Packet packet) const = 0;
     virtual std::shared_ptr<ILink> next_inlink() = 0;
-    virtual std::set<std::shared_ptr<ILink>>get_outlinks() = 0;
-    
-    // Returns true if the total number of packets in inlinks change from 0 to 1 
+    virtual std::set<std::shared_ptr<ILink>> get_outlinks() = 0;
+
+    // Returns true if the total number of packets in inlinks change from 0 to 1
     virtual bool notify_about_arrival(Time arrival_time) = 0;
 };
 
@@ -53,11 +55,9 @@ public:
     virtual Time send_data() = 0;
 };
 
-class ISwitch : public IRoutingDevice,
-                public IProcessingDevice {
+class ISwitch : public IRoutingDevice, public IProcessingDevice {
 public:
     virtual ~ISwitch() = default;
 };
-
 
 }  // namespace sim

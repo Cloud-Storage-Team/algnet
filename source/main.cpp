@@ -1,22 +1,23 @@
-#include <yaml-cpp/yaml.h>
-
 #include <cxxopts.hpp>
 
 #include "logger/logger.hpp"
 #include "metrics/metrics_collector.hpp"
 #include "parser/parser.hpp"
 
-#include <iostream>
-
 int main(const int argc, char **argv) {
     cxxopts::Options options("simulator", "Discrete-event based simulator");
-    options.add_options()
-        ("c,config", "Path to the simulation configuration file", cxxopts::value<std::string>())
-        ("output-dir", "Output directory for metrics and plots", cxxopts::value<std::string>()->default_value("metrics"))
-        ("no-logs", "Output without logs", cxxopts::value<bool>()->default_value("false"))
-        ("no-plots", "Disables plots generation", cxxopts::value<bool>()->default_value("false"))
-        ("export-metrics", "Export metric values into output-dir", cxxopts::value<bool>()->default_value("false"))
-        ("h,help", "Print usage");
+    options.add_options()("c,config",
+                          "Path to the simulation configuration file",
+                          cxxopts::value<std::string>())(
+        "output-dir", "Output directory for metrics and plots",
+        cxxopts::value<std::string>()->default_value("metrics"))(
+        "no-logs", "Output without logs",
+        cxxopts::value<bool>()->default_value("false"))(
+        "no-plots", "Disables plots generation",
+        cxxopts::value<bool>()->default_value("false"))(
+        "export-metrics", "Export metric values into output-dir",
+        cxxopts::value<bool>()->default_value("false"))("h,help",
+                                                        "Print usage");
 
     try {
         auto flags = options.parse(argc, argv);
@@ -32,8 +33,8 @@ int main(const int argc, char **argv) {
         }
 
         sim::YamlParser parser;
-        auto [simulator, simulation_time] =
-            parser.build_simulator_from_config(flags["config"].as<std::string>());
+        auto [simulator, simulation_time] = parser.build_simulator_from_config(
+            flags["config"].as<std::string>());
         std::visit([&](auto &sim) { sim.start(simulation_time); }, simulator);
 
         if (!flags["no-plots"].as<bool>()) {

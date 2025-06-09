@@ -1,14 +1,7 @@
-#include "receiver.hpp"
+#include "device/receiver.hpp"
 
-#include <memory>
-
-#include "event.hpp"
-#include "link.hpp"
-#include "routing_module.hpp"
-#include "scheduling_module.hpp"
-#include "scheduler.hpp"
+#include "device/routing_module.hpp"
 #include "logger/logger.hpp"
-#include "utils/identifier_factory.hpp"
 #include "utils/validation.hpp"
 
 namespace sim {
@@ -29,7 +22,8 @@ bool Receiver::add_outlink(std::shared_ptr<ILink> link) {
     return m_router->add_outlink(link);
 }
 
-bool Receiver::update_routing_table(Id dest_id, std::shared_ptr<ILink> link, size_t paths_count) {
+bool Receiver::update_routing_table(Id dest_id, std::shared_ptr<ILink> link,
+                                    size_t paths_count) {
     if (!is_valid_link(link)) {
         return false;
     }
@@ -45,7 +39,8 @@ std::shared_ptr<ILink> Receiver::get_link_to_destination(Packet packet) const {
 };
 
 bool Receiver::notify_about_arrival(Time arrival_time) {
-    return m_process_scheduler.notify_about_arriving(arrival_time, weak_from_this());
+    return m_process_scheduler.notify_about_arriving(arrival_time,
+                                                     weak_from_this());
 };
 
 DeviceType Receiver::get_type() const { return DeviceType::RECEIVER; }
@@ -77,7 +72,7 @@ Time Receiver::process() {
 
     if (data_packet.type == DATA && data_packet.dest_id == get_id()) {
         // TODO: think about processing time
-        // Not sure if we want to send ack before processing or after it
+        // Not sure if we want to send ACK before processing or after it
         total_processing_time += send_ack(data_packet);
     } else {
         LOG_WARN(
@@ -93,8 +88,9 @@ Time Receiver::process() {
         // TODO: think about redirecting time
     }
 
-
-    if (m_process_scheduler.notify_about_finish(Scheduler::get_instance().get_current_time() + total_processing_time)) {
+    if (m_process_scheduler.notify_about_finish(
+            Scheduler::get_instance().get_current_time() +
+            total_processing_time)) {
         return 0;
     }
 
@@ -103,19 +99,20 @@ Time Receiver::process() {
 
 Time Receiver::send_ack(Packet data_packet) {
     Time processing_time = 1;
-    Time current_time = Scheduler::get_instance().get_current_time();
-    Time RTT = data_packet.RTT + current_time -  data_packet.send_time;
-    Packet ack(PacketType::ACK, 1, data_packet.flow, data_packet.flow->get_receiver()->get_id(), data_packet.flow->get_sender()->get_id(), RTT, current_time);
+    // Note: ACK's sent time is the data packet sent time
+    Packet ack(PacketType::ACK, 1, data_packet.flow,
+               data_packet.flow->get_receiver()->get_id(),
+               data_packet.flow->get_sender()->get_id(), data_packet.sent_time);
 
     std::shared_ptr<ILink> link_to_dest = get_link_to_destination(ack);
     if (link_to_dest == nullptr) {
-        LOG_ERROR("Link to send ack does not exist");
+        LOG_ERROR("Link to send ACK does not exist");
         return processing_time;
     }
 
     // TODO: add some receiver ID for easier packet path tracing
-    LOG_INFO("Sent ack after processing packet on receiver. Data packet: " +
-             data_packet.to_string() + ". Ack packet: " + ack.to_string());
+    LOG_INFO("Sent ACK after processing packet on receiver. Data packet: " +
+             data_packet.to_string() + ". ACK packet: " + ack.to_string());
 
     link_to_dest->schedule_arrival(ack);
     return processing_time;

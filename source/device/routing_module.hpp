@@ -1,18 +1,12 @@
 #pragma once
 
-#include <map>
 #include <unordered_map>
 
-#include "device.hpp"
-#include "types.hpp"
+#include "device/interfaces/i_routing_device.hpp"
 #include "utils/hasher.hpp"
 #include "utils/loop_iterator.hpp"
 
 namespace sim {
-
-struct Packet;
-class IHasher;
-class BaseHasher;
     
 class RoutingModule : public IRoutingDevice {
 public:

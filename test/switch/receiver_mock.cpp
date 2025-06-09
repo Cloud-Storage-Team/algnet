@@ -1,9 +1,5 @@
 #include "receiver_mock.hpp"
 
-#include <memory>
-
-#include "link.hpp"
-
 namespace test {
 
 bool ReceiverMock::add_inlink(std::shared_ptr<sim::ILink> link) {

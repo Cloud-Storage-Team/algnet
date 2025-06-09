@@ -4,7 +4,6 @@
 #include <memory>
 #include <utility>
 
-#include "device/device.hpp"
 #include "simulator.hpp"
 
 namespace test {
