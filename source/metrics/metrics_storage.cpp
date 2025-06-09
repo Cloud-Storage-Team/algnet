@@ -4,7 +4,7 @@
 
 namespace sim {
 
-void MetricsStorage::add_record(Time time, MetricsValue value) {
+void MetricsStorage::add_record(Time time, double value) {
     m_records.emplace_back(time, value);
 }
 

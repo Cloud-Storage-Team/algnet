@@ -22,7 +22,7 @@ void MetricsCollector::add_RTT(Id flow_id, Time time, Time value) {
     m_RTT_storage[flow_id].add_record(time, value);
 }
 
-void MetricsCollector::add_cwnd(Id flow_id, Time time, std::uint32_t cwnd) {
+void MetricsCollector::add_cwnd(Id flow_id, Time time, double cwnd) {
     m_cwnd_storage[flow_id].add_record(time, cwnd);
 }
 

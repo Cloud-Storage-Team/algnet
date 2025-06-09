@@ -26,7 +26,7 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<ISender> a_src,
       m_packets_to_send(a_packets_to_send),
       m_delay_threshold(a_delay_threshold),
       m_ssthresh(a_ssthresh),
-      m_cwnd(1),
+      m_cwnd(1.),
       m_packets_in_flight(0),
       m_packets_acked(0),
       m_id(a_id) {
@@ -88,12 +88,12 @@ void TcpFlow::update(Packet packet, DeviceType type) {
         if (m_cwnd < m_ssthresh) {
             m_cwnd *= 2;
         } else {
-            m_cwnd++;
+            m_cwnd += 1.;
         }
         try_to_put_data_to_device();
     } else {  // trigger_congestion
         m_ssthresh = m_cwnd / 2;
-        m_cwnd = 1;
+        m_cwnd = 1.;
         m_packets_in_flight = 0;
     }
 

@@ -8,8 +8,6 @@
 
 namespace sim {
 
-using MetricsValue = long long;
-
 struct PlotMetadata {
     std::string x_label;
     std::string y_label;
@@ -18,14 +16,14 @@ struct PlotMetadata {
 
 class MetricsStorage {
 public:
-    void add_record(Time time, MetricsValue value);
+    void add_record(Time time, double value);
 
     void export_to_file(std::filesystem::path path) const;
     matplot::figure_handle get_picture(PlotMetadata metadata) const;
     void draw_plot(std::filesystem::path path, PlotMetadata metadata) const;
 
 private:
-    std::vector<std::pair<Time, MetricsValue> > m_records;
+    std::vector<std::pair<Time, double> > m_records;
 };
 
 }  // namespace sim
