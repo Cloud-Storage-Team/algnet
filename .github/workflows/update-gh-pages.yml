@@ -1,9 +1,10 @@
 name: Update root index.html
 
 on:
-  push:
-    branches: ["gh-pages"]
-
+  workflow_run:
+    workflows: ["Build and run project"]
+    types:
+      - completed
 jobs:
   rewrite-root-index:
     runs-on: ubuntu-latest
