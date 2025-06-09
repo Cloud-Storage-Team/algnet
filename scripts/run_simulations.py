@@ -80,15 +80,19 @@ def main(args):
 
         print(f"Run {simulator_path} {filepath} {metrics_dir}")
 
-        simulator_args = [simulator_path, "--config", filepath]
+        simulator_args = [
+            simulator_path,
+            "--config",
+            filepath,
+            "--output-dir",
+            metrics_dir,
+        ]
         if parsed_args.export_metrics:
             simulator_args.append("--export-metrics")
         if parsed_args.no_logs:
             simulator_args.append("--no-logs")
         if parsed_args.no_plots:
             simulator_args.append("--no-plots")
-        if parsed_args.output_dir:
-            simulator_args.extend(["--output-dir", metrics_dir])
 
         subprocess.run(
             simulator_args,
