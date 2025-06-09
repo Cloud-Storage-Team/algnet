@@ -86,9 +86,9 @@ Time Switch::process() {
                     next_link->get_max_from_egress_buffer_size())) {
         packet.congestion_experienced = true;
     }
+    // TODO: increase total_processing_time correctly
     next_link->schedule_arrival(packet);
 
-    // TODO: increase total_processing_time correctly
     if (m_process_scheduler.notify_about_finish(
             Scheduler::get_instance().get_current_time() +
             total_processing_time)) {
