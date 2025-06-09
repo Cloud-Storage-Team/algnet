@@ -16,7 +16,8 @@ Flow::Flow(Id a_id, std::shared_ptr<ISender> a_src,
       m_packet_size(a_packet_size),
       m_delay_between_packets(a_delay_between_packets),
       m_updates_number(0),
-      m_packets_to_send(a_packets_to_send) {
+      m_packets_to_send(a_packets_to_send),
+      m_sent_bytes(0) {
     if (m_src.lock() == nullptr) {
         throw std::invalid_argument("Sender for Flow is nullptr");
     }
@@ -44,11 +45,17 @@ void Flow::update(Packet packet, DeviceType type) {
     if (packet.type != PacketType::ACK || type != DeviceType::SENDER) {
         return;
     }
-    ++m_updates_number;
+    m_updates_number++;
 
     Time current_time = Scheduler::get_instance().get_current_time();
-    MetricsCollector::get_instance().add_RTT(
-        packet.flow->get_id(), current_time, current_time - packet.sent_time);
+
+    double rtt = current_time - packet.sent_time;
+    MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
+                                             current_time, rtt);
+
+    double delivery_rate = (m_sent_bytes - packet.sent_bytes_at_origin) / rtt;
+    MetricsCollector::get_instance().add_delivery_rate(
+        packet.flow->get_id(), current_time, delivery_rate);
 }
 
 std::uint32_t Flow::get_updates_number() const { return m_updates_number; }

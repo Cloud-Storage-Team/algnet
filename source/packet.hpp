@@ -23,6 +23,7 @@ struct Packet {
     Size size_byte;
     IFlow* flow;
     Time sent_time;  // Note: ACK's sent time is the data packet sent time
+    Size sent_bytes_at_origin;  // For ACK this is inherited from data packet
     bool ecn_capable_transport;
     bool congestion_experienced;
 };

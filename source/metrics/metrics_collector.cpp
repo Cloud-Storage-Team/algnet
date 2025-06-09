@@ -16,12 +16,16 @@ MetricsCollector& MetricsCollector::get_instance() {
     return instance;
 }
 
-void MetricsCollector::add_RTT(Id flow_id, Time time, Time value) {
-    m_RTT_storage[flow_id].add_record(time, value);
-}
-
 void MetricsCollector::add_cwnd(Id flow_id, Time time, double cwnd) {
     m_cwnd_storage[flow_id].add_record(time, cwnd);
+}
+
+void MetricsCollector::add_delivery_rate(Id flow_id, Time time, double value) {
+    m_rate_storage[flow_id].add_record(time, value);
+}
+
+void MetricsCollector::add_RTT(Id flow_id, Time time, Time value) {
+    m_RTT_storage[flow_id].add_record(time, value);
 }
 
 void MetricsCollector::export_metrics_to_files(
