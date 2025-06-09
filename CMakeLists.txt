@@ -23,6 +23,7 @@ file(GLOB_RECURSE tests "test/*.cpp")
 include_directories(
     ${CMAKE_SOURCE_DIR}/source/
     ${CMAKE_SOURCE_DIR}/external/spdlog/include/
+    ${CMAKE_SOURCE_DIR}/external/cxxopts/include/
 )
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/yaml-cpp/)

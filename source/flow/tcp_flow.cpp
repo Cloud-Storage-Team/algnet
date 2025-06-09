@@ -80,7 +80,7 @@ void TcpFlow::update(Packet packet, DeviceType type) {
     MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
                                              current_time, delay);
 
-    if (delay < m_delay_threshold) {  // ask
+    if (delay < m_delay_threshold) {
         if (m_packets_in_flight > 0) {
             m_packets_in_flight--;
         }
@@ -113,12 +113,12 @@ std::string TcpFlow::to_string() const {
     oss << "TcpFlow[";
     oss << "Id: " << m_id;
     oss << ", packet size: " << m_packet_size;
-    oss << ", to send packages: " << m_packets_to_send;
+    oss << ", to send packets: " << m_packets_to_send;
     oss << ", delay: " << m_delay_between_packets;
     oss << ", delay threshhold: " << m_delay_threshold;
     oss << ", cwnd: " << m_cwnd;
     oss << ", packets_in_flight: " << m_packets_in_flight;
-    oss << ", asked packges: " << m_packets_acked;
+    oss << ", acked packets: " << m_packets_acked;
     oss << "]";
     return oss.str();
 }

@@ -79,7 +79,7 @@ Time Receiver::process() {
 
     if (data_packet.type == DATA && data_packet.dest_id == get_id()) {
         // TODO: think about processing time
-        // Not sure if we want to send ack before processing or after it
+        // Not sure if we want to send ACK before processing or after it
         total_processing_time += send_ack(data_packet);
     } else {
         LOG_WARN(
@@ -113,13 +113,13 @@ Time Receiver::send_ack(Packet data_packet) {
 
     std::shared_ptr<ILink> link_to_dest = get_link_to_destination(ack);
     if (link_to_dest == nullptr) {
-        LOG_ERROR("Link to send ack does not exist");
+        LOG_ERROR("Link to send ACK does not exist");
         return processing_time;
     }
 
     // TODO: add some receiver ID for easier packet path tracing
-    LOG_INFO("Sent ack after processing packet on receiver. Data packet: " +
-             data_packet.to_string() + ". Ack packet: " + ack.to_string());
+    LOG_INFO("Sent ACK after processing packet on receiver. Data packet: " +
+             data_packet.to_string() + ". ACK packet: " + ack.to_string());
 
     link_to_dest->schedule_arrival(ack);
     return processing_time;
