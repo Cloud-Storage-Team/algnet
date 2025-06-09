@@ -145,6 +145,6 @@ bool TcpFlow::try_to_put_data_to_device() {
     return false;
 }
 
-std::uint32_t TcpFlow::get_cwnd() const { return m_cwnd; }
+double TcpFlow::get_cwnd() const { return m_cwnd; }
 
 }  // namespace sim
