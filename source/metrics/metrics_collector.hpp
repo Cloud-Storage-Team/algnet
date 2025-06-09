@@ -13,7 +13,7 @@ public:
     void add_RTT(Id flow_id, Time time, Time value);
     void add_queue_size(Id link_id, Time time, std::uint32_t value);
 
-    void add_cwnd(Id flow_id, Time time, std::uint32_t cwnd);
+    void add_cwnd(Id flow_id, Time time, double cwnd);
 
     void export_metrics_to_files(std::filesystem::path metrics_dir) const;
     void draw_metric_plots(std::filesystem::path metrics_dir) const;

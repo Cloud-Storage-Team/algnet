@@ -5,7 +5,7 @@
 
 namespace sim {
 
-Event::Event(Time a_time) : m_time(a_time){};
+Event::Event(Time a_time) : m_time(a_time) {};
 
 Time Event::get_time() const { return m_time; }
 
@@ -28,7 +28,7 @@ void Generate::operator()() {
 }
 
 Arrive::Arrive(Time a_time, std::weak_ptr<ILink> a_link, Packet a_packet)
-    : Event(a_time), m_link(a_link), m_packet(a_packet){};
+    : Event(a_time), m_link(a_link), m_packet(a_packet) {};
 
 void Arrive::operator()() {
     if (m_link.expired()) {
@@ -39,7 +39,7 @@ void Arrive::operator()() {
 };
 
 Process::Process(Time a_time, std::weak_ptr<IProcessingDevice> a_device)
-    : Event(a_time), m_device(a_device){};
+    : Event(a_time), m_device(a_device) {};
 
 void Process::operator()() {
     if (m_device.expired()) {
@@ -60,7 +60,7 @@ void Process::operator()() {
 };
 
 SendData::SendData(Time a_time, std::weak_ptr<ISender> a_device)
-    : Event(a_time), m_device(a_device){};
+    : Event(a_time), m_device(a_device) {};
 
 void SendData::operator()() {
     if (m_device.expired()) {
@@ -95,7 +95,7 @@ void StartFlow::operator()() {
 }
 
 TcpMetric::TcpMetric(Time a_time, std::weak_ptr<ITcpFlow> a_flow)
-    : Event(a_time), m_flow(a_flow){};
+    : Event(a_time), m_flow(a_flow) {};
 
 void TcpMetric::operator()() {
     if (m_flow.expired()) {
@@ -104,7 +104,7 @@ void TcpMetric::operator()() {
 
     auto flow = m_flow.lock();
 
-    std::uint32_t cwnd = flow->get_cwnd();
+    double cwnd = flow->get_cwnd();
     MetricsCollector::get_instance().add_cwnd(flow->get_id(), m_time, cwnd);
 
     auto next_metrics_event =

@@ -19,7 +19,7 @@ public:
     std::shared_ptr<ISender> get_sender() const final;
     std::shared_ptr<IReceiver> get_receiver() const final;
     Id get_id() const final;
-    std::uint32_t get_cwnd() const final;
+    double get_cwnd() const final;
 
     std::string to_string() const;
 
@@ -35,9 +35,9 @@ private:
     Time m_delay_between_packets;
     std::uint32_t m_packets_to_send;
     std::uint32_t m_delay_threshold;  // delay threshold for update
-    std::uint32_t m_ssthresh;         // Slow start threshold
+    double m_ssthresh;                // Slow start threshold
 
-    std::uint32_t m_cwnd;  // Congestion window
+    double m_cwnd;  // Congestion window
     std::uint32_t m_packets_in_flight;
     std::uint32_t m_packets_acked;
 
