@@ -125,7 +125,7 @@ std::shared_ptr<IRoutingDevice> Link::get_to() const {
     return m_to.lock();
 };
 
-Size Link::get_current_from_egress_buffer_size() const {
+Size Link::get_from_egress_queue_size() const {
     return m_from_egress_queue_size;
 }
 

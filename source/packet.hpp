@@ -11,7 +11,7 @@ enum PacketType { ACK, DATA };
 struct Packet {
     Packet(PacketType a_type = PacketType::DATA, Size a_size_byte = 0,
            IFlow* a_flow = nullptr, Id a_source_id = "", Id a_dest_id = "",
-           Time a_sent_time = 0, bool a_is_ecn_enabled = true);
+           Time a_sent_time = 0, bool a_ecn_capable_transport = true);
 
     bool operator==(const Packet& packet) const;
     std::string to_string() const;
@@ -23,8 +23,8 @@ struct Packet {
     Size size_byte;
     IFlow* flow;
     Time sent_time;  // Note: ACK's sent time is the data packet sent time
-    bool is_ecn_enabled;
-    bool detected_congestion;
+    bool ecn_capable_transport;
+    bool congestion_experienced;
 };
 
 }  // namespace sim

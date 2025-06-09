@@ -8,8 +8,8 @@
 
 namespace sim {
 
-Switch::Switch(Id a_id, bool a_is_ecn_enabled, double a_ecn_threshold)
-    : m_is_ecn_enabled(a_is_ecn_enabled),
+Switch::Switch(Id a_id, bool a_ecn_capable_transport, double a_ecn_threshold)
+    : m_ecn_capable_transport(a_ecn_capable_transport),
       m_ecn_threshold(a_ecn_threshold),
       m_router(std::make_unique<RoutingModule>(a_id)) {}
 
@@ -79,15 +79,16 @@ Time Switch::process() {
     LOG_INFO("Processing packet from link on switch. Packet: " +
              packet.to_string());
 
-    // TODO: increase total_processing_time correctly
-    double current_threshold =
-        static_cast<double>(next_link->get_current_from_egress_buffer_size()) /
-        static_cast<double>(next_link->get_max_from_egress_buffer_size());
-    if (current_threshold >= m_ecn_threshold && packet.is_ecn_enabled) {
-        packet.detected_congestion = true;
+    if (packet.ecn_capable_transport &&
+        static_cast<double>(next_link->get_from_egress_queue_size()) >=
+            m_ecn_threshold *
+                static_cast<double>(
+                    next_link->get_max_from_egress_buffer_size())) {
+        packet.congestion_experienced = true;
     }
     next_link->schedule_arrival(packet);
 
+    // TODO: increase total_processing_time correctly
     if (m_process_scheduler.notify_about_finish(
             Scheduler::get_instance().get_current_time() +
             total_processing_time)) {

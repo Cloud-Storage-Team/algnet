@@ -1,19 +1,21 @@
 #pragma once
 
-#include "event.hpp"
-#include "device/scheduling_module.hpp"
 #include "device/interfaces/i_switch.hpp"
+#include "device/scheduling_module.hpp"
+#include "event.hpp"
 
 namespace sim {
 
 class Switch : public ISwitch, public std::enable_shared_from_this<Switch> {
 public:
-    Switch(Id a_id, bool a_is_ecn_enabled = false, double a_ecn_threshold_percent = 1.0);
+    Switch(Id a_id, bool a_ecn_capable_transport = false,
+           double a_ecn_threshold_percent = 1.0);
     ~Switch() = default;
 
     bool add_inlink(std::shared_ptr<ILink> link) final;
     bool add_outlink(std::shared_ptr<ILink> link) final;
-    bool update_routing_table(Id dest_id, std::shared_ptr<ILink> link, size_t paths_count = 1) final;
+    bool update_routing_table(Id dest_id, std::shared_ptr<ILink> link,
+                              size_t paths_count = 1) final;
     std::shared_ptr<ILink> next_inlink() final;
     std::shared_ptr<ILink> get_link_to_destination(Packet packet) const final;
     std::set<std::shared_ptr<ILink>> get_outlinks() final;
@@ -29,7 +31,7 @@ public:
     Id get_id() const final;
 
 private:
-    bool m_is_ecn_enabled;
+    bool m_ecn_capable_transport;
     double m_ecn_threshold;
     std::unique_ptr<IRoutingDevice> m_router;
     SchedulingModule<ISwitch, Process> m_process_scheduler;

@@ -1,4 +1,5 @@
 #include "utils.hpp"
+
 #include "device/routing_module.hpp"
 
 namespace test {
@@ -29,7 +30,7 @@ std::shared_ptr<sim::IRoutingDevice> TestLink::get_to() const {
     return dst.lock();
 };
 
-Size TestLink::get_current_from_egress_buffer_size() const { return 0; }
+Size TestLink::get_from_egress_queue_size() const { return 0; }
 
 Size TestLink::get_max_from_egress_buffer_size() const { return 4096; }
 

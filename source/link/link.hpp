@@ -30,7 +30,7 @@ public:
 
     std::shared_ptr<IRoutingDevice> get_from() const final;
     std::shared_ptr<IRoutingDevice> get_to() const final;
-    Size get_current_from_egress_buffer_size() const final;
+    Size get_from_egress_queue_size() const final;
     Size get_max_from_egress_buffer_size() const final;
 
     Id get_id() const final;
