@@ -9,6 +9,7 @@ def check_directory(dirname: str):
     if not os.path.isdir(dirname):
         os.mkdir(dirname)
 
+
 def get_topology_name(config_path: str):
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
@@ -34,10 +35,10 @@ def copy_topology_image(topology_name: str, metrics_dir: str):
 
 
 def main(args):
-    assert len(args) >= 4
+    assert len(args) >= 6
     simulator_path = args[1]
-    simulation_configs_dir = args[2]
-    corner_metrics_dir = args[3]
+    simulation_configs_dir = args[3]
+    corner_metrics_dir = args[5]
 
     check_directory(corner_metrics_dir)
 
