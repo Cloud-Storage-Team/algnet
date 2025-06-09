@@ -58,7 +58,8 @@ def main(args):
         print(f"Run {simulator_path} {filepath} {metrics_dir}")
 
         subprocess.run(
-            [simulator_path, filepath, metrics_dir], stdout=subprocess.DEVNULL
+            [simulator_path, "-c", filepath, "--output-dir", metrics_dir],
+            stdout=subprocess.DEVNULL,
         )
 
         # separate_files(metrics_dir)
