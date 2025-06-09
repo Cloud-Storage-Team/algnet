@@ -1,18 +1,12 @@
 #pragma once
-#include <memory>
+
 #include <queue>
 
-#include "device.hpp"
-#include "packet.hpp"
-#include "scheduling_module.hpp"
-#include "routing_module.hpp"
-#include "utils/identifier_factory.hpp"
+#include "event.hpp"
+#include "device/scheduling_module.hpp"
+#include "device/interfaces/i_sender.hpp"
 
 namespace sim {
-
-struct Packet;
-class Process;
-class SendData;
 
 class Sender : public ISender,
                public std::enable_shared_from_this<Sender> {

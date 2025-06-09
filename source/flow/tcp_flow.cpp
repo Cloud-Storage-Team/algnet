@@ -1,17 +1,11 @@
-#include "tcp_flow.hpp"
+#include "flow/tcp_flow.hpp"
 
 #include <spdlog/fmt/fmt.h>
 
-#include <sstream>
-
-#include "device/receiver.hpp"
-#include "device/sender.hpp"
 #include "event.hpp"
-#include "iostream"
 #include "logger/logger.hpp"
 #include "metrics/metrics_collector.hpp"
 #include "scheduler.hpp"
-#include "utils/identifier_factory.hpp"
 
 namespace sim {
 
@@ -66,13 +60,13 @@ void TcpFlow::update(Packet packet, DeviceType type) {
     }
 
     Time current_time = Scheduler::get_instance().get_current_time();
-    if (current_time < packet.send_time) {
+    if (current_time < packet.sent_time) {
         LOG_ERROR("Packet " + packet.to_string() +
                   " sending time less that current time; ignored");
         return;
     }
 
-    Time delay = packet.RTT + current_time - packet.send_time;
+    Time delay = current_time - packet.sent_time;
 
     LOG_INFO(fmt::format("Packet {} got in flow; delay = {}",
                          packet.to_string(), to_string(), delay));
@@ -80,7 +74,7 @@ void TcpFlow::update(Packet packet, DeviceType type) {
     MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
                                              current_time, delay);
 
-    if (delay < m_delay_threshold) {  // ask
+    if (delay < m_delay_threshold) {
         if (m_packets_in_flight > 0) {
             m_packets_in_flight--;
         }
@@ -113,12 +107,12 @@ std::string TcpFlow::to_string() const {
     oss << "TcpFlow[";
     oss << "Id: " << m_id;
     oss << ", packet size: " << m_packet_size;
-    oss << ", to send packages: " << m_packets_to_send;
+    oss << ", to send packets: " << m_packets_to_send;
     oss << ", delay: " << m_delay_between_packets;
     oss << ", delay threshhold: " << m_delay_threshold;
     oss << ", cwnd: " << m_cwnd;
     oss << ", packets_in_flight: " << m_packets_in_flight;
-    oss << ", asked packges: " << m_packets_acked;
+    oss << ", acked packets: " << m_packets_acked;
     oss << "]";
     return oss.str();
 }
@@ -130,8 +124,7 @@ Packet TcpFlow::generate_packet() {
     packet.flow = this;
     packet.source_id = get_sender()->get_id();
     packet.dest_id = get_receiver()->get_id();
-    packet.RTT = 0;
-    packet.send_time = Scheduler::get_instance().get_current_time();
+    packet.sent_time = Scheduler::get_instance().get_current_time();
     return packet;
 }
 

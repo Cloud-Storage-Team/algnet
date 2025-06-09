@@ -1,26 +1,26 @@
 #include "packet.hpp"
 
-#include "device/sender.hpp"
-#include "device/receiver.hpp"
-
 #include <sstream>
 
+#include "device/receiver.hpp"
+#include "device/sender.hpp"
+
 namespace sim {
-Packet::Packet(PacketType a_type, Size a_size_byte, IFlow* a_flow, Id a_source_id, Id a_dest_id, Time a_RTT, Time a_send_time, bool a_is_ecn_enabled)
+
+Packet::Packet(PacketType a_type, Size a_size_byte, IFlow* a_flow,
+               Id a_source_id, Id a_dest_id, Time a_sent_time,
+               bool a_is_ecn_enabled)
     : type(a_type),
       source_id(a_source_id),
       dest_id(a_dest_id),
-      RTT(a_RTT),
       size_byte(a_size_byte),
       flow(a_flow),
-      send_time(a_send_time),
+      sent_time(a_sent_time),
       is_ecn_enabled(a_is_ecn_enabled) {}
 
 bool Packet::operator==(const Packet& packet) const {
-    return flow == packet.flow && 
-           source_id == packet.source_id && 
-           dest_id == packet.dest_id &&
-           size_byte == packet.size_byte && 
+    return flow == packet.flow && source_id == packet.source_id &&
+           dest_id == packet.dest_id && size_byte == packet.size_byte &&
            type == packet.type;
 }
 
@@ -41,13 +41,13 @@ std::string Packet::to_string() const {
             oss << "UNKNOWN";
             break;
     }
-    
+
     oss << ", source_id: " << source_id;
     oss << ", dest_id: " << dest_id;
     oss << ", packet_num: " << packet_num;
     oss << ", size(byte): " << size_byte;
     oss << ", flow: " << (flow ? "set" : "null");
-    oss << ", send time: " << send_time;
+    oss << ", sent time: " << sent_time;
     oss << "]";
 
     return oss.str();

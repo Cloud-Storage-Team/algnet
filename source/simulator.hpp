@@ -1,26 +1,16 @@
 #pragma once
 
 #include <spdlog/fmt/fmt.h>
-
-#include <concepts>
-#include <memory>
-#include <string_view>
 #include <unordered_set>
 #include <variant>
-#include <vector>
 
-#include "device/device.hpp"
-#include "device/receiver.hpp"
-#include "device/sender.hpp"
 #include "device/switch.hpp"
-#include "event.hpp"
+#include "device/sender.hpp"
+#include "device/receiver.hpp"
+#include "flow/flow.hpp"
 #include "flow/tcp_flow.hpp"
-#include "link.hpp"
-#include "logger/logger.hpp"
-#include "metrics/metrics_collector.hpp"
-#include "scheduler.hpp"
+#include "link/link.hpp"
 #include "utils/algorithms.hpp"
-#include "utils/identifier_factory.hpp"
 #include "utils/validation.hpp"
 
 namespace sim {

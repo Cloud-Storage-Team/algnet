@@ -92,7 +92,7 @@ jobs:
           branch_name=${branch_name#"refs/heads/"};
           echo "DEPLOY_DIR=${branch_name}/" >> $GITHUB_ENV;
         fi
-    
+
     - name: Deploy to GitHub Pages
       if: ${{env.DEPLOY_DIR}} != ''
       uses: peaceiris/actions-gh-pages@v3
@@ -101,7 +101,7 @@ jobs:
         publish_dir: metrics
         destination_dir: ${{env.DEPLOY_DIR}}
     - name: Wait for artifacts to be avaliable
-      run: 
+      run:
         URL="https://cloud-storage-team.github.io/algnet/${{env.DEPLOY_DIR}}";
         while true; do
           if curl --output /dev/null --silent --head --fail "$URL"; then

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "link.hpp"
+#include "link/interfaces/i_link.hpp"
 
 namespace sim {
 

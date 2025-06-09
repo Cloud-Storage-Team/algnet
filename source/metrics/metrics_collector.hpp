@@ -1,11 +1,8 @@
 #pragma once
 
-#include <string>
 #include <unordered_map>
-#include <vector>
 
-#include "metrics_storage.hpp"
-#include "types.hpp"
+#include "metrics/metrics_storage.hpp"
 
 namespace sim {
 

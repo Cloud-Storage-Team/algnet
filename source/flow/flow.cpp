@@ -1,13 +1,8 @@
-#include "flow.hpp"
+#include "flow/flow.hpp"
 
-#include <memory>
-#include <string>
-
-#include "device/receiver.hpp"
-#include "device/sender.hpp"
+#include "event.hpp"
 #include "logger/logger.hpp"
 #include "metrics/metrics_collector.hpp"
-#include "packet.hpp"
 #include "scheduler.hpp"
 
 namespace sim {
@@ -41,8 +36,7 @@ Packet Flow::generate_packet() {
     packet.flow = this;
     packet.source_id = get_sender()->get_id();
     packet.dest_id = get_receiver()->get_id();
-    packet.RTT = 0;
-    packet.send_time = Scheduler::get_instance().get_current_time();
+    packet.sent_time = Scheduler::get_instance().get_current_time();
     return packet;
 }
 
@@ -54,9 +48,7 @@ void Flow::update(Packet packet, DeviceType type) {
 
     Time current_time = Scheduler::get_instance().get_current_time();
     MetricsCollector::get_instance().add_RTT(
-        packet.flow->get_id(),
-        current_time,
-        packet.RTT + current_time - packet.send_time);
+        packet.flow->get_id(), current_time, current_time - packet.sent_time);
 }
 
 std::uint32_t Flow::get_updates_number() const { return m_updates_number; }
@@ -82,7 +74,7 @@ Time Flow::put_data_to_device() {
         LOG_ERROR("Flow source was deleted; can not put data to it");
         return 0;
     }
-    m_sending_buffer.front().send_time =
+    m_sending_buffer.front().sent_time =
         Scheduler::get_instance().get_current_time();
     m_src.lock()->enqueue_packet(m_sending_buffer.front());
     m_sending_buffer.pop();

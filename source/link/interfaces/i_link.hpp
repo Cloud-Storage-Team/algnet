@@ -1,16 +1,10 @@
 #pragma once
 
-#include <cstdint>
-#include <memory>
 #include <optional>
-#include <queue>
 
-#include "utils/identifier_factory.hpp"
+#include "device/interfaces/i_routing_device.hpp"
 
 namespace sim {
-
-struct Packet;
-class IRoutingDevice;
 
 /**
  * Unidirectional link from the source to a_next
@@ -33,6 +27,8 @@ public:
     virtual std::optional<Packet> get_packet() = 0;
     virtual std::shared_ptr<IRoutingDevice> get_from() const = 0;
     virtual std::shared_ptr<IRoutingDevice> get_to() const = 0;
+    virtual Size get_current_from_egress_buffer_size() const = 0;
+    virtual Size get_max_from_egress_buffer_size() const = 0;
 };
 
 }  // namespace sim

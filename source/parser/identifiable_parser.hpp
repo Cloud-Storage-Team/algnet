@@ -1,8 +1,8 @@
 #pragma once
+#include <spdlog/fmt/fmt.h>
 #include <yaml-cpp/yaml.h>
 
-#include "device/receiver.hpp"
-#include "parse_primitives.hpp"
+#include "parser/parse_primitives.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
@@ -152,10 +152,10 @@ static FlowCommon parse_flow_common(const YAML::Node& key_node,
 
     Id sender_id = value_node["sender_id"].as<Id>();
     result.sender_ptr = IdentifierFactory::get_instance().get_object<ISender>(sender_id);
-    
+
     Id receiver_id = value_node["receiver_id"].as<Id>();
     result.receiver_ptr = IdentifierFactory::get_instance().get_object<IReceiver>(receiver_id);
-    
+
     result.packet_size = value_node["packet_size"].as<Size>();
     result.number_of_packets =
         value_node["number_of_packets"].as<std::uint32_t>();
@@ -178,12 +178,12 @@ Id parse_object<Flow>(const YAML::Node& key_node,
 template <>
 Id parse_object<TcpFlow>(const YAML::Node& key_node,
                          const YAML::Node& value_node) {
-    
     FlowCommon flow_common = parse_flow_common(key_node, value_node);
 
-    parse_object_helper<TcpFlow>(flow_common.id, flow_common.sender_ptr, flow_common.receiver_ptr, 
-                              flow_common.packet_size, flow_common.packet_interval,
-                              flow_common.number_of_packets);
+    parse_object_helper<TcpFlow>(
+        flow_common.id, flow_common.sender_ptr, flow_common.receiver_ptr,
+        flow_common.packet_size, flow_common.packet_interval,
+        flow_common.number_of_packets);
     return flow_common.id;
 }
 
