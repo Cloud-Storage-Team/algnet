@@ -54,9 +54,10 @@ void Flow::update(Packet packet, DeviceType type) {
     MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
                                              current_time, rtt);
 
-    double delivery_rate = (m_sent_bytes - packet.sent_bytes_at_origin) / rtt;
+    double delivery_bit_rate =
+        8 * (m_sent_bytes - packet.sent_bytes_at_origin) / rtt;
     MetricsCollector::get_instance().add_delivery_rate(
-        packet.flow->get_id(), current_time, delivery_rate);
+        packet.flow->get_id(), current_time, delivery_bit_rate);
 }
 
 std::uint32_t Flow::get_updates_number() const { return m_updates_number; }
