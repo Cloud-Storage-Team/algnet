@@ -3,11 +3,13 @@ import os
 import subprocess
 import yaml
 import shutil
+import argparse
 
 
 def check_directory(dirname: str):
     if not os.path.isdir(dirname):
         os.mkdir(dirname)
+
 
 def get_topology_name(config_path: str):
     with open(config_path, "r") as f:
@@ -34,10 +36,32 @@ def copy_topology_image(topology_name: str, metrics_dir: str):
 
 
 def main(args):
-    assert len(args) >= 4
-    simulator_path = args[1]
-    simulation_configs_dir = args[2]
-    corner_metrics_dir = args[3]
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-s", "--simulator", help="Path to the simulator executable", required=True
+    )
+    parser.add_argument(
+        "-c",
+        "--config",
+        help="Path to the simulation configuration file",
+        required=True,
+    )
+    parser.add_argument(
+        "--output-dir", help="Directory to export simulation results", default="metrics"
+    )
+    parser.add_argument(
+        "--export-metrics", action="store_true", help="Export simulation metrics"
+    )
+    parser.add_argument("--no-logs", action="store_true", help="Disable logging")
+    parser.add_argument(
+        "--no-plots", action="store_true", help="Disable plots generation"
+    )
+
+    parsed_args = parser.parse_args()
+
+    simulator_path = parsed_args.simulator
+    simulation_configs_dir = parsed_args.config
+    corner_metrics_dir = parsed_args.output_dir
 
     check_directory(corner_metrics_dir)
 
@@ -56,9 +80,25 @@ def main(args):
 
         print(f"Run {simulator_path} {filepath} {metrics_dir}")
 
-        subprocess.run(
-            [simulator_path, filepath, metrics_dir], stdout=subprocess.DEVNULL
-        )
+        simulator_args = [
+            simulator_path,
+            "--config",
+            filepath,
+            "--output-dir",
+            metrics_dir,
+        ]
+        if parsed_args.export_metrics:
+            simulator_args.append("--export-metrics")
+        if parsed_args.no_logs:
+            simulator_args.append("--no-logs")
+        if parsed_args.no_plots:
+            simulator_args.append("--no-plots")
+
+        result = subprocess.run(simulator_args, capture_output=True)
+        if result.returncode != 0:
+            print(f"Error running simulator on {filepath}.")
+            print(f"Simulator output: {result.stderr.decode()}")
+            exit(1)
 
         # separate_files(metrics_dir)
 

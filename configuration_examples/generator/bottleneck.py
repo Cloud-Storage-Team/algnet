@@ -2,7 +2,7 @@ import yaml
 import argparse
 import sys
 
-def generate_topology(num_senders, num_receivers, switch_name="bus", link_latency="1ns", link_throughput="10Gbps", ingress_buffer_size = "4096B", egress_buffer_size = "4096B"):
+def generate_topology(num_senders, num_receivers, switch_name="switch", link_latency="5ns", link_throughput="100Gbps", ingress_buffer_size = "1024000B", egress_buffer_size = "1024000B"):
     topology = {
         "devices": {},
         "links": {}
@@ -69,8 +69,8 @@ def generate_topology(num_senders, num_receivers, switch_name="bus", link_latenc
     
     return topology
 
-def generate_simulation(topology_path, num_senders, num_receivers, packet_size=1024, 
-                        packet_interval=2000, number_of_packets=1000, algorithm="basic", simulation_time=10000000):
+def generate_simulation(topology_path, num_senders, num_receivers, flows, packet_size=1500, 
+                        packet_interval=120, number_of_packets=100, algorithm="basic", simulation_time=10000):
     """
     Generate a simulation YAML structure with flows between senders and receivers.
     """
@@ -81,23 +81,42 @@ def generate_simulation(topology_path, num_senders, num_receivers, packet_size=1
         "simulation_time": simulation_time
     }
     
-    # Create flows - each sender connects to one receiver (1:1 mapping)
-    # If there are more senders than receivers, extra senders will connect to last receiver
-    # If there are more receivers than senders, extra receivers won't have flows
-    flow_id = 0
-    for i in range(0, num_senders):
-        for j in range(0, num_receivers):
+    if flows == '1-to-1':
+        
+        # One sender to one receiver
+        # If there are more senders than receivers, extra senders will connect to last receiver
+        # If there are more receivers than senders, extra receivers won't have flows
+        flow_id = 0
+        for i in range(0, num_senders):
             flow_name = f"flow{flow_id}"
             flow_id += 1
             simulation["flows"][flow_name] = {
                 "sender_id": f"sender{i}",
-                "receiver_id": f"receiver{j}",
+                "receiver_id": f"receiver{min(i,num_receivers-1)}",
                 "packet_size": packet_size,
                 "packet_interval": packet_interval,
                 "number_of_packets": number_of_packets
             }
+        return simulation
+
+    elif flows == '1-to-all':
+        # One sender to all receivers
+        flow_id = 0
+        for i in range(0, num_senders):
+            for j in range(0, num_receivers):
+                flow_name = f"flow{flow_id}"
+                flow_id += 1
+                simulation["flows"][flow_name] = {
+                    "sender_id": f"sender{i}",
+                    "receiver_id": f"receiver{j}",
+                    "packet_size": packet_size,
+                    "packet_interval": packet_interval,
+                    "number_of_packets": number_of_packets
+                }
+        return simulation
     
-    return simulation
+    else:
+        print("Error: Unknown flows option value")
 
 def save_yaml(data, filename):
     """Save data as YAML to a file"""
@@ -111,14 +130,16 @@ def parse_arguments():
                        help='Number of sender devices')
     parser.add_argument('--receivers', type=int, required=True,
                        help='Number of receiver devices')
-    parser.add_argument('--topology', default='stress_topology.yml',
+    parser.add_argument('--topology', default='bottleneck_topology.yml',
                        help='Output filename for topology file')
-    parser.add_argument('--simulation', default='stress_simulation.yml',
+    parser.add_argument('--simulation', default='bottleneck_simulation.yml',
                        help='Output filename for simulation file')
-    parser.add_argument('--topology-path', default='../topology_examples/stress_topology.yml',
+    parser.add_argument('--topology-path', default='../topology_examples/bottleneck_topology.yml',
                        help='Path to topology file as referenced in simulation file')
-    parser.add_argument('--simulation-path', default='../simulation_examples/stress_simulation.yml',
+    parser.add_argument('--simulation-path', default='../simulation_examples/bottleneck_simulation.yml',
                        help='Path to topology file as referenced in simulation file')
+    parser.add_argument('--flows', default='1-to-1',
+                        help='Flows: 1-to-1 on 1-to-all'),
     
     args = parser.parse_args()
     
@@ -142,7 +163,7 @@ def main():
     print(f"Topology file saved as {args.topology} with {args.senders} senders and {args.receivers} receivers")
     
     # Generate simulation
-    simulation = generate_simulation(args.topology_path, args.senders, args.receivers)
+    simulation = generate_simulation(args.topology_path, args.senders, args.receivers, args.flows)
     save_yaml(simulation, args.simulation_path)
     print(f"Simulation file saved as {args.simulation}")
 

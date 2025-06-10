@@ -72,7 +72,7 @@ jobs:
       run: chmod +x simulator
 
     - name: Run simulation
-      run: python3 scripts/run_simulations.py ./simulator configuration_examples/simulation_examples ./metrics
+      run: python3 scripts/run_simulations.py -s ./simulator -c configuration_examples/simulation_examples --output-dir ./metrics
 
     - name: Create html
       run: python3 scripts/generate-html.py ./metrics
