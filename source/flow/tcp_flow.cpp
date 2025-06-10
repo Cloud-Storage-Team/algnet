@@ -134,6 +134,7 @@ bool TcpFlow::try_to_put_data_to_device() {
     if (m_packets_in_flight < m_cwnd) {
         m_packets_in_flight++;
         Packet packet = generate_packet();
+        m_sent_bytes += packet.size_byte;
         m_src.lock()->enqueue_packet(packet);
         return true;
     }

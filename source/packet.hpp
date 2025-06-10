@@ -11,7 +11,9 @@ enum PacketType { ACK, DATA };
 struct Packet {
     Packet(PacketType a_type = PacketType::DATA, Size a_size_byte = 0,
            IFlow* a_flow = nullptr, Id a_source_id = "", Id a_dest_id = "",
-           Time a_sent_time = 0, bool a_ecn_capable_transport = true);
+           Time a_sent_time = 0, Size a_sent_bytes_at_origin = 0,
+           bool a_ecn_capable_transport = true,
+           bool a_congestion_experienced = false);
 
     bool operator==(const Packet& packet) const;
     std::string to_string() const;
