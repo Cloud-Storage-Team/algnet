@@ -43,6 +43,11 @@ void MetricsCollector::export_metrics_to_files(
         values.export_to_file(metrics_dir /
                               fmt::format("cwnd_{}.txt", flow_id));
     }
+
+    for (auto& [flow_id, values] : m_rate_storage) {
+        values.export_to_file(metrics_dir /
+                              fmt::format("rate_{}.txt", flow_id));
+    }
 }
 
 void MetricsCollector::add_queue_size(Id link_id, Time time,
@@ -93,6 +98,16 @@ void MetricsCollector::draw_metric_plots(
         values.draw_plot(metrics_dir / fmt::format("cwnd/{}.svg", flow_id),
                          {"Time, ns", "Values, packets",
                           fmt::format("Cwnd values from {} to {}",
+                                      flow->get_sender()->get_id(),
+                                      flow->get_receiver()->get_id())});
+    }
+
+    for (auto& [flow_id, values] : m_rate_storage) {
+        auto flow =
+            IdentifierFactory::get_instance().get_object<IFlow>(flow_id);
+        values.draw_plot(metrics_dir / fmt::format("rate/{}.svg", flow_id),
+                         {"Time, ns", "Values, packets",
+                          fmt::format("Rate values from {} to {}",
                                       flow->get_sender()->get_id(),
                                       flow->get_receiver()->get_id())});
     }

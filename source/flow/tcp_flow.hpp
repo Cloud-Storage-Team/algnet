@@ -28,6 +28,7 @@ private:
 
     bool try_to_put_data_to_device();
 
+    Id m_id;
     std::weak_ptr<ISender> m_src;
     std::weak_ptr<IReceiver> m_dest;
     Size m_packet_size;
@@ -41,6 +42,6 @@ private:
     std::uint32_t m_packets_in_flight;
     std::uint32_t m_packets_acked;
 
-    Id m_id;
+    Size m_sent_bytes;
 };
 }  // namespace sim

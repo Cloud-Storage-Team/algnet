@@ -13,7 +13,8 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<ISender> a_src,
                  std::shared_ptr<IReceiver> a_dest, Size a_packet_size,
                  Time a_delay_between_packets, std::uint32_t a_packets_to_send,
                  Time a_delay_threshold, std::uint32_t a_ssthresh)
-    : m_src(a_src),
+    : m_id(a_id),
+      m_src(a_src),
       m_dest(a_dest),
       m_packet_size(a_packet_size),
       m_delay_between_packets(a_delay_between_packets),
@@ -23,7 +24,7 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<ISender> a_src,
       m_cwnd(1.),
       m_packets_in_flight(0),
       m_packets_acked(0),
-      m_id(a_id) {
+      m_sent_bytes(0) {
     if (m_src.lock() == nullptr) {
         throw std::invalid_argument("Sender for TcpFlow is nullptr");
     }
@@ -66,15 +67,15 @@ void TcpFlow::update(Packet packet, DeviceType type) {
         return;
     }
 
-    Time delay = current_time - packet.sent_time;
-
-    LOG_INFO(fmt::format("Packet {} got in flow; delay = {}",
-                         packet.to_string(), to_string(), delay));
-
+    Time rtt = current_time - packet.sent_time;
     MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
-                                             current_time, delay);
+                                             current_time, rtt);
 
-    if (delay < m_delay_threshold) {
+    double delivery_rate = (m_sent_bytes - packet.sent_bytes_at_origin) / rtt;
+    MetricsCollector::get_instance().add_delivery_rate(
+        packet.flow->get_id(), current_time, delivery_rate);
+
+    if (rtt < m_delay_threshold) {
         if (m_packets_in_flight > 0) {
             m_packets_in_flight--;
         }
@@ -125,6 +126,7 @@ Packet TcpFlow::generate_packet() {
     packet.source_id = get_sender()->get_id();
     packet.dest_id = get_receiver()->get_id();
     packet.sent_time = Scheduler::get_instance().get_current_time();
+    packet.sent_bytes_at_origin = m_sent_bytes;
     return packet;
 }
 

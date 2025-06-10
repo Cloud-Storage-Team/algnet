@@ -38,6 +38,7 @@ Packet Flow::generate_packet() {
     packet.source_id = get_sender()->get_id();
     packet.dest_id = get_receiver()->get_id();
     packet.sent_time = Scheduler::get_instance().get_current_time();
+    packet.sent_bytes_at_origin = m_sent_bytes;
     return packet;
 }
 
