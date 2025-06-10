@@ -65,17 +65,17 @@ def generate_topology(num_senders, num_receivers, switch_name="switch", link_lat
         }
     
     # Add the switch
-    topology["devices"][switch_name] = {"type": "switch"}
+    topology["devices"][switch_name] = {"type": "switch", "threshold": 0.7}
     
     return topology
 
-def generate_simulation(topology_path, num_senders, num_receivers, flows, packet_size=1500, 
-                        packet_interval=120, number_of_packets=100, algorithm="basic", simulation_time=10000):
+def generate_simulation(topology_file, num_senders, num_receivers, flows, packet_size=1500, 
+                        packet_interval=500, number_of_packets=100, algorithm="tcp", simulation_time=50000):
     """
     Generate a simulation YAML structure with flows between senders and receivers.
     """
     simulation = {
-        "topology_config_path": topology_path,
+        "topology_config_path": topology_file,
         "flows": {},
         "algorithm": algorithm,
         "simulation_time": simulation_time
@@ -134,10 +134,10 @@ def parse_arguments():
                        help='Output filename for topology file')
     parser.add_argument('--simulation', default='bottleneck_simulation.yml',
                        help='Output filename for simulation file')
-    parser.add_argument('--topology-path', default='../topology_examples/bottleneck_topology.yml',
-                       help='Path to topology file as referenced in simulation file')
-    parser.add_argument('--simulation-path', default='../simulation_examples/bottleneck_simulation.yml',
-                       help='Path to topology file as referenced in simulation file')
+    parser.add_argument('--topology-dir', default='../topology_examples/',
+                       help='Path to the topology config file')
+    parser.add_argument('--simulation-dir', default='../simulation_examples/',
+                       help='Path to the simulation config file')
     parser.add_argument('--flows', default='1-to-1',
                         help='Flows: 1-to-1 on 1-to-all'),
     
@@ -159,12 +159,12 @@ def main():
     
     # Generate topology
     topology = generate_topology(args.senders, args.receivers)
-    save_yaml(topology, args.topology_path)
-    print(f"Topology file saved as {args.topology} with {args.senders} senders and {args.receivers} receivers")
+    save_yaml(topology, args.topology_dir + args.topology)
+    print(f"Topology file saved as {args.topology_dir + args.topology} with {args.senders} senders and {args.receivers} receivers")
     
     # Generate simulation
-    simulation = generate_simulation(args.topology_path, args.senders, args.receivers, args.flows)
-    save_yaml(simulation, args.simulation_path)
+    simulation = generate_simulation(args.topology_dir + args.topology, args.senders, args.receivers, args.flows)
+    save_yaml(simulation, args.simulation_dir + args.simulation)
     print(f"Simulation file saved as {args.simulation}")
 
 if __name__ == "__main__":
