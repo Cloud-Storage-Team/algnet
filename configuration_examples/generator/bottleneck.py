@@ -2,7 +2,7 @@ import yaml
 import argparse
 import sys
 
-def generate_topology(num_senders, num_receivers, switch_name="switch", link_latency="5ns", link_throughput="100Gbps", ingress_buffer_size = "1024000B", egress_buffer_size = "1024000B"):
+def generate_topology(num_senders, num_receivers, switch_name="switch", link_latency="0ns", link_throughput="100Gbps", ingress_buffer_size = "1024000B", egress_buffer_size = "1024000B"):
     topology = {
         "devices": {},
         "links": {}
