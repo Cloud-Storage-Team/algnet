@@ -11,6 +11,7 @@
 #include "device/switch.hpp"
 #include "flow/flow.hpp"
 #include "flow/new_flow.hpp"
+#include "flow/new_tcp_flow.hpp"
 #include "flow/tcp_flow.hpp"
 #include "link/link.hpp"
 #include "utils/algorithms.hpp"
@@ -122,6 +123,7 @@ private:
 using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;
 using TcpSimulator = Simulator<Sender, Switch, Receiver, TcpFlow, Link>;
 using NewBasicSimulator = Simulator<Host, Switch, Host, NewFlow, Link>;
+using NewTcpSimulator = Simulator<Host, Switch, Host, NewTcpFlow, Link>;
 
 using SimulatorVariant =
     std::variant<BasicSimulator, TcpSimulator, NewBasicSimulator>;

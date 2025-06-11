@@ -48,7 +48,8 @@ void NewFlow::update(Packet packet, DeviceType type) {
         packet.type == PacketType::DATA) {
         // packet arrived to destination device, send ack
         Packet ack(PacketType::ACK, 1, this, m_dest.lock()->get_id(),
-                   m_src.lock()->get_id(), packet.sent_time);
+                   m_src.lock()->get_id(), packet.sent_time,
+                   packet.ecn_capable_transport);
         m_dest.lock()->enqueue_packet(ack);
     } else if (packet.dest_id == m_src.lock()->get_id() &&
                packet.type == PacketType::ACK) {
