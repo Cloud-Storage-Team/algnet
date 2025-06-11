@@ -59,7 +59,8 @@ void NewTcpFlow::update(Packet packet, DeviceType type) {
     (void)type;
     if (packet.dest_id == m_src.lock()->get_id() &&
         packet.type == PacketType::ACK) {
-        // ACK delivered to sender
+        // ACK delivered to soiurce device; calculate metrics, update internal
+        // state
         Time current_time = Scheduler::get_instance().get_current_time();
         if (current_time < packet.sent_time) {
             LOG_ERROR("Packet " + packet.to_string() +
@@ -98,7 +99,8 @@ void NewTcpFlow::update(Packet packet, DeviceType type) {
         // data packet delivered to destination device; send ack
         Packet ack(PacketType::ACK, 1, this, m_dest.lock()->get_id(),
                    m_src.lock()->get_id(), packet.sent_time,
-                   packet.ecn_capable_transport);
+                   packet.sent_bytes_at_origin, packet.ecn_capable_transport,
+                   packet.congestion_experienced);
         m_dest.lock()->enqueue_packet(ack);
     }
 }
