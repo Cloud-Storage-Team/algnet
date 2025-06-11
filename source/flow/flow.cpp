@@ -16,7 +16,8 @@ Flow::Flow(Id a_id, std::shared_ptr<ISender> a_src,
       m_packet_size(a_packet_size),
       m_delay_between_packets(a_delay_between_packets),
       m_updates_number(0),
-      m_packets_to_send(a_packets_to_send) {
+      m_packets_to_send(a_packets_to_send),
+      m_sent_bytes(0) {
     if (m_src.lock() == nullptr) {
         throw std::invalid_argument("Sender for Flow is nullptr");
     }
@@ -37,6 +38,7 @@ Packet Flow::generate_packet() {
     packet.source_id = get_sender()->get_id();
     packet.dest_id = get_receiver()->get_id();
     packet.sent_time = Scheduler::get_instance().get_current_time();
+    packet.sent_bytes_at_origin = m_sent_bytes;
     return packet;
 }
 
@@ -44,11 +46,18 @@ void Flow::update(Packet packet, DeviceType type) {
     if (packet.type != PacketType::ACK || type != DeviceType::SENDER) {
         return;
     }
-    ++m_updates_number;
+    m_updates_number++;
 
     Time current_time = Scheduler::get_instance().get_current_time();
-    MetricsCollector::get_instance().add_RTT(
-        packet.flow->get_id(), current_time, current_time - packet.sent_time);
+
+    double rtt = current_time - packet.sent_time;
+    MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
+                                             current_time, rtt);
+
+    double delivery_bit_rate =
+        8 * (m_sent_bytes - packet.sent_bytes_at_origin) / rtt;
+    MetricsCollector::get_instance().add_delivery_rate(
+        packet.flow->get_id(), current_time, delivery_bit_rate);
 }
 
 std::uint32_t Flow::get_updates_number() const { return m_updates_number; }
@@ -58,8 +67,11 @@ Time Flow::create_new_data_packet() {
         return 0;
     }
     --m_packets_to_send;
-    Packet data = generate_packet();
-    m_sending_buffer.push(data);
+    Packet packet = generate_packet();
+    // Note: sent_time and m_sent_bytes are evaluated at time of pushing
+    // the packet to the m_sending_buffer
+    m_sent_bytes += packet.size_byte;
+    m_sending_buffer.push(packet);
     return put_data_to_device();
 }
 
@@ -74,9 +86,8 @@ Time Flow::put_data_to_device() {
         LOG_ERROR("Flow source was deleted; can not put data to it");
         return 0;
     }
-    m_sending_buffer.front().sent_time =
-        Scheduler::get_instance().get_current_time();
-    m_src.lock()->enqueue_packet(m_sending_buffer.front());
+    Packet packet = m_sending_buffer.front();
+    m_src.lock()->enqueue_packet(packet);
     m_sending_buffer.pop();
     return m_delay_between_packets;
 }

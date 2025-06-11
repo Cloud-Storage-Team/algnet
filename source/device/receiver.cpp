@@ -102,7 +102,10 @@ Time Receiver::send_ack(Packet data_packet) {
     // Note: ACK's sent time is the data packet sent time
     Packet ack(PacketType::ACK, 1, data_packet.flow,
                data_packet.flow->get_receiver()->get_id(),
-               data_packet.flow->get_sender()->get_id(), data_packet.sent_time);
+               data_packet.flow->get_sender()->get_id(), data_packet.sent_time,
+               data_packet.sent_bytes_at_origin,
+               data_packet.ecn_capable_transport,
+               data_packet.congestion_experienced);
 
     std::shared_ptr<ILink> link_to_dest = get_link_to_destination(ack);
     if (link_to_dest == nullptr) {

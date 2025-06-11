@@ -16,12 +16,16 @@ MetricsCollector& MetricsCollector::get_instance() {
     return instance;
 }
 
-void MetricsCollector::add_RTT(Id flow_id, Time time, Time value) {
-    m_RTT_storage[flow_id].add_record(time, value);
-}
-
 void MetricsCollector::add_cwnd(Id flow_id, Time time, double cwnd) {
     m_cwnd_storage[flow_id].add_record(time, cwnd);
+}
+
+void MetricsCollector::add_delivery_rate(Id flow_id, Time time, double value) {
+    m_rate_storage[flow_id].add_record(time, value);
+}
+
+void MetricsCollector::add_RTT(Id flow_id, Time time, Time value) {
+    m_RTT_storage[flow_id].add_record(time, value);
 }
 
 void MetricsCollector::export_metrics_to_files(
@@ -38,6 +42,11 @@ void MetricsCollector::export_metrics_to_files(
     for (auto& [flow_id, values] : m_cwnd_storage) {
         values.export_to_file(metrics_dir /
                               fmt::format("cwnd_{}.txt", flow_id));
+    }
+
+    for (auto& [flow_id, values] : m_rate_storage) {
+        values.export_to_file(metrics_dir /
+                              fmt::format("rate_{}.txt", flow_id));
     }
 }
 
@@ -89,6 +98,16 @@ void MetricsCollector::draw_metric_plots(
         values.draw_plot(metrics_dir / fmt::format("cwnd/{}.svg", flow_id),
                          {"Time, ns", "Values, packets",
                           fmt::format("Cwnd values from {} to {}",
+                                      flow->get_sender()->get_id(),
+                                      flow->get_receiver()->get_id())});
+    }
+
+    for (auto& [flow_id, values] : m_rate_storage) {
+        auto flow =
+            IdentifierFactory::get_instance().get_object<IFlow>(flow_id);
+        values.draw_plot(metrics_dir / fmt::format("rate/{}.svg", flow_id),
+                         {"Time, ns", "Values, Gbps",
+                          fmt::format("Rate values from {} to {}",
                                       flow->get_sender()->get_id(),
                                       flow->get_receiver()->get_id())});
     }
