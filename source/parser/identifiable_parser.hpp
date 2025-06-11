@@ -2,6 +2,9 @@
 #include <spdlog/fmt/fmt.h>
 #include <yaml-cpp/yaml.h>
 
+#include <memory>
+
+#include "flow/new_flow.hpp"
 #include "parser/parse_primitives.hpp"
 #include "utils/identifier_factory.hpp"
 
@@ -63,11 +66,20 @@ Id parse_object<Switch>(const YAML::Node& key_node,
     Id id = key_node.as<Id>();
     if (value_node["threshold"]) {
         double threshold = value_node["threshold"].as<double>();
-        bool is_valid = (threshold > 0.0 && threshold <= 1.0); 
+        bool is_valid = (threshold > 0.0 && threshold <= 1.0);
         parse_object_helper<Switch>(id, is_valid, threshold);
     } else {
         parse_object_helper<Switch>(id);
     }
+    return id;
+}
+
+template <>
+Id parse_object<Host>(const YAML::Node& key_node,
+                      const YAML::Node& value_node) {
+    (void)value_node;
+    Id id = key_node.as<Id>();
+    parse_object_helper<Host>(id);
     return id;
 }
 
@@ -82,12 +94,12 @@ Id parse_object<Link>(const YAML::Node& key_node,
     auto to_ptr =
         IdentifierFactory::get_instance().get_object<IRoutingDevice>(to_id);
 
-    if (from_ptr == nullptr) { 
+    if (from_ptr == nullptr) {
         LOG_ERROR("Failed to find link's source");
         return "";
     }
-    
-    if (to_ptr == nullptr) { 
+
+    if (to_ptr == nullptr) {
         LOG_ERROR("Failed to find link's destination");
         return "";
     }
@@ -136,7 +148,7 @@ Id parse_object<Link>(const YAML::Node& key_node,
     return id;
 }
 
-struct FlowCommon{
+struct FlowCommon {
     Id id;
     std::shared_ptr<ISender> sender_ptr;
     std::shared_ptr<IReceiver> receiver_ptr;
@@ -151,10 +163,12 @@ static FlowCommon parse_flow_common(const YAML::Node& key_node,
     result.id = key_node.as<Id>();
 
     Id sender_id = value_node["sender_id"].as<Id>();
-    result.sender_ptr = IdentifierFactory::get_instance().get_object<ISender>(sender_id);
+    result.sender_ptr =
+        IdentifierFactory::get_instance().get_object<ISender>(sender_id);
 
     Id receiver_id = value_node["receiver_id"].as<Id>();
-    result.receiver_ptr = IdentifierFactory::get_instance().get_object<IReceiver>(receiver_id);
+    result.receiver_ptr =
+        IdentifierFactory::get_instance().get_object<IReceiver>(receiver_id);
 
     result.packet_size = value_node["packet_size"].as<Size>();
     result.number_of_packets =
@@ -169,9 +183,23 @@ Id parse_object<Flow>(const YAML::Node& key_node,
                       const YAML::Node& value_node) {
     FlowCommon flow_common = parse_flow_common(key_node, value_node);
 
-    parse_object_helper<Flow>(flow_common.id, flow_common.sender_ptr, flow_common.receiver_ptr, 
-                              flow_common.packet_size, flow_common.packet_interval,
+    parse_object_helper<Flow>(flow_common.id, flow_common.sender_ptr,
+                              flow_common.receiver_ptr, flow_common.packet_size,
+                              flow_common.packet_interval,
                               flow_common.number_of_packets);
+    return flow_common.id;
+}
+
+template <>
+Id parse_object<NewFlow>(const YAML::Node& key_node,
+                         const YAML::Node& value_node) {
+    FlowCommon flow_common = parse_flow_common(key_node, value_node);
+
+    parse_object_helper<NewFlow>(
+        flow_common.id, dynamic_pointer_cast<IHost>(flow_common.sender_ptr),
+        dynamic_pointer_cast<IHost>(flow_common.receiver_ptr),
+        flow_common.packet_size, flow_common.packet_interval,
+        flow_common.number_of_packets);
     return flow_common.id;
 }
 

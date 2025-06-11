@@ -1,13 +1,16 @@
 #pragma once
 
 #include <spdlog/fmt/fmt.h>
+
 #include <unordered_set>
 #include <variant>
 
-#include "device/switch.hpp"
-#include "device/sender.hpp"
+#include "device/host.hpp"
 #include "device/receiver.hpp"
+#include "device/sender.hpp"
+#include "device/switch.hpp"
 #include "flow/flow.hpp"
+#include "flow/new_flow.hpp"
 #include "flow/tcp_flow.hpp"
 #include "link/link.hpp"
 #include "utils/algorithms.hpp"
@@ -18,9 +21,9 @@ namespace sim {
 template <typename TSender, typename TSwitch, typename TReceiver,
           typename TFlow, typename TLink>
 requires std::derived_from<TSender, ISender> &&
-         std::derived_from<TSwitch, ISwitch> &&
-         std::derived_from<TReceiver, IReceiver> &&
-         std::derived_from<TFlow, IFlow> && std::derived_from<TLink, ILink>
+    std::derived_from<TSwitch, ISwitch> &&
+    std::derived_from<TReceiver, IReceiver> &&
+    std::derived_from<TFlow, IFlow> && std::derived_from<TLink, ILink>
 class Simulator {
 public:
     using Sender_T = TSender;
@@ -86,8 +89,9 @@ public:
         for (auto src_device : get_devices()) {
             RoutingTable routing_table = bfs(src_device);
             for (auto [dest_device_id, links] : routing_table) {
-                for (auto [link, paths_count]: links) {
-                    src_device->update_routing_table(dest_device_id, link.lock(), paths_count);
+                for (auto [link, paths_count] : links) {
+                    src_device->update_routing_table(dest_device_id,
+                                                     link.lock(), paths_count);
                 }
             }
         }
@@ -117,8 +121,10 @@ private:
 
 using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;
 using TcpSimulator = Simulator<Sender, Switch, Receiver, TcpFlow, Link>;
+using NewBasicSimulator = Simulator<Host, Switch, Host, NewFlow, Link>;
 
-using SimulatorVariant = std::variant<BasicSimulator, TcpSimulator>;
+using SimulatorVariant =
+    std::variant<BasicSimulator, TcpSimulator, NewBasicSimulator>;
 
 SimulatorVariant create_simulator(std::string_view algorithm);
 

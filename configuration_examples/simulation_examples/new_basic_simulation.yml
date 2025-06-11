@@ -1,0 +1,18 @@
+topology_config_path: ../topology_examples/bus_topology.yml
+
+flows:
+  flow1:
+    sender_id: "sender1"
+    receiver_id: "receiver1"
+    packet_size: 1024
+    packet_interval: 100
+    number_of_packets: 10000
+  flow2:
+    sender_id: "sender2"
+    receiver_id: "receiver2"
+    packet_size: 1024
+    packet_interval: 100
+    number_of_packets: 10000
+
+algorithm: new_basic
+simulation_time: 100000
