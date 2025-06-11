@@ -15,7 +15,7 @@ SimulatorVariant create_simulator(std::string_view algorithm) {
         return TcpSimulator();
     }
     if (algorithm == "new_tcp") {
-        return TcpSimulator();
+        return NewTcpSimulator();
     }
     throw std::invalid_argument("Unknown algorithm: " + std::string(algorithm));
 }
