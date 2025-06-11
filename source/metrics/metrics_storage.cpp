@@ -47,9 +47,6 @@ matplot::figure_handle MetricsStorage::get_picture(
 
     ax->plot(x_data, y_data, "-o")->line_width(1.5);
 
-    auto limits = ax->ylim();
-    ax->ylim({0, limits[1]});
-
     ax->xlabel(metadata.x_label);
     ax->ylabel(metadata.y_label);
 
