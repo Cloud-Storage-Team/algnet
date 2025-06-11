@@ -106,7 +106,7 @@ void MetricsCollector::draw_metric_plots(
         auto flow =
             IdentifierFactory::get_instance().get_object<IFlow>(flow_id);
         values.draw_plot(metrics_dir / fmt::format("rate/{}.svg", flow_id),
-                         {"Time, ns", "Values, packets",
+                         {"Time, ns", "Values, Gbps",
                           fmt::format("Rate values from {} to {}",
                                       flow->get_sender()->get_id(),
                                       flow->get_receiver()->get_id())});
