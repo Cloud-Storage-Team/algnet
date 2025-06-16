@@ -9,7 +9,6 @@
 #include "device/switch.hpp"
 #include "flow/new_flow.hpp"
 #include "flow/new_tcp_flow.hpp"
-#include "flow/tcp_flow.hpp"
 #include "link/link.hpp"
 #include "utils/algorithms.hpp"
 #include "utils/validation.hpp"
