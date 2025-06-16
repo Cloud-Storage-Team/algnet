@@ -28,9 +28,9 @@ TEST_F(Start, TrivialTopology) {
     constexpr std::uint32_t packets_to_send = 1;
 
     Id id = "flow";
-    auto flow =
-        std::make_shared<sim::NewFlow>(id, sender, receiver, packet_size,
-                                    delay_between_packets, packets_to_send);
+    auto flow = std::make_shared<sim::SimpleFlow>(
+        id, sender, receiver, packet_size, delay_between_packets,
+        packets_to_send);
     sim.add_flow(flow);
 
     add_two_way_links(sim, {{sender, swtch}, {swtch, receiver}});
@@ -70,21 +70,21 @@ TEST_F(Start, ThreeToOneTopology) {
     constexpr std::uint32_t packets_to_send_by_flow3 = 100;
 
     Id id_1 = "flow_1";
-    auto flow1 = std::make_shared<sim::NewFlow>(id_1, sender1, receiver,
-                                             packet_size, delay_between_packets,
-                                             packets_to_send_by_flow1);
+    auto flow1 = std::make_shared<sim::SimpleFlow>(
+        id_1, sender1, receiver, packet_size, delay_between_packets,
+        packets_to_send_by_flow1);
     sim.add_flow(flow1);
 
     Id id_2 = "flow_2";
-    auto flow2 = std::make_shared<sim::NewFlow>(id_2, sender2, receiver,
-                                             packet_size, delay_between_packets,
-                                             packets_to_send_by_flow2);
+    auto flow2 = std::make_shared<sim::SimpleFlow>(
+        id_2, sender2, receiver, packet_size, delay_between_packets,
+        packets_to_send_by_flow2);
     sim.add_flow(flow2);
 
     Id id_3 = "flow_3";
-    auto flow3 = std::make_shared<sim::NewFlow>(id_3, sender3, receiver,
-                                             packet_size, delay_between_packets,
-                                             packets_to_send_by_flow3);
+    auto flow3 = std::make_shared<sim::SimpleFlow>(
+        id_3, sender3, receiver, packet_size, delay_between_packets,
+        packets_to_send_by_flow3);
     sim.add_flow(flow3);
 
     sim.start(stop_time);
@@ -124,21 +124,21 @@ TEST_F(Start, StopTime) {
     constexpr std::uint32_t packets_to_send_by_flow3 = 100;
 
     Id id_1 = "flow_1";
-    auto flow1 = std::make_shared<sim::NewFlow>(id_1, sender1, receiver,
-                                             packet_size, delay_between_packets,
-                                             packets_to_send_by_flow1);
+    auto flow1 = std::make_shared<sim::SimpleFlow>(
+        id_1, sender1, receiver, packet_size, delay_between_packets,
+        packets_to_send_by_flow1);
     sim.add_flow(flow1);
 
     Id id_2 = "flow_2";
-    auto flow2 = std::make_shared<sim::NewFlow>(id_2, sender2, receiver,
-                                             packet_size, delay_between_packets,
-                                             packets_to_send_by_flow2);
+    auto flow2 = std::make_shared<sim::SimpleFlow>(
+        id_2, sender2, receiver, packet_size, delay_between_packets,
+        packets_to_send_by_flow2);
     sim.add_flow(flow2);
 
     Id id_3 = "flow_3";
-    auto flow3 = std::make_shared<sim::NewFlow>(id_3, sender3, receiver,
-                                             packet_size, delay_between_packets,
-                                             packets_to_send_by_flow3);
+    auto flow3 = std::make_shared<sim::SimpleFlow>(
+        id_3, sender3, receiver, packet_size, delay_between_packets,
+        packets_to_send_by_flow3);
     sim.add_flow(flow3);
 
     sim.start(stop_time);

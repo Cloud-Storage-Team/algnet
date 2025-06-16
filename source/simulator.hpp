@@ -7,7 +7,7 @@
 
 #include "device/host.hpp"
 #include "device/switch.hpp"
-#include "flow/new_flow.hpp"
+#include "flow/simple_flow.hpp"
 #include "flow/new_tcp_flow.hpp"
 #include "link/link.hpp"
 #include "utils/algorithms.hpp"
@@ -116,7 +116,7 @@ private:
     std::unordered_set<std::shared_ptr<ILink>> m_links;
 };
 
-using NewBasicSimulator = Simulator<Host, Switch, Host, NewFlow, Link>;
+using NewBasicSimulator = Simulator<Host, Switch, Host, SimpleFlow, Link>;
 using NewTcpSimulator = Simulator<Host, Switch, Host, NewTcpFlow, Link>;
 
 using SimulatorVariant = std::variant<NewBasicSimulator, NewTcpSimulator>;

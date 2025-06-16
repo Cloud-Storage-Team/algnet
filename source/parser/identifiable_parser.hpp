@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include "flow/new_flow.hpp"
+#include "flow/simple_flow.hpp"
 #include "parser/parse_primitives.hpp"
 #include "utils/identifier_factory.hpp"
 
@@ -161,11 +161,11 @@ static FlowCommon parse_flow_common(const YAML::Node& key_node,
 }
 
 template <>
-Id parse_object<NewFlow>(const YAML::Node& key_node,
-                         const YAML::Node& value_node) {
+Id parse_object<SimpleFlow>(const YAML::Node& key_node,
+                            const YAML::Node& value_node) {
     FlowCommon flow_common = parse_flow_common(key_node, value_node);
 
-    parse_object_helper<NewFlow>(
+    parse_object_helper<SimpleFlow>(
         flow_common.id, dynamic_pointer_cast<IHost>(flow_common.sender_ptr),
         dynamic_pointer_cast<IHost>(flow_common.receiver_ptr),
         flow_common.packet_size, flow_common.packet_interval,
