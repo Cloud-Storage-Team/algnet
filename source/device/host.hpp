@@ -1,6 +1,7 @@
 #pragma once
 #include <queue>
 
+#include "device/routing_module.hpp"
 #include "device/scheduling_module.hpp"
 #include "event.hpp"
 #include "interfaces/i_host.hpp"
@@ -31,7 +32,7 @@ public:
 
 private:
     std::queue<Packet> m_flow_buffer;
-    std::unique_ptr<IRoutingDevice> m_router;
+    RoutingModule m_router;
     SchedulingModule<IHost, Process> m_process_scheduler;
     SchedulingModule<IHost, SendData> m_send_data_scheduler;
 };

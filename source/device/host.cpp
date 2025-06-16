@@ -8,20 +8,20 @@
 
 namespace sim {
 
-Host::Host(Id a_id) : m_router(std::make_unique<RoutingModule>(a_id)) {}
+Host::Host(Id a_id) : m_router(a_id) {}
 
 bool Host::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
         return false;
     }
-    return m_router->add_inlink(link);
+    return m_router.add_inlink(link);
 }
 
 bool Host::add_outlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
         return false;
     }
-    m_router->add_outlink(link);
+    m_router.add_outlink(link);
     return true;
 }
 
@@ -30,14 +30,14 @@ bool Host::update_routing_table(Id dest_id, std::shared_ptr<ILink> link,
     if (!is_valid_link(link)) {
         return false;
     }
-    m_router->update_routing_table(dest_id, link, paths_count);
+    m_router.update_routing_table(dest_id, link, paths_count);
     return true;
 }
 
-std::shared_ptr<ILink> Host::next_inlink() { return m_router->next_inlink(); };
+std::shared_ptr<ILink> Host::next_inlink() { return m_router.next_inlink(); };
 
 std::shared_ptr<ILink> Host::get_link_to_destination(Packet packet) const {
-    return m_router->get_link_to_destination(packet);
+    return m_router.get_link_to_destination(packet);
 };
 
 bool Host::notify_about_arrival(Time arrival_time) {
@@ -136,9 +136,9 @@ Time Host::send_data() {
 }
 
 std::set<std::shared_ptr<ILink>> Host::get_outlinks() {
-    return m_router->get_outlinks();
+    return m_router.get_outlinks();
 }
 
-Id Host::get_id() const { return m_router->get_id(); }
+Id Host::get_id() const { return m_router.get_id(); }
 
 }  // namespace sim
