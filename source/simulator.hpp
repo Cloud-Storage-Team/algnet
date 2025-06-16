@@ -126,7 +126,7 @@ using NewBasicSimulator = Simulator<Host, Switch, Host, NewFlow, Link>;
 using NewTcpSimulator = Simulator<Host, Switch, Host, NewTcpFlow, Link>;
 
 using SimulatorVariant =
-    std::variant<BasicSimulator, TcpSimulator, NewBasicSimulator>;
+    std::variant<BasicSimulator, TcpSimulator, NewBasicSimulator, NewTcpSimulator>;
 
 SimulatorVariant create_simulator(std::string_view algorithm);
 
