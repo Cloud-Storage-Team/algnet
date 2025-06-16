@@ -42,24 +42,6 @@ static void parse_object_helper(Args... args) {
 }
 
 template <>
-Id parse_object<Sender>(const YAML::Node& key_node,
-                        const YAML::Node& value_node) {
-    (void)value_node;
-    Id id = key_node.as<Id>();
-    parse_object_helper<Sender>(id);
-    return id;
-}
-
-template <>
-Id parse_object<Receiver>(const YAML::Node& key_node,
-                          const YAML::Node& value_node) {
-    (void)value_node;
-    Id id = key_node.as<Id>();
-    parse_object_helper<Receiver>(id);
-    return id;
-}
-
-template <>
 Id parse_object<Switch>(const YAML::Node& key_node,
                         const YAML::Node& value_node) {
     (void)value_node;
