@@ -174,11 +174,11 @@ Id parse_object<SimpleFlow>(const YAML::Node& key_node,
 }
 
 template <>
-Id parse_object<NewTcpFlow>(const YAML::Node& key_node,
-                            const YAML::Node& value_node) {
+Id parse_object<TcpFlow>(const YAML::Node& key_node,
+                         const YAML::Node& value_node) {
     FlowCommon flow_common = parse_flow_common(key_node, value_node);
 
-    parse_object_helper<NewTcpFlow>(
+    parse_object_helper<TcpFlow>(
         flow_common.id, dynamic_pointer_cast<IHost>(flow_common.sender_ptr),
         dynamic_pointer_cast<IHost>(flow_common.receiver_ptr),
         flow_common.packet_size, flow_common.packet_interval,

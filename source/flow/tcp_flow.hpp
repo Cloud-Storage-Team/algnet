@@ -5,13 +5,12 @@
 
 namespace sim {
 
-class NewTcpFlow : public ITcpFlow,
-                   public std::enable_shared_from_this<NewTcpFlow> {
+class TcpFlow : public ITcpFlow, public std::enable_shared_from_this<TcpFlow> {
 public:
-    NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
-               std::shared_ptr<IHost> a_dest, Size a_packet_size,
-               Time a_delay_between_packets, std::uint32_t a_packets_to_send,
-               Time a_delay_threshold = 4000, std::uint32_t a_ssthresh = 8);
+    TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
+            std::shared_ptr<IHost> a_dest, Size a_packet_size,
+            Time a_delay_between_packets, std::uint32_t a_packets_to_send,
+            Time a_delay_threshold = 4000, std::uint32_t a_ssthresh = 8);
 
     void start() final;
     Time create_new_data_packet() final;

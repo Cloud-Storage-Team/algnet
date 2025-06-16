@@ -1,4 +1,4 @@
-#include "flow/new_tcp_flow.hpp"
+#include "flow/tcp_flow.hpp"
 
 #include <spdlog/fmt/fmt.h>
 
@@ -9,11 +9,10 @@
 
 namespace sim {
 
-NewTcpFlow::NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
-                       std::shared_ptr<IHost> a_dest, Size a_packet_size,
-                       Time a_delay_between_packets,
-                       std::uint32_t a_packets_to_send, Time a_delay_threshold,
-                       std::uint32_t a_ssthresh)
+TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
+                 std::shared_ptr<IHost> a_dest, Size a_packet_size,
+                 Time a_delay_between_packets, std::uint32_t a_packets_to_send,
+                 Time a_delay_threshold, std::uint32_t a_ssthresh)
     : m_src(a_src),
       m_dest(a_dest),
       m_packet_size(a_packet_size),
@@ -33,7 +32,7 @@ NewTcpFlow::NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
     }
 }
 
-void NewTcpFlow::start() {
+void TcpFlow::start() {
     Time curr_time = Scheduler::get_instance().get_current_time();
     auto generate_event = std::make_unique<Generate>(
         curr_time, shared_from_this(), m_packet_size);
@@ -44,7 +43,7 @@ void NewTcpFlow::start() {
     Scheduler::get_instance().add(std::move(metrics_event));
 }
 
-Time NewTcpFlow::create_new_data_packet() {
+Time TcpFlow::create_new_data_packet() {
     if (m_packets_to_send == 0) {
         return 0;
     }
@@ -55,7 +54,7 @@ Time NewTcpFlow::create_new_data_packet() {
     return m_delay_between_packets;
 }
 
-void NewTcpFlow::update(Packet packet, DeviceType type) {
+void TcpFlow::update(Packet packet, DeviceType type) {
     (void)type;
     if (packet.dest_id == m_src.lock()->get_id() &&
         packet.type == PacketType::ACK) {
@@ -105,17 +104,15 @@ void NewTcpFlow::update(Packet packet, DeviceType type) {
     }
 }
 
-std::shared_ptr<IHost> NewTcpFlow::get_sender() const { return m_src.lock(); }
+std::shared_ptr<IHost> TcpFlow::get_sender() const { return m_src.lock(); }
 
-std::shared_ptr<IHost> NewTcpFlow::get_receiver() const {
-    return m_dest.lock();
-}
+std::shared_ptr<IHost> TcpFlow::get_receiver() const { return m_dest.lock(); }
 
-Id NewTcpFlow::get_id() const { return m_id; }
+Id TcpFlow::get_id() const { return m_id; }
 
-std::string NewTcpFlow::to_string() const {
+std::string TcpFlow::to_string() const {
     std::ostringstream oss;
-    oss << "NewTcpFlow[";
+    oss << "TcpFlow[";
     oss << "Id: " << m_id;
     oss << ", packet size: " << m_packet_size;
     oss << ", to send packets: " << m_packets_to_send;
@@ -128,7 +125,7 @@ std::string NewTcpFlow::to_string() const {
     return oss.str();
 }
 
-Packet NewTcpFlow::generate_packet() {
+Packet TcpFlow::generate_packet() {
     sim::Packet packet;
     packet.type = sim::PacketType::DATA;
     packet.size_byte = m_packet_size;
@@ -139,7 +136,7 @@ Packet NewTcpFlow::generate_packet() {
     return packet;
 }
 
-bool NewTcpFlow::try_to_put_data_to_device() {
+bool TcpFlow::try_to_put_data_to_device() {
     if (m_packets_in_flight < m_cwnd) {
         m_packets_in_flight++;
         Packet packet = generate_packet();
@@ -149,6 +146,6 @@ bool NewTcpFlow::try_to_put_data_to_device() {
     return false;
 }
 
-double NewTcpFlow::get_cwnd() const { return m_cwnd; }
+double TcpFlow::get_cwnd() const { return m_cwnd; }
 
 }  // namespace sim
