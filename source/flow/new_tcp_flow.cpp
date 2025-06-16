@@ -105,9 +105,9 @@ void NewTcpFlow::update(Packet packet, DeviceType type) {
     }
 }
 
-std::shared_ptr<ISender> NewTcpFlow::get_sender() const { return m_src.lock(); }
+std::shared_ptr<IHost> NewTcpFlow::get_sender() const { return m_src.lock(); }
 
-std::shared_ptr<IReceiver> NewTcpFlow::get_receiver() const {
+std::shared_ptr<IHost> NewTcpFlow::get_receiver() const {
     return m_dest.lock();
 }
 

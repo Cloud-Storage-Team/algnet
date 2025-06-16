@@ -59,7 +59,7 @@ void Process::operator()() {
     Scheduler::get_instance().add(std::move(next_process_event));
 };
 
-SendData::SendData(Time a_time, std::weak_ptr<ISender> a_device)
+SendData::SendData(Time a_time, std::weak_ptr<IHost> a_device)
     : Event(a_time), m_device(a_device) {};
 
 void SendData::operator()() {

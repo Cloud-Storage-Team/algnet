@@ -7,9 +7,9 @@
 
 namespace sim {
 
-Flow::Flow(Id a_id, std::shared_ptr<ISender> a_src,
-           std::shared_ptr<IReceiver> a_dest, Size a_packet_size,
-           Time a_delay_between_packets, std::uint32_t a_packets_to_send)
+Flow::Flow(Id a_id, std::shared_ptr<IHost> a_src, std::shared_ptr<IHost> a_dest,
+           Size a_packet_size, Time a_delay_between_packets,
+           std::uint32_t a_packets_to_send)
     : m_id(a_id),
       m_src(a_src),
       m_dest(a_dest),
@@ -75,9 +75,9 @@ Time Flow::create_new_data_packet() {
     return put_data_to_device();
 }
 
-std::shared_ptr<ISender> Flow::get_sender() const { return m_src.lock(); }
+std::shared_ptr<IHost> Flow::get_sender() const { return m_src.lock(); }
 
-std::shared_ptr<IReceiver> Flow::get_receiver() const { return m_dest.lock(); }
+std::shared_ptr<IHost> Flow::get_receiver() const { return m_dest.lock(); }
 
 Id Flow::get_id() const { return m_id; }
 

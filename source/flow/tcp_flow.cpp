@@ -9,8 +9,8 @@
 
 namespace sim {
 
-TcpFlow::TcpFlow(Id a_id, std::shared_ptr<ISender> a_src,
-                 std::shared_ptr<IReceiver> a_dest, Size a_packet_size,
+TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
+                 std::shared_ptr<IHost> a_dest, Size a_packet_size,
                  Time a_delay_between_packets, std::uint32_t a_packets_to_send,
                  Time a_delay_threshold, std::uint32_t a_ssthresh)
     : m_id(a_id),
@@ -96,11 +96,9 @@ void TcpFlow::update(Packet packet, DeviceType type) {
     LOG_INFO("New flow: " + to_string());
 }
 
-std::shared_ptr<ISender> TcpFlow::get_sender() const { return m_src.lock(); }
+std::shared_ptr<IHost> TcpFlow::get_sender() const { return m_src.lock(); }
 
-std::shared_ptr<IReceiver> TcpFlow::get_receiver() const {
-    return m_dest.lock();
-}
+std::shared_ptr<IHost> TcpFlow::get_receiver() const { return m_dest.lock(); }
 
 Id TcpFlow::get_id() const { return m_id; }
 

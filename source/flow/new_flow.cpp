@@ -79,11 +79,9 @@ Time NewFlow::create_new_data_packet() {
     return put_data_to_device();
 }
 
-std::shared_ptr<ISender> NewFlow::get_sender() const { return m_src.lock(); }
+std::shared_ptr<IHost> NewFlow::get_sender() const { return m_src.lock(); }
 
-std::shared_ptr<IReceiver> NewFlow::get_receiver() const {
-    return m_dest.lock();
-}
+std::shared_ptr<IHost> NewFlow::get_receiver() const { return m_dest.lock(); }
 
 Id NewFlow::get_id() const { return m_id; }
 

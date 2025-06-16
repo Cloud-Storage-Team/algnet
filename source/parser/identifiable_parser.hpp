@@ -132,8 +132,8 @@ Id parse_object<Link>(const YAML::Node& key_node,
 
 struct FlowCommon {
     Id id;
-    std::shared_ptr<ISender> sender_ptr;
-    std::shared_ptr<IReceiver> receiver_ptr;
+    std::shared_ptr<IHost> sender_ptr;
+    std::shared_ptr<IHost> receiver_ptr;
     Size packet_size;
     Time packet_interval;
     std::uint32_t number_of_packets;
@@ -146,11 +146,11 @@ static FlowCommon parse_flow_common(const YAML::Node& key_node,
 
     Id sender_id = value_node["sender_id"].as<Id>();
     result.sender_ptr =
-        IdentifierFactory::get_instance().get_object<ISender>(sender_id);
+        IdentifierFactory::get_instance().get_object<IHost>(sender_id);
 
     Id receiver_id = value_node["receiver_id"].as<Id>();
     result.receiver_ptr =
-        IdentifierFactory::get_instance().get_object<IReceiver>(receiver_id);
+        IdentifierFactory::get_instance().get_object<IHost>(receiver_id);
 
     result.packet_size = value_node["packet_size"].as<Size>();
     result.number_of_packets =

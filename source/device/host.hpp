@@ -32,8 +32,8 @@ public:
 private:
     std::queue<Packet> m_flow_buffer;
     std::unique_ptr<IRoutingDevice> m_router;
-    SchedulingModule<ISender, Process> m_process_scheduler;
-    SchedulingModule<ISender, SendData> m_send_data_scheduler;
+    SchedulingModule<IHost, Process> m_process_scheduler;
+    SchedulingModule<IHost, SendData> m_send_data_scheduler;
 };
 
 }  // namespace sim

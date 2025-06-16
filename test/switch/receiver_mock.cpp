@@ -2,38 +2,34 @@
 
 namespace test {
 
-bool ReceiverMock::add_inlink(std::shared_ptr<sim::ILink> link) {
+bool HostMock::add_inlink(std::shared_ptr<sim::ILink> link) { return false; }
+
+bool HostMock::add_outlink(std::shared_ptr<sim::ILink> link) { return false; }
+
+bool HostMock::update_routing_table(Id dest_id,
+                                    std::shared_ptr<sim::ILink> link,
+                                    size_t paths_count) {
     return false;
 }
 
-bool ReceiverMock::add_outlink(std::shared_ptr<sim::ILink> link) {
-    return false;
-}
+std::shared_ptr<sim::ILink> HostMock::next_inlink() { return nullptr; }
 
-bool ReceiverMock::update_routing_table(Id dest_id,
-                                        std::shared_ptr<sim::ILink> link, size_t paths_count) {
-    return false;
-}
-
-std::shared_ptr<sim::ILink> ReceiverMock::next_inlink() { return nullptr; }
-
-std::shared_ptr<sim::ILink> ReceiverMock::get_link_to_destination(sim::Packet packet) const {
+std::shared_ptr<sim::ILink> HostMock::get_link_to_destination(
+    sim::Packet packet) const {
     return nullptr;
 }
 
-bool ReceiverMock::notify_about_arrival(Time arrival_time) {
-    return false;
-}
+bool HostMock::notify_about_arrival(Time arrival_time) { return false; }
 
-std::uint32_t ReceiverMock::process() { return 1; }
-sim::DeviceType ReceiverMock::get_type() const {
-    return sim::DeviceType::RECEIVER;
-}
+std::uint32_t HostMock::process() { return 1; }
+sim::DeviceType HostMock::get_type() const { return sim::DeviceType::RECEIVER; }
 
-std::set<std::shared_ptr<sim::ILink>> ReceiverMock::get_outlinks() {
-    return {};
-}
+std::set<std::shared_ptr<sim::ILink>> HostMock::get_outlinks() { return {}; }
 
-Id ReceiverMock::get_id() const { return ""; }
+Id HostMock::get_id() const { return ""; }
+
+void HostMock::enqueue_packet(sim::Packet packet) { return; }
+
+Time HostMock::send_data() { return 0; }
 
 }  // namespace test

@@ -4,12 +4,12 @@
 #include <memory>
 #include <vector>
 
+#include "../utils/fake_packet.hpp"
 #include "device/switch.hpp"
 #include "flow_mock.hpp"
 #include "link_mock.hpp"
 #include "packet.hpp"
 #include "receiver_mock.hpp"
-#include "../utils/fake_packet.hpp"
 
 namespace test {
 
@@ -32,25 +32,27 @@ TEST_F(TestSwitch, test_add_incorrect_inlink) {
     ASSERT_FALSE(switch_device->add_inlink(link));
 }
 
-// Real system does not know if another device exists or not, so this test is not correct at all
-// TEST_F(TestSwitch, nullptr_destination_device) {
+// Real system does not know if another device exists or not, so this test is
+// not correct at all TEST_F(TestSwitch, nullptr_destination_device) {
 //     auto switch_device = std::make_shared<sim::Switch>();
-//     auto temp_device = std::make_shared<test::ReceiverMock>();
+//     auto temp_device = std::make_shared<test::HostMock>();
 //     auto link = std::make_shared<LinkMock>(switch_device, temp_device);
 //     ASSERT_FALSE(switch_device->update_routing_table(nullptr, link));
 // }
 
 TEST_F(TestSwitch, nullptr_outlink) {
     auto switch_device = std::make_shared<sim::Switch>("");
-    auto temp_device = std::make_shared<test::ReceiverMock>();
-    ASSERT_FALSE(switch_device->update_routing_table(temp_device->get_id(), nullptr));
+    auto temp_device = std::make_shared<test::HostMock>();
+    ASSERT_FALSE(
+        switch_device->update_routing_table(temp_device->get_id(), nullptr));
 }
 
 TEST_F(TestSwitch, add_foreign_inlink) {
     auto switch_device = std::make_shared<sim::Switch>("test");
-    auto temp_device = std::make_shared<test::ReceiverMock>();
+    auto temp_device = std::make_shared<test::HostMock>();
     auto link = std::make_shared<LinkMock>(temp_device, switch_device);
-    ASSERT_FALSE(switch_device->update_routing_table(temp_device->get_id(), link));
+    ASSERT_FALSE(
+        switch_device->update_routing_table(temp_device->get_id(), link));
 }
 
 TEST_F(TestSwitch, test_no_senders) {
@@ -76,7 +78,7 @@ TEST_F(TestSwitch, test_no_packets_on_inlinks) {
 
 TEST_F(TestSwitch, test_no_destination_route) {
     auto switch_device = std::make_shared<sim::Switch>("");
-    auto receiver = std::make_shared<ReceiverMock>();
+    auto receiver = std::make_shared<HostMock>();
     FlowMock flow(receiver);
     sim::Packet packet(sim::PacketType::DATA, 0, &flow);
 
@@ -104,7 +106,7 @@ static bool compare_packets(const sim::Packet& p1, const sim::Packet& p2) {
 void test_senders(size_t senders_count) {
     // create devices
     auto switch_device = std::make_shared<sim::Switch>("");
-    std::shared_ptr<ReceiverMock> receiver = std::make_shared<ReceiverMock>();
+    std::shared_ptr<HostMock> receiver = std::make_shared<HostMock>();
     // create flows
     std::vector<FlowMock> flows;
     flows.reserve(senders_count);
@@ -115,7 +117,8 @@ void test_senders(size_t senders_count) {
     // create packets
     std::vector<sim::Packet> packets(senders_count);
     for (size_t i = 0; i < senders_count; i++) {
-        packets[i] = sim::Packet(sim::PacketType::DATA, i, &flows[i], "", flows[i].get_receiver()->get_id());
+        packets[i] = sim::Packet(sim::PacketType::DATA, i, &flows[i], "",
+                                 flows[i].get_receiver()->get_id());
     }
 
     // create links
@@ -123,13 +126,14 @@ void test_senders(size_t senders_count) {
     links.reserve(senders_count);
 
     std::shared_ptr<sim::IRoutingDevice> device_mock =
-        std::make_shared<ReceiverMock>();
+        std::make_shared<HostMock>();
     for (size_t i = 0; i < senders_count; i++) {
         links.push_back(std::make_shared<LinkMock>(device_mock, switch_device));
     }
     std::shared_ptr<LinkMock> switch_reciever_link =
         std::make_shared<LinkMock>(switch_device, receiver);
-    switch_device->update_routing_table(receiver->get_id(), switch_reciever_link);
+    switch_device->update_routing_table(receiver->get_id(),
+                                        switch_reciever_link);
 
     // set ingress packets
     for (size_t i = 0; i < senders_count; i++) {

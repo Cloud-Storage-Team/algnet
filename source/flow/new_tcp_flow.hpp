@@ -17,8 +17,8 @@ public:
     Time create_new_data_packet() final;
 
     void update(Packet packet, DeviceType type) final;
-    std::shared_ptr<ISender> get_sender() const final;
-    std::shared_ptr<IReceiver> get_receiver() const final;
+    std::shared_ptr<IHost> get_sender() const final;
+    std::shared_ptr<IHost> get_receiver() const final;
     Id get_id() const final;
     double get_cwnd() const final;
 

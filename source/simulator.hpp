@@ -19,9 +19,9 @@ namespace sim {
 
 template <typename TSender, typename TSwitch, typename TReceiver,
           typename TFlow, typename TLink>
-requires std::derived_from<TSender, ISender> &&
+requires std::derived_from<TSender, IHost> &&
          std::derived_from<TSwitch, ISwitch> &&
-         std::derived_from<TReceiver, IReceiver> &&
+         std::derived_from<TReceiver, IHost> &&
          std::derived_from<TFlow, IFlow> && std::derived_from<TLink, ILink>
 class Simulator {
 public:

@@ -39,14 +39,14 @@ public:
     virtual std::set<std::shared_ptr<ILink>> get_outlinks() = 0;
 };
 
-class IReceiver : public IRoutingDevice, public IProcessingDevice {
+class IHost : public IRoutingDevice, public IProcessingDevice {
 public:
-    virtual ~IReceiver() = default;
+    virtual ~IHost() = default;
 };
 
-class ISender : public IRoutingDevice, public IProcessingDevice {
+class IHost : public IRoutingDevice, public IProcessingDevice {
 public:
-    virtual ~ISender() = default;
+    virtual ~IHost() = default;
     virtual void enqueue_packet(Packet packet) = 0;
     virtual Time send_data() = 0;
 };

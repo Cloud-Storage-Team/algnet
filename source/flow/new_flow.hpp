@@ -26,8 +26,8 @@ public:
     void update(Packet packet, DeviceType type) final;
     std::uint32_t get_updates_number() const;
 
-    std::shared_ptr<ISender> get_sender() const final;
-    std::shared_ptr<IReceiver> get_receiver() const final;
+    std::shared_ptr<IHost> get_sender() const final;
+    std::shared_ptr<IHost> get_receiver() const final;
 
     Id get_id() const final;
 
