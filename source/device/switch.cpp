@@ -11,7 +11,9 @@ namespace sim {
 Switch::Switch(Id a_id, bool a_ecn_capable_transport, double a_ecn_threshold)
     : m_ecn_capable_transport(a_ecn_capable_transport),
       m_ecn_threshold(a_ecn_threshold),
-      m_router(std::make_unique<RoutingModule>(a_id)) {}
+      m_router(std::make_unique<RoutingModule>(a_id)) {
+    (void)m_ecn_capable_transport;
+}
 
 bool Switch::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
