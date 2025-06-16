@@ -1,16 +1,16 @@
 devices:
   sender0:
-    type: sender
+    type: host
   sender1:
-    type: sender
+    type: host
   sender2:
-    type: sender
+    type: host
   sender3:
-    type: sender
+    type: host
   sender4:
-    type: sender
+    type: host
   receiver0:
-    type: receiver
+    type: host
   switch:
     type: switch
     threshold: 0.7

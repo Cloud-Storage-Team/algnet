@@ -45,7 +45,7 @@ void YamlParser::process_devices(const YAML::Node &config) {
         auto device_name = key_node.as<Id>();
         auto device_type = val_node["type"].as<std::string>();
 
-        if (device_type == "sender") {
+        if (device_type == "host") {
             std::visit(
                 [&key_node, &val_node](auto &sim) {
                     using SimType = std::decay_t<decltype(sim)>;
@@ -55,20 +55,6 @@ void YamlParser::process_devices(const YAML::Node &config) {
                                           .get_object<SenderType>(id))) {
                         throw std::runtime_error("Can not add sender with id " +
                                                  id);
-                    }
-                },
-                m_simulator);
-        } else if (device_type == "receiver") {
-            std::visit(
-                [&key_node, &val_node](auto &simulator) {
-                    using SimType = std::decay_t<decltype(simulator)>;
-                    using ReceiverType = typename SimType::Host_T;
-                    Id id = parse_object<ReceiverType>(key_node, val_node);
-                    if (!simulator.add_host(
-                            IdentifierFactory::get_instance()
-                                .get_object<ReceiverType>(id))) {
-                        throw std::runtime_error(
-                            "Can not add receiver with id " + id);
                     }
                 },
                 m_simulator);
