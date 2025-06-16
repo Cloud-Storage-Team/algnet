@@ -1,5 +1,5 @@
 #pragma once
-#include "flow/flow.hpp"
+#include "flow/interfaces/i_flow.hpp"
 
 namespace test {
 

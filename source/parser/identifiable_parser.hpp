@@ -161,18 +161,6 @@ static FlowCommon parse_flow_common(const YAML::Node& key_node,
 }
 
 template <>
-Id parse_object<Flow>(const YAML::Node& key_node,
-                      const YAML::Node& value_node) {
-    FlowCommon flow_common = parse_flow_common(key_node, value_node);
-
-    parse_object_helper<Flow>(flow_common.id, flow_common.sender_ptr,
-                              flow_common.receiver_ptr, flow_common.packet_size,
-                              flow_common.packet_interval,
-                              flow_common.number_of_packets);
-    return flow_common.id;
-}
-
-template <>
 Id parse_object<NewFlow>(const YAML::Node& key_node,
                          const YAML::Node& value_node) {
     FlowCommon flow_common = parse_flow_common(key_node, value_node);
