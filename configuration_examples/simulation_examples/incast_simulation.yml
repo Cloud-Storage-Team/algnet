@@ -30,5 +30,5 @@ flows:
     packet_size: 1500
     packet_interval: 500
     number_of_packets: 100
-algorithm: new_tcp
+algorithm: tcp
 simulation_time: 50000
