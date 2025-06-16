@@ -9,13 +9,12 @@
 
 namespace sim {
 
-class SimpleFlow : public IFlow,
-                   public std::enable_shared_from_this<SimpleFlow> {
+class BasicFlow : public IFlow, public std::enable_shared_from_this<BasicFlow> {
 public:
-    SimpleFlow(Id a_id, std::shared_ptr<IHost> a_src,
-               std::shared_ptr<IHost> a_dest, Size a_packet_size,
-               Time a_delay_between_packets, std::uint32_t a_packets_to_send);
-    virtual ~SimpleFlow() = default;
+    BasicFlow(Id a_id, std::shared_ptr<IHost> a_src,
+              std::shared_ptr<IHost> a_dest, Size a_packet_size,
+              Time a_delay_between_packets, std::uint32_t a_packets_to_send);
+    virtual ~BasicFlow() = default;
 
     // Start at time
     void start() final;

@@ -7,7 +7,7 @@
 
 #include "device/host.hpp"
 #include "device/switch.hpp"
-#include "flow/simple_flow.hpp"
+#include "flow/basic_flow.hpp"
 #include "flow/tcp_flow.hpp"
 #include "link/link.hpp"
 #include "utils/algorithms.hpp"
@@ -116,10 +116,10 @@ private:
     std::unordered_set<std::shared_ptr<ILink>> m_links;
 };
 
-using NewBasicSimulator = Simulator<Host, Switch, Host, SimpleFlow, Link>;
-using NewTcpSimulator = Simulator<Host, Switch, Host, TcpFlow, Link>;
+using BasicSimulator = Simulator<Host, Switch, Host, BasicFlow, Link>;
+using TcpSimulator = Simulator<Host, Switch, Host, TcpFlow, Link>;
 
-using SimulatorVariant = std::variant<NewBasicSimulator, NewTcpSimulator>;
+using SimulatorVariant = std::variant<BasicSimulator, TcpSimulator>;
 
 SimulatorVariant create_simulator(std::string_view algorithm);
 

@@ -1,4 +1,4 @@
-#include "simple_flow.hpp"
+#include "basic_flow.hpp"
 
 #include <spdlog/fmt/fmt.h>
 
@@ -9,10 +9,10 @@
 
 namespace sim {
 
-SimpleFlow::SimpleFlow(Id a_id, std::shared_ptr<IHost> a_src,
-                       std::shared_ptr<IHost> a_dest, Size a_packet_size,
-                       Time a_delay_between_packets,
-                       std::uint32_t a_packets_to_send)
+BasicFlow::BasicFlow(Id a_id, std::shared_ptr<IHost> a_src,
+                     std::shared_ptr<IHost> a_dest, Size a_packet_size,
+                     Time a_delay_between_packets,
+                     std::uint32_t a_packets_to_send)
     : m_id(a_id),
       m_src(a_src),
       m_dest(a_dest),
@@ -28,11 +28,11 @@ SimpleFlow::SimpleFlow(Id a_id, std::shared_ptr<IHost> a_src,
     }
 }
 
-void SimpleFlow::start() {
+void BasicFlow::start() {
     schedule_packet_generation(Scheduler::get_instance().get_current_time());
 }
 
-Packet SimpleFlow::generate_packet() {
+Packet BasicFlow::generate_packet() {
     sim::Packet packet;
     packet.type = sim::PacketType::DATA;
     packet.size_byte = m_packet_size;
@@ -43,7 +43,7 @@ Packet SimpleFlow::generate_packet() {
     return packet;
 }
 
-void SimpleFlow::update(Packet packet, DeviceType type) {
+void BasicFlow::update(Packet packet, DeviceType type) {
     (void)type;
     if (packet.dest_id == m_dest.lock()->get_id() &&
         packet.type == PacketType::DATA) {
@@ -68,11 +68,9 @@ void SimpleFlow::update(Packet packet, DeviceType type) {
     }
 }
 
-std::uint32_t SimpleFlow::get_updates_number() const {
-    return m_updates_number;
-}
+std::uint32_t BasicFlow::get_updates_number() const { return m_updates_number; }
 
-Time SimpleFlow::create_new_data_packet() {
+Time BasicFlow::create_new_data_packet() {
     if (m_packets_to_send == 0) {
         return 0;
     }
@@ -82,15 +80,13 @@ Time SimpleFlow::create_new_data_packet() {
     return put_data_to_device();
 }
 
-std::shared_ptr<IHost> SimpleFlow::get_sender() const { return m_src.lock(); }
+std::shared_ptr<IHost> BasicFlow::get_sender() const { return m_src.lock(); }
 
-std::shared_ptr<IHost> SimpleFlow::get_receiver() const {
-    return m_dest.lock();
-}
+std::shared_ptr<IHost> BasicFlow::get_receiver() const { return m_dest.lock(); }
 
-Id SimpleFlow::get_id() const { return m_id; }
+Id BasicFlow::get_id() const { return m_id; }
 
-Time SimpleFlow::put_data_to_device() {
+Time BasicFlow::put_data_to_device() {
     if (m_src.expired()) {
         LOG_ERROR("Flow source was deleted; can not put data to it");
         return 0;
@@ -102,7 +98,7 @@ Time SimpleFlow::put_data_to_device() {
     return m_delay_between_packets;
 }
 
-void SimpleFlow::schedule_packet_generation(Time time) {
+void BasicFlow::schedule_packet_generation(Time time) {
     auto generate_event_ptr =
         std::make_unique<Generate>(time, shared_from_this(), m_packet_size);
     Scheduler::get_instance().add(std::move(generate_event_ptr));

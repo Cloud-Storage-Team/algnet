@@ -4,7 +4,7 @@
 
 namespace test {
 
-void add_two_way_links(sim::NewBasicSimulator& sim,
+void add_two_way_links(sim::BasicSimulator& sim,
                        std::initializer_list<two_way_link_t> links) {
     for (auto& l : links) {
         sim.add_link(std::make_shared<sim::Link>("", l.first, l.second, 0, 0));
