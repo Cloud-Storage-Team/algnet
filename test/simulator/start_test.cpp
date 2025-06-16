@@ -14,13 +14,13 @@ public:
 TEST_F(Start, TrivialTopology) {
     sim::BasicSimulator sim;
     auto sender = std::make_shared<sim::Host>("sender");
-    sim.add_sender(sender);
+    sim.add_host(sender);
 
     auto swtch = std::make_shared<sim::Switch>("switch");
     sim.add_switch(swtch);
 
     auto receiver = std::make_shared<sim::Host>("receiver");
-    sim.add_receiver(receiver);
+    sim.add_host(receiver);
 
     constexpr Time delay_between_packets = 100;
     constexpr Time stop_time = 1000;
@@ -43,19 +43,19 @@ TEST_F(Start, TrivialTopology) {
 TEST_F(Start, ThreeToOneTopology) {
     sim::BasicSimulator sim;
     auto sender1 = std::make_shared<sim::Host>("sender1");
-    sim.add_sender(sender1);
+    sim.add_host(sender1);
 
     auto sender2 = std::make_shared<sim::Host>("sender2");
-    sim.add_sender(sender2);
+    sim.add_host(sender2);
 
     auto sender3 = std::make_shared<sim::Host>("sender3");
-    sim.add_sender(sender3);
+    sim.add_host(sender3);
 
     auto swtch = std::make_shared<sim::Switch>("switch");
     sim.add_switch(swtch);
 
     auto receiver = std::make_shared<sim::Host>("receiver");
-    sim.add_receiver(receiver);
+    sim.add_host(receiver);
 
     add_two_way_links(sim, {{sender1, swtch},
                             {sender2, swtch},
@@ -97,19 +97,19 @@ TEST_F(Start, ThreeToOneTopology) {
 TEST_F(Start, StopTime) {
     sim::BasicSimulator sim;
     auto sender1 = std::make_shared<sim::Host>("sender1");
-    sim.add_sender(sender1);
+    sim.add_host(sender1);
 
     auto sender2 = std::make_shared<sim::Host>("sender2");
-    sim.add_sender(sender2);
+    sim.add_host(sender2);
 
     auto sender3 = std::make_shared<sim::Host>("sender3");
-    sim.add_sender(sender3);
+    sim.add_host(sender3);
 
     auto swtch = std::make_shared<sim::Switch>("switch");
     sim.add_switch(swtch);
 
     auto receiver = std::make_shared<sim::Host>("receiver");
-    sim.add_receiver(receiver);
+    sim.add_host(receiver);
 
     add_two_way_links(sim, {{sender1, swtch},
                             {sender2, swtch},

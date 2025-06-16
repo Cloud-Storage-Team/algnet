@@ -15,34 +15,24 @@
 
 namespace sim {
 
-template <typename TSender, typename TSwitch, typename TReceiver,
-          typename TFlow, typename TLink>
-requires std::derived_from<TSender, IHost> &&
+template <typename THost, typename TSwitch, typename TFlow, typename TLink>
+requires std::derived_from<THost, IHost> &&
          std::derived_from<TSwitch, ISwitch> &&
-         std::derived_from<TReceiver, IHost> &&
          std::derived_from<TFlow, IFlow> && std::derived_from<TLink, ILink>
 class Simulator {
 public:
-    using Sender_T = TSender;
+    using Host_T = THost;
     using Switch_T = TSwitch;
-    using Receiver_T = TReceiver;
     using Flow_T = TFlow;
     using Link_T = TLink;
     Simulator() = default;
     ~Simulator() = default;
 
-    bool add_sender(std::shared_ptr<TSender> sender) {
-        if (sender == nullptr) {
+    bool add_host(std::shared_ptr<THost> host) {
+        if (host == nullptr) {
             return false;
         }
-        return m_senders.insert(sender).second;
-    }
-
-    bool add_receiver(std::shared_ptr<TReceiver> receiver) {
-        if (receiver == nullptr) {
-            return false;
-        }
-        return m_receivers.insert(receiver).second;
+        return m_hosts.insert(host).second;
     }
 
     bool add_switch(std::shared_ptr<TSwitch> switch_device) {
@@ -75,8 +65,7 @@ public:
 
     std::vector<std::shared_ptr<IRoutingDevice>> get_devices() const {
         std::vector<std::shared_ptr<IRoutingDevice>> result;
-        result.insert(result.end(), m_senders.begin(), m_senders.end());
-        result.insert(result.end(), m_receivers.begin(), m_receivers.end());
+        result.insert(result.end(), m_hosts.begin(), m_hosts.end());
         result.insert(result.end(), m_switches.begin(), m_switches.end());
         return result;
     }
@@ -109,15 +98,14 @@ public:
     }
 
 private:
-    std::unordered_set<std::shared_ptr<TSender>> m_senders;
-    std::unordered_set<std::shared_ptr<TReceiver>> m_receivers;
+    std::unordered_set<std::shared_ptr<THost>> m_hosts;
     std::unordered_set<std::shared_ptr<TSwitch>> m_switches;
     std::unordered_set<std::shared_ptr<IFlow>> m_flows;
     std::unordered_set<std::shared_ptr<ILink>> m_links;
 };
 
-using BasicSimulator = Simulator<Host, Switch, Host, BasicFlow, Link>;
-using TcpSimulator = Simulator<Host, Switch, Host, TcpFlow, Link>;
+using BasicSimulator = Simulator<Host, Switch, BasicFlow, Link>;
+using TcpSimulator = Simulator<Host, Switch, TcpFlow, Link>;
 
 using SimulatorVariant = std::variant<BasicSimulator, TcpSimulator>;
 
