@@ -26,4 +26,11 @@ jobs:
 
     - name: Run simulations
       run: |
-        time ./build/simulator --config configuration_examples/simulation_examples/basic_simulation.yml --no-logs --no-plots
+        for config in \
+            "configuration_examples/simulation_examples/basic_simulation.yml" \
+            "configuration_examples/simulation_examples/incast_simulation.yml"
+        do
+            echo "Running simulation with ${config##*/}"
+            time ./build/simulator --config "$config" --no-logs --no-plots
+            echo
+        done
