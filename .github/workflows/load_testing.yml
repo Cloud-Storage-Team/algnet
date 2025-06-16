@@ -1,0 +1,29 @@
+name: Load testing
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "*" ]  
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  load_testing:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Update submodules
+      run: git submodule update --init --recursive
+
+    - name: Configure CMake for building project
+      run: cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF
+
+    - name: Build project
+      run: cmake --build build --config Debug -j $(nproc)
+
+    - name: Run simulations
+      run: |
+        time ./build/simulator --config configuration_examples/simulation_examples/basic_simulation.yml --no-logs --no-plots
