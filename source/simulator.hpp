@@ -22,9 +22,9 @@ namespace sim {
 template <typename TSender, typename TSwitch, typename TReceiver,
           typename TFlow, typename TLink>
 requires std::derived_from<TSender, ISender> &&
-    std::derived_from<TSwitch, ISwitch> &&
-    std::derived_from<TReceiver, IReceiver> &&
-    std::derived_from<TFlow, IFlow> && std::derived_from<TLink, ILink>
+         std::derived_from<TSwitch, ISwitch> &&
+         std::derived_from<TReceiver, IReceiver> &&
+         std::derived_from<TFlow, IFlow> && std::derived_from<TLink, ILink>
 class Simulator {
 public:
     using Sender_T = TSender;
@@ -120,13 +120,10 @@ private:
     std::unordered_set<std::shared_ptr<ILink>> m_links;
 };
 
-using BasicSimulator = Simulator<Sender, Switch, Receiver, Flow, Link>;
-using TcpSimulator = Simulator<Sender, Switch, Receiver, TcpFlow, Link>;
 using NewBasicSimulator = Simulator<Host, Switch, Host, NewFlow, Link>;
 using NewTcpSimulator = Simulator<Host, Switch, Host, NewTcpFlow, Link>;
 
-using SimulatorVariant =
-    std::variant<BasicSimulator, TcpSimulator, NewBasicSimulator, NewTcpSimulator>;
+using SimulatorVariant = std::variant<NewBasicSimulator, NewTcpSimulator>;
 
 SimulatorVariant create_simulator(std::string_view algorithm);
 
