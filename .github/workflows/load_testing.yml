@@ -27,9 +27,30 @@ jobs:
     - name: Create configs
       run: |
         cd configuration_examples/generator
-        python3 bottleneck.py --senders 30 --receivers 1 --topology incast_30_to_1_topology.yml --simulation incast_30_to_1_simulation.yml
-        python3 bottleneck.py --senders 100 --receivers 2 --topology incast_100_to_2_topology.yml --simulation incast_100_to_2_simulation.yml
-        python3 bottleneck.py --senders 1000 --receivers 5 --topology incast_1000_to_5_topology.yml --simulation incast_1000_to_5_simulation.yml
+
+        python3 bottleneck.py \
+        --senders 30 \
+        --receivers 1 \
+        --simulation-time 1000000 \
+        --packets 2000 \
+        --topology incast_30_to_1_topology.yml \
+        --simulation incast_30_to_1_simulation.yml
+
+        python3 bottleneck.py \
+        --senders 100 \
+        --receivers 2 \
+        --simulation-time 1000000 \
+        --packets 2000 \
+        --topology incast_100_to_2_topology.yml \
+        --simulation incast_100_to_2_simulation.yml
+
+        python3 bottleneck.py \
+        --senders 1000 \
+        --receivers 5 \
+        --simulation-time 1000000 \
+        --packets 2000 \
+        --topology incast_1000_to_5_topology.yml \
+        --simulation incast_1000_to_5_simulation.yml
 
     - name: Run simulations
       run: |
