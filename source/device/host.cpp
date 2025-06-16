@@ -3,7 +3,6 @@
 #include <spdlog/fmt/fmt.h>
 
 #include "device/routing_module.hpp"
-#include "device/sender.hpp"
 #include "logger/logger.hpp"
 #include "utils/validation.hpp"
 

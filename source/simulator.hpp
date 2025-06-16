@@ -6,8 +6,6 @@
 #include <variant>
 
 #include "device/host.hpp"
-#include "device/receiver.hpp"
-#include "device/sender.hpp"
 #include "device/switch.hpp"
 #include "flow/flow.hpp"
 #include "flow/new_flow.hpp"
