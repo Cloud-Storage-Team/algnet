@@ -11,9 +11,7 @@ namespace sim {
 Switch::Switch(Id a_id, bool a_ecn_capable_transport, double a_ecn_threshold)
     : m_ecn_capable_transport(a_ecn_capable_transport),
       m_ecn_threshold(a_ecn_threshold),
-      m_router(std::make_unique<RoutingModule>(a_id)) {
-    (void)m_ecn_capable_transport;
-}
+      m_router(std::make_unique<RoutingModule>(a_id)) {}
 
 bool Switch::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
@@ -82,7 +80,8 @@ Time Switch::process() {
              packet.to_string());
 
     // ECN mark for data packets
-    if (packet.type == DATA && packet.ecn_capable_transport &&
+    if (m_ecn_capable_transport && packet.type == DATA &&
+        packet.ecn_capable_transport &&
         static_cast<double>(next_link->get_from_egress_queue_size()) >=
             m_ecn_threshold *
                 static_cast<double>(
