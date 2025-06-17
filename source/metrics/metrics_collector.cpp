@@ -55,20 +55,76 @@ void MetricsCollector::add_queue_size(Id link_id, Time time,
     m_queue_size_storage[link_id].add_record(time, value);
 }
 
-void MetricsCollector::draw_metric_plots(
-    std::filesystem::path metrics_dir) const {
-    for (auto& [flow_id, values] : m_RTT_storage) {
-        auto flow =
-            IdentifierFactory::get_instance().get_object<IFlow>(flow_id);
+// verctor of pairs<Storage, curve name>
+using PlotMetricsData = std::vector<std::pair<MetricsStorage, std::string> >;
 
-        values.draw_plot(
-            metrics_dir / fmt::format("rtt/{}.svg", flow_id),
-            PlotMetadata{"Time, ns", "Values, ns",
-                         fmt::format("RTT values from {} to {}",
-                                     flow->get_sender()->get_id(),
-                                     flow->get_receiver()->get_id())});
+// Draws data from different DataStorage on one plot
+static void draw_on_same_plot(std::filesystem::path path, PlotMetricsData data,
+                              PlotMetadata metadata) {
+    auto fig = matplot::figure(true);
+    auto ax = fig->current_axes();
+    ax->hold(matplot::on);
+
+    for (auto& [values, name] : data) {
+        values.draw_on_plot(fig, name);
     }
+    ax->xlabel(metadata.x_label);
+    ax->ylabel(metadata.y_label);
+    ax->title(metadata.title);
+    ax->legend(std::vector<std::string>());
 
+    matplot::save(fig, path.string());
+}
+
+void MetricsCollector::draw_cwnd_plot(std::filesystem::path path) const {
+    PlotMetricsData data;
+    std::transform(
+        begin(m_cwnd_storage), end(m_cwnd_storage), std::back_inserter(data),
+        [](auto const& pair) {
+            auto flow =
+                IdentifierFactory::get_instance().get_object<IFlow>(pair.first);
+            std::string name =
+                fmt::format("{}->{}", flow->get_sender()->get_id(),
+                            flow->get_receiver()->get_id());
+            return std::make_pair(pair.second, name);
+        });
+    draw_on_same_plot(path, data, {"Time, ns", "CWND, packets", "CWND"});
+}
+
+void MetricsCollector::draw_RTT_plot(std::filesystem::path path) const {
+    PlotMetricsData data;
+    std::transform(
+        begin(m_RTT_storage), end(m_RTT_storage), std::back_inserter(data),
+        [](auto const& pair) {
+            auto flow =
+                IdentifierFactory::get_instance().get_object<IFlow>(pair.first);
+            std::string name =
+                fmt::format("{}->{}", flow->get_sender()->get_id(),
+                            flow->get_receiver()->get_id());
+            return std::make_pair(pair.second, name);
+        });
+    draw_on_same_plot(path, data, {"Time, ns", "RTT, ns", "Round Trip Time"});
+}
+
+void MetricsCollector::draw_delivery_rate_plot(
+    std::filesystem::path path) const {
+    PlotMetricsData data;
+    std::transform(
+        begin(m_rate_storage), end(m_rate_storage), std::back_inserter(data),
+        [](auto const& pair) {
+            auto flow =
+                IdentifierFactory::get_instance().get_object<IFlow>(pair.first);
+            std::string name =
+                fmt::format("{}->{}", flow->get_sender()->get_id(),
+                            flow->get_receiver()->get_id());
+            return std::make_pair(pair.second, name);
+        });
+    draw_on_same_plot(path, data,
+                      {"Time, ns", "Values, Gbps", "Delivery rate"});
+}
+
+void MetricsCollector::draw_queue_size_plots(
+    std::filesystem::path dir_path) const {
     for (auto& [link_id, values] : m_queue_size_storage) {
         auto link =
             IdentifierFactory::get_instance().get_object<ILink>(link_id);
@@ -88,29 +144,16 @@ void MetricsCollector::draw_metric_plots(
 
         ax->color("white");
 
-        matplot::save(fig,
-                      metrics_dir / fmt::format("queue_size/{}.svg", link_id));
+        matplot::save(fig, dir_path / fmt::format("{}.svg", link_id));
     }
+}
 
-    for (auto& [flow_id, values] : m_cwnd_storage) {
-        auto flow =
-            IdentifierFactory::get_instance().get_object<IFlow>(flow_id);
-        values.draw_plot(metrics_dir / fmt::format("cwnd/{}.svg", flow_id),
-                         {"Time, ns", "Values, packets",
-                          fmt::format("Cwnd values from {} to {}",
-                                      flow->get_sender()->get_id(),
-                                      flow->get_receiver()->get_id())});
-    }
-
-    for (auto& [flow_id, values] : m_rate_storage) {
-        auto flow =
-            IdentifierFactory::get_instance().get_object<IFlow>(flow_id);
-        values.draw_plot(metrics_dir / fmt::format("rate/{}.svg", flow_id),
-                         {"Time, ns", "Values, Gbps",
-                          fmt::format("Rate values from {} to {}",
-                                      flow->get_sender()->get_id(),
-                                      flow->get_receiver()->get_id())});
-    }
+void MetricsCollector::draw_metric_plots(
+    std::filesystem::path metrics_dir) const {
+    draw_cwnd_plot(metrics_dir / "cwnd.svg");
+    draw_delivery_rate_plot(metrics_dir / "rate.svg");
+    draw_RTT_plot(metrics_dir / "rtt.svg");
+    draw_queue_size_plots(metrics_dir / "queue_size");
 }
 
 }  // namespace sim
