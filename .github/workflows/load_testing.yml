@@ -26,6 +26,6 @@ jobs:
 
     - name: Run simulations
       run: | 
-        python3 scripts/run_incast_simulations.py --senders 30 --receivers 1 --time 10000000 --packets 2000
-        python3 scripts/run_incast_simulations.py --senders 100 --receivers 2 --time 10000000 --packets 2000
-        python3 scripts/run_incast_simulations.py --senders 1000 --receivers 5 --time 10000000 --packets 2000
+        python3 scripts/run_incast_simulation.py --senders 30 --receivers 1 --time 10000000 --packets 2000
+        python3 scripts/run_incast_simulation.py --senders 100 --receivers 2 --time 10000000 --packets 2000
+        python3 scripts/run_incast_simulation.py --senders 1000 --receivers 5 --time 10000000 --packets 2000
