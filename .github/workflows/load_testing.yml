@@ -24,42 +24,8 @@ jobs:
     - name: Build project
       run: cmake --build build --config Debug -j $(nproc)
 
-    - name: Create configs
-      run: |
-        cd configuration_examples/generator
-
-        python3 bottleneck.py \
-        --senders 30 \
-        --receivers 1 \
-        --simulation-time 10000000 \
-        --packets 2000 \
-        --topology incast_30_to_1_topology.yml \
-        --simulation incast_30_to_1_simulation.yml
-
-        python3 bottleneck.py \
-        --senders 100 \
-        --receivers 2 \
-        --simulation-time 10000000 \
-        --packets 2000 \
-        --topology incast_100_to_2_topology.yml \
-        --simulation incast_100_to_2_simulation.yml
-
-        python3 bottleneck.py \
-        --senders 1000 \
-        --receivers 5 \
-        --simulation-time 10000000 \
-        --packets 2000 \
-        --topology incast_1000_to_5_topology.yml \
-        --simulation incast_1000_to_5_simulation.yml
-
     - name: Run simulations
-      run: |
-        for config in \
-            "configuration_examples/simulation_examples/incast_30_to_1_simulation.yml" \
-            "configuration_examples/simulation_examples/incast_100_to_2_simulation.yml" \
-            "configuration_examples/simulation_examples/incast_1000_to_5_simulation.yml"
-        do
-            echo "Running simulation with ${config##*/}"
-            time ./build/simulator --config "$config" --no-logs --no-plots
-            echo ""
-        done
+      run: | 
+        python3 scripts/run_incast_simulations.py --senders 30 --receivers 1 --time 10000000 --packets 2000
+        python3 scripts/run_incast_simulations.py --senders 100 --receivers 2 --time 10000000 --packets 2000
+        python3 scripts/run_incast_simulations.py --senders 1000 --receivers 5 --time 10000000 --packets 2000
