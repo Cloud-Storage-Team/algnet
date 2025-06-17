@@ -2,6 +2,7 @@ import sys
 import os
 import subprocess
 import argparse
+import time
 
 
 def main(args):
@@ -27,30 +28,33 @@ def main(args):
 
     bottleneck_args = [
         "python3",
-        "configuration_examples/generator/bottleneck.py",
+        "bottleneck.py",
         "--senders",
-        parsed_args.senders,
+        str(parsed_args.senders),
         "--receivers",
-        parsed_args.receivers,
+        str(parsed_args.receivers),
         "--topology",
         topology_config_name,
         "--simulation",
         simulation_config_name,
         "--packets",
-        parsed_args.packets,
+        str(parsed_args.packets),
         "--simulation-time",
-        parsed_args.time,
+        str(parsed_args.time),
     ]
 
+    os.chdir("configuration_examples/generator")
     bottleneck_result = subprocess.run(bottleneck_args, capture_output=True)
     if bottleneck_result.returncode != 0:
         print(f"Error in bottleneck.py.")
         print(f"Output: {bottleneck_result.stderr.decode()}")
+        os.chdir("../..")
         exit(1)
 
     simulator_args = [
         "time",
         "./build/simulator",
+        "--config",
         f"configuration_examples/simulation_examples/{simulation_config_name}",
         "--no-logs",
         "--no-plots",
@@ -60,11 +64,15 @@ def main(args):
         f"Running simulation with {parsed_args.senders} senders, {parsed_args.receivers} receivers, {parsed_args.packets} packets, {parsed_args.time}ns"
     )
 
+    os.chdir("../..")
+    start_time = time.perf_counter()
     simulator_result = subprocess.run(simulator_args, capture_output=True)
+    elapsed_time = time.perf_counter() - start_time
     if simulator_result.returncode != 0:
         print(f"Error running simulator.")
         print(f"Simulator output: {simulator_result.stderr.decode()}")
         exit(1)
+    print(f"Elapsed time: {elapsed_time:.3f} sec")
 
 
 if __name__ == "__main__":
