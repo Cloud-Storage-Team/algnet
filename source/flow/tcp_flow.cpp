@@ -35,13 +35,10 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<ISender> a_src,
 
 void TcpFlow::start() {
     Time curr_time = Scheduler::get_instance().get_current_time();
-    auto generate_event = std::make_unique<Generate>(
-        curr_time, shared_from_this(), m_packet_size);
-    Scheduler::get_instance().add(std::move(generate_event));
+    Scheduler::get_instance().add<Generate>(curr_time, shared_from_this(),
+                                            m_packet_size);
 
-    auto metrics_event =
-        std::make_unique<TcpMetric>(curr_time, shared_from_this());
-    Scheduler::get_instance().add(std::move(metrics_event));
+    Scheduler::get_instance().add<TcpMetric>(curr_time, shared_from_this());
 }
 
 Time TcpFlow::create_new_data_packet() {

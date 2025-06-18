@@ -93,9 +93,8 @@ Time Flow::put_data_to_device() {
 }
 
 void Flow::schedule_packet_generation(Time time) {
-    auto generate_event_ptr =
-        std::make_unique<Generate>(time, shared_from_this(), m_packet_size);
-    Scheduler::get_instance().add(std::move(generate_event_ptr));
+    Scheduler::get_instance().add<Generate>(time, shared_from_this(),
+                                            m_packet_size);
 }
 
 }  // namespace sim
