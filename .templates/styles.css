@@ -4,32 +4,40 @@ body {
     padding: 20px;
     margin: 0;
 }
+
 h1 {
     text-align: center;
     color: #333;
     margin-bottom: 20px;
 }
+
 .container {
     display: flex;
-    justify-content: center;
-    flex-wrap: nowrap;      /* no wrapping */
-    overflow-x: auto;       /* horizontal scroll */
+    justify-content: safe center;
+    flex-wrap: nowrap;
+    /* no wrapping */
+    overflow-x: auto;
+    /* horizontal scroll */
     padding-bottom: 10px;
 }
+
 .group {
-    flex: 0 0 auto;         /* fixed width columns */
+    flex: 0 0 auto;
+    /* fixed width columns */
     margin: 0 10px 20px;
     background: #fff;
     padding: 10px;
     border-radius: 5px;
-    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
+
 .group-title {
     text-align: center;
     font-size: 18px;
     color: #555;
     margin-bottom: 10px;
 }
+
 .button {
     display: block;
     width: 200px;
@@ -42,6 +50,7 @@ h1 {
     transition: background 0.3s;
     text-align: center;
 }
+
 .button:hover {
     background: #0056b3;
 }
