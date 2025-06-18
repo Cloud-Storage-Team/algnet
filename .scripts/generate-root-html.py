@@ -21,11 +21,13 @@ def natural_key(s: str) -> List[object]:
         if chunk
     ]
 
-def generate_html(source_dir: str, css_path) -> str:
+def get_groups(source_dir : str) -> List[Tuple[str, List[Tuple[str, str]]]]:
     """
     Walk through all subdirectories of source_dir,
     find those containing index.html, group them by their first
-    path component, sort groups and links, and return the HTML text.
+    path component, sort groups and links.
+    Returns sorted list of pairs (group, group_content).
+    where group_content is a list of pairs (label, href to index.html)
     """
     groups: Dict[str, List[Tuple[str, str]]] = {}
     for root, dirs, files in os.walk(source_dir):
@@ -37,22 +39,26 @@ def generate_html(source_dir: str, css_path) -> str:
         parts = rel_path.split('/')
         group = parts[0]
         # if more than one component, join the rest with ' > '
-        sublabel = ' > '.join(parts[1:]) if len(parts) > 1 else parts[0]
+        label = ' > '.join(parts[1:]) if len(parts) > 1 else parts[0]
         href = f"{rel_path}/index.html"
-        groups.setdefault(group, []).append((sublabel, href))
+        groups.setdefault(group, []).append((label, href))
 
     # sort groups: 'main' first, then alphabetically
-    sorted_groups: List[str] = sorted(
-        groups.keys(),
-        key=lambda g: (g.lower() != 'main', g.lower())
+    sorted_groups = sorted(
+        groups.items(),
+        key=lambda item: (item[0].lower() != 'main', item[0].lower())
     )
 
     # within each group, sort links in reverse “natural” order
-    for grp in sorted_groups:
-        groups[grp].sort(
+    for _, grp in sorted_groups:
+        grp.sort(
             key=lambda item: natural_key(item[0]),
             reverse=True
         )
+    return sorted_groups
+
+def generate_html(source_dir: str, css_path) -> str:
+    groups = get_groups(source_dir)
 
     # build the HTML document using yattag
     doc, tag, text = Doc().tagtext()
@@ -73,11 +79,11 @@ def generate_html(source_dir: str, css_path) -> str:
             with tag('h1'):
                 text('Metrics')
             with tag('div', klass='container'):
-                for grp in sorted_groups:
+                for grp, content in groups:
                     with tag('div', klass='group'):
                         with tag('div', klass='group-title'):
                             text(grp)
-                        for label, href in groups[grp]:
+                        for label, href in content:
                             with tag('a', href=href, klass='button'):
                                 text(label)
 

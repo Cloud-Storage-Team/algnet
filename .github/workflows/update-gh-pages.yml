@@ -20,8 +20,8 @@ jobs:
         run: python3 .scripts/delete-useless-files.py
         continue-on-error: true
 
-      - name: Generate new index.html
-        run: python3 .scripts/generate-root-html.py index.html
+      - name: Generate new site
+        run: python3 .scripts/generate-root-html.py
 
       - name: Configure Git
         run: |
@@ -30,8 +30,7 @@ jobs:
 
       - name: Commit changes
         run: |
-          git add -u
-          git add index.html
+          git add .
           git commit -m "Add changes from GitHub Actions" || echo "No changes to commit"
 
       - name: Push changes
