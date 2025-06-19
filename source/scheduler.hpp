@@ -31,7 +31,7 @@ public:
         static_assert(std::is_base_of_v<Event, TEvent>,
                       "TEvent must inherit from Event");
 
-        m_events.push(std::make_unique<TEvent>(args...));
+        m_events.emplace(std::make_unique<TEvent>(args...));
     }
 
     void clear();  // Clear all events
