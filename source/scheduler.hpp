@@ -29,7 +29,7 @@ public:
         static_assert(std::is_constructible_v<TEvent, Args&&...>,
                       "Event must be constructible from given args");
         static_assert(std::is_base_of_v<Event, TEvent>,
-                      "TEvent must be inherit from Event");
+                      "TEvent must inherit from Event");
 
         m_events.push(std::make_unique<TEvent>(args...));
     }
