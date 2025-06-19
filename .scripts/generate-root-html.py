@@ -1,85 +1,160 @@
+#!/usr/bin/env python3
 import os
 import sys
+import re
+import shutil
+import argparse
+from typing import List, Dict, Tuple
+from yattag import Doc
 
+# relative path from current file
+TEMPLATES_DIR = "../.templates"
 
-def generate_html(dir="."):
-    html_content = f"""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metrics</title>
-    <style>
-        body {{
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }}
-        h1 {{
-            color: #333;
-            font-size: 24px;
-            margin-bottom: 20px;
-        }}
-        .button {{
-            display: block;
-            padding: 10px 20px;
-            margin: 10px auto;
-            font-size: 16px;
-            color: white;
-            background-color: #007BFF;
-            border: none;
-            border-radius: 5px;
-            text-decoration: none;
-            transition: background-color 0.3s;
-            width: 200px;
-        }}
-        .button:hover {{
-            background-color: #0056b3;
-        }}
-    </style>
-</head>
-<body>
-    <h1>Metrics</h1>
+def natural_key(s: str) -> List[object]:
     """
+    Split a string into numeric and text parts for “natural” sorting
+    (so that file2 comes before file10).
+    """
+    return [
+        int(chunk) if chunk.isdigit() else chunk.lower()
+        for chunk in re.split(r'(\d+)', s)
+        if chunk
+    ]
 
-    buttons = []
-
-    for root, dirs, files in os.walk(dir):
-        if root == dir:
+def get_groups(source_dir : str) -> List[Tuple[str, List[Tuple[str, str]]]]:
+    """
+    Walk through all subdirectories of source_dir,
+    find those containing index.html, group them by their first
+    path component, sort groups and links.
+    Returns sorted list of pairs (group, group_content).
+    where group_content is a list of pairs (label, href to index.html)
+    """
+    groups: Dict[str, List[Tuple[str, str]]] = {}
+    for root, dirs, files in os.walk(source_dir):
+        # skip the root directory itself and any folder without index.html
+        if root == source_dir or 'index.html' not in files:
             continue
-        for file in files:
-            if file == 'index.html':
-                file_path = os.path.relpath(os.path.join(root, file), dir)
-                link_name = os.path.relpath(root, dir).replace(os.path.sep, ' > ')
-                buttons.append((link_name, file_path))
 
-    buttons.sort(key=lambda x: (x[0] != 'main', x[0].lower()))
+        rel_path = os.path.relpath(root, source_dir).replace(os.path.sep, '/')
+        parts = rel_path.split('/')
+        group = parts[0]
+        # if more than one component, join the rest with ' > '
+        label = ' > '.join(parts[1:]) if len(parts) > 1 else parts[0]
+        href = f"{rel_path}/index.html"
+        groups.setdefault(group, []).append((label, href))
 
-    for link_name, file_path in buttons:
-        html_content += f"<a href='{file_path}' class='button'>{link_name}</a>\n"
+    # sort groups: 'main' first, then alphabetically
+    sorted_groups = sorted(
+        groups.items(),
+        key=lambda item: (item[0].lower() != 'main', item[0].lower())
+    )
 
-    html_content += """
-    </body>
-    </html>
+    # within each group, sort links in reverse “natural” order
+    for _, grp in sorted_groups:
+        grp.sort(
+            key=lambda item: natural_key(item[0]),
+            reverse=True
+        )
+    return sorted_groups
+
+def generate_html(source_dir: str, css_path) -> str:
+    groups = get_groups(source_dir)
+
+    # build the HTML document using yattag
+    doc, tag, text = Doc().tagtext()
+    doc.asis('<!DOCTYPE html>')
+    with tag('html', lang='en'):
+        with tag('head'):
+            doc.stag('meta', charset='UTF-8')
+            doc.stag('meta', **{
+                'name': 'viewport',
+                'content': 'width=device-width, initial-scale=1'
+            })
+            with tag('title'):
+                text('Metrics')
+            # link to the external CSS file
+            doc.stag('link', rel='stylesheet', href=css_path)
+
+        with tag('body'):
+            with tag('h1'):
+                text('Metrics')
+            with tag('div', klass='container'):
+                for grp, content in groups:
+                    with tag('div', klass='group'):
+                        with tag('div', klass='group-title'):
+                            text(grp)
+                        for label, href in content:
+                            with tag('a', href=href, klass='button'):
+                                text(label)
+
+    return doc.getvalue()
+
+def save_file(content: str, output_path: str):
     """
+    Write content to output_path, creating parent directories if needed.
+    """
+    out_dir = os.path.dirname(output_path)
+    if out_dir and not os.path.exists(out_dir):
+        os.makedirs(out_dir, exist_ok=True)
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(content)
 
-    return html_content
+def copy_css(template_css_path: str, target_dir: str):
+    """
+    Copy the CSS template file to the target directory.
+    """
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir, exist_ok=True)
+    dest: str = os.path.join(target_dir, os.path.basename(template_css_path))
+    shutil.copy(template_css_path, dest)
 
-def save_html_file(html_content, output_file):
-    with open(output_file, "w", encoding='utf-8') as f:
-        f.write(html_content)
+def parse_args() -> argparse.Namespace:
+    """
+    Parse command line arguments for source and output directories.
+    """
+    parser = argparse.ArgumentParser(
+        description="Generate an HTML index of metric pages."
+    )
+    parser.add_argument(
+        '--source-dir', '-s',
+        default='',
+        help="Path to the directory containing metric subfolders (default: current directory)."
+    )
+    parser.add_argument(
+        '--output-dir', '-o',
+        default='',
+        help="Directory where HTML and CSS will be saved (default: current directory)."
+    )
+    return parser.parse_args()
 
-if __name__ == "__main__":
-    output_file = sys.argv[1]
+def main():
+    args = parse_args()
 
-    html_content = generate_html()
+    # use current working directory if none provided
+    source_dir = args.source_dir or os.getcwd()
+    output_dir = args.output_dir or os.getcwd()
 
-    dirpath = os.path.dirname(output_file)
-    if (dirpath != ''):
-        os.makedirs(dirpath, exist_ok=True)
-    save_html_file(html_content, output_file)
+    # change working dir to the script's dir to locate styles.css
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(script_dir)
 
-    print(f"HTML file successfully created and saved to {output_file}.")
+    # ensure the CSS template exists next to the script
+    template_css_path = os.path.join(script_dir, TEMPLATES_DIR, 'styles.css')
+    if not os.path.isfile(template_css_path):
+        print(f"Error: CSS template not found: {template_css_path}", file=sys.stderr)
+        sys.exit(1)
+
+    # 1) copy the CSS file into the output directory
+    copy_css(template_css_path, output_dir)
+
+    css_dir = os.path.basename(template_css_path)
+    print(f"CSS copied to {os.path.join(output_dir, css_dir)}")
+
+    # 2) generate the HTML and save it to output_dir/index.html
+    html: str = generate_html(source_dir, css_dir)
+    output_html: str = os.path.join(output_dir, 'index.html')
+    save_file(html, output_html)
+    print(f"HTML saved to {output_html}")
+
+if __name__ == '__main__':
+    main()
