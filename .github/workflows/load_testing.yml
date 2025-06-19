@@ -29,3 +29,25 @@ jobs:
         python3 scripts/run_incast_simulation.py --senders 300 --receivers 5 --time 100000000 --packets 20000
         python3 scripts/run_incast_simulation.py --senders 1000 --receivers 10 --time 100000000 --packets 20000
         python3 scripts/run_incast_simulation.py --senders 1000 --receivers 30 --time 100000000 --packets 20000
+
+    - name: Configure CMake for profiling
+      run: |
+        rm -r build
+        cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF -DPROFILING=ON
+
+    - name: Build project with profiling
+      run: cmake --build build  -j $(nproc)
+
+    - name: Run simulations with profiling
+      run: | 
+        python3 scripts/run_incast_simulation.py --senders 300 --receivers 5 --time 100000000 --packets 20000
+        gprof build/simulator > profile.txt
+        head profile.txt
+        
+        python3 scripts/run_incast_simulation.py --senders 1000 --receivers 10 --time 100000000 --packets 20000
+        gprof build/simulator > profile.txt
+        head profile.txt
+        
+        python3 scripts/run_incast_simulation.py --senders 1000 --receivers 30 --time 100000000 --packets 20000  
+        gprof build/simulator > profile.txt
+        head profile.txt
