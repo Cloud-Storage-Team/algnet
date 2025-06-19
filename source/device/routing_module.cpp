@@ -9,15 +9,14 @@ namespace sim {
 
 RoutingModule::RoutingModule(Id a_id, std::unique_ptr<IHasher> a_hasher)
     : m_id(a_id),
-      m_hasher(std::move(a_hasher ? std::move(a_hasher) : std::make_unique<BaseHasher>())) {}
+      m_hasher(a_hasher ? std::move(a_hasher)
+                        : std::make_unique<BaseHasher>()) {}
 
-Id RoutingModule::get_id() const {
-    return m_id;
-}
+Id RoutingModule::get_id() const { return m_id; }
 
 bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
     if (m_id != link->get_to()->get_id()) {
-       LOG_WARN(
+        LOG_WARN(
             "Link destination device is incorrect (expected current device)");
         return false;
     }
@@ -46,7 +45,9 @@ bool RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
     return true;
 }
 
-bool RoutingModule::update_routing_table(Id dest_id, std::shared_ptr<ILink> link, size_t paths_count) {
+bool RoutingModule::update_routing_table(Id dest_id,
+                                         std::shared_ptr<ILink> link,
+                                         size_t paths_count) {
     if (m_id != link->get_from()->get_id()) {
         LOG_WARN("Link source device is incorrect (expected current device)");
         return false;
@@ -61,7 +62,8 @@ bool RoutingModule::update_routing_table(Id dest_id, std::shared_ptr<ILink> link
     return true;
 }
 
-std::shared_ptr<ILink> RoutingModule::get_link_to_destination(Packet packet) const {
+std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
+    Packet packet) const {
     auto iterator = m_routing_table.find(packet.dest_id);
     if (iterator == m_routing_table.end()) {
         return nullptr;
@@ -125,9 +127,9 @@ void RoutingModule::correctify_outlinks() {
                   [](std::weak_ptr<ILink> link) { return link.expired(); });
 }
 
-bool RoutingModule::notify_about_arrival(Time arrival_time) { 
+bool RoutingModule::notify_about_arrival(Time arrival_time) {
     (void)arrival_time;
-    return false; 
+    return false;
 };
 
 }  // namespace sim
