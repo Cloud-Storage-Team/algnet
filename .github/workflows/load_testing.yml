@@ -22,7 +22,7 @@ jobs:
       run: cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF
 
     - name: Build project
-      run: cmake --build build --config Debug -j $(nproc)
+      run: cmake --build build  -j $(nproc)
 
     - name: Run simulations
       run: | 
