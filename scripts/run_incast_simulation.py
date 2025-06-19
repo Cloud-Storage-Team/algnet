@@ -5,8 +5,10 @@ import argparse
 import time
 
 
-def main(args):
-    parser = argparse.ArgumentParser()
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        description="Generate incast topologies and simulate them."
+    )
     parser.add_argument(
         "--senders", type=int, help="Number of senders in topology", default=30
     )
@@ -17,8 +19,28 @@ def main(args):
     parser.add_argument(
         "--packets", type=int, help="Number of sending packets", default=100
     )
-    parsed_args = parser.parse_args()
 
+    args = parser.parse_args()
+
+    # Validate inputs
+    if args.senders < 1:
+        print("Error: Number of senders must be at least 1", file=sys.stderr)
+        sys.exit(1)
+    if args.receivers < 1:
+        print("Error: Number of receivers must be at least 1", file=sys.stderr)
+        sys.exit(1)
+    if args.packets < 1:
+        print("Error: Number of packets must be at least 1", file=sys.stderr)
+        sys.exit(1)
+    if args.time < 1:
+        print("Error: Simulation time must be at least 1ns", file=sys.stderr)
+        sys.exit(1)
+
+    return args
+
+
+def main(args):
+    parsed_args = parse_arguments()
     topology_config_name = (
         f"incast-{parsed_args.senders}-to-{parsed_args.receivers}-topology.yml"
     )
