@@ -1,6 +1,7 @@
 import yaml
 import argparse
 import sys
+import os
 
 def generate_topology(num_senders, num_receivers, switch_name="switch", link_latency="0ns", link_throughput="100Gbps", ingress_buffer_size = "1024000B", egress_buffer_size = "1024000B"):
     topology = {
@@ -169,7 +170,7 @@ def main():
     print(f"Topology file saved as {args.topology_dir + args.topology} with {args.senders} senders and {args.receivers} receivers")
 
     # Generate simulation
-    simulation = generate_simulation(args.topology_dir + args.topology, args.senders, args.receivers, args.flows, args.simulation_time, args.packets, args.packet_interval)
+    simulation = generate_simulation(os.path.relpath(args.topology_dir + args.topology, start=args.simulation_dir), args.senders, args.receivers, args.flows, args.simulation_time, args.packets, args.packet_interval)
     save_yaml(simulation, args.simulation_dir + args.simulation)
     print(f"Simulation file saved as {args.simulation}")
 

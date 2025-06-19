@@ -49,8 +49,8 @@ def main(args):
     )
 
     generator_dir_path = "configuration_examples/generator/"
-    topology_dir_path = "configuration_examples/topology_examples/"
-    simulation_dir_path = "configuration_examples/simulation_examples/"
+    # topology_dir_path = "configuration_examples/topology_examples/"
+    # simulation_dir_path = "configuration_examples/simulation_examples/"
 
     bottleneck_script_path = os.path.join(generator_dir_path, "bottleneck.py")
 
@@ -64,11 +64,11 @@ def main(args):
         "--topology",
         topology_config_name,
         "--topology-dir",
-        topology_dir_path,
+        generator_dir_path,
         "--simulation",
         simulation_config_name,
         "--simulation-dir",
-        simulation_dir_path,
+        generator_dir_path,
         "--packets",
         str(parsed_args.packets),
         "--simulation-time",
@@ -81,7 +81,7 @@ def main(args):
         "time",
         "./build/simulator",
         "--config",
-        f"configuration_examples/simulation_examples/{simulation_config_name}",
+        str(os.path.join(generator_dir_path, simulation_config_name)),
         "--no-logs",
         "--no-plots",
     ]
@@ -90,14 +90,9 @@ def main(args):
         f"Running simulation with {parsed_args.senders} senders, {parsed_args.receivers} receivers, {parsed_args.packets} packets, {parsed_args.time}ns"
     )
 
-    os.chdir("../..")
     start_time = time.perf_counter()
-    simulator_result = subprocess.run(simulator_args, capture_output=True)
+    subprocess.run(simulator_args, capture_output=True, check=True)
     elapsed_time = time.perf_counter() - start_time
-    if simulator_result.returncode != 0:
-        print(f"Error running simulator.")
-        print(f"Simulator output: {simulator_result.stderr.decode()}")
-        exit(1)
     print(f"Elapsed time: {elapsed_time:.3f} sec")
 
 
