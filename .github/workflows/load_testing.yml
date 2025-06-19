@@ -3,8 +3,6 @@ name: Load testing
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "*" ]
 
 env:
   BUILD_TYPE: Release
