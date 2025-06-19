@@ -4,7 +4,7 @@
 Simple Network Simulator (SNS) is a free open source project aiming to build a discrete-event network simulator targeted for easy testing congestion control algoritmhs.
 
 ## Build project
-SNS uses Cmake build manager, so project builds in this way:
+SNS uses CMake build manager, so project builds in this way:
 
 ```bash
 cmake -B build -DCMAKE_BUILD_TYPE=Release
