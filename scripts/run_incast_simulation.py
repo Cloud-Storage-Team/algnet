@@ -48,6 +48,9 @@ def main(args):
         f"incast_{parsed_args.senders}_to_{parsed_args.receivers}_simulation.yml"
     )
 
+    generator_dir_path = "configuration_examples/generator"
+    topology_config_path = os.path.join(generator_dir_path, topology_config_name)
+    simulation_config_path = os.path.join(generator_dir_path, simulation_config_name)
     bottleneck_args = [
         "python3",
         "bottleneck.py",
@@ -56,22 +59,17 @@ def main(args):
         "--receivers",
         str(parsed_args.receivers),
         "--topology",
-        topology_config_name,
+        topology_config_path,
         "--simulation",
-        simulation_config_name,
+        simulation_config_path,
         "--packets",
         str(parsed_args.packets),
         "--simulation-time",
         str(parsed_args.time),
     ]
 
-    os.chdir("configuration_examples/generator")
-    bottleneck_result = subprocess.run(bottleneck_args, capture_output=True)
-    if bottleneck_result.returncode != 0:
-        print(f"Error in bottleneck.py.")
-        print(f"Output: {bottleneck_result.stderr.decode()}")
-        os.chdir("../..")
-        exit(1)
+    subprocess.run(bottleneck_args, capture_output=True, check=True)
+    
 
     simulator_args = [
         "time",
