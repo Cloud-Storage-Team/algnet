@@ -30,6 +30,14 @@ jobs:
         python3 scripts/run_incast_simulation.py --senders 1000 --receivers 10 --time 100000000 --packets 20000
         python3 scripts/run_incast_simulation.py --senders 1000 --receivers 30 --time 100000000 --packets 20000
 
+  profiling_load_testing:
+    runs on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Update submodules
+      run: git submodule update --init --recursive
+
     - name: Configure CMake for profiling
       run: |
         rm -r build
