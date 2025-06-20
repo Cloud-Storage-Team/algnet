@@ -50,7 +50,7 @@ void Host::enqueue_packet(Packet packet) {
     m_flow_buffer.push(packet);
     m_send_data_scheduler.notify_about_arriving(
         Scheduler::get_instance().get_current_time(), weak_from_this());
-    LOG_INFO(fmt::format("Packet {} arrived to sender", packet.to_string()));
+    LOG_INFO(fmt::format("Packet {} arrived to host", packet.to_string()));
 }
 
 Time Host::process() {
