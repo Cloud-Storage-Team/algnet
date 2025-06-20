@@ -112,7 +112,7 @@ Time Host::send_data() {
     Packet data_packet = m_flow_buffer.front();
     m_flow_buffer.pop();
 
-    LOG_INFO(fmt::format("Taken new data packet on sender {}. Packet: {}",
+    LOG_INFO(fmt::format("Taken new data packet on host {}. Packet: {}",
                          get_id(), data_packet.to_string()));
 
     auto next_link = get_link_to_destination(data_packet);
