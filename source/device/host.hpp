@@ -8,7 +8,7 @@
 
 namespace sim {
 
-class Host : public IH`ost, public std::enable_shared_from_this<Host> {
+class Host : public IHost, public std::enable_shared_from_this<Host> {
 public:
     Host(Id id);
     ~Host() = default;
