@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <utility>
 
 #include "event_comparator.hpp"
