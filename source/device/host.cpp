@@ -102,7 +102,7 @@ Time Host::process() {
     return total_processing_time;
 }
 
-Time Host::send_data() {
+Time Host::send_packet() {
     Time total_processing_time = 1;
 
     if (m_flow_buffer.empty()) {

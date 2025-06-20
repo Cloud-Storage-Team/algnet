@@ -30,6 +30,6 @@ Id HostMock::get_id() const { return ""; }
 
 void HostMock::enqueue_packet(sim::Packet packet) { return; }
 
-Time HostMock::send_data() { return 0; }
+Time HostMock::send_packet() { return 0; }
 
 }  // namespace test

@@ -8,7 +8,7 @@
 
 namespace sim {
 
-class Host : public IHost, public std::enable_shared_from_this<Host> {
+class Host : public IH`ost, public std::enable_shared_from_this<Host> {
 public:
     Host(Id id);
     ~Host() = default;
@@ -24,7 +24,7 @@ public:
 
     DeviceType get_type() const final;
     Time process() final;
-    Time send_data() final;
+    Time send_packet() final;
 
     void enqueue_packet(Packet packet) final;
 

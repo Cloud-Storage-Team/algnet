@@ -28,7 +28,7 @@ public:
     Id get_id() const final;
 
     void enqueue_packet(sim::Packet packet) final;
-    Time send_data() final;
+    Time send_packet() final;
 };
 
 }  // namespace test
