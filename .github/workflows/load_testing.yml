@@ -1,6 +1,7 @@
 name: Load testing
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main" ]
 
