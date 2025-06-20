@@ -88,7 +88,8 @@ void MetricsCollector::draw_cwnd_plot(std::filesystem::path path) const {
                             flow->get_receiver()->get_id());
             return std::make_pair(pair.second, name);
         });
-    draw_on_same_plot(path, data, {"Time, ns", "CWND, packets", "CWND"});
+    draw_on_same_plot(path, std::move(data),
+                      {"Time, ns", "CWND, packets", "CWND"});
 }
 
 void MetricsCollector::draw_RTT_plot(std::filesystem::path path) const {
@@ -103,7 +104,8 @@ void MetricsCollector::draw_RTT_plot(std::filesystem::path path) const {
                             flow->get_receiver()->get_id());
             return std::make_pair(pair.second, name);
         });
-    draw_on_same_plot(path, data, {"Time, ns", "RTT, ns", "Round Trip Time"});
+    draw_on_same_plot(path, std::move(data),
+                      {"Time, ns", "RTT, ns", "Round Trip Time"});
 }
 
 void MetricsCollector::draw_delivery_rate_plot(
@@ -119,7 +121,7 @@ void MetricsCollector::draw_delivery_rate_plot(
                             flow->get_receiver()->get_id());
             return std::make_pair(pair.second, name);
         });
-    draw_on_same_plot(path, data,
+    draw_on_same_plot(path, std::move(data),
                       {"Time, ns", "Values, Gbps", "Delivery rate"});
 }
 
