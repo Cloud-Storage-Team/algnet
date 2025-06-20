@@ -75,7 +75,7 @@ Time Host::process() {
     }
 
     // TODO: add some sender ID for easier packet path tracing
-    LOG_INFO("Processing packet from link on sender. Packet: " +
+    LOG_INFO("Processing packet from link on host. Packet: " +
              packet.to_string());
 
     if (packet.dest_id == get_id()) {
