@@ -121,7 +121,7 @@ Time Host::send_data() {
         return total_processing_time;
     }
 
-    LOG_INFO(fmt::format("Sent new packet from sender. Packet: {}", get_id(),
+    LOG_INFO(fmt::format("Sent new packet from host. Packet: {}", get_id(),
                          data_packet.to_string()));
 
     next_link->schedule_arrival(data_packet);
