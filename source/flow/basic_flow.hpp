@@ -43,6 +43,7 @@ private:
     Time m_delay_between_packets;
     std::uint32_t m_updates_number;
     std::uint32_t m_packets_to_send;
+    Size m_sent_bytes;
 
     std::queue<Packet> m_sending_buffer;
 };

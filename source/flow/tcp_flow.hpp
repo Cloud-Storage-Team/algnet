@@ -28,19 +28,21 @@ private:
 
     bool try_to_put_data_to_device();
 
+    Id m_id;
+
     std::weak_ptr<IHost> m_src;
     std::weak_ptr<IHost> m_dest;
-    Size m_packet_size;
 
+    Size m_packet_size;
     Time m_delay_between_packets;
     std::uint32_t m_packets_to_send;
     std::uint32_t m_delay_threshold;  // delay threshold for update
-    double m_ssthresh;                // Slow start threshold
 
-    double m_cwnd;  // Congestion window
+    double m_ssthresh;  // Slow start threshold
+    double m_cwnd;      // Congestion window
+
     std::uint32_t m_packets_in_flight;
     std::uint32_t m_packets_acked;
-
-    Id m_id;
+    Size m_sent_bytes;
 };
 }  // namespace sim

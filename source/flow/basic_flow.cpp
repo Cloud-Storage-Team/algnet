@@ -19,7 +19,8 @@ BasicFlow::BasicFlow(Id a_id, std::shared_ptr<IHost> a_src,
       m_packet_size(a_packet_size),
       m_delay_between_packets(a_delay_between_packets),
       m_updates_number(0),
-      m_packets_to_send(a_packets_to_send) {
+      m_packets_to_send(a_packets_to_send),
+      m_sent_bytes(0) {
     if (m_src.lock() == nullptr) {
         throw std::invalid_argument("Sender for Flow is nullptr");
     }
@@ -47,7 +48,7 @@ void BasicFlow::update(Packet packet, DeviceType type) {
     (void)type;
     if (packet.dest_id == m_dest.lock()->get_id() &&
         packet.type == PacketType::DATA) {
-        // packet arrived to destination device, send ack
+        // data packet arrived to destination device, send ack
         Packet ack(PacketType::ACK, 1, this, m_dest.lock()->get_id(),
                    m_src.lock()->get_id(), packet.sent_time,
                    packet.sent_bytes_at_origin, packet.ecn_capable_transport,
@@ -55,12 +56,18 @@ void BasicFlow::update(Packet packet, DeviceType type) {
         m_dest.lock()->enqueue_packet(ack);
     } else if (packet.dest_id == m_src.lock()->get_id() &&
                packet.type == PacketType::ACK) {
+        // ask arrived to source device, update metrics
         ++m_updates_number;
 
         Time current_time = Scheduler::get_instance().get_current_time();
-        MetricsCollector::get_instance().add_RTT(
-            packet.flow->get_id(), current_time,
-            current_time - packet.sent_time);
+        double rtt = current_time - packet.sent_time;
+        MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
+                                                 current_time, rtt);
+
+        double delivery_bit_rate =
+            8 * (m_sent_bytes - packet.sent_bytes_at_origin) / rtt;
+        MetricsCollector::get_instance().add_delivery_rate(
+            packet.flow->get_id(), current_time, delivery_bit_rate);
     } else {
         LOG_ERROR(
             fmt::format("Called update on flow {} with some foreign packet {}",
@@ -76,6 +83,9 @@ Time BasicFlow::create_new_data_packet() {
     }
     --m_packets_to_send;
     Packet data = generate_packet();
+    // Note: sent_time and m_sent_bytes are evaluated at time of pushing
+    // the packet to the m_sending_buffer
+    m_sent_bytes += data.size_byte;
     m_sending_buffer.push(data);
     return put_data_to_device();
 }
