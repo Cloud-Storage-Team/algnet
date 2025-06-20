@@ -1,19 +1,20 @@
 import yaml
 import argparse
 import sys
+import os
 
 def generate_topology(num_senders, num_receivers, switch_name="switch", link_latency="0ns", link_throughput="100Gbps", ingress_buffer_size = "1024000B", egress_buffer_size = "1024000B"):
     topology = {
         "devices": {},
         "links": {}
     }
-    
+
     # Add senders
     for i in range(0, num_senders):
         sender_name = f"sender{i}"
         topology["devices"][sender_name] = {"type": "sender"}
         base_index = 2 * i
-        
+
         # Add link from sender to switch
         link_name = f"link{base_index}"
         topology["links"][link_name] = {
@@ -35,7 +36,7 @@ def generate_topology(num_senders, num_receivers, switch_name="switch", link_lat
             "ingress_buffer_size": ingress_buffer_size,
             "egress_buffer_size": egress_buffer_size
         }
-    
+
     # Add receivers
     for i in range(0, num_receivers):
         receiver_name = f"receiver{i}"
@@ -63,14 +64,14 @@ def generate_topology(num_senders, num_receivers, switch_name="switch", link_lat
             "ingress_buffer_size": ingress_buffer_size,
             "egress_buffer_size": egress_buffer_size
         }
-    
+
     # Add the switch
     topology["devices"][switch_name] = {"type": "switch", "threshold": 0.7}
-    
+
     return topology
 
-def generate_simulation(topology_file, num_senders, num_receivers, flows, packet_size=1500, 
-                        packet_interval=500, number_of_packets=100, algorithm="tcp", simulation_time=50000):
+def generate_simulation(topology_file, num_senders, num_receivers, flows, simulation_time, packet_interval,
+                        number_of_packets, packet_size=1500, algorithm="tcp"):
     """
     Generate a simulation YAML structure with flows between senders and receivers.
     """
@@ -80,9 +81,9 @@ def generate_simulation(topology_file, num_senders, num_receivers, flows, packet
         "algorithm": algorithm,
         "simulation_time": simulation_time
     }
-    
+
     if flows == '1-to-1':
-        
+
         # One sender to one receiver
         # If there are more senders than receivers, extra senders will connect to last receiver
         # If there are more receivers than senders, extra receivers won't have flows
@@ -114,7 +115,7 @@ def generate_simulation(topology_file, num_senders, num_receivers, flows, packet
                     "number_of_packets": number_of_packets
                 }
         return simulation
-    
+
     else:
         print("Error: Unknown flows option value")
 
@@ -138,11 +139,17 @@ def parse_arguments():
                        help='Path to the topology config file')
     parser.add_argument('--simulation-dir', default='../simulation_examples/',
                        help='Path to the simulation config file')
+    parser.add_argument('--simulation-time', type=int, default=50000,
+                       help='Time of the simulation, ns')
+    parser.add_argument('--packets', type=int, default=100,
+                       help='Number of packets sending by each sender')
+    parser.add_argument('--packet-interval', type=int, default=500,
+                       help='Time between two consequent packets, ns')
     parser.add_argument('--flows', default='1-to-1',
                         help='Flows: 1-to-1 on 1-to-all'),
-    
+
     args = parser.parse_args()
-    
+
     # Validate inputs
     if args.senders < 1:
         print("Error: Number of senders must be at least 1", file=sys.stderr)
@@ -150,20 +157,20 @@ def parse_arguments():
     if args.receivers < 1:
         print("Error: Number of receivers must be at least 1", file=sys.stderr)
         sys.exit(1)
-    
+
     return args
 
 def main():
     # Parse command line arguments
     args = parse_arguments()
-    
+
     # Generate topology
     topology = generate_topology(args.senders, args.receivers)
     save_yaml(topology, args.topology_dir + args.topology)
     print(f"Topology file saved as {args.topology_dir + args.topology} with {args.senders} senders and {args.receivers} receivers")
-    
+
     # Generate simulation
-    simulation = generate_simulation(args.topology_dir + args.topology, args.senders, args.receivers, args.flows)
+    simulation = generate_simulation(os.path.relpath(args.topology_dir + args.topology, start=args.simulation_dir), args.senders, args.receivers, args.flows, args.simulation_time, args.packets, args.packet_interval)
     save_yaml(simulation, args.simulation_dir + args.simulation)
     print(f"Simulation file saved as {args.simulation}")
 
