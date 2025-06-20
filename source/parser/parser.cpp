@@ -49,10 +49,10 @@ void YamlParser::process_devices(const YAML::Node &config) {
             std::visit(
                 [&key_node, &val_node](auto &sim) {
                     using SimType = std::decay_t<decltype(sim)>;
-                    using SenderType = typename SimType::Host_T;
-                    Id id = parse_object<SenderType>(key_node, val_node);
+                    using HostType = typename SimType::Host_T;
+                    Id id = parse_object<HostType>(key_node, val_node);
                     if (!sim.add_host(IdentifierFactory::get_instance()
-                                          .get_object<SenderType>(id))) {
+                                          .get_object<HostType>(id))) {
                         throw std::runtime_error("Can not add host with id " +
                                                  id);
                     }
