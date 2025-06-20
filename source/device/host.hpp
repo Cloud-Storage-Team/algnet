@@ -31,7 +31,7 @@ public:
     Id get_id() const final;
 
 private:
-    std::queue<Packet> m_flow_buffer;
+    std::queue<Packet> m_nic_buffer;
     RoutingModule m_router;
     SchedulingModule<IHost, Process> m_process_scheduler;
     SchedulingModule<IHost, SendData> m_send_data_scheduler;

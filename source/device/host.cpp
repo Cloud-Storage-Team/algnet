@@ -47,7 +47,7 @@ bool Host::notify_about_arrival(Time arrival_time) {
 DeviceType Host::get_type() const { return DeviceType::SENDER; }
 
 void Host::enqueue_packet(Packet packet) {
-    m_flow_buffer.push(packet);
+    m_nic_buffer.push(packet);
     m_send_data_scheduler.notify_about_arriving(
         Scheduler::get_instance().get_current_time(), weak_from_this());
     LOG_INFO(fmt::format("Packet {} arrived to host", packet.to_string()));
@@ -105,12 +105,12 @@ Time Host::process() {
 Time Host::send_packet() {
     Time total_processing_time = 1;
 
-    if (m_flow_buffer.empty()) {
+    if (m_nic_buffer.empty()) {
         LOG_WARN("No packets to send");
         return total_processing_time;
     }
-    Packet data_packet = m_flow_buffer.front();
-    m_flow_buffer.pop();
+    Packet data_packet = m_nic_buffer.front();
+    m_nic_buffer.pop();
 
     LOG_INFO(fmt::format("Taken new data packet on host {}. Packet: {}",
                          get_id(), data_packet.to_string()));
