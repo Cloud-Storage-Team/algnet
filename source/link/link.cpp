@@ -65,8 +65,8 @@ void Link::schedule_arrival(Packet packet) {
         get_id(), Scheduler::get_instance().get_current_time(),
         m_from_egress_queue_size);
 
-    Scheduler::get_instance().add(
-        std::make_unique<Arrive>(m_arrival_time, weak_from_this(), packet));
+    Scheduler::get_instance().add<Arrive>(m_arrival_time, weak_from_this(),
+                                          packet);
 };
 
 void Link::process_arrival(Packet packet) {

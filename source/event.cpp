@@ -22,9 +22,8 @@ void Generate::operator()() {
         return;
     }
 
-    auto new_event = std::make_unique<Generate>(m_time + generate_delay, m_flow,
-                                                m_packet_size);
-    Scheduler::get_instance().add(std::move(new_event));
+    Scheduler::get_instance().add<Generate>(m_time + generate_delay, m_flow,
+                                            m_packet_size);
 }
 
 Arrive::Arrive(Time a_time, std::weak_ptr<ILink> a_link, Packet a_packet)
@@ -54,9 +53,7 @@ void Process::operator()() {
         return;
     }
 
-    std::unique_ptr<Event> next_process_event =
-        std::make_unique<Process>(m_time + process_time, m_device);
-    Scheduler::get_instance().add(std::move(next_process_event));
+    Scheduler::get_instance().add<Process>(m_time + process_time, m_device);
 };
 
 SendData::SendData(Time a_time, std::weak_ptr<IHost> a_device)
@@ -74,9 +71,7 @@ void SendData::operator()() {
         return;
     }
 
-    std::unique_ptr<Event> next_process_event =
-        std::make_unique<SendData>(m_time + process_time, m_device);
-    Scheduler::get_instance().add(std::move(next_process_event));
+    Scheduler::get_instance().add<SendData>(m_time + process_time, m_device);
 };
 
 Stop::Stop(Time a_time) : Event(a_time) {}
@@ -107,9 +102,7 @@ void TcpMetric::operator()() {
     double cwnd = flow->get_cwnd();
     MetricsCollector::get_instance().add_cwnd(flow->get_id(), m_time, cwnd);
 
-    auto next_metrics_event =
-        std::make_unique<TcpMetric>(m_time + DELAY, m_flow);
-    Scheduler::get_instance().add(std::move(next_metrics_event));
+    Scheduler::get_instance().add<TcpMetric>(m_time + DELAY, m_flow);
 }
 
 }  // namespace sim

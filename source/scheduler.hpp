@@ -24,7 +24,16 @@ public:
         return instance;
     }
 
-    void add(std::unique_ptr<Event> event);
+    template <typename TEvent, typename... Args>
+    void add(Args&&... args) {
+        static_assert(std::is_constructible_v<TEvent, Args&&...>,
+                      "Event must be constructible from given args");
+        static_assert(std::is_base_of_v<Event, TEvent>,
+                      "TEvent must inherit from Event");
+
+        m_events.emplace(std::make_unique<TEvent>(args...));
+    }
+
     void clear();  // Clear all events
     bool tick();
     Time get_current_time();

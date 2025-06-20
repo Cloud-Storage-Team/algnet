@@ -80,7 +80,8 @@ Time Switch::process() {
              packet.to_string());
 
     // ECN mark for data packets
-    if (packet.type == DATA && packet.ecn_capable_transport &&
+    if (m_ecn_capable_transport && packet.type == DATA &&
+        packet.ecn_capable_transport &&
         static_cast<double>(next_link->get_from_egress_queue_size()) >=
             m_ecn_threshold *
                 static_cast<double>(

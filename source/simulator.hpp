@@ -85,12 +85,11 @@ public:
     // Create a Stop event at a_stop_time and start simulation
     void start(Time a_stop_time) {
         recalculate_paths();
-        Scheduler::get_instance().add(std::make_unique<Stop>(a_stop_time));
+        Scheduler::get_instance().add<Stop>(a_stop_time);
         constexpr Time start_time = 0;
 
         for (auto flow : m_flows) {
-            Scheduler::get_instance().add(
-                std::make_unique<StartFlow>(start_time, flow));
+            Scheduler::get_instance().add<StartFlow>(start_time, flow);
         }
 
         while (Scheduler::get_instance().tick()) {

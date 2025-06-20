@@ -23,6 +23,11 @@ private:
     MetricsCollector(const MetricsCollector&) = delete;
     MetricsCollector& operator=(const MetricsCollector&) = delete;
 
+    void draw_cwnd_plot(std::filesystem::path path) const;
+    void draw_delivery_rate_plot(std::filesystem::path path) const;
+    void draw_RTT_plot(std::filesystem::path path) const;
+    void draw_queue_size_plots(std::filesystem::path dir_path) const;
+
     // flow_ID --> vector of <time, ...> values
     std::unordered_map<Id, MetricsStorage> m_RTT_storage;
     std::unordered_map<Id, MetricsStorage> m_cwnd_storage;

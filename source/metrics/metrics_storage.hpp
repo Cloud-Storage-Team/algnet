@@ -21,6 +21,8 @@ public:
     void export_to_file(std::filesystem::path path) const;
     matplot::figure_handle get_picture(PlotMetadata metadata) const;
     void draw_plot(std::filesystem::path path, PlotMetadata metadata) const;
+    void draw_on_plot(matplot::figure_handle& fig,
+                      std::string_view name = "") const;
 
 private:
     std::vector<std::pair<Time, double> > m_records;

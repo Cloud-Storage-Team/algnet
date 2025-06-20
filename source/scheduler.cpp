@@ -7,7 +7,7 @@
 namespace sim {
 
 bool EventComparator::operator()(const std::unique_ptr<Event>& lhs,
-                    const std::unique_ptr<Event>& rhs) const {
+                                 const std::unique_ptr<Event>& rhs) const {
     return (*lhs.get()) > (*rhs.get());
 }
 
@@ -22,10 +22,6 @@ bool Scheduler::tick() {
     m_current_event_local_time = event->get_time();
     event->operator()();
     return true;
-}
-
-void Scheduler::add(std::unique_ptr<Event> event) {
-    m_events.emplace(std::move(event));
 }
 
 void Scheduler::clear() {
