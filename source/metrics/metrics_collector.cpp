@@ -61,6 +61,9 @@ using PlotMetricsData = std::vector<std::pair<MetricsStorage, std::string> >;
 // Draws data from different DataStorage on one plot
 static void draw_on_same_plot(std::filesystem::path path, PlotMetricsData data,
                               PlotMetadata metadata) {
+    if (data.empty()) {
+        return;
+    }
     auto fig = matplot::figure(true);
     auto ax = fig->current_axes();
     ax->hold(matplot::on);
