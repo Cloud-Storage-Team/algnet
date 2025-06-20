@@ -53,7 +53,7 @@ void YamlParser::process_devices(const YAML::Node &config) {
                     Id id = parse_object<SenderType>(key_node, val_node);
                     if (!sim.add_host(IdentifierFactory::get_instance()
                                           .get_object<SenderType>(id))) {
-                        throw std::runtime_error("Can not add sender with id " +
+                        throw std::runtime_error("Can not add host with id " +
                                                  id);
                     }
                 },
