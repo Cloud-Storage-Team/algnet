@@ -4,25 +4,15 @@
 #include <queue>
 
 #include "types.hpp"
+#include "event_comparator.hpp"
 
 namespace sim {
 
-class Event;
-
-struct EventComparator {
-    bool operator()(const std::unique_ptr<Event>& lhs,
-                    const std::unique_ptr<Event>& rhs) const;
-};
-
 // Scheduler is implemented as a Singleton class
 // which provides a global access to a single instance
-class Scheduler {
+class SimpleScheduler {
 public:
-    // Static method to get the instance
-    static Scheduler& get_instance() {
-        static Scheduler instance;
-        return instance;
-    }
+    SimpleScheduler() = default;
 
     template <typename TEvent, typename... Args>
     void add(Args&&... args) {
@@ -39,12 +29,6 @@ public:
     Time get_current_time();
 
 private:
-    // Private constructor to prevent instantiation
-    Scheduler() {}
-    // No copy constructor and assignment operators
-    Scheduler(const Scheduler&) = delete;
-    Scheduler& operator=(const Scheduler&) = delete;
-
     std::priority_queue<std::unique_ptr<Event>,
                         std::vector<std::unique_ptr<Event>>, EventComparator>
         m_events;

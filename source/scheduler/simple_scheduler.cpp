@@ -1,4 +1,4 @@
-#include "scheduler.hpp"
+#include "scheduler/simple_scheduler.hpp"
 
 #include <queue>
 
@@ -6,12 +6,7 @@
 
 namespace sim {
 
-bool EventComparator::operator()(const std::unique_ptr<Event>& lhs,
-                                 const std::unique_ptr<Event>& rhs) const {
-    return (*lhs.get()) > (*rhs.get());
-}
-
-bool Scheduler::tick() {
+bool SimpleScheduler::tick() {
     if (m_events.empty()) {
         return false;
     }
@@ -24,12 +19,12 @@ bool Scheduler::tick() {
     return true;
 }
 
-void Scheduler::clear() {
+void SimpleScheduler::clear() {
     m_events = std::priority_queue<std::unique_ptr<Event>,
                                    std::vector<std::unique_ptr<Event>>,
                                    EventComparator>();
 }
 
-Time Scheduler::get_current_time() { return m_current_event_local_time; };
+Time SimpleScheduler::get_current_time() { return m_current_event_local_time; };
 
 }  // namespace sim

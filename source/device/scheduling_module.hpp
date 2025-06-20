@@ -1,7 +1,7 @@
 #pragma once
 
 #include "logger/logger.hpp"
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 
 namespace sim {
 
