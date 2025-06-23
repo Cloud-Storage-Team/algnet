@@ -8,20 +8,18 @@
 namespace sim {
 
 bool MultithreadScheduler::tick() {
-    cppcoro::task<> pop_task = pop();
     cppcoro::task<> execute_task;
     {
-        std::lock_guard<SpinLock> lock(m_lock);
+        std::lock_guard lock(m_lock);
         if (m_events.empty()) {
             return false;
         }
 
-        execute_task = execute_event(
-            std::move(const_cast<std::unique_ptr<Event>&>(m_events.top())));
+        execute_task =
+            execute_event(const_cast<std::unique_ptr<Event>&&>(m_events.top()));
     }
 
-    cppcoro::sync_wait(
-        cppcoro::when_all(std::move(pop_task), std::move(execute_task)));
+    cppcoro::sync_wait(cppcoro::when_all(pop(), std::move(execute_task)));
 
     return true;
 }
@@ -32,6 +30,10 @@ void MultithreadScheduler::clear() {
                                    std::vector<std::unique_ptr<Event>>,
                                    EventComparator>();
 }
+
+Time MultithreadScheduler::get_current_time() {
+    return m_current_event_local_time;
+};
 
 cppcoro::task<> MultithreadScheduler::pop() {
     std::lock_guard lock(m_lock);
@@ -45,9 +47,5 @@ cppcoro::task<> MultithreadScheduler::execute_event(
     event->operator()();
     co_return;
 }
-
-Time MultithreadScheduler::get_current_time() {
-    return m_current_event_local_time;
-};
 
 }  // namespace sim

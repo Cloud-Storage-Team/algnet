@@ -3,7 +3,6 @@
 #include <memory>
 #include <queue>
 
-#include "multithread_scheduler.hpp"
 #include "simple_scheduler.hpp"
 #include "types.hpp"
 
@@ -11,7 +10,7 @@ namespace sim {
 
 // Scheduler is implemented as a Singleton class
 // which provides a global access to a single instance
-class Scheduler : public MultithreadScheduler {
+class Scheduler : public SimpleScheduler {
 public:
     // Static method to get the instance
     static Scheduler& get_instance() {
