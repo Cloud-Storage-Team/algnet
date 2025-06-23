@@ -3,7 +3,7 @@
 #include <memory>
 #include <queue>
 
-#include "multithread_sheduler.hpp"
+#include "multithread_scheduler.hpp"
 #include "simple_scheduler.hpp"
 #include "types.hpp"
 
