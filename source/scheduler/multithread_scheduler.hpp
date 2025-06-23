@@ -1,6 +1,6 @@
 #pragma once
 
-#include <kelcoro/task.hpp>
+#include <cppcoro/task.hpp>
 #include <memory>
 #include <queue>
 
@@ -31,6 +31,9 @@ public:
     Time get_current_time();
 
 private:
+    cppcoro::task<> pop();
+    cppcoro::task<> execute_event(std::unique_ptr<Event> event);
+    
     SpinLock m_lock;  // lock for m_events
     std::priority_queue<std::unique_ptr<Event>,
                         std::vector<std::unique_ptr<Event>>, EventComparator>

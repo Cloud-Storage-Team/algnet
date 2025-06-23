@@ -1,3 +1,5 @@
+#include <cppcoro/sync_wait.hpp>
+#include <cppcoro/when_all.hpp>
 #include <queue>
 
 #include "event.hpp"
@@ -6,30 +8,42 @@
 namespace sim {
 
 bool MultithreadScheduler::tick() {
-    std::unique_ptr<Event> event;
+    cppcoro::task<> pop_task = pop();
+    cppcoro::task<> execute_task;
     {
         std::lock_guard<SpinLock> lock(m_lock);
         if (m_events.empty()) {
             return false;
         }
 
-        event = std::move(const_cast<std::unique_ptr<Event>&>(m_events.top()));
+        execute_task = execute_event(
+            std::move(const_cast<std::unique_ptr<Event>&>(m_events.top())));
     }
 
-    // to first coroutive
-    m_events.pop();
+    cppcoro::sync_wait(
+        cppcoro::when_all(std::move(pop_task), std::move(execute_task)));
 
-    // to second coroutine
-    m_current_event_local_time = event->get_time();
-    event->operator()();
-    
     return true;
 }
 
 void MultithreadScheduler::clear() {
+    std::lock_guard lock(m_lock);
     m_events = std::priority_queue<std::unique_ptr<Event>,
                                    std::vector<std::unique_ptr<Event>>,
                                    EventComparator>();
+}
+
+cppcoro::task<> MultithreadScheduler::pop() {
+    std::lock_guard lock(m_lock);
+    m_events.pop();
+    co_return;
+}
+
+cppcoro::task<> MultithreadScheduler::execute_event(
+    std::unique_ptr<Event> event) {
+    m_current_event_local_time = event->get_time();
+    event->operator()();
+    co_return;
 }
 
 Time MultithreadScheduler::get_current_time() {

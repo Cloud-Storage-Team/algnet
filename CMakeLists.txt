@@ -22,19 +22,19 @@ file(GLOB_RECURSE tests "test/*.cpp")
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/yaml-cpp/)
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/matplotplusplus/)
-add_subdirectory(${CMAKE_SOURCE_DIR}/external/kelcoro/)
+add_subdirectory(${CMAKE_SOURCE_DIR}/external/cppcoro/)
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/source/
     ${CMAKE_SOURCE_DIR}/external/spdlog/include/
     ${CMAKE_SOURCE_DIR}/external/cxxopts/include/
-    ${CMAKE_SOURCE_DIR}/external/kelcoro/include/
+    ${CMAKE_SOURCE_DIR}/external/cppcoro/include/
 )
 
 if (BUILD_PROJECT)
     set(TARGET_NAME "${PROJECT_NAME}")
     add_executable(${TARGET_NAME} ${src} source/main.cpp)
-    target_link_libraries(${TARGET_NAME} PUBLIC yaml-cpp matplot kelcorolib)
+    target_link_libraries(${TARGET_NAME} PRIVATE yaml-cpp matplot cppcoro)
     target_compile_options(${TARGET_NAME} PRIVATE -Wall -Werror -Wextra)
 endif()
 
