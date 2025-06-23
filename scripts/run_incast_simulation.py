@@ -79,7 +79,7 @@ def main(args):
 
     simulator_args = [
         "time",
-        "./build/simulator",
+        "./build/nons",
         "--config",
         str(os.path.join(generator_dir_path, simulation_config_name)),
         "--no-logs",
