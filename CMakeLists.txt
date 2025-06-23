@@ -20,21 +20,22 @@ file(GLOB_RECURSE src "source/*.cpp")
 list(REMOVE_ITEM src "${CMAKE_CURRENT_SOURCE_DIR}/source/main.cpp")
 file(GLOB_RECURSE tests "test/*.cpp")
 
+add_subdirectory(${CMAKE_SOURCE_DIR}/external/yaml-cpp/)
+add_subdirectory(${CMAKE_SOURCE_DIR}/external/matplotplusplus/)
+add_subdirectory(${CMAKE_SOURCE_DIR}/external/kelcoro/)
+
 include_directories(
     ${CMAKE_SOURCE_DIR}/source/
     ${CMAKE_SOURCE_DIR}/external/spdlog/include/
     ${CMAKE_SOURCE_DIR}/external/cxxopts/include/
-    ${CMAKE_SOURCE_DIR}/external/cppcoro/include/
+    ${CMAKE_SOURCE_DIR}/external/kelcoro/include/
 )
-
-add_subdirectory(${CMAKE_SOURCE_DIR}/external/yaml-cpp/)
-add_subdirectory(${CMAKE_SOURCE_DIR}/external/matplotplusplus/)
 
 if (BUILD_PROJECT)
     set(TARGET_NAME "${PROJECT_NAME}")
     add_executable(${TARGET_NAME} ${src} source/main.cpp)
-    target_link_libraries(${TARGET_NAME} yaml-cpp matplot)
-    target_compile_options(${TARGET_NAME} PRIVATE -Wall -Werror -Wextra -fcoroutines)
+    target_link_libraries(${TARGET_NAME} PUBLIC yaml-cpp matplot kelcorolib)
+    target_compile_options(${TARGET_NAME} PRIVATE -Wall -Werror -Wextra)
 endif()
 
 # tests
