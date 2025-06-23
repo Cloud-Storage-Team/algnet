@@ -59,7 +59,7 @@ def main(args):
 
     parsed_args = parser.parse_args()
 
-    simulator_path = parsed_args.nons
+    simulator_path = parsed_args.executable
     simulation_configs_dir = parsed_args.config
     corner_metrics_dir = parsed_args.output_dir
 
