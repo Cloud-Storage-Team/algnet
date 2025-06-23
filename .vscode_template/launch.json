@@ -2,11 +2,14 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug simulator",
+            "name": "Debug NoNS",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/simulator",
-            "args": [],
+            "program": "${workspaceFolder}/build/nons",
+            "args": [
+                "-c",
+                "${workspaceFolder}/configuration_examples/simulation_examples/tcp_simulation.yml"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build",
             "environment": [],

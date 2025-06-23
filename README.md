@@ -1,10 +1,10 @@
-# Simple Network Simulator
+# Not Overcomplicated Network Simulator
 
 ## Overview
-Simple Network Simulator (SNS) is a free open source project aiming to build a discrete-event network simulator targeted for easy testing congestion control algoritmhs.
+Not Overcomplicated Network Simulator (NoNS ) is a free open source project aiming to build a discrete-event network simulator targeted for easy testing congestion control algoritmhs.
 
 ## Build project
-SNS uses CMake build manager, so project builds in this way:
+NoNS uses CMake build manager, so project builds in this way:
 
 ```bash
 cmake -B build -DCMAKE_BUILD_TYPE=Release
@@ -14,7 +14,7 @@ cmake --build build
 ## Run project
 
 ```
-./build/simulator
+./build/nons
     --config path 
     [--output-dir output-dir-name] 
     [--no-logs]

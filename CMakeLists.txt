@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22.0)
 set(CMAKE_CXX_STANDARD 20)
 
-project(simulator)
+project(nons)
 
 # main part of project
 
@@ -41,7 +41,7 @@ option(BUILD_TESTS "Build tests" ON)
 
 if(BUILD_TESTS)
     add_subdirectory(external/googletest)
-    set(TEST_NAME "test_simulator")
+    set(TEST_NAME "test_nons")
     add_executable(${TEST_NAME} ${src} ${tests})
     target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/external/yaml-cpp/include)
     target_compile_options(${TEST_NAME} PRIVATE -Wall -Wextra)
