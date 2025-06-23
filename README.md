@@ -1,7 +1,7 @@
 # Not Overcomplicated Network Simulator
 
 ## Overview
-Not Overcomplicated Network Simulator (NoNS ) is a free open source project aiming to build a discrete-event network simulator targeted for easy testing congestion control algoritmhs.
+Not Overcomplicated Network Simulator (NoNS) is a free open source project aiming to build a discrete-event network simulator targeted for easy testing congestion control algoritmhs.
 
 ## Build project
 NoNS uses CMake build manager, so project builds in this way:
