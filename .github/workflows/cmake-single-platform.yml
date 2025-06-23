@@ -8,6 +8,7 @@ on:
 
 env:
   EXECUTABLE_NAME: nons
+  TEST_EXECUTABLE_NAME: test_nons
 
 jobs:
   clang-format:
@@ -68,7 +69,7 @@ jobs:
       with:
         name: build-artifact
 
-    - name: Make project executable
+    - name: Add executable flag
       run: chmod +x ${{env.EXECUTABLE_NAME}}
 
     - name: Run simulation
@@ -129,5 +130,5 @@ jobs:
 
     - name: Run tests
       working-directory: build
-      run: ./test_simulator
+      run: ./${{env.TEST_EXECUTABLE_NAME}}
 
