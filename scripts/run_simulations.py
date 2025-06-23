@@ -38,7 +38,7 @@ def copy_topology_image(topology_name: str, metrics_dir: str):
 def main(args):
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-s", "--simulator", help="Path to the simulator executable", required=True
+        "-e", "--executable", help="Path to the compiled project", required=True
     )
     parser.add_argument(
         "-c",
@@ -59,7 +59,7 @@ def main(args):
 
     parsed_args = parser.parse_args()
 
-    simulator_path = parsed_args.simulator
+    simulator_path = parsed_args.executable
     simulation_configs_dir = parsed_args.config
     corner_metrics_dir = parsed_args.output_dir
 
@@ -96,7 +96,7 @@ def main(args):
 
         result = subprocess.run(simulator_args, capture_output=True)
         if result.returncode != 0:
-            print(f"Error running simulator on {filepath}.")
+            print(f"Error running nons on {filepath}.")
             print(f"Simulator output: {result.stderr.decode()}")
             exit(1)
 

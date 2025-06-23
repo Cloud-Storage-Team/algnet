@@ -13,14 +13,14 @@ public:
 
 TEST_F(Start, TrivialTopology) {
     sim::BasicSimulator sim;
-    auto sender = std::make_shared<sim::Sender>("sender");
-    sim.add_sender(sender);
+    auto sender = std::make_shared<sim::Host>("sender");
+    sim.add_host(sender);
 
     auto swtch = std::make_shared<sim::Switch>("switch");
     sim.add_switch(swtch);
 
-    auto receiver = std::make_shared<sim::Receiver>("receiver");
-    sim.add_receiver(receiver);
+    auto receiver = std::make_shared<sim::Host>("receiver");
+    sim.add_host(receiver);
 
     constexpr Time delay_between_packets = 100;
     constexpr Time stop_time = 1000;
@@ -28,9 +28,9 @@ TEST_F(Start, TrivialTopology) {
     constexpr std::uint32_t packets_to_send = 1;
 
     Id id = "flow";
-    auto flow =
-        std::make_shared<sim::Flow>(id, sender, receiver, packet_size,
-                                    delay_between_packets, packets_to_send);
+    auto flow = std::make_shared<sim::BasicFlow>(
+        id, sender, receiver, packet_size, delay_between_packets,
+        packets_to_send);
     sim.add_flow(flow);
 
     add_two_way_links(sim, {{sender, swtch}, {swtch, receiver}});
@@ -42,20 +42,20 @@ TEST_F(Start, TrivialTopology) {
 
 TEST_F(Start, ThreeToOneTopology) {
     sim::BasicSimulator sim;
-    auto sender1 = std::make_shared<sim::Sender>("sender1");
-    sim.add_sender(sender1);
+    auto sender1 = std::make_shared<sim::Host>("sender1");
+    sim.add_host(sender1);
 
-    auto sender2 = std::make_shared<sim::Sender>("sender2");
-    sim.add_sender(sender2);
+    auto sender2 = std::make_shared<sim::Host>("sender2");
+    sim.add_host(sender2);
 
-    auto sender3 = std::make_shared<sim::Sender>("sender3");
-    sim.add_sender(sender3);
+    auto sender3 = std::make_shared<sim::Host>("sender3");
+    sim.add_host(sender3);
 
     auto swtch = std::make_shared<sim::Switch>("switch");
     sim.add_switch(swtch);
 
-    auto receiver = std::make_shared<sim::Receiver>("receiver");
-    sim.add_receiver(receiver);
+    auto receiver = std::make_shared<sim::Host>("receiver");
+    sim.add_host(receiver);
 
     add_two_way_links(sim, {{sender1, swtch},
                             {sender2, swtch},
@@ -70,21 +70,21 @@ TEST_F(Start, ThreeToOneTopology) {
     constexpr std::uint32_t packets_to_send_by_flow3 = 100;
 
     Id id_1 = "flow_1";
-    auto flow1 = std::make_shared<sim::Flow>(id_1, sender1, receiver,
-                                             packet_size, delay_between_packets,
-                                             packets_to_send_by_flow1);
+    auto flow1 = std::make_shared<sim::BasicFlow>(
+        id_1, sender1, receiver, packet_size, delay_between_packets,
+        packets_to_send_by_flow1);
     sim.add_flow(flow1);
 
     Id id_2 = "flow_2";
-    auto flow2 = std::make_shared<sim::Flow>(id_2, sender2, receiver,
-                                             packet_size, delay_between_packets,
-                                             packets_to_send_by_flow2);
+    auto flow2 = std::make_shared<sim::BasicFlow>(
+        id_2, sender2, receiver, packet_size, delay_between_packets,
+        packets_to_send_by_flow2);
     sim.add_flow(flow2);
 
     Id id_3 = "flow_3";
-    auto flow3 = std::make_shared<sim::Flow>(id_3, sender3, receiver,
-                                             packet_size, delay_between_packets,
-                                             packets_to_send_by_flow3);
+    auto flow3 = std::make_shared<sim::BasicFlow>(
+        id_3, sender3, receiver, packet_size, delay_between_packets,
+        packets_to_send_by_flow3);
     sim.add_flow(flow3);
 
     sim.start(stop_time);
@@ -96,20 +96,20 @@ TEST_F(Start, ThreeToOneTopology) {
 
 TEST_F(Start, StopTime) {
     sim::BasicSimulator sim;
-    auto sender1 = std::make_shared<sim::Sender>("sender1");
-    sim.add_sender(sender1);
+    auto sender1 = std::make_shared<sim::Host>("sender1");
+    sim.add_host(sender1);
 
-    auto sender2 = std::make_shared<sim::Sender>("sender2");
-    sim.add_sender(sender2);
+    auto sender2 = std::make_shared<sim::Host>("sender2");
+    sim.add_host(sender2);
 
-    auto sender3 = std::make_shared<sim::Sender>("sender3");
-    sim.add_sender(sender3);
+    auto sender3 = std::make_shared<sim::Host>("sender3");
+    sim.add_host(sender3);
 
     auto swtch = std::make_shared<sim::Switch>("switch");
     sim.add_switch(swtch);
 
-    auto receiver = std::make_shared<sim::Receiver>("receiver");
-    sim.add_receiver(receiver);
+    auto receiver = std::make_shared<sim::Host>("receiver");
+    sim.add_host(receiver);
 
     add_two_way_links(sim, {{sender1, swtch},
                             {sender2, swtch},
@@ -124,21 +124,21 @@ TEST_F(Start, StopTime) {
     constexpr std::uint32_t packets_to_send_by_flow3 = 100;
 
     Id id_1 = "flow_1";
-    auto flow1 = std::make_shared<sim::Flow>(id_1, sender1, receiver,
-                                             packet_size, delay_between_packets,
-                                             packets_to_send_by_flow1);
+    auto flow1 = std::make_shared<sim::BasicFlow>(
+        id_1, sender1, receiver, packet_size, delay_between_packets,
+        packets_to_send_by_flow1);
     sim.add_flow(flow1);
 
     Id id_2 = "flow_2";
-    auto flow2 = std::make_shared<sim::Flow>(id_2, sender2, receiver,
-                                             packet_size, delay_between_packets,
-                                             packets_to_send_by_flow2);
+    auto flow2 = std::make_shared<sim::BasicFlow>(
+        id_2, sender2, receiver, packet_size, delay_between_packets,
+        packets_to_send_by_flow2);
     sim.add_flow(flow2);
 
     Id id_3 = "flow_3";
-    auto flow3 = std::make_shared<sim::Flow>(id_3, sender3, receiver,
-                                             packet_size, delay_between_packets,
-                                             packets_to_send_by_flow3);
+    auto flow3 = std::make_shared<sim::BasicFlow>(
+        id_3, sender3, receiver, packet_size, delay_between_packets,
+        packets_to_send_by_flow3);
     sim.add_flow(flow3);
 
     sim.start(stop_time);

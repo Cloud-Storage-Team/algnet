@@ -56,7 +56,7 @@ void Process::operator()() {
     Scheduler::get_instance().add<Process>(m_time + process_time, m_device);
 };
 
-SendData::SendData(Time a_time, std::weak_ptr<ISender> a_device)
+SendData::SendData(Time a_time, std::weak_ptr<IHost> a_device)
     : Event(a_time), m_device(a_device) {};
 
 void SendData::operator()() {
@@ -64,7 +64,7 @@ void SendData::operator()() {
         return;
     }
 
-    Time process_time = m_device.lock()->send_data();
+    Time process_time = m_device.lock()->send_packet();
 
     // TODO: think about better way of cancelling event rescheduling
     if (process_time == 0) {

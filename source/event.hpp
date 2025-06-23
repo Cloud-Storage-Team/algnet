@@ -73,12 +73,12 @@ private:
  */
 class SendData : public Event {
 public:
-    SendData(Time a_time, std::weak_ptr<ISender> a_device);
+    SendData(Time a_time, std::weak_ptr<IHost> a_device);
     ~SendData() = default;
     void operator()() final;
 
 private:
-    std::weak_ptr<ISender> m_device;
+    std::weak_ptr<IHost> m_device;
 };
 
 /**
@@ -104,7 +104,7 @@ public:
     void operator()() final;
 };
 
-class TcpMetric : public Event  {
+class TcpMetric : public Event {
 public:
     TcpMetric(Time a_time, std::weak_ptr<ITcpFlow> a_flow);
     virtual ~TcpMetric() = default;

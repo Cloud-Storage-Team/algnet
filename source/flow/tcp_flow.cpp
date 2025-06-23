@@ -9,8 +9,8 @@
 
 namespace sim {
 
-TcpFlow::TcpFlow(Id a_id, std::shared_ptr<ISender> a_src,
-                 std::shared_ptr<IReceiver> a_dest, Size a_packet_size,
+TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
+                 std::shared_ptr<IHost> a_dest, Size a_packet_size,
                  Time a_delay_between_packets, std::uint32_t a_packets_to_send,
                  Time a_delay_threshold, std::uint32_t a_ssthresh)
     : m_id(a_id),
@@ -53,51 +53,57 @@ Time TcpFlow::create_new_data_packet() {
 }
 
 void TcpFlow::update(Packet packet, DeviceType type) {
-    if (type != DeviceType::SENDER || packet.type != PacketType::ACK) {
-        return;
-    }
-
-    Time current_time = Scheduler::get_instance().get_current_time();
-    if (current_time < packet.sent_time) {
-        LOG_ERROR("Packet " + packet.to_string() +
-                  " sending time less that current time; ignored");
-        return;
-    }
-
-    Time rtt = current_time - packet.sent_time;
-    MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
-                                             current_time, rtt);
-
-    double delivery_bit_rate =
-        8 * (m_sent_bytes - packet.sent_bytes_at_origin) / rtt;
-    MetricsCollector::get_instance().add_delivery_rate(
-        packet.flow->get_id(), current_time, delivery_bit_rate);
-
-    if (rtt < m_delay_threshold) {
-        if (m_packets_in_flight > 0) {
-            m_packets_in_flight--;
+    (void)type;
+    if (packet.dest_id == m_src.lock()->get_id() &&
+        packet.type == PacketType::ACK) {
+        // ACK delivered to soiurce device; calculate metrics, update internal
+        // state
+        Time current_time = Scheduler::get_instance().get_current_time();
+        if (current_time < packet.sent_time) {
+            LOG_ERROR("Packet " + packet.to_string() +
+                      " sending time less that current time; ignored");
+            return;
         }
-        m_packets_acked++;
-        if (m_cwnd < m_ssthresh) {
-            m_cwnd *= 2;
-        } else {
-            m_cwnd += 1.;
-        }
-        try_to_put_data_to_device();
-    } else {  // trigger_congestion
-        m_ssthresh = m_cwnd / 2;
-        m_cwnd = 1.;
-        m_packets_in_flight = 0;
-    }
 
-    LOG_INFO("New flow: " + to_string());
+        Time rtt = current_time - packet.sent_time;
+        MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
+                                                 current_time, rtt);
+
+        double delivery_bit_rate =
+            8 * (m_sent_bytes - packet.sent_bytes_at_origin) / rtt;
+        MetricsCollector::get_instance().add_delivery_rate(
+            packet.flow->get_id(), current_time, delivery_bit_rate);
+
+        if (rtt < m_delay_threshold) {
+            if (m_packets_in_flight > 0) {
+                m_packets_in_flight--;
+            }
+            m_packets_acked++;
+            if (m_cwnd < m_ssthresh) {
+                m_cwnd *= 2;
+            } else {
+                m_cwnd += 1.;
+            }
+            try_to_put_data_to_device();
+        } else {  // trigger_congestion
+            m_ssthresh = m_cwnd / 2;
+            m_cwnd = 1.;
+            m_packets_in_flight = 0;
+        }
+    } else if (packet.dest_id == m_dest.lock()->get_id() &&
+               packet.type == PacketType::DATA) {
+        // data packet delivered to destination device; send ack
+        Packet ack(PacketType::ACK, 1, this, m_dest.lock()->get_id(),
+                   m_src.lock()->get_id(), packet.sent_time,
+                   packet.sent_bytes_at_origin, packet.ecn_capable_transport,
+                   packet.congestion_experienced);
+        m_dest.lock()->enqueue_packet(ack);
+    }
 }
 
-std::shared_ptr<ISender> TcpFlow::get_sender() const { return m_src.lock(); }
+std::shared_ptr<IHost> TcpFlow::get_sender() const { return m_src.lock(); }
 
-std::shared_ptr<IReceiver> TcpFlow::get_receiver() const {
-    return m_dest.lock();
-}
+std::shared_ptr<IHost> TcpFlow::get_receiver() const { return m_dest.lock(); }
 
 Id TcpFlow::get_id() const { return m_id; }
 
@@ -127,7 +133,6 @@ Packet TcpFlow::generate_packet() {
     packet.sent_bytes_at_origin = m_sent_bytes;
     return packet;
 }
-
 bool TcpFlow::try_to_put_data_to_device() {
     if (m_packets_in_flight < m_cwnd) {
         m_packets_in_flight++;

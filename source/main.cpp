@@ -5,7 +5,7 @@
 #include "parser/parser.hpp"
 
 int main(const int argc, char **argv) {
-    cxxopts::Options options("simulator", "Discrete-event based simulator");
+    cxxopts::Options options("NoNS", "Discrete-event based simulator");
     options.add_options()("c,config",
                           "Path to the simulation configuration file",
                           cxxopts::value<std::string>())(

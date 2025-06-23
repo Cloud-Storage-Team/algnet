@@ -2,9 +2,6 @@
 
 #include <sstream>
 
-#include "device/receiver.hpp"
-#include "device/sender.hpp"
-
 namespace sim {
 
 Packet::Packet(PacketType a_type, Size a_size_byte, IFlow* a_flow,

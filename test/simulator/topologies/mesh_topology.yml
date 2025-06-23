@@ -4,11 +4,11 @@ simulation_time: 1000
 
 devices:
   sender1:
-    type: sender
+    type: host
   sender2:
-    type: sender
+    type: host
   sender3:
-    type: sender
+    type: host
   switch1:
     type: switch
     threshold: 0.7
@@ -16,11 +16,11 @@ devices:
     type: switch
     threshold: 0.7
   receiver1:
-    type: receiver
+    type: host
   receiver2:
-    type: receiver
+    type: host
   receiver3:
-    type: receiver
+    type: host
 
 links:
   link1:

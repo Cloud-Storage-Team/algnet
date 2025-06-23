@@ -12,7 +12,7 @@ def generate_topology(num_senders, num_receivers, switch_name="switch", link_lat
     # Add senders
     for i in range(0, num_senders):
         sender_name = f"sender{i}"
-        topology["devices"][sender_name] = {"type": "sender"}
+        topology["devices"][sender_name] = {"type": "host"}
         base_index = 2 * i
 
         # Add link from sender to switch
@@ -40,7 +40,7 @@ def generate_topology(num_senders, num_receivers, switch_name="switch", link_lat
     # Add receivers
     for i in range(0, num_receivers):
         receiver_name = f"receiver{i}"
-        topology["devices"][receiver_name] = {"type": "receiver"}
+        topology["devices"][receiver_name] = {"type": "host"}
         base_index = 2 * num_senders + 2 * i
 
         # Add link from switch to receiver

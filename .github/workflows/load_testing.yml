@@ -6,7 +6,7 @@ on:
     branches: [ "main" ]
 
 env:
-  BUILD_TYPE: Release
+  EXECUTABLE_NAME: nons
 
 jobs:
   load_testing:
@@ -18,7 +18,7 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Configure CMake for building project
-      run: cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF
+      run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF
 
     - name: Build project
       run: cmake --build build  -j $(nproc)
@@ -38,7 +38,7 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Configure CMake for profiling
-      run: cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF -DPROFILING=ON
+      run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF -DPROFILING=ON
 
     - name: Build project with profiling
       run: cmake --build build  -j $(nproc)
@@ -46,13 +46,13 @@ jobs:
     - name: Run simulations with profiling
       run: | 
         python3 scripts/run_incast_simulation.py --senders 300 --receivers 5 --time 100000000 --packets 20000
-        gprof build/simulator > profile.txt
+        gprof build/${{env.EXECUTABLE_NAME}} > profile.txt
         head profile.txt
         
         python3 scripts/run_incast_simulation.py --senders 1000 --receivers 10 --time 100000000 --packets 20000
-        gprof build/simulator > profile.txt
+        gprof build/${{env.EXECUTABLE_NAME}} > profile.txt
         head profile.txt
         
         python3 scripts/run_incast_simulation.py --senders 1000 --receivers 30 --time 100000000 --packets 20000  
-        gprof build/simulator > profile.txt
+        gprof build/${{env.EXECUTABLE_NAME}} > profile.txt
         head profile.txt
