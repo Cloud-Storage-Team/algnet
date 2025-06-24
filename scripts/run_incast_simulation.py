@@ -10,6 +10,9 @@ def parse_arguments():
         description="Generate incast topologies and simulate them."
     )
     parser.add_argument(
+        "-e,--executable", help="Path to NoNS executable file", required=True
+    )
+    parser.add_argument(
         "--senders", type=int, help="Number of senders in topology", default=30
     )
     parser.add_argument(
@@ -79,7 +82,7 @@ def main(args):
 
     simulator_args = [
         "time",
-        "./build/nons",
+        str(parsed_args.executable),
         "--config",
         str(os.path.join(generator_dir_path, simulation_config_name)),
         "--no-logs",
