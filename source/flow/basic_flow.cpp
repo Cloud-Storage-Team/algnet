@@ -21,10 +21,10 @@ BasicFlow::BasicFlow(Id a_id, std::shared_ptr<IHost> a_src,
       m_updates_number(0),
       m_packets_to_send(a_packets_to_send),
       m_sent_bytes(0) {
-    if (m_src.lock() == nullptr) {
+    if (m_src.lock() == nullptr) [[unlikely]] {
         throw std::invalid_argument("Sender for Flow is nullptr");
     }
-    if (m_dest.lock() == nullptr) {
+    if (m_dest.lock() == nullptr) [[unlikely]] {
         throw std::invalid_argument("Receiver for Flow is nullptr");
     }
 }
@@ -78,7 +78,7 @@ void BasicFlow::update(Packet packet, DeviceType type) {
 std::uint32_t BasicFlow::get_updates_number() const { return m_updates_number; }
 
 Time BasicFlow::create_new_data_packet() {
-    if (m_packets_to_send == 0) {
+    if (m_packets_to_send == 0) [[unlikely]] {
         return 0;
     }
     --m_packets_to_send;
@@ -97,7 +97,7 @@ std::shared_ptr<IHost> BasicFlow::get_receiver() const { return m_dest.lock(); }
 Id BasicFlow::get_id() const { return m_id; }
 
 Time BasicFlow::put_data_to_device() {
-    if (m_src.expired()) {
+    if (m_src.expired()) [[unlikely]] {
         LOG_ERROR("Flow source was deleted; can not put data to it");
         return 0;
     }

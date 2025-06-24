@@ -10,14 +10,14 @@ namespace sim {
 Host::Host(Id a_id) : m_router(a_id) {}
 
 bool Host::add_inlink(std::shared_ptr<ILink> link) {
-    if (!is_valid_link(link)) {
+    if (!is_valid_link(link)) [[unlikely]] {
         return false;
     }
     return m_router.add_inlink(link);
 }
 
 bool Host::add_outlink(std::shared_ptr<ILink> link) {
-    if (!is_valid_link(link)) {
+    if (!is_valid_link(link)) [[unlikely]] {
         return false;
     }
     m_router.add_outlink(link);
@@ -26,7 +26,7 @@ bool Host::add_outlink(std::shared_ptr<ILink> link) {
 
 bool Host::update_routing_table(Id dest_id, std::shared_ptr<ILink> link,
                                 size_t paths_count) {
-    if (!is_valid_link(link)) {
+    if (!is_valid_link(link)) [[unlikely]] {
         return false;
     }
     m_router.update_routing_table(dest_id, link, paths_count);
@@ -69,7 +69,7 @@ Time Host::process() {
     }
 
     Packet packet = opt_packet.value();
-    if (packet.flow == nullptr) {
+    if (packet.flow == nullptr) [[unlikely]] {
         LOG_ERROR("Packet flow does not exist");
         return total_processing_time;
     }
@@ -86,7 +86,7 @@ Time Host::process() {
             "table to send it further");
         std::shared_ptr<ILink> next_link = get_link_to_destination(packet);
 
-        if (next_link == nullptr) {
+        if (next_link == nullptr) [[unlikely]] {
             LOG_WARN("No link corresponds to destination device");
             return total_processing_time;
         }
@@ -116,7 +116,7 @@ Time Host::send_packet() {
                          get_id(), data_packet.to_string()));
 
     auto next_link = get_link_to_destination(data_packet);
-    if (next_link == nullptr) {
+    if (next_link == nullptr) [[unlikely]] {
         LOG_WARN("Link to send data packet does not exist");
         return total_processing_time;
     }
