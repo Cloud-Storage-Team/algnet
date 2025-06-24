@@ -10,7 +10,7 @@ def parse_arguments():
         description="Generate incast topologies and simulate them."
     )
     parser.add_argument(
-        "-e,--executable", help="Path to NoNS executable file", required=True
+        "-e", "--executable", help="Path to NoNS executable file", required=True
     )
     parser.add_argument(
         "--senders", type=int, help="Number of senders in topology", default=30
