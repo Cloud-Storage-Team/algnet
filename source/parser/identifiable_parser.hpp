@@ -48,8 +48,7 @@ Id parse_object<Switch>(const YAML::Node& key_node,
     Id id = key_node.as<Id>();
     if (value_node["threshold"]) {
         double threshold = value_node["threshold"].as<double>();
-        bool is_valid = (threshold > 0.0 && threshold <= 1.0);
-        parse_object_helper<Switch>(id, is_valid, threshold);
+        parse_object_helper<Switch>(id, threshold);
     } else {
         parse_object_helper<Switch>(id);
     }

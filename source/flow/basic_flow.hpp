@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <queue>
 
 #include "device/interfaces/i_host.hpp"
@@ -8,6 +7,7 @@
 
 namespace sim {
 
+// Basic flow version, no congestion control
 class BasicFlow : public IFlow, public std::enable_shared_from_this<BasicFlow> {
 public:
     BasicFlow(Id a_id, std::shared_ptr<IHost> a_src,

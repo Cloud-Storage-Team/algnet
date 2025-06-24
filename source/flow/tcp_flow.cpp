@@ -12,10 +12,12 @@ namespace sim {
 TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
                  std::shared_ptr<IHost> a_dest, Size a_packet_size,
                  Time a_delay_between_packets, std::uint32_t a_packets_to_send,
-                 Time a_delay_threshold, std::uint32_t a_ssthresh)
+                 Time a_delay_threshold, std::uint32_t a_ssthresh,
+                 bool a_ecn_capable)
     : m_id(a_id),
       m_src(a_src),
       m_dest(a_dest),
+      m_ecn_capable(a_ecn_capable),
       m_packet_size(a_packet_size),
       m_delay_between_packets(a_delay_between_packets),
       m_packets_to_send(a_packets_to_send),
@@ -74,7 +76,12 @@ void TcpFlow::update(Packet packet, DeviceType type) {
         MetricsCollector::get_instance().add_delivery_rate(
             packet.flow->get_id(), current_time, delivery_bit_rate);
 
-        if (rtt < m_delay_threshold) {
+        if (rtt >= m_delay_threshold || packet.congestion_experienced) {
+            // trigger_congestion
+            m_ssthresh = m_cwnd / 2;
+            m_cwnd = 1.;
+            m_packets_in_flight = 0;
+        } else {
             if (m_packets_in_flight > 0) {
                 m_packets_in_flight--;
             }
@@ -85,10 +92,6 @@ void TcpFlow::update(Packet packet, DeviceType type) {
                 m_cwnd += 1.;
             }
             try_to_put_data_to_device();
-        } else {  // trigger_congestion
-            m_ssthresh = m_cwnd / 2;
-            m_cwnd = 1.;
-            m_packets_in_flight = 0;
         }
     } else if (packet.dest_id == m_dest.lock()->get_id() &&
                packet.type == PacketType::DATA) {
@@ -131,6 +134,7 @@ Packet TcpFlow::generate_packet() {
     packet.dest_id = get_receiver()->get_id();
     packet.sent_time = Scheduler::get_instance().get_current_time();
     packet.sent_bytes_at_origin = m_sent_bytes;
+    packet.ecn_capable_transport = m_ecn_capable;
     return packet;
 }
 bool TcpFlow::try_to_put_data_to_device() {
