@@ -129,6 +129,8 @@ Size Link::get_from_egress_queue_size() const {
     return m_from_egress_queue_size;
 }
 
+Size Link::get_to_ingress_queue_size() const { return m_to_ingress_queue_size; }
+
 Size Link::get_max_from_egress_buffer_size() const {
     return m_max_from_egress_buffer_size;
 }

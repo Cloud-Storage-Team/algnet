@@ -31,6 +31,7 @@ std::shared_ptr<sim::IRoutingDevice> TestLink::get_to() const {
 };
 
 Size TestLink::get_from_egress_queue_size() const { return 0; }
+Size TestLink::get_to_ingress_queue_size() const { return 0; }
 
 Size TestLink::get_max_from_egress_buffer_size() const { return 4096; }
 
