@@ -9,7 +9,9 @@ devices:
     type: host
   bus:
     type: switch
-    threshold: 0.7
+    ecn_min: 64B
+    ecn_max: 128B
+    ecn_probability: 1.0
 
 links:
   link1:

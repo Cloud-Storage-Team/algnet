@@ -8,9 +8,9 @@
 
 namespace sim {
 
-Switch::Switch(Id a_id, double a_ecn_threshold)
-    : m_ecn_threshold(a_ecn_threshold),
-      m_router(std::make_unique<RoutingModule>(a_id)) {}
+Switch::Switch(Id a_id, ECN&& a_ecn)
+    : m_router(std::make_unique<RoutingModule>(a_id)),
+      m_ecn(std::move(a_ecn)) {}
 
 bool Switch::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {
@@ -79,12 +79,11 @@ Time Switch::process() {
              packet.to_string());
 
     // ECN mark for data packets
-    if (packet.ecn_capable_transport &&
-        static_cast<double>(next_link->get_from_egress_queue_size()) >=
-            m_ecn_threshold *
-                static_cast<double>(
-                    next_link->get_max_from_egress_buffer_size())) {
-        packet.congestion_experienced = true;
+    if (packet.ecn_capable_transport) {
+        Size egress_queue_size = next_link->get_from_egress_queue_size();
+        if (m_ecn.get_congestion_mark(egress_queue_size)) {
+            packet.congestion_experienced = true;
+        }
     }
     // TODO: increase total_processing_time correctly
     next_link->schedule_arrival(packet);

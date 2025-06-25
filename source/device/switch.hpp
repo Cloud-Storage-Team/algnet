@@ -2,13 +2,14 @@
 
 #include "device/interfaces/i_switch.hpp"
 #include "device/scheduling_module.hpp"
+#include "ecn.hpp"
 #include "event.hpp"
 
 namespace sim {
 
 class Switch : public ISwitch, public std::enable_shared_from_this<Switch> {
 public:
-    Switch(Id a_id, double a_ecn_threshold_percent = 1.0);
+    Switch(Id a_id, ECN&& a_ecn);
     ~Switch() = default;
 
     bool add_inlink(std::shared_ptr<ILink> link) final;
@@ -30,9 +31,9 @@ public:
     Id get_id() const final;
 
 private:
-    double m_ecn_threshold;
     std::unique_ptr<IRoutingDevice> m_router;
     SchedulingModule<ISwitch, Process> m_process_scheduler;
+    ECN m_ecn;
 };
 
 }  // namespace sim
