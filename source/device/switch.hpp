@@ -9,7 +9,7 @@ namespace sim {
 
 class Switch : public ISwitch, public std::enable_shared_from_this<Switch> {
 public:
-    Switch(Id a_id, ECN&& a_ecn = ECN(10000, 10000, 0.0));
+    Switch(Id a_id, ECN&& a_ecn = ECN(1.0, 1.0, 0.0));
     ~Switch() = default;
 
     bool add_inlink(std::shared_ptr<ILink> link) final;

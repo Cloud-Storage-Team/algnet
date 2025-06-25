@@ -46,9 +46,9 @@ static void parse_object_helper(Args&&... args) {
 }
 
 static ECN parse_ecn(const YAML::Node& node) {
-    Size min = parse_buffer_size(node["min"].as<std::string>());
-    Size max = parse_buffer_size(node["max"].as<std::string>());
-    double probability = node["probability"].as<double>();
+    float min = node["min"].as<float>();
+    float max = node["max"].as<float>();
+    float probability = node["probability"].as<float>();
     return ECN(min, max, probability);
 }
 

@@ -57,7 +57,8 @@ Time Switch::process() {
     }
 
     // requests queue size here to consider processing packet
-    Size from_queue_size = link->get_to_ingress_queue_size();
+    float from_queue_filling = link->get_to_ingress_queue_size() /
+                               (float)link->get_max_to_ingress_queue_size();
     std::optional<Packet> optional_packet = link->get_packet();
     if (!optional_packet.has_value()) {
         LOG_WARN("No packet in link");
@@ -82,10 +83,14 @@ Time Switch::process() {
 
     // ECN mark for data packets
     if (packet.ecn_capable_transport) {
-        Size to_queue_size = next_link->get_from_egress_queue_size();
-        if (m_ecn.get_congestion_mark(from_queue_size) ||
-            m_ecn.get_congestion_mark(to_queue_size)) {
+        float to_queue_filling =
+            next_link->get_from_egress_queue_size() /
+            (float)next_link->get_max_from_egress_buffer_size();
+        if (m_ecn.get_congestion_mark(from_queue_filling) ||
+            m_ecn.get_congestion_mark(to_queue_filling)) {
             packet.congestion_experienced = true;
+        } else {
+            packet.congestion_experienced = packet.congestion_experienced;
         }
     }
     // TODO: increase total_processing_time correctly

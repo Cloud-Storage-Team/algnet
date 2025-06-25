@@ -10,8 +10,8 @@ devices:
   bus:
     type: switch
     ecn:  
-      min: 64B
-      max: 128B
+      min: 0.2
+      max: 0.3
       probability: 1.0
 
 links:
