@@ -61,7 +61,7 @@ TEST_F(EcnTest, TestAtMaxThreshold) {
     }
 }
 
-TEST_F(EcnTest, TestLoverBetweenMinAndMax) {
+TEST_F(EcnTest, TestBetweenMinAndMax) {
     const float MIN_THESHOLD = 0.23;
     const float MAX_THESHOLD = 0.57;
     const float PROBABILITY = 0.82;
