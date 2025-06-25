@@ -46,18 +46,22 @@ static void parse_object_helper(Args&&... args) {
 }
 
 static ECN parse_ecn(const YAML::Node& node) {
-    Size min = parse_buffer_size(node["ecn_min"].as<std::string>());
-    Size max = parse_buffer_size(node["ecn_min"].as<std::string>());
-    double probability = node["ecn_probability"].as<double>();
+    Size min = parse_buffer_size(node["min"].as<std::string>());
+    Size max = parse_buffer_size(node["max"].as<std::string>());
+    double probability = node["probability"].as<double>();
     return ECN(min, max, probability);
 }
 
 template <>
 Id parse_object<Switch>(const YAML::Node& key_node,
                         const YAML::Node& value_node) {
-    (void)value_node;
     Id id = key_node.as<Id>();
-    parse_object_helper<Switch>(id, std::move(parse_ecn(value_node)));
+    const YAML::Node& ecn_node = value_node["ecn"];
+    if (!ecn_node) {
+        parse_object_helper<Switch>(id);
+    } else {
+        parse_object_helper<Switch>(id, parse_ecn(ecn_node));
+    }
     return id;
 }
 

@@ -9,9 +9,10 @@ devices:
     type: host
   bus:
     type: switch
-    ecn_min: 64B
-    ecn_max: 128B
-    ecn_probability: 1.0
+    ecn:  
+      min: 64B
+      max: 128B
+      probability: 1.0
 
 links:
   link1:
