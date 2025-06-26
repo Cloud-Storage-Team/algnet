@@ -8,8 +8,7 @@ namespace sim {
 class ECN {
 public:
     ECN(float a_min, float a_max, float a_probability);
-    // returns true if congestion detected with given queue size, false
-    // otherwise
+    // Returns true if congestion detected for a given queue filling
     bool get_congestion_mark(float queue_filling) const;
 
     friend std::ostream& operator<<(std::ostream& out, const ECN& ecn);
