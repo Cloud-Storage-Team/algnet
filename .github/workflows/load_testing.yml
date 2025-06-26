@@ -6,7 +6,7 @@ on:
     branches: [ "main" ]
 
 env:
-  EXECUTABLE_NAME: nons
+  EXECUTABLE_PATH: build/nons
 
 jobs:
   load_testing:
@@ -25,9 +25,9 @@ jobs:
 
     - name: Run simulations
       run: | 
-        python3 scripts/run_incast_simulation.py -e build/${{env.EXECUTABLE_NAME}} --senders 300 --receivers 5 --time 100000000 --packets 20000
-        python3 scripts/run_incast_simulation.py -e build/${{env.EXECUTABLE_NAME}} --senders 1000 --receivers 10 --time 100000000 --packets 20000
-        python3 scripts/run_incast_simulation.py -e build/${{env.EXECUTABLE_NAME}} --senders 1000 --receivers 30 --time 100000000 --packets 20000
+        python3 scripts/run_incast_simulation.py -e ${{env.EXECUTABLE_PATH}} --senders 300 --receivers 5 --time 100000000 --packets 20000
+        python3 scripts/run_incast_simulation.py -e ${{env.EXECUTABLE_PATH}} --senders 1000 --receivers 10 --time 100000000 --packets 20000
+        python3 scripts/run_incast_simulation.py -e ${{env.EXECUTABLE_PATH}} --senders 1000 --receivers 30 --time 100000000 --packets 20000
 
   profiling_load_testing:
     runs-on: ubuntu-latest
@@ -45,14 +45,14 @@ jobs:
 
     - name: Run simulations with profiling
       run: | 
-        python3 scripts/run_incast_simulation.py -e build/${{env.EXECUTABLE_NAME}} --senders 300 --receivers 5 --time 100000000 --packets 20000
-        gprof build/${{env.EXECUTABLE_NAME}} > profile.txt
+        python3 scripts/run_incast_simulation.py -e ${{env.EXECUTABLE_PATH}} --senders 300 --receivers 5 --time 100000000 --packets 20000
+        gprof ${{env.EXECUTABLE_PATH}} > profile.txt
         head profile.txt
         
-        python3 scripts/run_incast_simulation.py -e build/${{env.EXECUTABLE_NAME}} --senders 1000 --receivers 10 --time 100000000 --packets 20000
-        gprof build/${{env.EXECUTABLE_NAME}} > profile.txt
+        python3 scripts/run_incast_simulation.py -e ${{env.EXECUTABLE_PATH}} --senders 1000 --receivers 10 --time 100000000 --packets 20000
+        gprof ${{env.EXECUTABLE_PATH}} > profile.txt
         head profile.txt
         
-        python3 scripts/run_incast_simulation.py -e build/${{env.EXECUTABLE_NAME}} --senders 1000 --receivers 30 --time 100000000 --packets 20000  
-        gprof build/${{env.EXECUTABLE_NAME}} > profile.txt
+        python3 scripts/run_incast_simulation.py -e ${{env.EXECUTABLE_PATH}} --senders 1000 --receivers 30 --time 100000000 --packets 20000  
+        gprof ${{env.EXECUTABLE_PATH}} > profile.txt
         head profile.txt
