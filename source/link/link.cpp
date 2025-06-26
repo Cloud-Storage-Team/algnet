@@ -14,13 +14,9 @@ Link::Link(Id a_id, std::weak_ptr<IRoutingDevice> a_from,
       m_from(a_from),
       m_to(a_to),
       m_speed_gbps(a_speed_gbps),
-      m_from_egress_queue_size(0),
-      m_max_from_egress_buffer_size(a_max_from_egress_buffer_size),
-      m_arrival_time(0),
       m_transmission_delay(a_delay),
-      m_to_ingress(),
-      m_to_ingress_queue_size(0),
-      m_max_to_ingress_buffer_size(a_max_to_ingress_buffer_size) {
+      m_from_eggress(a_max_from_egress_buffer_size),
+      m_to_ingress(a_max_to_ingress_buffer_size) {
     if (a_from.expired() || a_to.expired()) {
         LOG_WARN("Passed link to device is expired");
     } else if (a_speed_gbps == 0) {
@@ -28,81 +24,23 @@ Link::Link(Id a_id, std::weak_ptr<IRoutingDevice> a_from,
     }
 }
 
-Link::Arrive::Arrive(Time a_time, std::weak_ptr<Link> a_link, Packet a_packet)
-    : Event(a_time), m_link(a_link), m_paket(a_packet) {}
-
-void Link::Arrive::operator()() {
-    if (m_link.expired()) {
-        return;
-    }
-
-    m_link.lock()->process_arrival(m_paket);
-}
-
-Time Link::get_transmission_time(const Packet& packet) const {
-    if (m_speed_gbps == 0) {
-        LOG_WARN("Passed zero link speed");
-        return 0;
-    }
-    const std::uint32_t byte_to_bit_multiplier = 8;
-
-    Size packet_size_bit = packet.size_byte * byte_to_bit_multiplier;
-    std::uint32_t transmission_speed_bit_ns = m_speed_gbps;
-    return (packet_size_bit + transmission_speed_bit_ns - 1) /
-               transmission_speed_bit_ns +
-           m_transmission_delay;
-};
-
 void Link::schedule_arrival(Packet packet) {
     if (m_to.expired()) {
         LOG_WARN("Destination device pointer is expired");
         return;
     }
 
-    if (m_from_egress_queue_size + packet.size_byte >
-        m_max_from_egress_buffer_size) {
+    bool empty_before_push = m_from_eggress.empty();
+
+    if (!m_from_eggress.push(packet)) {
         LOG_ERROR("Egress buffer overflow; packet " + packet.to_string() +
                   " lost");
         return;
     }
 
-    unsigned int transmission_time = get_transmission_time(packet);
-    m_arrival_time =
-        std::max(m_arrival_time, Scheduler::get_instance().get_current_time()) +
-        transmission_time;
-
-    m_from_egress_queue_size += packet.size_byte;
-    MetricsCollector::get_instance().add_queue_size(
-        get_id(), Scheduler::get_instance().get_current_time(),
-        m_from_egress_queue_size);
-
-    Scheduler::get_instance().add<Arrive>(m_arrival_time, weak_from_this(),
-                                          packet);
-};
-
-void Link::process_arrival(Packet packet) {
-    if (m_to_ingress_queue_size + packet.size_byte >
-        m_max_to_ingress_buffer_size) {
-        LOG_ERROR("Ingress buffer overflow; packet " + packet.to_string() +
-                  " lost");
-        return;
+    if (empty_before_push) {
+        start_head_packet_sending();
     }
-
-    // Remove packet from the source egress queue
-    m_from_egress_queue_size -= packet.size_byte;
-
-    MetricsCollector::get_instance().add_queue_size(
-        get_id(), Scheduler::get_instance().get_current_time(),
-        m_from_egress_queue_size);
-
-    // Add packet to the next device ingress queue
-    m_to_ingress.push(packet);
-    m_to_ingress_queue_size += packet.size_byte;
-
-    m_to.lock()->notify_about_arrival(
-        Scheduler::get_instance().get_current_time());
-    LOG_INFO("Packet arrived to the next device. Packet: " +
-             packet.to_string());
 };
 
 std::optional<Packet> Link::get_packet() {
@@ -111,10 +49,8 @@ std::optional<Packet> Link::get_packet() {
         return {};
     }
 
-    auto packet = m_to_ingress.front();
-    LOG_INFO("Packet is taken from the link. Packet: " + packet.to_string());
+    Packet packet = m_to_ingress.front();
     m_to_ingress.pop();
-    m_to_ingress_queue_size -= packet.size_byte;
     return packet;
 };
 
@@ -137,18 +73,93 @@ std::shared_ptr<IRoutingDevice> Link::get_to() const {
 };
 
 Size Link::get_from_egress_queue_size() const {
-    return m_from_egress_queue_size;
+    return m_from_eggress.get_size();
 }
 
 Size Link::get_max_from_egress_buffer_size() const {
-    return m_max_from_egress_buffer_size;
+    return m_from_eggress.get_max_size();
 }
 
-Size Link::get_to_ingress_queue_size() const { return m_to_ingress_queue_size; }
+Size Link::get_to_ingress_queue_size() const { return m_to_ingress.get_size(); }
+
 Size Link::get_max_to_ingress_queue_size() const {
-    return m_max_to_ingress_buffer_size;
+    return m_to_ingress.get_max_size();
 }
 
 Id Link::get_id() const { return m_id; }
+
+Link::Arrive::Arrive(Time a_time, std::weak_ptr<Link> a_link, Packet a_packet)
+    : Event(a_time), m_link(a_link), m_paket(a_packet) {}
+
+void Link::Arrive::operator()() {
+    if (m_link.expired()) {
+        return;
+    }
+
+    m_link.lock()->arrive(std::move(m_paket));
+}
+
+Link::Transmit::Transmit(Time a_time, std::weak_ptr<Link> a_link)
+    : Event(a_time), m_link(a_link) {}
+
+void Link::Transmit::operator()() {
+    if (m_link.expired()) {
+        return;
+    }
+
+    m_link.lock()->transmit();
+}
+
+Time Link::get_transmission_delay(const Packet& packet) const {
+    if (m_speed_gbps == 0) {
+        LOG_WARN("Passed zero link speed");
+        return 0;
+    }
+    const std::uint32_t byte_to_bit_multiplier = 8;
+
+    Size packet_size_bit = packet.size_byte * byte_to_bit_multiplier;
+    std::uint32_t transmission_speed_bit_ns = m_speed_gbps;
+    return (packet_size_bit + transmission_speed_bit_ns - 1) /
+           transmission_speed_bit_ns;
+};
+
+void Link::transmit() {
+    if (m_from_eggress.empty()) {
+        LOG_ERROR("Transmit on link with empty source eggress buffer");
+        return;
+    }
+    Time current_time = Scheduler::get_instance().get_current_time();
+    Scheduler::get_instance().add<Arrive>(current_time + m_transmission_delay,
+                                          shared_from_this(),
+                                          m_from_eggress.front());
+    m_from_eggress.pop();
+    if (!m_from_eggress.empty()) {
+        start_head_packet_sending();
+    }
+}
+
+void Link::arrive(Packet packet) {
+    if (!m_to_ingress.push(packet)) {
+        LOG_ERROR("Ingress buffer overflow; packet " + packet.to_string() +
+                  " lost");
+        return;
+    }
+
+    MetricsCollector::get_instance().add_queue_size(
+        get_id(), Scheduler::get_instance().get_current_time(),
+        m_from_eggress.get_size());
+
+    m_to.lock()->notify_about_arrival(
+        Scheduler::get_instance().get_current_time());
+    LOG_INFO("Packet arrived to the next device. Packet: " +
+             packet.to_string());
+};
+
+void Link::start_head_packet_sending() {
+    Time current_time = Scheduler::get_instance().get_current_time();
+    Scheduler::get_instance().add<Transmit>(
+        current_time + get_transmission_delay(m_from_eggress.front()),
+        shared_from_this());
+}
 
 }  // namespace sim

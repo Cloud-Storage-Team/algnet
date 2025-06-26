@@ -4,7 +4,7 @@
 
 #include "event/event.hpp"
 #include "link/interfaces/i_link.hpp"
-#include "packet.hpp"
+#include "packet_queue.hpp"
 
 namespace sim {
 
@@ -46,28 +46,37 @@ private:
         Packet m_paket;
     };
 
-    // Removes packet from the source egress queue.
-    void process_arrival(Packet packet);
+    class Transmit : public Event {
+    public:
+        Transmit(Time a_time, std::weak_ptr<Link> a_link);
+        void operator()() final;
 
-    Time get_transmission_time(const Packet& packet) const;
+    private:
+        std::weak_ptr<Link> m_link;
+    };
+
+    // Head packet leaves source eggress queue
+    void transmit();
+
+    // Packet arrives to destination ingress queue
+    void arrive(Packet packet);
+
+    Time get_transmission_delay(const Packet& packet) const;
+
+    // Shedule Arrive and Transmit events for first packet from source eggress
+    // queue
+    void start_head_packet_sending();
 
     Id m_id;
     std::weak_ptr<IRoutingDevice> m_from;
     std::weak_ptr<IRoutingDevice> m_to;
     std::uint32_t m_speed_gbps;
 
-    Size m_from_egress_queue_size;
-    Size m_max_from_egress_buffer_size;
-    Time m_arrival_time;
-
     Time m_transmission_delay;
 
     // Queue at the ingress port of the m_to device
-    std::queue<Packet> m_to_ingress;
-    // We keep track of m_to_ingress size in bytes
-    // to account for packet size variations
-    Size m_to_ingress_queue_size;
-    Size m_max_to_ingress_buffer_size;
+    PacketQueue m_from_eggress;
+    PacketQueue m_to_ingress;
 };
 
 }  // namespace sim
