@@ -29,7 +29,7 @@ Link::Link(Id a_id, std::weak_ptr<IRoutingDevice> a_from,
 }
 
 Time Link::get_transmission_time(const Packet& packet) const {
-    if (m_speed_gbps == 0) {
+    if (m_speed_gbps == 0) [[unlikely]] {
         LOG_WARN("Passed zero link speed");
         return 0;
     }
@@ -43,7 +43,7 @@ Time Link::get_transmission_time(const Packet& packet) const {
 };
 
 void Link::schedule_arrival(Packet packet) {
-    if (m_to.expired()) {
+    if (m_to.expired()) [[unlikely]] {
         LOG_WARN("Destination device pointer is expired");
         return;
     }
@@ -108,7 +108,7 @@ std::optional<Packet> Link::get_packet() {
 };
 
 std::shared_ptr<IRoutingDevice> Link::get_from() const {
-    if (m_from.expired()) {
+    if (m_from.expired()) [[unlikely]] {
         LOG_WARN("Source device pointer is expired");
         return nullptr;
     }
@@ -117,7 +117,7 @@ std::shared_ptr<IRoutingDevice> Link::get_from() const {
 };
 
 std::shared_ptr<IRoutingDevice> Link::get_to() const {
-    if (m_to.expired()) {
+    if (m_to.expired()) [[unlikely]] {
         LOG_WARN("Destination device pointer is expired");
         return nullptr;
     }

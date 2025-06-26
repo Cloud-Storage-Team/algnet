@@ -37,7 +37,7 @@ public:
         static_assert(std::is_base_of_v<Identifiable, TObject>,
                       "TObject must implement Identifiable interface");
         auto it = m_id_table.find(id);
-        if (it == m_id_table.end()) {
+        if (it == m_id_table.end()) [[unlikely]] {
             return nullptr;
         }
         return std::dynamic_pointer_cast<TObject>(it->second);

@@ -13,14 +13,14 @@ Switch::Switch(Id a_id, ECN&& a_ecn)
       m_ecn(std::move(a_ecn)) {}
 
 bool Switch::add_inlink(std::shared_ptr<ILink> link) {
-    if (!is_valid_link(link)) {
+    if (!is_valid_link(link)) [[unlikely]] {
         return false;
     }
     return m_router->add_inlink(link);
 }
 
 bool Switch::add_outlink(std::shared_ptr<ILink> link) {
-    if (!is_valid_link(link)) {
+    if (!is_valid_link(link)) [[unlikely]] {
         return false;
     }
     return m_router->add_outlink(link);
@@ -28,7 +28,7 @@ bool Switch::add_outlink(std::shared_ptr<ILink> link) {
 
 bool Switch::update_routing_table(Id dest_id, std::shared_ptr<ILink> link,
                                   size_t paths_count) {
-    if (!is_valid_link(link)) {
+    if (!is_valid_link(link)) [[unlikely]] {
         return false;
     }
     return m_router->update_routing_table(dest_id, link, paths_count);
@@ -51,7 +51,7 @@ Time Switch::process() {
     Time total_processing_time = 1;
     std::shared_ptr<ILink> link = next_inlink();
 
-    if (link == nullptr) {
+    if (link == nullptr) [[unlikely]] {
         LOG_WARN("No next inlink");
         return total_processing_time;
     }
@@ -65,14 +65,14 @@ Time Switch::process() {
         return total_processing_time;
     }
     Packet packet = optional_packet.value();
-    if (packet.flow == nullptr) {
+    if (packet.flow == nullptr) [[unlikely]] {
         LOG_WARN("No flow in packet");
         return total_processing_time;
     }
 
     std::shared_ptr<ILink> next_link = get_link_to_destination(packet);
 
-    if (next_link == nullptr) {
+    if (next_link == nullptr) [[unlikely]] {
         LOG_WARN("No link corresponds to destination device");
         return total_processing_time;
     }

@@ -12,7 +12,7 @@ bool EventComparator::operator()(const std::unique_ptr<Event>& lhs,
 }
 
 bool Scheduler::tick() {
-    if (m_events.empty()) {
+    if (m_events.empty()) [[unlikely]] {
         return false;
     }
 

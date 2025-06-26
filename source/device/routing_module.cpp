@@ -15,12 +15,12 @@ RoutingModule::RoutingModule(Id a_id, std::unique_ptr<IHasher> a_hasher)
 Id RoutingModule::get_id() const { return m_id; }
 
 bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
-    if (m_id != link->get_to()->get_id()) {
+    if (m_id != link->get_to()->get_id()) [[unlikely]] {
         LOG_WARN(
             "Link destination device is incorrect (expected current device)");
         return false;
     }
-    if (m_inlinks.contains(link)) {
+    if (m_inlinks.contains(link)) [[unlikely]] {
         LOG_WARN("Unexpected already added inlink");
         return false;
     }
@@ -33,11 +33,11 @@ bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
 }
 
 bool RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
-    if (m_id != link->get_from()->get_id()) {
+    if (m_id != link->get_from()->get_id()) [[unlikely]] {
         LOG_WARN("Outlink source is not our device");
         return false;
     }
-    if (m_outlinks.contains(link)) {
+    if (m_outlinks.contains(link)) [[unlikely]] {
         LOG_WARN("Unexpected already added outlink");
         return false;
     }
@@ -48,11 +48,11 @@ bool RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
 bool RoutingModule::update_routing_table(Id dest_id,
                                          std::shared_ptr<ILink> link,
                                          size_t paths_count) {
-    if (m_id != link->get_from()->get_id()) {
+    if (m_id != link->get_from()->get_id()) [[unlikely]] {
         LOG_WARN("Link source device is incorrect (expected current device)");
         return false;
     }
-    if (link == nullptr) {
+    if (link == nullptr) [[unlikely]] {
         LOG_WARN("Unexpected nullptr link");
         return false;
     }
@@ -65,7 +65,7 @@ bool RoutingModule::update_routing_table(Id dest_id,
 std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
     Packet packet) const {
     auto iterator = m_routing_table.find(packet.dest_id);
-    if (iterator == m_routing_table.end()) {
+    if (iterator == m_routing_table.end()) [[unlikely]] {
         return nullptr;
     }
 
@@ -93,12 +93,12 @@ std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
 }
 
 std::shared_ptr<ILink> RoutingModule::next_inlink() {
-    if (m_inlinks.empty()) {
+    if (m_inlinks.empty()) [[unlikely]] {
         LOG_INFO("Inlinks storage is empty");
         return nullptr;
     }
     auto inlink = *m_next_inlink++;
-    if (inlink.expired()) {
+    if (inlink.expired()) [[unlikely]] {
         correctify_inlinks();
         return next_inlink();
     }

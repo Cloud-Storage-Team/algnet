@@ -17,7 +17,7 @@ public:
         : m_curr(a_begin), m_begin(a_begin), m_end(a_end) {}
 
     value_ref_t operator*() const {
-        if (m_begin == m_end) {
+        if (m_begin == m_end) [[unlikely]] {
             LOG_CRITICAL(
                 "Loop's begin iterator equals to end iterator while "
                 "dereferencing");
@@ -27,7 +27,7 @@ public:
     }
 
     LoopIterator& operator++() {
-        if (m_begin == m_end) {
+        if (m_begin == m_end) [[unlikely]] {
             LOG_ERROR("Loop's begin iterator equals to end iterator");
             return *this;
         }
@@ -39,7 +39,7 @@ public:
     }
 
     LoopIterator operator++(int) {
-        if (m_begin == m_end) {
+        if (m_begin == m_end) [[unlikely]] {
             LOG_ERROR("Loop's begin iterator equals to end iterator");
             return *this;
         }

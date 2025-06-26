@@ -13,7 +13,7 @@ Generate::Generate(Time a_time, std::weak_ptr<IFlow> a_flow, Size a_packet_size)
     : Event(a_time), m_flow(a_flow), m_packet_size(a_packet_size) {}
 
 void Generate::operator()() {
-    if (m_flow.expired()) {
+    if (m_flow.expired()) [[unlikely]] {
         return;
     }
 
@@ -30,7 +30,7 @@ Arrive::Arrive(Time a_time, std::weak_ptr<ILink> a_link, Packet a_packet)
     : Event(a_time), m_link(a_link), m_packet(a_packet) {};
 
 void Arrive::operator()() {
-    if (m_link.expired()) {
+    if (m_link.expired()) [[unlikely]] {
         return;
     }
 
@@ -41,7 +41,7 @@ Process::Process(Time a_time, std::weak_ptr<IProcessingDevice> a_device)
     : Event(a_time), m_device(a_device) {};
 
 void Process::operator()() {
-    if (m_device.expired()) {
+    if (m_device.expired()) [[unlikely]] {
         return;
     }
 
@@ -60,7 +60,7 @@ SendData::SendData(Time a_time, std::weak_ptr<IHost> a_device)
     : Event(a_time), m_device(a_device) {};
 
 void SendData::operator()() {
-    if (m_device.expired()) {
+    if (m_device.expired()) [[unlikely]] {
         return;
     }
 
@@ -82,7 +82,7 @@ StartFlow::StartFlow(Time a_time, std::weak_ptr<IFlow> a_flow)
     : Event(a_time), m_flow(a_flow) {}
 
 void StartFlow::operator()() {
-    if (m_flow.expired()) {
+    if (m_flow.expired()) [[unlikely]] {
         return;
     }
 
@@ -93,7 +93,7 @@ TcpMetric::TcpMetric(Time a_time, std::weak_ptr<ITcpFlow> a_flow)
     : Event(a_time), m_flow(a_flow) {};
 
 void TcpMetric::operator()() {
-    if (m_flow.expired()) {
+    if (m_flow.expired()) [[unlikely]] {
         return;
     }
 
