@@ -16,10 +16,6 @@ public:
          Size a_max_to_ingress_buffer_size = 4096);
     ~Link() = default;
 
-    /**
-     * Update the source egress delay and schedule the arrival event
-     * based on the egress queueing and transmission delays.
-     */
     void schedule_arrival(Packet packet) final;
 
     std::optional<Packet> get_packet() final;
@@ -36,6 +32,15 @@ public:
     Id get_id() const final;
 
 private:
+    class Transmit : public Event {
+    public:
+        Transmit(Time a_time, std::weak_ptr<Link> a_link);
+        void operator()() final;
+
+    private:
+        std::weak_ptr<Link> m_link;
+    };
+
     class Arrive : public Event {
     public:
         Arrive(Time a_time, std::weak_ptr<Link> a_link, Packet a_packet);
@@ -46,16 +51,7 @@ private:
         Packet m_paket;
     };
 
-    class Transmit : public Event {
-    public:
-        Transmit(Time a_time, std::weak_ptr<Link> a_link);
-        void operator()() final;
-
-    private:
-        std::weak_ptr<Link> m_link;
-    };
-
-    // Head packet leaves source eggress queue
+    // Head packet leaves source egress queue
     void transmit();
 
     // Packet arrives to destination ingress queue
@@ -63,8 +59,7 @@ private:
 
     Time get_transmission_delay(const Packet& packet) const;
 
-    // Shedule Arrive and Transmit events for first packet from source eggress
-    // queue
+    // Shedule Transmit event
     void start_head_packet_sending();
 
     Id m_id;
@@ -72,10 +67,12 @@ private:
     std::weak_ptr<IRoutingDevice> m_to;
     std::uint32_t m_speed_gbps;
 
-    Time m_transmission_delay;
+    Time m_propagation_delay;
 
     // Queue at the ingress port of the m_to device
-    PacketQueue m_from_eggress;
+    PacketQueue m_from_egress;
+
+    // Queue at the egress port of the m_to device
     PacketQueue m_to_ingress;
 };
 

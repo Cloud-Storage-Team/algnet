@@ -14,8 +14,8 @@ Link::Link(Id a_id, std::weak_ptr<IRoutingDevice> a_from,
       m_from(a_from),
       m_to(a_to),
       m_speed_gbps(a_speed_gbps),
-      m_transmission_delay(a_delay),
-      m_from_eggress(a_max_from_egress_buffer_size),
+      m_propagation_delay(a_delay),
+      m_from_egress(a_max_from_egress_buffer_size),
       m_to_ingress(a_max_to_ingress_buffer_size) {
     if (a_from.expired() || a_to.expired()) {
         LOG_WARN("Passed link to device is expired");
@@ -30,9 +30,9 @@ void Link::schedule_arrival(Packet packet) {
         return;
     }
 
-    bool empty_before_push = m_from_eggress.empty();
+    bool empty_before_push = m_from_egress.empty();
 
-    if (!m_from_eggress.push(packet)) {
+    if (!m_from_egress.push(packet)) {
         LOG_ERROR("Egress buffer overflow; packet " + packet.to_string() +
                   " lost");
         return;
@@ -73,11 +73,11 @@ std::shared_ptr<IRoutingDevice> Link::get_to() const {
 };
 
 Size Link::get_from_egress_queue_size() const {
-    return m_from_eggress.get_size();
+    return m_from_egress.get_size();
 }
 
 Size Link::get_max_from_egress_buffer_size() const {
-    return m_from_eggress.get_max_size();
+    return m_from_egress.get_max_size();
 }
 
 Size Link::get_to_ingress_queue_size() const { return m_to_ingress.get_size(); }
@@ -124,16 +124,16 @@ Time Link::get_transmission_delay(const Packet& packet) const {
 };
 
 void Link::transmit() {
-    if (m_from_eggress.empty()) {
-        LOG_ERROR("Transmit on link with empty source eggress buffer");
+    if (m_from_egress.empty()) {
+        LOG_ERROR("Transmit on link with empty source egress buffer");
         return;
     }
     Time current_time = Scheduler::get_instance().get_current_time();
-    Scheduler::get_instance().add<Arrive>(current_time + m_transmission_delay,
+    Scheduler::get_instance().add<Arrive>(current_time + m_propagation_delay,
                                           shared_from_this(),
-                                          m_from_eggress.front());
-    m_from_eggress.pop();
-    if (!m_from_eggress.empty()) {
+                                          m_from_egress.front());
+    m_from_egress.pop();
+    if (!m_from_egress.empty()) {
         start_head_packet_sending();
     }
 }
@@ -147,7 +147,7 @@ void Link::arrive(Packet packet) {
 
     MetricsCollector::get_instance().add_queue_size(
         get_id(), Scheduler::get_instance().get_current_time(),
-        m_from_eggress.get_size());
+        m_from_egress.get_size());
 
     m_to.lock()->notify_about_arrival(
         Scheduler::get_instance().get_current_time());
@@ -158,7 +158,7 @@ void Link::arrive(Packet packet) {
 void Link::start_head_packet_sending() {
     Time current_time = Scheduler::get_instance().get_current_time();
     Scheduler::get_instance().add<Transmit>(
-        current_time + get_transmission_delay(m_from_eggress.front()),
+        current_time + get_transmission_delay(m_from_egress.front()),
         shared_from_this());
 }
 
