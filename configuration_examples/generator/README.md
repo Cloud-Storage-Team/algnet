@@ -1,4 +1,4 @@
-# How to generate config
+# How to generate a config
 
 ### Incast topology N-to-1
 
