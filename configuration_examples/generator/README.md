@@ -36,7 +36,7 @@ python3 configuration_examples/generator/bottleneck.py \
 python3 configuration_examples/generator/bottleneck.py \
   --senders M \ # M should be replaced with a number
   --receivers N \ # N should be replaced with a number
-  --flows 1-to-all \ # Total M*N flows
+  --flows all-to-all \ # Total M*N flows
   --packets 10000 \
   --simulation-time 1000000 \
   --topology incast-M-to-N-topology.yml \

@@ -145,8 +145,8 @@ def generate_simulation(
             }
         return simulation
 
-    elif flows == "1-to-all":
-        # One sender to all receivers
+    elif flows == "all-to-all":
+        # Each sender to all receivers
         flow_id = 0
         for i in range(0, num_senders):
             for j in range(0, num_receivers):
@@ -223,7 +223,9 @@ def parse_arguments():
         default=500,
         help="Time between two consequent packets, ns",
     )
-    parser.add_argument("--flows", default="1-to-1", help="Flows: 1-to-1 or 1-to-all"),
+    parser.add_argument(
+        "--flows", default="1-to-1", help="Flows: 1-to-1 or all-to-all"
+    ),
 
     args = parser.parse_args()
 
