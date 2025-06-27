@@ -188,7 +188,7 @@ def parse_arguments():
         default=500,
         help="Time between two consequent packets, ns",
     )
-    parser.add_argument("--flows", default="1-to-1", help="Flows: 1-to-1 on 1-to-all"),
+    parser.add_argument("--flows", default="1-to-1", help="Flows: 1-to-1 or 1-to-all"),
 
     args = parser.parse_args()
 
