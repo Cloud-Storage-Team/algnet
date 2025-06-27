@@ -1,7 +1,5 @@
 #include "flow_mock.hpp"
 
-#include "event.hpp"
-
 namespace test {
 
 FlowMock::FlowMock(std::shared_ptr<sim::IHost> m_receiver)

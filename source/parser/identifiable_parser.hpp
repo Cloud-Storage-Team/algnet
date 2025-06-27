@@ -4,7 +4,10 @@
 
 #include <memory>
 
+#include "device/host.hpp"
+#include "device/switch.hpp"
 #include "flow/basic_flow.hpp"
+#include "flow/tcp_flow.hpp"
 #include "parser/parse_primitives.hpp"
 #include "utils/identifier_factory.hpp"
 
@@ -33,25 +36,31 @@ static std::string concatenate(T first, Args... args) {
 }
 
 template <typename T, typename... Args>
-static void parse_object_helper(Args... args) {
-    if (!IdentifierFactory::get_instance().add_object<T>(args...)) {
+static void parse_object_helper(Args&&... args) {
+    if (!IdentifierFactory::get_instance().add_object<T>(
+            std::forward<Args>(args)...)) {
         throw std::runtime_error(fmt::format(
             "Can not add object {}({}): object with this id already exists",
             typeid(T).name(), concatenate(args...)));
     }
 }
 
+static ECN parse_ecn(const YAML::Node& node) {
+    float min = node["min"].as<float>();
+    float max = node["max"].as<float>();
+    float probability = node["probability"].as<float>();
+    return ECN(min, max, probability);
+}
+
 template <>
 Id parse_object<Switch>(const YAML::Node& key_node,
                         const YAML::Node& value_node) {
-    (void)value_node;
     Id id = key_node.as<Id>();
-    if (value_node["threshold"]) {
-        double threshold = value_node["threshold"].as<double>();
-        bool is_valid = (threshold > 0.0 && threshold <= 1.0);
-        parse_object_helper<Switch>(id, is_valid, threshold);
-    } else {
+    const YAML::Node& ecn_node = value_node["ecn"];
+    if (!ecn_node) {
         parse_object_helper<Switch>(id);
+    } else {
+        parse_object_helper<Switch>(id, parse_ecn(ecn_node));
     }
     return id;
 }

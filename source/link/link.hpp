@@ -2,8 +2,9 @@
 
 #include <queue>
 
-#include "event.hpp"
+#include "event/event.hpp"
 #include "link/interfaces/i_link.hpp"
+#include "packet.hpp"
 
 namespace sim {
 
@@ -21,21 +22,33 @@ public:
      */
     void schedule_arrival(Packet packet) final;
 
-    /**
-     * Removes packet from the source egress queue.
-     */
-    void process_arrival(Packet packet) final;
-
     std::optional<Packet> get_packet() final;
 
     std::shared_ptr<IRoutingDevice> get_from() const final;
     std::shared_ptr<IRoutingDevice> get_to() const final;
+
     Size get_from_egress_queue_size() const final;
     Size get_max_from_egress_buffer_size() const final;
+
+    Size get_to_ingress_queue_size() const final;
+    Size get_max_to_ingress_queue_size() const final;
 
     Id get_id() const final;
 
 private:
+    class Arrive : public Event {
+    public:
+        Arrive(Time a_time, std::weak_ptr<Link> a_link, Packet a_packet);
+        void operator()() final;
+
+    private:
+        std::weak_ptr<Link> m_link;
+        Packet m_paket;
+    };
+
+    // Removes packet from the source egress queue.
+    void process_arrival(Packet packet);
+
     Time get_transmission_time(const Packet& packet) const;
 
     Id m_id;

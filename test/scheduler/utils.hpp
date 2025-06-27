@@ -4,7 +4,7 @@
 
 #include <ctime>
 
-#include "event.hpp"
+#include "event/event.hpp"
 #include "scheduler/scheduler.hpp"
 
 namespace test {
@@ -40,5 +40,21 @@ struct ComparatorEvent : public sim::Event {
 };
 
 template <typename T>
-void AddEvents(int number, std::shared_ptr<Time> event_time = nullptr);
+void AddEvents(int number, std::shared_ptr<Time> event_time = nullptr) {
+    static_assert(std::is_base_of<sim::Event, T>::value,
+                  "T must inherit from Event");
+
+    srand(static_cast<unsigned int>(time(0)));
+    Time min_time = 1;
+    Time max_time = static_cast<Time>(1e9);
+
+    while ((number--) > 0) {
+        if (event_time == nullptr) {
+            sim::Scheduler::get_instance().add<T>(
+                rand() % (max_time - min_time + 1) + min_time);
+        } else {
+            sim::Scheduler::get_instance().add<T>(++(*event_time.get()));
+        }
+    }
+}
 }  // namespace test

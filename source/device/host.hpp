@@ -3,7 +3,8 @@
 
 #include "device/routing_module.hpp"
 #include "device/scheduling_module.hpp"
-#include "event.hpp"
+#include "event/process.hpp"
+#include "event/send_data.hpp"
 #include "interfaces/i_host.hpp"
 
 namespace sim {

@@ -2,7 +2,7 @@
 #include <cppcoro/when_all.hpp>
 #include <queue>
 
-#include "event.hpp"
+#include "event/event.hpp"
 #include "scheduler/multithread_scheduler.hpp"
 
 namespace sim {

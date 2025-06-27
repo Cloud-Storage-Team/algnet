@@ -28,6 +28,17 @@ Link::Link(Id a_id, std::weak_ptr<IRoutingDevice> a_from,
     }
 }
 
+Link::Arrive::Arrive(Time a_time, std::weak_ptr<Link> a_link, Packet a_packet)
+    : Event(a_time), m_link(a_link), m_paket(a_packet) {}
+
+void Link::Arrive::operator()() {
+    if (m_link.expired()) {
+        return;
+    }
+
+    m_link.lock()->process_arrival(m_paket);
+}
+
 Time Link::get_transmission_time(const Packet& packet) const {
     if (m_speed_gbps == 0) {
         LOG_WARN("Passed zero link speed");
@@ -131,6 +142,11 @@ Size Link::get_from_egress_queue_size() const {
 
 Size Link::get_max_from_egress_buffer_size() const {
     return m_max_from_egress_buffer_size;
+}
+
+Size Link::get_to_ingress_queue_size() const { return m_to_ingress_queue_size; }
+Size Link::get_max_to_ingress_queue_size() const {
+    return m_max_to_ingress_buffer_size;
 }
 
 Id Link::get_id() const { return m_id; }

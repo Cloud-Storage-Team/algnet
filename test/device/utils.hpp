@@ -20,12 +20,15 @@ public:
     ~TestLink() = default;
 
     void schedule_arrival(sim::Packet packet) final;
-    void process_arrival(sim::Packet packet) final;
     std::optional<sim::Packet> get_packet() final;
     std::shared_ptr<sim::IRoutingDevice> get_from() const final;
     std::shared_ptr<sim::IRoutingDevice> get_to() const final;
+    
     Size get_from_egress_queue_size() const final;
     Size get_max_from_egress_buffer_size() const final;
+
+    Size get_to_ingress_queue_size() const final;
+    Size get_max_to_ingress_queue_size() const final;
 
     Id get_id() const final;
 

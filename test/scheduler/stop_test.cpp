@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "utils.hpp"
+#include "event/stop.hpp"
 
 namespace test {
 

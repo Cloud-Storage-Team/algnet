@@ -2,7 +2,7 @@
 
 #include <queue>
 
-#include "event.hpp"
+#include "event/event.hpp"
 
 namespace sim {
 

@@ -2,6 +2,7 @@
 
 #include "device/interfaces/i_host.hpp"
 #include "flow/interfaces/i_tcp_flow.hpp"
+#include "packet.hpp"
 
 namespace sim {
 
@@ -10,7 +11,8 @@ public:
     TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
             std::shared_ptr<IHost> a_dest, Size a_packet_size,
             Time a_delay_between_packets, std::uint32_t a_packets_to_send,
-            Time a_delay_threshold = 4000, std::uint32_t a_ssthresh = 8);
+            Time a_delay_threshold = 4000, std::uint32_t a_ssthresh = 8,
+            bool a_ecn_capable = true);
 
     void start() final;
     Time create_new_data_packet() final;
@@ -33,10 +35,11 @@ private:
     std::weak_ptr<IHost> m_src;
     std::weak_ptr<IHost> m_dest;
 
+    bool m_ecn_capable;
     Size m_packet_size;
     Time m_delay_between_packets;
     std::uint32_t m_packets_to_send;
-    std::uint32_t m_delay_threshold;  // delay threshold for update
+    Time m_delay_threshold;  // delay threshold for update
 
     double m_ssthresh;  // Slow start threshold
     double m_cwnd;      // Congestion window

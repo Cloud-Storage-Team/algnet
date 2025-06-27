@@ -19,16 +19,15 @@ public:
      */
     virtual void schedule_arrival(Packet packet) = 0;
 
-    /**
-     * Removes packet from the source egress queue.
-     */
-    virtual void process_arrival(Packet packet) = 0;
-
     virtual std::optional<Packet> get_packet() = 0;
     virtual std::shared_ptr<IRoutingDevice> get_from() const = 0;
     virtual std::shared_ptr<IRoutingDevice> get_to() const = 0;
-    virtual Size get_from_egress_queue_size() const = 0;
+
     virtual Size get_max_from_egress_buffer_size() const = 0;
+    virtual Size get_from_egress_queue_size() const = 0;
+
+    virtual Size get_to_ingress_queue_size() const = 0;
+    virtual Size get_max_to_ingress_queue_size() const = 0;
 };
 
 }  // namespace sim

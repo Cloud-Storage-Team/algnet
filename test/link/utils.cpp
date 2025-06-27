@@ -15,20 +15,20 @@ bool DeviceMock::add_inlink(std::shared_ptr<sim::ILink> link) { return false; }
 bool DeviceMock::add_outlink(std::shared_ptr<sim::ILink> link) { return false; }
 
 bool DeviceMock::update_routing_table(Id dest_id,
-                                      std::shared_ptr<sim::ILink> link, size_t paths_count) {
+                                      std::shared_ptr<sim::ILink> link,
+                                      size_t paths_count) {
     return false;
 }
 
 std::set<std::shared_ptr<sim::ILink>> DeviceMock::get_outlinks() { return {}; }
 
-std::shared_ptr<sim::ILink> DeviceMock::get_link_to_destination(sim::Packet packet) const {
+std::shared_ptr<sim::ILink> DeviceMock::get_link_to_destination(
+    sim::Packet packet) const {
     return nullptr;
 }
 
 std::shared_ptr<sim::ILink> DeviceMock::next_inlink() { return {}; }
 
-bool DeviceMock::notify_about_arrival(Time arrival_time) {
-    return false;
-};
+bool DeviceMock::notify_about_arrival(Time arrival_time) { return false; };
 
 }  // namespace test

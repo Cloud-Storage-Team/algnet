@@ -1,13 +1,14 @@
 #pragma once
 
-
 #include <queue>
 
 #include "device/interfaces/i_host.hpp"
 #include "flow/interfaces/i_flow.hpp"
+#include "packet.hpp"
 
 namespace sim {
 
+// Basic flow version, no congestion control
 class BasicFlow : public IFlow, public std::enable_shared_from_this<BasicFlow> {
 public:
     BasicFlow(Id a_id, std::shared_ptr<IHost> a_src,
