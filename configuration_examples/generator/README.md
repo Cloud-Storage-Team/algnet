@@ -1,6 +1,32 @@
 # Usage examples
 
-All the following commands must be run from root directory!
+`bottleneck.py`
+
+```bash
+Generate topology and simulation YAML files.
+
+options:
+  -h, --help            show this help message and exit
+  --senders SENDERS     Number of sender devices
+  --receivers RECEIVERS
+                        Number of receiver devices
+  --switches SWITCHES   Number of switches between senders and receivers
+  --topology TOPOLOGY   Output filename for topology file
+  --simulation SIMULATION
+                        Output filename for simulation file
+  --topology-dir TOPOLOGY_DIR
+                        Path to the topology config file
+  --simulation-dir SIMULATION_DIR
+                        Path to the simulation config file
+  --simulation-time SIMULATION_TIME
+                        Time of the simulation, ns
+  --packets PACKETS     Number of packets sending by each sender
+  --packet-interval PACKET_INTERVAL
+                        Time between two consequent packets, ns
+  --flows FLOWS         Flows: 1-to-1 or all-to-all
+```
+
+#### All the following commands must be run from root directory!
 
 ### Incast topology N-to-1
 
