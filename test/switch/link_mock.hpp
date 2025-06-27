@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "link/interfaces/i_link.hpp"
+#include "link/i_link.hpp"
 #include "packet.hpp"
 
 class LinkMock : public sim::ILink {
@@ -15,7 +15,7 @@ public:
     virtual std::optional<sim::Packet> get_packet() final;
     virtual std::shared_ptr<sim::IRoutingDevice> get_from() const final;
     virtual std::shared_ptr<sim::IRoutingDevice> get_to() const final;
-    
+
     virtual Size get_from_egress_queue_size() const final;
     virtual Size get_max_from_egress_buffer_size() const final;
 

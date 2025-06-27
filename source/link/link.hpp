@@ -3,8 +3,8 @@
 #include <queue>
 
 #include "event/event.hpp"
-#include "link/interfaces/i_link.hpp"
-#include "packet_queue.hpp"
+#include "link/i_link.hpp"
+#include "packet_queue/simple_packet_queue.hpp"
 
 namespace sim {
 
@@ -70,10 +70,10 @@ private:
     Time m_propagation_delay;
 
     // Queue at the ingress port of the m_to device
-    PacketQueue m_from_egress;
+    SimplePacketQueue m_from_egress;
 
     // Queue at the egress port of the m_to device
-    PacketQueue m_to_ingress;
+    SimplePacketQueue m_to_ingress;
 };
 
 }  // namespace sim
