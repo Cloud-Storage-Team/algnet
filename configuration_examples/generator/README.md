@@ -1,4 +1,4 @@
-# How to generate a config using bottleneck.py
+# Usage examples
 
 All the following commands must be run from root directory!
 
