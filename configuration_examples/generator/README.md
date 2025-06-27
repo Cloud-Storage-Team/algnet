@@ -1,22 +1,36 @@
 # How to generate a config
 
-### Incast topology N-to-1
+All the following commands must be run from root directory!
 
-To generate simulation and topology configs for **N-to-1 incast** topology just run this command from root directory:
+### Incast topology N-to-1
 
 ```bash
 python3 configuration_examples/generator/bottleneck.py \
   --senders N \ # N should be replaced with a number
   --receivers 1 \
   --packets 10000 \
-  --simulation-time 1000000
-  --topology incast-50-to-1-topology.yml \
+  --simulation-time 1000000 \
+  --topology incast-N-to-1-topology.yml \
   --topology-dir configuration_examples/generator/ \
-  --simulation incast-50-to-1-simulation.yml \
+  --simulation incast-N-to-1-simulation.yml \
   --simulation-dir configuration_examples/generator/
 ```
 
-### Incast topology M-to-N
+### Incast topology N-to-N, N flows
+
+```bash
+python3 configuration_examples/generator/bottleneck.py \
+  --senders N \ # N should be replaced with a number
+  --receivers N \ # N should be replaced with a number
+  --packets 10000 \
+  --simulation-time 1000000 \
+  --topology incast-N-to-N-topology.yml \
+  --topology-dir configuration_examples/generator/ \
+  --simulation incast-N-to-N-simulation.yml \
+  --simulation-dir configuration_examples/generator/
+```
+
+### Incast topology M-to-N, M*N flows
 
 ```bash
 python3 configuration_examples/generator/bottleneck.py \
@@ -24,9 +38,9 @@ python3 configuration_examples/generator/bottleneck.py \
   --receivers N \ # N should be replaced with a number
   --flows 1-to-all \ # Total M*N flows
   --packets 10000 \
-  --simulation-time 1000000
-  --topology incast-50-to-1-topology.yml \
+  --simulation-time 1000000 \
+  --topology incast-M-to-N-topology.yml \
   --topology-dir configuration_examples/generator/ \
-  --simulation incast-50-to-1-simulation.yml \
+  --simulation incast-M-to-N-simulation.yml \
   --simulation-dir configuration_examples/generator/
 ```
