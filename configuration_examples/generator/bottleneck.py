@@ -7,6 +7,7 @@ import os
 def generate_topology(
     num_senders,
     num_receivers,
+    num_switches,
     switch_name="switch",
     link_latency="0ns",
     link_throughput="100Gbps",
@@ -14,6 +15,9 @@ def generate_topology(
     egress_buffer_size="1024000B",
 ):
     topology = {"devices": {}, "links": {}}
+
+    sender_switch_name = "switch0"
+    receiver_switch_name = f"switch{num_switches - 1}"
 
     # Add senders
     for i in range(0, num_senders):
@@ -25,7 +29,7 @@ def generate_topology(
         link_name = f"link{base_index}"
         topology["links"][link_name] = {
             "from": sender_name,
-            "to": switch_name,
+            "to": sender_switch_name,
             "latency": link_latency,
             "throughput": link_throughput,
             "ingress_buffer_size": ingress_buffer_size,
@@ -35,7 +39,7 @@ def generate_topology(
         # Add link from switch to sender
         link_name = f"link{base_index + 1}"
         topology["links"][link_name] = {
-            "from": switch_name,
+            "from": sender_switch_name,
             "to": sender_name,
             "latency": link_latency,
             "throughput": link_throughput,
@@ -52,7 +56,7 @@ def generate_topology(
         # Add link from switch to receiver
         link_name = f"link{base_index}"
         topology["links"][link_name] = {
-            "from": switch_name,
+            "from": receiver_switch_name,
             "to": receiver_name,
             "latency": link_latency,
             "throughput": link_throughput,
@@ -64,15 +68,40 @@ def generate_topology(
         link_name = f"link{base_index + 1}"
         topology["links"][link_name] = {
             "from": receiver_name,
-            "to": switch_name,
+            "to": receiver_switch_name,
             "latency": link_latency,
             "throughput": link_throughput,
             "ingress_buffer_size": ingress_buffer_size,
             "egress_buffer_size": egress_buffer_size,
         }
 
-    # Add the switch
-    topology["devices"][switch_name] = {"type": "switch", "threshold": 0.7}
+    # Add the switches
+    for i in range(0, num_switches):
+        topology["devices"][switch_name] = {"type": f"switch{i}", "threshold": 0.7}
+
+    # Add links between switches
+    for i in range(0, num_switches - 1):
+        # Forward link
+        link_name = f"switch_link_{i}_to_{i + 1}"
+        topology["links"][link_name] = {
+            "from": f"switch{i}",
+            "to": f"switch{i + 1}",
+            "latency": link_latency,
+            "throughput": link_throughput,
+            "ingress_buffer_size": ingress_buffer_size,
+            "egress_buffer_size": egress_buffer_size,
+        }
+
+        # Backward link
+        link_name = f"switch_link_{i + 1}_to_{i}"
+        topology["links"][link_name] = {
+            "from": f"switch{i + 1}",
+            "to": f"switch{i}",
+            "latency": link_latency,
+            "throughput": link_throughput,
+            "ingress_buffer_size": ingress_buffer_size,
+            "egress_buffer_size": egress_buffer_size,
+        }
 
     return topology
 
@@ -154,6 +183,12 @@ def parse_arguments():
         "--receivers", type=int, required=True, help="Number of receiver devices"
     )
     parser.add_argument(
+        "--switches",
+        type=int,
+        default=1,
+        help="Number of switches between senders and receivers",
+    )
+    parser.add_argument(
         "--topology",
         default="bottleneck_topology.yml",
         help="Output filename for topology file",
@@ -199,7 +234,8 @@ def parse_arguments():
     if args.receivers < 1:
         print("Error: Number of receivers must be at least 1", file=sys.stderr)
         sys.exit(1)
-
+    if args.switches > 2:
+        print("Warning: Number of switches should be less than 3", file=sys.stderr)
     return args
 
 
@@ -208,7 +244,7 @@ def main():
     args = parse_arguments()
 
     # Generate topology
-    topology = generate_topology(args.senders, args.receivers)
+    topology = generate_topology(args.senders, args.receivers, args.switches)
     save_yaml(topology, args.topology_dir + args.topology)
     print(
         f"Topology file saved as {args.topology_dir + args.topology} with {args.senders} senders and {args.receivers} receivers"

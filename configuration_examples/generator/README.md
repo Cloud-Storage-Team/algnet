@@ -1,4 +1,4 @@
-# How to generate a config
+# How to generate a config using bottleneck.py
 
 All the following commands must be run from root directory!
 
@@ -16,7 +16,7 @@ python3 configuration_examples/generator/bottleneck.py \
   --simulation-dir configuration_examples/generator/
 ```
 
-### Incast topology N-to-N, N flows
+### Topology N-to-N, N flows
 
 ```bash
 python3 configuration_examples/generator/bottleneck.py \
@@ -30,7 +30,7 @@ python3 configuration_examples/generator/bottleneck.py \
   --simulation-dir configuration_examples/generator/
 ```
 
-### Incast topology M-to-N, M*N flows
+### Topology M-to-N, M*N flows
 
 ```bash
 python3 configuration_examples/generator/bottleneck.py \
@@ -44,3 +44,18 @@ python3 configuration_examples/generator/bottleneck.py \
   --simulation incast-M-to-N-simulation.yml \
   --simulation-dir configuration_examples/generator/
 ```
+
+### Topology with several switches between senders and receivers
+
+```bash
+python3 configuration_examples/generator/bottleneck.py \
+  --senders M \ # M should be replaced with a number
+  --receivers N \ # N should be replaced with a number
+  --switches 2 \
+  --flows 1-to-all \
+  --packets 10000 \
+  --simulation-time 1000000 \
+  --topology incast-M-to-N-topology.yml \
+  --topology-dir configuration_examples/generator/ \
+  --simulation incast-M-to-N-simulation.yml \
+  --simulation-dir configuration_examples/generator/
