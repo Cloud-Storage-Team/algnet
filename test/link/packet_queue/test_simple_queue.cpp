@@ -11,8 +11,17 @@ public:
     void SetUp() override {};
 };
 
-TEST_F(SimpleQueueTest, PopFromEmpty) {
-    TestPopEmpty<sim::SimplePacketQueue>(0);
+TEST_F(SimpleQueueTest, PopFromEmpty) { TestEmpty<sim::SimplePacketQueue>(0); }
+TEST_F(SimpleQueueTest, TestPushEmptyPacket) {
+    TestPushOnePacket<sim::SimplePacketQueue>(0, 0);
+}
+
+TEST_F(SimpleQueueTest, TestPushOnePacket) {
+    TestPushOnePacket<sim::SimplePacketQueue>(10, 10);
+}
+
+TEST_F(SimpleQueueTest, TestOverflow) {
+    TestOverflow<sim::SimplePacketQueue>(128);
 }
 
 }  // namespace test
