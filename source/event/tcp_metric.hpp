@@ -1,5 +1,6 @@
 #pragma once
 #include "event.hpp"
+#include "flow/interfaces/i_tcp_flow.hpp"
 
 namespace sim {
 

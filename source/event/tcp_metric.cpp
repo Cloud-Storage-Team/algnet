@@ -1,7 +1,8 @@
+#include "tcp_metric.hpp"
+
 #include "flow/interfaces/i_tcp_flow.hpp"
 #include "metrics/metrics_collector.hpp"
-#include "scheduler.hpp"
-#include "tcp_metric.hpp"
+#include "scheduler/scheduler.hpp"
 
 namespace sim {
 
