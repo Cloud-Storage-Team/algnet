@@ -22,12 +22,12 @@ def generate_topology(
 
     # Add senders
     for i in range(0, num_senders):
-        sender_name = f"sender{i}"
+        sender_name = f"sender_{i}"
         topology["devices"][sender_name] = {"type": "host"}
         base_index = 2 * i
 
         # Add link from sender to switch
-        link_name = f"link{base_index}"
+        link_name = f"link_{base_index}"
         topology["links"][link_name] = {
             "from": sender_name,
             "to": sender_switch_name,
@@ -38,7 +38,7 @@ def generate_topology(
         }
 
         # Add link from switch to sender
-        link_name = f"link{base_index + 1}"
+        link_name = f"link_{base_index + 1}"
         topology["links"][link_name] = {
             "from": sender_switch_name,
             "to": sender_name,
@@ -50,12 +50,12 @@ def generate_topology(
 
     # Add receivers
     for i in range(0, num_receivers):
-        receiver_name = f"receiver{i}"
+        receiver_name = f"receiver_{i}"
         topology["devices"][receiver_name] = {"type": "host"}
         base_index = 2 * num_senders + 2 * i
 
         # Add link from switch to receiver
-        link_name = f"link{base_index}"
+        link_name = f"link_{base_index}"
         topology["links"][link_name] = {
             "from": receiver_switch_name,
             "to": receiver_name,
@@ -66,7 +66,7 @@ def generate_topology(
         }
 
         # Add link from receiver to switch
-        link_name = f"link{base_index + 1}"
+        link_name = f"link_{base_index + 1}"
         topology["links"][link_name] = {
             "from": receiver_name,
             "to": receiver_switch_name,
@@ -78,15 +78,15 @@ def generate_topology(
 
     # Add the switches
     for i in range(0, num_switches):
-        topology["devices"][f"{switch_name}{i}"] = {"type": "switch", "threshold": 0.7}
+        topology["devices"][switch_names[i]] = {"type": "switch", "threshold": 0.7}
 
     # Add links between switches
     for i in range(0, num_switches - 1):
         # Forward link
-        link_name = f"switch_link_{i}_to_{i + 1}"
+        link_name = f"link_{i}_to_{i + 1}"
         topology["links"][link_name] = {
-            "from": f"switch{i}",
-            "to": f"switch{i + 1}",
+            "from": switch_names[i],
+            "to": switch_names[i + 1],
             "latency": link_latency,
             "throughput": link_throughput,
             "ingress_buffer_size": ingress_buffer_size,
@@ -94,10 +94,10 @@ def generate_topology(
         }
 
         # Backward link
-        link_name = f"switch_link_{i + 1}_to_{i}"
+        link_name = f"link_{i + 1}_to_{i}"
         topology["links"][link_name] = {
-            "from": f"switch{i + 1}",
-            "to": f"switch{i}",
+            "from": switch_names[i + 1],
+            "to": switch_names[i],
             "latency": link_latency,
             "throughput": link_throughput,
             "ingress_buffer_size": ingress_buffer_size,
@@ -135,11 +135,11 @@ def generate_simulation(
         # If there are more receivers than senders, extra receivers won't have flows
         flow_id = 0
         for i in range(0, num_senders):
-            flow_name = f"flow{flow_id}"
+            flow_name = f"flow_{flow_id}"
             flow_id += 1
             simulation["flows"][flow_name] = {
-                "sender_id": f"sender{i}",
-                "receiver_id": f"receiver{min(i,num_receivers-1)}",
+                "sender_id": f"sender_{i}",
+                "receiver_id": f"receiver_{min(i,num_receivers-1)}",
                 "packet_size": packet_size,
                 "packet_interval": packet_interval,
                 "number_of_packets": number_of_packets,
@@ -151,11 +151,11 @@ def generate_simulation(
         flow_id = 0
         for i in range(0, num_senders):
             for j in range(0, num_receivers):
-                flow_name = f"flow{flow_id}"
+                flow_name = f"flow_{flow_id}"
                 flow_id += 1
                 simulation["flows"][flow_name] = {
-                    "sender_id": f"sender{i}",
-                    "receiver_id": f"receiver{j}",
+                    "sender_id": f"sender_{i}",
+                    "receiver_id": f"receiver_{j}",
                     "packet_size": packet_size,
                     "packet_interval": packet_interval,
                     "number_of_packets": number_of_packets,
