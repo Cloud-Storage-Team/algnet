@@ -2,7 +2,7 @@
 #include <memory>
 
 #include "device/interfaces/i_host.hpp"
-#include "link/interfaces/i_link.hpp"
+#include "link/i_link.hpp"
 #include "packet.hpp"
 
 namespace test {

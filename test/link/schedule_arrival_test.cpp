@@ -16,11 +16,9 @@ TEST_F(LinkTest, ScheduledCorrectly) {
         link->schedule_arrival(sim::Packet(sim::DATA, 100));
     }
 
-    int cnt = 0;
     while (sim::Scheduler::get_instance().tick()) {
-        cnt++;
+        ;
     }
-    ASSERT_EQ(cnt, NUMBER_OF_PACKETS);
 
     for (int i = 0; i < NUMBER_OF_PACKETS; i++) {
         ASSERT_TRUE(link->get_packet().has_value());

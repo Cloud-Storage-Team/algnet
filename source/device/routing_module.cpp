@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "link/interfaces/i_link.hpp"
+#include "link/i_link.hpp"
 #include "logger/logger.hpp"
 
 namespace sim {
