@@ -16,8 +16,9 @@ def generate_topology(
 ):
     topology = {"devices": {}, "links": {}}
 
-    sender_switch_name = "switch0"
-    receiver_switch_name = f"switch{num_switches - 1}"
+    switch_names = [f"{switch_name}_{i}" for i in range(num_switches)]
+    sender_switch_name = switch_names[0]
+    receiver_switch_name = switch_names[-1]
 
     # Add senders
     for i in range(0, num_senders):
