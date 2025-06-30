@@ -77,7 +77,7 @@ def generate_topology(
 
     # Add the switches
     for i in range(0, num_switches):
-        topology["devices"][switch_name] = {"type": f"switch{i}", "threshold": 0.7}
+        topology["devices"][f"{switch_name}{i}"] = {"type": "switch", "threshold": 0.7}
 
     # Add links between switches
     for i in range(0, num_switches - 1):
