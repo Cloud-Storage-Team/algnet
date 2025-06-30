@@ -52,8 +52,6 @@ def main(args):
     )
 
     generator_dir_path = "configuration_examples/generator/"
-    # topology_dir_path = "configuration_examples/topology_examples/"
-    # simulation_dir_path = "configuration_examples/simulation_examples/"
 
     bottleneck_script_path = os.path.join(generator_dir_path, "bottleneck.py")
 
@@ -64,14 +62,10 @@ def main(args):
         str(parsed_args.senders),
         "--receivers",
         str(parsed_args.receivers),
-        "--topology",
-        topology_config_name,
-        "--topology-dir",
-        generator_dir_path,
-        "--simulation",
-        simulation_config_name,
-        "--simulation-dir",
-        generator_dir_path,
+        "--topology-path",
+        generator_dir_path + topology_config_name,
+        "--simulation-path",
+        generator_dir_path + simulation_config_name,
         "--packets",
         str(parsed_args.packets),
         "--simulation-time",
