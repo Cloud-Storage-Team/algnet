@@ -11,13 +11,10 @@ options:
   --receivers RECEIVERS
                         Number of receiver devices
   --switches SWITCHES   Number of switches between senders and receivers
-  --topology TOPOLOGY   Output filename for topology file
-  --simulation SIMULATION
-                        Output filename for simulation file
-  --topology-dir TOPOLOGY_DIR
-                        Path to the topology config file
-  --simulation-dir SIMULATION_DIR
-                        Path to the simulation config file
+  --topology-path TOPOLOGY_PATH
+                        Path to the output topology config file
+  --simulation-path SIMULATION_PATH
+                        Path to the output simulation config file
   --simulation-time SIMULATION_TIME
                         Time of the simulation, ns
   --packets PACKETS     Number of packets sending by each sender
@@ -36,10 +33,8 @@ python3 configuration_examples/generator/bottleneck.py \
   --receivers 1 \
   --packets 10000 \
   --simulation-time 1000000 \
-  --topology incast-N-to-1-topology.yml \
-  --topology-dir configuration_examples/generator/ \
-  --simulation incast-N-to-1-simulation.yml \
-  --simulation-dir configuration_examples/generator/
+  --topology-path configuration_examples/generator/incast-N-to-1-topology.yml \
+  --simulation-path configuration_examples/generator/incast-N-to-1-simulation.yml
 ```
 
 ### Topology N-to-N, N flows
@@ -50,10 +45,8 @@ python3 configuration_examples/generator/bottleneck.py \
   --receivers N \ # N should be replaced with a number
   --packets 10000 \
   --simulation-time 1000000 \
-  --topology incast-N-to-N-topology.yml \
-  --topology-dir configuration_examples/generator/ \
-  --simulation incast-N-to-N-simulation.yml \
-  --simulation-dir configuration_examples/generator/
+  --topology-path configuration_examples/generator/incast-N-to-N-topology.yml \
+  --simulation-path configuration_examples/generator/incast-N-to-N-simulation.yml
 ```
 
 ### Topology M-to-N, M*N flows
@@ -65,10 +58,8 @@ python3 configuration_examples/generator/bottleneck.py \
   --flows all-to-all \ # Total M*N flows
   --packets 10000 \
   --simulation-time 1000000 \
-  --topology incast-M-to-N-topology.yml \
-  --topology-dir configuration_examples/generator/ \
-  --simulation incast-M-to-N-simulation.yml \
-  --simulation-dir configuration_examples/generator/
+  --topology-path configuration_examples/generator/incast-M-to-N-topology.yml \
+  --simulation-path configuration_examples/generator/incast-M-to-N-simulation.yml
 ```
 
 ### Topology with several switches between senders and receivers
@@ -81,7 +72,6 @@ python3 configuration_examples/generator/bottleneck.py \
   --flows 1-to-all \
   --packets 10000 \
   --simulation-time 1000000 \
-  --topology incast-M-to-N-topology.yml \
-  --topology-dir configuration_examples/generator/ \
-  --simulation incast-M-to-N-simulation.yml \
-  --simulation-dir configuration_examples/generator/
+  --topology-path configuration_examples/generator/incast-M-to-N-topology.yml \
+  --simulation-path configuration_examples/generator/incast-M-to-N-simulation.yml
+```

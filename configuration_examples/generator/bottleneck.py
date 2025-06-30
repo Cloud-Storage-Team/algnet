@@ -189,24 +189,14 @@ def parse_arguments():
         help="Number of switches between senders and receivers",
     )
     parser.add_argument(
-        "--topology",
+        "--topology-path",
         default="bottleneck_topology.yml",
-        help="Output filename for topology file",
+        help="Path to the output topology config file",
     )
     parser.add_argument(
-        "--simulation",
+        "--simulation-path",
         default="bottleneck_simulation.yml",
-        help="Output filename for simulation file",
-    )
-    parser.add_argument(
-        "--topology-dir",
-        default="../topology_examples/",
-        help="Path to the topology config file",
-    )
-    parser.add_argument(
-        "--simulation-dir",
-        default="../simulation_examples/",
-        help="Path to the simulation config file",
+        help="Path to the output simulation config file",
     )
     parser.add_argument(
         "--simulation-time", type=int, default=50000, help="Time of the simulation, ns"
@@ -247,14 +237,16 @@ def main():
 
     # Generate topology
     topology = generate_topology(args.senders, args.receivers, args.switches)
-    save_yaml(topology, args.topology_dir + args.topology)
+    save_yaml(topology, args.topology_path)
     print(
-        f"Topology file saved as {args.topology_dir + args.topology} with {args.senders} senders and {args.receivers} receivers"
+        f"Topology file saved as {args.topology_path} with {args.senders} senders and {args.receivers} receivers"
     )
 
     # Generate simulation
     simulation = generate_simulation(
-        os.path.relpath(args.topology_dir + args.topology, start=args.simulation_dir),
+        os.path.relpath(
+            args.topology_path, start=os.path.dirname(args.simulation_path)
+        ),
         args.senders,
         args.receivers,
         args.flows,
@@ -262,8 +254,8 @@ def main():
         args.packets,
         args.packet_interval,
     )
-    save_yaml(simulation, args.simulation_dir + args.simulation)
-    print(f"Simulation file saved as {args.simulation}")
+    save_yaml(simulation, args.simulation_path)
+    print(f"Simulation file saved as {args.simulation_path}")
 
 
 if __name__ == "__main__":
