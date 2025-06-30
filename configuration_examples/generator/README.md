@@ -10,17 +10,23 @@ options:
   --senders SENDERS     Number of sender devices
   --receivers RECEIVERS
                         Number of receiver devices
-  --switches SWITCHES   Number of switches between senders and receivers
+  --switches SWITCHES   Number of switches between senders and receivers. 
+                        Default value: 1
   --topology-path TOPOLOGY_PATH
                         Path to the output topology config file
+                        Default value: bottleneck_topology.yml
   --simulation-path SIMULATION_PATH
-                        Path to the output simulation config file
+                        Path to the output simulation config file. 
+                        Default value: bottleneck_simulation.yml
   --simulation-time SIMULATION_TIME
-                        Time of the simulation, ns
-  --packets PACKETS     Number of packets sending by each sender
+                        Time of the simulation, ns. 
+                        Default value: 50000
+  --packets PACKETS     Number of packets sending by each sender. 
+                        Default value: 100
   --packet-interval PACKET_INTERVAL
                         Time between two consequent packets, ns
-  --flows FLOWS         Flows: 1-to-1 or all-to-all
+  --flows FLOWS         Flows: 1-to-1 or all-to-all. 
+                        Default value: 1-to-1
 ```
 
 #### All the following commands must be run from root directory!
