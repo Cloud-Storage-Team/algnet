@@ -12,9 +12,9 @@ namespace sim {
 
 // Scheduler is implemented as a Singleton class
 // which provides a global access to a single instance
-class MultithreadScheduler {
+class AsyncScheduler {
 public:
-    MultithreadScheduler() = default;
+    AsyncScheduler() = default;
 
     template <typename TEvent, typename... Args>
     void add(Args&&... args) {

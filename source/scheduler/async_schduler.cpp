@@ -2,12 +2,12 @@
 #include <cppcoro/when_all.hpp>
 #include <queue>
 
+#include "async_scheduler.hpp"
 #include "event/event.hpp"
-#include "scheduler/multithread_scheduler.hpp"
 
 namespace sim {
 
-bool MultithreadScheduler::tick() {
+bool AsyncScheduler::tick() {
     cppcoro::task<> execute_task;
     {
         std::lock_guard lock(m_lock);
@@ -24,24 +24,24 @@ bool MultithreadScheduler::tick() {
     return true;
 }
 
-void MultithreadScheduler::clear() {
+void AsyncScheduler::clear() {
     std::lock_guard lock(m_lock);
     m_events = std::priority_queue<std::unique_ptr<Event>,
                                    std::vector<std::unique_ptr<Event>>,
                                    EventComparator>();
 }
 
-Time MultithreadScheduler::get_current_time() {
+Time AsyncScheduler::get_current_time() {
     return m_current_event_local_time;
 };
 
-cppcoro::task<> MultithreadScheduler::pop() {
+cppcoro::task<> AsyncScheduler::pop() {
     std::lock_guard lock(m_lock);
     m_events.pop();
     co_return;
 }
 
-cppcoro::task<> MultithreadScheduler::execute_event(
+cppcoro::task<> AsyncScheduler::execute_event(
     std::unique_ptr<Event> event) {
     m_current_event_local_time = event->get_time();
     event->operator()();
