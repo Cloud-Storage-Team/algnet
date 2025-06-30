@@ -3,8 +3,8 @@
 #include <memory>
 #include <queue>
 
-#include "types.hpp"
 #include "event_comparator.hpp"
+#include "types.hpp"
 
 namespace sim {
 
@@ -21,7 +21,7 @@ public:
         static_assert(std::is_base_of_v<Event, TEvent>,
                       "TEvent must inherit from Event");
 
-        m_events.emplace(std::make_unique<TEvent>(args...));
+        m_events.emplace(std::make_unique<TEvent>(std::forward<Args>(args)...));
     }
 
     void clear();  // Clear all events

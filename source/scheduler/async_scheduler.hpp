@@ -23,7 +23,7 @@ public:
         static_assert(std::is_base_of_v<Event, TEvent>,
                       "TEvent must inherit from Event");
 
-        m_events.emplace(std::make_unique<TEvent>(args...));
+        m_events.emplace(std::make_unique<TEvent>(std::forward<Args>(args)...));
     }
 
     void clear();  // Clear all events
@@ -33,7 +33,7 @@ public:
 private:
     cppcoro::task<> pop();
     cppcoro::task<> execute_event(std::unique_ptr<Event> event);
-    
+
     SpinLock m_lock;  // lock for m_events
     std::priority_queue<std::unique_ptr<Event>,
                         std::vector<std::unique_ptr<Event>>, EventComparator>
