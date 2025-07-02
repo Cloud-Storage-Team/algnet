@@ -55,7 +55,7 @@ std::uint32_t BitSet32::get_bit(std::uint32_t pos) const {
         return 0;
     }
 
-    return (m_data & (1U << pos)) >> pos;
+    return (m_data >> pos) & 1;
 }
 
 std::uint32_t BitSet32::get_range(std::uint32_t low, std::uint32_t high) const {
