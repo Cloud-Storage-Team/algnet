@@ -59,15 +59,15 @@ void BasicFlow::update(Packet packet, DeviceType type) {
         // ask arrived to source device, update metrics
         ++m_updates_number;
 
-        Time current_time = Scheduler::get_instance().get_current_time();
-        double rtt = current_time - packet.sent_time;
-        MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
-                                                 current_time, rtt);
+        // Time current_time = Scheduler::get_instance().get_current_time();
+        // double rtt = current_time - packet.sent_time;
+        // MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
+        //                                          current_time, rtt);
 
-        double delivery_bit_rate =
-            8 * (m_sent_bytes - packet.sent_bytes_at_origin) / rtt;
-        MetricsCollector::get_instance().add_delivery_rate(
-            packet.flow->get_id(), current_time, delivery_bit_rate);
+        // double delivery_bit_rate =
+        //     8 * (m_sent_bytes - packet.sent_bytes_at_origin) / rtt;
+        // MetricsCollector::get_instance().add_delivery_rate(
+        //     packet.flow->get_id(), current_time, delivery_bit_rate);
     } else {
         LOG_ERROR(
             fmt::format("Called update on flow {} with some foreign packet {}",

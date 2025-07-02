@@ -1,5 +1,6 @@
 #pragma once
 #include "event.hpp"
+#include "flow/interfaces/i_tcp_flow.hpp"
 
 namespace sim {
 
@@ -15,4 +16,4 @@ private:
     std::weak_ptr<ITcpFlow> m_flow;
 };
 
-}
+}  // namespace sim
