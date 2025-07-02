@@ -22,6 +22,9 @@ def parse_arguments():
     parser.add_argument(
         "--packets", type=int, help="Number of sending packets", default=100
     )
+    parser.add_argument(
+        "-o", "--output-dir", help="Path to directory for generated configs", default=""
+    )
 
     args = parser.parse_args()
 
@@ -45,7 +48,7 @@ def parse_arguments():
 def main(args):
     parsed_args = parse_arguments()
     topology_config_name = (
-        f"incast-{parsed_args.senders}-to-{parsed_args.receivers}-topology.yml"
+        f"incast_{parsed_args.senders}_to_{parsed_args.receivers}_topology.yml"
     )
     simulation_config_name = (
         f"incast_{parsed_args.senders}_to_{parsed_args.receivers}_simulation.yml"
@@ -63,9 +66,9 @@ def main(args):
         "--receivers",
         str(parsed_args.receivers),
         "--topology-path",
-        generator_dir_path + topology_config_name,
+        os.path.join(parsed_args.output_dir, topology_config_name),
         "--simulation-path",
-        generator_dir_path + simulation_config_name,
+        os.path.join(parsed_args.output_dir, simulation_config_name),
         "--packets",
         str(parsed_args.packets),
         "--simulation-time",
@@ -78,7 +81,7 @@ def main(args):
         "time",
         str(parsed_args.executable),
         "--config",
-        str(os.path.join(generator_dir_path, simulation_config_name)),
+        str(os.path.join(parsed_args.output_dir, simulation_config_name)),
         "--no-logs",
         "--no-plots",
     ]
