@@ -77,13 +77,8 @@ private:
             return 0;
         }
 
-        std::uint32_t highest_bit = max_values - 1;
-        std::uint32_t bits_num = 0;
-        while (highest_bit) {
-            bits_num++;
-            highest_bit >>= 1;
-        }
-        return bits_num;
+        max_values--;
+        return sizeof_bits(max_values) - __builtin_clz(max_values);
     }
 
     std::uint32_t m_next_pos = 0;
