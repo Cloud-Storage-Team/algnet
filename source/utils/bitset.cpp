@@ -11,7 +11,7 @@ BitSet32::BitSet32() : m_data(0) {}
 BitSet32::BitSet32(std::uint32_t initial) : m_data(initial) {}
 
 bool BitSet32::set_bit(std::uint32_t pos, bool value) {
-    if (pos >= 32) {
+    if (pos >= sizeof_bits(m_data)) {
         LOG_ERROR(fmt::format("Bit position is out of range. Max possible position is {}, but got {}", 32 - 1, pos));
         return false;
     }
