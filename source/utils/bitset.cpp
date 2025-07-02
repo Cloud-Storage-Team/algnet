@@ -11,8 +11,8 @@ BitSet32::BitSet32() : m_data(0) {}
 BitSet32::BitSet32(std::uint32_t initial) : m_data(initial) {}
 
 bool BitSet32::set_bit(std::uint32_t pos, bool value) {
-    if (pos >= MAX_POS) {
-        LOG_ERROR(fmt::format("Bit position is out of range. Max possible position is {}, but got {}", MAX_POS - 1, pos));
+    if (pos >= 32) {
+        LOG_ERROR(fmt::format("Bit position is out of range. Max possible position is {}, but got {}", 32 - 1, pos));
         return false;
     }
 
@@ -30,8 +30,8 @@ bool BitSet32::set_range(std::uint32_t low, std::uint32_t high, std::uint32_t va
         return set_bit(low, value);
     }
 
-    if (low >= MAX_POS || high >= MAX_POS || low > high) {
-        LOG_ERROR(fmt::format("Range edges error. Low and high should be less than {} and low should be <= hight. Got low = {} and high = {}", MAX_POS, low, high));
+    if (low >= 32 || high >= 32 || low > high) {
+        LOG_ERROR(fmt::format("Range edges error. Low and high should be less than {} and low should be <= hight. Got low = {} and high = {}", 32, low, high));
         return false;
     }
 
@@ -50,8 +50,8 @@ bool BitSet32::set_range(std::uint32_t low, std::uint32_t high, std::uint32_t va
 }
 
 std::uint32_t BitSet32::get_bit(std::uint32_t pos) const {
-    if (pos >= MAX_POS) {
-        LOG_ERROR(fmt::format("Bit position is out of range. Max possible position is {}, but got {}", MAX_POS - 1, pos));
+    if (pos >= 32) {
+        LOG_ERROR(fmt::format("Bit position is out of range. Max possible position is {}, but got {}", 32 - 1, pos));
         return 0;
     }
 
@@ -59,8 +59,8 @@ std::uint32_t BitSet32::get_bit(std::uint32_t pos) const {
 }
 
 std::uint32_t BitSet32::get_range(std::uint32_t low, std::uint32_t high) const {
-    if (low >= MAX_POS || high >= MAX_POS || low > high) {
-        LOG_ERROR(fmt::format("Range edges error. Low and high should be less than {} and low should be <= hight. Got low = {} and high = {}", MAX_POS, low, high));
+    if (low >= 32 || high >= 32 || low > high) {
+        LOG_ERROR(fmt::format("Range edges error. Low and high should be less than {} and low should be <= hight. Got low = {} and high = {}", 32, low, high));
         return 0;
     }
 

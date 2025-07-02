@@ -22,11 +22,10 @@ public:
     void reset();
 
 private:
-    const static std::uint32_t MAX_POS = 32;
     std::uint32_t m_data;
 
     inline std::uint32_t max_range_value(std::uint32_t length) const {
-        return length == MAX_POS ? 0xFFFFFFFF : (1U << length) - 1;
+        return length == 32 ? 0xFFFFFFFF : (1U << length) - 1;
     }
 };
 
