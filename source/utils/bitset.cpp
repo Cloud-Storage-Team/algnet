@@ -50,7 +50,7 @@ bool BitSet32::set_range(std::uint32_t low, std::uint32_t high, std::uint32_t va
 }
 
 std::uint32_t BitSet32::get_bit(std::uint32_t pos) const {
-    if (pos >= 32) {
+    if (pos >= sizeof_bits(m_data)) {
         LOG_ERROR(fmt::format("Bit position is out of range. Max possible position is {}, but got {}", 32 - 1, pos));
         return 0;
     }
