@@ -258,10 +258,7 @@ def main():
         args.senders, args.receivers, args.switches
     )
 
-    assert (
-        len(receiver_names) == args.num_receivers
-        and len(sender_names) == args.num_senders
-    )
+    assert len(receiver_names) == args.receivers and len(sender_names) == args.senders
 
     save_yaml(topology, args.topology_path)
     print(
