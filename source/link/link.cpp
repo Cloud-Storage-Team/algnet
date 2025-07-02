@@ -145,9 +145,9 @@ void Link::arrive(Packet packet) {
         return;
     }
 
-    MetricsCollector::get_instance().add_queue_size(
-        get_id(), Scheduler::get_instance().get_current_time(),
-        m_from_egress.get_size());
+    // MetricsCollector::get_instance().add_queue_size(
+    //     get_id(), Scheduler::get_instance().get_current_time(),
+    //     m_from_egress.get_size());
 
     m_to.lock()->notify_about_arrival(
         Scheduler::get_instance().get_current_time());

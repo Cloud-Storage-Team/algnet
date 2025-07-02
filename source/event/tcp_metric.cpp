@@ -1,7 +1,8 @@
+#include "tcp_metric.hpp"
+
 #include "flow/interfaces/i_tcp_flow.hpp"
 #include "metrics/metrics_collector.hpp"
 #include "scheduler.hpp"
-#include "tcp_metric.hpp"
 
 namespace sim {
 
@@ -15,8 +16,8 @@ void TcpMetric::operator()() {
 
     auto flow = m_flow.lock();
 
-    double cwnd = flow->get_cwnd();
-    MetricsCollector::get_instance().add_cwnd(flow->get_id(), m_time, cwnd);
+    // double cwnd = flow->get_cwnd();
+    // MetricsCollector::get_instance().add_cwnd(flow->get_id(), m_time, cwnd);
 
     Scheduler::get_instance().add<TcpMetric>(m_time + DELAY, m_flow);
 }
