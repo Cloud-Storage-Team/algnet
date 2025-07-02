@@ -16,13 +16,20 @@ def generate_topology(
 ):
     topology = {"devices": {}, "links": {}}
 
+    if switch_name == "sender" or switch_name == "receiver":
+        raise ValueError("Switch name cannot be 'sender' or 'receiver'")
+
     switch_names = [f"{switch_name}_{i}" for i in range(num_switches)]
     sender_switch_name = switch_names[0]
     receiver_switch_name = switch_names[-1]
 
+    sender_names = []
+    receiver_names = []
+
     # Add senders
     for i in range(0, num_senders):
         sender_name = f"sender_{i}"
+        sender_names.append(sender_name)
         topology["devices"][sender_name] = {"type": "host"}
         base_index = 2 * i
 
@@ -51,6 +58,7 @@ def generate_topology(
     # Add receivers
     for i in range(0, num_receivers):
         receiver_name = f"receiver_{i}"
+        receiver_names.append(receiver_name)
         topology["devices"][receiver_name] = {"type": "host"}
         base_index = 2 * num_senders + 2 * i
 
@@ -82,8 +90,10 @@ def generate_topology(
 
     # Add links between switches
     for i in range(0, num_switches - 1):
+        base_index = 2 * (num_senders + num_receivers) + 2 * i
+
         # Forward link
-        link_name = f"link_{i}_to_{i + 1}"
+        link_name = f"link_{base_index}"
         topology["links"][link_name] = {
             "from": switch_names[i],
             "to": switch_names[i + 1],
@@ -94,7 +104,7 @@ def generate_topology(
         }
 
         # Backward link
-        link_name = f"link_{i + 1}_to_{i}"
+        link_name = f"link_{base_index + 1}"
         topology["links"][link_name] = {
             "from": switch_names[i + 1],
             "to": switch_names[i],
@@ -104,11 +114,13 @@ def generate_topology(
             "egress_buffer_size": egress_buffer_size,
         }
 
-    return topology
+    return topology, sender_names, receiver_names
 
 
 def generate_simulation(
     topology_file,
+    sender_names,
+    receiver_names,
     num_senders,
     num_receivers,
     flows,
@@ -128,6 +140,8 @@ def generate_simulation(
         "simulation_time": simulation_time,
     }
 
+    assert len(receiver_names) == num_receivers and len(sender_names) == num_senders
+
     if flows == "1-to-1":
 
         # One sender to one receiver
@@ -138,8 +152,8 @@ def generate_simulation(
             flow_name = f"flow_{flow_id}"
             flow_id += 1
             simulation["flows"][flow_name] = {
-                "sender_id": f"sender_{i}",
-                "receiver_id": f"receiver_{min(i,num_receivers-1)}",
+                "sender_id": sender_names[i],
+                "receiver_id": receiver_names[min(i, num_receivers - 1)],
                 "packet_size": packet_size,
                 "packet_interval": packet_interval,
                 "number_of_packets": number_of_packets,
@@ -154,8 +168,8 @@ def generate_simulation(
                 flow_name = f"flow_{flow_id}"
                 flow_id += 1
                 simulation["flows"][flow_name] = {
-                    "sender_id": f"sender_{i}",
-                    "receiver_id": f"receiver_{j}",
+                    "sender_id": sender_names[i],
+                    "receiver_id": receiver_names[j],
                     "packet_size": packet_size,
                     "packet_interval": packet_interval,
                     "number_of_packets": number_of_packets,
@@ -237,7 +251,9 @@ def main():
     args = parse_arguments()
 
     # Generate topology
-    topology = generate_topology(args.senders, args.receivers, args.switches)
+    topology, sender_names, receiver_names = generate_topology(
+        args.senders, args.receivers, args.switches
+    )
     save_yaml(topology, args.topology_path)
     print(
         f"Topology file saved as {args.topology_path} with {args.senders} senders and {args.receivers} receivers"
@@ -248,6 +264,8 @@ def main():
         os.path.relpath(
             args.topology_path, start=os.path.dirname(args.simulation_path)
         ),
+        sender_names,
+        receiver_names,
         args.senders,
         args.receivers,
         args.flows,
