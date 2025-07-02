@@ -21,7 +21,7 @@ static void check_pairwise_reachability(
     for (auto src : devices) {
         for (auto dest : devices) {
             if (src != dest) {
-                sim::Packet packet_to_dest = sim::Packet(sim::PacketType::DATA, 0, nullptr, src->get_id(), dest->get_id());
+                sim::Packet packet_to_dest = sim::Packet(0, nullptr, src->get_id(), dest->get_id());
                 EXPECT_TRUE(check_reachability(src, packet_to_dest));
             }
         }

@@ -3,13 +3,12 @@
 #include <string>
 
 #include "flow/interfaces/i_flow.hpp"
+#include "utils/bitset.hpp"
 
 namespace sim {
 
-enum PacketType { ACK, DATA };
-
 struct Packet {
-    Packet(PacketType a_type = PacketType::DATA, Size a_size_byte = 0,
+    Packet(Size a_size_byte = 0,
            IFlow* a_flow = nullptr, Id a_source_id = "", Id a_dest_id = "",
            Time a_sent_time = 0, Size a_sent_bytes_at_origin = 0,
            bool a_ecn_capable_transport = true,
@@ -19,7 +18,7 @@ struct Packet {
     std::string to_string() const;
 
     std::uint32_t packet_num;
-    PacketType type;
+    BitSet32 flags;
     Id source_id;
     Id dest_id;
     Size size_byte;

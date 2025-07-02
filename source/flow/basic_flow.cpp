@@ -8,6 +8,8 @@
 #include "scheduler.hpp"
 
 namespace sim {
+FlagManager<std::string> BasicFlow::m_flags;
+bool BasicFlow::m_is_initialized = false;
 
 BasicFlow::BasicFlow(Id a_id, std::shared_ptr<IHost> a_src,
                      std::shared_ptr<IHost> a_dest, Size a_packet_size,
@@ -27,6 +29,7 @@ BasicFlow::BasicFlow(Id a_id, std::shared_ptr<IHost> a_src,
     if (m_dest.lock() == nullptr) {
         throw std::invalid_argument("Receiver for Flow is nullptr");
     }
+    initialize_flag_manager();
 }
 
 void BasicFlow::start() {
@@ -35,7 +38,7 @@ void BasicFlow::start() {
 
 Packet BasicFlow::generate_packet() {
     sim::Packet packet;
-    packet.type = sim::PacketType::DATA;
+    m_flags.set_flag(packet, "type", PacketType::DATA);
     packet.size_byte = m_packet_size;
     packet.flow = this;
     packet.source_id = get_sender()->get_id();
@@ -47,15 +50,17 @@ Packet BasicFlow::generate_packet() {
 void BasicFlow::update(Packet packet, DeviceType type) {
     (void)type;
     if (packet.dest_id == m_dest.lock()->get_id() &&
-        packet.type == PacketType::DATA) {
+        m_flags.get_flag(packet, "type") == PacketType::DATA) {
         // data packet arrived to destination device, send ack
-        Packet ack(PacketType::ACK, 1, this, m_dest.lock()->get_id(),
+        Packet ack(1, this, m_dest.lock()->get_id(),
                    m_src.lock()->get_id(), packet.sent_time,
                    packet.sent_bytes_at_origin, packet.ecn_capable_transport,
                    packet.congestion_experienced);
+        
+        m_flags.set_flag(ack, "type", PacketType::ACK);
         m_dest.lock()->enqueue_packet(ack);
     } else if (packet.dest_id == m_src.lock()->get_id() &&
-               packet.type == PacketType::ACK) {
+               m_flags.get_flag(packet, "type") == PacketType::ACK) {
         // ask arrived to source device, update metrics
         ++m_updates_number;
 
@@ -111,6 +116,13 @@ Time BasicFlow::put_data_to_device() {
 void BasicFlow::schedule_packet_generation(Time time) {
     Scheduler::get_instance().add<Generate>(time, shared_from_this(),
                                             m_packet_size);
+}
+
+void BasicFlow::initialize_flag_manager() {
+    if (!m_is_initialized) {
+        m_flags.register_flag_by_length("type", 1);
+        m_is_initialized = true;
+    }
 }
 
 }  // namespace sim

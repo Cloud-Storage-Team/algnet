@@ -17,8 +17,8 @@ void LinkMock::schedule_arrival(sim::Packet a_packet) {
 
 void LinkMock::process_arrival(sim::Packet a_packet) {}
 
-void LinkMock::set_ingress_packet(sim::Packet a_paket) {
-    m_ingress_packet = a_paket;
+void LinkMock::set_ingress_packet(sim::Packet a_packet) {
+    m_ingress_packet.emplace(a_packet);
 }
 
 std::optional<sim::Packet> LinkMock::get_packet() { return m_ingress_packet; }
