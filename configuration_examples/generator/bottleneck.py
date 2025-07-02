@@ -15,6 +15,7 @@ def generate_topology(
     egress_buffer_size="1024000B",
 ):
     topology = {"devices": {}, "links": {}}
+    base_index = 0
 
     if switch_name == "sender" or switch_name == "receiver":
         raise ValueError("Switch name cannot be 'sender' or 'receiver'")
@@ -31,10 +32,10 @@ def generate_topology(
         sender_name = f"sender_{i}"
         sender_names.append(sender_name)
         topology["devices"][sender_name] = {"type": "host"}
-        base_index = 2 * i
 
         # Add link from sender to switch
         link_name = f"link_{base_index}"
+        base_index += 1
         topology["links"][link_name] = {
             "from": sender_name,
             "to": sender_switch_name,
@@ -45,7 +46,8 @@ def generate_topology(
         }
 
         # Add link from switch to sender
-        link_name = f"link_{base_index + 1}"
+        link_name = f"link_{base_index}"
+        base_index += 1
         topology["links"][link_name] = {
             "from": sender_switch_name,
             "to": sender_name,
@@ -60,10 +62,10 @@ def generate_topology(
         receiver_name = f"receiver_{i}"
         receiver_names.append(receiver_name)
         topology["devices"][receiver_name] = {"type": "host"}
-        base_index = 2 * num_senders + 2 * i
 
         # Add link from switch to receiver
         link_name = f"link_{base_index}"
+        base_index += 1
         topology["links"][link_name] = {
             "from": receiver_switch_name,
             "to": receiver_name,
@@ -74,7 +76,8 @@ def generate_topology(
         }
 
         # Add link from receiver to switch
-        link_name = f"link_{base_index + 1}"
+        link_name = f"link_{base_index}"
+        base_index += 1
         topology["links"][link_name] = {
             "from": receiver_name,
             "to": receiver_switch_name,
@@ -90,10 +93,10 @@ def generate_topology(
 
     # Add links between switches
     for i in range(0, num_switches - 1):
-        base_index = 2 * (num_senders + num_receivers) + 2 * i
 
         # Forward link
         link_name = f"link_{base_index}"
+        base_index += 1
         topology["links"][link_name] = {
             "from": switch_names[i],
             "to": switch_names[i + 1],
@@ -104,7 +107,8 @@ def generate_topology(
         }
 
         # Backward link
-        link_name = f"link_{base_index + 1}"
+        link_name = f"link_{base_index}"
+        base_index += 1
         topology["links"][link_name] = {
             "from": switch_names[i + 1],
             "to": switch_names[i],
@@ -121,8 +125,6 @@ def generate_simulation(
     topology_file,
     sender_names,
     receiver_names,
-    num_senders,
-    num_receivers,
     flows,
     simulation_time,
     packet_interval,
@@ -140,7 +142,8 @@ def generate_simulation(
         "simulation_time": simulation_time,
     }
 
-    assert len(receiver_names) == num_receivers and len(sender_names) == num_senders
+    num_senders = len(sender_names)
+    num_receivers = len(receiver_names)
 
     if flows == "1-to-1":
 
@@ -254,6 +257,12 @@ def main():
     topology, sender_names, receiver_names = generate_topology(
         args.senders, args.receivers, args.switches
     )
+
+    assert (
+        len(receiver_names) == args.num_receivers
+        and len(sender_names) == args.num_senders
+    )
+
     save_yaml(topology, args.topology_path)
     print(
         f"Topology file saved as {args.topology_path} with {args.senders} senders and {args.receivers} receivers"
@@ -266,8 +275,6 @@ def main():
         ),
         sender_names,
         receiver_names,
-        args.senders,
-        args.receivers,
         args.flows,
         args.simulation_time,
         args.packets,
