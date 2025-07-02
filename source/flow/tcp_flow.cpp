@@ -9,6 +9,7 @@
 #include "scheduler.hpp"
 
 namespace sim {
+std::string TcpFlow::packet_type_label = "type";
 FlagManager<std::string> TcpFlow::m_flags;
 bool TcpFlow::m_is_initialized = false;
 
@@ -61,7 +62,7 @@ Time TcpFlow::create_new_data_packet() {
 void TcpFlow::update(Packet packet, DeviceType type) {
     (void)type;
     if (packet.dest_id == m_src.lock()->get_id() &&
-        m_flags.get_flag(packet, "type") == PacketType::ACK) {
+        m_flags.get_flag(packet, packet_type_label) == PacketType::ACK) {
         // ACK delivered to soiurce device; calculate metrics, update internal
         // state
         Time current_time = Scheduler::get_instance().get_current_time();
@@ -98,13 +99,13 @@ void TcpFlow::update(Packet packet, DeviceType type) {
             try_to_put_data_to_device();
         }
     } else if (packet.dest_id == m_dest.lock()->get_id() &&
-               m_flags.get_flag(packet, "type") == PacketType::DATA) {
+               m_flags.get_flag(packet, packet_type_label) == PacketType::DATA) {
         // data packet delivered to destination device; send ack
         Packet ack(1, this, m_dest.lock()->get_id(),
                    m_src.lock()->get_id(), packet.sent_time,
                    packet.sent_bytes_at_origin, packet.ecn_capable_transport,
                    packet.congestion_experienced);
-        m_flags.set_flag(packet, "type", PacketType::ACK);
+        m_flags.set_flag(packet, packet_type_label, PacketType::ACK);
         m_dest.lock()->enqueue_packet(ack);
     }
 }
@@ -132,7 +133,7 @@ std::string TcpFlow::to_string() const {
 
 Packet TcpFlow::generate_packet() {
     sim::Packet packet;
-    m_flags.set_flag(packet, "type", PacketType::DATA);
+    m_flags.set_flag(packet, packet_type_label, PacketType::DATA);
     packet.size_byte = m_packet_size;
     packet.flow = this;
     packet.source_id = get_sender()->get_id();
@@ -157,7 +158,7 @@ double TcpFlow::get_cwnd() const { return m_cwnd; }
 
 void TcpFlow::initialize_flag_manager() {
     if (!m_is_initialized) {
-        m_flags.register_flag_by_length("type", 1);
+        m_flags.register_flag_by_amount(packet_type_label, PacketType::ENUM_SIZE);
         m_is_initialized = true;
     }
 }

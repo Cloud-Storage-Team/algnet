@@ -62,16 +62,30 @@ TEST(BitSet32Test, ValidEdgeCases) {
     bits.set_bit(0, 1);
     EXPECT_EQ(bits.get_bit(0), bits.get_range(0, 0));
     EXPECT_EQ(bits.get_bit(0), 1);
+
+    bits.set_range(0, 0, 0);
+    EXPECT_EQ(bits.get_bit(0), bits.get_range(0, 0));
+    EXPECT_EQ(bits.get_bit(0), 0);
     
     bits.set_range(31, 31, 1);
     EXPECT_EQ(bits.get_bit(31), bits.get_range(31, 31));
     EXPECT_EQ(bits.get_bit(31), 1);
+
+    bits.set_bit(31, 0);
+    EXPECT_EQ(bits.get_bit(31), bits.get_range(31, 31));
+    EXPECT_EQ(bits.get_bit(31), 0);
 
     bits.set_range(8, 15, 0xFF);
     EXPECT_EQ(bits.get_range(8, 15), 0xFF);
 
     bits.set_range(0, 31, 0xFFFFFFFF);
     EXPECT_EQ(bits.get_bits(), 0xFFFFFFFF);
+
+    bits.set_range(0, 7, 0);
+    EXPECT_EQ(bits.get_range(0, 7), 0);
+
+    bits.set_range(0, 31, 0);
+    EXPECT_EQ(bits.get_bits(), 0);
 }
 
 } // namespace test

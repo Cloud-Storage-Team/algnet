@@ -1,6 +1,9 @@
 #pragma once
 
+#define sizeof_bits(x) (8 * sizeof(x))
+
 #include <cstdint>
+#include <limits>
 #include <stdexcept>
 
 namespace sim {
@@ -25,7 +28,7 @@ private:
     std::uint32_t m_data;
 
     inline std::uint32_t max_range_value(std::uint32_t length) const {
-        return length == sizeof_bits(m_data) ? std::numeric_limits<std::uint32_t>::max(): (static_cast<std::uint32_t>1 << length) - 1;
+        return length == sizeof_bits(m_data) ? (std::numeric_limits<std::uint32_t>::max()) : (static_cast<std::uint32_t>(1) << length) - 1;
     }
 };
 

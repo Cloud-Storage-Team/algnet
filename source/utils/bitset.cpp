@@ -26,10 +26,6 @@ bool BitSet32::set_bit(std::uint32_t pos, bool value) {
 }
 
 bool BitSet32::set_range(std::uint32_t low, std::uint32_t high, std::uint32_t value) {
-    if (low == high) {
-        return set_bit(low, value);
-    }
-
     if (high >= sizeof_bits(m_data) || low > high) {
         LOG_ERROR(fmt::format("Range edges error. Low and high should be less than {} and low should be <= hight. Got low = {} and high = {}", 32, low, high));
         return false;

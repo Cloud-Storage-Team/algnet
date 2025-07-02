@@ -27,7 +27,8 @@ public:
     std::string to_string() const;
 
 private:
-    enum PacketType { ACK, DATA };
+    static std::string packet_type_label;
+    enum PacketType { ACK, DATA, ENUM_SIZE };
 
     Packet generate_packet();
 

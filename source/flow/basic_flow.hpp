@@ -33,7 +33,8 @@ public:
     Id get_id() const final;
 
 private:
-    enum PacketType { ACK, DATA };
+    static std::string packet_type_label;
+    enum PacketType { ACK, DATA, ENUM_SIZE };
 
     Time put_data_to_device();
     void schedule_packet_generation(Time time);
