@@ -59,7 +59,7 @@ std::uint32_t BitSet32::get_bit(std::uint32_t pos) const {
 }
 
 std::uint32_t BitSet32::get_range(std::uint32_t low, std::uint32_t high) const {
-    if (low >= 32 || high >= 32 || low > high) {
+    if (high >= sizeof_bits(m_data)  || low > high) {
         LOG_ERROR(fmt::format("Range edges error. Low and high should be less than {} and low should be <= hight. Got low = {} and high = {}", 32, low, high));
         return 0;
     }
