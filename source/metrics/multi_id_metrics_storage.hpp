@@ -28,11 +28,13 @@ private:
 
     std::string metric_name;
 
-    mutable std::mutex m_mutex;         // Protecs m_storage and m_record_queue
-    std::condition_variable m_condvar;  // If m_record_queue is not empty
+    std::mutex m_record_queue_mutex;  // Protecs m_record_queue
+    std::condition_variable m_condvar;        // If m_record_queue is not empty
 
     std::queue<std::tuple<Id, Time, double> >
         m_record_queue;  // queue of metrics records
+
+    mutable std::mutex m_storage_mutex;  // Protects m_storage
 
     // If m_storage does not contain some id, there was no check is metrics file
     // name for id correspond to m_filter
