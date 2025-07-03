@@ -2,7 +2,7 @@ name: Update root index.html
 
 on:
   workflow_run:
-    workflows: ["Build and run project"]
+    workflows: ["Build and run project", "Load testing"]
     types:
       - completed
 jobs:
@@ -16,8 +16,15 @@ jobs:
         with:
           ref: 'gh-pages'
 
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: flamegraph
+  
       - name: Install dependency
-        run: pip install yattag
+        run: |
+          ls -hal
+          pip install yattag
 
       - name: Remove redundant files
         run: python3 .scripts/delete-useless-files.py
