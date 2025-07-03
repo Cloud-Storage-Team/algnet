@@ -80,13 +80,7 @@ jobs:
 
     - name: Generate simulation config  
       run:
-        python3 configuration_examples/generator/bottleneck.py \
-        --senders 1000 \
-        --receivers 1 \
-        --topology-path incast_1000_to_1_topology.yml \ 
-        --simulation-path incast_1000_to_1_simulation.yml \
-        --packets 100000 \
-        --simulation-time 100000000
+        python3 configuration_examples/generator/bottleneck.py --senders 1000 --receivers 1 --topology-path incast_1000_to_1_topology.yml --simulation-path incast_1000_to_1_simulation.yml --packets 100000 --simulation-time 100000000
 
     - name: Run perf
       run: |
