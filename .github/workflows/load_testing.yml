@@ -57,3 +57,35 @@ jobs:
         python3 scripts/run_incast_simulation.py -e ${{env.EXECUTABLE_PATH}} --senders 1000 --receivers 30 --time 100000000 --packets 20000  
         gprof ${{env.EXECUTABLE_PATH}} > profile.txt
         head profile.txt
+
+  flamegraph:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Update submodules
+      run: git submodule update --init --recursive
+
+    - name: Get dependencies  
+      run: git clone git@github.com:brendangregg/FlameGraph.git
+
+    - name: Configure CMake for perf
+      run: cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF -DCMAKE_CXX_FLAGS="-g -fno-omit-frame-pointer"
+
+    - name: Build project with profiling
+      run: cmake --build ${{env.BUILD_DIR}} -j $(nproc)
+
+    - name: Run perf
+      run: sudo perf record -F 99 -g -- ./build/nons -c configuration_examples/simulation_examples/incast_simulation.yml --no-logs --no-plots
+
+    - name: Generate flamegraph
+      run: | 
+        sudo perf script > out.perf
+        ./FlameGraph/stackcollapse-perf.pl out.perf > out.folded
+        ./FlameGraph/flamegraph.pl out.folded > flamegraph.svg
+
+    - name: Upload flamegraph
+      uses: actions/upload-artifact@v4
+      with:
+        name: flamegraph
+        path: flamegraph.svg
