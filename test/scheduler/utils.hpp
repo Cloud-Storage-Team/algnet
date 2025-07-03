@@ -4,7 +4,8 @@
 
 #include <ctime>
 
-#include "scheduler.hpp"
+#include "event/event.hpp"
+#include "scheduler/scheduler.hpp"
 
 namespace test {
 

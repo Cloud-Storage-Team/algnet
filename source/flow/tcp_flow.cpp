@@ -6,7 +6,7 @@
 #include "event/tcp_metric.hpp"
 #include "logger/logger.hpp"
 #include "metrics/metrics_collector.hpp"
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 
 namespace sim {
 
