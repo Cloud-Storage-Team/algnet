@@ -102,12 +102,12 @@ jobs:
 
     - name: Prepare FlameGraph
       run: |
-        mkdir -p load_testing
-        mv flamegraph.svg load_testing/flamegraph.svg
+        mkdir -p load_testing/load_testing
+        mv flamegraph.svg load_testing/load_testing/flamegraph.svg
 
     - name: Create HTML    
       run: python3 scripts/generate-html.py ./load_testing
-       
+
     - name: Calculate deploy destination directory
       run:
         if [ "${{ github.event_name }}" == "pull_request" ]; then
@@ -124,4 +124,4 @@ jobs:
       with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: load_testing
-          destination_dir: ${{ env.DEPLOY_DIR }}/load_testing
+          destination_dir: ${{ env.DEPLOY_DIR }}
