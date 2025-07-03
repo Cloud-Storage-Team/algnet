@@ -28,10 +28,10 @@ private:
 
     std::string metric_name;
 
-    std::mutex m_record_queue_mutex;  // Protecs m_record_queue
-    std::condition_variable m_condvar;        // If m_record_queue is not empty
+    std::mutex m_record_queue_mutex;    // Protecs m_record_queue
+    std::condition_variable m_condvar;  // If m_record_queue is not empty
 
-    std::queue<std::tuple<Id, Time, double> >
+    std::vector<std::tuple<Id, Time, double> >
         m_record_queue;  // queue of metrics records
 
     mutable std::mutex m_storage_mutex;  // Protects m_storage

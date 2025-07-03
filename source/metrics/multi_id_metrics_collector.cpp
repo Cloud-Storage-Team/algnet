@@ -1,4 +1,4 @@
-#include <ranges>
+#include <cassert>
 
 #include "multi_id_metrics_storage.hpp"
 
@@ -22,7 +22,8 @@ MultiIdMetricsStorage::~MultiIdMetricsStorage() {
 
 void MultiIdMetricsStorage::add_record(Id id, Time time, double value) {
     std::lock_guard lock(m_record_queue_mutex);
-    m_record_queue.emplace(std::move(id), std::move(time), std::move(value));
+    m_record_queue.emplace_back(std::move(id), std::move(time),
+                                std::move(value));
     m_condvar.notify_one();
 }
 
@@ -56,11 +57,9 @@ std::string MultiIdMetricsStorage::get_metrics_filename(Id id) const {
 }
 
 void MultiIdMetricsStorage::writer_cycle() {
-    Id id;
-    Time time;
-    double value;
     std::unordered_map<Id, std::optional<MetricsStorage> >::iterator it;
     while (m_needs_write) {
+        std::vector<std::tuple<Id, Time, double> > local_queue;
         {
             std::unique_lock lock(m_record_queue_mutex);
             m_condvar.wait(lock, [this]() {
@@ -71,22 +70,23 @@ void MultiIdMetricsStorage::writer_cycle() {
                 break;
             }
 
-            std::tie(id, time, value) = m_record_queue.front();
-            m_record_queue.pop();
+            local_queue.swap(m_record_queue);
         }
         {
             std::lock_guard lock(m_storage_mutex);
-            it = m_storage.find(id);
-            if (it == m_storage.end()) {
-                if (!std::regex_match(get_metrics_filename(id), m_filter)) {
-                    m_storage[id] = std::nullopt;
-                } else {
-                    MetricsStorage new_storage;
-                    new_storage.add_record(time, value);
-                    m_storage.emplace(id, std::move(new_storage));
+            for (auto [id, time, value] : local_queue) {
+                it = m_storage.find(id);
+                if (it == m_storage.end()) {
+                    if (!std::regex_match(get_metrics_filename(id), m_filter)) {
+                        m_storage[id] = std::nullopt;
+                    } else {
+                        MetricsStorage new_storage;
+                        new_storage.add_record(time, value);
+                        m_storage.emplace(id, std::move(new_storage));
+                    }
+                } else if (it->second.has_value()) {
+                    it->second->add_record(time, value);
                 }
-            } else if (it->second.has_value()) {
-                it->second->add_record(time, value);
             }
         }
     }
