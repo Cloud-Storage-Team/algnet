@@ -1,8 +1,9 @@
 #pragma once
 
+#include <regex>
 #include <unordered_map>
 
-#include "metrics/metrics_storage.hpp"
+#include "multi_id_metrics_storage.hpp"
 
 namespace sim {
 
@@ -18,6 +19,8 @@ public:
     void export_metrics_to_files(std::filesystem::path metrics_dir) const;
     void draw_metric_plots(std::filesystem::path metrics_dir) const;
 
+    void set_metrics_filter(const std::string& filter);
+
 private:
     MetricsCollector() {}
     MetricsCollector(const MetricsCollector&) = delete;
@@ -29,12 +32,13 @@ private:
     void draw_queue_size_plots(std::filesystem::path dir_path) const;
 
     // flow_ID --> vector of <time, ...> values
-    std::unordered_map<Id, MetricsStorage> m_RTT_storage;
-    std::unordered_map<Id, MetricsStorage> m_cwnd_storage;
-    std::unordered_map<Id, MetricsStorage> m_rate_storage;
+    MultiIdMetricsStorage m_RTT_storage = MultiIdMetricsStorage("rtt");
+    MultiIdMetricsStorage m_cwnd_storage = MultiIdMetricsStorage("cwnd");
+    MultiIdMetricsStorage m_rate_storage = MultiIdMetricsStorage("rate");
 
     // link_ID --> vector of <time, queue size> values
-    std::unordered_map<Id, MetricsStorage> m_queue_size_storage;
+    MultiIdMetricsStorage m_queue_size_storage =
+        MultiIdMetricsStorage("queue_size");
 };
 
 }  // namespace sim

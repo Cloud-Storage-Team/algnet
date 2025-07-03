@@ -15,38 +15,34 @@ int main(const int argc, char **argv) {
         cxxopts::value<bool>()->default_value("false"))(
         "no-plots", "Disables plots generation",
         cxxopts::value<bool>()->default_value("false"))(
-        "export-metrics", "Export metric values into output-dir",
-        cxxopts::value<bool>()->default_value("false"))("h,help",
-                                                        "Print usage");
+        "metrics-filter", "Fiter for collecting metrics pathes",
+        cxxopts::value<std::string>()->default_value(".*"))("h,help",
+                                                            "Print usage");
 
-    try {
-        auto flags = options.parse(argc, argv);
-        auto output_dir = flags["output-dir"].as<std::string>();
+    auto flags = options.parse(argc, argv);
+    auto output_dir = flags["output-dir"].as<std::string>();
 
-        if (flags.contains("help")) {
-            std::cout << options.help() << std::endl;
-            return 0;
-        }
-
-        if (flags["no-logs"].as<bool>()) {
-            Logger::get_instance().disable_logs();
-        }
-
-        sim::YamlParser parser;
-        auto [simulator, simulation_time] = parser.build_simulator_from_config(
-            flags["config"].as<std::string>());
-        std::visit([&](auto &sim) { sim.start(simulation_time); }, simulator);
-
-        if (!flags["no-plots"].as<bool>()) {
-            sim::MetricsCollector::get_instance().draw_metric_plots(output_dir);
-        }
-        if (flags["export-metrics"].as<bool>()) {
-            sim::MetricsCollector::get_instance().export_metrics_to_files(
-                output_dir);
-        }
-    } catch (const std::exception &e) {
-        std::cerr << fmt::format("Error: {}", e.what()) << std::endl;
-        return 1;
+    if (flags.contains("help")) {
+        std::cout << options.help() << std::endl;
+        return 0;
     }
+
+    if (flags["no-logs"].as<bool>()) {
+        Logger::get_instance().disable_logs();
+    }
+
+    sim::MetricsCollector::get_instance().set_metrics_filter(
+        flags["metrics-filter"].as<std::string>());
+
+    sim::YamlParser parser;
+    auto [simulator, simulation_time] =
+        parser.build_simulator_from_config(flags["config"].as<std::string>());
+    std::visit([&](auto &sim) { sim.start(simulation_time); }, simulator);
+
+    if (!flags["no-plots"].as<bool>()) {
+        sim::MetricsCollector::get_instance().draw_metric_plots(output_dir);
+    }
+    sim::MetricsCollector::get_instance().export_metrics_to_files(output_dir);
+
     return 0;
 }
