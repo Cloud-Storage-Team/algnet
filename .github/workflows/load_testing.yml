@@ -79,8 +79,10 @@ jobs:
       run: sudo perf record -F 99 -g -- ./build/nons -c configuration_examples/simulation_examples/incast_simulation.yml --no-logs --no-plots
 
     - name: Generate flamegraph
-      run: | 
+      run: |
+        ls -hal
         sudo perf script > out.perf
+        ls -hal
         ./FlameGraph/stackcollapse-perf.pl out.perf > out.folded
         ./FlameGraph/flamegraph.pl out.folded > flamegraph.svg
 
