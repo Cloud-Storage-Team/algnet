@@ -5,8 +5,7 @@ on:
     workflows: ["Build and run project", "Load testing"]
     types:
       - completed
-  workflow_dispatch:
-      
+
 jobs:
   rewrite-root-index:
     runs-on: ubuntu-latest
@@ -18,16 +17,8 @@ jobs:
         with:
           ref: 'gh-pages'
 
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: flamegraph
-          path: .flamegraph.svg
-  
       - name: Install dependency
-        run: |
-          ls -lah
-          pip install yattag
+        run: pip install yattag
 
       - name: Remove redundant files
         run: python3 .scripts/delete-useless-files.py
@@ -43,7 +34,7 @@ jobs:
 
       - name: Commit changes
         run: |
-          git add -uxx`
+          git add -u
           git add index.html
           git commit -m "Add changes from GitHub Actions" || echo "No changes to commit"
 
