@@ -17,68 +17,30 @@ MetricsCollector& MetricsCollector::get_instance() {
 }
 
 void MetricsCollector::add_cwnd(Id flow_id, Time time, double cwnd) {
-    m_cwnd_storage[flow_id].add_record(time, cwnd);
+    m_cwnd_storage.add_record(flow_id, time, cwnd);
 }
 
 void MetricsCollector::add_delivery_rate(Id flow_id, Time time, double value) {
-    m_rate_storage[flow_id].add_record(time, value);
+    m_rate_storage.add_record(flow_id, time, value);
 }
 
 void MetricsCollector::add_RTT(Id flow_id, Time time, Time value) {
-    m_RTT_storage[flow_id].add_record(time, value);
-}
-
-void MetricsCollector::export_metrics_to_files(
-    std::filesystem::path metrics_dir) const {
-    for (auto& [flow_id, values] : m_RTT_storage) {
-        std::filesystem::path file_path =
-            std::filesystem::path("rtt") / flow_id;
-        std::string file_name = file_path.string();
-
-        if (std::regex_match(file_name, m_metrics_filter)) {
-            values.export_to_file(metrics_dir / file_name);
-        }
-    }
-
-    for (auto& [link_id, values] : m_queue_size_storage) {
-        std::filesystem::path file_path =
-            std::filesystem::path("queue_size") / link_id;
-        std::string file_name = file_path.string();
-
-        if (std::regex_match(file_name, m_metrics_filter)) {
-            values.export_to_file(metrics_dir / file_name);
-        }
-    }
-
-    for (auto& [flow_id, values] : m_cwnd_storage) {
-        std::filesystem::path file_path =
-            std::filesystem::path("cwnd") / flow_id;
-        std::string file_name = file_path.string();
-
-        if (std::regex_match(file_name, m_metrics_filter)) {
-            values.export_to_file(metrics_dir / file_name);
-        }
-    }
-
-    for (auto& [flow_id, values] : m_rate_storage) {
-        std::filesystem::path file_path =
-            std::filesystem::path("rate") / flow_id;
-        std::string file_name = file_path.string();
-
-        if (std::regex_match(file_name, m_metrics_filter)) {
-            values.export_to_file(metrics_dir / file_name);
-        }
-    }
+    m_RTT_storage.add_record(flow_id, time, value);
 }
 
 void MetricsCollector::add_queue_size(Id link_id, Time time,
                                       std::uint32_t value) {
-    m_queue_size_storage[link_id].add_record(time, value);
+    m_queue_size_storage.add_record(link_id, time, value);
 }
 
-void MetricsCollector::set_metrics_filter(const std::string& filter) {
-    m_metrics_filter = std::regex(filter);
+void MetricsCollector::export_metrics_to_files(
+    std::filesystem::path metrics_dir) const {
+    m_RTT_storage.export_to_files(metrics_dir);
+    m_queue_size_storage.export_to_files(metrics_dir);
+    m_cwnd_storage.export_to_files(metrics_dir);
+    m_rate_storage.export_to_files(metrics_dir);
 }
+
 // verctor of pairs<Storage, curve name>
 using PlotMetricsData = std::vector<std::pair<MetricsStorage, std::string> >;
 
@@ -106,8 +68,8 @@ static void draw_on_same_plot(std::filesystem::path path, PlotMetricsData data,
 void MetricsCollector::draw_cwnd_plot(std::filesystem::path path) const {
     PlotMetricsData data;
     std::transform(
-        begin(m_cwnd_storage), end(m_cwnd_storage), std::back_inserter(data),
-        [](auto const& pair) {
+        begin(m_cwnd_storage.data()), end(m_cwnd_storage.data()),
+        std::back_inserter(data), [](auto const& pair) {
             auto flow =
                 IdentifierFactory::get_instance().get_object<IFlow>(pair.first);
             std::string name =
@@ -122,8 +84,8 @@ void MetricsCollector::draw_cwnd_plot(std::filesystem::path path) const {
 void MetricsCollector::draw_RTT_plot(std::filesystem::path path) const {
     PlotMetricsData data;
     std::transform(
-        begin(m_RTT_storage), end(m_RTT_storage), std::back_inserter(data),
-        [](auto const& pair) {
+        begin(m_RTT_storage.data()), end(m_RTT_storage.data()),
+        std::back_inserter(data), [](auto const& pair) {
             auto flow =
                 IdentifierFactory::get_instance().get_object<IFlow>(pair.first);
             std::string name =
@@ -139,8 +101,8 @@ void MetricsCollector::draw_delivery_rate_plot(
     std::filesystem::path path) const {
     PlotMetricsData data;
     std::transform(
-        begin(m_rate_storage), end(m_rate_storage), std::back_inserter(data),
-        [](auto const& pair) {
+        begin(m_rate_storage.data()), end(m_rate_storage.data()),
+        std::back_inserter(data), [](auto const& pair) {
             auto flow =
                 IdentifierFactory::get_instance().get_object<IFlow>(pair.first);
             std::string name =
@@ -154,7 +116,7 @@ void MetricsCollector::draw_delivery_rate_plot(
 
 void MetricsCollector::draw_queue_size_plots(
     std::filesystem::path dir_path) const {
-    for (auto& [link_id, values] : m_queue_size_storage) {
+    for (auto& [link_id, values] : m_queue_size_storage.data()) {
         auto link =
             IdentifierFactory::get_instance().get_object<ILink>(link_id);
         auto fig = values.get_picture(
@@ -183,6 +145,13 @@ void MetricsCollector::draw_metric_plots(
     draw_delivery_rate_plot(metrics_dir / "rate.svg");
     draw_RTT_plot(metrics_dir / "rtt.svg");
     draw_queue_size_plots(metrics_dir / "queue_size");
+}
+
+void MetricsCollector::set_metrics_filter(const std::string& filter) {
+    m_RTT_storage.set_filter(filter);
+    m_cwnd_storage.set_filter(filter);
+    m_rate_storage.set_filter(filter);
+    m_queue_size_storage.set_filter(filter);
 }
 
 }  // namespace sim
