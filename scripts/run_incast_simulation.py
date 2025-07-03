@@ -22,6 +22,9 @@ def parse_arguments():
     parser.add_argument(
         "--packets", type=int, help="Number of sending packets", default=100
     )
+    parser.add_argument(
+        "-o", "--output-dir", help="Path to directory for generated configs", default=""
+    )
 
     args = parser.parse_args()
 
@@ -45,15 +48,13 @@ def parse_arguments():
 def main(args):
     parsed_args = parse_arguments()
     topology_config_name = (
-        f"incast-{parsed_args.senders}-to-{parsed_args.receivers}-topology.yml"
+        f"incast_{parsed_args.senders}_to_{parsed_args.receivers}_topology.yml"
     )
     simulation_config_name = (
         f"incast_{parsed_args.senders}_to_{parsed_args.receivers}_simulation.yml"
     )
 
     generator_dir_path = "configuration_examples/generator/"
-    # topology_dir_path = "configuration_examples/topology_examples/"
-    # simulation_dir_path = "configuration_examples/simulation_examples/"
 
     bottleneck_script_path = os.path.join(generator_dir_path, "bottleneck.py")
 
@@ -64,14 +65,10 @@ def main(args):
         str(parsed_args.senders),
         "--receivers",
         str(parsed_args.receivers),
-        "--topology",
-        topology_config_name,
-        "--topology-dir",
-        generator_dir_path,
-        "--simulation",
-        simulation_config_name,
-        "--simulation-dir",
-        generator_dir_path,
+        "--topology-path",
+        os.path.join(parsed_args.output_dir, topology_config_name),
+        "--simulation-path",
+        os.path.join(parsed_args.output_dir, simulation_config_name),
         "--packets",
         str(parsed_args.packets),
         "--simulation-time",
@@ -84,7 +81,7 @@ def main(args):
         "time",
         str(parsed_args.executable),
         "--config",
-        str(os.path.join(generator_dir_path, simulation_config_name)),
+        str(os.path.join(parsed_args.output_dir, simulation_config_name)),
         "--no-logs",
         "--no-plots",
     ]
