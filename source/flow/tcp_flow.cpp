@@ -3,7 +3,6 @@
 #include <spdlog/fmt/fmt.h>
 
 #include "event/generate.hpp"
-#include "event/tcp_metric.hpp"
 #include "logger/logger.hpp"
 #include "metrics/metrics_collector.hpp"
 #include "scheduler.hpp"
@@ -44,8 +43,6 @@ void TcpFlow::start() {
     Time curr_time = Scheduler::get_instance().get_current_time();
     Scheduler::get_instance().add<Generate>(curr_time, shared_from_this(),
                                             m_packet_size);
-
-    Scheduler::get_instance().add<TcpMetric>(curr_time, shared_from_this());
 }
 
 Time TcpFlow::create_new_data_packet() {
@@ -81,6 +78,8 @@ void TcpFlow::update(Packet packet, DeviceType type) {
         MetricsCollector::get_instance().add_delivery_rate(
             packet.flow->get_id(), current_time, delivery_bit_rate);
 
+        double old_cwnd = m_cwnd;
+
         if (rtt >= m_delay_threshold || packet.congestion_experienced) {
             // trigger_congestion
             m_ssthresh = m_cwnd / 2;
@@ -97,6 +96,12 @@ void TcpFlow::update(Packet packet, DeviceType type) {
                 m_cwnd += 1.;
             }
             try_to_put_data_to_device();
+        }
+        if (old_cwnd != m_cwnd) {
+            MetricsCollector::get_instance().add_cwnd(m_id, current_time - 1,
+                                                      old_cwnd);
+            MetricsCollector::get_instance().add_cwnd(m_id, current_time,
+                                                      m_cwnd);
         }
     } else if (packet.dest_id == m_dest.lock()->get_id() &&
                m_flags.get_flag(packet, packet_type_label) == PacketType::DATA) {

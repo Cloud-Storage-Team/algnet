@@ -2,8 +2,8 @@
 
 #include <string>
 
-#include "flow/interfaces/i_flow.hpp"
 #include "utils/bitset.hpp"
+#include "flow/i_flow.hpp"
 
 namespace sim {
 

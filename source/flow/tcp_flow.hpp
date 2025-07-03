@@ -1,13 +1,13 @@
 #pragma once
 
 #include "device/interfaces/i_host.hpp"
-#include "flow/interfaces/i_tcp_flow.hpp"
+#include "i_flow.hpp"
 #include "packet.hpp"
 #include "utils/flag_manager.hpp"
 
 namespace sim {
 
-class TcpFlow : public ITcpFlow, public std::enable_shared_from_this<TcpFlow> {
+class TcpFlow : public IFlow, public std::enable_shared_from_this<TcpFlow> {
 public:
     TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
             std::shared_ptr<IHost> a_dest, Size a_packet_size,
@@ -22,7 +22,6 @@ public:
     std::shared_ptr<IHost> get_sender() const final;
     std::shared_ptr<IHost> get_receiver() const final;
     Id get_id() const final;
-    double get_cwnd() const final;
 
     std::string to_string() const;
 
