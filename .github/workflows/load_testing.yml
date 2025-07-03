@@ -78,20 +78,24 @@ jobs:
     - name: Build project with profiling
       run: cmake --build ${{env.BUILD_DIR}} -j $(nproc)
 
-    - name: Run perf
-      run: sudo perf record -F 99 -g -- ./build/nons -c configuration_examples/simulation_examples/incast_simulation.yml --no-logs --no-plots > perf.data
+    - name: Generate simulation config  
+      run:
+        python3 configuration_examples/generator/bottleneck.py \
+        --senders 1000 \
+        --receivers 1 \
+        --topology-path incast_1000_to_1_topology.yml \ 
+        --simulation-path incast_1000_to_1_simulation.yml \
+        --packets 100000 \
+        --simulation-time 100000000
 
-    - name: Debug perf.data
+    - name: Run perf
       run: |
-        ls -hal
-        file perf.data
+        sudo perf record -F 99 -g -- ./build/nons -c incast_1000_to_1_simulation.yml --no-logs --no-plots > perf.data
         perf report -i perf.data --header-only
         perf script -i perf.data -v > out.perf 2>&1 || true
-        cat out.perf
 
     - name: Generate flamegraph
       run: |
-        ls -hal
         ./FlameGraph/stackcollapse-perf.pl out.perf > out.folded
         ./FlameGraph/flamegraph.pl out.folded > flamegraph.svg
 
