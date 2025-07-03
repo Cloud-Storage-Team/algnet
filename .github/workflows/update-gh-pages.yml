@@ -24,7 +24,7 @@ jobs:
   
       - name: Install dependency
         run: |
-          ls -hal
+          ls -lah
           pip install yattag
 
       - name: Remove redundant files
