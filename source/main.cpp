@@ -48,5 +48,8 @@ int main(const int argc, char **argv) {
     //     std::cerr << fmt::format("Error: {}", e.what()) << std::endl;
     //     return 1;
     // }
+
+    std::cout << sizeof(std::optional<sim::MetricsStorage>) << '\n';
+
     return 0;
 }
