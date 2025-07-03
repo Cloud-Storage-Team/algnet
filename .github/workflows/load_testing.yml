@@ -4,6 +4,20 @@ on:
   workflow_dispatch:
   push:
     branches: [ "main" ]
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # Do not cancel in-progress runs if a labeling action took place (other than 'needs-load-testing'). Otherwise, adding irrelevant
+  # labels causes existing runs to be canceled and a new (identical) run to be started.
+  cancel-in-progress: ${{ (github.event.action != 'labeled' && github.event.action != 'unlabeled') || github.event.label.name == 'needs-load-testing' }}
+
 
 env:
   BUILD_DIR: build
