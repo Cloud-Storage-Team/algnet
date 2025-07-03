@@ -22,6 +22,7 @@ private:
     std::string get_metrics_filename(Id id) const;
 
     std::string metric_name;
+    std::unordered_map<Id, bool> m_filter_cache;
     std::unordered_map<Id, MetricsStorage> m_storage;
     std::regex m_filter;
 };

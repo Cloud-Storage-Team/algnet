@@ -5,7 +5,14 @@ MultiIdMetricsStorage::MultiIdMetricsStorage(std::string a_metric_name)
     : metric_name(std::move(a_metric_name)) {}
 
 void MultiIdMetricsStorage::add_record(Id id, Time time, double value) {
-    if (std::regex_match(get_metrics_filename(id), m_filter)) {
+    bool needs_add;
+    if (auto it = m_filter_cache.find(id); it != m_filter_cache.end()) {
+        needs_add = it->second;
+    } else {
+        needs_add = (m_filter_cache[id] =
+                         std::regex_match(get_metrics_filename(id), m_filter));
+    }
+    if (needs_add) {
         m_storage[id].add_record(time, value);
     }
 }
