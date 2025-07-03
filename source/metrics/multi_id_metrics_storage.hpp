@@ -14,7 +14,7 @@ public:
     void add_record(Id id, Time time, double value);
     void export_to_files(std::filesystem::path output_dir_path) const;
 
-    const std::unordered_map<Id, MetricsStorage>& data() const;
+    std::unordered_map<Id, MetricsStorage> data() const;
 
     void set_filter(std::string filter);
 
@@ -22,8 +22,11 @@ private:
     std::string get_metrics_filename(Id id) const;
 
     std::string metric_name;
-    std::unordered_map<Id, bool> m_filter_cache;
-    std::unordered_map<Id, MetricsStorage> m_storage;
+    // If m_storage does not contain some id, there was no check is metrics file
+    // name for id correspond to m_filter
+    // If m_storage[id] = std::nullopt, this check was failed
+    // Otherwice, check was succseed
+    std::unordered_map<Id, std::optional<MetricsStorage> > m_storage;
     std::regex m_filter;
 };
 }  // namespace sim

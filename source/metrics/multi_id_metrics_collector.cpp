@@ -1,3 +1,5 @@
+#include <ranges>
+
 #include "multi_id_metrics_storage.hpp"
 
 namespace sim {
@@ -5,28 +7,39 @@ MultiIdMetricsStorage::MultiIdMetricsStorage(std::string a_metric_name)
     : metric_name(std::move(a_metric_name)) {}
 
 void MultiIdMetricsStorage::add_record(Id id, Time time, double value) {
-    bool needs_add;
-    if (auto it = m_filter_cache.find(id); it != m_filter_cache.end()) {
-        needs_add = it->second;
-    } else {
-        needs_add = (m_filter_cache[id] =
-                         std::regex_match(get_metrics_filename(id), m_filter));
-    }
-    if (needs_add) {
-        m_storage[id].add_record(time, value);
+    std::optional<MetricsStorage> maybe_storage = std::nullopt;
+    auto it = m_storage.find(id);
+    if (it == m_storage.end()) {
+        if (!std::regex_match(get_metrics_filename(id), m_filter)) {
+            m_storage[id] = std::nullopt;
+        } else {
+            MetricsStorage new_storage;
+            new_storage.add_record(time, value);
+            m_storage[id] = std::move(new_storage);
+        }
+        return;
+    } else if (it->second.has_value()) {
+        it->second->add_record(time, value);
     }
 }
 
 void MultiIdMetricsStorage::export_to_files(
     std::filesystem::path output_dir_path) const {
     for (auto& [id, values] : m_storage) {
-        values.export_to_file(output_dir_path / get_metrics_filename(id));
+        if (values) {
+            values->export_to_file(output_dir_path / get_metrics_filename(id));
+        }
     }
 }
 
-const std::unordered_map<Id, MetricsStorage>& MultiIdMetricsStorage::data()
-    const {
-    return m_storage;
+std::unordered_map<Id, MetricsStorage> MultiIdMetricsStorage::data() const {
+    std::unordered_map<Id, MetricsStorage> result;
+    for (auto [id, maybe_storage] : m_storage) {
+        if (maybe_storage) {
+            result[id] = maybe_storage.value();
+        }
+    }
+    return result;
 }
 
 void MultiIdMetricsStorage::set_filter(std::string filter) {
