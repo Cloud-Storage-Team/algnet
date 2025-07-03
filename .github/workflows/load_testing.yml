@@ -83,6 +83,7 @@ jobs:
 
     - name: Debug perf.data
       run: |
+        ls -hal
         file perf.data
         perf report -i perf_data.data --header-only
         perf script -i perf_data.data -v > out.perf 2>&1 || true
