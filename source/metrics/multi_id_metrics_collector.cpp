@@ -13,7 +13,7 @@ MultiIdMetricsStorage::~MultiIdMetricsStorage() {
     m_needs_write.store(false);
     {
         std::lock_guard lock(m_record_queue_mutex);
-        m_condvar.notify_all();
+        m_condvar.notify_one();
     }
     if (m_writer.joinable()) {
         m_writer.join();
@@ -23,7 +23,7 @@ MultiIdMetricsStorage::~MultiIdMetricsStorage() {
 void MultiIdMetricsStorage::add_record(Id id, Time time, double value) {
     std::lock_guard lock(m_record_queue_mutex);
     m_record_queue.emplace(std::move(id), std::move(time), std::move(value));
-    m_condvar.notify_all();
+    m_condvar.notify_one();
 }
 
 void MultiIdMetricsStorage::export_to_files(
