@@ -7,7 +7,6 @@ MultiIdMetricsStorage::MultiIdMetricsStorage(std::string a_metric_name)
     : metric_name(std::move(a_metric_name)) {}
 
 void MultiIdMetricsStorage::add_record(Id id, Time time, double value) {
-    std::optional<MetricsStorage> maybe_storage = std::nullopt;
     auto it = m_storage.find(id);
     if (it == m_storage.end()) {
         if (!std::regex_match(get_metrics_filename(id), m_filter)) {
@@ -15,9 +14,8 @@ void MultiIdMetricsStorage::add_record(Id id, Time time, double value) {
         } else {
             MetricsStorage new_storage;
             new_storage.add_record(time, value);
-            m_storage[id] = std::move(new_storage);
+            m_storage.emplace(id, std::move(new_storage));
         }
-        return;
     } else if (it->second.has_value()) {
         it->second->add_record(time, value);
     }
