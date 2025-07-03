@@ -159,8 +159,6 @@ bool TcpFlow::try_to_put_data_to_device() {
     return false;
 }
 
-double TcpFlow::get_cwnd() const { return m_cwnd; }
-
 void TcpFlow::initialize_flag_manager() {
     if (!m_is_initialized) {
         m_flags.register_flag_by_amount(packet_type_label, PacketType::ENUM_SIZE);
