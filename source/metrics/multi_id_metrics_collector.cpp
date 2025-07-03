@@ -2,6 +2,8 @@
 
 #include "multi_id_metrics_storage.hpp"
 
+const static size_t MIN_QUEUE_AWAKE_SIZE = 50;
+
 namespace sim {
 MultiIdMetricsStorage::MultiIdMetricsStorage(std::string a_metric_name)
     : metric_name(std::move(a_metric_name)) {
@@ -22,9 +24,10 @@ MultiIdMetricsStorage::~MultiIdMetricsStorage() {
 
 void MultiIdMetricsStorage::add_record(Id&& id, Time time, double value) {
     std::lock_guard lock(m_record_queue_mutex);
-    m_record_queue.emplace_back(std::move(id), std::move(time),
-                                std::move(value));
-    m_condvar.notify_one();
+    m_record_queue.emplace_back(std::move(id), time, value);
+    if (m_record_queue.size() > MIN_QUEUE_AWAKE_SIZE) {
+        m_condvar.notify_one();
+    }
 }
 
 void MultiIdMetricsStorage::export_to_files(
@@ -65,10 +68,6 @@ void MultiIdMetricsStorage::writer_cycle() {
             m_condvar.wait(lock, [this]() {
                 return !m_record_queue.empty() || !m_needs_write;
             });
-
-            if (!m_needs_write) {
-                break;
-            }
 
             local_queue.swap(m_record_queue);
         }
