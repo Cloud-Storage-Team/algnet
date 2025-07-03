@@ -3,11 +3,10 @@
 #include <cppcoro/task.hpp>
 #include <memory>
 #include <queue>
-#include <mutex>
 
 #include "event_comparator.hpp"
 #include "types.hpp"
-
+#include "utils/spinlock.hpp"
 
 namespace sim {
 
@@ -35,7 +34,7 @@ private:
     cppcoro::task<> pop();
     cppcoro::task<> execute_event(std::unique_ptr<Event> event);
 
-    std::mutex m_lock;  // lock for m_events
+    SpinLock m_lock;  // lock for m_events
     std::priority_queue<std::unique_ptr<Event>,
                         std::vector<std::unique_ptr<Event>>, EventComparator>
         m_events;
