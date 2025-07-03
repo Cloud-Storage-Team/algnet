@@ -85,8 +85,8 @@ jobs:
       run: |
         ls -hal
         file perf.data
-        perf report -i perf_data.data --header-only
-        perf script -i perf_data.data -v > out.perf 2>&1 || true
+        perf report -i perf.data --header-only
+        perf script -i perf.data -v > out.perf 2>&1 || true
         cat out.perf
 
     - name: Generate flamegraph
