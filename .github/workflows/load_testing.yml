@@ -105,6 +105,9 @@ jobs:
         mkdir -p load_testing
         mv flamegraph.svg load_testing/flamegraph.svg
 
+    - name: Create HTML    
+      run: python3 scripts/generate-html.py ./load_testing
+       
     - name: Calculate deploy destination directory
       run:
         if [ "${{ github.event_name }}" == "pull_request" ]; then
