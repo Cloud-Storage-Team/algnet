@@ -5,6 +5,8 @@ on:
     workflows: ["Build and run project", "Load testing"]
     types:
       - completed
+  workflow_dispatch:
+      
 jobs:
   rewrite-root-index:
     runs-on: ubuntu-latest
