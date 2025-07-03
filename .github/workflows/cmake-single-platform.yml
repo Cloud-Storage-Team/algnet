@@ -88,19 +88,11 @@ jobs:
       run:
         if [ "${{ github.event_name }}" == "pull_request" ]; then
           echo "DEPLOY_DIR=${{github.head_ref}}/${{ github.run_id }}" >> $GITHUB_ENV;
-          echo "${{ github.run_id }}" >> run_id.txt;
         elif [ "${{ github.event_name }}" == "push" ]; then
           branch_name="${{ github.ref }}";
           branch_name=${branch_name#"refs/heads/"};
           echo "DEPLOY_DIR=${branch_name}/" >> $GITHUB_ENV;
         fi
-
-    - name: Upload GitHub run_id artifact
-      if: ${{ github.event_name == 'pull_request' }}
-      uses: actions/upload-artifact@v4
-      with:
-        name: run_id
-        path: run_id.txt
 
     - name: Deploy to GitHub Pages
       if: ${{env.DEPLOY_DIR}} != ''
