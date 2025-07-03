@@ -83,7 +83,7 @@ jobs:
 
     - name: Debug perf.data
       run: |
-        file perf_data.data
+        file perf.data
         perf report -i perf_data.data --header-only
         perf script -i perf_data.data -v > out.perf 2>&1 || true
         cat out.perf
