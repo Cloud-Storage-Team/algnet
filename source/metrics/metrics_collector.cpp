@@ -5,7 +5,7 @@
 
 #include <filesystem>
 
-#include "flow/interfaces/i_flow.hpp"
+#include "flow/i_flow.hpp"
 #include "link/i_link.hpp"
 #include "utils/identifier_factory.hpp"
 
