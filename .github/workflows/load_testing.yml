@@ -81,6 +81,13 @@ jobs:
     - name: Run perf
       run: sudo perf record -F 99 -g -- ./build/nons -c configuration_examples/simulation_examples/incast_simulation.yml --no-logs --no-plots > perf.data
 
+    - name: Debug perf.data
+      run: |
+        file perf_data.data
+        perf report -i perf_data.data --header-only
+        perf script -i perf_data.data -v > out.perf 2>&1 || true
+        cat out.perf
+
     - name: Generate flamegraph
       run: |
         cat perf.data
