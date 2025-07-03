@@ -56,8 +56,11 @@ std::string MultiIdMetricsStorage::get_metrics_filename(Id id) const {
 }
 
 void MultiIdMetricsStorage::writer_cycle() {
+    Id id;
+    Time time;
+    double value;
+    std::unordered_map<Id, std::optional<MetricsStorage> >::iterator it;
     while (m_needs_write) {
-        std::tuple<Id, Time, double> record;
         {
             std::unique_lock lock(m_record_queue_mutex);
             m_condvar.wait(lock, [this]() {
@@ -68,13 +71,12 @@ void MultiIdMetricsStorage::writer_cycle() {
                 break;
             }
 
-            record = m_record_queue.front();
+            std::tie(id, time, value) = m_record_queue.front();
             m_record_queue.pop();
         }
         {
-            auto [id, time, value] = std::move(record);
             std::lock_guard lock(m_storage_mutex);
-            auto it = m_storage.find(id);
+            it = m_storage.find(id);
             if (it == m_storage.end()) {
                 if (!std::regex_match(get_metrics_filename(id), m_filter)) {
                     m_storage[id] = std::nullopt;

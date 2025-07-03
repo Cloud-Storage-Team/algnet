@@ -19,7 +19,6 @@ int main(const int argc, char **argv) {
         cxxopts::value<std::string>()->default_value(".*"))("h,help",
                                                             "Print usage");
 
-    // try {
     auto flags = options.parse(argc, argv);
     auto output_dir = flags["output-dir"].as<std::string>();
 
@@ -44,12 +43,6 @@ int main(const int argc, char **argv) {
         sim::MetricsCollector::get_instance().draw_metric_plots(output_dir);
     }
     sim::MetricsCollector::get_instance().export_metrics_to_files(output_dir);
-    // } catch (const std::exception &e) {
-    //     std::cerr << fmt::format("Error: {}", e.what()) << std::endl;
-    //     return 1;
-    // }
-
-    std::cout << sizeof(std::optional<sim::MetricsStorage>) << '\n';
 
     return 0;
 }
