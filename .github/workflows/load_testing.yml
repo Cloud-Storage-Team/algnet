@@ -85,7 +85,7 @@ jobs:
       run: |
         cat perf.data
         ls -hal
-        sudo perf script > out.perf
+        sudo perf script -v > out.perf
         ls -hal
         ./FlameGraph/stackcollapse-perf.pl out.perf > out.folded
         ./FlameGraph/flamegraph.pl out.folded > flamegraph.svg
