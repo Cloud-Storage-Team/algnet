@@ -93,8 +93,18 @@ jobs:
         ./FlameGraph/stackcollapse-perf.pl out.perf > out.folded
         ./FlameGraph/flamegraph.pl out.folded > flamegraph.svg
 
+    - name: Get branch name
+      run:
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          echo "DEPLOY_DIR=${{github.head_ref}}/${{ github.run_id }}" >> $GITHUB_ENV;
+        elif [ "${{ github.event_name }}" == "push" ]; then
+          branch_name="${{ github.ref }}";
+          branch_name=${branch_name#"refs/heads/"};
+          echo "DEPLOY_DIR=${branch_name}/" >> $GITHUB_ENV;
+        fi
+
     - name: Upload flamegraph
       uses: actions/upload-artifact@v4
       with:
         name: flamegraph
-        path: flamegraph.svg
+        path:  ${{ env.DEPLOY_DIR }}/flamegraph.svg
