@@ -20,7 +20,7 @@ MultiIdMetricsStorage::~MultiIdMetricsStorage() {
     }
 }
 
-void MultiIdMetricsStorage::add_record(Id id, Time time, double value) {
+void MultiIdMetricsStorage::add_record(Id&& id, Time time, double value) {
     std::lock_guard lock(m_record_queue_mutex);
     m_record_queue.emplace_back(std::move(id), std::move(time),
                                 std::move(value));
