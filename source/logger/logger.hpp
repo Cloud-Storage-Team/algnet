@@ -16,18 +16,18 @@ public:
     void logExample();
     void disable_logs();
 
-    void trace(std::string msg,
-               std::source_location loc = std::source_location::current());
-    void debug(std::string msg,
-               std::source_location loc = std::source_location::current());
-    void info(std::string msg,
-              std::source_location loc = std::source_location::current());
-    void warn(std::string msg,
-              std::source_location loc = std::source_location::current());
-    void error(std::string msg,
-               std::source_location loc = std::source_location::current());
-    void critical(std::string msg,
-                  std::source_location loc = std::source_location::current());
+    void trace(std::string&& msg,
+               const std::source_location& loc = std::source_location::current());
+    void debug(std::string&& msg,
+               const std::source_location& = std::source_location::current());
+    void info(std::string&& msg,
+               const std::source_location& = std::source_location::current());
+    void warn(std::string&& msg,
+               const std::source_location& = std::source_location::current());
+    void error(std::string&& msg,
+               const std::source_location& = std::source_location::current());
+    void critical(std::string&& msg,
+               const std::source_location& = std::source_location::current());
 
 private:
     Logger();
