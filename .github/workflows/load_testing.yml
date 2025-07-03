@@ -67,7 +67,7 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Get dependencies  
-      run: git clone git@github.com:brendangregg/FlameGraph.git
+      run: git clone https://github.com/brendangregg/FlameGraph.git
 
     - name: Configure CMake for perf
       run: cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF -DCMAKE_CXX_FLAGS="-g -fno-omit-frame-pointer"
