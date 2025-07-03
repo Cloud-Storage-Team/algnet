@@ -1,5 +1,6 @@
 #pragma once
 
+#include <regex>
 #include <unordered_map>
 
 #include "metrics/metrics_storage.hpp"
@@ -18,6 +19,8 @@ public:
     void export_metrics_to_files(std::filesystem::path metrics_dir) const;
     void draw_metric_plots(std::filesystem::path metrics_dir) const;
 
+    void set_metrics_filter(const std::string& filter);
+
 private:
     MetricsCollector() {}
     MetricsCollector(const MetricsCollector&) = delete;
@@ -35,6 +38,8 @@ private:
 
     // link_ID --> vector of <time, queue size> values
     std::unordered_map<Id, MetricsStorage> m_queue_size_storage;
+
+    std::regex m_metrics_filter;
 };
 
 }  // namespace sim

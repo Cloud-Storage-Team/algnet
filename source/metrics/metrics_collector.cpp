@@ -1,4 +1,4 @@
-#include "metrics/metrics_collector.hpp"
+#include "metrics_collector.hpp"
 
 #include <matplot/matplot.h>
 #include <spdlog/fmt/fmt.h>
@@ -31,22 +31,43 @@ void MetricsCollector::add_RTT(Id flow_id, Time time, Time value) {
 void MetricsCollector::export_metrics_to_files(
     std::filesystem::path metrics_dir) const {
     for (auto& [flow_id, values] : m_RTT_storage) {
-        values.export_to_file(metrics_dir / fmt::format("rtt_{}.txt", flow_id));
+        std::filesystem::path file_path =
+            std::filesystem::path("rtt") / flow_id;
+        std::string file_name = file_path.string();
+
+        if (std::regex_match(file_name, m_metrics_filter)) {
+            values.export_to_file(metrics_dir / file_name);
+        }
     }
 
     for (auto& [link_id, values] : m_queue_size_storage) {
-        values.export_to_file(metrics_dir /
-                              fmt::format("queue_size_{}.txt", link_id));
+        std::filesystem::path file_path =
+            std::filesystem::path("queue_size") / link_id;
+        std::string file_name = file_path.string();
+
+        if (std::regex_match(file_name, m_metrics_filter)) {
+            values.export_to_file(metrics_dir / file_name);
+        }
     }
 
     for (auto& [flow_id, values] : m_cwnd_storage) {
-        values.export_to_file(metrics_dir /
-                              fmt::format("cwnd_{}.txt", flow_id));
+        std::filesystem::path file_path =
+            std::filesystem::path("cwnd") / flow_id;
+        std::string file_name = file_path.string();
+
+        if (std::regex_match(file_name, m_metrics_filter)) {
+            values.export_to_file(metrics_dir / file_name);
+        }
     }
 
     for (auto& [flow_id, values] : m_rate_storage) {
-        values.export_to_file(metrics_dir /
-                              fmt::format("rate_{}.txt", flow_id));
+        std::filesystem::path file_path =
+            std::filesystem::path("rate") / flow_id;
+        std::string file_name = file_path.string();
+
+        if (std::regex_match(file_name, m_metrics_filter)) {
+            values.export_to_file(metrics_dir / file_name);
+        }
     }
 }
 
@@ -55,6 +76,9 @@ void MetricsCollector::add_queue_size(Id link_id, Time time,
     m_queue_size_storage[link_id].add_record(time, value);
 }
 
+void MetricsCollector::set_metrics_filter(const std::string& filter) {
+    m_metrics_filter = std::regex(filter);
+}
 // verctor of pairs<Storage, curve name>
 using PlotMetricsData = std::vector<std::pair<MetricsStorage, std::string> >;
 
