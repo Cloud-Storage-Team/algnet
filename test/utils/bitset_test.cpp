@@ -8,15 +8,15 @@
 
 namespace test {
 
-class BitSet32Test : public testing::Test {
+class BitSetTest : public testing::Test {
 public:
     void TearDown() override {};
     void SetUp() override {};
 };
 
 
-TEST(BitSet32Test, InvalidCases) {
-    sim::BitSet32 bits(0x12345678);
+TEST(BitSetTest, InvalidCases) {
+    sim::BitSet<std::uint32_t> bits(0x12345678);
     const uint32_t original = bits.get_bits();
 
     bits.set_range(0, 32, 15);
@@ -38,8 +38,8 @@ TEST(BitSet32Test, InvalidCases) {
     EXPECT_EQ(bits.get_bits(), original);
 }
 
-TEST(BitSet32Test, BasicCases) {
-    sim::BitSet32 bits(0);
+TEST(BitSetTest, BasicCases) {
+    sim::BitSet<std::uint32_t> bits(0);
 
     bits.set_range(4, 4, 1);
     EXPECT_EQ(bits.get_range(4, 4), bits.get_bit(4));
@@ -56,8 +56,8 @@ TEST(BitSet32Test, BasicCases) {
     EXPECT_EQ(bits.get_range(0, 31), 137);
 }
 
-TEST(BitSet32Test, ValidEdgeCases) {
-    sim::BitSet32 bits(0);
+TEST(BitSetTest, ValidEdgeCases) {
+    sim::BitSet<std::uint32_t> bits(0);
     
     bits.set_bit(0, 1);
     EXPECT_EQ(bits.get_bit(0), bits.get_range(0, 0));

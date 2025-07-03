@@ -1,34 +1,106 @@
 #pragma once
 
-#define sizeof_bits(x) (8 * sizeof(x))
+#define sizeof_bits(x) (CHAR_BIT * sizeof(x))
 
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
+#include <type_traits>
+#include <concepts>
+#include <spdlog/fmt/fmt.h>
+
+#include "logger/logger.hpp"
 
 namespace sim {
 
-class BitSet32 {
+template <typename T>
+concept BitStorageType = 
+    std::is_same_v<T, std::uint8_t>  ||
+    std::is_same_v<T, std::uint16_t> ||
+    std::is_same_v<T, std::uint32_t> ||
+    std::is_same_v<T, std::uint64_t> ||
+    std::is_same_v<T, unsigned __int128>;
+
+template <BitStorageType BitStorage>
+class BitSet {
 public:
-    BitSet32();
-    explicit BitSet32(std::uint32_t initial);
+    BitSet() : m_data(0) {};
+    explicit BitSet(BitStorage initial) : m_data(initial) {};
 
-    bool set_bit(std::uint32_t pos, bool value);
-    bool set_range(std::uint32_t low, std::uint32_t high, std::uint32_t value);
+    bool set_bit(std::uint8_t pos, bool value) {
+        if (pos >= sizeof_bits(m_data)) {
+            LOG_ERROR(fmt::format("Bit position is out of range. Max possible position is {}, but got {}", sizeof(BitStorage) - 1, pos));
+            return false;
+        }
 
-    std::uint32_t get_bit(std::uint32_t pos) const;
-    std::uint32_t get_range(std::uint32_t low, std::uint32_t high) const;
-    std::uint32_t get_bits() const;
+        if (value) {
+            m_data |= (1U << pos);
+        } else {
+            m_data &= ~(1U << pos);
+        }
 
-    friend bool operator==(const BitSet32& fst, const BitSet32& snd);
+        return true;
+    };
 
-    void reset();
+    bool set_range(std::uint8_t low, std::uint8_t high, BitStorage value){
+        if (high >= sizeof_bits(m_data) || low > high) {
+            LOG_ERROR(fmt::format("Range edges error. Low and high should be less than {} and low should be <= hight. Got low = {} and high = {}", sizeof(BitStorage), low, high));
+            return false;
+        }
+
+        const std::uint32_t length = high - low + 1;
+        const std::uint32_t max_val = max_range_value(length);
+
+        if (value > max_val) {
+            LOG_ERROR(fmt::format("Value is out of range. Max possible value = {}, when got {}", max_val, value));
+            return false;
+        }
+
+        std::uint32_t mask = max_val << low;
+        m_data = (m_data & ~mask) | (value << low);
+
+        return true;
+    };
+
+    std::uint8_t get_bit(std::uint8_t pos) const {
+        if (pos >= sizeof_bits(m_data)) {
+            LOG_ERROR(fmt::format("Bit position is out of range. Max possible position is {}, but got {}", sizeof(BitStorage) - 1, pos));
+            return 0;
+        }
+
+        return (m_data >> pos) & 1;
+    };
+
+    BitStorage get_range(std::uint8_t low, std::uint8_t high) const {
+        if (high >= sizeof_bits(m_data)  || low > high) {
+            LOG_ERROR(fmt::format("Range edges error. Low and high should be less than {} and low should be <= hight. Got low = {} and high = {}", 32, low, high));
+            return 0;
+        }
+
+        const std::uint32_t length = high - low + 1;
+        std::uint32_t mask = max_range_value(length) << low;
+        return (m_data & mask) >> low;
+    };
+
+    BitStorage get_bits() const {
+        return m_data;
+    };
+
+    friend bool operator==(const BitSet& fst, const BitSet& snd) {
+        return fst.m_data == snd.m_data;
+    };
+
+    void reset() {
+        m_data = 0;
+    };
 
 private:
-    std::uint32_t m_data;
+    BitStorage m_data;
 
-    inline std::uint32_t max_range_value(std::uint32_t length) const {
-        return length == sizeof_bits(m_data) ? (std::numeric_limits<std::uint32_t>::max()) : (static_cast<std::uint32_t>(1) << length) - 1;
+    inline BitStorage max_range_value(std::uint8_t length) const {
+        return length == sizeof_bits(BitStorage)
+            ? std::numeric_limits<BitStorage>::max()
+            : (static_cast<BitStorage>(1) << length) - 1;
     }
 };
 

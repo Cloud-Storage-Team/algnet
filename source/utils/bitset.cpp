@@ -6,11 +6,11 @@
 
 namespace sim {
 
-BitSet32::BitSet32() : m_data(0) {}
+BitSet::BitSet() : m_data(0) {}
 
-BitSet32::BitSet32(std::uint32_t initial) : m_data(initial) {}
+BitSet::BitSet(std::uint32_t initial) : m_data(initial) {}
 
-bool BitSet32::set_bit(std::uint32_t pos, bool value) {
+bool BitSet::set_bit(std::uint32_t pos, bool value) {
     if (pos >= sizeof_bits(m_data)) {
         LOG_ERROR(fmt::format("Bit position is out of range. Max possible position is {}, but got {}", 32 - 1, pos));
         return false;
@@ -25,7 +25,7 @@ bool BitSet32::set_bit(std::uint32_t pos, bool value) {
     return true;
 }
 
-bool BitSet32::set_range(std::uint32_t low, std::uint32_t high, std::uint32_t value) {
+bool BitSet::set_range(std::uint32_t low, std::uint32_t high, std::uint32_t value) {
     if (high >= sizeof_bits(m_data) || low > high) {
         LOG_ERROR(fmt::format("Range edges error. Low and high should be less than {} and low should be <= hight. Got low = {} and high = {}", 32, low, high));
         return false;
@@ -45,7 +45,7 @@ bool BitSet32::set_range(std::uint32_t low, std::uint32_t high, std::uint32_t va
     return true;
 }
 
-std::uint32_t BitSet32::get_bit(std::uint32_t pos) const {
+std::uint32_t BitSet::get_bit(std::uint32_t pos) const {
     if (pos >= sizeof_bits(m_data)) {
         LOG_ERROR(fmt::format("Bit position is out of range. Max possible position is {}, but got {}", 32 - 1, pos));
         return 0;
@@ -54,7 +54,7 @@ std::uint32_t BitSet32::get_bit(std::uint32_t pos) const {
     return (m_data >> pos) & 1;
 }
 
-std::uint32_t BitSet32::get_range(std::uint32_t low, std::uint32_t high) const {
+std::uint32_t BitSet::get_range(std::uint32_t low, std::uint32_t high) const {
     if (high >= sizeof_bits(m_data)  || low > high) {
         LOG_ERROR(fmt::format("Range edges error. Low and high should be less than {} and low should be <= hight. Got low = {} and high = {}", 32, low, high));
         return 0;
@@ -65,15 +65,15 @@ std::uint32_t BitSet32::get_range(std::uint32_t low, std::uint32_t high) const {
     return (m_data & mask) >> low;
 }
 
-std::uint32_t BitSet32::get_bits() const {
+std::uint32_t BitSet::get_bits() const {
     return m_data;
 }
 
-bool operator==(const BitSet32& fst, const BitSet32& snd) {
+bool operator==(const BitSet& fst, const BitSet& snd) {
     return fst.m_data == snd.m_data;
 }
 
-void BitSet32::reset() {
+void BitSet::reset() {
     m_data = 0;
 }
 
