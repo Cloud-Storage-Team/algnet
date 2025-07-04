@@ -5,6 +5,7 @@
 #include "device/interfaces/i_host.hpp"
 #include "flow/i_flow.hpp"
 #include "packet.hpp"
+#include "utils/flag_manager.hpp"
 
 namespace sim {
 
@@ -32,9 +33,16 @@ public:
     Id get_id() const final;
 
 private:
+    static std::string packet_type_label;
+    enum PacketType { ACK, DATA, ENUM_SIZE };
+
     Time put_data_to_device();
     void schedule_packet_generation(Time time);
     Packet generate_packet();
+
+    static void initialize_flag_manager();
+    static bool m_is_initialized;
+    static FlagManager<std::string> m_flags;
 
     Id m_id;
     std::weak_ptr<IHost> m_src;

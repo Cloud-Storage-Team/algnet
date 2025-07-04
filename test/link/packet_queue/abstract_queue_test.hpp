@@ -40,7 +40,7 @@ requires ValidPacketQueueWithArgs<TPacketQueue, Args...>
 void TestPushOnePacket(size_t packet_size, Args&&... args) {
     TPacketQueue queue(std::forward<Args>(args)...);
 
-    sim::Packet packet(sim::PacketType::DATA, packet_size);
+    sim::Packet packet(packet_size);
 
     ASSERT_TRUE(queue.push(packet));
 
@@ -62,7 +62,7 @@ void TestOverflow(Args&&... args) {
     const size_t NUMBER_OF_PACKETS = 10;
     Size packet_size = max_size / NUMBER_OF_PACKETS;
 
-    sim::Packet packet(sim::PacketType::DATA, packet_size);
+    sim::Packet packet(packet_size);
 
     for (size_t i = 0; i < NUMBER_OF_PACKETS; i++) {
         ASSERT_TRUE(queue.push(packet));
@@ -71,7 +71,7 @@ void TestOverflow(Args&&... args) {
     size_t expected_queue_size = NUMBER_OF_PACKETS * packet_size;
     ASSERT_EQ(queue.get_size(), expected_queue_size);
 
-    sim::Packet overflow_packet(sim::PacketType::DATA, packet_size + 1);
+    sim::Packet overflow_packet(packet_size + 1);
     ASSERT_FALSE(queue.push(overflow_packet));
 
     ASSERT_EQ(queue.get_size(), expected_queue_size);
