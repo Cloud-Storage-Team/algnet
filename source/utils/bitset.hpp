@@ -91,7 +91,7 @@ public:
     };
 
 private:
-    const static inline BitStorageType ONE = 1
+    const static inline BitStorageType ONE = 1;
 
     BitStorage m_data;
 
