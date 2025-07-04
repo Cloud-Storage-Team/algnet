@@ -98,7 +98,7 @@ private:
     inline BitStorage max_range_value(std::uint8_t length) const {
         return length == sizeof_bits(BitStorage)
             ? std::numeric_limits<BitStorage>::max()
-            : (static_cast<BitStorage>(1) << length) - 1;
+            : (ONE << length) - 1;
     }
 };
 
