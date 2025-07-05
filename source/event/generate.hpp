@@ -1,6 +1,6 @@
 #pragma once
 #include "event.hpp"
-#include "flow/interfaces/i_flow.hpp"
+#include "flow/i_flow.hpp"
 
 namespace sim {
 /**
