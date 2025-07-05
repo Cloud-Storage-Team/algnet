@@ -101,12 +101,6 @@ jobs:
         ./FlameGraph/stackcollapse-perf.pl out.perf > out.folded
         ./FlameGraph/flamegraph.pl out.folded > ${{ env.FLAMEGRAPH_OUTPUT_DIR }}/${{ env.FLAMEGRAPH_FILENAME }}
 
-    - name: Upload flamegraph
-      uses: actions/upload-artifact@v4
-      with:
-        name: flamegraph
-        path:  ${{ env.FLAMEGRAPH_OUTPUT_DIR }}/${{ env.FLAMEGRAPH_FILENAME }}
-
     - name: Create HTML    
       run: python3 scripts/generate-html.py ./${{ env.FLAMEGRAPH_ARTIFACT_DIR }}
 
