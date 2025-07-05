@@ -1,7 +1,7 @@
 import argparse
 import sys
-import subprocess
 import re
+import json
 
 
 def parse_arguments():
@@ -9,54 +9,70 @@ def parse_arguments():
         description="Calculate deploy destination directory."
     )
     parser.add_argument(
+        "-c",
+        "--context",
+        help="GitHub context JSON file",
+        required=True,
+    )
+    parser.add_argument(
         "--github-event-name",
         help="Type of GitHub event that triggered the workflow",
-        required=True,
+        # required=True,
     )
     parser.add_argument(
         "--github-head-ref",
         help="TODO",
-        required=True,
+        # required=True,
     )
     parser.add_argument(
         "--github-run-id",
         help="GitHub Workflow run ID",
-        required=True,
+        # required=True,
     )
     parser.add_argument(
         "--github-ref",
         help="TODO",
-        required=True,
+        # required=True,
     )
     parser.add_argument(
         "--github-env-varname",
         help="Name of variable for GitHub environment",
-        required=True,
+        # required=True,
     )
     parser.add_argument(
         "--deploy-dir-varname",
         help="Name of environment variable to store deploy directory",
-        required=True,
+        # required=True,
     )
     return parser.parse_args()
 
 
+def load_github_context(context_file):
+    with open(context_file, "r", encoding="utf-8") as file:
+        return json.load(file)
+
+
 def main():
     args = parse_arguments()
-    if args.github_event_name == "pull_request":
-        deploy_dir = f"{args.github_head_ref}/{args.github_run_id}"
-    elif args.github_event_name == "push":
-        branch_name = re.sub(r"^refs/heads/", "", args.github_ref)
+
+    github_ctx = load_github_context(args.context)
+
+    if github_ctx["event_name"] == "pull_request":
+        deploy_dir = f"{github_ctx["head_ref"]}/{github_ctx["run_id"]}"
+    elif github_ctx["event_name"] == "push":
+        branch_name = re.sub(r"^refs/heads/", "", github_ctx["ref"])
         deploy_dir = f"{branch_name}/"
     else:
         print(
-            f"Error: Unsupported GitHub event name '{args.github_event_name}'",
+            f"Error: Unsupported GitHub event name '{github_ctx["event_name"]}'",
             file=sys.stderr,
         )
         sys.exit(1)
 
-    with open(args.github_env_varname, "a") as f:
-        f.write(f"{args.deploy_dir_varname}={deploy_dir}\n")
+    print(deploy_dir)
+
+    # with open(args.github_env_varname, "a") as f:
+    #     f.write(f"{args.deploy_dir_varname}={deploy_dir}\n")
 
 
 if __name__ == "__main__":

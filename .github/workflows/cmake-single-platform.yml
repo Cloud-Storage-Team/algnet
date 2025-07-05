@@ -84,15 +84,25 @@ jobs:
         name: metrics
         path: metrics/**
 
-    - name: Calculate deploy destination directory
+    - name: Put github context to json file
+      run: | 
+        echo ${{ toJson(github) }} > github_context.json
+        cat github_context.json
+
+    - name: Calculate deploy destination dir
       run: |
-        python3 scripts/caclulate_deploy_dir.py \
-          --github-event-name "${{ github.event_name }}" \
-          --github-head-ref "${{ github.head_ref }}" \
-          --github-run-id "${{ github.run_id }}" \
-          --github-ref "${{ github.ref }}" \
-          --github-env-varname $GITHUB_ENV \
-          --deploy-dir-varname DEPLOY_DIR
+        DEPLOY_DIR = $(python3 scripts/caclulate_deploy_dir.py -c github_context.json);
+        echo "DEPLOY_DIR=${DEPLOY_DIR}" >> $GITHUB_ENV"     
+
+    # - name: Calculate deploy destination directory
+    #   run: |
+    #     python3 scripts/caclulate_deploy_dir.py \
+    #       --github-event-name "${{ github.event_name }}" \
+    #       --github-head-ref "${{ github.head_ref }}" \
+    #       --github-run-id "${{ github.run_id }}" \
+    #       --github-ref "${{ github.ref }}" \
+    #       --github-env-varname $GITHUB_ENV \
+    #       --deploy-dir-varname DEPLOY_DIR
 
     - name: debug
       run: echo "DEPLOY_DIR=${{ env.DEPLOY_DIR }}"   
