@@ -105,11 +105,11 @@ jobs:
       run: python3 scripts/generate-html.py ./${{ env.FLAMEGRAPH_ARTIFACT_DIR }}
 
     - name: Put github context to json file
-      run: echo ${{ toJson(github) }} > github_context.json
+      run: echo "${{ toJson(github) }}" > github_context.json
 
     - name: Calculate deploy destination dir
       run: |
-        DEPLOY_DIR = $(python3 scripts/caclulate_deploy_dir.py -c github_context.json);
+        DEPLOY_DIR=$(python3 scripts/caclulate_deploy_dir.py -c github_context.json);
         echo "DEPLOY_DIR=${DEPLOY_DIR}" >> $GITHUB_ENV"    
   
     - name: debug
