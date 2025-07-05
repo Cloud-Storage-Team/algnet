@@ -8,6 +8,8 @@ on:
 env:
   BUILD_DIR: build
   EXECUTABLE_PATH: $BUILD_DIR/nons
+  FLAMEGRAPH_ARTIFACT_DIR: flamegraph
+  FLAMEGRAPH_PATH: $FLAMEGRAPH_ARTIFACT_DIR/flamegraph/flamegraph.svg
 
 jobs:
   load_testing:
@@ -89,24 +91,23 @@ jobs:
         perf report -i perf.data --header-only
         perf script -i perf.data -v > out.perf 2>&1 || true
 
+    - name: Prepare FlameGraph
+      run: |
+        mkdir -p ${{ env.FLAMEGRAPH_PATH }}
+
     - name: Generate flamegraph
       run: |
         ./FlameGraph/stackcollapse-perf.pl out.perf > out.folded
-        ./FlameGraph/flamegraph.pl out.folded > flamegraph.svg
+        ./FlameGraph/flamegraph.pl out.folded > ${{ env.FLAMEGRAPH_PATH }}
 
     - name: Upload flamegraph
       uses: actions/upload-artifact@v4
       with:
         name: flamegraph
-        path:  flamegraph.svg
-
-    - name: Prepare FlameGraph
-      run: |
-        mkdir -p load_testing/load_testing
-        mv flamegraph.svg load_testing/load_testing/flamegraph.svg
+        path:  ${{ env.FLAMEGRAPH_PATH }}
 
     - name: Create HTML    
-      run: python3 scripts/generate-html.py ./load_testing
+      run: python3 scripts/generate-html.py ./${{ env.FLAMEGRAPH_ARTIFACT_DIR }}
 
     - name: Calculate deploy destination directory
       run:
@@ -123,5 +124,5 @@ jobs:
       uses: peaceiris/actions-gh-pages@v3
       with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: load_testing
+          publish_dir: ${{ env.FLAMEGRAPH_ARTIFACT_DIR }}
           destination_dir: ${{ env.DEPLOY_DIR }}
