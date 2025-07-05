@@ -105,14 +105,15 @@ jobs:
       run: python3 scripts/generate-html.py ./${{ env.FLAMEGRAPH_ARTIFACT_DIR }}
 
     - name: Calculate deploy destination directory
+      shell: bash
       run:
-        if [ "${{ github.event_name }}" == "pull_request" ]; then
-          echo "DEPLOY_DIR=${{ github.head_ref }}/${{ github.run_id }}" >> $GITHUB_ENV;
-        elif [ "${{ github.event_name }}" == "push" ]; then
-          branch_name="${{ github.ref }}";
-          branch_name=${branch_name#"refs/heads/"};
-          echo "DEPLOY_DIR=${branch_name}/" >> $GITHUB_ENV;
-        fi
+        python3 scripts/caclulate_deploy_dir.py \
+          --github-event-name "${{ github.event_name }}" \
+          --github-head-ref "${{ github.head_ref }}" \
+          --github-run-id "${{ github.run_id }}" \
+          --github-ref "${{ github.ref }}" \
+          --github-env-varname GITHUB_ENV \
+          --deploy-dir-varname DEPLOY_DIR
   
     - name: Deploy to GitHub Pages
       if: ${{ env.DEPLOY_DIR }} != ''
