@@ -45,42 +45,30 @@ def main():
     args = parse_arguments()
     if args.github_event_name == "pull_request":
 
-        subprocess_args = [
-            "echo",
-            f'"{args.deploy_dir_varname}={args.github_head_ref}/{args.github_run_id}"',
-            ">>",
-            f"${args.github_env_varname};",
-        ]
-
         subprocess.run(
-            subprocess_args,
+            [
+                "echo",
+                f'"{args.deploy_dir_varname}={args.github_head_ref}/{args.github_run_id}"',
+                ">>",
+                f"${args.github_env_varname};",
+            ],
             capture_output=True,
             check=True,
         )
-
-        # debug
-        for a in subprocess_args:
-            print(a, end=" ")
 
     elif args.github_event_name == "push":
         branch_name = re.sub(r"^refs/heads/", "", args.github_ref)
 
-        subprocess_args = [
-            "echo",
-            f'"{args.deploy_dir_varname}={branch_name}/"',
-            ">>",
-            f"${args.github_env_varname};",
-        ]
-
         subprocess.run(
-            subprocess_args,
+            [
+                "echo",
+                f'"{args.deploy_dir_varname}={branch_name}/"',
+                ">>",
+                f"${args.github_env_varname};",
+            ],
             capture_output=True,
             check=True,
         )
-
-        # debug
-        for a in subprocess_args:
-            print(a, end=" ")
 
     else:
         print(
