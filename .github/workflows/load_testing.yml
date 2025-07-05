@@ -114,6 +114,9 @@ jobs:
           --github-env-varname GITHUB_ENV \
           --deploy-dir-varname DEPLOY_DIR
   
+    - name: debug
+      run: echo "DEPLOY_DIR=${{ env.DEPLOY_DIR }}"    
+
     - name: Deploy to GitHub Pages
       if: ${{ env.DEPLOY_DIR }} != ''
       uses: peaceiris/actions-gh-pages@v3
