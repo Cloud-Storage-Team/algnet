@@ -9,7 +9,8 @@ env:
   BUILD_DIR: build
   EXECUTABLE_PATH: $BUILD_DIR/nons
   FLAMEGRAPH_ARTIFACT_DIR: flamegraph
-  FLAMEGRAPH_PATH: $FLAMEGRAPH_ARTIFACT_DIR/flamegraph/flamegraph.svg
+  FLAMEGRAPH_OUTPUT_DIR: $FLAMEGRAPH_ARTIFACT_DIR/flamegraph
+  FLAMEGRAPH_FILENAME: flamegraph.svg
 
 jobs:
   load_testing:
@@ -93,18 +94,18 @@ jobs:
 
     - name: Prepare FlameGraph
       run: |
-        mkdir -p ${{ env.FLAMEGRAPH_PATH }}
+        mkdir -p ${{ env.FLAMEGRAPH_OUTPUT_DIR }}
 
     - name: Generate flamegraph
       run: |
         ./FlameGraph/stackcollapse-perf.pl out.perf > out.folded
-        ./FlameGraph/flamegraph.pl out.folded > ${{ env.FLAMEGRAPH_PATH }}
+        ./FlameGraph/flamegraph.pl out.folded > ${{ env.FLAMEGRAPH_OUTPUT_DIR }}/${{ env.FLAMEGRAPH_FILENAME }}
 
     - name: Upload flamegraph
       uses: actions/upload-artifact@v4
       with:
         name: flamegraph
-        path:  ${{ env.FLAMEGRAPH_PATH }}
+        path:  ${{ env.FLAMEGRAPH_OUTPUT_DIR }}/${{ env.FLAMEGRAPH_FILENAME }}
 
     - name: Create HTML    
       run: python3 scripts/generate-html.py ./${{ env.FLAMEGRAPH_ARTIFACT_DIR }}
