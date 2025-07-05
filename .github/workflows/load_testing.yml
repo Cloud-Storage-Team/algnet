@@ -85,7 +85,7 @@ jobs:
 
     - name: Run perf
       run: |
-        sudo perf record -F 99 -g -- ./build/nons -c incast_1000_to_1_simulation.yml --no-logs --no-plots > perf.data
+        sudo perf record -F 99 -g -- ./${{env.EXECUTABLE_PATH}} -c incast_1000_to_1_simulation.yml --no-logs --no-plots > perf.data
         perf report -i perf.data --header-only
         perf script -i perf.data -v > out.perf 2>&1 || true
 
