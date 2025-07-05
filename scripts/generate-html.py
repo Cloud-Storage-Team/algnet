@@ -56,7 +56,7 @@ def generate_html(directory):
             html_content += f"<h2>{relative_path}</h2><div class='gallery'>"
             for image in images:
                 image_path = os.path.join(relative_path, image)
-                html_content += f"<img src='{image_path}' alt='{image}'>"
+                html_content += f"<a href={image_path}> <img src='{image_path}' alt='{image}'> </a>"
             html_content += "</div>"
 
     html_content += """
