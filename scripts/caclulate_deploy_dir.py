@@ -55,7 +55,7 @@ def main():
         )
         sys.exit(1)
 
-    with open(args.github_env_file, "a") as f:
+    with open(args.github_env_varname, "a") as f:
         f.write(f"{args.deploy_dir_varname}={deploy_dir}\n")
 
 
