@@ -91,7 +91,7 @@ jobs:
           --github-head-ref "${{ github.head_ref }}" \
           --github-run-id "${{ github.run_id }}" \
           --github-ref "${{ github.ref }}" \
-          --github-env-varname GITHUB_ENV \
+          --github-env-varname $GITHUB_ENV \
           --deploy-dir-varname DEPLOY_DIR
 
     - name: debug
