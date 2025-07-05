@@ -85,9 +85,7 @@ jobs:
         path: metrics/**
 
     - name: Put github context to json file
-      run: | 
-        echo ${{ toJson(github) }} > github_context.json
-        cat github_context.json
+      run: echo ${{ toJson(github) }} > github_context.json
 
     - name: Calculate deploy destination dir
       run: |
