@@ -14,36 +14,6 @@ def parse_arguments():
         help="GitHub context JSON file",
         required=True,
     )
-    parser.add_argument(
-        "--github-event-name",
-        help="Type of GitHub event that triggered the workflow",
-        # required=True,
-    )
-    parser.add_argument(
-        "--github-head-ref",
-        help="TODO",
-        # required=True,
-    )
-    parser.add_argument(
-        "--github-run-id",
-        help="GitHub Workflow run ID",
-        # required=True,
-    )
-    parser.add_argument(
-        "--github-ref",
-        help="TODO",
-        # required=True,
-    )
-    parser.add_argument(
-        "--github-env-varname",
-        help="Name of variable for GitHub environment",
-        # required=True,
-    )
-    parser.add_argument(
-        "--deploy-dir-varname",
-        help="Name of environment variable to store deploy directory",
-        # required=True,
-    )
     return parser.parse_args()
 
 
@@ -70,9 +40,6 @@ def main():
         sys.exit(1)
 
     print(deploy_dir)
-
-    # with open(args.github_env_varname, "a") as f:
-    #     f.write(f"{args.deploy_dir_varname}={deploy_dir}\n")
 
 
 if __name__ == "__main__":

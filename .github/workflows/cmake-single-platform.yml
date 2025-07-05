@@ -92,9 +92,6 @@ jobs:
         DEPLOY_DIR=$(python3 scripts/calculate_deploy_dir.py -c github_context.json);
         echo "DEPLOY_DIR=${DEPLOY_DIR}" >> $GITHUB_ENV;     
 
-    - name: debug
-      run: echo "DEPLOY_DIR=${{ env.DEPLOY_DIR }}"   
-
     - name: Deploy to GitHub Pages
       if: ${{env.DEPLOY_DIR}} != ''
       uses: peaceiris/actions-gh-pages@v3
