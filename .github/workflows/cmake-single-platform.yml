@@ -85,7 +85,6 @@ jobs:
         path: metrics/**
 
     - name: Calculate deploy destination directory
-      shell: bash
       run: |
         python3 scripts/caclulate_deploy_dir.py \
           --github-event-name "${{ github.event_name }}" \
