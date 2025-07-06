@@ -1,7 +1,10 @@
 name: Update root index.html
 
 on:
-  page_build
+  workflow_run:
+    workflows: ["Build and run project", "Load testing"]
+    types:
+      - completed
 
 jobs:
   rewrite-root-index:
