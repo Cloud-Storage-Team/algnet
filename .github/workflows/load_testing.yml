@@ -130,7 +130,7 @@ jobs:
           publish_dir: ${{ env.FLAMEGRAPH_ARTIFACT_DIR }}
           destination_dir: ${{ env.DEPLOY_DIR }}
 
-    - name: Wait for artifacts to be avaliable
+    - name: Wait for artifacts to be available
       run:
-        python3 scripts/check_artifacts.py -u https://cloud-storage-team.github.io/algnet/${{env.DEPLOY_DIR}}
+        python3 scripts/check_artifacts.py -u 'https://cloud-storage-team.github.io/algnet/${{env.DEPLOY_DIR}}'
           
