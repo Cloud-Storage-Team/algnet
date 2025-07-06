@@ -9,6 +9,7 @@ on:
 env:
   EXECUTABLE_NAME: nons
   TEST_EXECUTABLE_NAME: test_nons
+  METRICS_ARTIFACT_DIR: metrics
 
 jobs:
   clang-format:
@@ -73,7 +74,7 @@ jobs:
       run: chmod +x ${{env.EXECUTABLE_NAME}}
 
     - name: Run simulation
-      run: python3 scripts/run_simulations.py -e ./${{env.EXECUTABLE_NAME}} -c configuration_examples/simulation_examples --output-dir ./metrics
+      run: python3 scripts/run_simulations.py -e ./${{env.EXECUTABLE_NAME}} -c configuration_examples/simulation_examples --output-dir ./${{env.METRICS_ARTIFACT_DIR}}
 
     - name: Create html
       run: python3 scripts/generate-html.py ./metrics
@@ -82,7 +83,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: metrics
-        path: metrics/**
+        path: ${{env.METRICS_ARTIFACT_DIR}}/**
 
     - name: Put github context to json file
       run: echo '${{ toJson(github) }}' > github_context.json
@@ -90,14 +91,14 @@ jobs:
     - name: Calculate deploy destination dir
       run: |
         DEPLOY_DIR=$(python3 scripts/calculate_deploy_dir.py -c github_context.json);
-        echo "DEPLOY_DIR=${DEPLOY_DIR}" >> $GITHUB_ENV;     
+        echo "DEPLOY_DIR=${DEPLOY_DIR}/${{env.METRICS_ARTIFACT_DIR}}" >> $GITHUB_ENV;     
 
     - name: Deploy to GitHub Pages
       if: ${{env.DEPLOY_DIR}} != ''
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: metrics
+        publish_dir: ${{env.METRICS_ARTIFACT_DIR}}
         destination_dir: ${{env.DEPLOY_DIR}}
     - name: Wait for artifacts to be avaliable
       run:
