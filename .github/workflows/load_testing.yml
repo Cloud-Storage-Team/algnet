@@ -23,6 +23,7 @@ env:
   BUILD_DIR: build
   EXECUTABLE_PATH: $BUILD_DIR/nons
   FLAMEGRAPH_ARTIFACT_DIR: flamegraph
+  FLAMEGRAPH_ARTIFACT_INTERNAL_DIR: flamegraph
   FLAMEGRAPH_OUTPUT_DIR: $FLAMEGRAPH_ARTIFACT_DIR/flamegraph
   FLAMEGRAPH_FILENAME: flamegraph.svg
 
@@ -124,9 +125,9 @@ jobs:
     - name: Calculate deploy destination dir
       run: |
         DEPLOY_DIR=$(python3 scripts/calculate_deploy_dir.py -c github_context.json)_load_testing;
-        echo "DEPLOY_DIR=${DEPLOY_DIR}/flamegraph" >> $GITHUB_ENV;      
+        echo "DEPLOY_DIR=${DEPLOY_DIR}/${{ env.FLAMEGRAPH_ARTIFACT_INTERNAL_DIR }}" >> $GITHUB_ENV;      
 
-    - name: Deploy to GitHub Pages
+    - name: Deploy to GitHub Pages 
       if: ${{ env.DEPLOY_DIR }} != ''
       uses: peaceiris/actions-gh-pages@v3
       with:
