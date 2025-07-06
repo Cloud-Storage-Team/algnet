@@ -21,7 +21,7 @@ def main():
     while True:
         try:
             response = requests.head(args.url)
-            if response.status_code == 200:
+            if response.status_code >= 200 and response.status_code < 400:
                 print(f"Artifacts are available at {args.url}")
                 break
             else:
