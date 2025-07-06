@@ -23,9 +23,7 @@ env:
   BUILD_DIR: build
   EXECUTABLE_PATH: $BUILD_DIR/nons
   FLAMEGRAPH_ARTIFACT_DIR: flamegraph
-  FLAMEGRAPH_ARTIFACT_INTERNAL_DIR: flamegraph
   FLAMEGRAPH_OUTPUT_DIR: $FLAMEGRAPH_ARTIFACT_DIR/flamegraph
-  FLAMEGRAPH_FILENAME: flamegraph.svg
 
 jobs:
   load_testing:
@@ -114,18 +112,19 @@ jobs:
     - name: Generate flamegraph
       run: |
         ./FlameGraph/stackcollapse-perf.pl out.perf > out.folded
-        ./FlameGraph/flamegraph.pl out.folded > ${{ env.FLAMEGRAPH_OUTPUT_DIR }}/${{ env.FLAMEGRAPH_FILENAME }}
+        ./FlameGraph/flamegraph.pl out.folded > ${{ env.FLAMEGRAPH_OUTPUT_DIR }}/flamegraph.svg
 
     - name: Create HTML    
       run: python3 scripts/generate-html.py ./${{ env.FLAMEGRAPH_ARTIFACT_DIR }}
 
     - name: Put github context to json file
-      run: echo '${{ toJson(github) }}' > github_context.json
+      run: echo '${{ toJson(github) }}' > github_context.json    
 
     - name: Calculate deploy destination dir
       run: |
-        DEPLOY_DIR=$(python3 scripts/calculate_deploy_dir.py -c github_context.json)_load_testing;
-        echo "DEPLOY_DIR=${DEPLOY_DIR}/${{ env.FLAMEGRAPH_ARTIFACT_INTERNAL_DIR }}" >> $GITHUB_ENV;      
+        DEPLOY_DIR=$(python3 scripts/calculate_deploy_dir.py -c github_context.json);
+        echo "DEPLOY_DIR=${DEPLOY_DIR}/flamegraph" >> $GITHUB_ENV;
+
 
     - name: Deploy to GitHub Pages 
       if: ${{ env.DEPLOY_DIR }} != ''
