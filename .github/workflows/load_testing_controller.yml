@@ -16,6 +16,8 @@ concurrency:
 
 jobs:
   load_testing_controller:
+    permissions:
+      contents: write
     if: |
       github.repository == 'Cloud-Storage-Team/algnet'
       && !contains(github.event.pull_request.labels.*.name, 'no-load-testing')
