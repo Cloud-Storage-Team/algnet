@@ -12,7 +12,7 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   # Cancel in-progress runs only for PRs with 'no-load-testing' label
-  cancel-in-progress: ${{ contains(github.event.pull_request.labels.*.name, 'no-load-testing') }}
+  cancel-in-progress: ${{ !contains(github.event.pull_request.labels.*.name, 'needs-load-testing') }}
 
 jobs:
   load_testing_controller:
@@ -20,6 +20,6 @@ jobs:
       contents: write
     if: |
       github.repository == 'Cloud-Storage-Team/algnet'
-      && !contains(github.event.pull_request.labels.*.name, 'no-load-testing')
+      && contains(github.event.pull_request.labels.*.name, 'needs-load-testing')
     name: 'Load testing'
     uses: ./.github/workflows/load_testing.yml
