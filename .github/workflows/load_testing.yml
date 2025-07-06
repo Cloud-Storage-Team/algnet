@@ -12,8 +12,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  # Do not cancel in-progress runs if a labeling action took place (other than 'needs-load-testing'). Otherwise, adding irrelevant
-  # labels causes existing runs to be canceled and a new (identical) run to be started.
+  # Cancel in-progress runs only for PRs with 'no-load-testing' label
   cancel-in-progress: ${{ contains(github.event.pull_request.labels.*.name, 'no-load-testing') }}
 
 
@@ -134,4 +133,3 @@ jobs:
     - name: Wait for artifacts to be available
       run:
         python3 scripts/check_artifacts.py -u 'https://cloud-storage-team.github.io/algnet/${{env.DEPLOY_DIR}}'
-          
