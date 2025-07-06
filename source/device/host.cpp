@@ -50,7 +50,7 @@ void Host::enqueue_packet(Packet packet) {
     m_nic_buffer.push(packet);
     m_send_data_scheduler.notify_about_arriving(
         Scheduler::get_instance().get_current_time(), weak_from_this());
-    LOG_INFO(fmt::format("Packet {} arrived to host", packet.to_string()));
+    LOG_INFO(fmt::format("Packet {} arrived to host(id: {})", packet.to_string(), get_id()));
 }
 
 Time Host::process() {
@@ -58,35 +58,41 @@ Time Host::process() {
     Time total_processing_time = 1;
 
     if (current_inlink == nullptr) {
-        LOG_WARN("No available inlinks for device");
+        // TODO: think about calling this log once
+        LOG_ERROR("No available inlinks for device");
         return total_processing_time;
     }
 
     std::optional<Packet> opt_packet = current_inlink->get_packet();
     if (!opt_packet.has_value()) {
-        LOG_WARN("No available packets from inlink for device");
+        // This log brings approximately 0 information
+        // TODO: think about removing or lowering level
+        // LOG_WARN("No available packets from inlink for device");
         return total_processing_time;
     }
 
     Packet packet = opt_packet.value();
     if (packet.flow == nullptr) {
-        LOG_ERROR("Packet flow does not exist");
+        // Do we really need to log it here?
+        // TODO: think about moving or removing
+        // LOG_ERROR("Packet flow does not exist");
         return total_processing_time;
     }
 
-    // TODO: add some sender ID for easier packet path tracing
-    LOG_INFO("Processing packet from link on host. Packet: " +
-             packet.to_string());
+    LOG_INFO(fmt::format("Processing packet from link(id: {}) on host(id: {}). Packet: {}", current_inlink->get_id(), get_id(),
+             packet.to_string()));
 
     if (packet.dest_id == get_id()) {
         packet.flow->update(packet, get_type());
     } else {
-        LOG_WARN(
-            "Packet arrived to Host that is not its destination; use routing "
-            "table to send it further");
+        LOG_WARN(fmt::format(
+            "Packet arrived to host that is not its destination. Host id: {}, "
+            "destination id: {}. Using routing table to send it further", get_id(), packet.dest_id));
         std::shared_ptr<ILink> next_link = get_link_to_destination(packet);
 
         if (next_link == nullptr) {
+            // Maybe we should add information about current and next device here (for multithread simulator runs)
+            // TODO: think about logging corresponded ids and increasing log level
             LOG_WARN("No link corresponds to destination device");
             return total_processing_time;
         }
@@ -106,22 +112,25 @@ Time Host::send_packet() {
     Time total_processing_time = 1;
 
     if (m_nic_buffer.empty()) {
-        LOG_WARN("No packets to send");
+        // This log also not really informative
+        // TODO: think about removing
+        // LOG_WARN("No packets to send");
         return total_processing_time;
     }
     Packet data_packet = m_nic_buffer.front();
     m_nic_buffer.pop();
 
-    LOG_INFO(fmt::format("Taken new data packet on host {}. Packet: {}",
-                         get_id(), data_packet.to_string()));
+    // LOG_INFO(fmt::format("Taken new packet on host(id: {}). Packet: {}",
+    //                      get_id(), data_packet.to_string()));
 
     auto next_link = get_link_to_destination(data_packet);
     if (next_link == nullptr) {
-        LOG_WARN("Link to send data packet does not exist");
+        // TODO: think about increasing log level
+        LOG_WARN(fmt::format("Link to send packet from host(id: {}) does not exist", get_id()));
         return total_processing_time;
     }
 
-    LOG_INFO(fmt::format("Sent new packet from host. Packet: {}", get_id(),
+    LOG_INFO(fmt::format("Sent new packet from host(id: {}). Packet: {}", get_id(),
                          data_packet.to_string()));
 
     next_link->schedule_arrival(data_packet);

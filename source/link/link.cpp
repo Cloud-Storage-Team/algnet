@@ -1,5 +1,7 @@
 #include "link/link.hpp"
 
+#include <spdlog/fmt/fmt.h>
+
 #include "logger/logger.hpp"
 #include "metrics/metrics_collector.hpp"
 #include "scheduler.hpp"
@@ -18,9 +20,11 @@ Link::Link(Id a_id, std::weak_ptr<IRoutingDevice> a_from,
       m_from_egress(a_max_from_egress_buffer_size),
       m_to_ingress(a_max_to_ingress_buffer_size) {
     if (a_from.expired() || a_to.expired()) {
-        LOG_WARN("Passed link to device is expired");
+        // increased level
+        LOG_ERROR(fmt::format("Passed expired device source or destinations device to link(id: {})", m_id));
     } else if (a_speed_gbps == 0) {
-        LOG_WARN("Passed zero link speed");
+        // increased level
+        LOG_ERROR(fmt::format("Passed zero link(id: {}) speed", m_id));
     }
 }
 
@@ -45,7 +49,8 @@ void Link::schedule_arrival(Packet packet) {
 
 std::optional<Packet> Link::get_packet() {
     if (m_to_ingress.empty()) {
-        LOG_INFO("Ingress packet queue is empty");
+        // Not really informative, spams to logs too much
+        // LOG_INFO("Ingress packet queue is empty");
         return {};
     }
 
@@ -112,7 +117,8 @@ void Link::Transmit::operator()() {
 
 Time Link::get_transmission_delay(const Packet& packet) const {
     if (m_speed_gbps == 0) {
-        LOG_WARN("Passed zero link speed");
+        // TODO: should be detected in constructor
+        // LOG_WARN("Passed zero link speed");
         return 0;
     }
     const std::uint32_t byte_to_bit_multiplier = 8;

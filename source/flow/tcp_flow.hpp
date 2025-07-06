@@ -35,7 +35,7 @@ private:
 
     static void initialize_flag_manager();
     static bool m_is_initialized;
-    static FlagManager<std::string> m_flags;
+    static FlagManager<std::string, PacketBitsetSize> m_flags;
 
     Id m_id;
 

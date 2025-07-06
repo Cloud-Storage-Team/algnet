@@ -8,6 +8,7 @@
 namespace sim {
 
 struct Packet {
+
     Packet(Size a_size_byte = 0,
            IFlow* a_flow = nullptr, Id a_source_id = "", Id a_dest_id = "",
            Time a_sent_time = 0, Size a_sent_bytes_at_origin = 0,
@@ -18,7 +19,7 @@ struct Packet {
     std::string to_string() const;
 
     std::uint32_t packet_num;
-    BitSet<std::uint32_t> flags;
+    BitSet<PacketBitsetSize> flags;
     Id source_id;
     Id dest_id;
     Size size_byte;

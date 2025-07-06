@@ -1,6 +1,7 @@
 #include "device/switch.hpp"
 
 #include <iostream>
+#include <spdlog/fmt/fmt.h>
 
 #include "device/routing_module.hpp"
 #include "logger/logger.hpp"
@@ -52,7 +53,8 @@ Time Switch::process() {
     std::shared_ptr<ILink> link = next_inlink();
 
     if (link == nullptr) {
-        LOG_WARN("No next inlink");
+        // TODO: think about calling this log once
+        LOG_ERROR("No available inlinks for device");
         return total_processing_time;
     }
 
@@ -61,25 +63,30 @@ Time Switch::process() {
                                (float)link->get_max_to_ingress_queue_size();
     std::optional<Packet> optional_packet = link->get_packet();
     if (!optional_packet.has_value()) {
-        LOG_WARN("No packet in link");
+        // This log brings approximately 0 information
+        // TODO: think about removing or lowering level
+        // LOG_WARN("No available packets from inlink for device");
         return total_processing_time;
     }
     Packet packet = optional_packet.value();
     if (packet.flow == nullptr) {
-        LOG_WARN("No flow in packet");
+        // Do we really need to log it here?
+        // TODO: think about moving or removing
+        // LOG_ERROR("Packet flow does not exist");
         return total_processing_time;
     }
 
     std::shared_ptr<ILink> next_link = get_link_to_destination(packet);
 
     if (next_link == nullptr) {
-        LOG_WARN("No link corresponds to destination device");
+        // TODO: think about and increasing log level
+        LOG_WARN(fmt::format("No link corresponds to destination device. Current switch id: {}, destination device id: {}",
+                 get_id(), packet.dest_id));
         return total_processing_time;
     }
 
-    // TODO: add some switch ID for easier packet path tracing
-    LOG_INFO("Processing packet from link on switch. Packet: " +
-             packet.to_string());
+    LOG_INFO(fmt::format("Processing packet from link(id: {}) on switch(id: {}). Packet: {}",
+         next_link->get_id(), get_id(), packet.to_string()));
 
     // ECN mark for data packets
     if (packet.ecn_capable_transport) {
