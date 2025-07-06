@@ -58,7 +58,7 @@ public:
         return true;
     };
 
-    std::uint8_t get_bit(std::uint8_t pos) const {
+    bool get_bit(std::uint8_t pos) const {
         if (pos >= sizeof_bits(m_data)) {
             LOG_ERROR(fmt::format("Bit position is out of range. Max possible position is {}, but got {}", sizeof_bits(BitStorage) - 1, pos));
             return 0;

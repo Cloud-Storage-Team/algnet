@@ -9,7 +9,7 @@
 
 namespace sim {
 std::string TcpFlow::packet_type_label = "type";
-FlagManager<std::string> TcpFlow::m_flags;
+FlagManager<std::string, PacketBitsetSize> TcpFlow::m_flags;
 bool TcpFlow::m_is_initialized = false;
 
 TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,

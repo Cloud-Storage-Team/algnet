@@ -10,23 +10,23 @@
 
 namespace sim {
 
-template <typename FlagId>
+template <typename FlagId, BitStorageType BitStorage>
 class FlagManager {
 public:
     FlagManager() : m_next_pos(0) {}
 
-    bool register_flag_by_amount(FlagId id, std::uint32_t different_values) {
+    bool register_flag_by_amount(FlagId id, BitStorage different_values) {
         return register_flag_by_length(id, required_bits_for_values(different_values));
     }
 
-    bool register_flag_by_length(FlagId id, std::uint32_t flag_length) {
-        if (flag_length == 0 || flag_length > 32) {
-            LOG_ERROR(fmt::format("Incorrect flag length. Max possible length is {}, flag length should be more than 0. Got {}", 32, flag_length));
+    bool register_flag_by_length(FlagId id, BitStorage flag_length) {
+        if (flag_length == 0 || flag_length > sizeof_bits(BitStorage)) {
+            LOG_ERROR(fmt::format("Incorrect flag length. Max possible length is {}, flag length should be more than 0. Got {}", sizeof_bits(BitStorage), flag_length));
             return false;
         }
 
-        if (m_next_pos + flag_length > 32) {
-            LOG_ERROR(fmt::format("Partition position is out of range. Max possible position is {}, but got {}", 32, m_next_pos + flag_length));
+        if (m_next_pos + flag_length > sizeof_bits(BitStorage)) {
+            LOG_ERROR(fmt::format("Partition position is out of range. Max possible position is {}, but got {}", sizeof_bits(BitStorage), m_next_pos + flag_length));
             return false;
         }
 
@@ -40,7 +40,7 @@ public:
         return true;
     }
 
-    void set_flag(Packet& packet, FlagId id, std::uint32_t value) {
+    void set_flag(Packet& packet, FlagId id, BitStorage value) {
         auto it = m_flags.find(id);
         if (it == m_flags.end()) {
             LOG_ERROR(fmt::format("Flag was not registered. Flag id: {}", id));
@@ -51,7 +51,7 @@ public:
         packet.flags.set_range(info.start, info.start + info.length - 1, value);
     }
 
-    std::uint32_t get_flag(const Packet& packet, FlagId id) const {
+    BitStorage get_flag(const Packet& packet, FlagId id) const {
         auto it = m_flags.find(id);
         if (it == m_flags.end()) {
             LOG_ERROR(fmt::format("Flag was not registered. Flag id: {}", id));
@@ -68,11 +68,11 @@ public:
 
 private:
     struct FlagInfo {
-        std::uint32_t start;
-        std::uint32_t length;
+        BitStorage start;
+        BitStorage length;
     };
 
-    inline std::uint32_t required_bits_for_values(std::uint32_t max_values) {
+    inline BitStorage required_bits_for_values(BitStorage max_values) {
         if (max_values <= 1) {
             return 0;
         }
@@ -81,7 +81,7 @@ private:
         return sizeof_bits(max_values) - __builtin_clz(max_values);
     }
 
-    std::uint32_t m_next_pos = 0;
+    BitStorage m_next_pos = 0;
     std::unordered_map<FlagId, FlagInfo> m_flags;
 };
 

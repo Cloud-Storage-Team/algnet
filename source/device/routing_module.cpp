@@ -1,6 +1,7 @@
 #include "device/routing_module.hpp"
 
 #include <algorithm>
+#include <spdlog/fmt/fmt.h>
 
 #include "link/i_link.hpp"
 #include "logger/logger.hpp"
@@ -16,12 +17,15 @@ Id RoutingModule::get_id() const { return m_id; }
 
 bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
     if (m_id != link->get_to()->get_id()) {
-        LOG_WARN(
-            "Link destination device is incorrect (expected current device)");
+        // Increased level
+        LOG_ERROR(fmt::format(
+            "Link destination device is incorrect (expected current device). Destination device id: {}, current device id: {}",
+            link->get_to()->get_id(), m_id));
         return false;
     }
     if (m_inlinks.contains(link)) {
-        LOG_WARN("Unexpected already added inlink");
+        // Increased level
+        LOG_ERROR(fmt::format("Unexpected already added inlink. Link id: {}", link->get_id()));
         return false;
     }
     m_inlinks.insert(link);
@@ -34,11 +38,14 @@ bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
 
 bool RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
     if (m_id != link->get_from()->get_id()) {
-        LOG_WARN("Outlink source is not our device");
+        // Increased level
+        LOG_ERROR(fmt::format("Outlink source is not our device. Source device id: {}, current device id: {}",
+            link->get_to()->get_id(), m_id));
         return false;
     }
     if (m_outlinks.contains(link)) {
-        LOG_WARN("Unexpected already added outlink");
+        // Increased level
+        LOG_ERROR(fmt::format("Unexpected already added outlink. Link id: {}", link->get_id()));
         return false;
     }
     m_outlinks.insert(link);
@@ -49,11 +56,14 @@ bool RoutingModule::update_routing_table(Id dest_id,
                                          std::shared_ptr<ILink> link,
                                          size_t paths_count) {
     if (m_id != link->get_from()->get_id()) {
-        LOG_WARN("Link source device is incorrect (expected current device)");
+        // Increased level
+        LOG_ERROR(fmt::format("Link source device is incorrect (expected current device). Source device id: {}, current device id: {}",
+            link->get_to()->get_id(), m_id));
         return false;
     }
     if (link == nullptr) {
-        LOG_WARN("Unexpected nullptr link");
+        // Increased level
+        LOG_ERROR("Unexpected nullptr link");
         return false;
     }
     auto link_dest = link->get_to();
