@@ -2,9 +2,10 @@ name: Update root index.html
 
 on:
   workflow_run:
-    workflows: ["Build and run project"]
+    workflows: ["Build and run project", "Load testing"]
     types:
       - completed
+
 jobs:
   rewrite-root-index:
     runs-on: ubuntu-latest

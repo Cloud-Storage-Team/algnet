@@ -4,28 +4,18 @@ on:
   workflow_dispatch:
   push:
     branches: [ "main" ]
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - labeled
-      - unlabeled
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  # Do not cancel in-progress runs if a labeling action took place (other than 'needs-load-testing'). Otherwise, adding irrelevant
-  # labels causes existing runs to be canceled and a new (identical) run to be started.
-  cancel-in-progress: ${{ (github.event.action != 'labeled' && github.event.action != 'unlabeled') || github.event.label.name == 'needs-load-testing' }}
-
+  workflow_call: 
 
 env:
   BUILD_DIR: build
   EXECUTABLE_PATH: $BUILD_DIR/nons
+  FLAMEGRAPH_ARTIFACT_DIR: flamegraph
+  FLAMEGRAPH_OUTPUT_DIR: $FLAMEGRAPH_ARTIFACT_DIR/flamegraph
 
 jobs:
   load_testing:
     runs-on: ubuntu-latest
+    
     steps:
     - uses: actions/checkout@v4
 
@@ -71,3 +61,65 @@ jobs:
         python3 scripts/run_incast_simulation.py -e ${{env.EXECUTABLE_PATH}} --senders 1000 --receivers 30 --time 100000000 --packets 20000  
         gprof ${{env.EXECUTABLE_PATH}} > profile.txt
         head profile.txt
+
+  flamegraph:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Update submodules
+      run: git submodule update --init --recursive
+
+    - name: Get dependencies  
+      run: git clone https://github.com/brendangregg/FlameGraph.git
+
+    - name: Configure CMake for perf
+      run: cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF -DCMAKE_CXX_FLAGS="-g -fno-omit-frame-pointer"
+
+    - name: Build project with profiling
+      run: cmake --build ${{env.BUILD_DIR}} -j $(nproc)
+
+    - name: Generate simulation config  
+      run:
+        python3 configuration_examples/generator/bottleneck.py --senders 1000 --receivers 1 --topology-path incast_1000_to_1_topology.yml --simulation-path incast_1000_to_1_simulation.yml --packets 100000 --simulation-time 100000000
+
+    - name: Run perf
+      run: |
+        sudo perf record -F 99 -g -- ./${{env.EXECUTABLE_PATH}} -c incast_1000_to_1_simulation.yml --no-logs --no-plots > perf.data
+        perf report -i perf.data --header-only
+        perf script -i perf.data -v > out.perf 2>&1 || true
+
+    - name: Prepare FlameGraph
+      run: |
+        mkdir -p ${{ env.FLAMEGRAPH_OUTPUT_DIR }}
+
+    - name: Generate flamegraph
+      run: |
+        ./FlameGraph/stackcollapse-perf.pl out.perf > out.folded
+        ./FlameGraph/flamegraph.pl out.folded > ${{ env.FLAMEGRAPH_OUTPUT_DIR }}/flamegraph.svg
+
+    - name: Create HTML    
+      run: python3 scripts/generate-html.py ./${{ env.FLAMEGRAPH_ARTIFACT_DIR }}
+
+    - name: Put github context to json file
+      run: echo '${{ toJson(github) }}' > github_context.json    
+
+    - name: Calculate deploy destination dir
+      run: |
+        DEPLOY_DIR=$(python3 scripts/calculate_deploy_dir.py -c github_context.json);
+        echo "DEPLOY_DIR=${DEPLOY_DIR}/flamegraph" >> $GITHUB_ENV;
+
+    - name: Deploy to GitHub Pages 
+      if: ${{ env.DEPLOY_DIR }} != ''
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ env.FLAMEGRAPH_ARTIFACT_DIR }}
+          destination_dir: ${{ env.DEPLOY_DIR }}
+
+    - name: Wait for artifacts to be available
+      run:
+        python3 scripts/check_artifacts.py -u 'https://cloud-storage-team.github.io/algnet/${{env.DEPLOY_DIR}}'
