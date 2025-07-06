@@ -133,3 +133,5 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ${{ env.FLAMEGRAPH_ARTIFACT_DIR }}
           destination_dir: ${{ env.DEPLOY_DIR }}
+          keep_files: true
+          
