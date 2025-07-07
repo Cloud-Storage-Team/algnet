@@ -7,6 +7,7 @@
 #include "device/host.hpp"
 #include "device/switch.hpp"
 #include "flow/basic_flow.hpp"
+#include "flow/flow_common.hpp"
 #include "flow/tcp_flow.hpp"
 #include "parser/parse_primitives.hpp"
 #include "utils/identifier_factory.hpp"
@@ -139,46 +140,32 @@ Id parse_object<Link>(const YAML::Node& key_node,
     return id;
 }
 
-struct FlowCommon {
-    Id id;
-    std::shared_ptr<IHost> sender_ptr;
-    std::shared_ptr<IHost> receiver_ptr;
-    Size packet_size;
-    Time packet_interval;
-    std::uint32_t number_of_packets;
-};
-
 static FlowCommon parse_flow_common(const YAML::Node& key_node,
                                     const YAML::Node& value_node) {
-    FlowCommon result;
-    result.id = key_node.as<Id>();
+    Id id = key_node.as<Id>();
 
     Id sender_id = value_node["sender_id"].as<Id>();
-    result.sender_ptr =
+    std::shared_ptr<IHost> src =
         IdentifierFactory::get_instance().get_object<IHost>(sender_id);
 
     Id receiver_id = value_node["receiver_id"].as<Id>();
-    result.receiver_ptr =
+    std::shared_ptr<IHost> dest =
         IdentifierFactory::get_instance().get_object<IHost>(receiver_id);
 
-    result.packet_size = value_node["packet_size"].as<Size>();
-    result.number_of_packets =
+    Size packet_size = value_node["packet_size"].as<Size>();
+    std::uint32_t number_of_packets =
         value_node["number_of_packets"].as<std::uint32_t>();
-    result.packet_interval = value_node["packet_interval"].as<Time>();
+    Time packet_interval = value_node["packet_interval"].as<Time>();
 
-    return result;
+    return FlowCommon(id, src, dest, packet_size, packet_interval,
+                      number_of_packets, packet_interval);
 }
 
 template <>
 Id parse_object<BasicFlow>(const YAML::Node& key_node,
                            const YAML::Node& value_node) {
     FlowCommon flow_common = parse_flow_common(key_node, value_node);
-
-    parse_object_helper<BasicFlow>(
-        flow_common.id, dynamic_pointer_cast<IHost>(flow_common.sender_ptr),
-        dynamic_pointer_cast<IHost>(flow_common.receiver_ptr),
-        flow_common.packet_size, flow_common.packet_interval,
-        flow_common.number_of_packets);
+    parse_object_helper<BasicFlow>(flow_common);
     return flow_common.id;
 }
 
@@ -188,10 +175,9 @@ Id parse_object<TcpFlow>(const YAML::Node& key_node,
     FlowCommon flow_common = parse_flow_common(key_node, value_node);
 
     parse_object_helper<TcpFlow>(
-        flow_common.id, dynamic_pointer_cast<IHost>(flow_common.sender_ptr),
-        dynamic_pointer_cast<IHost>(flow_common.receiver_ptr),
-        flow_common.packet_size, flow_common.packet_interval,
-        flow_common.number_of_packets);
+        flow_common.id, flow_common.src.lock(), flow_common.dest.lock(),
+        flow_common.packet_size, flow_common.delay_between_packets,
+        flow_common.packets_to_send);
     return flow_common.id;
 }
 
