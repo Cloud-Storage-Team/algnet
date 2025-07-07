@@ -18,7 +18,7 @@ struct Packet {
     std::string to_string() const;
 
     std::uint32_t packet_num;
-    BitSet<PacketBitsetSize> flags;
+    BitSet<PacketFlagsBase> flags;
     Id source_id;
     Id dest_id;
     Size size_byte;
