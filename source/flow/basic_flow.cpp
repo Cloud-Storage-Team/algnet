@@ -9,8 +9,8 @@
 
 namespace sim {
 std::string BasicFlow::packet_type_label = "type";
-FlagManager<std::string, PacketFlagsBase> BasicFlow::m_flags;
-bool BasicFlow::m_is_initialized = false;
+FlagManager<std::string, PacketFlagsBase> BasicFlow::m_flag_manager;
+bool BasicFlow::m_is_flag_manager_initialized = false;
 
 BasicFlow::BasicFlow(Id a_id, std::shared_ptr<IHost> a_src,
                      std::shared_ptr<IHost> a_dest, Size a_packet_size,
@@ -39,7 +39,7 @@ void BasicFlow::start() {
 
 Packet BasicFlow::generate_packet() {
     sim::Packet packet;
-    m_flags.set_flag(packet, packet_type_label, PacketType::DATA);
+    m_flag_manager.set_flag(packet, packet_type_label, PacketType::DATA);
     packet.size_byte = m_packet_size;
     packet.flow = this;
     packet.source_id = get_sender()->get_id();
@@ -51,17 +51,17 @@ Packet BasicFlow::generate_packet() {
 void BasicFlow::update(Packet packet, DeviceType type) {
     (void)type;
     if (packet.dest_id == m_dest.lock()->get_id() &&
-        m_flags.get_flag(packet, packet_type_label) == PacketType::DATA) {
+        m_flag_manager.get_flag(packet, packet_type_label) == PacketType::DATA) {
         // data packet arrived to destination device, send ack
         Packet ack(1, this, m_dest.lock()->get_id(),
                    m_src.lock()->get_id(), packet.sent_time,
                    packet.sent_bytes_at_origin, packet.ecn_capable_transport,
                    packet.congestion_experienced);
         
-        m_flags.set_flag(ack, packet_type_label, PacketType::ACK);
+        m_flag_manager.set_flag(ack, packet_type_label, PacketType::ACK);
         m_dest.lock()->enqueue_packet(ack);
     } else if (packet.dest_id == m_src.lock()->get_id() &&
-               m_flags.get_flag(packet, packet_type_label) == PacketType::ACK) {
+               m_flag_manager.get_flag(packet, packet_type_label) == PacketType::ACK) {
         // ask arrived to source device, update metrics
         ++m_updates_number;
 
@@ -120,9 +120,9 @@ void BasicFlow::schedule_packet_generation(Time time) {
 }
 
 void BasicFlow::initialize_flag_manager() {
-    if (!m_is_initialized) {
-        m_flags.register_flag_by_amount(packet_type_label, PacketType::ENUM_SIZE);
-        m_is_initialized = true;
+    if (!m_is_flag_manager_initialized) {
+        m_flag_manager.register_flag_by_amount(packet_type_label, PacketType::ENUM_SIZE);
+        m_is_flag_manager_initialized = true;
     }
 }
 

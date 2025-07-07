@@ -8,7 +8,6 @@
 namespace sim {
 
 struct Packet {
-
     Packet(Size a_size_byte = 0,
            IFlow* a_flow = nullptr, Id a_source_id = "", Id a_dest_id = "",
            Time a_sent_time = 0, Size a_sent_bytes_at_origin = 0,

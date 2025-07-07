@@ -20,8 +20,8 @@ public:
     }
 
     bool register_flag_by_length(FlagId id, BitStorage flag_length) {
-        if (flag_length == 0 || flag_length > sizeof_bits(BitStorage)) {
-            LOG_ERROR(fmt::format("Incorrect flag length. Max possible length is {}, flag length should be more than 0. Got {}", sizeof_bits(BitStorage), flag_length));
+        if (flag_length == 0) {
+            LOG_ERROR("Passed zero flag length, should be at least 1");
             return false;
         }
 
@@ -30,20 +30,20 @@ public:
             return false;
         }
 
-        if (m_flags.find(id) != m_flags.end()) {
-            LOG_ERROR(fmt::format("Flag already exists. Flag id: {}", id));
+        if (m_flag_manager.find(id) != m_flag_manager.end()) {
+            LOG_ERROR(fmt::format("Flag with same id '{}' already exists.", id));
             return false;
         }
 
-        m_flags[id] = FlagInfo{ m_next_pos, flag_length };
+        m_flag_manager[id] = FlagInfo{ m_next_pos, flag_length };
         m_next_pos += flag_length;
         return true;
     }
 
     void set_flag(Packet& packet, FlagId id, BitStorage value) {
-        auto it = m_flags.find(id);
-        if (it == m_flags.end()) {
-            LOG_ERROR(fmt::format("Flag was not registered. Flag id: {}", id));
+        auto it = m_flag_manager.find(id);
+        if (it == m_flag_manager.end()) {
+            LOG_ERROR(fmt::format("Flag with id '{}' not found", id));
             return;
         }
 
@@ -52,9 +52,9 @@ public:
     }
 
     BitStorage get_flag(const Packet& packet, FlagId id) const {
-        auto it = m_flags.find(id);
-        if (it == m_flags.end()) {
-            LOG_ERROR(fmt::format("Flag was not registered. Flag id: {}", id));
+        auto it = m_flag_manager.find(id);
+        if (it == m_flag_manager.end()) {
+            LOG_ERROR(fmt::format("Flag with id '{}' not found.", id));
             return 0;
         }
         const FlagInfo& info = it->second;
@@ -63,7 +63,7 @@ public:
 
     void reset() {
         m_next_pos = 0;
-        m_flags.clear();
+        m_flag_manager.clear();
     }
 
 private:
@@ -82,7 +82,7 @@ private:
     }
 
     BitStorage m_next_pos = 0;
-    std::unordered_map<FlagId, FlagInfo> m_flags;
+    std::unordered_map<FlagId, FlagInfo> m_flag_manager;
 };
 
 } // namespace sim

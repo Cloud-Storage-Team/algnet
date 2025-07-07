@@ -2,12 +2,14 @@
 
 #define sizeof_bits(x) (CHAR_BIT * sizeof(x))
 
+#include <bitset>
+#include <concepts>
 #include <cstdint>
 #include <limits>
+#include <spdlog/fmt/fmt.h>
+#include <sstream>
 #include <stdexcept>
 #include <type_traits>
-#include <concepts>
-#include <spdlog/fmt/fmt.h>
 
 #include "logger/logger.hpp"
 
@@ -74,12 +76,18 @@ public:
         }
 
         const std::uint8_t length = high - low + 1;
-        BitStorage mask = max_range_value(length) << low;
-        return (m_data & mask) >> low;
+        return (m_data >> low) & max_range_value(length);
     };
 
     BitStorage get_bits() const {
         return m_data;
+    };
+
+    std::string to_string() const {
+        std::bitset<sizeof_bits(BitStorage)> bits(m_data);
+        std::ostringstream oss;
+        oss << bits;
+        return oss.str();
     };
 
     friend bool operator==(const BitSet& fst, const BitSet& snd) {

@@ -9,8 +9,8 @@
 
 namespace sim {
 std::string TcpFlow::packet_type_label = "type";
-FlagManager<std::string, PacketFlagsBase> TcpFlow::m_flags;
-bool TcpFlow::m_is_initialized = false;
+FlagManager<std::string, PacketFlagsBase> TcpFlow::m_flag_manager;
+bool TcpFlow::m_is_flag_manager_initialized = false;
 
 TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
                  std::shared_ptr<IHost> a_dest, Size a_packet_size,
@@ -59,7 +59,7 @@ Time TcpFlow::create_new_data_packet() {
 void TcpFlow::update(Packet packet, DeviceType type) {
     (void)type;
     if (packet.dest_id == m_src.lock()->get_id() &&
-        m_flags.get_flag(packet, packet_type_label) == PacketType::ACK) {
+        m_flag_manager.get_flag(packet, packet_type_label) == PacketType::ACK) {
         // ACK delivered to soiurce device; calculate metrics, update internal
         // state
         Time current_time = Scheduler::get_instance().get_current_time();
@@ -104,13 +104,13 @@ void TcpFlow::update(Packet packet, DeviceType type) {
                                                       m_cwnd);
         }
     } else if (packet.dest_id == m_dest.lock()->get_id() &&
-               m_flags.get_flag(packet, packet_type_label) == PacketType::DATA) {
+               m_flag_manager.get_flag(packet, packet_type_label) == PacketType::DATA) {
         // data packet delivered to destination device; send ack
         Packet ack(1, this, m_dest.lock()->get_id(),
                    m_src.lock()->get_id(), packet.sent_time,
                    packet.sent_bytes_at_origin, packet.ecn_capable_transport,
                    packet.congestion_experienced);
-        m_flags.set_flag(packet, packet_type_label, PacketType::ACK);
+        m_flag_manager.set_flag(packet, packet_type_label, PacketType::ACK);
         m_dest.lock()->enqueue_packet(ack);
     }
 }
@@ -138,7 +138,7 @@ std::string TcpFlow::to_string() const {
 
 Packet TcpFlow::generate_packet() {
     sim::Packet packet;
-    m_flags.set_flag(packet, packet_type_label, PacketType::DATA);
+    m_flag_manager.set_flag(packet, packet_type_label, PacketType::DATA);
     packet.size_byte = m_packet_size;
     packet.flow = this;
     packet.source_id = get_sender()->get_id();
@@ -160,9 +160,9 @@ bool TcpFlow::try_to_put_data_to_device() {
 }
 
 void TcpFlow::initialize_flag_manager() {
-    if (!m_is_initialized) {
-        m_flags.register_flag_by_amount(packet_type_label, PacketType::ENUM_SIZE);
-        m_is_initialized = true;
+    if (!m_is_flag_manager_initialized) {
+        m_flag_manager.register_flag_by_amount(packet_type_label, PacketType::ENUM_SIZE);
+        m_is_flag_manager_initialized = true;
     }
 }
 

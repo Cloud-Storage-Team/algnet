@@ -13,6 +13,9 @@ enum TestFlagId {
 
 class FlagManagerTest : public ::testing::Test {
 protected:
+    // int here is an alias for TestFlagId
+    // Can not use TestFlagId  because `fmt` used for logs in sim::FlagManager
+    // does not work with enums 
     sim::FlagManager<int, PacketFlagsBase> flag_manager;
     sim::Packet packet;
 };
