@@ -1,0 +1,23 @@
+name: Load testing controller
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # Cancel in-progress runs only for PRs with 'no-load-testing' label
+  cancel-in-progress: ${{ !contains(github.event.pull_request.labels.*.name, 'needs-load-testing') }}
+
+jobs:
+  load_testing_controller:
+    permissions:
+      contents: write
+    if: contains(github.event.pull_request.labels.*.name, 'needs-load-testing')
+    name: 'Load testing'
+    uses: ./.github/workflows/load_testing.yml
