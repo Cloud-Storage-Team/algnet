@@ -30,7 +30,7 @@ void BasicFlow::start() {
 Packet BasicFlow::generate_packet() {
     sim::Packet packet;
     m_flag_manager.set_flag(packet, packet_type_label, PacketType::DATA);
-    packet.size_byte = m_flow_common.packet_size;
+    packet.size = m_flow_common.packet_size;
     packet.flow = this;
     packet.source_id = get_sender()->get_id();
     packet.dest_id = get_receiver()->get_id();
@@ -85,7 +85,7 @@ Time BasicFlow::create_new_data_packet() {
     Packet data = generate_packet();
     // Note: sent_time and m_flow_common.sent_bytes are evaluated at time of
     // pushing the packet to the m_flow_common.sending_buffer
-    m_flow_common.sent_bytes += data.size_byte;
+    m_flow_common.sent_bytes += data.size;
     m_flow_common.sending_buffer.push(data);
     return put_data_to_device();
 }

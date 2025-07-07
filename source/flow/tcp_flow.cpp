@@ -69,7 +69,8 @@ void TcpFlow::update(Packet packet, DeviceType type) {
 
         double old_cwnd = m_cwnd;
 
-        if (rtt >= m_flow_common.delay_threshold || packet.congestion_experienced) {
+        if (rtt >= m_flow_common.delay_threshold ||
+            packet.congestion_experienced) {
             // trigger_congestion
             m_ssthresh = m_cwnd / 2;
             m_cwnd = 1.;
@@ -133,7 +134,7 @@ std::string TcpFlow::to_string() const {
 Packet TcpFlow::generate_packet() {
     sim::Packet packet;
     m_flag_manager.set_flag(packet, packet_type_label, PacketType::DATA);
-    packet.size_byte = m_flow_common.packet_size;
+    packet.size = m_flow_common.packet_size;
     packet.flow = this;
     packet.source_id = get_sender()->get_id();
     packet.dest_id = get_receiver()->get_id();
@@ -146,7 +147,7 @@ bool TcpFlow::try_to_put_data_to_device() {
     if (m_packets_in_flight < m_cwnd) {
         m_packets_in_flight++;
         Packet packet = generate_packet();
-        m_flow_common.sent_bytes += packet.size_byte;
+        m_flow_common.sent_bytes += packet.size;
         m_flow_common.src.lock()->enqueue_packet(packet);
         return true;
     }

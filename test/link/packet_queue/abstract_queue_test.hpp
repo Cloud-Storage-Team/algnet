@@ -46,7 +46,7 @@ void TestPushOnePacket(size_t packet_size, Args&&... args) {
 
     ASSERT_EQ(queue.front(), packet);
     ASSERT_FALSE(queue.empty());
-    ASSERT_EQ(queue.get_size(), packet.size_byte);
+    ASSERT_EQ(queue.get_size(), packet.size);
 
     queue.pop();
     ASSERT_EQ(queue.get_size(), 0);

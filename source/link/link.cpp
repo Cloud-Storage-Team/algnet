@@ -117,7 +117,7 @@ Time Link::get_transmission_delay(const Packet& packet) const {
     }
     const std::uint32_t byte_to_bit_multiplier = 8;
 
-    Size packet_size_bit = packet.size_byte * byte_to_bit_multiplier;
+    Size packet_size_bit = packet.size * byte_to_bit_multiplier;
     std::uint32_t transmission_speed_bit_ns = m_speed_gbps;
     return (packet_size_bit + transmission_speed_bit_ns - 1) /
            transmission_speed_bit_ns;
