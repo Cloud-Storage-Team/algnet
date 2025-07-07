@@ -74,8 +74,7 @@ public:
         }
 
         const std::uint8_t length = high - low + 1;
-        BitStorage mask = max_range_value(length) << low;
-        return (m_data & mask) >> low;
+        return (m_data >> low) & max_range_value(length);
     };
 
     BitStorage get_bits() const {
