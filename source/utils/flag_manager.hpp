@@ -31,7 +31,7 @@ public:
         }
 
         if (m_flag_manager.find(id) != m_flag_manager.end()) {
-            LOG_ERROR(fmt::format("Flag already exists. Flag id: {}", id));
+            LOG_ERROR(fmt::format("Flag with same id '{}' already exists.", id));
             return false;
         }
 
