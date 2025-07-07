@@ -28,13 +28,8 @@ void BasicFlow::start() {
 }
 
 Packet BasicFlow::generate_packet() {
-    sim::Packet packet;
+    sim::Packet packet(m_flow_common.generate_routing_packet(), this);
     m_flag_manager.set_flag(packet, packet_type_label, PacketType::DATA);
-    packet.size = m_flow_common.packet_size;
-    packet.flow = this;
-    packet.source_id = get_sender()->get_id();
-    packet.dest_id = get_receiver()->get_id();
-    packet.sent_time = Scheduler::get_instance().get_current_time();
     return packet;
 }
 

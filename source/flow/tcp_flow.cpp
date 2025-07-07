@@ -103,6 +103,10 @@ void TcpFlow::update(Packet packet, DeviceType type) {
                    packet.congestion_experienced);
         m_flag_manager.set_flag(packet, packet_type_label, PacketType::ACK);
         m_flow_common.dest.lock()->enqueue_packet(ack);
+    } else {
+        LOG_ERROR(
+            fmt::format("Called update on flow {} with some foreign packet {}",
+                        get_id(), packet.to_string()));
     }
 }
 
@@ -132,17 +136,11 @@ std::string TcpFlow::to_string() const {
 }
 
 Packet TcpFlow::generate_packet() {
-    sim::Packet packet;
+    sim::Packet packet(m_flow_common.generate_routing_packet(), this);
     m_flag_manager.set_flag(packet, packet_type_label, PacketType::DATA);
-    packet.size = m_flow_common.packet_size;
-    packet.flow = this;
-    packet.source_id = get_sender()->get_id();
-    packet.dest_id = get_receiver()->get_id();
-    packet.sent_time = Scheduler::get_instance().get_current_time();
-    packet.sent_bytes_at_origin = m_flow_common.sent_bytes;
-    packet.ecn_capable_transport = m_ecn_capable;
     return packet;
 }
+
 bool TcpFlow::try_to_put_data_to_device() {
     if (m_packets_in_flight < m_cwnd) {
         m_packets_in_flight++;
