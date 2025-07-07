@@ -14,7 +14,7 @@ void MultiIdMetricsStorage::add_record(Id id, Time time, double value) {
         } else {
             MetricsStorage new_storage;
             new_storage.add_record(time, value);
-            m_storage.emplace(id, std::move(new_storage));
+            m_storage.emplace(std::move(id), std::move(new_storage));
         }
     } else if (it->second.has_value()) {
         it->second->add_record(time, value);
