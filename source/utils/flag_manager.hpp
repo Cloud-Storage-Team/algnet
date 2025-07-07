@@ -43,7 +43,7 @@ public:
     void set_flag(Packet& packet, FlagId id, BitStorage value) {
         auto it = m_flag_manager.find(id);
         if (it == m_flag_manager.end()) {
-            LOG_ERROR(fmt::format("Flag was not registered. Flag id: {}", id));
+            LOG_ERROR(fmt::format("Flag with id '{}' not found", id));
             return;
         }
 
