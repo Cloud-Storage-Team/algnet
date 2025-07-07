@@ -86,7 +86,7 @@ public:
     std::string to_string() const {
         std::bitset<sizeof_bits(BitStorage)> bits(m_data);
         std::ostringstream oss;
-        oss << "[" << bits << "]";
+        oss << bits;
         return oss.str();
     };
 
