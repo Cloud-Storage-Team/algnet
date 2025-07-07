@@ -4,12 +4,13 @@
 #include <string>
 
 // nanoseconds
-typedef std::uint32_t Time;
+using Time = std::uint32_t;
 // bytes
-typedef std::uint32_t Size;
-typedef std::string Id;
+using Size = std::uint32_t;
+using Id = std::string;
 
-typedef std::uint32_t PacketFlagsBase;
+// Describes a type used by packet's bitset to store flags
+using PacketFlagsBase = std::uint32_t;
 
 template <typename K, typename V>
 using MapWeakPtr =
