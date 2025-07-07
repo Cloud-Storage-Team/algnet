@@ -17,7 +17,6 @@ public:
 
 TEST(BitSetTest, InvalidCases) {
     sim::BitSet<std::uint32_t> bits(0x12345678);
-    std::cout << bits.to_string() << std::endl;
     const uint32_t original = bits.get_bits();
 
     bits.set_range(0, 32, 15);
