@@ -20,8 +20,8 @@ public:
     }
 
     bool register_flag_by_length(FlagId id, BitStorage flag_length) {
-        if (flag_length == 0 || flag_length > sizeof_bits(BitStorage)) {
-            LOG_ERROR(fmt::format("Incorrect flag length. Max possible length is {}, flag length should be more than 0. Got {}", sizeof_bits(BitStorage), flag_length));
+        if (flag_length == 0) {
+            LOG_ERROR("Passed zero flag length, should be at least 1");
             return false;
         }
 
