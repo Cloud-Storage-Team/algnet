@@ -158,7 +158,7 @@ static FlowCommon parse_flow_common(const YAML::Node& key_node,
     Time packet_interval = value_node["packet_interval"].as<Time>();
 
     return FlowCommon(id, src, dest, packet_size, packet_interval,
-                      number_of_packets, packet_interval);
+                      number_of_packets);
 }
 
 template <>
