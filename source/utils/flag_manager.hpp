@@ -54,7 +54,7 @@ public:
     BitStorage get_flag(const Packet& packet, FlagId id) const {
         auto it = m_flag_manager.find(id);
         if (it == m_flag_manager.end()) {
-            LOG_ERROR(fmt::format("Flag was not registered. Flag id: {}", id));
+            LOG_ERROR(fmt::format("Flag with id '{}' not found.", id));
             return 0;
         }
         const FlagInfo& info = it->second;
