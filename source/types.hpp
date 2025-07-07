@@ -9,7 +9,7 @@ typedef std::uint32_t Time;
 typedef std::uint32_t Size;
 typedef std::string Id;
 
-typedef std::uint32_t PacketBitsetSize;
+typedef std::uint32_t PacketFlagsBase;
 
 template <typename K, typename V>
 using MapWeakPtr =

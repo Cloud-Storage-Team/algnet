@@ -9,7 +9,7 @@
 
 namespace sim {
 std::string BasicFlow::packet_type_label = "type";
-FlagManager<std::string, PacketBitsetSize> BasicFlow::m_flags;
+FlagManager<std::string, PacketFlagsBase> BasicFlow::m_flags;
 bool BasicFlow::m_is_initialized = false;
 
 BasicFlow::BasicFlow(Id a_id, std::shared_ptr<IHost> a_src,

@@ -13,7 +13,7 @@ enum TestFlagId {
 
 class FlagManagerTest : public ::testing::Test {
 protected:
-    sim::FlagManager<int, PacketBitsetSize> flag_manager;
+    sim::FlagManager<int, PacketFlagsBase> flag_manager;
     sim::Packet packet;
 };
 
