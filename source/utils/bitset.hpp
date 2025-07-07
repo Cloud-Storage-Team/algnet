@@ -2,6 +2,7 @@
 
 #define sizeof_bits(x) (CHAR_BIT * sizeof(x))
 
+#include <bitset>
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
@@ -79,6 +80,13 @@ public:
 
     BitStorage get_bits() const {
         return m_data;
+    };
+
+    std::string to_string() const {
+        std::bitset<sizeof_bits(BitStorage)> bits(m_data);
+        std::ostringstream oss;
+        oss << "[" << bits << "]";
+        return oss.str();
     };
 
     friend bool operator==(const BitSet& fst, const BitSet& snd) {
