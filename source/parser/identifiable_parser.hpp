@@ -174,10 +174,7 @@ Id parse_object<TcpFlow>(const YAML::Node& key_node,
                          const YAML::Node& value_node) {
     FlowCommon flow_common = parse_flow_common(key_node, value_node);
 
-    parse_object_helper<TcpFlow>(
-        flow_common.id, flow_common.src.lock(), flow_common.dest.lock(),
-        flow_common.packet_size, flow_common.delay_between_packets,
-        flow_common.packets_to_send);
+    parse_object_helper<TcpFlow>(flow_common);
     return flow_common.id;
 }
 

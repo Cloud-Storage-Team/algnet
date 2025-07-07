@@ -27,10 +27,11 @@ public:
     std::uint32_t get_updates_number() const;
 
 private:
-    static std::string packet_type_label;
     enum PacketType { ACK, DATA, ENUM_SIZE };
-
+    
     static void initialize_flag_manager();
+    
+    static std::string packet_type_label;
     static bool m_is_flag_manager_initialized;
     static FlagManager<std::string, PacketFlagsBase> m_flag_manager;
 
