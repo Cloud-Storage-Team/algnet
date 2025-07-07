@@ -1,11 +1,10 @@
 #pragma once
 
-#include "device/interfaces/i_host.hpp"
-#include "utils/identifier_factory.hpp"
+#include "i_flow_common.hpp"
 
 namespace sim {
 
-class IFlow : public Identifiable {
+class IFlow : public IFlowCommon {
 public:
     virtual void start() = 0;
     // Adds new packet to sending queue
@@ -16,8 +15,6 @@ public:
     // Update the internal state according to some congestion control algorithm
     // Calls when data available for sending on corresponding device
     virtual void update(Packet packet, DeviceType type) = 0;
-    virtual std::shared_ptr<IHost> get_sender() const = 0;
-    virtual std::shared_ptr<IHost> get_receiver() const = 0;
 };
 
 }  // namespace sim
