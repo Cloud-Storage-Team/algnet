@@ -41,8 +41,8 @@ private:
     Packet generate_packet();
 
     static void initialize_flag_manager();
-    static bool m_is_initialized;
-    static FlagManager<std::string, PacketFlagsBase> m_flags;
+    static bool m_is_flag_manager_initialized;
+    static FlagManager<std::string, PacketFlagsBase> m_flag_manager;
 
     Id m_id;
     std::weak_ptr<IHost> m_src;

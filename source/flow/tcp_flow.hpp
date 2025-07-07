@@ -34,8 +34,8 @@ private:
     bool try_to_put_data_to_device();
 
     static void initialize_flag_manager();
-    static bool m_is_initialized;
-    static FlagManager<std::string, PacketFlagsBase> m_flags;
+    static bool m_is_flag_manager_initialized;
+    static FlagManager<std::string, PacketFlagsBase> m_flag_manager;
 
     Id m_id;
 

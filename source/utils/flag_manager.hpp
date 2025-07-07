@@ -30,19 +30,19 @@ public:
             return false;
         }
 
-        if (m_flags.find(id) != m_flags.end()) {
+        if (m_flag_manager.find(id) != m_flag_manager.end()) {
             LOG_ERROR(fmt::format("Flag already exists. Flag id: {}", id));
             return false;
         }
 
-        m_flags[id] = FlagInfo{ m_next_pos, flag_length };
+        m_flag_manager[id] = FlagInfo{ m_next_pos, flag_length };
         m_next_pos += flag_length;
         return true;
     }
 
     void set_flag(Packet& packet, FlagId id, BitStorage value) {
-        auto it = m_flags.find(id);
-        if (it == m_flags.end()) {
+        auto it = m_flag_manager.find(id);
+        if (it == m_flag_manager.end()) {
             LOG_ERROR(fmt::format("Flag was not registered. Flag id: {}", id));
             return;
         }
@@ -52,8 +52,8 @@ public:
     }
 
     BitStorage get_flag(const Packet& packet, FlagId id) const {
-        auto it = m_flags.find(id);
-        if (it == m_flags.end()) {
+        auto it = m_flag_manager.find(id);
+        if (it == m_flag_manager.end()) {
             LOG_ERROR(fmt::format("Flag was not registered. Flag id: {}", id));
             return 0;
         }
@@ -63,7 +63,7 @@ public:
 
     void reset() {
         m_next_pos = 0;
-        m_flags.clear();
+        m_flag_manager.clear();
     }
 
 private:
@@ -82,7 +82,7 @@ private:
     }
 
     BitStorage m_next_pos = 0;
-    std::unordered_map<FlagId, FlagInfo> m_flags;
+    std::unordered_map<FlagId, FlagInfo> m_flag_manager;
 };
 
 } // namespace sim
