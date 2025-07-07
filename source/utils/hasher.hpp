@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include "packet.hpp"
+#include "packet/packet.hpp"
 
 namespace sim {
 
@@ -33,4 +33,4 @@ public:
     std::uint32_t get_hash(Packet packet) const final;
 };
 
-} // namespace sim
+}  // namespace sim

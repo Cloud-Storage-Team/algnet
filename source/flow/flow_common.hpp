@@ -3,7 +3,7 @@
 #include <queue>
 
 #include "device/interfaces/i_host.hpp"
-#include "packet.hpp"
+#include "packet/packet.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {

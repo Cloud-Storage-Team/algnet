@@ -2,7 +2,7 @@
 
 #include "device/interfaces/i_host.hpp"
 #include "flow_common.hpp"
-#include "packet.hpp"
+#include "packet/packet.hpp"
 #include "utils/flag_manager.hpp"
 
 namespace sim {

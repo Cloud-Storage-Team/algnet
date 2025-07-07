@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "link/i_link.hpp"
-#include "packet.hpp"
+#include "packet/packet.hpp"
 
 class LinkMock : public sim::ILink {
 public:

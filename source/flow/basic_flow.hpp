@@ -4,7 +4,7 @@
 
 #include "device/interfaces/i_host.hpp"
 #include "flow_common.hpp"
-#include "packet.hpp"
+#include "packet/packet.hpp"
 #include "utils/flag_manager.hpp"
 
 namespace sim {
@@ -28,9 +28,9 @@ public:
 
 private:
     enum PacketType { ACK, DATA, ENUM_SIZE };
-    
+
     static void initialize_flag_manager();
-    
+
     static std::string packet_type_label;
     static bool m_is_flag_manager_initialized;
     static FlagManager<std::string, PacketFlagsBase> m_flag_manager;

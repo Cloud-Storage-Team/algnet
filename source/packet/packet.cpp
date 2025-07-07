@@ -1,13 +1,12 @@
-#include "packet.hpp"
+#include "packet/packet.hpp"
 
 #include <sstream>
 
 namespace sim {
 
-Packet::Packet(Size a_size_byte, IFlow* a_flow,
-               Id a_source_id, Id a_dest_id, Time a_sent_time,
-               Size a_sent_bytes_at_origin, bool a_ecn_capable_transport,
-               bool a_congestion_experienced)
+Packet::Packet(Size a_size_byte, IFlow* a_flow, Id a_source_id, Id a_dest_id,
+               Time a_sent_time, Size a_sent_bytes_at_origin,
+               bool a_ecn_capable_transport, bool a_congestion_experienced)
     : flags(0),
       source_id(a_source_id),
       dest_id(a_dest_id),
