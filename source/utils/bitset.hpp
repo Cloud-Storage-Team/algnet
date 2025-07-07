@@ -3,12 +3,13 @@
 #define sizeof_bits(x) (CHAR_BIT * sizeof(x))
 
 #include <bitset>
+#include <concepts>
 #include <cstdint>
 #include <limits>
+#include <spdlog/fmt/fmt.h>
+#include <sstream>
 #include <stdexcept>
 #include <type_traits>
-#include <concepts>
-#include <spdlog/fmt/fmt.h>
 
 #include "logger/logger.hpp"
 
