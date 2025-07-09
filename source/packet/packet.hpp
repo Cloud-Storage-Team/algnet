@@ -3,18 +3,18 @@
 #include <string>
 
 #include "flow/i_flow.hpp"
-#include "routing_packet.hpp"
+#include "packet_header.hpp"
 #include "utils/bitset.hpp"
 
 namespace sim {
 
-struct Packet : public RoutingPacket {
+struct Packet : public PacketHeader {
     Packet(Size a_size_byte = 0, IFlow* a_flow = nullptr, Id a_source_id = "",
            Id a_dest_id = "", Time a_sent_time = 0,
            Size a_sent_bytes_at_origin = 0, bool a_ecn_capable_transport = true,
            bool a_congestion_experienced = false);
 
-    Packet(RoutingPacket a_routing_packet, IFlow* a_flow = nullptr,
+    Packet(PacketHeader a_routing_packet, IFlow* a_flow = nullptr,
            bool a_ecn_capable_transport = true,
            bool a_congestion_experienced = false);
 

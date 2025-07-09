@@ -15,7 +15,7 @@ struct FlowCommon {
                Time a_delay_between_packets, std::uint32_t a_packets_to_send,
                Time a_delay_threshold = 4000);
 
-    RoutingPacket generate_routing_packet() const;
+    PacketHeader generate_routing_packet() const;
 
     Id id;
 

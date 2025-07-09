@@ -3,9 +3,9 @@
 
 namespace sim {
 
-struct RoutingPacket {
-    RoutingPacket(Size a_size = 0, Id a_source_id = "", Id a_dest_id = "",
-                  Size a_sent_bytes_at_origin = 0, Time a_send_time = 0);
+struct PacketHeader {
+    PacketHeader(Size a_size = 0, Id a_source_id = "", Id a_dest_id = "",
+                 Size a_sent_bytes_at_origin = 0, Time a_send_time = 0);
 
     Size size;
     Id source_id;

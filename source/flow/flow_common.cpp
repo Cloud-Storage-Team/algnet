@@ -17,10 +17,10 @@ FlowCommon::FlowCommon(Id a_id, std::shared_ptr<IHost> a_src,
       packets_acked(0),
       sent_bytes(0) {}
 
-RoutingPacket FlowCommon::generate_routing_packet() const {
-    return RoutingPacket(packet_size, src.lock()->get_id(),
-                         dest.lock()->get_id(), sent_bytes,
-                         Scheduler::get_instance().get_current_time());
+PacketHeader FlowCommon::generate_routing_packet() const {
+    return PacketHeader(packet_size, src.lock()->get_id(),
+                        dest.lock()->get_id(), sent_bytes,
+                        Scheduler::get_instance().get_current_time());
 }
 
 std::ostream& operator<<(std::ostream& out, const FlowCommon& flow_common) {
