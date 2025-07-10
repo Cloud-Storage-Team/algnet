@@ -1,8 +1,9 @@
 #pragma once
 #include <matplot/matplot.h>
-#include <spdlog/fmt/fmt.h>
 
 #include <filesystem>
+
+#include "logger/logger.hpp"
 
 namespace utils {
 
@@ -14,9 +15,9 @@ void inline create_all_directories(std::filesystem::path file) {
     }
     if (!std::filesystem::create_directories(dir_path) ||
         !std::filesystem::exists(dir_path)) {
-        throw std::runtime_error(
+        LOG_ERROR(
             fmt::format("Can not create {} directory", dir_path.string()));
     }
 }
 
-}
+}  // namespace utils
