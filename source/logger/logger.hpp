@@ -2,8 +2,8 @@
 
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 
-#include <string>
 #include <source_location>
+#include <string>
 
 namespace spdlog {
 class logger;
@@ -16,23 +16,25 @@ public:
     void logExample();
     void disable_logs();
 
-    void trace(std::string&& msg,
-               const std::source_location& loc = std::source_location::current());
+    void trace(std::string&& msg, const std::source_location& loc =
+                                      std::source_location::current());
     void debug(std::string&& msg,
                const std::source_location& = std::source_location::current());
     void info(std::string&& msg,
-               const std::source_location& = std::source_location::current());
+              const std::source_location& = std::source_location::current());
     void warn(std::string&& msg,
-               const std::source_location& = std::source_location::current());
+              const std::source_location& = std::source_location::current());
     void error(std::string&& msg,
                const std::source_location& = std::source_location::current());
-    void critical(std::string&& msg,
-               const std::source_location& = std::source_location::current());
+    void critical(std::string&& msg, const std::source_location& =
+                                         std::source_location::current());
 
 private:
     Logger();
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
+
+    bool m_disabled = false;
 };
 
 #define LOG_TRACE(...) Logger::get_instance().trace(__VA_ARGS__)
