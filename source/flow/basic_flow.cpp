@@ -96,7 +96,7 @@ void BasicFlow::initialize_flag_manager() {
 }
 
 Packet BasicFlow::generate_packet() {
-    sim::Packet packet(m_flow_common.generate_routing_packet(), this);
+    sim::Packet packet(m_flow_common.generate_packet_header(), this);
     m_flag_manager.set_flag(packet, packet_type_label, PacketType::DATA);
     return packet;
 }

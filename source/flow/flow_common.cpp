@@ -18,7 +18,7 @@ FlowCommon::FlowCommon(Id a_id, std::shared_ptr<IHost> a_src,
       sent_bytes(0),
       packets_in_flight(0) {}
 
-PacketHeader FlowCommon::generate_routing_packet() const {
+PacketHeader FlowCommon::generate_packet_header() const {
     return PacketHeader(packet_size, src.lock()->get_id(),
                         dest.lock()->get_id(), sent_bytes,
                         Scheduler::get_instance().get_current_time());
