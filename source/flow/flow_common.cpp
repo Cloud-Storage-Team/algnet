@@ -15,7 +15,8 @@ FlowCommon::FlowCommon(Id a_id, std::shared_ptr<IHost> a_src,
       packets_to_send(a_packets_to_send),
       delay_threshold(a_delay_threshold),
       packets_acked(0),
-      sent_bytes(0) {}
+      sent_bytes(0),
+      packets_in_flight(0) {}
 
 PacketHeader FlowCommon::generate_routing_packet() const {
     return PacketHeader(packet_size, src.lock()->get_id(),

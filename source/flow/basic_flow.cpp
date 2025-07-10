@@ -24,13 +24,17 @@ BasicFlow::BasicFlow(FlowCommon a_flow_common)
 }
 
 void BasicFlow::start() {
-    schedule_packet_generation(Scheduler::get_instance().get_current_time());
+    Time curr_time = Scheduler::get_instance().get_current_time();
+    Scheduler::get_instance().add<Generate>(curr_time, shared_from_this(),
+                                            m_flow_common.packet_size);
 }
 
-Packet BasicFlow::generate_packet() {
-    sim::Packet packet(m_flow_common.generate_routing_packet(), this);
-    m_flag_manager.set_flag(packet, packet_type_label, PacketType::DATA);
-    return packet;
+Time BasicFlow::create_new_data_packet() {
+    if (m_flow_common.packets_to_send == 0) {
+        return 0;
+    }
+    put_data_to_device();
+    return m_flow_common.delay_between_packets;
 }
 
 void BasicFlow::update(Packet packet, DeviceType type) {
@@ -49,10 +53,9 @@ void BasicFlow::update(Packet packet, DeviceType type) {
     } else if (packet.dest_id == m_flow_common.src.lock()->get_id() &&
                m_flag_manager.get_flag(packet, packet_type_label) ==
                    PacketType::ACK) {
-        // ask arrived to source device, update metrics
-        ++m_flow_common.packets_acked;
-
+        // ask arrived to source device, calsulate metrics
         Time current_time = Scheduler::get_instance().get_current_time();
+
         double rtt = current_time - packet.sent_time;
         MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
                                                  current_time, rtt);
@@ -61,28 +64,13 @@ void BasicFlow::update(Packet packet, DeviceType type) {
             8 * (m_flow_common.sent_bytes - packet.sent_bytes_at_origin) / rtt;
         MetricsCollector::get_instance().add_delivery_rate(
             packet.flow->get_id(), current_time, delivery_bit_rate);
+
+        ++m_flow_common.packets_acked;
     } else {
         LOG_ERROR(
             fmt::format("Called update on flow {} with some foreign packet {}",
                         get_id(), packet.to_string()));
     }
-}
-
-std::uint32_t BasicFlow::get_updates_number() const {
-    return m_flow_common.packets_acked;
-}
-
-Time BasicFlow::create_new_data_packet() {
-    if (m_flow_common.packets_to_send == 0) {
-        return 0;
-    }
-    --m_flow_common.packets_to_send;
-    Packet data = generate_packet();
-    // Note: sent_time and m_flow_common.sent_bytes are evaluated at time of
-    // pushing the packet to the m_flow_common.sending_buffer
-    m_flow_common.sent_bytes += data.size;
-    m_flow_common.sending_buffer.push(data);
-    return put_data_to_device();
 }
 
 std::shared_ptr<IHost> BasicFlow::get_sender() const {
@@ -95,22 +83,8 @@ std::shared_ptr<IHost> BasicFlow::get_receiver() const {
 
 Id BasicFlow::get_id() const { return m_flow_common.id; }
 
-Time BasicFlow::put_data_to_device() {
-    if (m_flow_common.src.expired()) {
-        LOG_ERROR("Flow source was deleted; can not put data to it");
-        return 0;
-    }
-    m_flow_common.sending_buffer.front().sent_time =
-        Scheduler::get_instance().get_current_time();
-    m_flow_common.src.lock()->enqueue_packet(
-        m_flow_common.sending_buffer.front());
-    m_flow_common.sending_buffer.pop();
-    return m_flow_common.delay_between_packets;
-}
-
-void BasicFlow::schedule_packet_generation(Time time) {
-    Scheduler::get_instance().add<Generate>(time, shared_from_this(),
-                                            m_flow_common.packet_size);
+std::uint32_t BasicFlow::get_updates_number() const {
+    return m_flow_common.packets_acked;
 }
 
 void BasicFlow::initialize_flag_manager() {
@@ -119,6 +93,19 @@ void BasicFlow::initialize_flag_manager() {
                                                PacketType::ENUM_SIZE);
         m_is_flag_manager_initialized = true;
     }
+}
+
+Packet BasicFlow::generate_packet() {
+    sim::Packet packet(m_flow_common.generate_routing_packet(), this);
+    m_flag_manager.set_flag(packet, packet_type_label, PacketType::DATA);
+    return packet;
+}
+
+void BasicFlow::put_data_to_device() {
+    Packet packet = generate_packet();
+    m_flow_common.src.lock()->enqueue_packet(packet);
+    --m_flow_common.packets_to_send;
+    m_flow_common.sent_bytes += packet.size;
 }
 
 }  // namespace sim

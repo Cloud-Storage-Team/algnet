@@ -15,14 +15,13 @@ public:
     BasicFlow(FlowCommon a_flow_common);
     virtual ~BasicFlow() = default;
 
-    Id get_id() const final;
-
     void start() final;
     Time create_new_data_packet() final;
     void update(Packet packet, DeviceType type) final;
 
     std::shared_ptr<IHost> get_sender() const final;
     std::shared_ptr<IHost> get_receiver() const final;
+    Id get_id() const final;
 
     std::uint32_t get_updates_number() const;
 
@@ -35,9 +34,8 @@ private:
     static bool m_is_flag_manager_initialized;
     static FlagManager<std::string, PacketFlagsBase> m_flag_manager;
 
-    Time put_data_to_device();
-    void schedule_packet_generation(Time time);
     Packet generate_packet();
+    void put_data_to_device();
 
     FlowCommon m_flow_common;
 };

@@ -28,8 +28,7 @@ struct FlowCommon {
 
     std::uint32_t packets_acked;
     Size sent_bytes;
-
-    std::queue<Packet> sending_buffer;
+    std::uint32_t packets_in_flight;
 };
 
 std::ostream& operator<<(std::ostream& out, const FlowCommon& flow_common);

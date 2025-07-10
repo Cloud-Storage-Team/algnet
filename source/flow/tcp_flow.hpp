@@ -11,16 +11,15 @@ class TcpFlow : public IFlow, public std::enable_shared_from_this<TcpFlow> {
 public:
     TcpFlow(FlowCommon a_flow_common, std::uint32_t a_ssthresh = 8,
             bool a_ecn_capable = true);
+    virtual ~TcpFlow() = default;
 
     void start() final;
     Time create_new_data_packet() final;
-
     void update(Packet packet, DeviceType type) final;
+
     std::shared_ptr<IHost> get_sender() const final;
     std::shared_ptr<IHost> get_receiver() const final;
     Id get_id() const final;
-
-    std::string to_string() const;
 
 private:
     enum PacketType { ACK, DATA, ENUM_SIZE };
@@ -32,7 +31,6 @@ private:
     static std::string packet_type_label;
 
     Packet generate_packet();
-
     bool try_to_put_data_to_device();
 
     FlowCommon m_flow_common;
@@ -41,7 +39,5 @@ private:
     double m_cwnd;      // Congestion window
 
     bool m_ecn_capable;
-
-    std::uint32_t m_packets_in_flight;
 };
 }  // namespace sim
