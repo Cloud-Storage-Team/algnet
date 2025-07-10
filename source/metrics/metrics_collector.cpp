@@ -1,13 +1,11 @@
 #include "metrics_collector.hpp"
 
-#include <matplot/matplot.h>
 #include <spdlog/fmt/fmt.h>
-
-#include <filesystem>
 
 #include "flow/i_flow.hpp"
 #include "link/i_link.hpp"
 #include "utils/identifier_factory.hpp"
+#include "utils/safe_matplot.hpp"
 
 namespace sim {
 
@@ -62,7 +60,7 @@ static void draw_on_same_plot(std::filesystem::path path, PlotMetricsData data,
     ax->title(metadata.title);
     ax->legend(std::vector<std::string>());
 
-    matplot::save(fig, path.string());
+    matplot::safe_save(fig, path.string());
 }
 
 void MetricsCollector::draw_cwnd_plot(std::filesystem::path path) const {
@@ -135,7 +133,10 @@ void MetricsCollector::draw_queue_size_plots(
 
         ax->color("white");
 
-        matplot::save(fig, dir_path / fmt::format("{}.svg", link_id));
+        std::filesystem::path plot_path =
+            dir_path / fmt::format("{}.svg", link_id);
+
+        matplot::safe_save(fig, plot_path.string());
     }
 }
 
