@@ -34,7 +34,7 @@ private:
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
 
-    bool m_disabled = false;
+    bool m_enabled = true;
 };
 
 #define LOG_TRACE(...) Logger::get_instance().trace(__VA_ARGS__)

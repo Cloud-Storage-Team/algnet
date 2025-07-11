@@ -11,7 +11,7 @@ Logger& Logger::get_instance() {
 }
 
 void Logger::disable_logs() {
-    m_disabled = true;
+    m_enabled = false;
     spdlog::set_level(spdlog::level::off);
     spdlog::get("multi_sink")->set_level(spdlog::level::off);
 }
@@ -49,42 +49,42 @@ static constexpr std::string_view file_name_from_path(std::string_view path) {
 }
 
 void Logger::trace(std::string&& msg, const std::source_location& loc) {
-    if (m_disabled) {
+    if (m_enabled) {
         SPDLOG_TRACE("[{}:{}] {}", file_name_from_path(loc.file_name()),
                      loc.line(), std::move(msg));
     }
 }
 
 void Logger::debug(std::string&& msg, const std::source_location& loc) {
-    if (m_disabled) {
+    if (m_enabled) {
         SPDLOG_DEBUG("[{}:{}] {}", file_name_from_path(loc.file_name()),
                      loc.line(), std::move(msg));
     }
 }
 
 void Logger::info(std::string&& msg, const std::source_location& loc) {
-    if (m_disabled) {
+    if (m_enabled) {
         SPDLOG_INFO("[{}:{}] {}", file_name_from_path(loc.file_name()),
                     loc.line(), std::move(msg));
     }
 }
 
 void Logger::warn(std::string&& msg, const std::source_location& loc) {
-    if (m_disabled) {
+    if (m_enabled) {
         SPDLOG_WARN("[{}:{}] {}", file_name_from_path(loc.file_name()),
                     loc.line(), std::move(msg));
     }
 }
 
 void Logger::error(std::string&& msg, const std::source_location& loc) {
-    if (m_disabled) {
+    if (m_enabled) {
         SPDLOG_ERROR("[{}:{}] {}", file_name_from_path(loc.file_name()),
                      loc.line(), std::move(msg));
     }
 }
 
 void Logger::critical(std::string&& msg, const std::source_location& loc) {
-    if (m_disabled) {
+    if (m_enabled) {
         SPDLOG_CRITICAL("[{}:{}] {}", file_name_from_path(loc.file_name()),
                         loc.line(), std::move(msg));
     }
