@@ -1,12 +1,12 @@
 #pragma once
 
-#include "bitset.hpp"
-#include "packet.hpp"
-
-#include <unordered_map>
 #include <spdlog/fmt/fmt.h>
 
+#include <unordered_map>
+
+#include "bitset.hpp"
 #include "logger/logger.hpp"
+#include "packet/packet.hpp"
 
 namespace sim {
 
@@ -16,7 +16,8 @@ public:
     FlagManager() : m_next_pos(0) {}
 
     bool register_flag_by_amount(FlagId id, BitStorage different_values) {
-        return register_flag_by_length(id, required_bits_for_values(different_values));
+        return register_flag_by_length(
+            id, required_bits_for_values(different_values));
     }
 
     bool register_flag_by_length(FlagId id, BitStorage flag_length) {
@@ -26,16 +27,20 @@ public:
         }
 
         if (m_next_pos + flag_length > sizeof_bits(BitStorage)) {
-            LOG_ERROR(fmt::format("Partition position is out of range. Max possible position is {}, but got {}", sizeof_bits(BitStorage), m_next_pos + flag_length));
+            LOG_ERROR(
+                fmt::format("Partition position is out of range. Max possible "
+                            "position is {}, but got {}",
+                            sizeof_bits(BitStorage), m_next_pos + flag_length));
             return false;
         }
 
         if (m_flag_manager.find(id) != m_flag_manager.end()) {
-            LOG_ERROR(fmt::format("Flag with same id '{}' already exists.", id));
+            LOG_ERROR(
+                fmt::format("Flag with same id '{}' already exists.", id));
             return false;
         }
 
-        m_flag_manager[id] = FlagInfo{ m_next_pos, flag_length };
+        m_flag_manager[id] = FlagInfo{m_next_pos, flag_length};
         m_next_pos += flag_length;
         return true;
     }
@@ -85,4 +90,4 @@ private:
     std::unordered_map<FlagId, FlagInfo> m_flag_manager;
 };
 
-} // namespace sim
+}  // namespace sim

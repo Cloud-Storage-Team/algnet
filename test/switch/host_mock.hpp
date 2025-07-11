@@ -3,7 +3,7 @@
 
 #include "device/interfaces/i_host.hpp"
 #include "link/i_link.hpp"
-#include "packet.hpp"
+#include "packet/packet.hpp"
 
 namespace test {
 

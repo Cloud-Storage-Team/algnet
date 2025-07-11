@@ -1,6 +1,6 @@
 #pragma once
 #include "flow/i_flow.hpp"
-#include "packet.hpp"
+#include "packet/packet.hpp"
 
 namespace test {
 
