@@ -2,26 +2,15 @@
 
 #include <spdlog/fmt/fmt.h>
 
+#include "utils/safe_matplot.hpp"
+
 namespace sim {
 
 void MetricsStorage::add_record(Time time, double value) {
     m_records.emplace_back(time, value);
 }
-
-void static create_all_directories(std::filesystem::path path) {
-    std::filesystem::path dir_path = path.parent_path();
-    if (std::filesystem::exists(dir_path)) {
-        return;
-    }
-    if (!std::filesystem::create_directories(dir_path) ||
-        !std::filesystem::exists(dir_path)) {
-        throw std::runtime_error(
-            fmt::format("Can not create {} directory", dir_path.string()));
-    }
-}
-
 void MetricsStorage::export_to_file(std::filesystem::path path) const {
-    create_all_directories(path);
+    utils::create_all_directories(path);
     std::ofstream output_file(path);
     if (!output_file) {
         throw std::runtime_error("Failed to create file for metric values");
@@ -48,8 +37,7 @@ matplot::figure_handle MetricsStorage::get_picture(
 void MetricsStorage::draw_plot(std::filesystem::path path,
                                PlotMetadata metadata) const {
     auto fig = get_picture(metadata);
-    create_all_directories(path);
-    matplot::save(fig, path.string());
+    matplot::safe_save(fig, path.string());
 }
 
 void MetricsStorage::draw_on_plot(matplot::figure_handle& fig,
