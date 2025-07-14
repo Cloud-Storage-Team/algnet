@@ -7,7 +7,7 @@
 #include "device/host.hpp"
 #include "device/switch.hpp"
 #include "flow/basic_flow.hpp"
-#include "flow/tcp_flow.hpp"
+#include "flow/tcp/tcp_flow.hpp"
 #include "parser/parse_primitives.hpp"
 #include "utils/identifier_factory.hpp"
 

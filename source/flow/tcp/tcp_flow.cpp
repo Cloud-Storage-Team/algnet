@@ -1,4 +1,4 @@
-#include "flow/tcp_flow.hpp"
+#include "tcp_flow.hpp"
 
 #include <spdlog/fmt/fmt.h>
 
@@ -104,12 +104,12 @@ void TcpFlow::update(Packet packet, DeviceType type) {
                                                       m_cwnd);
         }
     } else if (packet.dest_id == m_dest.lock()->get_id() &&
-               m_flag_manager.get_flag(packet, packet_type_label) == PacketType::DATA) {
+               m_flag_manager.get_flag(packet, packet_type_label) ==
+                   PacketType::DATA) {
         // data packet delivered to destination device; send ack
-        Packet ack(1, this, m_dest.lock()->get_id(),
-                   m_src.lock()->get_id(), packet.sent_time,
-                   packet.sent_bytes_at_origin, packet.ecn_capable_transport,
-                   packet.congestion_experienced);
+        Packet ack(1, this, m_dest.lock()->get_id(), m_src.lock()->get_id(),
+                   packet.sent_time, packet.sent_bytes_at_origin,
+                   packet.ecn_capable_transport, packet.congestion_experienced);
         m_flag_manager.set_flag(packet, packet_type_label, PacketType::ACK);
         m_dest.lock()->enqueue_packet(ack);
     }
@@ -161,7 +161,8 @@ bool TcpFlow::try_to_put_data_to_device() {
 
 void TcpFlow::initialize_flag_manager() {
     if (!m_is_flag_manager_initialized) {
-        m_flag_manager.register_flag_by_amount(packet_type_label, PacketType::ENUM_SIZE);
+        m_flag_manager.register_flag_by_amount(packet_type_label,
+                                               PacketType::ENUM_SIZE);
         m_is_flag_manager_initialized = true;
     }
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "device/interfaces/i_host.hpp"
-#include "i_flow.hpp"
+#include "flow/i_flow.hpp"
 #include "packet.hpp"
 #include "utils/flag_manager.hpp"
 
