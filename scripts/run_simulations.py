@@ -11,17 +11,15 @@ def check_directory(dirname: str):
         os.mkdir(dirname)
 
 
-def get_topology_name(config_path: str):
-    with open(config_path, "r") as f:
+def get_topology_path(simulation_config_path: str):
+    with open(simulation_config_path, "r") as f:
         config = yaml.safe_load(f)
-
-    topology_path = config.get("topology_config_path", "")
+    config_file_dirname = os.path.dirname(simulation_config_path)
+    relative_topology_path = config.get("topology_config_path", "")
+    topology_path = os.path.join(config_file_dirname, relative_topology_path)
     if not topology_path:
         sys.exit("Error: No topology_config_path found in the configuration file.")
-
-    topology_filename = os.path.basename(topology_path)
-    topology_name = os.path.splitext(topology_filename)[0]
-    return topology_name
+    return topology_path
 
 
 def copy_topology_image(topology_name: str, metrics_dir: str):
@@ -43,7 +41,7 @@ def main(args):
     parser.add_argument(
         "-c",
         "--config",
-        help="Path to the simulation configuration file",
+        help="Path to the directory with simulation configs",
         required=True,
     )
     parser.add_argument(
@@ -65,25 +63,42 @@ def main(args):
 
     check_directory(corner_metrics_dir)
 
-    for filename in os.listdir(simulation_configs_dir):
-        if not filename.endswith(".yml") and not filename.endswith(".yaml"):
+    for simulation_config_filename in os.listdir(simulation_configs_dir):
+        if not simulation_config_filename.endswith(".yml") and not simulation_config_filename.endswith(".yaml"):
             continue
 
-        no_extention_name = os.path.splitext(filename)[0]
+        no_extention_name = os.path.splitext(simulation_config_filename)[0]
         metrics_dir = os.path.join(corner_metrics_dir, no_extention_name)
         check_directory(metrics_dir)
 
-        filepath = os.path.join(simulation_configs_dir, filename)
+        simulation_config_filepath = os.path.join(simulation_configs_dir, simulation_config_filename)
 
-        topology_name = get_topology_name(filepath)
-        copy_topology_image(topology_name, metrics_dir)
+        current_file_path = os.path.abspath(__file__)
+        image_generator_path =  os.path.join(os.path.dirname(current_file_path), "generate_image.py")
+        output_image_path = os.path.join(metrics_dir, "topology.svg")
 
-        print(f"Run {simulator_path} {filepath} {metrics_dir}")
+        topology_path = get_topology_path(simulation_config_filepath)
+
+        image_generator_args = [
+            "python3",
+            image_generator_path,
+            "-c",
+            topology_path,
+            "-o",
+            output_image_path
+        ]
+        result = subprocess.run(image_generator_args, capture_output=True)
+        if result.returncode != 0:
+            print(f"Error running image generator.")
+            print(f"SCript output: {result.stderr.decode()}")
+            exit(1)
+
+        print(f"Run {simulator_path} {simulation_config_filepath} {metrics_dir}")
 
         simulator_args = [
             simulator_path,
             "--config",
-            filepath,
+            simulation_config_filepath,
             "--output-dir",
             metrics_dir,
         ]
@@ -96,7 +111,7 @@ def main(args):
 
         result = subprocess.run(simulator_args, capture_output=True)
         if result.returncode != 0:
-            print(f"Error running nons on {filepath}.")
+            print(f"Error running nons on {simulation_config_filepath}.")
             print(f"Simulator output: {result.stderr.decode()}")
             exit(1)
 

@@ -44,12 +44,9 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
         node_shape = "none"
 
         device_type = device_info.get("type", "")
-        if device_type == "sender":
+        if device_type == "host":
             color = "#2E7D32"  # Dark green
             icon = "🖥️"
-        elif device_type == "receiver":
-            color = "#C62828"  # Dark red
-            icon = "🖳"
         elif device_type == "switch":
             color = "#1565C0"  # Dark blue
             icon = "🌐"
@@ -78,7 +75,11 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
     for link_id, link_info in links.items():
         from_node = link_info["from"]
         to_node = link_info["to"]
-        label = f"⏱ {link_info['latency']}\n📶 {link_info['throughput']}\ningress {link_info['ingress_buffer_size']}\negress {link_info['egress_buffer_size']}"
+        label = f"{link_id}\n"\
+                f"⏱ {link_info['latency']}\n" \
+                f"📶 {link_info['throughput']}\n" \
+                f"ingress {link_info['ingress_buffer_size']}\n" \
+                f"egress {link_info['egress_buffer_size']}"
 
         graph.edge(
             from_node,
@@ -104,15 +105,14 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
             if devices[device_id]["type"] == "receiver":
                 s.node(device_id)
 
+    directory = os.path.dirname(output_file)
+    file_name, extention = os.path.splitext(os.path.basename(output_file))
+    # Delete . from the extention beginning
+    extention = extention[1:]
+    
     # Render the graph
-    graph.render(output_file, format="svg", cleanup=True)
-    print(f"Generated topology image: {output_file}.svg")
-
-
-"""
-Usage example:
-python3 generator.py plots ../topology_examples/bus_topology.yml
-"""
+    graph.render(file_name, directory, format=extention, cleanup=True)
+    print(f"Generated topology image: {output_file}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
