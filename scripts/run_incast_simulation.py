@@ -53,7 +53,8 @@ def main(args):
     simulation_config_name = (
         f"incast_{parsed_args.senders}_to_{parsed_args.receivers}_simulation.yml"
     )
-    bottleneck_script_path = os.path.join("scripts", "topology_generator" "bottleneck.py")
+    bottleneck_script_path = os.path.join("scripts", "topology_generator", "bottleneck.py")
+    print(bottleneck_script_path)
 
     bottleneck_args = [
         "python3",
