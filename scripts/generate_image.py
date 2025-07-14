@@ -2,7 +2,12 @@ import os
 import sys
 
 import yaml
+import argparse
 from graphviz import Digraph
+
+"""
+Generates topology image by given path to topology config file
+"""
 
 
 def generate_topology(config_file, output_file, picture_label="Network Topology"):
@@ -110,16 +115,12 @@ python3 generator.py plots ../topology_examples/bus_topology.yml
 """
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print(f"Usage: python {sys.argv[0]} <output-directory> <filenames>...")
-        exit(1)
+    parser = argparse.ArgumentParser(
+        description="Generate topology image by its configuration file."
+    )
+    parser.add_argument("-c", "--config", help="Path to the topology configuration file", required=True)
+    parser.add_argument("-o", "--output", help="Path to the output image", required=True)
+    args = parser.parse_args()
 
-    dir_name = sys.argv[1]
-    for idx in range(2, len(sys.argv)):
-        path = sys.argv[idx]
-        filename = os.path.basename(path)
-        filename = filename.split(".")[0]
-        pretty_image_name = " ".join(map(lambda x: x.capitalize(), filename.split("_")))
-        generate_topology(
-            path, os.path.join(dir_name, filename), picture_label=pretty_image_name
-        )
+    
+    generate_topology(args.config, args.output)
