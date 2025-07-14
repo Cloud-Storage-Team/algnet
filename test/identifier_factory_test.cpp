@@ -34,8 +34,8 @@ TEST_F(TestIdentifierFactory, TestUniqueness) {
     }
 
     for (Id id : entitiy_ids) {
-        ASSERT_TRUE(
-            sim::IdentifierFactory::get_instance().add_object<Entity>(id));
+        ASSERT_TRUE(sim::IdentifierFactory::get_instance().add_object(
+            std::make_shared<Entity>(id)));
         ASSERT_EQ(id, sim::IdentifierFactory::get_instance()
                           .get_object<Entity>(id)
                           ->get_id());
