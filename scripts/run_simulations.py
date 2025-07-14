@@ -115,8 +115,6 @@ def main(args):
             print(f"Simulator output: {result.stderr.decode()}")
             exit(1)
 
-        # separate_files(metrics_dir)
-
 
 if __name__ == "__main__":
     main(sys.argv)
