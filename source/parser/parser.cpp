@@ -4,6 +4,7 @@
 
 #include "identifiable_parser.hpp"
 #include "logger/logger.hpp"
+#include "new_identifiable_parser.hpp"
 
 namespace sim {
 
@@ -50,11 +51,12 @@ void YamlParser::process_devices(const YAML::Node &config) {
                 [&key_node, &val_node](auto &sim) {
                     using SimType = std::decay_t<decltype(sim)>;
                     using HostType = typename SimType::Host_T;
-                    Id id = parse_object<HostType>(key_node, val_node);
-                    if (!sim.add_host(IdentifierFactory::get_instance()
-                                          .get_object<HostType>(id))) {
+                    std::shared_ptr<HostType> ptr =
+                        IdentifieableParser::parse_and_registrate<HostType>(
+                            key_node, val_node);
+                    if (!sim.add_host(ptr)) {
                         throw std::runtime_error("Can not add host with id " +
-                                                 id);
+                                                 ptr.get()->get_id());
                     }
                 },
                 m_simulator);
@@ -63,12 +65,12 @@ void YamlParser::process_devices(const YAML::Node &config) {
                 [&key_node, &val_node](auto &simulator) {
                     using SimType = std::decay_t<decltype(simulator)>;
                     using SwitchType = typename SimType::Switch_T;
-                    Id id = parse_object<SwitchType>(key_node, val_node);
-                    if (!simulator.add_switch(
-                            IdentifierFactory::get_instance()
-                                .get_object<SwitchType>(id))) {
+                    std::shared_ptr<SwitchType> ptr =
+                        IdentifieableParser::parse_and_registrate<SwitchType>(
+                            key_node, val_node);
+                    if (!simulator.add_switch(ptr)) {
                         throw std::runtime_error("Can not add switch with id " +
-                                                 id);
+                                                 ptr.get()->get_id());
                     }
                 },
                 m_simulator);

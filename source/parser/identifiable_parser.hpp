@@ -8,6 +8,7 @@
 #include "device/switch.hpp"
 #include "flow/basic_flow.hpp"
 #include "flow/tcp_flow.hpp"
+#include "link/link.hpp"
 #include "parser/parse_primitives.hpp"
 #include "utils/identifier_factory.hpp"
 
@@ -37,8 +38,8 @@ static std::string concatenate(T first, Args... args) {
 
 template <typename T, typename... Args>
 static void parse_object_helper(Args&&... args) {
-    if (!IdentifierFactory::get_instance().add_object<T>(
-            std::forward<Args>(args)...)) {
+    if (!IdentifierFactory::get_instance().add_object(
+            std::make_shared<T>(std::forward<Args>(args)...))) {
         throw std::runtime_error(fmt::format(
             "Can not add object {}({}): object with this id already exists",
             typeid(T).name(), concatenate(args...)));
