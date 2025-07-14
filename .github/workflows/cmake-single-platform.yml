@@ -65,6 +65,7 @@ jobs:
     - name: Install dependencies gnuplot
       run: |
         sudo apt install --fix-missing gnuplot
+        sudo apt install --fix-missing graphviz
         pip install graphviz
 
     - name: Download artifact
