@@ -1,5 +1,5 @@
 #include "device/host.hpp"
-#include "new_identifiable_parser.hpp"
+#include "identifiable_parser.hpp"
 
 namespace sim {
 
