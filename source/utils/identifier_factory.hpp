@@ -19,18 +19,7 @@ public:
         return instance;
     }
 
-    template <typename TObject, typename... Args>
-    bool add_object(Args&&... args) {
-        static_assert(std::is_base_of_v<Identifiable, TObject>,
-                      "TObject must implement Identifiable interface");
-        auto ptr = std::make_shared<TObject>(std::forward<Args>(args)...);
-        Id id = ptr->get_id();
-        if (m_id_table.find(id) != m_id_table.end() || id == "") {
-            return false;
-        }
-        m_id_table[id] = ptr;
-        return true;
-    }
+    bool add_object(std::shared_ptr<Identifiable> object);
 
     template <typename TObject>
     std::shared_ptr<TObject> get_object(Id id) {

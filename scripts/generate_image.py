@@ -2,7 +2,12 @@ import os
 import sys
 
 import yaml
+import argparse
 from graphviz import Digraph
+
+"""
+Generates topology image by given path to topology config file
+"""
 
 
 def generate_topology(config_file, output_file, picture_label="Network Topology"):
@@ -39,12 +44,9 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
         node_shape = "none"
 
         device_type = device_info.get("type", "")
-        if device_type == "sender":
+        if device_type == "host":
             color = "#2E7D32"  # Dark green
             icon = "🖥️"
-        elif device_type == "receiver":
-            color = "#C62828"  # Dark red
-            icon = "🖳"
         elif device_type == "switch":
             color = "#1565C0"  # Dark blue
             icon = "🌐"
@@ -73,7 +75,11 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
     for link_id, link_info in links.items():
         from_node = link_info["from"]
         to_node = link_info["to"]
-        label = f"⏱ {link_info['latency']}\n📶 {link_info['throughput']}\ningress {link_info['ingress_buffer_size']}\negress {link_info['egress_buffer_size']}"
+        label = f"{link_id}\n"\
+                f"⏱ {link_info['latency']}\n" \
+                f"📶 {link_info['throughput']}\n" \
+                f"ingress {link_info['ingress_buffer_size']}\n" \
+                f"egress {link_info['egress_buffer_size']}"
 
         graph.edge(
             from_node,
@@ -99,27 +105,22 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
             if devices[device_id]["type"] == "receiver":
                 s.node(device_id)
 
+    directory = os.path.dirname(output_file)
+    file_name, extension = os.path.splitext(os.path.basename(output_file))
+    # Delete . from the extension beginning
+    extension = extension[1:]
+    
     # Render the graph
-    graph.render(output_file, format="svg", cleanup=True)
-    print(f"Generated topology image: {output_file}.svg")
-
-
-"""
-Usage example:
-python3 generator.py plots ../topology_examples/bus_topology.yml
-"""
+    graph.render(file_name, directory, format=extension, cleanup=True)
+    print(f"Generated topology image: {output_file}")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print(f"Usage: python {sys.argv[0]} <output-directory> <filenames>...")
-        exit(1)
+    parser = argparse.ArgumentParser(
+        description="Generate topology image by its configuration file."
+    )
+    parser.add_argument("-c", "--config", help="Path to the topology configuration file", required=True)
+    parser.add_argument("-o", "--output", help="Path to the output image", required=True)
+    args = parser.parse_args()
 
-    dir_name = sys.argv[1]
-    for idx in range(2, len(sys.argv)):
-        path = sys.argv[idx]
-        filename = os.path.basename(path)
-        filename = filename.split(".")[0]
-        pretty_image_name = " ".join(map(lambda x: x.capitalize(), filename.split("_")))
-        generate_topology(
-            path, os.path.join(dir_name, filename), picture_label=pretty_image_name
-        )
+    
+    generate_topology(args.config, args.output)
