@@ -2,21 +2,9 @@
 
 #include "identifiable_parser.hpp"
 #include "link/link.hpp"
-#include "parser/parse_primitives.hpp"
+#include "parser/parse_utils.hpp"
 
 namespace sim {
-
-static uint32_t parse_with_default(
-    const YAML::Node& node, std::string_view field_name,
-    std::function<uint32_t(const std::string&)> value_parser,
-    uint32_t default_value) {
-    if (!node[field_name]) {
-        LOG_WARN(fmt::format("{} does not set ; use default value {}",
-                             field_name, default_value));
-        return default_value;
-    }
-    return value_parser(node[field_name].as<std::string>());
-}
 
 template <>
 std::shared_ptr<Link> IdentifieableParser::parse_object<Link>(
