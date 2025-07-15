@@ -106,7 +106,7 @@ private:
 };
 
 using BasicSimulator = Simulator<Host, Switch, BasicFlow, Link>;
-using TcpSimulator = Simulator<Host, Switch, TcpFlow, Link>;
+using TcpSimulator = Simulator<Host, Switch, TcpTahoeFlow, Link>;
 
 using SimulatorVariant = std::variant<BasicSimulator, TcpSimulator>;
 

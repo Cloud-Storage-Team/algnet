@@ -4,6 +4,6 @@
 
 namespace sim {
 
-using TcpFlow = TemplateTcpFlow<TcpTahoeCC>;
+using TcpTahoeFlow = TcpFlow<TcpTahoeCC>;
 
 }  // namespace sim

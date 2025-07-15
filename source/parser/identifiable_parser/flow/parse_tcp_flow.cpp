@@ -6,12 +6,12 @@
 namespace sim {
 
 template <>
-std::shared_ptr<TcpFlow> IdentifieableParser::parse_object(
+std::shared_ptr<TcpTahoeFlow> IdentifieableParser::parse_object(
     const YAML::Node& key_node, const YAML::Node& value_node) {
     TcpTahoeCC cc = parse_tcp_cc<TcpTahoeCC>(key_node, value_node);
     FlowCommon flow_common = parse_flow_common(key_node, value_node);
 
-    return std::make_shared<TcpFlow>(
+    return std::make_shared<TcpTahoeFlow>(
         flow_common.id, dynamic_pointer_cast<IHost>(flow_common.sender_ptr),
         dynamic_pointer_cast<IHost>(flow_common.receiver_ptr), cc,
         flow_common.packet_size, flow_common.packet_interval,

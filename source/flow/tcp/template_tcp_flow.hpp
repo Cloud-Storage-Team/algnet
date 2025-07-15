@@ -16,14 +16,13 @@ namespace sim {
 
 template <typename TTcpCC>
 requires std::derived_from<TTcpCC, ITcpCC>
-class TemplateTcpFlow
-    : public IFlow,
-      public std::enable_shared_from_this<TemplateTcpFlow<TTcpCC> > {
+class TcpFlow : public IFlow,
+                public std::enable_shared_from_this<TcpFlow<TTcpCC> > {
 public:
-    TemplateTcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
-                    std::shared_ptr<IHost> a_dest, TTcpCC a_cc,
-                    Size a_packet_size, Time a_delay_between_packets,
-                    std::uint32_t a_packets_to_send, bool a_ecn_capable = true)
+    TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
+            std::shared_ptr<IHost> a_dest, TTcpCC a_cc, Size a_packet_size,
+            Time a_delay_between_packets, std::uint32_t a_packets_to_send,
+            bool a_ecn_capable = true)
         : m_id(std::move(a_id)),
           m_src(a_src),
           m_dest(a_dest),
@@ -196,15 +195,14 @@ private:
 
 template <typename TTcpCC>
 requires std::derived_from<TTcpCC, ITcpCC>
-std::string TemplateTcpFlow<TTcpCC>::packet_type_label = "type";
+std::string TcpFlow<TTcpCC>::packet_type_label = "type";
 
 template <typename TTcpCC>
 requires std::derived_from<TTcpCC, ITcpCC>
-FlagManager<std::string, PacketFlagsBase>
-    TemplateTcpFlow<TTcpCC>::m_flag_manager;
+FlagManager<std::string, PacketFlagsBase> TcpFlow<TTcpCC>::m_flag_manager;
 
 template <typename TTcpCC>
 requires std::derived_from<TTcpCC, ITcpCC>
-bool TemplateTcpFlow<TTcpCC>::m_is_flag_manager_initialized = false;
+bool TcpFlow<TTcpCC>::m_is_flag_manager_initialized = false;
 
 }  // namespace sim
