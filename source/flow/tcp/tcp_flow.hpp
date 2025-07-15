@@ -119,6 +119,8 @@ public:
     std::shared_ptr<IHost> get_receiver() const { return m_dest.lock(); }
     Id get_id() const final { return m_id; }
 
+    std::uint32_t get_packets_acked() const { return m_packets_acked; }
+
     std::string to_string() const {
         std::ostringstream oss;
         oss << "TcpFlow[";

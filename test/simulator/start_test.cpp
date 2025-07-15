@@ -29,15 +29,15 @@ TEST_F(Start, TrivialTopology) {
 
     Id id = "flow";
     auto flow = std::make_shared<sim::BasicFlow>(
-        id, sender, receiver, packet_size, delay_between_packets,
-        packets_to_send);
+        id, sender, receiver, sim::BasicCC(), packet_size,
+        delay_between_packets, packets_to_send);
     sim.add_flow(flow);
 
     add_two_way_links(sim, {{sender, swtch}, {swtch, receiver}});
 
     sim.start(stop_time);
 
-    ASSERT_EQ(flow->get_updates_number(), packets_to_send);
+    ASSERT_EQ(flow->get_packets_acked(), packets_to_send);
 }
 
 TEST_F(Start, ThreeToOneTopology) {
@@ -71,27 +71,27 @@ TEST_F(Start, ThreeToOneTopology) {
 
     Id id_1 = "flow_1";
     auto flow1 = std::make_shared<sim::BasicFlow>(
-        id_1, sender1, receiver, packet_size, delay_between_packets,
-        packets_to_send_by_flow1);
+        id_1, sender1, receiver, sim::BasicCC(), packet_size,
+        delay_between_packets, packets_to_send_by_flow1);
     sim.add_flow(flow1);
 
     Id id_2 = "flow_2";
     auto flow2 = std::make_shared<sim::BasicFlow>(
-        id_2, sender2, receiver, packet_size, delay_between_packets,
-        packets_to_send_by_flow2);
+        id_2, sender2, receiver, sim::BasicCC(), packet_size,
+        delay_between_packets, packets_to_send_by_flow2);
     sim.add_flow(flow2);
 
     Id id_3 = "flow_3";
     auto flow3 = std::make_shared<sim::BasicFlow>(
-        id_3, sender3, receiver, packet_size, delay_between_packets,
-        packets_to_send_by_flow3);
+        id_3, sender3, receiver, sim::BasicCC(), packet_size,
+        delay_between_packets, packets_to_send_by_flow3);
     sim.add_flow(flow3);
 
     sim.start(stop_time);
 
-    ASSERT_EQ(flow1->get_updates_number(), packets_to_send_by_flow1);
-    ASSERT_EQ(flow2->get_updates_number(), packets_to_send_by_flow2);
-    ASSERT_EQ(flow3->get_updates_number(), packets_to_send_by_flow3);
+    ASSERT_EQ(flow1->get_packets_acked(), packets_to_send_by_flow1);
+    ASSERT_EQ(flow2->get_packets_acked(), packets_to_send_by_flow2);
+    ASSERT_EQ(flow3->get_packets_acked(), packets_to_send_by_flow3);
 }
 
 TEST_F(Start, StopTime) {
@@ -125,31 +125,31 @@ TEST_F(Start, StopTime) {
 
     Id id_1 = "flow_1";
     auto flow1 = std::make_shared<sim::BasicFlow>(
-        id_1, sender1, receiver, packet_size, delay_between_packets,
+        id_1, sender1, receiver, sim::BasicCC(), packet_size, delay_between_packets,
         packets_to_send_by_flow1);
     sim.add_flow(flow1);
 
     Id id_2 = "flow_2";
     auto flow2 = std::make_shared<sim::BasicFlow>(
-        id_2, sender2, receiver, packet_size, delay_between_packets,
+        id_2, sender2, receiver, sim::BasicCC(), packet_size, delay_between_packets,
         packets_to_send_by_flow2);
     sim.add_flow(flow2);
 
     Id id_3 = "flow_3";
     auto flow3 = std::make_shared<sim::BasicFlow>(
-        id_3, sender3, receiver, packet_size, delay_between_packets,
+        id_3, sender3, receiver, sim::BasicCC(), packet_size, delay_between_packets,
         packets_to_send_by_flow3);
     sim.add_flow(flow3);
 
     sim.start(stop_time);
 
     // First flow generates all packets in time
-    ASSERT_EQ(flow1->get_updates_number(), packets_to_send_by_flow1);
+    ASSERT_EQ(flow1->get_packets_acked(), packets_to_send_by_flow1);
 
     // Second and third flows have no time to generate all packets (stop_time <
     // packets_to_send * generate_delay)
-    ASSERT_TRUE(flow2->get_updates_number() < packets_to_send_by_flow2);
-    ASSERT_TRUE(flow3->get_updates_number() < packets_to_send_by_flow3);
+    ASSERT_TRUE(flow2->get_packets_acked() < packets_to_send_by_flow2);
+    ASSERT_TRUE(flow3->get_packets_acked() < packets_to_send_by_flow3);
 }
 
 }  // namespace test
