@@ -2,7 +2,6 @@
 #include "flow/tcp/i_tcp_cc.hpp"
 #include "flow/tcp/tcp_flow.hpp"
 #include "parser/identifiable_parser/identifiable_parser.hpp"
-#include "parser/identifiable_parser/parse_flow_common.hpp"
 
 namespace sim {
 
@@ -13,14 +12,25 @@ public:
     static std::shared_ptr<TcpFlow<TTcpCC>> parse_and_registrate(
         const YAML::Node& key_node, const YAML::Node& value_node) {
         TTcpCC cc = parse_tcp_cc(key_node, value_node);
-        FlowCommon flow_common = parse_flow_common(key_node, value_node);
+        Id id = key_node.as<Id>();
+
+        Id sender_id = value_node["sender_id"].as<Id>();
+        std::shared_ptr<IHost> sender_ptr =
+            IdentifierFactory::get_instance().get_object<IHost>(sender_id);
+
+        Id receiver_id = value_node["receiver_id"].as<Id>();
+        std::shared_ptr<IHost> receiver_ptr =
+            IdentifierFactory::get_instance().get_object<IHost>(receiver_id);
+
+        Size packet_size = value_node["packet_size"].as<Size>();
+        std::uint32_t number_of_packets =
+            value_node["number_of_packets"].as<std::uint32_t>();
+        Time packet_interval = value_node["packet_interval"].as<Time>();
+
         std::shared_ptr<TcpFlow<TTcpCC>> tcp_flow =
-            std::make_shared<TcpFlow<TTcpCC>>(
-                flow_common.id,
-                dynamic_pointer_cast<IHost>(flow_common.sender_ptr),
-                dynamic_pointer_cast<IHost>(flow_common.receiver_ptr), cc,
-                flow_common.packet_size, flow_common.packet_interval,
-                flow_common.number_of_packets);
+            std::make_shared<TcpFlow<TTcpCC>>(id, sender_ptr, receiver_ptr, cc,
+                                              packet_size, packet_interval,
+                                              number_of_packets);
         if (!IdentifierFactory::get_instance().add_object(tcp_flow)) {
             throw std::runtime_error(fmt::format(
                 "Can not add object with type {}; object with same id ({}) "
