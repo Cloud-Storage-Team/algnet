@@ -5,20 +5,18 @@
 #include <memory>
 #include <type_traits>
 
-#include "flow/tcp/i_tcp_cc.hpp"
-#include "flow/tcp/tcp_flow.hpp"
-#include "parse_flow_common.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
 
+template <typename T>
 class IdentifieableParser {
+    static_assert(std::is_base_of_v<Identifiable, T>);
+
 public:
-    template <typename T>
     static std::shared_ptr<T> parse_and_registrate(
         const YAML::Node& key_node, const YAML::Node& value_node) {
-        static_assert(std::is_base_of_v<Identifiable, T>);
-        std::shared_ptr<T> object = parse_object<T>(key_node, value_node);
+        std::shared_ptr<T> object = parse_object(key_node, value_node);
         if (!IdentifierFactory::get_instance().add_object(object)) {
             throw std::runtime_error(fmt::format(
                 "Can not add object with type {}; object with same id ({}) "
@@ -28,25 +26,10 @@ public:
         return object;
     }
 
-    // private:
+private:
     // Parses object and return shared_ptr to it
-    template <typename T>
     static std::shared_ptr<T> parse_object(const YAML::Node& key_node,
                                            const YAML::Node& value_node);
-
-    // Специализированная версия для TcpFlow
-    template <typename TTcpCC>
-    static std::shared_ptr<TcpFlow<TTcpCC>> parse_object<TcpFlow<TTcpCC>>(
-        const YAML::Node& key_node, const YAML::Node& value_node) {
-        TTcpCC cc = parse_tcp_cc<TTcpCC>(key_node, value_node);
-        FlowCommon flow_common = parse_flow_common(key_node, value_node);
-
-        return std::make_shared<TcpFlow<TTcpCC>>(
-            flow_common.id, dynamic_pointer_cast<IHost>(flow_common.sender_ptr),
-            dynamic_pointer_cast<IHost>(flow_common.receiver_ptr), cc,
-            flow_common.packet_size, flow_common.packet_interval,
-            flow_common.number_of_packets);
-    }
 };
 
 }  // namespace sim

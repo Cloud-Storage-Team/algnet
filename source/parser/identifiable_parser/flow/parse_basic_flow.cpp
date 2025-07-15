@@ -5,7 +5,7 @@
 namespace sim {
 
 template <>
-std::shared_ptr<BasicFlow> IdentifieableParser::parse_object(
+std::shared_ptr<BasicFlow> IdentifieableParser<BasicFlow>::parse_object(
     const YAML::Node& key_node, const YAML::Node& value_node) {
     FlowCommon flow_common = parse_flow_common(key_node, value_node);
 

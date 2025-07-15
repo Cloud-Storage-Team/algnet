@@ -5,7 +5,7 @@
 namespace sim {
 
 template <>
-std::shared_ptr<Link> IdentifieableParser::parse_object<Link>(
+std::shared_ptr<Link> IdentifieableParser<Link>::parse_object(
     const YAML::Node& key_node, const YAML::Node& value_node) {
     Id id = key_node.as<Id>();
     Id from_id = value_node["from"].as<Id>();
