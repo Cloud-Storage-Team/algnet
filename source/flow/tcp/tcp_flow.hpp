@@ -9,7 +9,6 @@
 #include "metrics/metrics_collector.hpp"
 #include "packet.hpp"
 #include "scheduler.hpp"
-#include "tcp_tahoe_cc.hpp"
 #include "utils/flag_manager.hpp"
 
 namespace sim {
