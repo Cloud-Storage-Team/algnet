@@ -1,5 +1,3 @@
-#include <functional>
-
 #include "identifiable_parser.hpp"
 #include "link/link.hpp"
 #include "parser/parse_utils.hpp"

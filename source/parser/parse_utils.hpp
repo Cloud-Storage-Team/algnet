@@ -2,6 +2,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include <cstdint>
+#include <functional>
 #include <string>
 
 #include "logger/logger.hpp"
