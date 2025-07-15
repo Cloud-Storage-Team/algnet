@@ -1,7 +1,7 @@
 #pragma once
 #include <gtest/gtest.h>
 
-#include "device/routing_module.hpp"
+#include "device/basic_device.hpp"
 #include "link/i_link.hpp"
 #include "packet.hpp"
 
@@ -9,20 +9,35 @@ namespace test {
 
 const unsigned RANDOM_SEED = 42;
 
-std::vector<std::shared_ptr<sim::IRoutingDevice>> createRoutingModules(
+std::vector<std::shared_ptr<sim::IDevice>> createTestDevices(
     size_t count);
+
+class TestDevice : public sim::BasicDevice {
+    public:
+        TestDevice(Id a_id = "") : sim::BasicDevice(a_id) {};
+        ~TestDevice() = default;
+
+        bool notify_about_arrival(Time arrival_time) final;
+
+        sim::DeviceType get_type() const final;
+        // Process a packet by moving it from ingress to egress
+        // and schedule next process event after a delay.
+        // Packets are taken from ingress buffers on a round-robin basis.
+        // The iterator over ingress buffers is stored in m_next_link.
+        Time process() final;
+};
 
 class TestLink : public sim::ILink {
 public:
-    TestLink(std::shared_ptr<sim::IRoutingDevice> a_src,
-             std::shared_ptr<sim::IRoutingDevice> a_dest,
+    TestLink(std::shared_ptr<sim::IDevice> a_src,
+             std::shared_ptr<sim::IDevice> a_dest,
              sim::Packet packet_to_return = sim::Packet());
     ~TestLink() = default;
 
     void schedule_arrival(sim::Packet packet) final;
     std::optional<sim::Packet> get_packet() final;
-    std::shared_ptr<sim::IRoutingDevice> get_from() const final;
-    std::shared_ptr<sim::IRoutingDevice> get_to() const final;
+    std::shared_ptr<sim::IDevice> get_from() const final;
+    std::shared_ptr<sim::IDevice> get_to() const final;
 
     Size get_from_egress_queue_size() const final;
     Size get_max_from_egress_buffer_size() const final;
@@ -33,8 +48,8 @@ public:
     Id get_id() const final;
 
 private:
-    std::weak_ptr<sim::IRoutingDevice> src;
-    std::weak_ptr<sim::IRoutingDevice> dst;
+    std::weak_ptr<sim::IDevice> src;
+    std::weak_ptr<sim::IDevice> dst;
     sim::Packet packet;
 };
 

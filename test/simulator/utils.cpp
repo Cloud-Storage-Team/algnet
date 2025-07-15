@@ -12,8 +12,8 @@ void add_two_way_links(sim::BasicSimulator& sim,
     }
 }
 
-static std::shared_ptr<sim::IRoutingDevice> get_next_device(
-    std::shared_ptr<sim::IRoutingDevice> curr_device,
+static std::shared_ptr<sim::IDevice> get_next_device(
+    std::shared_ptr<sim::IDevice> curr_device,
     sim::Packet packet_to_dest) {
     auto next_link = curr_device->get_link_to_destination(packet_to_dest);
     if (next_link == nullptr) {
@@ -22,9 +22,9 @@ static std::shared_ptr<sim::IRoutingDevice> get_next_device(
     return next_link->get_to();
 }
 
-bool check_reachability(std::shared_ptr<sim::IRoutingDevice> src_device,
+bool check_reachability(std::shared_ptr<sim::IDevice> src_device,
                         sim::Packet packet_to_dest) {
-    std::set<std::shared_ptr<sim::IRoutingDevice>> used;
+    std::set<std::shared_ptr<sim::IDevice>> used;
     auto curr_device = src_device;
     while (curr_device->get_id() != packet_to_dest.dest_id) {
         if (curr_device == nullptr || used.contains(curr_device)) {

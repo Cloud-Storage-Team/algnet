@@ -9,36 +9,8 @@
 namespace sim {
 
 Switch::Switch(Id a_id, ECN&& a_ecn)
-    : m_router(std::make_unique<RoutingModule>(a_id)),
+    : BasicDevice(a_id),
       m_ecn(std::move(a_ecn)) {}
-
-bool Switch::add_inlink(std::shared_ptr<ILink> link) {
-    if (!is_valid_link(link)) {
-        return false;
-    }
-    return m_router->add_inlink(link);
-}
-
-bool Switch::add_outlink(std::shared_ptr<ILink> link) {
-    if (!is_valid_link(link)) {
-        return false;
-    }
-    return m_router->add_outlink(link);
-}
-
-bool Switch::update_routing_table(Id dest_id, std::shared_ptr<ILink> link,
-                                  size_t paths_count) {
-    if (!is_valid_link(link)) {
-        return false;
-    }
-    return m_router->update_routing_table(dest_id, link, paths_count);
-}
-
-std::shared_ptr<ILink> Switch::next_inlink() { return m_router->next_inlink(); }
-
-std::shared_ptr<ILink> Switch::get_link_to_destination(Packet packet) const {
-    return m_router->get_link_to_destination(packet);
-}
 
 bool Switch::notify_about_arrival(Time arrival_time) {
     return m_process_scheduler.notify_about_arriving(arrival_time,
@@ -102,11 +74,5 @@ Time Switch::process() {
 
     return total_processing_time;
 }
-
-std::set<std::shared_ptr<ILink>> Switch::get_outlinks() {
-    return m_router->get_outlinks();
-}
-
-Id Switch::get_id() const { return m_router->get_id(); }
 
 }  // namespace sim

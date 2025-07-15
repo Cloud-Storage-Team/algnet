@@ -8,10 +8,10 @@
 
 namespace sim {
     
-class RoutingModule : public IRoutingDevice {
+class RoutingModule : public virtual IRoutingDevice {
 public:
     RoutingModule(Id a_id = "", std::unique_ptr<IHasher> a_hasher = nullptr);
-    ~RoutingModule() = default;
+    virtual ~RoutingModule() = default;
 
     Id get_id() const final;
     bool add_inlink(std::shared_ptr<ILink> link) final;
@@ -21,7 +21,6 @@ public:
     std::shared_ptr<ILink> next_inlink() final;
     std::shared_ptr<ILink> get_link_to_destination(Packet packet) const final;
     std::set<std::shared_ptr<ILink>> get_outlinks() final;
-    bool notify_about_arrival(Time arrival_time) final;
 
     void correctify_inlinks();
     void correctify_outlinks();

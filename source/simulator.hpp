@@ -65,11 +65,18 @@ public:
         return true;
     }
 
-    std::vector<std::shared_ptr<IRoutingDevice>> get_devices() const {
-        std::vector<std::shared_ptr<IRoutingDevice>> result;
-        result.insert(result.end(), m_hosts.begin(), m_hosts.end());
-        result.insert(result.end(), m_switches.begin(), m_switches.end());
-        return result;
+    std::vector<std::shared_ptr<IDevice>> get_devices() const {
+        std::vector<std::shared_ptr<IDevice>> devices;
+
+        for (auto host : m_hosts) {
+            devices.push_back(dynamic_pointer_cast<IDevice>(host));
+        }
+
+        for (auto swtch : m_switches) {
+            devices.push_back(dynamic_pointer_cast<IDevice>(swtch));
+    }
+    
+    return devices;
     }
 
     // Calls BFS for each device to build the routing table

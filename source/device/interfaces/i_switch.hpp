@@ -1,12 +1,10 @@
 #pragma once
 
-#include "device/interfaces/i_routing_device.hpp"
-#include "device/interfaces/i_processing_device.hpp"
+#include "device/interfaces/i_device.hpp"
 
 namespace sim {
 
-class ISwitch : public IRoutingDevice,
-                public IProcessingDevice {
+class ISwitch : public virtual IDevice {
 public:
     virtual ~ISwitch() = default;
 };
