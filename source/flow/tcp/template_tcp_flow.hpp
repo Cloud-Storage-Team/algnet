@@ -195,13 +195,16 @@ private:
 };
 
 template <typename TTcpCC>
+requires std::derived_from<TTcpCC, ITcpCC>
 std::string TemplateTcpFlow<TTcpCC>::packet_type_label = "type";
 
 template <typename TTcpCC>
+requires std::derived_from<TTcpCC, ITcpCC>
 FlagManager<std::string, PacketFlagsBase>
     TemplateTcpFlow<TTcpCC>::m_flag_manager;
 
 template <typename TTcpCC>
+requires std::derived_from<TTcpCC, ITcpCC>
 bool TemplateTcpFlow<TTcpCC>::m_is_flag_manager_initialized = false;
 
 }  // namespace sim
