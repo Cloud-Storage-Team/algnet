@@ -140,6 +140,25 @@ private:
     static std::string packet_type_label;
     enum PacketType { ACK, DATA, ENUM_SIZE };
 
+    class SendAtTime : public Event {
+    public:
+        SendAtTime(Time a_time, std::weak_ptr<TcpFlow<TTcpCC> > a_flow,
+                   Packet a_packet)
+            : Event(a_time), m_flow(a_flow), m_packet(std::move(a_packet)) {}
+        void operator()() final {
+            if (m_flow.expired()) {
+                LOG_ERROR("Pointer to flow expired");
+                return;
+            }
+            auto flow = m_flow.lock();
+            flow->send_packet_now(m_packet);
+        }
+
+    private:
+        std::weak_ptr<TcpFlow<TTcpCC> > m_flow;
+        Packet m_packet;
+    };
+
     Packet generate_packet() {
         sim::Packet packet;
         m_flag_manager.set_flag(packet, packet_type_label, PacketType::DATA);
@@ -153,12 +172,24 @@ private:
         return packet;
     }
 
+    void send_packet_now(Packet packet) {
+        m_packets_in_flight++;
+        m_sent_bytes += packet.size_byte;
+        packet.sent_time = Scheduler::get_instance().get_current_time();
+        m_src.lock()->enqueue_packet(packet);
+    }
+
     bool try_to_put_data_to_device() {
         if (m_packets_in_flight < m_cc.get_cwnd()) {
-            m_packets_in_flight++;
             Packet packet = generate_packet();
-            m_sent_bytes += packet.size_byte;
-            m_src.lock()->enqueue_packet(packet);
+            Time pacing_delay = m_cc.get_pacing_delay();
+            if (pacing_delay == 0) {
+                send_packet_now(packet);
+            } else {
+                Time curr_time = Scheduler::get_instance().get_current_time();
+                Scheduler::get_instance().add<SendAtTime>(
+                    curr_time + pacing_delay, this->shared_from_this(), packet);
+            }
             return true;
         }
         return false;
