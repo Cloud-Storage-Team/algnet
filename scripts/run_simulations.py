@@ -67,8 +67,8 @@ def main(args):
         if not simulation_config_filename.endswith(".yml") and not simulation_config_filename.endswith(".yaml"):
             continue
 
-        no_extention_name = os.path.splitext(simulation_config_filename)[0]
-        metrics_dir = os.path.join(corner_metrics_dir, no_extention_name)
+        no_extension_name = os.path.splitext(simulation_config_filename)[0]
+        metrics_dir = os.path.join(corner_metrics_dir, no_extension_name)
         check_directory(metrics_dir)
 
         simulation_config_filepath = os.path.join(simulation_configs_dir, simulation_config_filename)

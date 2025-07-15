@@ -106,12 +106,12 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
                 s.node(device_id)
 
     directory = os.path.dirname(output_file)
-    file_name, extention = os.path.splitext(os.path.basename(output_file))
-    # Delete . from the extention beginning
-    extention = extention[1:]
+    file_name, extension = os.path.splitext(os.path.basename(output_file))
+    # Delete . from the extension beginning
+    extension = extension[1:]
     
     # Render the graph
-    graph.render(file_name, directory, format=extention, cleanup=True)
+    graph.render(file_name, directory, format=extension, cleanup=True)
     print(f"Generated topology image: {output_file}")
 
 if __name__ == "__main__":
