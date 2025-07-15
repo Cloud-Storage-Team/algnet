@@ -10,7 +10,7 @@
 #include "event/start_flow.hpp"
 #include "event/stop.hpp"
 #include "flow/basic_flow.hpp"
-#include "flow/tcp/tcp_flow.hpp"
+#include "flow/tcp/tcp_tahoe_flow.hpp"
 #include "link/link.hpp"
 #include "utils/algorithms.hpp"
 #include "utils/validation.hpp"
