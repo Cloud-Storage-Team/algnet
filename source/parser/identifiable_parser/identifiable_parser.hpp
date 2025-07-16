@@ -11,7 +11,6 @@ namespace sim {
 
 template <typename T>
 class Parser  {
-    static_assert(std::is_base_of_v<Identifiable, T>);
 public:
     // Parses object and return shared_ptr to it
     static std::shared_ptr<T> parse_object(const YAML::Node& key_node,
@@ -23,20 +22,21 @@ class IdentifieableParser {
     static_assert(std::is_base_of_v<Identifiable, T>);
 
 public:
-    static std::shared_ptr<T> registrate(std::shared_ptr<T> object) {
+    static std::shared_ptr<T> parse_and_registrate(
+        const YAML::Node& key_node, const YAML::Node& value_node) {
+        std::shared_ptr<T> object = Parser<T>::parse_object(key_node, value_node);
+        registrate(object);
+        return object;
+    }
+
+private:
+    static void registrate(std::shared_ptr<T> object) {
         if (!IdentifierFactory::get_instance().add_object(object)) {
             throw std::runtime_error(fmt::format(
                 "Can not add object with type {}; object with same id ({}) "
                 "already exists",
                 typeid(T).name(), object.get()->get_id()));
         }
-        return object;
-    }
-
-    static std::shared_ptr<T> parse_and_registrate(
-        const YAML::Node& key_node, const YAML::Node& value_node) {
-        std::shared_ptr<T> object = Parser<T>::parse_object(key_node, value_node);
-        registrate(object);
         return object;
     }
 };
