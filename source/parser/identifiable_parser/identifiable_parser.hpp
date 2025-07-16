@@ -9,14 +9,21 @@
 
 namespace sim {
 
-template <typename TIP, typename T>
-class IdentifieableParserCommon {
+template <typename T>
+class IdentifieableParser  {
+    static_assert(std::is_base_of_v<Identifiable, T>);
+public:
+    // Parses object and return shared_ptr to it
+    static std::shared_ptr<T> parse_object(const YAML::Node& key_node,
+                                           const YAML::Node& value_node);
+};
+
+template <typename T>
+class IdentifieableRegister {
     static_assert(std::is_base_of_v<Identifiable, T>);
 
 public:
-    static std::shared_ptr<T> parse_and_registrate(
-        const YAML::Node& key_node, const YAML::Node& value_node) {
-        std::shared_ptr<T> object = TIP::parse_object(key_node, value_node);
+    static std::shared_ptr<T> registrate(std::shared_ptr<T> object) {
         if (!IdentifierFactory::get_instance().add_object(object)) {
             throw std::runtime_error(fmt::format(
                 "Can not add object with type {}; object with same id ({}) "
@@ -25,14 +32,13 @@ public:
         }
         return object;
     }
-};
 
-template <typename T>
-class IdentifieableParser: public IdentifieableParserCommon<IdentifieableParser<T>, T> {
-public:
-    // Parses object and return shared_ptr to it
-    static std::shared_ptr<T> parse_object(const YAML::Node& key_node,
-                                           const YAML::Node& value_node);
+    static std::shared_ptr<T> parse_and_registrate(
+        const YAML::Node& key_node, const YAML::Node& value_node) {
+        std::shared_ptr<T> object = IdentifieableParser<T>::parse_object(key_node, value_node);
+        registrate(object);
+        return object;
+    }
 };
 
 }  // namespace sim

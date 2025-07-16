@@ -7,7 +7,7 @@ namespace sim {
 
 template <typename TTcpCC>
 requires std::derived_from<TTcpCC, ITcpCC>
-class IdentifieableParser<TcpFlow<TTcpCC>> : public IdentifieableParserCommon<IdentifieableParser<TcpFlow<TTcpCC>>, TcpFlow<TTcpCC>> {
+class IdentifieableParser<TcpFlow<TTcpCC>> {
 public:
     static std::shared_ptr<TcpFlow<TTcpCC>> parse_object(const YAML::Node& key_node,
                                            const YAML::Node& value_node) {
