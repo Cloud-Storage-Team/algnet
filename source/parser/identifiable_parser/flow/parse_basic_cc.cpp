@@ -3,7 +3,7 @@
 
 namespace sim {
 template <>
-BasicCC IdentifieableParser<TcpFlow<BasicCC>>::parse_tcp_cc(
+BasicCC Parser<TcpFlow<BasicCC>>::parse_tcp_cc(
     [[maybe_unused]] const YAML::Node& key_node,
     [[maybe_unused]] const YAML::Node& value_node) {
     return BasicCC();

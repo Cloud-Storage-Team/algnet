@@ -10,7 +10,7 @@
 namespace sim {
 
 template <typename T>
-class IdentifieableParser  {
+class Parser  {
     static_assert(std::is_base_of_v<Identifiable, T>);
 public:
     // Parses object and return shared_ptr to it
@@ -19,7 +19,7 @@ public:
 };
 
 template <typename T>
-class IdentifieableRegister {
+class IdentifieableParser {
     static_assert(std::is_base_of_v<Identifiable, T>);
 
 public:
@@ -35,7 +35,7 @@ public:
 
     static std::shared_ptr<T> parse_and_registrate(
         const YAML::Node& key_node, const YAML::Node& value_node) {
-        std::shared_ptr<T> object = IdentifieableParser<T>::parse_object(key_node, value_node);
+        std::shared_ptr<T> object = Parser<T>::parse_object(key_node, value_node);
         registrate(object);
         return object;
     }
