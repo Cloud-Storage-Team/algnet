@@ -49,7 +49,7 @@ def check_links_in_markdown(file_path : str):
     return False
 def main():
     parser = argparse.ArgumentParser(
-        description="Check are all links in given markdown file are correct pathes to some files or the links to the avaliable sites"
+        description="Check that all the links in given markdown file are correct pathes to some files or the links to the avaliable sites"
     )
     parser.add_argument("-f", "--file", help="Path to the file to be checked", required=True)
     args = parser.parse_args()
