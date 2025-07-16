@@ -113,6 +113,7 @@ public:
             m_flag_manager.set_flag(packet, packet_type_label, PacketType::ACK);
             m_dest.lock()->enqueue_packet(ack);
         }
+        // LOG_WARN(to_string());
     }
 
     std::shared_ptr<IHost> get_sender() const final { return m_src.lock(); }
@@ -123,13 +124,14 @@ public:
 
     std::string to_string() const {
         std::ostringstream oss;
-        oss << "TcpFlow[";
-        oss << "Id: " << m_id;
+        oss << "[TcpFlow; ";
+        oss << "Id:" << m_id;
+        oss << ", src id: " << m_src.lock()->get_id();
+        oss << ", dest id: " << m_dest.lock()->get_id();
+        oss << ", CC module: " << m_cc.to_string();
         oss << ", packet size: " << m_packet_size;
         oss << ", to send packets: " << m_packets_to_send;
         oss << ", delay: " << m_delay_between_packets;
-        // oss << ", delay threshhold: " << m_delay_threshold;
-        oss << ", cwnd: " << m_cc.get_cwnd();
         oss << ", packets_in_flight: " << m_packets_in_flight;
         oss << ", acked packets: " << m_packets_acked;
         oss << "]";
@@ -203,7 +205,7 @@ private:
         }
     }
 
-    // private:
+private:
     static bool m_is_flag_manager_initialized;
     static FlagManager<std::string, PacketFlagsBase> m_flag_manager;
 

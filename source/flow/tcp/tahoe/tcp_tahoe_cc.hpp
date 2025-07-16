@@ -10,6 +10,7 @@ public:
     bool on_ack(Time rtt, bool ecn_flag) final;
     Time get_pacing_delay() const final;
     double get_cwnd() const final;
+    std::string to_string() const final;
 
 private:
     Time m_delay_threshold;  // delay threshold for update
