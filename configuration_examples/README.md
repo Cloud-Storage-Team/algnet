@@ -59,4 +59,4 @@ links:
 
 ### Examples images
 
-[Images](images) of topologies are generated using the [generate.py](images/generator.py) script.
+You may generate images of topologies using the [generator](../scripts/generate_image.py) script.
