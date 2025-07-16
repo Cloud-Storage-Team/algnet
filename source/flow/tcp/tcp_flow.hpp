@@ -99,8 +99,6 @@ public:
             double cwnd = m_cc.get_cwnd();
 
             if (old_cwnd != cwnd) {
-                MetricsCollector::get_instance().add_cwnd(
-                    m_id, current_time - 1, old_cwnd);
                 MetricsCollector::get_instance().add_cwnd(m_id, current_time,
                                                           cwnd);
             }
