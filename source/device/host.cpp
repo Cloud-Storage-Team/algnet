@@ -7,7 +7,7 @@
 
 namespace sim {
 
-Host::Host(Id a_id) : BasicDevice(a_id) {}
+Host::Host(Id a_id) : RoutingModule(a_id) {}
 
 bool Host::notify_about_arrival(Time arrival_time) {
     return m_process_scheduler.notify_about_arriving(arrival_time,

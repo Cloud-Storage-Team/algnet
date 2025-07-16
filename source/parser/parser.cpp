@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "identifiable_parser.hpp"
+#include "identifiable_parser/identifiable_parser.hpp"
 #include "logger/logger.hpp"
 
 namespace sim {
@@ -50,11 +50,12 @@ void YamlParser::process_devices(const YAML::Node &config) {
                 [&key_node, &val_node](auto &sim) {
                     using SimType = std::decay_t<decltype(sim)>;
                     using HostType = typename SimType::Host_T;
-                    Id id = parse_object<HostType>(key_node, val_node);
-                    if (!sim.add_host(IdentifierFactory::get_instance()
-                                          .get_object<HostType>(id))) {
+                    std::shared_ptr<HostType> ptr =
+                        IdentifieableParser::parse_and_registrate<HostType>(
+                            key_node, val_node);
+                    if (!sim.add_host(ptr)) {
                         throw std::runtime_error("Can not add host with id " +
-                                                 id);
+                                                 ptr.get()->get_id());
                     }
                 },
                 m_simulator);
@@ -63,12 +64,12 @@ void YamlParser::process_devices(const YAML::Node &config) {
                 [&key_node, &val_node](auto &simulator) {
                     using SimType = std::decay_t<decltype(simulator)>;
                     using SwitchType = typename SimType::Switch_T;
-                    Id id = parse_object<SwitchType>(key_node, val_node);
-                    if (!simulator.add_switch(
-                            IdentifierFactory::get_instance()
-                                .get_object<SwitchType>(id))) {
+                    std::shared_ptr<SwitchType> ptr =
+                        IdentifieableParser::parse_and_registrate<SwitchType>(
+                            key_node, val_node);
+                    if (!simulator.add_switch(ptr)) {
                         throw std::runtime_error("Can not add switch with id " +
-                                                 id);
+                                                 ptr.get()->get_id());
                     }
                 },
                 m_simulator);
@@ -92,11 +93,12 @@ void YamlParser::process_links(const YAML::Node &config) {
             [&](auto &sim) {
                 using SimType = std::decay_t<decltype(sim)>;
                 using LinkType = typename SimType::Link_T;
-                Id id = parse_object<LinkType>(key_node, value_node);
-                if (!sim.add_link(
-                        IdentifierFactory::get_instance().get_object<LinkType>(
-                            id))) {
-                    throw std::runtime_error("Can not add link with id " + id);
+                std::shared_ptr<LinkType> ptr =
+                    IdentifieableParser::parse_and_registrate<LinkType>(
+                        key_node, value_node);
+                if (!sim.add_link(ptr)) {
+                    throw std::runtime_error("Can not add link with id " +
+                                             ptr.get()->get_id());
                 }
             },
             m_simulator);
@@ -117,11 +119,12 @@ void YamlParser::process_flows(const YAML::Node &config) {
             [&](auto &sim) {
                 using SimType = std::decay_t<decltype(sim)>;
                 using FlowType = typename SimType::Flow_T;
-                Id id = parse_object<FlowType>(key_node, val_node);
-                if (!sim.add_flow(
-                        IdentifierFactory::get_instance().get_object<FlowType>(
-                            id))) {
-                    throw std::runtime_error("can not add flow with id " + id);
+                std::shared_ptr<FlowType> ptr =
+                    IdentifieableParser::parse_and_registrate<FlowType>(
+                        key_node, val_node);
+                if (!sim.add_flow(ptr)) {
+                    throw std::runtime_error("can not add flow with id " +
+                                             ptr.get()->get_id());
                 }
             },
             m_simulator);

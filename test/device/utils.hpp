@@ -1,7 +1,7 @@
 #pragma once
 #include <gtest/gtest.h>
 
-#include "device/basic_device.hpp"
+#include "device/routing_module.hpp"
 #include "link/i_link.hpp"
 #include "packet.hpp"
 
@@ -12,9 +12,9 @@ const unsigned RANDOM_SEED = 42;
 std::vector<std::shared_ptr<sim::IDevice>> createTestDevices(
     size_t count);
 
-class TestDevice : public sim::BasicDevice {
+class TestDevice : public virtual sim::IDevice, public sim::RoutingModule {
     public:
-        TestDevice(Id a_id = "") : sim::BasicDevice(a_id) {};
+        TestDevice(Id a_id = "") : sim::RoutingModule(a_id) {};
         ~TestDevice() = default;
 
         bool notify_about_arrival(Time arrival_time) final;

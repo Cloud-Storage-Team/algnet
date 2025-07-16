@@ -2,14 +2,13 @@
 
 #include <iostream>
 
-#include "device/routing_module.hpp"
 #include "logger/logger.hpp"
 #include "utils/validation.hpp"
 
 namespace sim {
 
 Switch::Switch(Id a_id, ECN&& a_ecn)
-    : BasicDevice(a_id),
+    : RoutingModule(a_id),
       m_ecn(std::move(a_ecn)) {}
 
 bool Switch::notify_about_arrival(Time arrival_time) {

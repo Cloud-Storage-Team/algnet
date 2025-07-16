@@ -1,7 +1,5 @@
 #include "utils.hpp"
 
-#include "device/basic_device.hpp"
-
 namespace test {
 
 bool TestDevice::notify_about_arrival(Time arrival_time) {

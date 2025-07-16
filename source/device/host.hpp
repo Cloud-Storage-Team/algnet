@@ -1,7 +1,6 @@
 #pragma once
 #include <queue>
 
-#include "device/basic_device.hpp"
 #include "device/routing_module.hpp"
 #include "device/scheduling_module.hpp"
 #include "event/process.hpp"
@@ -10,7 +9,7 @@
 
 namespace sim {
 
-class Host : public IHost, public BasicDevice, public std::enable_shared_from_this<Host> {
+class Host : public IHost, public RoutingModule, public std::enable_shared_from_this<Host> {
 public:
     Host(Id id);
     ~Host() = default;

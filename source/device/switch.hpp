@@ -1,6 +1,6 @@
 #pragma once
 
-#include "device/basic_device.hpp"
+#include "device/routing_module.hpp"
 #include "device/interfaces/i_switch.hpp"
 #include "device/scheduling_module.hpp"
 #include "ecn.hpp"
@@ -8,7 +8,7 @@
 
 namespace sim {
 
-class Switch : public ISwitch, public BasicDevice, public std::enable_shared_from_this<Switch> {
+class Switch : public ISwitch, public RoutingModule, public std::enable_shared_from_this<Switch> {
 public:
     Switch(Id a_id, ECN&& a_ecn = ECN(1.0, 1.0, 0.0));
     ~Switch() = default;
