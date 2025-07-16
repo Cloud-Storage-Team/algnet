@@ -16,9 +16,10 @@ bool TcpTahoeCC::on_ack(Time rtt, bool ecn_flag) {
         return true;
     }
     if (m_cwnd < m_ssthresh) {
-        m_cwnd *= 2;
+        // Slow start
+        m_cwnd++;
     } else {
-        m_cwnd += 1.;
+        m_cwnd += 1 / m_cwnd;
     }
     return false;
 }
