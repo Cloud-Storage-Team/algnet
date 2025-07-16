@@ -19,6 +19,7 @@ bool TcpTahoeCC::on_ack(Time rtt, bool ecn_flag) {
         // Slow start
         m_cwnd++;
     } else {
+        // Congestion avoidance
         m_cwnd += 1 / m_cwnd;
     }
     return false;

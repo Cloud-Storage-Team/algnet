@@ -86,7 +86,9 @@ public:
 
             if (m_cc.on_ack(rtt, packet.congestion_experienced)) {
                 // Trigger congestion
-                m_packets_in_flight = 0;
+                if (m_packets_in_flight > 0) {
+                    m_packets_in_flight--;
+                }
             } else {
                 if (m_packets_in_flight > 0) {
                     m_packets_in_flight--;
