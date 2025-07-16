@@ -37,7 +37,6 @@ private:
                 "already exists",
                 typeid(T).name(), object.get()->get_id()));
         }
-        return object;
     }
 };
 
