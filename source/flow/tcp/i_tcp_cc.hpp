@@ -3,6 +3,7 @@
 
 namespace sim {
 
+// Interfacce of TCP-like congestion control (CC) module
 class ITcpCC {
 public:
     // Callback that triggers every time ACK receives on sender
