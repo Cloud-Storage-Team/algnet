@@ -14,9 +14,6 @@ def check_links_in_markdown(file_path : str):
     file_dir = os.path.dirname(file_path)
     if file_dir != "":
         os.chdir(file_dir)
-
-    # print(content)
-
     # Regular expression matches markdown links
     # Part [^\[^\(]* that repeats twice
     # parses any string that do not contain [ or (
