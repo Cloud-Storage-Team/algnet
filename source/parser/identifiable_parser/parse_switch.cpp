@@ -10,7 +10,7 @@ static ECN parse_ecn(const YAML::Node& node) {
 }
 
 template <>
-std::shared_ptr<Switch> IdentifieableParser<Switch>::parse_object(
+std::shared_ptr<Switch> Parser<Switch>::parse_object(
     const YAML::Node& key_node, const YAML::Node& value_node) {
     Id id = key_node.as<Id>();
     const YAML::Node& ecn_node = value_node["ecn"];

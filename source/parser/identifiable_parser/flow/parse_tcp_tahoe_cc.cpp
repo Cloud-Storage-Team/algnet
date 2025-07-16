@@ -3,7 +3,7 @@
 
 namespace sim {
 template <>
-TcpTahoeCC IdentifieableParser<TcpFlow<TcpTahoeCC>>::parse_tcp_cc(
+TcpTahoeCC Parser<TcpFlow<TcpTahoeCC>>::parse_tcp_cc(
     [[maybe_unused]] const YAML::Node& key_node,
     [[maybe_unused]] const YAML::Node& value_node) {
     return TcpTahoeCC();

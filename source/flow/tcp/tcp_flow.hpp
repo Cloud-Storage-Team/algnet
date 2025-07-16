@@ -64,12 +64,12 @@ public:
         if (packet.dest_id == m_src.lock()->get_id() &&
             m_flag_manager.get_flag(packet, packet_type_label) ==
                 PacketType::ACK) {
-            // ACK delivered to soiurce device; calculate metrics, update
+            // ACK delivered to source device; calculate metrics, update
             // internal state
             Time current_time = Scheduler::get_instance().get_current_time();
             if (current_time < packet.sent_time) {
                 LOG_ERROR("Packet " + packet.to_string() +
-                          " sending time less that current time; ignored");
+                          " current time less that sending time; ignored");
                 return;
             }
 
@@ -113,7 +113,6 @@ public:
             m_flag_manager.set_flag(packet, packet_type_label, PacketType::ACK);
             m_dest.lock()->enqueue_packet(ack);
         }
-        // LOG_WARN(to_string());
     }
 
     std::shared_ptr<IHost> get_sender() const final { return m_src.lock(); }
