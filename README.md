@@ -45,4 +45,4 @@ E.g. if `--metrics-filter = "cwnd/.*"`, NoNS measures only CWND values, if `--me
 
 ## Resuls of simulations
 
-Metrics of all simulation runs deploys to [gihub pages](https://cloud-storage-team.github.io/algnet/main). If you want to see results on all branches, visit [root site](https://cloud-storage-team.github.io/algnet).
+Metrics and results of load testing of all simulation runs deploys to [gihub pages](https://cloud-storage-team.github.io/algnet)
