@@ -136,23 +136,59 @@ void MetricsCollector::draw_delivery_rate_plot(
 
 void MetricsCollector::draw_queue_size_plots(
     std::filesystem::path dir_path) const {
+    // for data from both from_ingress and to_ingress queue sizes
+    std::map<Id, PlotMetricsData> queue_size_data;
     for (auto& [link_id, values] : m_from_egress_queue_size_storage.data()) {
         auto link =
             IdentifierFactory::get_instance().get_object<ILink>(link_id);
-        auto fig = values.get_picture(
-            {"Time, ns", "Values, bytes",
-             fmt::format("Queue size from {} to {}", link->get_from()->get_id(),
-                         link->get_to()->get_id())});
+        std::string curve_name =
+            fmt::format("{} engress queue size", link->get_from()->get_id());
+        queue_size_data[link_id].emplace_back(values, curve_name);
+    }
+
+    for (auto& [link_id, values] : m_to_inress_queue_size_storage.data()) {
+        auto link =
+            IdentifierFactory::get_instance().get_object<ILink>(link_id);
+        std::string curve_name =
+            fmt::format("{} ingress queue size", link->get_to()->get_id());
+        queue_size_data[link_id].emplace_back(values, curve_name);
+    }
+    for (auto [link_id, data] : queue_size_data) {
+        auto link =
+            IdentifierFactory::get_instance().get_object<ILink>(link_id);
+        PlotMetadata metadata = {
+            "Time, ns", "Values, bytes",
+            fmt::format("Queue size from {} to {}", link->get_from()->get_id(),
+                        link->get_to()->get_id())};
+
+        auto fig = put_on_same_plot(data, metadata);
         auto ax = fig->current_axes();
 
         auto limits = ax->xlim();
-        matplot::line(0, link->get_max_from_egress_buffer_size(), limits[1],
-                      link->get_max_from_egress_buffer_size())
-            ->line_width(1.5)
-            .color({1.f, 0.0f, 0.0f});
+
+        auto draw_gorizontal_line =
+            [&limits](double line_y, std::initializer_list<float> color) {
+                matplot::line(0, line_y, limits[1], line_y)
+                    ->line_width(1.5)
+                    .color(color);
+            };
+
+        draw_gorizontal_line(link->get_max_from_egress_buffer_size(),
+                             {1.f, 0.f, 0.f});
+        draw_gorizontal_line(link->get_max_to_ingress_queue_size(),
+                             {0.f, 1.f, 0.f});
+
+        // matplot::line(0, link->get_max_from_egress_buffer_size(), limits[1],
+        //               link->get_max_from_egress_buffer_size())
+        //     ->line_width(1.5)
+        //     .color({1.f, 0.0f, 0.0f});
+
+        // matplot::line(0, link->get_max_to_ingress_queue_size(), limits[1],
+        //               link->get_max_to_ingress_queue_size())
+        //     ->line_width(1.5)
+        //     .color({1.f, 0.0f, 0.0f});
 
         ax->xlim({0, limits[1]});
-
         ax->color("white");
 
         std::filesystem::path plot_path =

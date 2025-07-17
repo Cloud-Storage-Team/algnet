@@ -14,7 +14,7 @@ bool LinkQueue::push(Packet packet) {
     bool result = m_queue.push(std::move(packet));
     MetricsCollector::get_instance().add_queue_size(
         m_link_id, Scheduler::get_instance().get_current_time(),
-        m_queue.get_size());
+        m_queue.get_size(), m_type);
     return result;
 }
 
@@ -24,7 +24,7 @@ void LinkQueue::pop() {
     m_queue.pop();
     MetricsCollector::get_instance().add_queue_size(
         m_link_id, Scheduler::get_instance().get_current_time(),
-        m_queue.get_size());
+        m_queue.get_size(), m_type);
 }
 
 Size LinkQueue::get_size() const { return m_queue.get_size(); }
