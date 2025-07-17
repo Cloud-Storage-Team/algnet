@@ -1,5 +1,4 @@
 #pragma once
-#include <optional>
 #include <queue>
 
 #include "i_packet_queue.hpp"
