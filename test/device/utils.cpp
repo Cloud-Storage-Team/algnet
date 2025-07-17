@@ -1,20 +1,30 @@
 #include "utils.hpp"
 
-#include "device/routing_module.hpp"
-
 namespace test {
 
-std::vector<std::shared_ptr<sim::IRoutingDevice>> createRoutingModules(
+bool TestDevice::notify_about_arrival(Time arrival_time) {
+    return false;
+};
+
+sim::DeviceType TestDevice::get_type() const {
+    return sim::DeviceType::SWITCH;
+};
+
+Time TestDevice::process() {
+    return 0;
+};
+
+std::vector<std::shared_ptr<sim::IDevice>> createTestDevices(
     size_t count) {
-    std::vector<std::shared_ptr<sim::IRoutingDevice>> modules;
+    std::vector<std::shared_ptr<sim::IDevice>> devices;
     for (size_t i = 0; i < count; ++i) {
-        modules.emplace_back(std::make_shared<sim::RoutingModule>());
+        devices.emplace_back(std::make_shared<TestDevice>());
     }
-    return modules;
+    return devices;
 }
 
-TestLink::TestLink(std::shared_ptr<sim::IRoutingDevice> a_src,
-                   std::shared_ptr<sim::IRoutingDevice> a_dest,
+TestLink::TestLink(std::shared_ptr<sim::IDevice> a_src,
+                   std::shared_ptr<sim::IDevice> a_dest,
                    sim::Packet packet_to_return)
     : src(a_src), dst(a_dest), packet(packet_to_return) {}
 
@@ -22,10 +32,10 @@ void TestLink::schedule_arrival(sim::Packet packet) {};
 
 std::optional<sim::Packet> TestLink::get_packet() { return {packet}; };
 
-std::shared_ptr<sim::IRoutingDevice> TestLink::get_from() const {
+std::shared_ptr<sim::IDevice> TestLink::get_from() const {
     return src.lock();
 };
-std::shared_ptr<sim::IRoutingDevice> TestLink::get_to() const {
+std::shared_ptr<sim::IDevice> TestLink::get_to() const {
     return dst.lock();
 };
 

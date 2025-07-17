@@ -65,17 +65,24 @@ public:
         return true;
     }
 
-    std::vector<std::shared_ptr<IRoutingDevice>> get_devices() const {
-        std::vector<std::shared_ptr<IRoutingDevice>> result;
-        result.insert(result.end(), m_hosts.begin(), m_hosts.end());
-        result.insert(result.end(), m_switches.begin(), m_switches.end());
-        return result;
+    std::vector<std::shared_ptr<IDevice>> get_devices() const {
+        std::vector<std::shared_ptr<IDevice>> devices;
+
+        for (auto host : m_hosts) {
+            devices.push_back(dynamic_pointer_cast<IDevice>(host));
+        }
+
+        for (auto swtch : m_switches) {
+            devices.push_back(dynamic_pointer_cast<IDevice>(swtch));
+    }
+    
+    return devices;
     }
 
     // Calls BFS for each device to build the routing table
     void recalculate_paths() {
         for (auto src_device : get_devices()) {
-            RoutingTable routing_table = bfs(src_device);
+            RoutingTable routing_table = bfs(dynamic_pointer_cast<IRoutingDevice>(src_device));
             for (auto [dest_device_id, links] : routing_table) {
                 for (auto [link, paths_count] : links) {
                     src_device->update_routing_table(dest_device_id,

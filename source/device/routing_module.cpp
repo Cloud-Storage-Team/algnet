@@ -4,6 +4,7 @@
 
 #include "link/i_link.hpp"
 #include "logger/logger.hpp"
+#include "utils/validation.hpp"
 
 namespace sim {
 
@@ -15,6 +16,10 @@ RoutingModule::RoutingModule(Id a_id, std::unique_ptr<IHasher> a_hasher)
 Id RoutingModule::get_id() const { return m_id; }
 
 bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
+    if (!is_valid_link(link)) {
+        return false;
+    }
+
     if (m_id != link->get_to()->get_id()) {
         LOG_WARN(
             "Link destination device is incorrect (expected current device)");
@@ -33,6 +38,9 @@ bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
 }
 
 bool RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
+    if (!is_valid_link(link)) {
+        return false;
+    }
     if (m_id != link->get_from()->get_id()) {
         LOG_WARN("Outlink source is not our device");
         return false;
@@ -48,6 +56,9 @@ bool RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
 bool RoutingModule::update_routing_table(Id dest_id,
                                          std::shared_ptr<ILink> link,
                                          size_t paths_count) {
+    if (!is_valid_link(link)) {
+        return false;
+    }
     if (m_id != link->get_from()->get_id()) {
         LOG_WARN("Link source device is incorrect (expected current device)");
         return false;
@@ -126,10 +137,5 @@ void RoutingModule::correctify_outlinks() {
     std::erase_if(m_outlinks,
                   [](std::weak_ptr<ILink> link) { return link.expired(); });
 }
-
-bool RoutingModule::notify_about_arrival(Time arrival_time) {
-    (void)arrival_time;
-    return false;
-};
 
 }  // namespace sim

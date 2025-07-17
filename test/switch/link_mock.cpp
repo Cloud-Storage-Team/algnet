@@ -1,13 +1,13 @@
 #include "link_mock.hpp"
 
-LinkMock::LinkMock(std::weak_ptr<sim::IRoutingDevice> a_from,
-                   std::weak_ptr<sim::IRoutingDevice> a_to)
+LinkMock::LinkMock(std::weak_ptr<sim::IDevice> a_from,
+                   std::weak_ptr<sim::IDevice> a_to)
     : m_from(a_from), m_to(a_to), m_arrived_packets(), m_ingress_packet() {}
 
-std::shared_ptr<sim::IRoutingDevice> LinkMock::get_from() const {
+std::shared_ptr<sim::IDevice> LinkMock::get_from() const {
     return m_from.lock();
 }
-std::shared_ptr<sim::IRoutingDevice> LinkMock::get_to() const {
+std::shared_ptr<sim::IDevice> LinkMock::get_to() const {
     return m_to.lock();
 }
 

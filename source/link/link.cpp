@@ -5,8 +5,8 @@
 
 namespace sim {
 
-Link::Link(Id a_id, std::weak_ptr<IRoutingDevice> a_from,
-           std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_gbps,
+Link::Link(Id a_id, std::weak_ptr<IDevice> a_from,
+           std::weak_ptr<IDevice> a_to, std::uint32_t a_speed_gbps,
            Time a_delay, Size a_max_from_egress_buffer_size,
            Size a_max_to_ingress_buffer_size)
     : m_id(a_id),
@@ -55,7 +55,7 @@ std::optional<Packet> Link::get_packet() {
     return packet;
 };
 
-std::shared_ptr<IRoutingDevice> Link::get_from() const {
+std::shared_ptr<IDevice> Link::get_from() const {
     if (m_from.expired()) {
         LOG_WARN("Source device pointer is expired");
         return nullptr;
@@ -64,7 +64,7 @@ std::shared_ptr<IRoutingDevice> Link::get_from() const {
     return m_from.lock();
 };
 
-std::shared_ptr<IRoutingDevice> Link::get_to() const {
+std::shared_ptr<IDevice> Link::get_to() const {
     if (m_to.expired()) {
         LOG_WARN("Destination device pointer is expired");
         return nullptr;

@@ -10,8 +10,8 @@ namespace sim {
 
 class Link : public ILink, public std::enable_shared_from_this<Link> {
 public:
-    Link(Id a_id, std::weak_ptr<IRoutingDevice> a_from,
-         std::weak_ptr<IRoutingDevice> a_to, std::uint32_t a_speed_gbps = 1,
+    Link(Id a_id, std::weak_ptr<IDevice> a_from,
+         std::weak_ptr<IDevice> a_to, std::uint32_t a_speed_gbps = 1,
          Time a_delay = 0, Size a_max_from_egress_buffer_size = 4096,
          Size a_max_to_ingress_buffer_size = 4096);
     ~Link() = default;
@@ -20,8 +20,8 @@ public:
 
     std::optional<Packet> get_packet() final;
 
-    std::shared_ptr<IRoutingDevice> get_from() const final;
-    std::shared_ptr<IRoutingDevice> get_to() const final;
+    std::shared_ptr<IDevice> get_from() const final;
+    std::shared_ptr<IDevice> get_to() const final;
 
     Size get_from_egress_queue_size() const final;
     Size get_max_from_egress_buffer_size() const final;
@@ -63,8 +63,8 @@ private:
     void start_head_packet_sending();
 
     Id m_id;
-    std::weak_ptr<IRoutingDevice> m_from;
-    std::weak_ptr<IRoutingDevice> m_to;
+    std::weak_ptr<IDevice> m_from;
+    std::weak_ptr<IDevice> m_to;
     std::uint32_t m_speed_gbps;
 
     Time m_propagation_delay;
