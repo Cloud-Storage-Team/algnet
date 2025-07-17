@@ -82,7 +82,7 @@ public:
     // Calls BFS for each device to build the routing table
     void recalculate_paths() {
         for (auto src_device : get_devices()) {
-            RoutingTable routing_table = bfs(src_device);
+            RoutingTable routing_table = bfs(dynamic_pointer_cast<IRoutingDevice>(src_device));
             for (auto [dest_device_id, links] : routing_table) {
                 for (auto [link, paths_count] : links) {
                     src_device->update_routing_table(dest_device_id,
