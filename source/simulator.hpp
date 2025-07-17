@@ -9,8 +9,8 @@
 #include "device/switch.hpp"
 #include "event/start_flow.hpp"
 #include "event/stop.hpp"
-#include "flow/basic_flow.hpp"
-#include "flow/tcp_flow.hpp"
+#include "flow/tcp/basic/bacic_flow.hpp"
+#include "flow/tcp/tahoe/tcp_tahoe_flow.hpp"
 #include "link/link.hpp"
 #include "utils/algorithms.hpp"
 #include "utils/validation.hpp"
@@ -113,7 +113,7 @@ private:
 };
 
 using BasicSimulator = Simulator<Host, Switch, BasicFlow, Link>;
-using TcpSimulator = Simulator<Host, Switch, TcpFlow, Link>;
+using TcpSimulator = Simulator<Host, Switch, TcpTahoeFlow, Link>;
 
 using SimulatorVariant = std::variant<BasicSimulator, TcpSimulator>;
 

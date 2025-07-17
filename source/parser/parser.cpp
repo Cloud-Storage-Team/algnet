@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 
+#include "identifiable_parser/flow/parse_tcp_flow.hpp"
 #include "identifiable_parser/identifiable_parser.hpp"
 #include "logger/logger.hpp"
 
@@ -51,7 +52,7 @@ void YamlParser::process_devices(const YAML::Node &config) {
                     using SimType = std::decay_t<decltype(sim)>;
                     using HostType = typename SimType::Host_T;
                     std::shared_ptr<HostType> ptr =
-                        IdentifieableParser::parse_and_registrate<HostType>(
+                        IdentifieableParser<HostType>::parse_and_registrate(
                             key_node, val_node);
                     if (!sim.add_host(ptr)) {
                         throw std::runtime_error("Can not add host with id " +
@@ -65,7 +66,7 @@ void YamlParser::process_devices(const YAML::Node &config) {
                     using SimType = std::decay_t<decltype(simulator)>;
                     using SwitchType = typename SimType::Switch_T;
                     std::shared_ptr<SwitchType> ptr =
-                        IdentifieableParser::parse_and_registrate<SwitchType>(
+                        IdentifieableParser<SwitchType>::parse_and_registrate(
                             key_node, val_node);
                     if (!simulator.add_switch(ptr)) {
                         throw std::runtime_error("Can not add switch with id " +
@@ -94,7 +95,7 @@ void YamlParser::process_links(const YAML::Node &config) {
                 using SimType = std::decay_t<decltype(sim)>;
                 using LinkType = typename SimType::Link_T;
                 std::shared_ptr<LinkType> ptr =
-                    IdentifieableParser::parse_and_registrate<LinkType>(
+                    IdentifieableParser<LinkType>::parse_and_registrate(
                         key_node, value_node);
                 if (!sim.add_link(ptr)) {
                     throw std::runtime_error("Can not add link with id " +
@@ -120,7 +121,7 @@ void YamlParser::process_flows(const YAML::Node &config) {
                 using SimType = std::decay_t<decltype(sim)>;
                 using FlowType = typename SimType::Flow_T;
                 std::shared_ptr<FlowType> ptr =
-                    IdentifieableParser::parse_and_registrate<FlowType>(
+                    IdentifieableParser<FlowType>::parse_and_registrate(
                         key_node, val_node);
                 if (!sim.add_flow(ptr)) {
                     throw std::runtime_error("can not add flow with id " +
