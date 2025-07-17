@@ -26,7 +26,7 @@ TEST_F(TestSwitch, test_add_nullptr_link) {
 
 TEST_F(TestSwitch, test_add_incorrect_inlink) {
     auto switch_device = std::make_shared<sim::Switch>("");
-    std::shared_ptr<sim::IRoutingDevice> null_device(nullptr);
+    std::shared_ptr<sim::IDevice> null_device(nullptr);
     std::shared_ptr<LinkMock> link =
         std::make_shared<LinkMock>(null_device, null_device);
     ASSERT_FALSE(switch_device->add_inlink(link));
@@ -66,7 +66,7 @@ TEST_F(TestSwitch, test_no_packets_on_inlinks) {
     auto switch_device = std::make_shared<sim::Switch>("");
 
     // create links
-    std::shared_ptr<sim::IRoutingDevice> null_device(nullptr);
+    std::shared_ptr<sim::IDevice> null_device(nullptr);
     std::shared_ptr<LinkMock> switch_inlink =
         std::make_shared<LinkMock>(null_device, switch_device);
 
@@ -82,7 +82,7 @@ TEST_F(TestSwitch, test_no_destination_route) {
     FlowMock flow(receiver);
     sim::Packet packet(0, &flow);
 
-    std::shared_ptr<sim::IRoutingDevice> null_device(nullptr);
+    std::shared_ptr<sim::IDevice> null_device(nullptr);
     std::shared_ptr<LinkMock> switch_inlink =
         std::make_shared<LinkMock>(null_device, switch_device);
     switch_device->add_inlink(switch_inlink);
@@ -125,7 +125,7 @@ void test_senders(size_t senders_count) {
     std::vector<std::shared_ptr<LinkMock> > links;
     links.reserve(senders_count);
 
-    std::shared_ptr<sim::IRoutingDevice> device_mock =
+    std::shared_ptr<sim::IDevice> device_mock =
         std::make_shared<HostMock>();
     for (size_t i = 0; i < senders_count; i++) {
         links.push_back(std::make_shared<LinkMock>(device_mock, switch_device));

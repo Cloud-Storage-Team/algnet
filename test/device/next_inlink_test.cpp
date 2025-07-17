@@ -14,8 +14,8 @@ public:
 TEST_F(LinkToDevice, RoundRobin) {
     int NUMBER_OF_LINKS = 2;
     int NUMBER_OF_LOOPS = 3;
-    auto sources = createRoutingModules(NUMBER_OF_LINKS);
-    auto dest = std::make_shared<sim::RoutingModule>();
+    auto sources = createTestDevices(NUMBER_OF_LINKS);
+    auto dest = std::make_shared<TestDevice>();
 
     auto links = std::vector<std::shared_ptr<TestLink>>();
     for (int i = 0; i < NUMBER_OF_LINKS; i++) {

@@ -14,8 +14,8 @@ public:
 };
 
 TEST_F(AddLink, LinkIsPresent) {
-    auto source = std::make_shared<sim::RoutingModule>();
-    auto dest = std::make_shared<sim::RoutingModule>();
+    auto source = std::make_shared<TestDevice>();
+    auto dest = std::make_shared<TestDevice>();
     auto link = std::make_shared<TestLink>(TestLink(source, dest));
 
     EXPECT_EQ(dest->next_inlink(), nullptr);
@@ -34,9 +34,9 @@ TEST_F(AddLink, SameLinkMultipleTimes) {
     size_t MAX_LINKS = 3;
     size_t NUMBER_OF_LOOPS = 3;
 
-    auto neighbour_devices = createRoutingModules(NUMBER_OF_NEIGHBOURS);
-    auto dest = std::make_shared<sim::RoutingModule>();
-    auto source = std::make_shared<sim::RoutingModule>();
+    auto neighbour_devices = createTestDevices(NUMBER_OF_NEIGHBOURS);
+    auto dest = std::make_shared<TestDevice>();
+    auto source = std::make_shared<TestDevice>();
 
     std::mt19937 gen(RANDOM_SEED);
     std::uniform_int_distribution<> dis(1, MAX_LINKS);

@@ -16,7 +16,7 @@ public:
     void SetUp() override;
 };
 
-class DeviceMock : public sim::IRoutingDevice {
+class DeviceMock : public sim::IDevice {
 public:
     ~DeviceMock() = default;
 
@@ -29,6 +29,9 @@ public:
     std::shared_ptr<sim::ILink> get_link_to_destination(sim::Packet packet) const final;
     std::set<std::shared_ptr<sim::ILink>> get_outlinks() final;
     bool notify_about_arrival(Time arrival_time) final;
+
+    sim::DeviceType get_type() const final;
+    Time process() final;
 };
 
 }  // namespace test

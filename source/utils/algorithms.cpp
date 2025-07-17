@@ -8,7 +8,7 @@ namespace sim {
 // Unlike standard BFS that processes nodes one by one, this processes all nodes
 // at the current distance level together. So each iteration is a processing of
 // all devices at a certain distance (wavefront)
-RoutingTable bfs(std::shared_ptr<IRoutingDevice>& start_device) {
+RoutingTable bfs(std::shared_ptr<IRoutingDevice> start_device) {
     RoutingTable routing_table;
 
     std::queue<std::shared_ptr<IRoutingDevice>> queue;

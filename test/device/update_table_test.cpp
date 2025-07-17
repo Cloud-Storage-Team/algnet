@@ -12,10 +12,10 @@ public:
 };
 
 TEST_F(UpdateTable, RouteIsPresent) {
-    auto source = std::make_shared<sim::RoutingModule>("s1");
-    auto neighbour = std::make_shared<sim::RoutingModule>("m1");
-    auto dest = std::make_shared<sim::RoutingModule>("d1");
-    auto another_dest = std::make_shared<sim::RoutingModule>("d2");
+    auto source = std::make_shared<TestDevice>("s1");
+    auto neighbour = std::make_shared<TestDevice>("m1");
+    auto dest = std::make_shared<TestDevice>("d1");
+    auto another_dest = std::make_shared<TestDevice>("d2");
 
     auto link_neighbour =
         std::make_shared<TestLink>(TestLink(source, neighbour));

@@ -5,9 +5,9 @@
 namespace test {
 
 TEST_F(LinkTest, ScheduledCorrectly) {
-    std::shared_ptr<sim::IRoutingDevice> src =
+    std::shared_ptr<sim::IDevice> src =
         std::make_shared<DeviceMock>(DeviceMock());
-    std::shared_ptr<sim::IRoutingDevice> dst =
+    std::shared_ptr<sim::IDevice> dst =
         std::make_shared<DeviceMock>(DeviceMock());
     auto link = std::make_shared<sim::Link>("", src, dst, 10, 10);
 
