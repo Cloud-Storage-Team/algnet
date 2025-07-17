@@ -21,7 +21,7 @@ public:
     std::map<std::pair<Id, LinkQueueType>, MetricsStorage> data() const;
 
 private:
-    std::string get_metrics_filename(Id id, LinkQueueType type) const;
+    std::string get_metrics_filename(Id id) const;
 
     // If m_storage does not contain some id, there was no check is metrics file
     // name for id correspond to m_filter

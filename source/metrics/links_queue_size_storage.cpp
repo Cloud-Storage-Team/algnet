@@ -4,6 +4,7 @@
 #include "link/i_link.hpp"
 #include "multi_id_metrics_storage.hpp"
 #include "utils/safe_matplot.hpp"
+#include "write_to_csv.hpp"
 
 namespace sim {
 
@@ -15,7 +16,7 @@ void LinksQueueSizeStorage::add_record(Id id, LinkQueueType type, Time time,
     std::pair<Id, LinkQueueType> key = std::make_pair(id, type);
     auto it = m_storage.find(key);
     if (it == m_storage.end()) {
-        std::string filename = get_metrics_filename(id, type);
+        std::string filename = get_metrics_filename(id);
         if (!std::regex_match(filename, m_filter)) {
             m_storage[std::move(key)] = std::nullopt;
         } else {
@@ -30,12 +31,14 @@ void LinksQueueSizeStorage::add_record(Id id, LinkQueueType type, Time time,
 
 void LinksQueueSizeStorage::export_to_files(
     std::filesystem::path output_dir_path) const {
-    for (auto& [key, values] : m_storage) {
+    std::map<Id, std::vector<std::pair<MetricsStorage, std::string> > >
+        multi_id_storage;
+    for (const auto& [key, values] : data()) {
         auto [id, type] = key;
-        if (values) {
-            values->export_to_file(output_dir_path /
-                                   get_metrics_filename(id, type));
-        }
+        multi_id_storage[id].emplace_back(values, to_string(type));
+    }
+    for (auto [id, storages] : multi_id_storage) {
+        write_to_csv(storages, output_dir_path / get_metrics_filename(id));
     }
 }
 
@@ -97,8 +100,7 @@ LinksQueueSizeStorage::data() const {
     return result;
 }
 
-std::string LinksQueueSizeStorage::get_metrics_filename(
-    Id id, LinkQueueType type) const {
-    return fmt::format("{}/{}.txt", to_string(type), id);
+std::string LinksQueueSizeStorage::get_metrics_filename(Id id) const {
+    return fmt::format("queue_size/{}.csv", id);
 }
 }  // namespace sim
