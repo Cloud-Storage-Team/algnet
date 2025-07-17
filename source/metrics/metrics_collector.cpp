@@ -2,6 +2,7 @@
 
 #include <spdlog/fmt/fmt.h>
 
+#include "draw_plots.hpp"
 #include "flow/i_flow.hpp"
 #include "link/i_link.hpp"
 #include "utils/identifier_factory.hpp"
@@ -16,8 +17,7 @@ MetricsCollector::MetricsCollector()
     : m_RTT_storage("rtt", m_metrics_filter),
       m_cwnd_storage("cwnd", m_metrics_filter),
       m_rate_storage("rate", m_metrics_filter),
-      m_from_egress_queue_size_storage("queue_size", m_metrics_filter),
-      m_to_inress_queue_size_storage("queue_size", m_metrics_filter) {
+      m_links_queue_size_storage(m_metrics_filter) {
     m_is_initialised = true;
 }
 
@@ -40,61 +40,15 @@ void MetricsCollector::add_RTT(Id flow_id, Time time, Time value) {
 
 void MetricsCollector::add_queue_size(Id link_id, Time time,
                                       std::uint32_t value, LinkQueueType type) {
-    switch (type) {
-        case LinkQueueType::FromEgress: {
-            m_from_egress_queue_size_storage.add_record(std::move(link_id),
-                                                        time, value);
-            break;
-        }
-        case LinkQueueType::ToIngress: {
-            m_to_inress_queue_size_storage.add_record(std::move(link_id), time,
-                                                      value);
-            break;
-        }
-        default: {
-            LOG_ERROR(fmt::format("Unexpected LinkQueueSize {}",
-                                  static_cast<int>(type)));
-        }
-    }
+    m_links_queue_size_storage.add_record(link_id, type, time, value);
 }
 
 void MetricsCollector::export_metrics_to_files(
     std::filesystem::path metrics_dir) const {
     m_RTT_storage.export_to_files(metrics_dir);
-    m_from_egress_queue_size_storage.export_to_files(metrics_dir);
+    m_links_queue_size_storage.export_to_files(metrics_dir);
     m_cwnd_storage.export_to_files(metrics_dir);
     m_rate_storage.export_to_files(metrics_dir);
-}
-
-// verctor of pairs<Storage, curve name>
-using PlotMetricsData = std::vector<std::pair<MetricsStorage, std::string> >;
-
-// Puts data from different DataStorage on one plot
-static matplot::figure_handle put_on_same_plot(PlotMetricsData data,
-                                               PlotMetadata metadata) {
-    auto fig = matplot::figure(true);
-    auto ax = fig->current_axes();
-    ax->hold(matplot::on);
-
-    for (auto& [values, name] : data) {
-        values.draw_on_plot(fig, name);
-    }
-    ax->xlabel(metadata.x_label);
-    ax->ylabel(metadata.y_label);
-    ax->title(metadata.title);
-    ax->legend(std::vector<std::string>());
-    return fig;
-}
-
-// Draws data from different DataStorage on one plot
-static void draw_on_same_plot(std::filesystem::path path, PlotMetricsData data,
-                              PlotMetadata metadata) {
-    if (data.empty()) {
-        return;
-    }
-    auto fig = put_on_same_plot(data, metadata);
-
-    matplot::safe_save(fig, path.string());
 }
 
 void MetricsCollector::draw_cwnd_plot(std::filesystem::path path) const {
@@ -111,22 +65,6 @@ void MetricsCollector::draw_cwnd_plot(std::filesystem::path path) const {
         });
     draw_on_same_plot(path, std::move(data),
                       {"Time, ns", "CWND, packets", "CWND"});
-}
-
-void MetricsCollector::draw_RTT_plot(std::filesystem::path path) const {
-    PlotMetricsData data;
-    std::transform(
-        begin(m_RTT_storage.data()), end(m_RTT_storage.data()),
-        std::back_inserter(data), [](auto const& pair) {
-            auto flow =
-                IdentifierFactory::get_instance().get_object<IFlow>(pair.first);
-            std::string name =
-                fmt::format("{}->{}", flow->get_sender()->get_id(),
-                            flow->get_receiver()->get_id());
-            return std::make_pair(pair.second, name);
-        });
-    draw_on_same_plot(path, std::move(data),
-                      {"Time, ns", "RTT, ns", "Round Trip Time"});
 }
 
 void MetricsCollector::draw_delivery_rate_plot(
@@ -146,60 +84,25 @@ void MetricsCollector::draw_delivery_rate_plot(
                       {"Time, ns", "Values, Gbps", "Delivery rate"});
 }
 
+void MetricsCollector::draw_RTT_plot(std::filesystem::path path) const {
+    PlotMetricsData data;
+    std::transform(
+        begin(m_RTT_storage.data()), end(m_RTT_storage.data()),
+        std::back_inserter(data), [](auto const& pair) {
+            auto flow =
+                IdentifierFactory::get_instance().get_object<IFlow>(pair.first);
+            std::string name =
+                fmt::format("{}->{}", flow->get_sender()->get_id(),
+                            flow->get_receiver()->get_id());
+            return std::make_pair(pair.second, name);
+        });
+    draw_on_same_plot(path, std::move(data),
+                      {"Time, ns", "RTT, ns", "Round Trip Time"});
+}
+
 void MetricsCollector::draw_queue_size_plots(
     std::filesystem::path dir_path) const {
-    // for data from both from_ingress and to_ingress queue sizes
-    std::map<Id, PlotMetricsData> queue_size_data;
-    for (auto& [link_id, values] : m_from_egress_queue_size_storage.data()) {
-        auto link =
-            IdentifierFactory::get_instance().get_object<ILink>(link_id);
-        std::string curve_name =
-            fmt::format("{} engress queue size", link->get_from()->get_id());
-        queue_size_data[link_id].emplace_back(values, curve_name);
-    }
-
-    for (auto& [link_id, values] : m_to_inress_queue_size_storage.data()) {
-        auto link =
-            IdentifierFactory::get_instance().get_object<ILink>(link_id);
-        std::string curve_name =
-            fmt::format("{} ingress queue size", link->get_to()->get_id());
-        queue_size_data[link_id].emplace_back(values, curve_name);
-    }
-    for (auto [link_id, data] : queue_size_data) {
-        auto link =
-            IdentifierFactory::get_instance().get_object<ILink>(link_id);
-        PlotMetadata metadata = {
-            "Time, ns", "Values, bytes",
-            fmt::format("Queue size from {} to {}", link->get_from()->get_id(),
-                        link->get_to()->get_id())};
-
-        auto fig = put_on_same_plot(data, metadata);
-        auto ax = fig->current_axes();
-
-        auto limits = ax->xlim();
-
-        auto draw_gorizontal_line = [&limits](
-                                        double line_y, std::string_view name,
-                                        std::initializer_list<float> color) {
-            matplot::line(0, line_y, limits[1], line_y)
-                ->line_width(1.5)
-                .color(color)
-                .display_name(name);
-        };
-
-        draw_gorizontal_line(link->get_max_from_egress_buffer_size(),
-                             "max from egress", {1.f, 0.f, 0.f});
-        draw_gorizontal_line(link->get_max_to_ingress_queue_size(),
-                             "max to ingress", {0.f, 0.f, 1.f});
-
-        ax->xlim({0, limits[1]});
-        ax->color("white");
-
-        std::filesystem::path plot_path =
-            dir_path / fmt::format("{}.svg", link_id);
-
-        matplot::safe_save(fig, plot_path.string());
-    }
+    m_links_queue_size_storage.draw_plots(dir_path);
 }
 
 void MetricsCollector::draw_metric_plots(

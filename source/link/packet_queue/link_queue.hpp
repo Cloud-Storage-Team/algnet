@@ -6,6 +6,8 @@ namespace sim {
 
 enum class LinkQueueType { FromEgress, ToIngress };
 
+std::string to_string(LinkQueueType type);
+
 // Class for two types of links:
 // eggress queue of sourse link device or
 // ingress queue of desination link device

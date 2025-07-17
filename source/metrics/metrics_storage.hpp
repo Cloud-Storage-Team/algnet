@@ -2,17 +2,11 @@
 #include <matplot/matplot.h>
 
 #include <filesystem>
-#include <vector>
 
+#include "plot_metadata.hpp"
 #include "types.hpp"
 
 namespace sim {
-
-struct PlotMetadata {
-    std::string x_label;
-    std::string y_label;
-    std::string title;
-};
 
 class MetricsStorage {
 public:

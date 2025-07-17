@@ -6,6 +6,19 @@
 
 namespace sim {
 
+std::string to_string(LinkQueueType type) {
+    switch (type) {
+        case LinkQueueType::FromEgress:
+            return "from_ingress_queue_size";
+        case LinkQueueType::ToIngress:
+            return "to_ingress_queue_size";
+        default:
+            LOG_ERROR(fmt::format("Undefined link queue type: {}",
+                                  static_cast<int>(type)));
+            return "queue_size";
+    }
+}
+
 LinkQueue::LinkQueue(SimplePacketQueue a_queue, Id a_link_id,
                      LinkQueueType a_type)
     : m_queue(std::move(a_queue)), m_link_id(a_link_id), m_type(a_type) {}

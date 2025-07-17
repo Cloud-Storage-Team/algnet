@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 #include "link/packet_queue/link_queue.hpp"
+#include "links_queue_size_storage.hpp"
 #include "multi_id_metrics_storage.hpp"
 namespace sim {
 
@@ -41,9 +42,7 @@ private:
     MultiIdMetricsStorage m_rate_storage;
 
     // link_ID --> vector of <time, queue size> values
-    MultiIdMetricsStorage m_from_egress_queue_size_storage;
-
-    MultiIdMetricsStorage m_to_inress_queue_size_storage;
+    LinksQueueSizeStorage m_links_queue_size_storage;
 };
 
 }  // namespace sim
