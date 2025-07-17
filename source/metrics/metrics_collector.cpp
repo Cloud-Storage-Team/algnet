@@ -9,6 +9,18 @@
 
 namespace sim {
 
+std::string MetricsCollector::m_metrics_filter = ".*";
+bool MetricsCollector::m_is_initialised = false;
+
+MetricsCollector::MetricsCollector()
+    : m_RTT_storage("rtt", m_metrics_filter),
+      m_cwnd_storage("cwnd", m_metrics_filter),
+      m_rate_storage("rate", m_metrics_filter),
+      m_from_egress_queue_size_storage("queue_size", m_metrics_filter),
+      m_to_inress_queue_size_storage("queue_size", m_metrics_filter) {
+    m_is_initialised = true;
+}
+
 MetricsCollector& MetricsCollector::get_instance() {
     static MetricsCollector instance;
     return instance;
@@ -166,27 +178,19 @@ void MetricsCollector::draw_queue_size_plots(
 
         auto limits = ax->xlim();
 
-        auto draw_gorizontal_line =
-            [&limits](double line_y, std::initializer_list<float> color) {
-                matplot::line(0, line_y, limits[1], line_y)
-                    ->line_width(1.5)
-                    .color(color);
-            };
+        auto draw_gorizontal_line = [&limits](
+                                        double line_y, std::string_view name,
+                                        std::initializer_list<float> color) {
+            matplot::line(0, line_y, limits[1], line_y)
+                ->line_width(1.5)
+                .color(color)
+                .display_name(name);
+        };
 
         draw_gorizontal_line(link->get_max_from_egress_buffer_size(),
-                             {1.f, 0.f, 0.f});
+                             "max from egress", {1.f, 0.f, 0.f});
         draw_gorizontal_line(link->get_max_to_ingress_queue_size(),
-                             {0.f, 1.f, 0.f});
-
-        // matplot::line(0, link->get_max_from_egress_buffer_size(), limits[1],
-        //               link->get_max_from_egress_buffer_size())
-        //     ->line_width(1.5)
-        //     .color({1.f, 0.0f, 0.0f});
-
-        // matplot::line(0, link->get_max_to_ingress_queue_size(), limits[1],
-        //               link->get_max_to_ingress_queue_size())
-        //     ->line_width(1.5)
-        //     .color({1.f, 0.0f, 0.0f});
+                             "max to ingress", {0.f, 0.f, 1.f});
 
         ax->xlim({0, limits[1]});
         ax->color("white");
@@ -207,10 +211,13 @@ void MetricsCollector::draw_metric_plots(
 }
 
 void MetricsCollector::set_metrics_filter(const std::string& filter) {
-    m_RTT_storage.set_filter(filter);
-    m_cwnd_storage.set_filter(filter);
-    m_rate_storage.set_filter(filter);
-    m_from_egress_queue_size_storage.set_filter(filter);
+    if (m_is_initialised) {
+        LOG_ERROR(fmt::format(
+            "Set metrics filter {} when MetricsCollector already initialized "
+            "with filter {}; no effect",
+            filter, m_metrics_filter));
+    }
+    m_metrics_filter = filter;
 }
 
 }  // namespace sim

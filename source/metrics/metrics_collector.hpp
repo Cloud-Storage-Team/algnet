@@ -20,10 +20,10 @@ public:
     void export_metrics_to_files(std::filesystem::path metrics_dir) const;
     void draw_metric_plots(std::filesystem::path metrics_dir) const;
 
-    void set_metrics_filter(const std::string& filter);
+    static void set_metrics_filter(const std::string& filter);
 
 private:
-    MetricsCollector() {}
+    MetricsCollector();
     MetricsCollector(const MetricsCollector&) = delete;
     MetricsCollector& operator=(const MetricsCollector&) = delete;
 
@@ -32,17 +32,18 @@ private:
     void draw_RTT_plot(std::filesystem::path path) const;
     void draw_queue_size_plots(std::filesystem::path dir_path) const;
 
+    static std::string m_metrics_filter;
+    static bool m_is_initialised;
+
     // flow_ID --> vector of <time, ...> values
-    MultiIdMetricsStorage m_RTT_storage = MultiIdMetricsStorage("rtt");
-    MultiIdMetricsStorage m_cwnd_storage = MultiIdMetricsStorage("cwnd");
-    MultiIdMetricsStorage m_rate_storage = MultiIdMetricsStorage("rate");
+    MultiIdMetricsStorage m_RTT_storage;
+    MultiIdMetricsStorage m_cwnd_storage;
+    MultiIdMetricsStorage m_rate_storage;
 
     // link_ID --> vector of <time, queue size> values
-    MultiIdMetricsStorage m_from_egress_queue_size_storage =
-        MultiIdMetricsStorage("from_egress_queue_size");
+    MultiIdMetricsStorage m_from_egress_queue_size_storage;
 
-    MultiIdMetricsStorage m_to_inress_queue_size_storage =
-        MultiIdMetricsStorage("to_ingress_queue_size");
+    MultiIdMetricsStorage m_to_inress_queue_size_storage;
 };
 
 }  // namespace sim

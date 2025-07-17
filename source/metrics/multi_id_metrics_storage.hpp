@@ -9,14 +9,12 @@
 namespace sim {
 class MultiIdMetricsStorage {
 public:
-    MultiIdMetricsStorage(std::string a_metric_name);
+    MultiIdMetricsStorage(std::string a_metric_name, std::string a_filter);
 
     void add_record(Id id, Time time, double value);
     void export_to_files(std::filesystem::path output_dir_path) const;
 
     std::unordered_map<Id, MetricsStorage> data() const;
-
-    void set_filter(std::string filter);
 
 private:
     std::string get_metrics_filename(Id id) const;
