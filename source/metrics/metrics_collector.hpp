@@ -3,8 +3,8 @@
 #include <regex>
 #include <unordered_map>
 
+#include "link/packet_queue/link_queue.hpp"
 #include "multi_id_metrics_storage.hpp"
-
 namespace sim {
 
 class MetricsCollector {
@@ -14,7 +14,8 @@ public:
     void add_cwnd(Id flow_id, Time time, double cwnd);
     void add_delivery_rate(Id flow_id, Time time, double value);
     void add_RTT(Id flow_id, Time time, Time value);
-    void add_queue_size(Id link_id, Time time, std::uint32_t value);
+    void add_queue_size(Id link_id, Time time, std::uint32_t value,
+                        LinkQueueType type = LinkQueueType::FromEgress);
 
     void export_metrics_to_files(std::filesystem::path metrics_dir) const;
     void draw_metric_plots(std::filesystem::path metrics_dir) const;
@@ -37,8 +38,11 @@ private:
     MultiIdMetricsStorage m_rate_storage = MultiIdMetricsStorage("rate");
 
     // link_ID --> vector of <time, queue size> values
-    MultiIdMetricsStorage m_queue_size_storage =
-        MultiIdMetricsStorage("queue_size");
+    MultiIdMetricsStorage m_from_egress_queue_size_storage =
+        MultiIdMetricsStorage("from_egress_queue_size");
+
+    MultiIdMetricsStorage m_to_inress_queue_size_storage =
+        MultiIdMetricsStorage("to_ingress_queue_size");
 };
 
 }  // namespace sim

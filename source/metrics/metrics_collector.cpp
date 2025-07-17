@@ -27,14 +27,29 @@ void MetricsCollector::add_RTT(Id flow_id, Time time, Time value) {
 }
 
 void MetricsCollector::add_queue_size(Id link_id, Time time,
-                                      std::uint32_t value) {
-    m_queue_size_storage.add_record(std::move(link_id), time, value);
+                                      std::uint32_t value, LinkQueueType type) {
+    switch (type) {
+        case LinkQueueType::FromEgress: {
+            m_from_egress_queue_size_storage.add_record(std::move(link_id),
+                                                        time, value);
+            break;
+        }
+        case LinkQueueType::ToIngress: {
+            m_to_inress_queue_size_storage.add_record(std::move(link_id), time,
+                                                      value);
+            break;
+        }
+        default: {
+            LOG_ERROR(fmt::format("Unexpected LinkQueueSize {}",
+                                  static_cast<int>(type)));
+        }
+    }
 }
 
 void MetricsCollector::export_metrics_to_files(
     std::filesystem::path metrics_dir) const {
     m_RTT_storage.export_to_files(metrics_dir);
-    m_queue_size_storage.export_to_files(metrics_dir);
+    m_from_egress_queue_size_storage.export_to_files(metrics_dir);
     m_cwnd_storage.export_to_files(metrics_dir);
     m_rate_storage.export_to_files(metrics_dir);
 }
@@ -42,12 +57,9 @@ void MetricsCollector::export_metrics_to_files(
 // verctor of pairs<Storage, curve name>
 using PlotMetricsData = std::vector<std::pair<MetricsStorage, std::string> >;
 
-// Draws data from different DataStorage on one plot
-static void draw_on_same_plot(std::filesystem::path path, PlotMetricsData data,
-                              PlotMetadata metadata) {
-    if (data.empty()) {
-        return;
-    }
+// Puts data from different DataStorage on one plot
+static matplot::figure_handle put_on_same_plot(PlotMetricsData data,
+                                               PlotMetadata metadata) {
     auto fig = matplot::figure(true);
     auto ax = fig->current_axes();
     ax->hold(matplot::on);
@@ -59,6 +71,16 @@ static void draw_on_same_plot(std::filesystem::path path, PlotMetricsData data,
     ax->ylabel(metadata.y_label);
     ax->title(metadata.title);
     ax->legend(std::vector<std::string>());
+    return fig;
+}
+
+// Draws data from different DataStorage on one plot
+static void draw_on_same_plot(std::filesystem::path path, PlotMetricsData data,
+                              PlotMetadata metadata) {
+    if (data.empty()) {
+        return;
+    }
+    auto fig = put_on_same_plot(data, metadata);
 
     matplot::safe_save(fig, path.string());
 }
@@ -114,7 +136,7 @@ void MetricsCollector::draw_delivery_rate_plot(
 
 void MetricsCollector::draw_queue_size_plots(
     std::filesystem::path dir_path) const {
-    for (auto& [link_id, values] : m_queue_size_storage.data()) {
+    for (auto& [link_id, values] : m_from_egress_queue_size_storage.data()) {
         auto link =
             IdentifierFactory::get_instance().get_object<ILink>(link_id);
         auto fig = values.get_picture(
@@ -152,7 +174,7 @@ void MetricsCollector::set_metrics_filter(const std::string& filter) {
     m_RTT_storage.set_filter(filter);
     m_cwnd_storage.set_filter(filter);
     m_rate_storage.set_filter(filter);
-    m_queue_size_storage.set_filter(filter);
+    m_from_egress_queue_size_storage.set_filter(filter);
 }
 
 }  // namespace sim
