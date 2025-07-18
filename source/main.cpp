@@ -31,7 +31,7 @@ int main(const int argc, char **argv) {
         Logger::get_instance().disable_logs();
     }
 
-    sim::MetricsCollector::get_instance().set_metrics_filter(
+    sim::MetricsCollector::set_metrics_filter(
         flags["metrics-filter"].as<std::string>());
 
     sim::YamlParser parser;

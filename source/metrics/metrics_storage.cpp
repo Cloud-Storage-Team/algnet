@@ -9,6 +9,11 @@ namespace sim {
 void MetricsStorage::add_record(Time time, double value) {
     m_records.emplace_back(time, value);
 }
+
+std::vector<std::pair<Time, double> > MetricsStorage::get_records() const {
+    return m_records;
+}
+
 void MetricsStorage::export_to_file(std::filesystem::path path) const {
     utils::create_all_directories(path);
     std::ofstream output_file(path);
