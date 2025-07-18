@@ -1,7 +1,6 @@
 #include "write_to_csv.hpp"
 
 #include <cmath>
-#include <fstream>
 #include <limits>
 
 #include "utils/filesystem.hpp"
