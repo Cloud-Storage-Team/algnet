@@ -3,7 +3,6 @@
 #include <type_traits>
 
 #include "device/interfaces/i_host.hpp"
-#include "event/generate.hpp"
 #include "flow/i_flow.hpp"
 #include "i_tcp_cc.hpp"
 #include "metrics/metrics_collector.hpp"
@@ -20,14 +19,12 @@ class TcpFlow : public IFlow,
 public:
     TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
             std::shared_ptr<IHost> a_dest, TTcpCC a_cc, Size a_packet_size,
-            Time a_delay_between_packets, std::uint32_t a_packets_to_send,
-            bool a_ecn_capable = true)
+            std::uint32_t a_packets_to_send, bool a_ecn_capable = true)
         : m_id(std::move(a_id)),
           m_src(a_src),
           m_dest(a_dest),
           m_cc(std::move(a_cc)),
           m_packet_size(a_packet_size),
-          m_delay_between_packets(a_delay_between_packets),
           m_packets_to_send(a_packets_to_send),
           m_ecn_capable(a_ecn_capable),
           m_packets_in_flight(0),
@@ -42,22 +39,7 @@ public:
         initialize_flag_manager();
     }
 
-    void start() final {
-        Time curr_time = Scheduler::get_instance().get_current_time();
-        Scheduler::get_instance().add<Generate>(
-            curr_time, this->shared_from_this(), m_packet_size);
-    }
-
-    Time create_new_data_packet() final {
-        if (m_packets_to_send == 0) {
-            return 0;
-        }
-        if (try_to_put_data_to_device()) {
-            --m_packets_to_send;
-        }
-
-        return m_delay_between_packets;
-    }
+    void start() final { send_packets(); }
 
     void update(Packet packet, DeviceType type) final {
         (void)type;
@@ -84,15 +66,11 @@ public:
 
             double old_cwnd = m_cc.get_cwnd();
 
-            if (m_cc.on_ack(rtt, packet.congestion_experienced)) {
-                // Trigger congestion
-                if (m_packets_in_flight > 0) {
-                    m_packets_in_flight--;
-                }
-            } else {
-                if (m_packets_in_flight > 0) {
-                    m_packets_in_flight--;
-                }
+            if (m_packets_in_flight > 0) {
+                m_packets_in_flight--;
+            }
+            if (!m_cc.on_ack(rtt, packet.congestion_experienced)) {
+                // No congestion
                 m_packets_acked++;
             }
 
@@ -113,6 +91,7 @@ public:
             m_flag_manager.set_flag(packet, packet_type_label, PacketType::ACK);
             m_dest.lock()->enqueue_packet(ack);
         }
+        send_packets();
     }
 
     std::shared_ptr<IHost> get_sender() const final { return m_src.lock(); }
@@ -130,7 +109,6 @@ public:
         oss << ", CC module: " << m_cc.to_string();
         oss << ", packet size: " << m_packet_size;
         oss << ", to send packets: " << m_packets_to_send;
-        oss << ", delay: " << m_delay_between_packets;
         oss << ", packets_in_flight: " << m_packets_in_flight;
         oss << ", acked packets: " << m_packets_acked;
         oss << "]";
@@ -152,7 +130,7 @@ private:
                 return;
             }
             auto flow = m_flow.lock();
-            flow->send_packet_now(m_packet);
+            flow->send_packet_now(std::move(m_packet));
         }
 
     private:
@@ -174,26 +152,34 @@ private:
     }
 
     void send_packet_now(Packet packet) {
-        m_packets_in_flight++;
+        // TODO: think about this place(should be here or in send_packets)
         m_sent_bytes += packet.size_byte;
         packet.sent_time = Scheduler::get_instance().get_current_time();
-        m_src.lock()->enqueue_packet(packet);
+        m_src.lock()->enqueue_packet(std::move(packet));
     }
 
-    bool try_to_put_data_to_device() {
-        if (m_packets_in_flight < m_cc.get_cwnd()) {
+    // Send (ot plan sending) as many packets as possible
+    void send_packets() {
+        constexpr double EPS = 1e-6;
+
+        Time total_delay = 0;
+        Time pacing_delay = m_cc.get_pacing_delay();
+        Time curr_time = Scheduler::get_instance().get_current_time();
+
+        while (m_packets_to_send > 0 &&
+               m_packets_in_flight < m_cc.get_cwnd() + EPS) {
             Packet packet = generate_packet();
-            Time pacing_delay = m_cc.get_pacing_delay();
+            total_delay += pacing_delay;
             if (pacing_delay == 0) {
-                send_packet_now(packet);
+                send_packet_now(std::move(packet));
             } else {
-                Time curr_time = Scheduler::get_instance().get_current_time();
                 Scheduler::get_instance().add<SendAtTime>(
-                    curr_time + pacing_delay, this->shared_from_this(), packet);
+                    curr_time + total_delay, this->shared_from_this(),
+                    std::move(packet));
             }
-            return true;
+            m_packets_in_flight++;
+            m_packets_to_send--;
         }
-        return false;
     }
 
     static void initialize_flag_manager() {
@@ -217,7 +203,6 @@ private:
     TTcpCC m_cc;
 
     Size m_packet_size;
-    Time m_delay_between_packets;
     std::uint32_t m_packets_to_send;
     bool m_ecn_capable;
 
