@@ -3,8 +3,6 @@
 #include <cstdint>
 #include <type_traits>
 
-namespace sim {
-
 struct Bit {
     static constexpr uint64_t to_bit_multiplier = 1;
 };
@@ -40,18 +38,16 @@ public:
     using Size = TemplateSize<TSizeBase>;
 
     // Attention: a_value given in TSizeByte units!
-    TemplateSize(uint64_t a_value)
+    constexpr TemplateSize(uint64_t a_value)
         : m_value_bits(a_value * TSizeBase::to_bit_multiplier) {}
 
-    operator uint64_t() const {
+    constexpr operator uint64_t() const {
         return m_value_bits / TSizeBase::to_bit_multiplier;
     }
 
-    void operator+=(Size size) { m_value_bits += size.m_value_bits; }
-    void operator-=(Size size) { m_value_bits -= size.m_value_bits; }
+    constexpr void operator+=(Size size) { m_value_bits += size.m_value_bits; }
+    constexpr void operator-=(Size size) { m_value_bits -= size.m_value_bits; }
 
 private:
     uint64_t m_value_bits;  // Size in bits
 };
-
-}  // namespace sim

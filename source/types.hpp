@@ -5,8 +5,6 @@
 
 #include "units.hpp"
 
-namespace sim {
-
 // nanoseconds
 using Time = std::uint32_t;
 // bytes
@@ -19,5 +17,3 @@ using PacketFlagsBase = std::uint32_t;
 template <typename K, typename V>
 using MapWeakPtr =
     std::map<std::weak_ptr<K>, V, std::owner_less<std::weak_ptr<K>>>;
-
-}  // namespace sim
