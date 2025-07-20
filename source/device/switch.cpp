@@ -1,15 +1,12 @@
 #include "device/switch.hpp"
 
-#include <iostream>
-
+#include "link/i_link.hpp"
 #include "logger/logger.hpp"
-#include "utils/validation.hpp"
 
 namespace sim {
 
-Switch::Switch(Id a_id, ECN&& a_ecn)
-    : RoutingModule(a_id),
-      m_ecn(std::move(a_ecn)) {}
+Switch::Switch(Id a_id, ECN&& a_ecn, std::unique_ptr<IHasher> a_hasher)
+    : RoutingModule(a_id, std::move(a_hasher)), m_ecn(std::move(a_ecn)) {}
 
 bool Switch::notify_about_arrival(Time arrival_time) {
     return m_process_scheduler.notify_about_arriving(arrival_time,
@@ -29,7 +26,7 @@ Time Switch::process() {
 
     // requests queue size here to consider processing packet
     float ingress_queue_filling = link->get_to_ingress_queue_size() /
-                               (float)link->get_max_to_ingress_queue_size();
+                                  (float)link->get_max_to_ingress_queue_size();
     std::optional<Packet> optional_packet = link->get_packet();
     if (!optional_packet.has_value()) {
         LOG_WARN("No packet in link");

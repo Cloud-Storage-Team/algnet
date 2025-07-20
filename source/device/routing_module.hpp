@@ -7,7 +7,7 @@
 #include "utils/loop_iterator.hpp"
 
 namespace sim {
-    
+
 class RoutingModule : public virtual IRoutingDevice {
 public:
     RoutingModule(Id a_id = "", std::unique_ptr<IHasher> a_hasher = nullptr);
@@ -16,7 +16,8 @@ public:
     Id get_id() const final;
     bool add_inlink(std::shared_ptr<ILink> link) final;
     bool add_outlink(std::shared_ptr<ILink> link) final;
-    bool update_routing_table(Id dest_id, std::shared_ptr<ILink> link, size_t paths_count = 1) final;
+    bool update_routing_table(Id dest_id, std::shared_ptr<ILink> link,
+                              size_t paths_count = 1) final;
     // returns next inlink and moves inlinks set iterator forward
     std::shared_ptr<ILink> next_inlink() final;
     std::shared_ptr<ILink> get_link_to_destination(Packet packet) const final;

@@ -2,12 +2,13 @@
 
 #include <spdlog/fmt/fmt.h>
 
+#include "link/i_link.hpp"
 #include "logger/logger.hpp"
-#include "utils/validation.hpp"
 
 namespace sim {
 
-Host::Host(Id a_id) : RoutingModule(a_id) {}
+Host::Host(Id a_id, std::unique_ptr<IHasher> a_hasher)
+    : RoutingModule(a_id, std::move(a_hasher)) {}
 
 bool Host::notify_about_arrival(Time arrival_time) {
     return m_process_scheduler.notify_about_arriving(arrival_time,
