@@ -1,6 +1,7 @@
 devices:
   sender1:
     type: host
+    hasher: symmetric
   sender2:
     type: host
   receiver1:
@@ -9,7 +10,7 @@ devices:
     type: host
   bus:
     type: switch
-    ecn:  
+    ecn:
       min: 0.2
       max: 0.3
       probability: 1.0
@@ -42,28 +43,28 @@ links:
     latency: 1ns
     throughput: 1Gbps
     ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B    
+    egress_buffer_size: 4096B
   link5:
     from: receiver1
     to: bus
     latency: 1ns
     throughput: 1Gbps
     ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B    
+    egress_buffer_size: 4096B
   link6:
     from: bus
     to: receiver1
     latency: 1ns
     throughput: 1Gbps
     ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B    
+    egress_buffer_size: 4096B
   link7:
     from: receiver2
     to: bus
     latency: 1ns
     throughput: 1Gbps
     ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B    
+    egress_buffer_size: 4096B
   link8:
     from: bus
     to: receiver2
