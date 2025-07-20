@@ -2,7 +2,11 @@
 
 #include <spdlog/fmt/fmt.h>
 
+#include <memory>
 #include <stdexcept>
+
+#include "logger/logger.hpp"
+#include "utils/hasher.hpp"
 
 static std::pair<uint32_t, std::string> parse_value_unit(
     const std::string &value_with_unit) {
@@ -52,4 +56,20 @@ uint32_t parse_with_default(
         return default_value;
     }
     return value_parser(node[field_name].as<std::string>());
+}
+
+std::unique_ptr<sim::IHasher> parse_hasher(const YAML::Node &node) {
+    const std::string hasher_field_name = "hasher";
+    const std::string hasher_value = node[hasher_field_name].as<std::string>();
+    if (hasher_value == "random") {
+        return std::make_unique<sim::RandomHasher>();
+    }
+    if (hasher_value == "base") {
+        return std::make_unique<sim::BaseHasher>();
+    }
+    if (hasher_value == "symmetric") {
+        return std::make_unique<sim::SymmetricHasher>();
+    }
+    LOG_WARN(fmt::format("Unknown hasher type: {}", hasher_value));
+    return std::make_unique<sim::BaseHasher>();
 }
