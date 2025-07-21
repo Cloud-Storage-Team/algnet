@@ -13,9 +13,15 @@ public:
     std::string to_string() const final;
 
 private:
+    void update_avg_rtt(Time rtt);
+
+    const static inline double M_RTT_WEIGHT_DECAY_FACTOR = 0.8;
     Time m_delay_threshold;  // delay threshold for update
 
     double m_ssthresh;  // Slow start threshold
     double m_cwnd;      // Congestion window
+    Time m_last_congestion_detected;
+
+    double m_avg_rtt;
 };
 }  // namespace sim
