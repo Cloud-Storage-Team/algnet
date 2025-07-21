@@ -13,7 +13,7 @@ void CountingEvent::operator()() { cnt++; }
 
 ComparatorEvent::ComparatorEvent(TimeNs a_time) : Event(a_time) {};
 void ComparatorEvent::operator()() {
-    EXPECT_GE(m_time, last_time);
+    EXPECT_GT(m_time, last_time);
     last_time = m_time;
 }
 

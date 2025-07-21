@@ -9,7 +9,7 @@ TcpTahoeCC::TcpTahoeCC(TimeNs a_dealay_threshold, double a_sstresh)
       m_cwnd(1.0) {}
 
 bool TcpTahoeCC::on_ack(TimeNs rtt, bool ecn_flag) {
-    if (ecn_flag || rtt >= m_delay_threshold) {
+    if (ecn_flag || rtt > m_delay_threshold) {
         // trigger_congestion
         m_ssthresh = m_cwnd / 2;
         m_cwnd = 1.;

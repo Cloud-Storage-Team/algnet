@@ -5,19 +5,19 @@
 #include <iostream>
 #include <type_traits>
 
-struct Nanoseconds {
+struct Nanosecond {
     static constexpr uint64_t to_nanoseconds_multiplier = 1;
 };
 
-struct Microseconds {
+struct Microsecond {
     static constexpr uint64_t to_nanoseconds_multiplier = 1'000;
 };
 
-struct Miliseconds {
+struct Milisecond {
     static constexpr uint64_t to_nanoseconds_multiplier = 1'000'000;
 };
 
-struct Seconds {
+struct Second {
     static constexpr uint64_t to_nanoseconds_multiplier = 1'000'000'000;
 };
 
@@ -37,27 +37,26 @@ public:
         : m_value_ns(a_size.get_nanoseconds()) {}
 
     // Attention: a_value given in TTimeBase units!
-    explicit constexpr Time(uint64_t a_value)
+    explicit constexpr Time(long double a_value)
         : m_value_ns(a_value * TTimeBase::to_nanoseconds_multiplier) {}
 
-    constexpr uint64_t value() const {
+    constexpr long double value() const {
         // Round up here to get maximal time
-        return (m_value_ns + TTimeBase::to_nanoseconds_multiplier - 1) /
-               TTimeBase::to_nanoseconds_multiplier;
+        return m_value_ns / TTimeBase::to_nanoseconds_multiplier;
     }
 
-    constexpr uint64_t get_nanoseconds() const { return m_value_ns; }
+    constexpr long double get_nanoseconds() const { return m_value_ns; }
 
     constexpr ThisTime operator+(ThisTime time) const {
-        return Time<Nanoseconds>(m_value_ns + time.m_value_ns);
+        return Time<Nanosecond>(m_value_ns + time.m_value_ns);
     }
 
     constexpr ThisTime operator-(ThisTime time) const {
-        return Time<Nanoseconds>(m_value_ns - time.m_value_ns);
+        return Time<Nanosecond>(m_value_ns - time.m_value_ns);
     }
 
-    constexpr ThisTime operator*(size_t mult) const {
-        return Time<Nanoseconds>(m_value_ns * mult);
+    constexpr ThisTime operator*(long double mult) const {
+        return Time<Nanosecond>(m_value_ns * mult);
     }
 
     constexpr ThisTime operator++() {
@@ -65,45 +64,34 @@ public:
         return *this;
     }
 
-    constexpr double operator/(ThisTime time) const {
-        return m_value_ns / (double)time.get_nanoseconds();
+    constexpr long double operator/(ThisTime time) const {
+        return m_value_ns / time.get_nanoseconds();
     }
 
     constexpr void operator+=(ThisTime time) { m_value_ns += time.m_value_ns; }
     constexpr void operator-=(ThisTime time) { m_value_ns -= time.m_value_ns; }
 
-    constexpr void operator*=(size_t mult) { m_value_ns *= mult; }
+    constexpr void operator*=(long double mult) { m_value_ns *= mult; }
 
-    constexpr void operator/=(size_t mult) {
-        m_value_ns = (m_value_ns + mult - 1) / mult;
-    }
+    constexpr void operator/=(long double mult) { m_value_ns /= mult; }
 
     bool constexpr operator<(ThisTime time) const {
         return m_value_ns < time.m_value_ns;
-    }
-
-    bool constexpr operator<=(ThisTime time) const {
-        return m_value_ns <= time.m_value_ns;
     }
 
     bool constexpr operator>(ThisTime time) const {
         return m_value_ns > time.m_value_ns;
     }
 
-    bool constexpr operator>=(ThisTime time) const {
-        return m_value_ns >= time.m_value_ns;
-    }
-
     bool constexpr operator==(ThisTime time) const {
-        return m_value_ns == time.m_value_ns;
+        constexpr long double EPS = 1e-6;
+        return abs(m_value_ns - time.m_value_ns) < EPS;
     }
 
-    bool constexpr operator!=(ThisTime time) const {
-        return m_value_ns != time.m_value_ns;
-    }
+    bool constexpr operator!=(ThisTime time) const { return !operator==(time); }
 
 private:
-    uint64_t m_value_ns;  // Time in nanoseconds
+    long double m_value_ns;  // Time in nanoseconds
 };
 
 template <IsTimeBase TTimeBase>
