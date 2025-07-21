@@ -12,13 +12,18 @@ public:
     constexpr Speed(Speed<USizeBase, UTimeBase> speed)
         : m_bit_per_ns(speed.value_bit_per_ns()) {}
 
-    long double value() const {
+    constexpr long double value() const {
         return m_bit_per_ns / TSizeBase::to_bit_multiplier *
                TTimeBase::to_nanoseconds_multiplier;
     }
 
-    long double value_bit_per_ns() const { return m_bit_per_ns; }
+    constexpr long double value_bit_per_ns() const { return m_bit_per_ns; }
 
 private:
     long double m_bit_per_ns;  // value in bit per nanosecond
 };
+
+template <IsSizeBase TSizeBase, IsTimeBase TTimeBase>
+std::ostream& operator<<(std::ostream& out, Speed<TSizeBase, TTimeBase> time) {
+    return out << time.value();
+}
