@@ -13,7 +13,7 @@ TEST_F(LinkTest, ScheduledCorrectly) {
 
     int NUMBER_OF_PACKETS = 10;
     for (int i = 0; i < NUMBER_OF_PACKETS; i++) {
-        link->schedule_arrival(sim::Packet(100));
+        link->schedule_arrival(sim::Packet(SizeByte(100)));
     }
 
     while (sim::Scheduler::get_instance().tick()) {

@@ -25,10 +25,12 @@ std::vector<sim::Packet> LinkMock::get_arrived_packets() const {
     return m_arrived_packets;
 }
 
-SizeByte LinkMock::get_from_egress_queue_size() const { return 0; }
-SizeByte LinkMock::get_max_from_egress_buffer_size() const { return 4096; }
+SizeByte LinkMock::get_from_egress_queue_size() const { return SizeByte(0); }
+SizeByte LinkMock::get_max_from_egress_buffer_size() const {
+    return SizeByte(4096);
+}
 
-SizeByte LinkMock::get_to_ingress_queue_size() const { return 0; }
-SizeByte LinkMock::get_max_to_ingress_queue_size() const { return 0; }
+SizeByte LinkMock::get_to_ingress_queue_size() const { return SizeByte(0); }
+SizeByte LinkMock::get_max_to_ingress_queue_size() const { return SizeByte(0); }
 
 Id LinkMock::get_id() const { return ""; }

@@ -24,7 +24,7 @@ TEST_F(Start, TrivialTopology) {
 
     constexpr Time delay_between_packets = 100;
     constexpr Time stop_time = 1000;
-    constexpr SizeByte packet_size = 1024;
+    constexpr SizeByte packet_size = SizeByte(1024);
     constexpr std::uint32_t packets_to_send = 1;
 
     Id id = "flow";
@@ -64,7 +64,7 @@ TEST_F(Start, ThreeToOneTopology) {
 
     constexpr Time delay_between_packets = 100;
     constexpr Time stop_time = 10000;
-    constexpr SizeByte packet_size = 1024;
+    constexpr SizeByte packet_size = SizeByte(1024);
     constexpr std::uint32_t packets_to_send_by_flow1 = 10;
     constexpr std::uint32_t packets_to_send_by_flow2 = 50;
     constexpr std::uint32_t packets_to_send_by_flow3 = 100;
@@ -118,7 +118,7 @@ TEST_F(Start, StopTime) {
 
     constexpr Time delay_between_packets = 100;
     constexpr Time stop_time = 1000;
-    constexpr SizeByte packet_size = 1024;
+    constexpr SizeByte packet_size = SizeByte(1024);
     constexpr std::uint32_t packets_to_send_by_flow1 = 10;
     constexpr std::uint32_t packets_to_send_by_flow2 = 50;
     constexpr std::uint32_t packets_to_send_by_flow3 = 100;
