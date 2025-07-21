@@ -19,7 +19,7 @@ std::shared_ptr<sim::ILink> HostMock::get_link_to_destination(
     return nullptr;
 }
 
-bool HostMock::notify_about_arrival(Time arrival_time) { return false; }
+bool HostMock::notify_about_arrival(TimeNs arrival_time) { return false; }
 
 std::uint32_t HostMock::process() { return 1; }
 sim::DeviceType HostMock::get_type() const { return sim::DeviceType::RECEIVER; }
@@ -30,6 +30,6 @@ Id HostMock::get_id() const { return ""; }
 
 void HostMock::enqueue_packet(sim::Packet packet) { return; }
 
-Time HostMock::send_packet() { return 0; }
+TimeNs HostMock::send_packet() { return 0; }
 
 }  // namespace test

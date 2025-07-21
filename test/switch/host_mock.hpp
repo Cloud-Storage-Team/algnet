@@ -20,15 +20,15 @@ public:
     std::shared_ptr<sim::ILink> get_link_to_destination(
         sim::Packet packet) const final;
     std::set<std::shared_ptr<sim::ILink>> get_outlinks() final;
-    bool notify_about_arrival(Time arrival_time) final;
+    bool notify_about_arrival(TimeNs arrival_time) final;
 
-    Time process() final;
+    TimeNs process() final;
     sim::DeviceType get_type() const final;
 
     Id get_id() const final;
 
     void enqueue_packet(sim::Packet packet) final;
-    Time send_packet() final;
+    TimeNs send_packet() final;
 };
 
 }  // namespace test

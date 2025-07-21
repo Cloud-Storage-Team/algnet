@@ -20,7 +20,7 @@ class TcpFlow : public IFlow,
 public:
     TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
             std::shared_ptr<IHost> a_dest, TTcpCC a_cc, SizeByte a_packet_size,
-            Time a_delay_between_packets, std::uint32_t a_packets_to_send,
+            TimeNs a_delay_between_packets, std::uint32_t a_packets_to_send,
             bool a_ecn_capable = true)
         : m_id(std::move(a_id)),
           m_src(a_src),
@@ -43,12 +43,12 @@ public:
     }
 
     void start() final {
-        Time curr_time = Scheduler::get_instance().get_current_time();
+        TimeNs curr_time = Scheduler::get_instance().get_current_time();
         Scheduler::get_instance().add<Generate>(
             curr_time, this->shared_from_this(), m_packet_size);
     }
 
-    Time create_new_data_packet() final {
+    TimeNs create_new_data_packet() final {
         if (m_packets_to_send == 0) {
             return 0;
         }
@@ -66,14 +66,14 @@ public:
                 PacketType::ACK) {
             // ACK delivered to source device; calculate metrics, update
             // internal state
-            Time current_time = Scheduler::get_instance().get_current_time();
+            TimeNs current_time = Scheduler::get_instance().get_current_time();
             if (current_time < packet.sent_time) {
                 LOG_ERROR("Packet " + packet.to_string() +
                           " current time less that sending time; ignored");
                 return;
             }
 
-            Time rtt = current_time - packet.sent_time;
+            TimeNs rtt = current_time - packet.sent_time;
             MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
                                                      current_time, rtt);
 
@@ -144,7 +144,7 @@ private:
 
     class SendAtTime : public Event {
     public:
-        SendAtTime(Time a_time, std::weak_ptr<TcpFlow<TTcpCC> > a_flow,
+        SendAtTime(TimeNs a_time, std::weak_ptr<TcpFlow<TTcpCC> > a_flow,
                    Packet a_packet)
             : Event(a_time), m_flow(a_flow), m_packet(std::move(a_packet)) {}
         void operator()() final {
@@ -184,11 +184,11 @@ private:
     bool try_to_put_data_to_device() {
         if (m_packets_in_flight < m_cc.get_cwnd()) {
             Packet packet = generate_packet();
-            Time pacing_delay = m_cc.get_pacing_delay();
+            TimeNs pacing_delay = m_cc.get_pacing_delay();
             if (pacing_delay == 0) {
                 send_packet_now(packet);
             } else {
-                Time curr_time = Scheduler::get_instance().get_current_time();
+                TimeNs curr_time = Scheduler::get_instance().get_current_time();
                 Scheduler::get_instance().add<SendAtTime>(
                     curr_time + pacing_delay, this->shared_from_this(), packet);
             }
@@ -218,7 +218,7 @@ private:
     TTcpCC m_cc;
 
     SizeByte m_packet_size;
-    Time m_delay_between_packets;
+    TimeNs m_delay_between_packets;
     std::uint32_t m_packets_to_send;
     bool m_ecn_capable;
 

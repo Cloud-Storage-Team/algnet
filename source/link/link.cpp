@@ -7,7 +7,7 @@
 namespace sim {
 
 Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
-           std::uint32_t a_speed_gbps, Time a_delay,
+           std::uint32_t a_speed_gbps, TimeNs a_delay,
            SizeByte a_max_from_egress_buffer_size,
            SizeByte a_max_to_ingress_buffer_size)
     : m_id(a_id),
@@ -90,7 +90,7 @@ SizeByte Link::get_max_to_ingress_queue_size() const {
 
 Id Link::get_id() const { return m_id; }
 
-Link::Arrive::Arrive(Time a_time, std::weak_ptr<Link> a_link, Packet a_packet)
+Link::Arrive::Arrive(TimeNs a_time, std::weak_ptr<Link> a_link, Packet a_packet)
     : Event(a_time), m_link(a_link), m_paket(a_packet) {}
 
 void Link::Arrive::operator()() {
@@ -101,7 +101,7 @@ void Link::Arrive::operator()() {
     m_link.lock()->arrive(std::move(m_paket));
 }
 
-Link::Transmit::Transmit(Time a_time, std::weak_ptr<Link> a_link)
+Link::Transmit::Transmit(TimeNs a_time, std::weak_ptr<Link> a_link)
     : Event(a_time), m_link(a_link) {}
 
 void Link::Transmit::operator()() {
@@ -112,7 +112,7 @@ void Link::Transmit::operator()() {
     m_link.lock()->transmit();
 }
 
-Time Link::get_transmission_delay(const Packet& packet) const {
+TimeNs Link::get_transmission_delay(const Packet& packet) const {
     if (m_speed_gbps == 0) {
         LOG_WARN("Passed zero link speed");
         return 0;
@@ -129,7 +129,7 @@ void Link::transmit() {
         LOG_ERROR("Transmit on link with empty source egress buffer");
         return;
     }
-    Time current_time = Scheduler::get_instance().get_current_time();
+    TimeNs current_time = Scheduler::get_instance().get_current_time();
     Scheduler::get_instance().add<Arrive>(current_time + m_propagation_delay,
                                           shared_from_this(),
                                           m_from_egress.front());
@@ -157,7 +157,7 @@ void Link::arrive(Packet packet) {
 };
 
 void Link::start_head_packet_sending() {
-    Time current_time = Scheduler::get_instance().get_current_time();
+    TimeNs current_time = Scheduler::get_instance().get_current_time();
     Scheduler::get_instance().add<Transmit>(
         current_time + get_transmission_delay(m_from_egress.front()),
         shared_from_this());

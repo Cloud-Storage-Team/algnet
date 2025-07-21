@@ -16,14 +16,14 @@ public:
     TestDevice(Id a_id = "") : sim::RoutingModule(a_id) {};
     ~TestDevice() = default;
 
-    bool notify_about_arrival(Time arrival_time) final;
+    bool notify_about_arrival(TimeNs arrival_time) final;
 
     sim::DeviceType get_type() const final;
     // Process a packet by moving it from ingress to egress
     // and schedule next process event after a delay.
     // Packets are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
-    Time process() final;
+    TimeNs process() final;
 };
 
 class TestLink : public sim::ILink {

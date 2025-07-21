@@ -11,7 +11,7 @@ public:
     // Adds new packet to sending queue
     // This packet will be send at some time in future (depends on concrete
     // flow) Used in event Generate
-    virtual Time create_new_data_packet() = 0;
+    virtual TimeNs create_new_data_packet() = 0;
 
     // Update the internal state according to some congestion control algorithm
     // Calls when data available for sending on corresponding device

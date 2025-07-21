@@ -35,7 +35,7 @@ public:
 
     void clear();  // Clear all events
     bool tick();
-    Time get_current_time();
+    TimeNs get_current_time();
 
 private:
     // Private constructor to prevent instantiation
@@ -48,7 +48,7 @@ private:
                         std::vector<std::unique_ptr<Event>>, EventComparator>
         m_events;
 
-    Time m_current_event_local_time;
+    TimeNs m_current_event_local_time;
 };
 
 }  // namespace sim

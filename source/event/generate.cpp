@@ -4,7 +4,7 @@
 
 namespace sim {
 
-Generate::Generate(Time a_time, std::weak_ptr<IFlow> a_flow,
+Generate::Generate(TimeNs a_time, std::weak_ptr<IFlow> a_flow,
                    SizeByte a_packet_size)
     : Event(a_time), m_flow(a_flow), m_packet_size(a_packet_size) {}
 
@@ -13,7 +13,7 @@ void Generate::operator()() {
         return;
     }
 
-    Time generate_delay = m_flow.lock()->create_new_data_packet();
+    TimeNs generate_delay = m_flow.lock()->create_new_data_packet();
     if (generate_delay == 0) {
         return;
     }

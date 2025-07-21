@@ -2,13 +2,13 @@
 
 namespace test {
 
-bool TestDevice::notify_about_arrival(Time arrival_time) { return false; };
+bool TestDevice::notify_about_arrival(TimeNs arrival_time) { return false; };
 
 sim::DeviceType TestDevice::get_type() const {
     return sim::DeviceType::SWITCH;
 };
 
-Time TestDevice::process() { return 0; };
+TimeNs TestDevice::process() { return 0; };
 
 std::vector<std::shared_ptr<sim::IDevice>> createTestDevices(size_t count) {
     std::vector<std::shared_ptr<sim::IDevice>> devices;

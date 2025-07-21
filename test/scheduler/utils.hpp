@@ -33,19 +33,19 @@ struct ComparatorEvent : public sim::Event {
     ComparatorEvent(std::uint32_t a_time);
     ~ComparatorEvent() = default;
 
-    static Time last_time;
+    static TimeNs last_time;
 
     virtual void operator()() final;
 };
 
 template <typename T>
-void AddEvents(int number, std::shared_ptr<Time> event_time = nullptr) {
+void AddEvents(int number, std::shared_ptr<TimeNs> event_time = nullptr) {
     static_assert(std::is_base_of<sim::Event, T>::value,
                   "T must inherit from Event");
 
     srand(static_cast<unsigned int>(time(0)));
-    Time min_time = 1;
-    Time max_time = static_cast<Time>(1e9);
+    TimeNs min_time = 1;
+    TimeNs max_time = static_cast<TimeNs>(1e9);
 
     while ((number--) > 0) {
         if (event_time == nullptr) {

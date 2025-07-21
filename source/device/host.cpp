@@ -9,7 +9,7 @@ namespace sim {
 
 Host::Host(Id a_id) : RoutingModule(a_id) {}
 
-bool Host::notify_about_arrival(Time arrival_time) {
+bool Host::notify_about_arrival(TimeNs arrival_time) {
     return m_process_scheduler.notify_about_arriving(arrival_time,
                                                      weak_from_this());
 };
@@ -23,9 +23,9 @@ void Host::enqueue_packet(Packet packet) {
     LOG_INFO(fmt::format("Packet {} arrived to host", packet.to_string()));
 }
 
-Time Host::process() {
+TimeNs Host::process() {
     std::shared_ptr<ILink> current_inlink = next_inlink();
-    Time total_processing_time = 1;
+    TimeNs total_processing_time = 1;
 
     if (current_inlink == nullptr) {
         LOG_WARN("No available inlinks for device");
@@ -63,7 +63,7 @@ Time Host::process() {
         next_link->schedule_arrival(packet);
     }
 
-    Time current_time = Scheduler::get_instance().get_current_time();
+    TimeNs current_time = Scheduler::get_instance().get_current_time();
     if (m_process_scheduler.notify_about_finish(current_time +
                                                 total_processing_time)) {
         return 0;
@@ -72,8 +72,8 @@ Time Host::process() {
     return total_processing_time;
 }
 
-Time Host::send_packet() {
-    Time total_processing_time = 1;
+TimeNs Host::send_packet() {
+    TimeNs total_processing_time = 1;
 
     if (m_nic_buffer.empty()) {
         LOG_WARN("No packets to send");

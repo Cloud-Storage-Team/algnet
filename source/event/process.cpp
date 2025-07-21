@@ -4,7 +4,7 @@
 
 namespace sim {
 
-Process::Process(Time a_time, std::weak_ptr<IProcessingDevice> a_device)
+Process::Process(TimeNs a_time, std::weak_ptr<IProcessingDevice> a_device)
     : Event(a_time), m_device(a_device) {};
 
 void Process::operator()() {
@@ -12,7 +12,7 @@ void Process::operator()() {
         return;
     }
 
-    Time process_time = m_device.lock()->process();
+    TimeNs process_time = m_device.lock()->process();
 
     // TODO: think about better way of cancelling event rescheduling and
     // signaling errors

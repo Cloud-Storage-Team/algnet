@@ -74,15 +74,16 @@ public:
 
         for (auto swtch : m_switches) {
             devices.push_back(dynamic_pointer_cast<IDevice>(swtch));
-    }
-    
-    return devices;
+        }
+
+        return devices;
     }
 
     // Calls BFS for each device to build the routing table
     void recalculate_paths() {
         for (auto src_device : get_devices()) {
-            RoutingTable routing_table = bfs(dynamic_pointer_cast<IRoutingDevice>(src_device));
+            RoutingTable routing_table =
+                bfs(dynamic_pointer_cast<IRoutingDevice>(src_device));
             for (auto [dest_device_id, links] : routing_table) {
                 for (auto [link, paths_count] : links) {
                     src_device->update_routing_table(dest_device_id,
@@ -92,10 +93,10 @@ public:
         }
     }
     // Create a Stop event at a_stop_time and start simulation
-    void start(Time a_stop_time) {
+    void start(TimeNs a_stop_time) {
         recalculate_paths();
         Scheduler::get_instance().add<Stop>(a_stop_time);
-        constexpr Time start_time = 0;
+        constexpr TimeNs start_time = 0;
 
         for (auto flow : m_flows) {
             Scheduler::get_instance().add<StartFlow>(start_time, flow);

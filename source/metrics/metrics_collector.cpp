@@ -14,19 +14,20 @@ MetricsCollector& MetricsCollector::get_instance() {
     return instance;
 }
 
-void MetricsCollector::add_cwnd(Id flow_id, Time time, double cwnd) {
+void MetricsCollector::add_cwnd(Id flow_id, TimeNs time, double cwnd) {
     m_cwnd_storage.add_record(std::move(flow_id), time, cwnd);
 }
 
-void MetricsCollector::add_delivery_rate(Id flow_id, Time time, double value) {
+void MetricsCollector::add_delivery_rate(Id flow_id, TimeNs time,
+                                         double value) {
     m_rate_storage.add_record(std::move(flow_id), time, value);
 }
 
-void MetricsCollector::add_RTT(Id flow_id, Time time, Time value) {
+void MetricsCollector::add_RTT(Id flow_id, TimeNs time, TimeNs value) {
     m_RTT_storage.add_record(std::move(flow_id), time, value);
 }
 
-void MetricsCollector::add_queue_size(Id link_id, Time time, SizeByte value) {
+void MetricsCollector::add_queue_size(Id link_id, TimeNs time, SizeByte value) {
     m_queue_size_storage.add_record(std::move(link_id), time, value.value());
 }
 
@@ -124,7 +125,8 @@ void MetricsCollector::draw_queue_size_plots(
 
         auto limits = ax->xlim();
         matplot::line(0, link->get_max_from_egress_buffer_size().value(),
-                      limits[1], link->get_max_from_egress_buffer_size().value())
+                      limits[1],
+                      link->get_max_from_egress_buffer_size().value())
             ->line_width(1.5)
             .color({1.f, 0.0f, 0.0f});
 

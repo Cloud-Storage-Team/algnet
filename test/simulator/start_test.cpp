@@ -22,8 +22,8 @@ TEST_F(Start, TrivialTopology) {
     auto receiver = std::make_shared<sim::Host>("receiver");
     sim.add_host(receiver);
 
-    constexpr Time delay_between_packets = 100;
-    constexpr Time stop_time = 1000;
+    constexpr TimeNs delay_between_packets = 100;
+    constexpr TimeNs stop_time = 1000;
     constexpr SizeByte packet_size = SizeByte(1024);
     constexpr std::uint32_t packets_to_send = 1;
 
@@ -62,8 +62,8 @@ TEST_F(Start, ThreeToOneTopology) {
                             {sender3, swtch},
                             {swtch, receiver}});
 
-    constexpr Time delay_between_packets = 100;
-    constexpr Time stop_time = 10000;
+    constexpr TimeNs delay_between_packets = 100;
+    constexpr TimeNs stop_time = 10000;
     constexpr SizeByte packet_size = SizeByte(1024);
     constexpr std::uint32_t packets_to_send_by_flow1 = 10;
     constexpr std::uint32_t packets_to_send_by_flow2 = 50;
@@ -116,8 +116,8 @@ TEST_F(Start, StopTime) {
                             {sender3, swtch},
                             {swtch, receiver}});
 
-    constexpr Time delay_between_packets = 100;
-    constexpr Time stop_time = 1000;
+    constexpr TimeNs delay_between_packets = 100;
+    constexpr TimeNs stop_time = 1000;
     constexpr SizeByte packet_size = SizeByte(1024);
     constexpr std::uint32_t packets_to_send_by_flow1 = 10;
     constexpr std::uint32_t packets_to_send_by_flow2 = 50;

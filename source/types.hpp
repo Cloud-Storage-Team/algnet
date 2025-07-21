@@ -6,7 +6,7 @@
 #include "units/units.hpp"
 
 // nanoseconds
-using Time = std::uint32_t;
+using TimeNs = std::uint32_t;
 // bytes
 using SizeByte = Size<Byte>;
 using Id = std::string;

@@ -9,16 +9,18 @@
 
 namespace sim {
 
-class Host : public IHost, public RoutingModule, public std::enable_shared_from_this<Host> {
+class Host : public IHost,
+             public RoutingModule,
+             public std::enable_shared_from_this<Host> {
 public:
     Host(Id id);
     ~Host() = default;
 
-    bool notify_about_arrival(Time arrive_time) final;
+    bool notify_about_arrival(TimeNs arrive_time) final;
 
     DeviceType get_type() const final;
-    Time process() final;
-    Time send_packet() final;
+    TimeNs process() final;
+    TimeNs send_packet() final;
 
     void enqueue_packet(Packet packet) final;
 

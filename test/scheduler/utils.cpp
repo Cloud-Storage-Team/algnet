@@ -3,7 +3,7 @@
 namespace test {
 
 int CountingEvent::cnt;
-Time ComparatorEvent::last_time;
+TimeNs ComparatorEvent::last_time;
 
 EmptyEvent::EmptyEvent(std::uint32_t a_time) : Event(a_time) {};
 void EmptyEvent::operator()() {}

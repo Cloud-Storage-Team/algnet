@@ -10,15 +10,15 @@ namespace sim {
 Switch::Switch(Id a_id, ECN&& a_ecn)
     : RoutingModule(a_id), m_ecn(std::move(a_ecn)) {}
 
-bool Switch::notify_about_arrival(Time arrival_time) {
+bool Switch::notify_about_arrival(TimeNs arrival_time) {
     return m_process_scheduler.notify_about_arriving(arrival_time,
                                                      weak_from_this());
 };
 
 DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
 
-Time Switch::process() {
-    Time total_processing_time = 1;
+TimeNs Switch::process() {
+    TimeNs total_processing_time = 1;
     std::shared_ptr<ILink> link = next_inlink();
 
     if (link == nullptr) {

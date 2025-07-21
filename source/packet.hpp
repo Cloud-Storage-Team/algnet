@@ -9,7 +9,7 @@ namespace sim {
 
 struct Packet {
     Packet(SizeByte a_size_byte = SizeByte(0), IFlow* a_flow = nullptr,
-           Id a_source_id = "", Id a_dest_id = "", Time a_sent_time = 0,
+           Id a_source_id = "", Id a_dest_id = "", TimeNs a_sent_time = 0,
            SizeByte a_sent_bytes_at_origin = SizeByte(0),
            bool a_ecn_capable_transport = true,
            bool a_congestion_experienced = false);
@@ -23,7 +23,7 @@ struct Packet {
     Id dest_id;
     SizeByte size_byte;
     IFlow* flow;
-    Time sent_time;  // Note: ACK's sent time is the data packet sent time
+    TimeNs sent_time;  // Note: ACK's sent time is the data packet sent time
     SizeByte
         sent_bytes_at_origin;  // For ACK this is inherited from data packet
     bool ecn_capable_transport;

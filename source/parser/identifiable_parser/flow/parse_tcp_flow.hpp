@@ -22,10 +22,11 @@ public:
         std::shared_ptr<IHost> receiver_ptr =
             IdentifierFactory::get_instance().get_object<IHost>(receiver_id);
 
-        SizeByte packet_size = SizeByte(value_node["packet_size"].as<uint64_t>());
+        SizeByte packet_size =
+            SizeByte(value_node["packet_size"].as<uint64_t>());
         std::uint32_t number_of_packets =
             value_node["number_of_packets"].as<std::uint32_t>();
-        Time packet_interval = value_node["packet_interval"].as<Time>();
+        TimeNs packet_interval = value_node["packet_interval"].as<TimeNs>();
 
         return std::make_shared<TcpFlow<TTcpCC>>(
             id, sender_ptr, receiver_ptr, cc, packet_size, packet_interval,

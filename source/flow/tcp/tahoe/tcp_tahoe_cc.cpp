@@ -3,12 +3,12 @@
 #include <spdlog/fmt/fmt.h>
 
 namespace sim {
-TcpTahoeCC::TcpTahoeCC(Time a_dealay_threshold, double a_sstresh)
+TcpTahoeCC::TcpTahoeCC(TimeNs a_dealay_threshold, double a_sstresh)
     : m_delay_threshold(a_dealay_threshold),
       m_ssthresh(a_sstresh),
       m_cwnd(1.0) {}
 
-bool TcpTahoeCC::on_ack(Time rtt, bool ecn_flag) {
+bool TcpTahoeCC::on_ack(TimeNs rtt, bool ecn_flag) {
     if (ecn_flag || rtt >= m_delay_threshold) {
         // trigger_congestion
         m_ssthresh = m_cwnd / 2;
@@ -23,7 +23,7 @@ bool TcpTahoeCC::on_ack(Time rtt, bool ecn_flag) {
     return false;
 }
 
-Time TcpTahoeCC::get_pacing_delay() const { return 0; }
+TimeNs TcpTahoeCC::get_pacing_delay() const { return 0; }
 
 double TcpTahoeCC::get_cwnd() const { return m_cwnd; }
 
