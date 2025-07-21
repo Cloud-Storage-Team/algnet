@@ -53,15 +53,6 @@ public:
 
     constexpr uint64_t get_bits() const { return m_value_bits; }
 
-    constexpr void operator+=(ThisSize size) {
-        m_value_bits += size.m_value_bits;
-    }
-    constexpr void operator-=(ThisSize size) {
-        m_value_bits -= size.m_value_bits;
-    }
-
-    constexpr void operator*=(size_t mult) { m_value_bits *= mult; }
-
     constexpr ThisSize operator+(ThisSize size) const {
         return Size<Bit>(m_value_bits + size.m_value_bits);
     }
@@ -74,16 +65,25 @@ public:
         return Size<Bit>(m_value_bits * mult);
     }
 
-    double constexpr operator/(ThisSize size) const {
+    constexpr double operator/(ThisSize size) const {
         return m_value_bits / (double)size.get_bits();
     }
 
-    double constexpr operator/(std::uint32_t time) const {
+    constexpr double operator/(std::uint32_t time) const {
         return m_value_bits / time;
     }
 
-    ThisSize constexpr operator*(size_t mult) {
-        return Size<Bit>(m_value_bits * mult);
+    constexpr void operator+=(ThisSize size) {
+        m_value_bits += size.m_value_bits;
+    }
+    constexpr void operator-=(ThisSize size) {
+        m_value_bits -= size.m_value_bits;
+    }
+
+    constexpr void operator*=(size_t mult) { m_value_bits *= mult; }
+
+    constexpr void operator/=(size_t mult) {
+        m_value_bits = (m_value_bits + mult - 1) / mult;
     }
 
     bool constexpr operator<(ThisSize size) const {
