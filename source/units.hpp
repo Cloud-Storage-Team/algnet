@@ -27,26 +27,31 @@ struct GByte {
     static constexpr uint64_t to_bit_multiplier = (1ull << 23);
 };
 
+// Concept for all types that might be the base for Size
 template <typename T>
-concept HasToBitMultiplier = requires {
+concept IsSizeBase = requires {
     { T::to_bit_multiplier } -> std::convertible_to<uint64_t>;
 };
 
-template <HasToBitMultiplier TSizeBase>
-class TemplateSize {
+template <IsSizeBase TSizeBase>
+class Size {
 public:
-    using Size = TemplateSize<TSizeBase>;
+    using ThisSize = Size<TSizeBase>;
 
-    // Attention: a_value given in TSizeByte units!
-    constexpr TemplateSize(uint64_t a_value)
+    // Attention: a_value given in TSizeBase units!
+    constexpr Size(uint64_t a_value)
         : m_value_bits(a_value * TSizeBase::to_bit_multiplier) {}
 
     constexpr operator uint64_t() const {
         return m_value_bits / TSizeBase::to_bit_multiplier;
     }
 
-    constexpr void operator+=(Size size) { m_value_bits += size.m_value_bits; }
-    constexpr void operator-=(Size size) { m_value_bits -= size.m_value_bits; }
+    constexpr void operator+=(ThisSize size) {
+        m_value_bits += size.m_value_bits;
+    }
+    constexpr void operator-=(ThisSize size) {
+        m_value_bits -= size.m_value_bits;
+    }
 
 private:
     uint64_t m_value_bits;  // Size in bits

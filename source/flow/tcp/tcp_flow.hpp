@@ -19,7 +19,7 @@ class TcpFlow : public IFlow,
                 public std::enable_shared_from_this<TcpFlow<TTcpCC> > {
 public:
     TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
-            std::shared_ptr<IHost> a_dest, TTcpCC a_cc, Size a_packet_size,
+            std::shared_ptr<IHost> a_dest, TTcpCC a_cc, SizeByte a_packet_size,
             Time a_delay_between_packets, std::uint32_t a_packets_to_send,
             bool a_ecn_capable = true)
         : m_id(std::move(a_id)),
@@ -216,14 +216,14 @@ private:
     // Congestion control module
     TTcpCC m_cc;
 
-    Size m_packet_size;
+    SizeByte m_packet_size;
     Time m_delay_between_packets;
     std::uint32_t m_packets_to_send;
     bool m_ecn_capable;
 
     std::uint32_t m_packets_in_flight;
     std::uint32_t m_packets_acked;
-    Size m_sent_bytes;
+    SizeByte m_sent_bytes;
 };
 
 template <typename TTcpCC>

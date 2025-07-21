@@ -58,9 +58,9 @@ requires ValidPacketQueueWithArgs<TPacketQueue, Args...>
 void TestOverflow(Args&&... args) {
     TPacketQueue queue(std::forward<Args>(args)...);
 
-    const Size max_size = queue.get_max_size();
+    const SizeByte max_size = queue.get_max_size();
     const size_t NUMBER_OF_PACKETS = 10;
-    Size packet_size = max_size / NUMBER_OF_PACKETS;
+    SizeByte packet_size = max_size / NUMBER_OF_PACKETS;
 
     sim::Packet packet(packet_size);
 

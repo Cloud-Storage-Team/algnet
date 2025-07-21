@@ -8,7 +8,7 @@
 // nanoseconds
 using Time = std::uint32_t;
 // bytes
-using Size = TemplateSize<Byte>;
+using SizeByte = Size<Byte>;
 using Id = std::string;
 
 // Describes a type used by packet's bitset to store flags

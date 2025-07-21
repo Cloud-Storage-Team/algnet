@@ -6,10 +6,10 @@
 
 namespace sim {
 
-Link::Link(Id a_id, std::weak_ptr<IDevice> a_from,
-           std::weak_ptr<IDevice> a_to, std::uint32_t a_speed_gbps,
-           Time a_delay, Size a_max_from_egress_buffer_size,
-           Size a_max_to_ingress_buffer_size)
+Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
+           std::uint32_t a_speed_gbps, Time a_delay,
+           SizeByte a_max_from_egress_buffer_size,
+           SizeByte a_max_to_ingress_buffer_size)
     : m_id(a_id),
       m_from(a_from),
       m_to(a_to),
@@ -72,17 +72,19 @@ std::shared_ptr<IDevice> Link::get_to() const {
     return m_to.lock();
 };
 
-Size Link::get_from_egress_queue_size() const {
+SizeByte Link::get_from_egress_queue_size() const {
     return m_from_egress.get_size();
 }
 
-Size Link::get_max_from_egress_buffer_size() const {
+SizeByte Link::get_max_from_egress_buffer_size() const {
     return m_from_egress.get_max_size();
 }
 
-Size Link::get_to_ingress_queue_size() const { return m_to_ingress.get_size(); }
+SizeByte Link::get_to_ingress_queue_size() const {
+    return m_to_ingress.get_size();
+}
 
-Size Link::get_max_to_ingress_queue_size() const {
+SizeByte Link::get_max_to_ingress_queue_size() const {
     return m_to_ingress.get_max_size();
 }
 
@@ -117,7 +119,7 @@ Time Link::get_transmission_delay(const Packet& packet) const {
     }
     const std::uint32_t byte_to_bit_multiplier = 8;
 
-    Size packet_size_bit = packet.size_byte * byte_to_bit_multiplier;
+    SizeByte packet_size_bit = packet.size_byte * byte_to_bit_multiplier;
     std::uint32_t transmission_speed_bit_ns = m_speed_gbps;
     return (packet_size_bit + transmission_speed_bit_ns - 1) /
            transmission_speed_bit_ns;

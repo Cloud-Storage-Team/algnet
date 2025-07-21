@@ -10,10 +10,10 @@ namespace sim {
 
 class Link : public ILink, public std::enable_shared_from_this<Link> {
 public:
-    Link(Id a_id, std::weak_ptr<IDevice> a_from,
-         std::weak_ptr<IDevice> a_to, std::uint32_t a_speed_gbps = 1,
-         Time a_delay = 0, Size a_max_from_egress_buffer_size = 4096,
-         Size a_max_to_ingress_buffer_size = 4096);
+    Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
+         std::uint32_t a_speed_gbps = 1, Time a_delay = 0,
+         SizeByte a_max_from_egress_buffer_size = 4096,
+         SizeByte a_max_to_ingress_buffer_size = 4096);
     ~Link() = default;
 
     void schedule_arrival(Packet packet) final;
@@ -23,11 +23,11 @@ public:
     std::shared_ptr<IDevice> get_from() const final;
     std::shared_ptr<IDevice> get_to() const final;
 
-    Size get_from_egress_queue_size() const final;
-    Size get_max_from_egress_buffer_size() const final;
+    SizeByte get_from_egress_queue_size() const final;
+    SizeByte get_max_from_egress_buffer_size() const final;
 
-    Size get_to_ingress_queue_size() const final;
-    Size get_max_to_ingress_queue_size() const final;
+    SizeByte get_to_ingress_queue_size() const final;
+    SizeByte get_max_to_ingress_queue_size() const final;
 
     Id get_id() const final;
 

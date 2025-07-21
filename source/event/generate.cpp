@@ -4,7 +4,8 @@
 
 namespace sim {
 
-Generate::Generate(Time a_time, std::weak_ptr<IFlow> a_flow, Size a_packet_size)
+Generate::Generate(Time a_time, std::weak_ptr<IFlow> a_flow,
+                   SizeByte a_packet_size)
     : Event(a_time), m_flow(a_flow), m_packet_size(a_packet_size) {}
 
 void Generate::operator()() {

@@ -1,7 +1,7 @@
 #include "simple_packet_queue.hpp"
 
 namespace sim {
-SimplePacketQueue::SimplePacketQueue(Size a_max_size)
+SimplePacketQueue::SimplePacketQueue(SizeByte a_max_size)
     : m_queue(), m_size(0), m_max_size(a_max_size) {}
 
 bool SimplePacketQueue::push(Packet packet) {
@@ -28,10 +28,10 @@ void SimplePacketQueue::pop() {
     m_queue.pop();
 }
 
-Size SimplePacketQueue::get_size() const { return m_size; }
+SizeByte SimplePacketQueue::get_size() const { return m_size; }
 
 bool SimplePacketQueue::empty() const { return m_queue.empty(); }
 
-Size SimplePacketQueue::get_max_size() const { return m_max_size; }
+SizeByte SimplePacketQueue::get_max_size() const { return m_max_size; }
 
 }  // namespace sim
