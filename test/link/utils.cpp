@@ -35,6 +35,6 @@ sim::DeviceType DeviceMock::get_type() const {
     return sim::DeviceType::RECEIVER;
 };
 
-TimeNs DeviceMock::process() { return 0; };
+TimeNs DeviceMock::process() { return TimeNs(0); };
 
 }  // namespace test

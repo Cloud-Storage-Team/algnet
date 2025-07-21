@@ -11,7 +11,7 @@ namespace sim {
 class Link : public ILink, public std::enable_shared_from_this<Link> {
 public:
     Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
-         std::uint32_t a_speed_gbps = 1, TimeNs a_delay = 0,
+         std::uint32_t a_speed_gbps = 1, TimeNs a_delay = TimeNs(0),
          SizeByte a_max_from_egress_buffer_size = SizeByte(4096),
          SizeByte a_max_to_ingress_buffer_size = SizeByte(4096));
     ~Link() = default;

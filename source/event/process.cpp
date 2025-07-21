@@ -16,7 +16,7 @@ void Process::operator()() {
 
     // TODO: think about better way of cancelling event rescheduling and
     // signaling errors
-    if (process_time == 0) {
+    if (process_time == TimeNs(0)) {
         return;
     }
 

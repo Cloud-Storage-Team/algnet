@@ -8,7 +8,7 @@ sim::DeviceType TestDevice::get_type() const {
     return sim::DeviceType::SWITCH;
 };
 
-TimeNs TestDevice::process() { return 0; };
+TimeNs TestDevice::process() { return TimeNs(0); };
 
 std::vector<std::shared_ptr<sim::IDevice>> createTestDevices(size_t count) {
     std::vector<std::shared_ptr<sim::IDevice>> devices;

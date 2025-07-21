@@ -15,7 +15,7 @@ void SendData::operator()() {
     TimeNs process_time = m_device.lock()->send_packet();
 
     // TODO: think about better way of cancelling event rescheduling
-    if (process_time == 0) {
+    if (process_time == TimeNs(0)) {
         return;
     }
 

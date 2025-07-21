@@ -30,7 +30,7 @@ TimeNs YamlParser::parse_simulation_time(const YAML::Node &config) {
         throw std::runtime_error(
             "No simulation time specified in the simulation config");
     }
-    return config["simulation_time"].as<TimeNs>();
+    return TimeNs(config["simulation_time"].as<uint32_t>());
 }
 
 void YamlParser::process_devices(const YAML::Node &config) {

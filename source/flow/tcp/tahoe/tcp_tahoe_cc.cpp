@@ -16,20 +16,20 @@ bool TcpTahoeCC::on_ack(TimeNs rtt, bool ecn_flag) {
         return true;
     }
     if (m_cwnd < m_ssthresh) {
-        m_cwnd *= 2;
+        m_cwnd++;
     } else {
-        m_cwnd += 1.;
+        m_cwnd += 1 / m_cwnd;
     }
     return false;
 }
 
-TimeNs TcpTahoeCC::get_pacing_delay() const { return 0; }
+TimeNs TcpTahoeCC::get_pacing_delay() const { return TimeNs(0); }
 
 double TcpTahoeCC::get_cwnd() const { return m_cwnd; }
 
 std::string TcpTahoeCC::to_string() const {
     return fmt::format("[delay threshold: {}, cwnd: {}, sstresh: {}]",
-                       m_delay_threshold, m_cwnd, m_ssthresh);
+                       m_delay_threshold.value(), m_cwnd, m_ssthresh);
 }
 
 }  // namespace sim

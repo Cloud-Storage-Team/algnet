@@ -96,7 +96,7 @@ public:
     void start(TimeNs a_stop_time) {
         recalculate_paths();
         Scheduler::get_instance().add<Stop>(a_stop_time);
-        constexpr TimeNs start_time = 0;
+        constexpr TimeNs start_time = TimeNs(0);
 
         for (auto flow : m_flows) {
             Scheduler::get_instance().add<StartFlow>(start_time, flow);

@@ -3,10 +3,11 @@
 #include <memory>
 #include <string>
 
+#include "units/time.hpp"
 #include "units/units.hpp"
 
 // nanoseconds
-using TimeNs = std::uint32_t;
+using TimeNs = Time<Nanoseconds>;
 // bytes
 using SizeByte = Size<Byte>;
 using Id = std::string;

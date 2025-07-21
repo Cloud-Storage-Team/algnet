@@ -25,7 +25,7 @@ void Host::enqueue_packet(Packet packet) {
 
 TimeNs Host::process() {
     std::shared_ptr<ILink> current_inlink = next_inlink();
-    TimeNs total_processing_time = 1;
+    TimeNs total_processing_time = TimeNs(1);
 
     if (current_inlink == nullptr) {
         LOG_WARN("No available inlinks for device");
@@ -66,14 +66,14 @@ TimeNs Host::process() {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
     if (m_process_scheduler.notify_about_finish(current_time +
                                                 total_processing_time)) {
-        return 0;
+        return TimeNs(0);
     }
 
     return total_processing_time;
 }
 
 TimeNs Host::send_packet() {
-    TimeNs total_processing_time = 1;
+    TimeNs total_processing_time = TimeNs(1);
 
     if (m_nic_buffer.empty()) {
         LOG_WARN("No packets to send");
@@ -98,7 +98,7 @@ TimeNs Host::send_packet() {
     if (m_send_data_scheduler.notify_about_finish(
             Scheduler::get_instance().get_current_time() +
             total_processing_time)) {
-        return 0;
+        return TimeNs(0);
     }
 
     return total_processing_time;

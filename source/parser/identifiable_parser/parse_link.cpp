@@ -24,8 +24,8 @@ std::shared_ptr<Link> Parser<Link>::parse_object(const YAML::Node& key_node,
         return nullptr;
     }
 
-    uint32_t latency =
-        parse_with_default<uint32_t>(value_node, "latency", parse_latency, 0u);
+    TimeNs latency = parse_with_default<TimeNs>(value_node, "latency",
+                                                parse_latency, TimeNs(0));
 
     uint32_t speed = parse_with_default<uint32_t>(value_node, "throughput",
                                                   parse_throughput, 1u);

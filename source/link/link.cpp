@@ -115,13 +115,13 @@ void Link::Transmit::operator()() {
 TimeNs Link::get_transmission_delay(const Packet& packet) const {
     if (m_speed_gbps == 0) {
         LOG_WARN("Passed zero link speed");
-        return 0;
+        return TimeNs(0);
     }
 
     Size<Bit> packet_size_bit(packet.size_byte);
     std::uint32_t transmission_speed_bit_ns = m_speed_gbps;
-    return (packet_size_bit.get_bits() + transmission_speed_bit_ns - 1) /
-           transmission_speed_bit_ns;
+    return TimeNs((packet_size_bit.get_bits() + transmission_speed_bit_ns - 1) /
+                  transmission_speed_bit_ns);
 };
 
 void Link::transmit() {

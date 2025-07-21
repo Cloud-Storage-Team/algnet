@@ -45,7 +45,7 @@ private:
     }
 
     std::uint32_t m_cnt = 0;
-    TimeNs m_earliest_possible_time = 0;
+    TimeNs m_earliest_possible_time = TimeNs(0);
 };
 
 }  // namespace sim

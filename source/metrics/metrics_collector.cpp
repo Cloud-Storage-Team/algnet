@@ -24,7 +24,7 @@ void MetricsCollector::add_delivery_rate(Id flow_id, TimeNs time,
 }
 
 void MetricsCollector::add_RTT(Id flow_id, TimeNs time, TimeNs value) {
-    m_RTT_storage.add_record(std::move(flow_id), time, value);
+    m_RTT_storage.add_record(std::move(flow_id), time, value.value());
 }
 
 void MetricsCollector::add_queue_size(Id link_id, TimeNs time, SizeByte value) {

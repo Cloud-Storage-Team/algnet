@@ -9,7 +9,7 @@ TEST_F(LinkTest, ScheduledCorrectly) {
         std::make_shared<DeviceMock>(DeviceMock());
     std::shared_ptr<sim::IDevice> dst =
         std::make_shared<DeviceMock>(DeviceMock());
-    auto link = std::make_shared<sim::Link>("", src, dst, 10, 10);
+    auto link = std::make_shared<sim::Link>("", src, dst, 10, TimeNs(10));
 
     int NUMBER_OF_PACKETS = 10;
     for (int i = 0; i < NUMBER_OF_PACKETS; i++) {

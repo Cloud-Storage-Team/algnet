@@ -14,7 +14,7 @@ void Generate::operator()() {
     }
 
     TimeNs generate_delay = m_flow.lock()->create_new_data_packet();
-    if (generate_delay == 0) {
+    if (generate_delay == TimeNs(0)) {
         return;
     }
 

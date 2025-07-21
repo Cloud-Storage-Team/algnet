@@ -44,7 +44,7 @@ void MetricsStorage::draw_on_plot(matplot::figure_handle& fig,
                                   std::string_view name) const {
     std::vector<double> x_data;
     std::transform(begin(m_records), end(m_records), std::back_inserter(x_data),
-                   [](auto const& pair) { return pair.first; });
+                   [](auto const& pair) { return pair.first.value(); });
 
     std::vector<double> y_data;
     std::transform(begin(m_records), end(m_records), std::back_inserter(y_data),

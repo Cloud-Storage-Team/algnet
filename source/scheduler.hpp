@@ -39,7 +39,7 @@ public:
 
 private:
     // Private constructor to prevent instantiation
-    Scheduler() {}
+    Scheduler() : m_current_event_local_time(TimeNs(0)) {}
     // No copy constructor and assignment operators
     Scheduler(const Scheduler&) = delete;
     Scheduler& operator=(const Scheduler&) = delete;

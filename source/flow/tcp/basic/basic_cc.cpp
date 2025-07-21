@@ -12,7 +12,7 @@ bool BasicCC::on_ack(TimeNs rtt, bool ecn_flag) {
 
 double BasicCC::get_cwnd() const { return std::numeric_limits<double>::max(); }
 
-TimeNs BasicCC::get_pacing_delay() const { return 0; }
+TimeNs BasicCC::get_pacing_delay() const { return TimeNs(0); }
 
 std::string BasicCC::to_string() const { return ""; }
 

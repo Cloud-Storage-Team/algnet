@@ -9,7 +9,8 @@ namespace sim {
 
 struct Packet {
     Packet(SizeByte a_size_byte = SizeByte(0), IFlow* a_flow = nullptr,
-           Id a_source_id = "", Id a_dest_id = "", TimeNs a_sent_time = 0,
+           Id a_source_id = "", Id a_dest_id = "",
+           TimeNs a_sent_time = TimeNs(0),
            SizeByte a_sent_bytes_at_origin = SizeByte(0),
            bool a_ecn_capable_transport = true,
            bool a_congestion_experienced = false);

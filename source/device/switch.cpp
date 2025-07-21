@@ -18,7 +18,7 @@ bool Switch::notify_about_arrival(TimeNs arrival_time) {
 DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
 
 TimeNs Switch::process() {
-    TimeNs total_processing_time = 1;
+    TimeNs total_processing_time = TimeNs(1);
     std::shared_ptr<ILink> link = next_inlink();
 
     if (link == nullptr) {
@@ -67,7 +67,7 @@ TimeNs Switch::process() {
     if (m_process_scheduler.notify_about_finish(
             Scheduler::get_instance().get_current_time() +
             total_processing_time)) {
-        return 0;
+        return TimeNs(0);
     }
 
     return total_processing_time;

@@ -50,7 +50,7 @@ public:
 
     TimeNs create_new_data_packet() final {
         if (m_packets_to_send == 0) {
-            return 0;
+            return TimeNs(0);
         }
         if (try_to_put_data_to_device()) {
             --m_packets_to_send;
@@ -78,7 +78,7 @@ public:
                                                      current_time, rtt);
 
             double delivery_bit_rate =
-                Size<Bit>(m_sent_bytes - packet.sent_bytes_at_origin) / rtt;
+                (m_sent_bytes - packet.sent_bytes_at_origin) / rtt;
             MetricsCollector::get_instance().add_delivery_rate(
                 packet.flow->get_id(), current_time, delivery_bit_rate);
 
@@ -98,7 +98,7 @@ public:
 
             if (old_cwnd != cwnd) {
                 MetricsCollector::get_instance().add_cwnd(
-                    m_id, current_time - 1, old_cwnd);
+                    m_id, current_time - TimeNs(1), old_cwnd);
                 MetricsCollector::get_instance().add_cwnd(m_id, current_time,
                                                           cwnd);
             }
@@ -185,7 +185,7 @@ private:
         if (m_packets_in_flight < m_cc.get_cwnd()) {
             Packet packet = generate_packet();
             TimeNs pacing_delay = m_cc.get_pacing_delay();
-            if (pacing_delay == 0) {
+            if (pacing_delay == TimeNs(0)) {
                 send_packet_now(packet);
             } else {
                 TimeNs curr_time = Scheduler::get_instance().get_current_time();

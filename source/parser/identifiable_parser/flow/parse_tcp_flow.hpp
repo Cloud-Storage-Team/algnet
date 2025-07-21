@@ -26,7 +26,7 @@ public:
             SizeByte(value_node["packet_size"].as<uint64_t>());
         std::uint32_t number_of_packets =
             value_node["number_of_packets"].as<std::uint32_t>();
-        TimeNs packet_interval = value_node["packet_interval"].as<TimeNs>();
+        TimeNs packet_interval = TimeNs(value_node["packet_interval"].as<uint32_t>());
 
         return std::make_shared<TcpFlow<TTcpCC>>(
             id, sender_ptr, receiver_ptr, cc, packet_size, packet_interval,

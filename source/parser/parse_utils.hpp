@@ -10,7 +10,7 @@
 #include "types.hpp"
 
 uint32_t parse_throughput(const std::string& throughput);
-uint32_t parse_latency(const std::string& latency);
+TimeNs parse_latency(const std::string& latency);
 SizeByte parse_buffer_size(const std::string& buffer_size);
 
 // Parses node[field_name] using value_parser if node contains filed_name;

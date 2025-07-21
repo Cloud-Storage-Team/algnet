@@ -26,10 +26,10 @@ uint32_t parse_throughput(const std::string &throughput) {
     throw std::runtime_error("Unsupported throughput unit: " + unit);
 }
 
-uint32_t parse_latency(const std::string &latency) {
+TimeNs parse_latency(const std::string &latency) {
     auto [value, unit] = parse_value_unit(latency);
     if (unit == "ns") {
-        return value;
+        return TimeNs(value);
     }
     throw std::runtime_error("Unsupported latency unit: " + unit);
 }
