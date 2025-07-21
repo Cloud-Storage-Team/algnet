@@ -117,11 +117,10 @@ Time Link::get_transmission_delay(const Packet& packet) const {
         LOG_WARN("Passed zero link speed");
         return 0;
     }
-    const std::uint32_t byte_to_bit_multiplier = 8;
 
-    SizeByte packet_size_bit = packet.size_byte * byte_to_bit_multiplier;
+    Size<Bit> packet_size_bit(packet.size_byte);
     std::uint32_t transmission_speed_bit_ns = m_speed_gbps;
-    return (packet_size_bit + transmission_speed_bit_ns - 1) /
+    return (packet_size_bit.get_bits() + transmission_speed_bit_ns - 1) /
            transmission_speed_bit_ns;
 };
 

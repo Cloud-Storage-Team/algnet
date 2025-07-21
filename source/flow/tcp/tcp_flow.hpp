@@ -78,7 +78,7 @@ public:
                                                      current_time, rtt);
 
             double delivery_bit_rate =
-                8 * (m_sent_bytes - packet.sent_bytes_at_origin) / rtt;
+                Size<Bit>(m_sent_bytes - packet.sent_bytes_at_origin) / rtt;
             MetricsCollector::get_instance().add_delivery_rate(
                 packet.flow->get_id(), current_time, delivery_bit_rate);
 
@@ -106,8 +106,9 @@ public:
                    m_flag_manager.get_flag(packet, packet_type_label) ==
                        PacketType::DATA) {
             // data packet delivered to destination device; send ack
-            Packet ack(1, this, m_dest.lock()->get_id(), m_src.lock()->get_id(),
-                       packet.sent_time, packet.sent_bytes_at_origin,
+            Packet ack(SizeByte(1), this, m_dest.lock()->get_id(),
+                       m_src.lock()->get_id(), packet.sent_time,
+                       packet.sent_bytes_at_origin,
                        packet.ecn_capable_transport,
                        packet.congestion_experienced);
             m_flag_manager.set_flag(packet, packet_type_label, PacketType::ACK);
