@@ -7,56 +7,56 @@
 
 struct Bit {
     static constexpr uint64_t to_bit_multiplier = 1;
-    static constexpr std::string name = "b";
+    // static constexpr std::string name = "b";
 };
 
 struct Byte {
     static constexpr uint64_t to_bit_multiplier = (1ull << 3);
-    static constexpr std::string name = "B";
+    // static constexpr std::string name = "B";
 };
 
 struct KBit {
     static constexpr uint64_t to_bit_multiplier = (1ull << 10);
-    static constexpr std::string name = "Kb";
+    // static constexpr std::string name = "Kb";
 };
 
 struct KByte {
     static constexpr uint64_t to_bit_multiplier = (1ull << 13);
-    static constexpr std::string name = "KB";
+    // static constexpr std::string name = "KB";
 };
 
 struct MBit {
     static constexpr uint64_t to_bit_multiplier = (1ull << 20);
-    static constexpr std::string name = "Mb";
+    // static constexpr std::string name = "Mb";
 };
 
 struct MByte {
     static constexpr uint64_t to_bit_multiplier = (1ull << 23);
-    static constexpr std::string name = "MB";
+    // static constexpr std::string name = "MB";
 };
 
 struct GBit {
     static constexpr uint64_t to_bit_multiplier = (1ull << 30);
-    static constexpr std::string name = "Gb";
+    // static constexpr std::string name = "Gb";
 };
 
 struct GByte {
     static constexpr uint64_t to_bit_multiplier = (1ull << 33);
-    static constexpr std::string name = "GB";
+    // static constexpr std::string name = "GB";
 };
 
 // Concept for all types that might be the base for Size
 template <typename T>
 concept IsSizeBase = requires {
     { T::to_bit_multiplier } -> std::convertible_to<uint64_t>;
-    { T::name } -> std::convertible_to<std::string>;
+    // { T::name } -> std::convertible_to<std::string>;
 };
 
 template <IsSizeBase TSizeBase>
 class Size {
 public:
     using ThisSize = Size<TSizeBase>;
-    static constexpr std::string unit_name = TSizeBase::name;
+    // static constexpr std::string unit_name = TSizeBase::name;
 
     template <IsSizeBase USizeBase>
     constexpr Size(Size<USizeBase> a_size) : m_value_bits(a_size.get_bits()) {}

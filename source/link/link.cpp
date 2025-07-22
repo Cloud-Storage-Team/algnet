@@ -117,7 +117,7 @@ TimeNs Link::get_transmission_delay(const Packet& packet) const {
         LOG_WARN("Passed zero link speed");
         return TimeNs(0);
     }
-    return packet.size_byte / Speed<Byte, Nanosecond>(m_speed_gbps);
+    return packet.size_byte / m_speed_gbps;
 };
 
 void Link::transmit() {
