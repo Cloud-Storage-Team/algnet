@@ -17,7 +17,7 @@ public:
     ~LinkQueue() = default;
 
     bool push(Packet packet) final;
-    Packet front() final;
+    Packet front() const final;
     void pop() final;
 
     Size get_size() const final;

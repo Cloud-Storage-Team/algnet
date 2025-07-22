@@ -31,7 +31,7 @@ bool LinkQueue::push(Packet packet) {
     return result;
 }
 
-Packet LinkQueue::front() { return m_queue.front(); }
+Packet LinkQueue::front() const { return m_queue.front(); }
 
 void LinkQueue::pop() {
     m_queue.pop();

@@ -13,7 +13,7 @@ public:
     // returns true on succseed (remaining space is enought), false
     // otherwice
     bool push(Packet packet) final;
-    Packet front() final;
+    Packet front() const final;
     void pop() final;
 
     Size get_size() const final;
