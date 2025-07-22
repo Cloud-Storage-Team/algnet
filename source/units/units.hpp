@@ -14,7 +14,7 @@ template <IsSizeBase TSpeedSizeBase, IsTimeBase TSpeedTimeBase,
           IsTimeBase TTimeBase>
 constexpr Size<Bit> operator*(Speed<TSpeedSizeBase, TSpeedTimeBase> speed,
                               Time<TTimeBase> time) {
-    return Size<Bit>(speed.m_bit_per_ns * time.value_nanoseconds());
+    return Size<Bit>(speed.m_value_bit_per_ns * time.value_nanoseconds());
 }
 
 template <IsSizeBase TSizeBase, IsSizeBase TSpeedSizeBase,
