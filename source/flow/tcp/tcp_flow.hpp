@@ -29,7 +29,8 @@ public:
           m_ecn_capable(a_ecn_capable),
           m_packets_in_flight(0),
           m_packets_acked(0),
-          m_sent_bytes(0) {
+          m_sent_bytes(0),
+          m_avg_rtt(0.0) {
         if (m_src.lock() == nullptr) {
             throw std::invalid_argument("Sender for TcpFlow is nullptr");
         }
@@ -56,6 +57,7 @@ public:
             }
 
             Time rtt = current_time - packet.sent_time;
+            update_avg_rtt(rtt);
             MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
                                                      current_time, rtt);
 
@@ -69,7 +71,7 @@ public:
             if (m_packets_in_flight > 0) {
                 m_packets_in_flight--;
             }
-            if (!m_cc.on_ack(rtt, packet.congestion_experienced)) {
+            if (!m_cc.on_ack(rtt, m_avg_rtt, packet.congestion_experienced)) {
                 // No congestion
                 m_packets_acked++;
             }
@@ -138,6 +140,7 @@ private:
         Packet m_packet;
     };
 
+    // Attention: this method DOES NOT set field sent_time to packet
     Packet generate_packet() {
         sim::Packet packet;
         m_flag_manager.set_flag(packet, packet_type_label, PacketType::DATA);
@@ -145,7 +148,6 @@ private:
         packet.flow = this;
         packet.source_id = get_sender()->get_id();
         packet.dest_id = get_receiver()->get_id();
-        packet.sent_time = Scheduler::get_instance().get_current_time();
         packet.sent_bytes_at_origin = m_sent_bytes;
         packet.ecn_capable_transport = m_ecn_capable;
         return packet;
@@ -190,7 +192,19 @@ private:
         }
     }
 
+    void update_avg_rtt(Time rtt) {
+        if (m_avg_rtt == 0.0) {
+            // If not initialized before
+            m_avg_rtt = rtt;
+        } else {
+            m_avg_rtt = m_avg_rtt * M_RTT_WEIGHT_DECAY_FACTOR +
+                        rtt * (1 - M_RTT_WEIGHT_DECAY_FACTOR);
+        }
+    }
+
 private:
+    const static inline double M_RTT_WEIGHT_DECAY_FACTOR = 0.8;
+
     static bool m_is_flag_manager_initialized;
     static FlagManager<std::string, PacketFlagsBase> m_flag_manager;
 
@@ -209,6 +223,8 @@ private:
     std::uint32_t m_packets_in_flight;
     std::uint32_t m_packets_acked;
     Size m_sent_bytes;
+
+    double m_avg_rtt;
 };
 
 template <typename TTcpCC>
