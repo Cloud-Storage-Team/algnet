@@ -60,6 +60,11 @@ uint32_t parse_with_default(
 
 std::unique_ptr<sim::IHasher> parse_hasher(const YAML::Node &node) {
     const std::string hasher_field_name = "hasher";
+    if (!node[hasher_field_name]) {
+        LOG_WARN("No hasher field found, using BaseHasher by default");
+        return std::make_unique<sim::BaseHasher>();
+    }
+    
     const std::string hasher_value = node[hasher_field_name].as<std::string>();
     if (hasher_value == "random") {
         return std::make_unique<sim::RandomHasher>();
@@ -70,6 +75,6 @@ std::unique_ptr<sim::IHasher> parse_hasher(const YAML::Node &node) {
     if (hasher_value == "symmetric") {
         return std::make_unique<sim::SymmetricHasher>();
     }
-    LOG_WARN(fmt::format("Unknown hasher type: {}", hasher_value));
+    LOG_WARN(fmt::format("Unknown hasher type: {}. Using BaseHasher by default", hasher_value));
     return std::make_unique<sim::BaseHasher>();
 }
