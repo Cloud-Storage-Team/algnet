@@ -9,7 +9,7 @@
 #include "logger/logger.hpp"
 #include "types.hpp"
 
-uint32_t parse_throughput(const std::string& throughput);
+SpeedGbps parse_throughput(const std::string& throughput);
 TimeNs parse_latency(const std::string& latency);
 SizeByte parse_buffer_size(const std::string& buffer_size);
 

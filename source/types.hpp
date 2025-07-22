@@ -6,10 +6,9 @@
 #include "units/time.hpp"
 #include "units/units.hpp"
 
-// nanoseconds
 using TimeNs = Time<Nanosecond>;
-// bytes
 using SizeByte = Size<Byte>;
+using SpeedGbps = Speed<GBit, Second>;
 using Id = std::string;
 
 // Describes a type used by packet's bitset to store flags

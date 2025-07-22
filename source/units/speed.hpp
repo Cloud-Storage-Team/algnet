@@ -8,6 +8,9 @@ public:
     constexpr Speed(Size<TSizeBase> size, Time<TTimeBase> time)
         : m_bit_per_ns(size.get_bits() / time.get_nanoseconds()) {}
 
+    // Attenstio: value given in TSizeBase per TTimeBase units!
+    constexpr explicit Speed(long double value): m_bit_per_ns(value * TSizeBase::to_bit_multiplier / TTimeBase::to_nanoseconds_multiplier);
+
     template <IsSizeBase USizeBase, IsTimeBase UTimeBase>
     constexpr Speed(Speed<USizeBase, UTimeBase> speed)
         : m_bit_per_ns(speed.value_bit_per_ns()) {}
