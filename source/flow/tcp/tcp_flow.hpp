@@ -164,7 +164,7 @@ private:
     Packet generate_packet() {
         sim::Packet packet;
         m_flag_manager.set_flag(packet, packet_type_label, PacketType::DATA);
-        packet.size_byte = m_packet_size;
+        packet.size = m_packet_size;
         packet.flow = this;
         packet.source_id = get_sender()->get_id();
         packet.dest_id = get_receiver()->get_id();
@@ -176,7 +176,7 @@ private:
 
     void send_packet_now(Packet packet) {
         m_packets_in_flight++;
-        m_sent_bytes += packet.size_byte;
+        m_sent_bytes += packet.size;
         packet.sent_time = Scheduler::get_instance().get_current_time();
         m_src.lock()->enqueue_packet(packet);
     }

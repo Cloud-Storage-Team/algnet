@@ -7,19 +7,19 @@
 namespace sim {
 
 Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
-           SpeedGbps a_speed_gbps, TimeNs a_delay,
+           SpeedGbps a_speed, TimeNs a_delay,
            SizeByte a_max_from_egress_buffer_size,
            SizeByte a_max_to_ingress_buffer_size)
     : m_id(a_id),
       m_from(a_from),
       m_to(a_to),
-      m_speed_gbps(a_speed_gbps),
+      m_speed(a_speed),
       m_propagation_delay(a_delay),
       m_from_egress(a_max_from_egress_buffer_size),
       m_to_ingress(a_max_to_ingress_buffer_size) {
     if (a_from.expired() || a_to.expired()) {
         LOG_WARN("Passed link to device is expired");
-    } else if (a_speed_gbps == SpeedGbps(0)) {
+    } else if (a_speed == SpeedGbps(0)) {
         LOG_WARN("Passed zero link speed");
     }
 }
@@ -113,11 +113,11 @@ void Link::Transmit::operator()() {
 }
 
 TimeNs Link::get_transmission_delay(const Packet& packet) const {
-    if (m_speed_gbps == SpeedGbps(0)) {
+    if (m_speed == SpeedGbps(0)) {
         LOG_WARN("Passed zero link speed");
         return TimeNs(0);
     }
-    return packet.size_byte / m_speed_gbps;
+    return packet.size / m_speed;
 };
 
 void Link::transmit() {

@@ -8,7 +8,7 @@
 namespace sim {
 
 struct Packet {
-    Packet(SizeByte a_size_byte = SizeByte(0), IFlow* a_flow = nullptr,
+    Packet(SizeByte a_size = SizeByte(0), IFlow* a_flow = nullptr,
            Id a_source_id = "", Id a_dest_id = "",
            TimeNs a_sent_time = TimeNs(0),
            SizeByte a_sent_bytes_at_origin = SizeByte(0),
@@ -22,7 +22,7 @@ struct Packet {
     BitSet<PacketFlagsBase> flags;
     Id source_id;
     Id dest_id;
-    SizeByte size_byte;
+    SizeByte size;
     IFlow* flow;
     TimeNs sent_time;  // Note: ACK's sent time is the data packet sent time
     SizeByte
