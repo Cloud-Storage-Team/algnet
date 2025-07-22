@@ -12,7 +12,7 @@ public:
     static MetricsCollector& get_instance();
 
     void add_cwnd(Id flow_id, TimeNs time, double cwnd);
-    void add_delivery_rate(Id flow_id, TimeNs time, double value);
+    void add_delivery_rate(Id flow_id, TimeNs time, SpeedGbps value);
     void add_RTT(Id flow_id, TimeNs time, TimeNs value);
     void add_queue_size(Id link_id, TimeNs time, SizeByte value);
 

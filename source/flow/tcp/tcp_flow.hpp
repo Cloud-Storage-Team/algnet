@@ -77,10 +77,10 @@ public:
             MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
                                                      current_time, rtt);
 
-            Speed<Bit, Nanosecond> delivery_bit_rate =
+            SpeedGbps delivery_bit_rate =
                 (m_sent_bytes - packet.sent_bytes_at_origin) / rtt;
             MetricsCollector::get_instance().add_delivery_rate(
-                packet.flow->get_id(), current_time, delivery_bit_rate.value());
+                packet.flow->get_id(), current_time, delivery_bit_rate);
 
             double old_cwnd = m_cc.get_cwnd();
 

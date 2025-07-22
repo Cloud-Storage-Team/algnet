@@ -19,8 +19,8 @@ void MetricsCollector::add_cwnd(Id flow_id, TimeNs time, double cwnd) {
 }
 
 void MetricsCollector::add_delivery_rate(Id flow_id, TimeNs time,
-                                         double value) {
-    m_rate_storage.add_record(std::move(flow_id), time, value);
+                                         SpeedGbps value) {
+    m_rate_storage.add_record(std::move(flow_id), time, value.value());
 }
 
 void MetricsCollector::add_RTT(Id flow_id, TimeNs time, TimeNs value) {
