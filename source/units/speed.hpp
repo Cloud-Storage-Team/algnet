@@ -28,6 +28,8 @@ public:
         return equal(m_bit_per_ns, speed.value_bit_per_ns());
     }
 
+    constexpr bool operator!=(ThisSpeed speed) { return !(*this == speed); }
+
 private:
     long double m_bit_per_ns;  // value in bit per nanosecond
 };

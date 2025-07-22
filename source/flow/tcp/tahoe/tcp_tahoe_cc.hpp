@@ -4,7 +4,7 @@
 namespace sim {
 class TcpTahoeCC : public ITcpCC {
 public:
-    TcpTahoeCC(TimeNs a_dealay_threshold = TimeNs(4000), double a_sstresh = 8);
+    TcpTahoeCC(TimeNs a_delay_threshold = TimeNs(4000), double a_ssthresh = 8);
     ~TcpTahoeCC() = default;
 
     bool on_ack(TimeNs rtt, bool ecn_flag) final;

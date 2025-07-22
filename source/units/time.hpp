@@ -61,7 +61,7 @@ public:
         return Time<Nanosecond>(m_value_ns * mult);
     }
 
-    constexpr ThisTime operator++() {
+    constexpr ThisTime& operator++() {
         m_value_ns += TTimeBase::to_nanoseconds_multiplier;
         return *this;
     }
