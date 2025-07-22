@@ -158,7 +158,7 @@ private:
         m_src.lock()->enqueue_packet(std::move(packet));
     }
 
-    // Send (ot plan sending) as many packets as possible
+    // Send (or plan sending) as many packets as possible
     void send_packets() {
         constexpr double EPS = 1e-6;
 
