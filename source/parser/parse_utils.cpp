@@ -15,13 +15,13 @@ static std::pair<uint32_t, std::string> parse_value_unit(
     return std::make_pair(value, unit);
 }
 
-SpeedGbps parse_throughput(const std::string &throughput) {
+SpeedGbps parse_speed(const std::string &throughput) {
     auto [value, unit] = parse_value_unit(throughput);
     if (unit == "Gbps") {
         return SpeedGbps(value);
     }
     if (unit == "Mbps") {
-        return Speed<MBi value / 1000;  // Convert to Gbps
+        return Speed<MBit, Second>(value);
     }
     throw std::runtime_error("Unsupported throughput unit: " + unit);
 }

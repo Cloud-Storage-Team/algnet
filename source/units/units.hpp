@@ -17,7 +17,7 @@ constexpr Size<Bit> operator*(Speed<TSizeBase, TTimeBase> speed,
 }
 
 template <IsSizeBase TSizeBase, IsTimeBase TTimeBase>
-constexpr Time<Nanosecond> operator/(Size<TSizeBase> size,
-                                     Speed<TSizeBase, TTimeBase> speed) {
-    return Time<Nanosecond>(size.get_bits() / speed.get_bits_per_ns());
+constexpr Time<TTimeBase> operator/(Size<TSizeBase> size,
+                                    Speed<TSizeBase, TTimeBase> speed) {
+    return Time<Nanosecond>(size.get_bits() / speed.value_bit_per_ns());
 }

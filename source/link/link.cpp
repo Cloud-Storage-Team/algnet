@@ -7,7 +7,7 @@
 namespace sim {
 
 Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
-           std::uint32_t a_speed_gbps, TimeNs a_delay,
+           SpeedGbps a_speed_gbps, TimeNs a_delay,
            SizeByte a_max_from_egress_buffer_size,
            SizeByte a_max_to_ingress_buffer_size)
     : m_id(a_id),
@@ -19,7 +19,7 @@ Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
       m_to_ingress(a_max_to_ingress_buffer_size) {
     if (a_from.expired() || a_to.expired()) {
         LOG_WARN("Passed link to device is expired");
-    } else if (a_speed_gbps == 0) {
+    } else if (a_speed_gbps == SpeedGbps(0)) {
         LOG_WARN("Passed zero link speed");
     }
 }
@@ -113,15 +113,11 @@ void Link::Transmit::operator()() {
 }
 
 TimeNs Link::get_transmission_delay(const Packet& packet) const {
-    if (m_speed_gbps == 0) {
+    if (m_speed_gbps == SpeedGbps(0)) {
         LOG_WARN("Passed zero link speed");
         return TimeNs(0);
     }
-
-    Size<Bit> packet_size_bit(packet.size_byte);
-    std::uint32_t transmission_speed_bit_ns = m_speed_gbps;
-    return TimeNs((packet_size_bit.get_bits() + transmission_speed_bit_ns - 1) /
-                  transmission_speed_bit_ns);
+    return packet.size_byte / Speed<Byte, Nanosecond>(m_speed_gbps);
 };
 
 void Link::transmit() {

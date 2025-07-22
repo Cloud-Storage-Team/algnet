@@ -27,8 +27,8 @@ std::shared_ptr<Link> Parser<Link>::parse_object(const YAML::Node& key_node,
     TimeNs latency = parse_with_default<TimeNs>(value_node, "latency",
                                                 parse_latency, TimeNs(0));
 
-    uint32_t speed = parse_with_default<uint32_t>(value_node, "throughput",
-                                                  parse_throughput, 1u);
+    SpeedGbps speed = parse_with_default<SpeedGbps>(value_node, "throughput",
+                                                    parse_speed, SpeedGbps(1));
 
     SizeByte ingress_buffer_size = parse_with_default<SizeByte>(
         value_node, "ingress_buffer_size", parse_buffer_size, SizeByte(4096u));

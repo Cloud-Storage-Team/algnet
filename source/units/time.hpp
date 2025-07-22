@@ -5,32 +5,40 @@
 #include <iostream>
 #include <type_traits>
 
+#include "ld_comparation.hpp"
+
 struct Nanosecond {
     static constexpr uint64_t to_nanoseconds_multiplier = 1;
+    static constexpr std::string name = "ns";
 };
 
 struct Microsecond {
     static constexpr uint64_t to_nanoseconds_multiplier = 1'000;
+    static constexpr std::string name = "mcs";
 };
 
 struct Milisecond {
     static constexpr uint64_t to_nanoseconds_multiplier = 1'000'000;
+    static constexpr std::string name = "mls";
 };
 
 struct Second {
     static constexpr uint64_t to_nanoseconds_multiplier = 1'000'000'000;
+    static constexpr std::string name = "s";
 };
 
 // Concept for all types that might be the base for Time
 template <typename T>
 concept IsTimeBase = requires {
     { T::to_nanoseconds_multiplier } -> std::convertible_to<uint64_t>;
+    { T::name } -> std::convertible_to<std::string>;
 };
 
 template <IsTimeBase TTimeBase>
 class Time {
 public:
     using ThisTime = Time<TTimeBase>;
+    static constexpr std::string unit_name = TTimeBase::name;
 
     template <IsTimeBase USizeBase>
     constexpr Time(Time<USizeBase> a_size)
@@ -84,8 +92,7 @@ public:
     }
 
     bool constexpr operator==(ThisTime time) const {
-        constexpr long double EPS = 1e-6;
-        return abs(m_value_ns - time.m_value_ns) < EPS;
+        return equal(m_value_ns, time.get_nanoseconds());
     }
 
     bool constexpr operator!=(ThisTime time) const { return !operator==(time); }
