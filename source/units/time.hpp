@@ -36,7 +36,7 @@ public:
 
     template <IsTimeBase USizeBase>
     constexpr Time(Time<USizeBase> a_size)
-        : m_value_ns(a_size.get_nanoseconds()) {}
+        : m_value_ns(a_size.value_nanoseconds()) {}
 
     // Attention: a_value given in TTimeBase units!
     explicit constexpr Time(long double a_value)
@@ -47,7 +47,7 @@ public:
         return m_value_ns / TTimeBase::to_nanoseconds_multiplier;
     }
 
-    constexpr long double get_nanoseconds() const { return m_value_ns; }
+    constexpr long double value_nanoseconds() const { return m_value_ns; }
 
     constexpr ThisTime operator+(ThisTime time) const {
         return Time<Nanosecond>(m_value_ns + time.m_value_ns);
@@ -67,7 +67,7 @@ public:
     }
 
     constexpr long double operator/(ThisTime time) const {
-        return m_value_ns / time.get_nanoseconds();
+        return m_value_ns / time.value_nanoseconds();
     }
 
     constexpr void operator+=(ThisTime time) { m_value_ns += time.m_value_ns; }
@@ -86,7 +86,7 @@ public:
     }
 
     bool constexpr operator==(ThisTime time) const {
-        return equal(m_value_ns, time.get_nanoseconds());
+        return equal(m_value_ns, time.value_nanoseconds());
     }
 
     bool constexpr operator!=(ThisTime time) const { return !operator==(time); }

@@ -49,7 +49,8 @@ public:
     using ThisSize = Size<TSizeBase>;
 
     template <IsSizeBase USizeBase>
-    constexpr Size(Size<USizeBase> a_size) : m_value_bits(a_size.get_bits()) {}
+    constexpr Size(Size<USizeBase> a_size)
+        : m_value_bits(a_size.value_bits()) {}
 
     // Attention: a_value given in TSizeBase units!
     explicit constexpr Size(uint64_t a_value)
@@ -61,7 +62,7 @@ public:
                TSizeBase::to_bit_multiplier;
     }
 
-    constexpr uint64_t get_bits() const { return m_value_bits; }
+    constexpr uint64_t value_bits() const { return m_value_bits; }
 
     constexpr ThisSize operator+(ThisSize size) const {
         return Size<Bit>(m_value_bits + size.m_value_bits);
@@ -76,7 +77,7 @@ public:
     }
 
     constexpr double operator/(ThisSize size) const {
-        return m_value_bits / (double)size.get_bits();
+        return m_value_bits / (double)size.value_bits();
     }
 
     constexpr void operator+=(ThisSize size) {

@@ -4,10 +4,9 @@
 
 namespace sim {
 
-Packet::Packet(SizeByte a_size, IFlow* a_flow, Id a_source_id,
-               Id a_dest_id, TimeNs a_sent_time,
-               SizeByte a_sent_bytes_at_origin, bool a_ecn_capable_transport,
-               bool a_congestion_experienced)
+Packet::Packet(SizeByte a_size, IFlow* a_flow, Id a_source_id, Id a_dest_id,
+               TimeNs a_sent_time, SizeByte a_sent_bytes_at_origin,
+               bool a_ecn_capable_transport, bool a_congestion_experienced)
     : flags(0),
       source_id(a_source_id),
       dest_id(a_dest_id),

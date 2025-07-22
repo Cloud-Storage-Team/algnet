@@ -60,7 +60,7 @@ void TestOverflow(Args&&... args) {
 
     const SizeByte max_size = queue.get_max_size();
     const size_t NUMBER_OF_PACKETS = 10;
-    SizeByte packet_size = Size<Bit>(max_size.get_bits() / NUMBER_OF_PACKETS);
+    SizeByte packet_size = Size<Bit>(max_size.value_bits() / NUMBER_OF_PACKETS);
 
     sim::Packet packet(packet_size);
 
