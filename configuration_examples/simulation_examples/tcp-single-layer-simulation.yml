@@ -1,0 +1,18 @@
+topology_config_path: ../topology_examples/single_layer_topology.yml
+
+flows:
+  flow1:
+    sender_id: "sender"
+    receiver_id: "receiver"
+    packet_size: 1024
+    packet_interval: 600
+    number_of_packets: 100
+  flow2:
+    sender_id: "sender"
+    receiver_id: "receiver"
+    packet_size: 2048
+    packet_interval: 600
+    number_of_packets: 100
+
+algorithm: tcp
+simulation_time: 100000
