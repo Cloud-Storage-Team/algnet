@@ -22,9 +22,9 @@ def generate_topology(
     }
 
     switch_name_prefix = "switch"
-    switch_names = [f"{switch_name_prefix}_{i}" for i in range(num_switches)]
+    switch_names = [f"{switch_name_prefix}_{i}" for i in range(1, num_switches + 1)]
     
-    base_index = 0
+    base_index = 1
     def add_link(src_device : str, dest_device : str):
         nonlocal base_index
         name = f"link_{base_index}"
