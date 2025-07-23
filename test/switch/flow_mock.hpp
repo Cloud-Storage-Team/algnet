@@ -11,8 +11,6 @@ public:
 
     void start() final;
 
-    TimeNs create_new_data_packet() final;
-
     void update(sim::Packet packet, sim::DeviceType type) final;
     std::uint32_t get_packets_acked() const;
 
