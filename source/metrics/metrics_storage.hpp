@@ -2,22 +2,17 @@
 #include <matplot/matplot.h>
 
 #include <filesystem>
-#include <vector>
 
+#include "plot_metadata.hpp"
 #include "types.hpp"
 
 namespace sim {
-
-struct PlotMetadata {
-    std::string x_label;
-    std::string y_label;
-    std::string title;
-};
 
 class MetricsStorage {
 public:
     void add_record(TimeNs time, double value);
 
+    std::vector<std::pair<TimeNs, double> > get_records() const;
     void export_to_file(std::filesystem::path path) const;
     matplot::figure_handle get_picture(PlotMetadata metadata) const;
     void draw_plot(std::filesystem::path path, PlotMetadata metadata) const;

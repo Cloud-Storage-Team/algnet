@@ -1,5 +1,4 @@
 #pragma once
-#include <optional>
 #include <queue>
 
 #include "i_packet_queue.hpp"
@@ -14,7 +13,7 @@ public:
     // returns true on succseed (remaining space is enought), false
     // otherwice
     bool push(Packet packet) final;
-    Packet front() final;
+    Packet front() const final;
     void pop() final;
 
     SizeByte get_size() const final;

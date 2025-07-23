@@ -1,5 +1,6 @@
 #pragma once
 #include <matplot/matplot.h>
+#include <spdlog/fmt/fmt.h>
 
 #include <filesystem>
 

@@ -3,13 +3,15 @@
 #include "multi_id_metrics_storage.hpp"
 
 namespace sim {
-MultiIdMetricsStorage::MultiIdMetricsStorage(std::string a_metric_name)
-    : metric_name(std::move(a_metric_name)) {}
+MultiIdMetricsStorage::MultiIdMetricsStorage(std::string a_metric_name,
+                                             std::string a_filter)
+    : metric_name(std::move(a_metric_name)), m_filter(a_filter) {}
 
 void MultiIdMetricsStorage::add_record(Id id, TimeNs time, double value) {
     auto it = m_storage.find(id);
     if (it == m_storage.end()) {
-        if (!std::regex_match(get_metrics_filename(id), m_filter)) {
+        std::string filename = get_metrics_filename(id);
+        if (!std::regex_match(filename, m_filter)) {
             m_storage[id] = std::nullopt;
         } else {
             MetricsStorage new_storage;
@@ -39,11 +41,6 @@ std::unordered_map<Id, MetricsStorage> MultiIdMetricsStorage::data() const {
     }
     return result;
 }
-
-void MultiIdMetricsStorage::set_filter(std::string filter) {
-    m_filter = std::regex(filter);
-}
-
 std::string MultiIdMetricsStorage::get_metrics_filename(Id id) const {
     return fmt::format("{}/{}.txt", metric_name, id);
 }
