@@ -3,155 +3,155 @@ devices:
     type: host
   receiver:
     type: host
-  switch_1_0:
+  switch-1:
     type: switch
-  switch_2_0:
+  switch-2:
     type: switch
-  switch_1_1:
+  switch-1-1:
     type: switch
-  switch_1_2:
+  switch-1-2:
     type: switch
-  switch_2_1:
+  switch-2-1:
     type: switch
-  switch_2_2:
+  switch-2-2:
     type: switch
 links:
-  link_1:
+  link-1:
     from: sender
-    to: switch_1_0
+    to: switch-1
     latency: 0ns
     throughput: 10Gbps
     ingress_buffer_size: 4096B
     egress_buffer_size: 4096B
-  link_2:
-    from: switch_1_0
+  link-2:
+    from: switch-1
     to: sender
     latency: 0ns
     throughput: 10Gbps
     ingress_buffer_size: 4096B
     egress_buffer_size: 4096B
-  link_3:
+  link-3:
     from: sender
-    to: switch_2_0
+    to: switch-2
     latency: 0ns
     throughput: 10Gbps
     ingress_buffer_size: 4096B
     egress_buffer_size: 4096B
-  link_4:
-    from: switch_2_0
+  link-4:
+    from: switch-2
     to: sender
     latency: 0ns
     throughput: 10Gbps
     ingress_buffer_size: 4096B
     egress_buffer_size: 4096B
-  link_5:
-    from: switch_1_0
-    to: switch_1_1
+  link-5:
+    from: switch-1
+    to: switch-1-1
     latency: 0ns
     throughput: 10Gbps
     ingress_buffer_size: 4096B
     egress_buffer_size: 4096B
-  link_6:
-    from: switch_1_1
-    to: switch_1_0
+  link-6:
+    from: switch-1-1
+    to: switch-1
     latency: 0ns
     throughput: 10Gbps
     ingress_buffer_size: 4096B
     egress_buffer_size: 4096B
-  link_7:
-    from: switch_1_1
+  link-7:
+    from: switch-1
+    to: switch-1-2
+    latency: 0ns
+    throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link-8:
+    from: switch-1-2
+    to: switch-1
+    latency: 0ns
+    throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link-9:
+    from: switch-2
+    to: switch-2-1
+    latency: 0ns
+    throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link-10:
+    from: switch-2-1
+    to: switch-2
+    latency: 0ns
+    throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link-11:
+    from: switch-2
+    to: switch-2-2
+    latency: 0ns
+    throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link-12:
+    from: switch-2-2
+    to: switch-2
+    latency: 0ns
+    throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link-13:
+    from: switch-1-1
     to: receiver
     latency: 0ns
     throughput: 10Gbps
     ingress_buffer_size: 4096B
     egress_buffer_size: 4096B
-  link_8:
+  link-14:
     from: receiver
-    to: switch_1_1
+    to: switch-1-1
     latency: 0ns
     throughput: 10Gbps
     ingress_buffer_size: 4096B
     egress_buffer_size: 4096B
-  link_9:
-    from: switch_1_0
-    to: switch_1_2
-    latency: 0ns
-    throughput: 10Gbps
-    ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B
-  link_10:
-    from: switch_1_2
-    to: switch_1_0
-    latency: 0ns
-    throughput: 10Gbps
-    ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B
-  link_11:
-    from: switch_1_2
+  link-15:
+    from: switch-1-2
     to: receiver
     latency: 0ns
     throughput: 10Gbps
     ingress_buffer_size: 4096B
     egress_buffer_size: 4096B
-  link_12:
+  link-16:
     from: receiver
-    to: switch_1_2
+    to: switch-1-2
     latency: 0ns
     throughput: 10Gbps
     ingress_buffer_size: 4096B
     egress_buffer_size: 4096B
-  link_13:
-    from: switch_2_0
-    to: switch_2_1
-    latency: 0ns
-    throughput: 10Gbps
-    ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B
-  link_14:
-    from: switch_2_1
-    to: switch_2_0
-    latency: 0ns
-    throughput: 10Gbps
-    ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B
-  link_15:
-    from: switch_2_1
+  link-17:
+    from: switch-2-1
     to: receiver
     latency: 0ns
     throughput: 10Gbps
     ingress_buffer_size: 4096B
     egress_buffer_size: 4096B
-  link_16:
+  link-18:
     from: receiver
-    to: switch_2_1
+    to: switch-2-1
     latency: 0ns
     throughput: 10Gbps
     ingress_buffer_size: 4096B
     egress_buffer_size: 4096B
-  link_17:
-    from: switch_2_0
-    to: switch_2_2
-    latency: 0ns
-    throughput: 10Gbps
-    ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B
-  link_18:
-    from: switch_2_2
-    to: switch_2_0
-    latency: 0ns
-    throughput: 10Gbps
-    ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B
-  link_19:
-    from: switch_2_2
+  link-19:
+    from: switch-2-2
     to: receiver
     latency: 0ns
     throughput: 10Gbps
     ingress_buffer_size: 4096B
     egress_buffer_size: 4096B
-  link_20:
+  link-20:
     from: receiver
-    to: switch_2_2
+    to: switch-2-2
     latency: 0ns
     throughput: 10Gbps
     ingress_buffer_size: 4096B

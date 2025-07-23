@@ -5,6 +5,7 @@ import sys
 
 def generate_topology(
     number_switch_per_layer,
+    depth,
     link_latency,
     link_throughput,
     ingress_buffer_size,
@@ -24,7 +25,7 @@ def generate_topology(
     base_index = 1
     def add_link(src_device : str, dest_device : str):
         nonlocal base_index
-        name = f"link_{base_index}"
+        name = f"link-{base_index}"
         base_index += 1
         
         topology["links"][name] = {
@@ -38,25 +39,24 @@ def generate_topology(
 
     switch_nums_range = range(1, number_switch_per_layer + 1)
 
-    switch_first_layer_names = [f"switch_{i}_0" for i in switch_nums_range]
-    switch_second_layer_names = [[f"switch_{i}_{j}" for j in switch_nums_range] for i in switch_nums_range] 
-    # Add first layer
-    for switch_name in switch_first_layer_names:
-        topology["devices"][switch_name] = {"type" : "switch"}
+    prev_layer_names = [sender_name]
+    current_layer_names = [[f"switch-{i}" for i in switch_nums_range]]
+    # Add layers
+    for _ in range (depth):
+        for i, prev_layer_name in enumerate(prev_layer_names):
+            for switch_name in current_layer_names[i]:
+                topology["devices"][switch_name] = {"type" : "switch"}
 
-        add_link(sender_name, switch_name)
-        add_link(switch_name, sender_name)
+                add_link(prev_layer_name, switch_name)
+                add_link(switch_name, prev_layer_name)
 
-    # Add second layer
-    for i, first_layer_switch_name in enumerate(switch_first_layer_names):
-        for second_layer_switch_name in switch_second_layer_names[i]:
-            topology["devices"][second_layer_switch_name] = {"type" : "switch"}
+        prev_layer_names = [name for names in current_layer_names for name in names]
+        current_layer_names = [[f"{name}-{i}" for i in switch_nums_range] for name in prev_layer_names]
 
-            add_link(first_layer_switch_name, second_layer_switch_name)
-            add_link(second_layer_switch_name, first_layer_switch_name)
-
-            add_link(second_layer_switch_name, receiver_name)
-            add_link(receiver_name, second_layer_switch_name)
+    # Add links betwwen last layer and receiver
+    for name in prev_layer_names:
+        add_link(name, receiver_name)
+        add_link(receiver_name, name)
 
 
     return topology
@@ -74,11 +74,18 @@ def parse_arguments():
         description="Generates hash collision topology YAML file."
     )
     parser.add_argument(
-        "--num_switch_per_layer",
+        "--depth",
+        "-d",
+        type=int,
+        default=1,
+        help="Depth (number of layers) of topology",
+    )
+    parser.add_argument(
+        "--num_childs",
         "-n",
         type=int,
         default=1,
-        help="Number of switch on each of two layers",
+        help="Number of children of each switch",
     )
     parser.add_argument(
         "--throughput",
@@ -110,14 +117,14 @@ def parse_arguments():
     )
     parser.add_argument(
         "--output_path", "-o",
-        default="hash_collision_topology.yml",
+        default="fractal_topology.yml",
         help="Path to the output topology config file",
     )
 
     args = parser.parse_args()
 
     # Validate inputs
-    if args.num_switch_per_layer < 1:
+    if args.num_childs < 1:
         print("Error: Number of switches must be at least 1", file=sys.stderr)
         sys.exit(1)
     return args
@@ -129,7 +136,8 @@ def main():
 
     # Generate topology
     topology = generate_topology(
-        args.num_switch_per_layer,
+        args.num_childs,
+        args.depth,
         args.latency,
         args.throughput,
         args.ingress_buffers_size,
