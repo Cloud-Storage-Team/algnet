@@ -170,7 +170,7 @@ private:
         TimeNs curr_time = Scheduler::get_instance().get_current_time();
 
         while (m_packets_to_send > 0 &&
-               m_packets_in_flight < m_cc.get_cwnd() + EPS) {
+               m_packets_in_flight + 1 < m_cc.get_cwnd() + EPS) {
             Packet packet = generate_packet();
             total_delay += pacing_delay;
             if (pacing_delay == TimeNs(0)) {
