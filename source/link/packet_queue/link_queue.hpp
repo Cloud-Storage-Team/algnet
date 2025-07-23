@@ -20,9 +20,9 @@ public:
     Packet front() const final;
     void pop() final;
 
-    Size get_size() const final;
+    SizeByte get_size() const final;
     bool empty() const final;
-    Size get_max_size() const final;
+    SizeByte get_max_size() const final;
 
 private:
     SimplePacketQueue m_queue;

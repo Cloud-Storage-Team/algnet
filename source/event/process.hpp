@@ -10,7 +10,7 @@ namespace sim {
  */
 class Process : public Event {
 public:
-    Process(Time a_time, std::weak_ptr<IProcessingDevice> a_device);
+    Process(TimeNs a_time, std::weak_ptr<IProcessingDevice> a_device);
     ~Process() = default;
     void operator()() final;
 

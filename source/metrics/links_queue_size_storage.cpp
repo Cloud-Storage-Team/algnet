@@ -11,7 +11,7 @@ namespace sim {
 LinksQueueSizeStorage::LinksQueueSizeStorage(std::string a_filter)
     : m_filter(a_filter) {}
 
-void LinksQueueSizeStorage::add_record(Id id, LinkQueueType type, Time time,
+void LinksQueueSizeStorage::add_record(Id id, LinkQueueType type, TimeNs time,
                                        double value) {
     std::pair<Id, LinkQueueType> key = std::make_pair(id, type);
     auto it = m_storage.find(key);
@@ -74,9 +74,9 @@ void LinksQueueSizeStorage::draw_plots(
                 .display_name(name);
         };
 
-        draw_gorizontal_line(link->get_max_from_egress_buffer_size(),
+        draw_gorizontal_line(link->get_max_from_egress_buffer_size().value(),
                              "max from egress", {1.f, 0.f, 0.f});
-        draw_gorizontal_line(link->get_max_to_ingress_queue_size(),
+        draw_gorizontal_line(link->get_max_to_ingress_queue_size().value(),
                              "max to ingress", {0.f, 0.f, 1.f});
 
         ax->xlim({0, limits[1]});

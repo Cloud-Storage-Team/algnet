@@ -40,10 +40,10 @@ void LinkQueue::pop() {
         m_queue.get_size(), m_type);
 }
 
-Size LinkQueue::get_size() const { return m_queue.get_size(); }
+SizeByte LinkQueue::get_size() const { return m_queue.get_size(); }
 
 bool LinkQueue::empty() const { return m_queue.empty(); }
 
-Size LinkQueue::get_max_size() const { return m_queue.get_max_size(); }
+SizeByte LinkQueue::get_max_size() const { return m_queue.get_max_size(); }
 
 }  // namespace sim

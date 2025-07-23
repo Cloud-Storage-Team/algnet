@@ -26,21 +26,22 @@ MetricsCollector& MetricsCollector::get_instance() {
     return instance;
 }
 
-void MetricsCollector::add_cwnd(Id flow_id, Time time, double cwnd) {
+void MetricsCollector::add_cwnd(Id flow_id, TimeNs time, double cwnd) {
     m_cwnd_storage.add_record(std::move(flow_id), time, cwnd);
 }
 
-void MetricsCollector::add_delivery_rate(Id flow_id, Time time, double value) {
-    m_rate_storage.add_record(std::move(flow_id), time, value);
+void MetricsCollector::add_delivery_rate(Id flow_id, TimeNs time,
+                                         SpeedGbps value) {
+    m_rate_storage.add_record(std::move(flow_id), time, value.value());
 }
 
-void MetricsCollector::add_RTT(Id flow_id, Time time, Time value) {
-    m_RTT_storage.add_record(std::move(flow_id), time, value);
+void MetricsCollector::add_RTT(Id flow_id, TimeNs time, TimeNs value) {
+    m_RTT_storage.add_record(std::move(flow_id), time, value.value());
 }
 
-void MetricsCollector::add_queue_size(Id link_id, Time time,
-                                      std::uint32_t value, LinkQueueType type) {
-    m_links_queue_size_storage.add_record(link_id, type, time, value);
+void MetricsCollector::add_queue_size(Id link_id, TimeNs time, SizeByte value,
+                                      LinkQueueType type) {
+    m_links_queue_size_storage.add_record(link_id, type, time, value.value());
 }
 
 void MetricsCollector::export_metrics_to_files(

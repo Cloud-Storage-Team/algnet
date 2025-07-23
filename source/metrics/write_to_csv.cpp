@@ -15,7 +15,7 @@ void write_to_csv(
     // values[time][i] is a value of metric for i-th storage at time time;
     // If there were no measurement at time, values[time][i] =
     // std::numeric_limits<double>::quiet_NaN()
-    std::map<Time, std::vector<double> > values;
+    std::map<TimeNs, std::vector<double> > values;
     double nan = std::numeric_limits<double>::quiet_NaN();
     std::vector<double> default_values(count_storages, nan);
     for (size_t i = 0; i < count_storages; i++) {

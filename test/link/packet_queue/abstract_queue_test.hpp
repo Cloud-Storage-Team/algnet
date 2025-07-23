@@ -16,7 +16,7 @@ void TestEmpty(Args&&... args) {
     TPacketQueue queue(std::forward<Args>(args)...);
 
     ASSERT_TRUE(queue.empty());
-    ASSERT_EQ(queue.get_size(), 0);
+    ASSERT_EQ(queue.get_size(), SizeByte(0));
 
     bool runtime_error_catched = false;
     try {
@@ -37,7 +37,7 @@ void TestEmpty(Args&&... args) {
 
 template <typename TPacketQueue, typename... Args>
 requires ValidPacketQueueWithArgs<TPacketQueue, Args...>
-void TestPushOnePacket(size_t packet_size, Args&&... args) {
+void TestPushOnePacket(SizeByte packet_size, Args&&... args) {
     TPacketQueue queue(std::forward<Args>(args)...);
 
     sim::Packet packet(packet_size);
@@ -46,10 +46,10 @@ void TestPushOnePacket(size_t packet_size, Args&&... args) {
 
     ASSERT_EQ(queue.front(), packet);
     ASSERT_FALSE(queue.empty());
-    ASSERT_EQ(queue.get_size(), packet.size_byte);
+    ASSERT_EQ(queue.get_size(), packet.size);
 
     queue.pop();
-    ASSERT_EQ(queue.get_size(), 0);
+    ASSERT_EQ(queue.get_size(), SizeByte(0));
     ASSERT_TRUE(queue.empty());
 }
 
@@ -58,9 +58,9 @@ requires ValidPacketQueueWithArgs<TPacketQueue, Args...>
 void TestOverflow(Args&&... args) {
     TPacketQueue queue(std::forward<Args>(args)...);
 
-    const Size max_size = queue.get_max_size();
+    const SizeByte max_size = queue.get_max_size();
     const size_t NUMBER_OF_PACKETS = 10;
-    Size packet_size = max_size / NUMBER_OF_PACKETS;
+    SizeByte packet_size = Size<Bit>(max_size.value_bits() / NUMBER_OF_PACKETS);
 
     sim::Packet packet(packet_size);
 
@@ -68,10 +68,10 @@ void TestOverflow(Args&&... args) {
         ASSERT_TRUE(queue.push(packet));
     }
 
-    size_t expected_queue_size = NUMBER_OF_PACKETS * packet_size;
+    SizeByte expected_queue_size = packet_size * NUMBER_OF_PACKETS;
     ASSERT_EQ(queue.get_size(), expected_queue_size);
 
-    sim::Packet overflow_packet(packet_size + 1);
+    sim::Packet overflow_packet(packet_size + SizeByte(1));
     ASSERT_FALSE(queue.push(overflow_packet));
 
     ASSERT_EQ(queue.get_size(), expected_queue_size);
@@ -82,7 +82,7 @@ void TestOverflow(Args&&... args) {
     }
 
     ASSERT_TRUE(queue.empty());
-    ASSERT_EQ(queue.get_size(), 0);
+    ASSERT_EQ(queue.get_size(), SizeByte(0));
 }
 
 }  // namespace test

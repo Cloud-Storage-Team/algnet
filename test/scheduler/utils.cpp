@@ -3,17 +3,17 @@
 namespace test {
 
 int CountingEvent::cnt;
-Time ComparatorEvent::last_time;
+TimeNs ComparatorEvent::last_time(0);
 
-EmptyEvent::EmptyEvent(std::uint32_t a_time) : Event(a_time) {};
+EmptyEvent::EmptyEvent(TimeNs a_time) : Event(a_time) {};
 void EmptyEvent::operator()() {}
 
-CountingEvent::CountingEvent(std::uint32_t a_time) : Event(a_time) {};
+CountingEvent::CountingEvent(TimeNs a_time) : Event(a_time) {};
 void CountingEvent::operator()() { cnt++; }
 
-ComparatorEvent::ComparatorEvent(std::uint32_t a_time) : Event(a_time) {};
+ComparatorEvent::ComparatorEvent(TimeNs a_time) : Event(a_time) {};
 void ComparatorEvent::operator()() {
-    EXPECT_GE(m_time, last_time);
+    EXPECT_GT(m_time, last_time);
     last_time = m_time;
 }
 

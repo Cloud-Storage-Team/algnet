@@ -6,7 +6,7 @@
 namespace sim {
 class SimplePacketQueue : public IPacketQueue {
 public:
-    SimplePacketQueue(Size a_max_size);
+    SimplePacketQueue(SizeByte a_max_size);
     ~SimplePacketQueue() = default;
 
     // Adds packet to queue
@@ -16,13 +16,13 @@ public:
     Packet front() const final;
     void pop() final;
 
-    Size get_size() const final;
+    SizeByte get_size() const final;
     bool empty() const final;
-    Size get_max_size() const final;
+    SizeByte get_max_size() const final;
 
 private:
     std::queue<Packet> m_queue;
-    Size m_size;
-    Size m_max_size;
+    SizeByte m_size;
+    SizeByte m_max_size;
 };
 }  // namespace sim

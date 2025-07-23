@@ -12,10 +12,10 @@ class MetricsCollector {
 public:
     static MetricsCollector& get_instance();
 
-    void add_cwnd(Id flow_id, Time time, double cwnd);
-    void add_delivery_rate(Id flow_id, Time time, double value);
-    void add_RTT(Id flow_id, Time time, Time value);
-    void add_queue_size(Id link_id, Time time, std::uint32_t value,
+    void add_cwnd(Id flow_id, TimeNs time, double cwnd);
+    void add_delivery_rate(Id flow_id, TimeNs time, SpeedGbps value);
+    void add_RTT(Id flow_id, TimeNs time, TimeNs value);
+    void add_queue_size(Id link_id, TimeNs time, SizeByte value,
                         LinkQueueType type = LinkQueueType::FromEgress);
 
     void export_metrics_to_files(std::filesystem::path metrics_dir) const;

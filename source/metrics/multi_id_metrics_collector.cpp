@@ -7,7 +7,7 @@ MultiIdMetricsStorage::MultiIdMetricsStorage(std::string a_metric_name,
                                              std::string a_filter)
     : metric_name(std::move(a_metric_name)), m_filter(a_filter) {}
 
-void MultiIdMetricsStorage::add_record(Id id, Time time, double value) {
+void MultiIdMetricsStorage::add_record(Id id, TimeNs time, double value) {
     auto it = m_storage.find(id);
     if (it == m_storage.end()) {
         std::string filename = get_metrics_filename(id);

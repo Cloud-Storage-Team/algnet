@@ -14,7 +14,7 @@ class LinksQueueSizeStorage {
 public:
     LinksQueueSizeStorage(std::string filter);
 
-    void add_record(Id id, LinkQueueType type, Time time, double value);
+    void add_record(Id id, LinkQueueType type, TimeNs time, double value);
     void export_to_files(std::filesystem::path output_dir_path) const;
     void draw_plots(std::filesystem::path output_dir_path) const;
 

@@ -10,9 +10,9 @@ namespace sim {
 
 class MetricsStorage {
 public:
-    void add_record(Time time, double value);
-    std::vector<std::pair<Time, double> > get_records() const;
+    void add_record(TimeNs time, double value);
 
+    std::vector<std::pair<TimeNs, double> > get_records() const;
     void export_to_file(std::filesystem::path path) const;
     matplot::figure_handle get_picture(PlotMetadata metadata) const;
     void draw_plot(std::filesystem::path path, PlotMetadata metadata) const;
@@ -20,7 +20,7 @@ public:
                       std::string_view name = "") const;
 
 private:
-    std::vector<std::pair<Time, double> > m_records;
+    std::vector<std::pair<TimeNs, double> > m_records;
 };
 
 }  // namespace sim
