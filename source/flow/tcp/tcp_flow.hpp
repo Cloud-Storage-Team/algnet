@@ -19,8 +19,8 @@ class TcpFlow : public IFlow,
                 public std::enable_shared_from_this<TcpFlow<TTcpCC> > {
 public:
     TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
-            std::shared_ptr<IHost> a_dest, TTcpCC a_cc, Size a_packet_size,
-            Time a_delay_between_packets, std::uint32_t a_packets_to_send,
+            std::shared_ptr<IHost> a_dest, TTcpCC a_cc, SizeByte a_packet_size,
+            TimeNs a_delay_between_packets, std::uint32_t a_packets_to_send,
             bool a_ecn_capable = true)
         : m_id(std::move(a_id)),
           m_src(a_src),
@@ -43,14 +43,14 @@ public:
     }
 
     void start() final {
-        Time curr_time = Scheduler::get_instance().get_current_time();
+        TimeNs curr_time = Scheduler::get_instance().get_current_time();
         Scheduler::get_instance().add<Generate>(
             curr_time, this->shared_from_this(), m_packet_size);
     }
 
-    Time create_new_data_packet() final {
+    TimeNs create_new_data_packet() final {
         if (m_packets_to_send == 0) {
-            return 0;
+            return TimeNs(0);
         }
         if (try_to_put_data_to_device()) {
             --m_packets_to_send;
@@ -66,19 +66,19 @@ public:
                 PacketType::ACK) {
             // ACK delivered to source device; calculate metrics, update
             // internal state
-            Time current_time = Scheduler::get_instance().get_current_time();
+            TimeNs current_time = Scheduler::get_instance().get_current_time();
             if (current_time < packet.sent_time) {
                 LOG_ERROR("Packet " + packet.to_string() +
                           " current time less that sending time; ignored");
                 return;
             }
 
-            Time rtt = current_time - packet.sent_time;
+            TimeNs rtt = current_time - packet.sent_time;
             MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
                                                      current_time, rtt);
 
-            double delivery_bit_rate =
-                8 * (m_sent_bytes - packet.sent_bytes_at_origin) / rtt;
+            SpeedGbps delivery_bit_rate =
+                (m_sent_bytes - packet.sent_bytes_at_origin) / rtt;
             MetricsCollector::get_instance().add_delivery_rate(
                 packet.flow->get_id(), current_time, delivery_bit_rate);
 
@@ -98,7 +98,7 @@ public:
 
             if (old_cwnd != cwnd) {
                 MetricsCollector::get_instance().add_cwnd(
-                    m_id, current_time - 1, old_cwnd);
+                    m_id, current_time - TimeNs(1), old_cwnd);
                 MetricsCollector::get_instance().add_cwnd(m_id, current_time,
                                                           cwnd);
             }
@@ -106,8 +106,9 @@ public:
                    m_flag_manager.get_flag(packet, packet_type_label) ==
                        PacketType::DATA) {
             // data packet delivered to destination device; send ack
-            Packet ack(1, this, m_dest.lock()->get_id(), m_src.lock()->get_id(),
-                       packet.sent_time, packet.sent_bytes_at_origin,
+            Packet ack(SizeByte(1), this, m_dest.lock()->get_id(),
+                       m_src.lock()->get_id(), packet.sent_time,
+                       packet.sent_bytes_at_origin,
                        packet.ecn_capable_transport,
                        packet.congestion_experienced);
             m_flag_manager.set_flag(packet, packet_type_label, PacketType::ACK);
@@ -143,7 +144,7 @@ private:
 
     class SendAtTime : public Event {
     public:
-        SendAtTime(Time a_time, std::weak_ptr<TcpFlow<TTcpCC> > a_flow,
+        SendAtTime(TimeNs a_time, std::weak_ptr<TcpFlow<TTcpCC> > a_flow,
                    Packet a_packet)
             : Event(a_time), m_flow(a_flow), m_packet(std::move(a_packet)) {}
         void operator()() final {
@@ -163,7 +164,7 @@ private:
     Packet generate_packet() {
         sim::Packet packet;
         m_flag_manager.set_flag(packet, packet_type_label, PacketType::DATA);
-        packet.size_byte = m_packet_size;
+        packet.size = m_packet_size;
         packet.flow = this;
         packet.source_id = get_sender()->get_id();
         packet.dest_id = get_receiver()->get_id();
@@ -175,7 +176,7 @@ private:
 
     void send_packet_now(Packet packet) {
         m_packets_in_flight++;
-        m_sent_bytes += packet.size_byte;
+        m_sent_bytes += packet.size;
         packet.sent_time = Scheduler::get_instance().get_current_time();
         m_src.lock()->enqueue_packet(packet);
     }
@@ -183,11 +184,11 @@ private:
     bool try_to_put_data_to_device() {
         if (m_packets_in_flight < m_cc.get_cwnd()) {
             Packet packet = generate_packet();
-            Time pacing_delay = m_cc.get_pacing_delay();
-            if (pacing_delay == 0) {
+            TimeNs pacing_delay = m_cc.get_pacing_delay();
+            if (pacing_delay == TimeNs(0)) {
                 send_packet_now(packet);
             } else {
-                Time curr_time = Scheduler::get_instance().get_current_time();
+                TimeNs curr_time = Scheduler::get_instance().get_current_time();
                 Scheduler::get_instance().add<SendAtTime>(
                     curr_time + pacing_delay, this->shared_from_this(), packet);
             }
@@ -216,14 +217,14 @@ private:
     // Congestion control module
     TTcpCC m_cc;
 
-    Size m_packet_size;
-    Time m_delay_between_packets;
+    SizeByte m_packet_size;
+    TimeNs m_delay_between_packets;
     std::uint32_t m_packets_to_send;
     bool m_ecn_capable;
 
     std::uint32_t m_packets_in_flight;
     std::uint32_t m_packets_acked;
-    Size m_sent_bytes;
+    SizeByte m_sent_bytes;
 };
 
 template <typename TTcpCC>

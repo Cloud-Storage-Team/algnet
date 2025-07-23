@@ -1,7 +1,8 @@
+#include "event/stop.hpp"
+
 #include <gtest/gtest.h>
 
 #include "utils.hpp"
-#include "event/stop.hpp"
 
 namespace test {
 
@@ -9,8 +10,7 @@ TEST_F(TestScheduler, StopEventWorksCorrectly) {
     int number_of_events = 5;
 
     CountingEvent::cnt = 0;
-    std::shared_ptr<Time> event_time =
-        std::make_shared<Time>(1);
+    std::shared_ptr<TimeNs> event_time = std::make_shared<TimeNs>(1);
     AddEvents<CountingEvent>(number_of_events, event_time);
     AddEvents<sim::Stop>(1, event_time);
     AddEvents<CountingEvent>(number_of_events, event_time);

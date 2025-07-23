@@ -10,7 +10,7 @@ namespace sim {
  */
 class SendData : public Event {
 public:
-    SendData(Time a_time, std::weak_ptr<IHost> a_device);
+    SendData(TimeNs a_time, std::weak_ptr<IHost> a_device);
     ~SendData() = default;
     void operator()() final;
 

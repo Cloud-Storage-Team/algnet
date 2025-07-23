@@ -3,10 +3,12 @@
 #include <memory>
 #include <string>
 
-// nanoseconds
-using Time = std::uint32_t;
-// bytes
-using Size = std::uint32_t;
+#include "units/time.hpp"
+#include "units/units.hpp"
+
+using TimeNs = Time<Nanosecond>;
+using SizeByte = Size<Byte>;
+using SpeedGbps = Speed<GBit, Second>;
 using Id = std::string;
 
 // Describes a type used by packet's bitset to store flags

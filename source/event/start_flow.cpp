@@ -2,7 +2,7 @@
 
 namespace sim {
 
-StartFlow::StartFlow(Time a_time, std::weak_ptr<IFlow> a_flow)
+StartFlow::StartFlow(TimeNs a_time, std::weak_ptr<IFlow> a_flow)
     : Event(a_time), m_flow(a_flow) {}
 
 void StartFlow::operator()() {

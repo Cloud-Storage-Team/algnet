@@ -80,7 +80,7 @@ TEST_F(TestSwitch, test_no_destination_route) {
     auto switch_device = std::make_shared<sim::Switch>("");
     auto receiver = std::make_shared<HostMock>();
     FlowMock flow(receiver);
-    sim::Packet packet(0, &flow);
+    sim::Packet packet(SizeByte(0), &flow);
 
     std::shared_ptr<sim::IDevice> null_device(nullptr);
     std::shared_ptr<LinkMock> switch_inlink =
@@ -117,7 +117,7 @@ void test_senders(size_t senders_count) {
     // create packets
     std::vector<sim::Packet> packets(senders_count);
     for (size_t i = 0; i < senders_count; i++) {
-        packets[i] = sim::Packet(i, &flows[i], "",
+        packets[i] = sim::Packet(SizeByte(i), &flows[i], "",
                                  flows[i].get_receiver()->get_id());
     }
 
@@ -125,8 +125,7 @@ void test_senders(size_t senders_count) {
     std::vector<std::shared_ptr<LinkMock> > links;
     links.reserve(senders_count);
 
-    std::shared_ptr<sim::IDevice> device_mock =
-        std::make_shared<HostMock>();
+    std::shared_ptr<sim::IDevice> device_mock = std::make_shared<HostMock>();
     for (size_t i = 0; i < senders_count; i++) {
         links.push_back(std::make_shared<LinkMock>(device_mock, switch_device));
     }

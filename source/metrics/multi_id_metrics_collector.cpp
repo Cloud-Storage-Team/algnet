@@ -6,7 +6,7 @@ namespace sim {
 MultiIdMetricsStorage::MultiIdMetricsStorage(std::string a_metric_name)
     : metric_name(std::move(a_metric_name)) {}
 
-void MultiIdMetricsStorage::add_record(Id id, Time time, double value) {
+void MultiIdMetricsStorage::add_record(Id id, TimeNs time, double value) {
     auto it = m_storage.find(id);
     if (it == m_storage.end()) {
         if (!std::regex_match(get_metrics_filename(id), m_filter)) {
