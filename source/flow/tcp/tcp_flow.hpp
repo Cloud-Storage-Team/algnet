@@ -90,7 +90,7 @@ public:
                        packet.sent_time, packet.sent_bytes_at_origin,
                        packet.ecn_capable_transport,
                        packet.congestion_experienced);
-            m_flag_manager.set_flag(packet, packet_type_label, PacketType::ACK);
+            m_flag_manager.set_flag(ack, packet_type_label, PacketType::ACK);
             m_dest.lock()->enqueue_packet(ack);
         }
         send_packets();
