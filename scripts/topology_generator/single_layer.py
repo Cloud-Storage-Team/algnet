@@ -74,7 +74,7 @@ def parse_arguments():
         "--throughput",
         "-t",
         type=int,
-        default=0,
+        default=10,
         help="Throughput of each link, Gbit per s",
     )
     parser.add_argument(
