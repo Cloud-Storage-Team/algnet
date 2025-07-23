@@ -22,7 +22,8 @@ public:
         std::shared_ptr<IHost> receiver_ptr =
             IdentifierFactory::get_instance().get_object<IHost>(receiver_id);
 
-        Size packet_size = value_node["packet_size"].as<Size>();
+        SizeByte packet_size =
+            SizeByte(value_node["packet_size"].as<uint64_t>());
         std::uint32_t number_of_packets =
             value_node["number_of_packets"].as<std::uint32_t>();
 

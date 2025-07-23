@@ -11,17 +11,19 @@ public:
     void SetUp() override {};
 };
 
-TEST_F(SimpleQueueTest, PopFromEmpty) { TestEmpty<sim::SimplePacketQueue>(0); }
+TEST_F(SimpleQueueTest, PopFromEmpty) {
+    TestEmpty<sim::SimplePacketQueue>(SizeByte(0));
+}
 TEST_F(SimpleQueueTest, TestPushEmptyPacket) {
-    TestPushOnePacket<sim::SimplePacketQueue>(0, 0);
+    TestPushOnePacket<sim::SimplePacketQueue>(SizeByte(0), SizeByte(0));
 }
 
 TEST_F(SimpleQueueTest, TestPushOnePacket) {
-    TestPushOnePacket<sim::SimplePacketQueue>(10, 10);
+    TestPushOnePacket<sim::SimplePacketQueue>(SizeByte(10), SizeByte(10));
 }
 
 TEST_F(SimpleQueueTest, TestOverflow) {
-    TestOverflow<sim::SimplePacketQueue>(128);
+    TestOverflow<sim::SimplePacketQueue>(SizeByte(128));
 }
 
 }  // namespace test

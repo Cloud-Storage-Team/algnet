@@ -8,7 +8,7 @@ namespace sim {
  */
 class Stop : public Event {
 public:
-    Stop(Time a_time);
+    Stop(TimeNs a_time);
     virtual ~Stop() = default;
     void operator()() final;
 };

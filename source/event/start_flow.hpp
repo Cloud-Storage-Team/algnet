@@ -9,7 +9,7 @@ namespace sim {
  */
 class StartFlow : public Event {
 public:
-    StartFlow(Time a_time, std::weak_ptr<IFlow> a_flow);
+    StartFlow(TimeNs a_time, std::weak_ptr<IFlow> a_flow);
     ~StartFlow() = default;
     void operator()() final;
 
