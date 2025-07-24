@@ -37,7 +37,6 @@ int main(const int argc, char **argv) {
     sim::YamlParser parser;
     auto [simulator, simulation_time] =
         parser.build_simulator_from_config(flags["config"].as<std::string>());
-    return 0;
     std::visit([&](auto &sim) { sim.start(simulation_time); }, simulator);
 
     if (!flags["no-plots"].as<bool>()) {
