@@ -20,6 +20,7 @@ private:
         const YAML::Node& config);
     static std::string parse_algorithm(const YAML::Node& config);
     static Time parse_simulation_time(const YAML::Node& config);
+    static std::string parse_multipath_type(const YAML::Node& config);
 
     void process_devices(const YAML::Node& config);
     void process_links(const YAML::Node& config);
@@ -27,6 +28,7 @@ private:
 
     SimulatorVariant m_simulator;
     std::filesystem::path m_topology_config_path;
+    std::string m_multipath_type;
 };
 
 }  // namespace sim

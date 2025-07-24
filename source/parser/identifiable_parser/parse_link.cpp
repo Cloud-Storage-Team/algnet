@@ -5,15 +5,14 @@
 namespace sim {
 
 template <>
-std::shared_ptr<Link> Parser<Link>::parse_object(
-    const YAML::Node& key_node, const YAML::Node& value_node) {
+std::shared_ptr<Link> Parser<Link>::parse_object(const YAML::Node& key_node,
+                                                 const YAML::Node& value_node) {
     Id id = key_node.as<Id>();
     Id from_id = value_node["from"].as<Id>();
     Id to_id = value_node["to"].as<Id>();
     auto from_ptr =
         IdentifierFactory::get_instance().get_object<IDevice>(from_id);
-    auto to_ptr =
-        IdentifierFactory::get_instance().get_object<IDevice>(to_id);
+    auto to_ptr = IdentifierFactory::get_instance().get_object<IDevice>(to_id);
 
     if (from_ptr == nullptr) {
         LOG_ERROR("Failed to find link's source");

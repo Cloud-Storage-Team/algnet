@@ -10,11 +10,16 @@
 namespace sim {
 
 template <typename T>
-class Parser  {
+class Parser {
 public:
     // Parses object and return shared_ptr to it
     static std::shared_ptr<T> parse_object(const YAML::Node& key_node,
                                            const YAML::Node& value_node);
+
+    template <typename... Args>
+    static std::shared_ptr<T> parse_object(const YAML::Node& key_node,
+                                           const YAML::Node& value_node,
+                                           Args&&... args);
 };
 
 template <typename T>
@@ -24,7 +29,18 @@ class IdentifieableParser {
 public:
     static std::shared_ptr<T> parse_and_registrate(
         const YAML::Node& key_node, const YAML::Node& value_node) {
-        std::shared_ptr<T> object = Parser<T>::parse_object(key_node, value_node);
+        std::shared_ptr<T> object =
+            Parser<T>::parse_object(key_node, value_node);
+        registrate(object);
+        return object;
+    }
+
+    template <typename... Args>
+    static std::shared_ptr<T> parse_and_registrate(const YAML::Node& key_node,
+                                                   const YAML::Node& value_node,
+                                                   Args&&... args) {
+        std::shared_ptr<T> object = Parser<T>::parse_object(
+            key_node, value_node, std::forward<Args>(args)...);
         registrate(object);
         return object;
     }

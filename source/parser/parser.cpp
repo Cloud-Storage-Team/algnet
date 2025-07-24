@@ -5,6 +5,7 @@
 #include "identifiable_parser/flow/parse_tcp_flow.hpp"
 #include "identifiable_parser/identifiable_parser.hpp"
 #include "logger/logger.hpp"
+#include "utils/hasher.hpp"
 
 namespace sim {
 
@@ -46,14 +47,22 @@ void YamlParser::process_devices(const YAML::Node &config) {
         auto device_name = key_node.as<Id>();
         auto device_type = val_node["type"].as<std::string>();
 
+        std::unique_ptr<sim::IHasher> hasher = nullptr;
+        m_multipath_type = parse_multipath_type(config);
+        if (m_multipath_type == "ECMP") {
+            hasher = std::make_unique<BaseHasher>();
+        } else if (m_multipath_type == "RPS") {
+            hasher = std::make_unique<RandomHasher>();
+        }
+
         if (device_type == "host") {
             std::visit(
-                [&key_node, &val_node](auto &sim) {
+                [&key_node, &val_node, &hasher](auto &sim) {
                     using SimType = std::decay_t<decltype(sim)>;
                     using HostType = typename SimType::Host_T;
                     std::shared_ptr<HostType> ptr =
                         IdentifieableParser<HostType>::parse_and_registrate(
-                            key_node, val_node);
+                            key_node, val_node, std::move(hasher));
                     if (!sim.add_host(ptr)) {
                         throw std::runtime_error("Can not add host with id " +
                                                  ptr.get()->get_id());
@@ -62,12 +71,12 @@ void YamlParser::process_devices(const YAML::Node &config) {
                 m_simulator);
         } else if (device_type == "switch") {
             std::visit(
-                [&key_node, &val_node](auto &simulator) {
+                [&key_node, &val_node, &hasher](auto &simulator) {
                     using SimType = std::decay_t<decltype(simulator)>;
                     using SwitchType = typename SimType::Switch_T;
                     std::shared_ptr<SwitchType> ptr =
                         IdentifieableParser<SwitchType>::parse_and_registrate(
-                            key_node, val_node);
+                            key_node, val_node, std::move(hasher));
                     if (!simulator.add_switch(ptr)) {
                         throw std::runtime_error("Can not add switch with id " +
                                                  ptr.get()->get_id());
@@ -147,6 +156,21 @@ std::string YamlParser::parse_algorithm(const YAML::Node &config) {
             "No algorithm specified in the simulation config");
     }
     return config["algorithm"].as<std::string>();
+}
+
+std::string YamlParser::parse_multipath_type(const YAML::Node &config) {
+    if (!config["multipath_type"]) {
+        LOG_WARN(
+            "No multipath type specified in the simulation config, using ECMP "
+            "by default");
+        return "ECMP";
+    }
+    auto field_value = config["multipath_type"].as<std::string>();
+    if (field_value != "ECMP" && field_value != "RPS") {
+        throw std::runtime_error("Invalid multipath type: " + field_value +
+                                 ". Supported types are: ECMP, RPS");
+    }
+    return field_value;
 }
 
 }  // namespace sim
