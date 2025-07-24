@@ -46,6 +46,17 @@ SizeByte parse_buffer_size(const std::string &buffer_size) {
     throw std::runtime_error("Unsupported buffer size unit: " + unit);
 }
 
+std::unique_ptr<sim::IHasher> parse_hasher(const std::string &multipath_type) {
+    if (multipath_type == "ECMP") {
+        return std::make_unique<sim::BaseHasher>();
+    } else if (multipath_type == "RPS") {
+        return std::make_unique<sim::RandomHasher>();
+    } else {
+        throw std::runtime_error("Unsupported multipath type: " +
+                                 multipath_type);
+    }
+}
+
 uint32_t parse_with_default(
     const YAML::Node &node, std::string_view field_name,
     std::function<uint32_t(const std::string &)> value_parser,

@@ -14,7 +14,7 @@ SpeedGbps parse_speed(const std::string& throughput);
 TimeNs parse_latency(const std::string& latency);
 SizeByte parse_buffer_size(const std::string& buffer_size);
 
-std::unique_ptr<sim::IHasher> parse_hasher(const YAML::Node& node);
+std::unique_ptr<sim::IHasher> parse_hasher(const std::string& multipath_type);
 
 // Parses node[field_name] using value_parser if node contains field_name;
 // Returns default_value otherwise
