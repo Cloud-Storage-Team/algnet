@@ -39,5 +39,11 @@ SizeByte parse_buffer_size(const std::string &buffer_size) {
     if (unit == "B") {
         return SizeByte(value);
     }
+    if (unit == "KB") {
+        return Size<KByte>(value);
+    }
+    if (unit == "MB") {
+        return Size<MByte>(value);
+    }
     throw std::runtime_error("Unsupported buffer size unit: " + unit);
 }

@@ -5,13 +5,11 @@ flows:
     sender_id: "sender"
     receiver_id: "receiver"
     packet_size: 1024
-    packet_interval: 600
-    number_of_packets: 100
+    number_of_packets: 200
   flow2:
     sender_id: "sender"
     receiver_id: "receiver"
     packet_size: 2048
-    packet_interval: 600
     number_of_packets: 100
 
 algorithm: tcp
