@@ -35,7 +35,7 @@ TEST_F(Start, TrivialTopology) {
 
     sim.start(stop_time);
 
-    ASSERT_EQ(flow->get_packets_acked(), packets_to_send);
+    ASSERT_EQ(flow->get_delivered_bytes(), packet_size * packets_to_send);
 }
 
 TEST_F(Start, ThreeToOneTopology) {
@@ -86,9 +86,12 @@ TEST_F(Start, ThreeToOneTopology) {
 
     sim.start(stop_time);
 
-    ASSERT_EQ(flow1->get_packets_acked(), packets_to_send_by_flow1);
-    ASSERT_EQ(flow2->get_packets_acked(), packets_to_send_by_flow2);
-    ASSERT_EQ(flow3->get_packets_acked(), packets_to_send_by_flow3);
+    ASSERT_EQ(flow1->get_delivered_bytes(),
+              packet_size * packets_to_send_by_flow1);
+    ASSERT_EQ(flow2->get_delivered_bytes(),
+              packet_size * packets_to_send_by_flow2);
+    ASSERT_EQ(flow3->get_delivered_bytes(),
+              packet_size * packets_to_send_by_flow3);
 }
 
 }  // namespace test
