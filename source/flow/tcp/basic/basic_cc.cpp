@@ -4,15 +4,14 @@
 
 namespace sim {
 
-bool BasicCC::on_ack(Time rtt, bool ecn_flag) {
-    (void)rtt;
-    (void)ecn_flag;
+bool BasicCC::on_ack([[maybe_unused]] TimeNs rtt, [[maybe_unused]] TimeNs avg_rtt,
+                     [[maybe_unused]] bool ecn_flag) {
     return false;
 }
 
 double BasicCC::get_cwnd() const { return std::numeric_limits<double>::max(); }
 
-Time BasicCC::get_pacing_delay() const { return 0; }
+TimeNs BasicCC::get_pacing_delay() const { return TimeNs(0); }
 
 std::string BasicCC::to_string() const { return ""; }
 

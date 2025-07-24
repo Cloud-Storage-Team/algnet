@@ -6,7 +6,7 @@
 
 namespace sim {
 
-void MetricsStorage::add_record(Time time, double value) {
+void MetricsStorage::add_record(TimeNs time, double value) {
     m_records.emplace_back(time, value);
 }
 void MetricsStorage::export_to_file(std::filesystem::path path) const {
@@ -44,7 +44,7 @@ void MetricsStorage::draw_on_plot(matplot::figure_handle& fig,
                                   std::string_view name) const {
     std::vector<double> x_data;
     std::transform(begin(m_records), end(m_records), std::back_inserter(x_data),
-                   [](auto const& pair) { return pair.first; });
+                   [](auto const& pair) { return pair.first.value(); });
 
     std::vector<double> y_data;
     std::transform(begin(m_records), end(m_records), std::back_inserter(y_data),

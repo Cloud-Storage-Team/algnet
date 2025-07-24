@@ -16,11 +16,11 @@ public:
     Host(Id id, std::unique_ptr<IHasher> a_hasher = nullptr);
     ~Host() = default;
 
-    bool notify_about_arrival(Time arrive_time) final;
+    bool notify_about_arrival(TimeNs arrive_time) final;
 
     DeviceType get_type() const final;
-    Time process() final;
-    Time send_packet() final;
+    TimeNs process() final;
+    TimeNs send_packet() final;
 
     void enqueue_packet(Packet packet) final;
 

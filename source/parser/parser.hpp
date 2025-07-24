@@ -12,14 +12,14 @@ namespace sim {
 
 class YamlParser {
 public:
-    std::pair<SimulatorVariant, Time> build_simulator_from_config(
+    std::pair<SimulatorVariant, TimeNs> build_simulator_from_config(
         const std::filesystem::path& path);
 
 private:
     static std::filesystem::path parse_topology_config_path(
         const YAML::Node& config);
     static std::string parse_algorithm(const YAML::Node& config);
-    static Time parse_simulation_time(const YAML::Node& config);
+    static TimeNs parse_simulation_time(const YAML::Node& config);
     static std::string parse_multipath_type(const YAML::Node& config);
 
     void process_devices(const YAML::Node& config);

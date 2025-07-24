@@ -19,31 +19,31 @@ static std::pair<uint32_t, std::string> parse_value_unit(
     return std::make_pair(value, unit);
 }
 
-uint32_t parse_throughput(const std::string &throughput) {
+SpeedGbps parse_speed(const std::string &throughput) {
     auto [value, unit] = parse_value_unit(throughput);
     if (unit == "Gbps") {
-        return value;
+        return SpeedGbps(value);
     }
     if (unit == "Mbps") {
-        return value / 1000;  // Convert to Gbps
+        return Speed<MBit, Second>(value);
     }
     throw std::runtime_error("Unsupported throughput unit: " + unit);
 }
 
-uint32_t parse_latency(const std::string &latency) {
+TimeNs parse_latency(const std::string &latency) {
     auto [value, unit] = parse_value_unit(latency);
     if (unit == "ns") {
-        return value;
+        return TimeNs(value);
     }
     throw std::runtime_error("Unsupported latency unit: " + unit);
 }
 
-uint32_t parse_buffer_size(const std::string &buffer_size) {
+SizeByte parse_buffer_size(const std::string &buffer_size) {
     auto [value, unit] = parse_value_unit(buffer_size);
     if (unit == "B") {
-        return value;
+        return SizeByte(value);
     }
-    throw std::runtime_error("Unsupported latency unit: " + unit);
+    throw std::runtime_error("Unsupported buffer size unit: " + unit);
 }
 
 uint32_t parse_with_default(

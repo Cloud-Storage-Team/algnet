@@ -4,7 +4,7 @@
 
 namespace sim {
 
-SendData::SendData(Time a_time, std::weak_ptr<IHost> a_device)
+SendData::SendData(TimeNs a_time, std::weak_ptr<IHost> a_device)
     : Event(a_time), m_device(a_device) {};
 
 void SendData::operator()() {
@@ -12,10 +12,10 @@ void SendData::operator()() {
         return;
     }
 
-    Time process_time = m_device.lock()->send_packet();
+    TimeNs process_time = m_device.lock()->send_packet();
 
     // TODO: think about better way of cancelling event rescheduling
-    if (process_time == 0) {
+    if (process_time == TimeNs(0)) {
         return;
     }
 

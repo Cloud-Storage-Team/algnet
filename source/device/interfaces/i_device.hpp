@@ -5,12 +5,13 @@
 
 namespace sim {
 
-class IDevice : public virtual IRoutingDevice, public virtual IProcessingDevice {
+class IDevice : public virtual IRoutingDevice,
+                public virtual IProcessingDevice {
 public:
     virtual ~IDevice() = default;
 
-    // Returns true if the total number of packets in inlinks change from 0 to 1 
-    virtual bool notify_about_arrival(Time arrival_time) = 0;
+    // Returns true if the total number of packets in inlinks change from 0 to 1
+    virtual bool notify_about_arrival(TimeNs arrival_time) = 0;
 };
 
 }  // namespace sim

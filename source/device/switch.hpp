@@ -16,14 +16,14 @@ public:
            std::unique_ptr<IHasher> a_hasher = nullptr);
     ~Switch() = default;
 
-    bool notify_about_arrival(Time arrival_time) final;
+    bool notify_about_arrival(TimeNs arrival_time) final;
 
     DeviceType get_type() const final;
     // Process a packet by moving it from ingress to egress
     // and schedule next process event after a delay.
     // Packets are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
-    Time process() final;
+    TimeNs process() final;
 
 private:
     SchedulingModule<ISwitch, Process> m_process_scheduler;
