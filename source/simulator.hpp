@@ -2,6 +2,7 @@
 
 #include <spdlog/fmt/fmt.h>
 
+#include <map>
 #include <unordered_set>
 #include <variant>
 
@@ -104,6 +105,28 @@ public:
 
         while (Scheduler::get_instance().tick()) {
         }
+    }
+
+    // returns summary in format [flow : size of delivered data]
+    std::map<Id, SizeByte> get_summary() const {
+        std::map<Id, SizeByte> result;
+        for (auto flow_ptr : m_flows) {
+            result.emplace(flow_ptr->get_id(),
+                           flow_ptr->get_delivered_data_size());
+        }
+        return result;
+    }
+
+    void write_summary(std::filesystem::path output_path) const {
+        std::ofstream out(output_path);
+        if (!out) {
+            throw std::runtime_error("Failed to create file for metric values");
+        }
+        out << "Flow id, Delivered data (bytes)\n";
+        for (const auto &[flow_id, value] : get_summary()) {
+            out << flow_id << ", " << value << "\n";
+        }
+        out.close();
     }
 
 private:

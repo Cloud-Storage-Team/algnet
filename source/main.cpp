@@ -44,5 +44,10 @@ int main(const int argc, char **argv) {
     }
     sim::MetricsCollector::get_instance().export_metrics_to_files(output_dir);
 
+    std::filesystem::path summary_file(std::filesystem::path(output_dir) /
+                                       "summary.csv");
+
+    std::visit([&](auto &sim) { sim.write_summary(summary_file); }, simulator);
+
     return 0;
 }
