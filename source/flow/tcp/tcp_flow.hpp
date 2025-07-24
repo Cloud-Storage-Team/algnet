@@ -96,6 +96,8 @@ public:
         send_packets();
     }
 
+    SizeByte get_delivered_data_size() const final { return m_delivered; }
+
     std::shared_ptr<IHost> get_sender() const final { return m_src.lock(); }
     std::shared_ptr<IHost> get_receiver() const { return m_dest.lock(); }
     Id get_id() const final { return m_id; }
