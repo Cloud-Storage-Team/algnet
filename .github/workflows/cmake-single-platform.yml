@@ -66,6 +66,8 @@ jobs:
         sudo apt install --fix-missing graphviz
         pip install graphviz
 
+    - uses: actions/checkout@v4
+
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
@@ -73,8 +75,6 @@ jobs:
 
     - name: Add executable flag
       run: chmod +x ${{env.EXECUTABLE_NAME}}
-
-    - uses: actions/checkout@v4
 
     - name: Run simulation
       run: python3 scripts/run_simulations.py -e ./${{env.EXECUTABLE_NAME}} -c configuration_examples/simulation_examples --output-dir ./${{env.METRICS_ARTIFACT_DIR}}
