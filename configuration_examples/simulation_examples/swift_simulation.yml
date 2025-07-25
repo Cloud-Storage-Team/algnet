@@ -1,0 +1,70 @@
+topology_config_path: ../topology_examples/for_swift_testing.yml
+
+flows:
+  flow1:
+    sender_id: "sender1"
+    receiver_id: "receiver1"
+    packet_size: 64
+    number_of_packets: 1000000
+    cc:
+      type: TcpSwiftCC
+      base_target: 10300
+  flow2:
+    sender_id: "sender2"
+    receiver_id: "receiver1"
+    packet_size: 64
+    number_of_packets: 1000000
+    cc:
+      type: TcpSwiftCC
+      base_target: 10300
+  flow3:
+    sender_id: "sender3"
+    receiver_id: "receiver1"
+    packet_size: 64
+    number_of_packets: 1000000
+    cc:
+      type: TcpSwiftCC
+      base_target: 10300
+  flow4:
+    sender_id: "sender4"
+    receiver_id: "receiver1"
+    packet_size: 64
+    number_of_packets: 1000000
+    cc:
+      type: TcpSwiftCC
+      base_target: 10300
+  flow5:
+    sender_id: "sender5"
+    receiver_id: "receiver1"
+    packet_size: 64
+    number_of_packets: 1000000
+    cc:
+      type: TcpSwiftCC
+      base_target: 10300
+  flow6:
+    sender_id: "sender6"
+    receiver_id: "receiver1"
+    packet_size: 64
+    number_of_packets: 1000000
+    cc:
+      type: TcpSwiftCC
+      base_target: 10300
+  flow7:
+    sender_id: "sender7"
+    receiver_id: "receiver1"
+    packet_size: 64
+    number_of_packets: 1000000
+    cc:
+      type: TcpSwiftCC
+      base_target: 10300
+  flow8:
+    sender_id: "sender8"
+    receiver_id: "receiver1"
+    packet_size: 64
+    number_of_packets: 1000000
+    cc:
+      type: TcpSwiftCC
+      base_target: 10300
+
+algorithm: tcp_swift
+simulation_time: 10000000

@@ -11,6 +11,7 @@
 #include "event/stop.hpp"
 #include "flow/tcp/basic/bacic_flow.hpp"
 #include "flow/tcp/tahoe/tcp_tahoe_flow.hpp"
+#include "flow/tcp/swift/swift_flow.hpp"
 #include "link/link.hpp"
 #include "utils/algorithms.hpp"
 #include "utils/validation.hpp"
@@ -115,8 +116,9 @@ private:
 
 using BasicSimulator = Simulator<Host, Switch, BasicFlow, Link>;
 using TcpSimulator = Simulator<Host, Switch, TcpTahoeFlow, Link>;
+using TcpSwiftSimulator = Simulator<Host, Switch, TcpSwiftFlow, Link>;
 
-using SimulatorVariant = std::variant<BasicSimulator, TcpSimulator>;
+using SimulatorVariant = std::variant<BasicSimulator, TcpSimulator, TcpSwiftSimulator>;
 
 SimulatorVariant create_simulator(std::string_view algorithm);
 
