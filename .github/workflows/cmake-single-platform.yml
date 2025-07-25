@@ -57,12 +57,10 @@ jobs:
     permissions:
       contents: write
     steps:
-    - uses: actions/checkout@v4
-
     - name: Apt update
       run: sudo apt update
 
-    - name: Install dependencies gnuplot
+    - name: Install dependencies
       run: |
         sudo apt install --fix-missing gnuplot
         sudo apt install --fix-missing graphviz
@@ -75,6 +73,8 @@ jobs:
 
     - name: Add executable flag
       run: chmod +x ${{env.EXECUTABLE_NAME}}
+
+    - uses: actions/checkout@v4
 
     - name: Run simulation
       run: python3 scripts/run_simulations.py -e ./${{env.EXECUTABLE_NAME}} -c configuration_examples/simulation_examples --output-dir ./${{env.METRICS_ARTIFACT_DIR}}
