@@ -1,0 +1,153 @@
+devices:
+  sender1:
+    type: host
+  sender2:
+    type: host
+  sender3:
+    type: host
+  sender4:
+    type: host
+  sender5:
+    type: host
+  sender6:
+    type: host
+  sender7:
+    type: host
+  sender8:
+    type: host
+  receiver1:
+    type: host
+  switch1:
+    type: switch
+    threshold: 0.7
+
+links:
+  link1:
+    from: sender1
+    to: switch1
+    latency: 2500ns
+    throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link2:
+    from: sender2
+    to: switch1
+    latency: 2500ns
+    throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link3:
+    from: sender3
+    to: switch1
+    latency: 2500ns
+    throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link4:
+    from: sender4
+    to: switch1
+    latency: 2500ns
+    throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link5:
+    from: sender5
+    to: switch1
+    latency: 2500ns
+    throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link6:
+    from: sender6
+    to: switch1
+    latency: 2500ns
+    throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link7:
+    from: sender7
+    to: switch1
+    latency: 2500ns
+    throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link8:
+    from: sender8
+    to: switch1
+    latency: 2500ns
+    throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+
+  # bottleneck link
+  link9:
+    from: switch1
+    to: receiver1
+    latency: 2500ns
+    throughput: 40Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+
+  link10:
+    from: receiver1
+    to: switch1
+    latency: 2500ns
+    throughput: 10Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link11:
+    from: switch1
+    to: sender1
+    latency: 2500ns
+    throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link12:
+    from: switch1
+    to: sender2
+    latency: 2500ns
+    throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link13:
+    from: switch1
+    to: sender3
+    latency: 2500ns
+    throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link14:
+    from: switch1
+    to: sender4
+    latency: 2500ns
+    throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link15:
+    from: switch1
+    to: sender5
+    latency: 2500ns
+    throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link16:
+    from: switch1
+    to: sender6
+    latency: 2500ns
+    throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link17:
+    from: switch1
+    to: sender7
+    latency: 2500ns
+    throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
+  link18:
+    from: switch1
+    to: sender8
+    latency: 2500ns
+    throughput: 1Gbps
+    ingress_buffer_size: 4096B
+    egress_buffer_size: 4096B
