@@ -2,7 +2,11 @@
 
 #include <spdlog/fmt/fmt.h>
 
+#include <memory>
 #include <stdexcept>
+
+#include "logger/logger.hpp"
+#include "utils/hasher.hpp"
 
 static std::pair<uint32_t, std::string> parse_value_unit(
     const std::string &value_with_unit) {
@@ -40,4 +44,27 @@ SizeByte parse_buffer_size(const std::string &buffer_size) {
         return SizeByte(value);
     }
     throw std::runtime_error("Unsupported buffer size unit: " + unit);
+}
+
+std::unique_ptr<sim::IHasher> parse_hasher(const std::string &multipath_type) {
+    if (multipath_type == "ECMP") {
+        return std::make_unique<sim::BaseHasher>();
+    } else if (multipath_type == "RPS") {
+        return std::make_unique<sim::RandomHasher>();
+    } else {
+        throw std::runtime_error("Unsupported multipath type: " +
+                                 multipath_type);
+    }
+}
+
+uint32_t parse_with_default(
+    const YAML::Node &node, std::string_view field_name,
+    std::function<uint32_t(const std::string &)> value_parser,
+    uint32_t default_value) {
+    if (!node[field_name]) {
+        LOG_WARN(fmt::format("{} does not set ; use default value {}",
+                             field_name, default_value));
+        return default_value;
+    }
+    return value_parser(node[field_name].as<std::string>());
 }

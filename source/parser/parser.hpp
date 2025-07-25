@@ -20,8 +20,10 @@ private:
         const YAML::Node& config);
     static std::string parse_algorithm(const YAML::Node& config);
     static TimeNs parse_simulation_time(const YAML::Node& config);
+    static std::string parse_multipath_type(const YAML::Node& config);
 
-    void process_devices(const YAML::Node& config);
+    void process_devices(const YAML::Node& topology_config,
+                         const YAML::Node& simulation_config);
     void process_links(const YAML::Node& config);
     void process_flows(const YAML::Node& config);
 

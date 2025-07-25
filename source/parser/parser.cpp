@@ -1,10 +1,13 @@
 #include "parser/parser.hpp"
 
+#include <memory>
 #include <stdexcept>
 
 #include "identifiable_parser/flow/parse_tcp_flow.hpp"
 #include "identifiable_parser/identifiable_parser.hpp"
 #include "logger/logger.hpp"
+#include "parser/parse_utils.hpp"
+#include "utils/hasher.hpp"
 
 namespace sim {
 
@@ -18,7 +21,7 @@ std::pair<SimulatorVariant, TimeNs> YamlParser::build_simulator_from_config(
         path.parent_path() / parse_topology_config_path(simulation_config);
     const YAML::Node topology_config = YAML::LoadFile(m_topology_config_path);
 
-    process_devices(topology_config);
+    process_devices(topology_config, simulation_config);
     process_links(topology_config);
 
     process_flows(simulation_config);
@@ -33,12 +36,13 @@ TimeNs YamlParser::parse_simulation_time(const YAML::Node &config) {
     return TimeNs(config["simulation_time"].as<uint32_t>());
 }
 
-void YamlParser::process_devices(const YAML::Node &config) {
-    if (!config["devices"]) {
+void YamlParser::process_devices(const YAML::Node &topology_config,
+                                 const YAML::Node &simulation_config) {
+    if (!topology_config["devices"]) {
         LOG_WARN("No devices specified in the topology config");
         return;
     }
-    for (auto it = config["devices"].begin(); it != config["devices"].end();
+    for (auto it = topology_config["devices"].begin(); it != topology_config["devices"].end();
          ++it) {
         const YAML::Node key_node = it->first;
         const YAML::Node val_node = it->second;
@@ -46,14 +50,19 @@ void YamlParser::process_devices(const YAML::Node &config) {
         auto device_name = key_node.as<Id>();
         auto device_type = val_node["type"].as<std::string>();
 
+        std::unique_ptr<sim::IHasher> default_hasher =
+            std::make_unique<sim::BaseHasher>();
+        auto parsed_hasher = parse_with_default<std::unique_ptr<sim::IHasher>>(
+            simulation_config, "multipath-type", parse_hasher, std::move(default_hasher));
+
         if (device_type == "host") {
             std::visit(
-                [&key_node, &val_node](auto &sim) {
+                [&key_node, &val_node, &parsed_hasher](auto &sim) {
                     using SimType = std::decay_t<decltype(sim)>;
                     using HostType = typename SimType::Host_T;
                     std::shared_ptr<HostType> ptr =
                         IdentifieableParser<HostType>::parse_and_registrate(
-                            key_node, val_node);
+                            key_node, val_node, std::move(parsed_hasher));
                     if (!sim.add_host(ptr)) {
                         throw std::runtime_error("Can not add host with id " +
                                                  ptr.get()->get_id());
@@ -62,12 +71,12 @@ void YamlParser::process_devices(const YAML::Node &config) {
                 m_simulator);
         } else if (device_type == "switch") {
             std::visit(
-                [&key_node, &val_node](auto &simulator) {
+                [&key_node, &val_node, &parsed_hasher](auto &simulator) {
                     using SimType = std::decay_t<decltype(simulator)>;
                     using SwitchType = typename SimType::Switch_T;
                     std::shared_ptr<SwitchType> ptr =
                         IdentifieableParser<SwitchType>::parse_and_registrate(
-                            key_node, val_node);
+                            key_node, val_node, std::move(parsed_hasher));
                     if (!simulator.add_switch(ptr)) {
                         throw std::runtime_error("Can not add switch with id " +
                                                  ptr.get()->get_id());

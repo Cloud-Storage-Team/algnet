@@ -13,7 +13,7 @@ class Host : public IHost,
              public RoutingModule,
              public std::enable_shared_from_this<Host> {
 public:
-    Host(Id id);
+    Host(Id id, std::unique_ptr<IHasher> a_hasher = nullptr);
     ~Host() = default;
 
     bool notify_about_arrival(TimeNs arrive_time) final;
