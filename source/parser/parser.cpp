@@ -21,7 +21,7 @@ std::pair<SimulatorVariant, TimeNs> YamlParser::build_simulator_from_config(
         path.parent_path() / parse_topology_config_path(simulation_config);
     const YAML::Node topology_config = YAML::LoadFile(m_topology_config_path);
 
-    process_devices(topology_config);
+    process_devices(topology_config, simulation_config);
     process_links(topology_config);
 
     process_flows(simulation_config);
@@ -36,12 +36,13 @@ TimeNs YamlParser::parse_simulation_time(const YAML::Node &config) {
     return TimeNs(config["simulation_time"].as<uint32_t>());
 }
 
-void YamlParser::process_devices(const YAML::Node &config) {
-    if (!config["devices"]) {
+void YamlParser::process_devices(const YAML::Node &topology_config,
+                                 const YAML::Node &simulation_config) {
+    if (!topology_config["devices"]) {
         LOG_WARN("No devices specified in the topology config");
         return;
     }
-    for (auto it = config["devices"].begin(); it != config["devices"].end();
+    for (auto it = topology_config["devices"].begin(); it != topology_config["devices"].end();
          ++it) {
         const YAML::Node key_node = it->first;
         const YAML::Node val_node = it->second;
@@ -52,7 +53,7 @@ void YamlParser::process_devices(const YAML::Node &config) {
         std::unique_ptr<sim::IHasher> default_hasher =
             std::make_unique<sim::BaseHasher>();
         auto parsed_hasher = parse_with_default<std::unique_ptr<sim::IHasher>>(
-            config, "multipath-type", parse_hasher, std::move(default_hasher));
+            simulation_config, "multipath-type", parse_hasher, std::move(default_hasher));
 
         if (device_type == "host") {
             std::visit(

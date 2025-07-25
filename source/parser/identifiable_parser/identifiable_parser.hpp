@@ -16,6 +16,8 @@ public:
     static std::shared_ptr<T> parse_object(const YAML::Node& key_node,
                                            const YAML::Node& value_node);
 
+    // Parses object, construct it with additional arguments and return
+    // shared_ptr to it
     template <typename... Args>
     static std::shared_ptr<T> parse_object(const YAML::Node& key_node,
                                            const YAML::Node& value_node,
