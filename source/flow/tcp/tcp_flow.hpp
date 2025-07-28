@@ -48,7 +48,7 @@ public:
             m_flag_manager.get_flag(packet, packet_type_label) ==
                 PacketType::ACK) {
             // ACK delivered to source device; calculate metrics, update
-            // internal state(ь_ - packet.delivered_at_origin) / rtt
+            // internal state
             TimeNs current_time = Scheduler::get_instance().get_current_time();
             if (current_time < packet.sent_time) {
                 LOG_ERROR("Packet " + packet.to_string() +
