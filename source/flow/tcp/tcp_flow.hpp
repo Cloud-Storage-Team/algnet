@@ -222,7 +222,6 @@ private:
 
     std::uint32_t m_packets_in_flight;
     SizeByte m_delivered;
-    SizeByte m_sent_bytes;
 
     TimeNs m_avg_rtt;
 };
