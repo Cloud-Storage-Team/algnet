@@ -29,7 +29,6 @@ public:
           m_ecn_capable(a_ecn_capable),
           m_packets_in_flight(0),
           m_delivered(0),
-          m_sent_bytes(0),
           m_avg_rtt(0.0) {
         if (m_src.lock() == nullptr) {
             throw std::invalid_argument("Sender for TcpFlow is nullptr");
@@ -155,7 +154,6 @@ private:
 
     void send_packet_now(Packet packet) {
         // TODO: think about this place(should be here or in send_packets)
-        m_sent_bytes += packet.size;
         packet.sent_time = Scheduler::get_instance().get_current_time();
         m_src.lock()->enqueue_packet(std::move(packet));
     }
