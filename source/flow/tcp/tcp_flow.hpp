@@ -142,7 +142,6 @@ private:
 
     // Attention: this method DOES NOT set field sent_time to packet
     Packet generate_packet() {
-        // TODO: set packet_num
         sim::Packet packet;
         m_flag_manager.set_flag(packet, packet_type_label, PacketType::DATA);
         packet.size = m_packet_size;
