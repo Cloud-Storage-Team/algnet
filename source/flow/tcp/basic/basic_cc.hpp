@@ -5,7 +5,7 @@
 namespace sim {
 class BasicCC : public ITcpCC {
 public:
-    bool on_ack(TimeNs rtt, bool ecn_flag) final;
+    bool on_ack(TimeNs rtt, TimeNs avg_rtt, bool ecn_flag) final;
     TimeNs get_pacing_delay() const final;
     double get_cwnd() const final;
     std::string to_string() const final;

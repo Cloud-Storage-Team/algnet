@@ -57,16 +57,16 @@ jobs:
     permissions:
       contents: write
     steps:
-    - uses: actions/checkout@v4
-
     - name: Apt update
       run: sudo apt update
 
-    - name: Install dependencies gnuplot
+    - name: Install dependencies
       run: |
         sudo apt install --fix-missing gnuplot
         sudo apt install --fix-missing graphviz
         pip install graphviz
+
+    - uses: actions/checkout@v4
 
     - name: Download artifact
       uses: actions/download-artifact@v4
