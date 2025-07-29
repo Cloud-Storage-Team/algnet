@@ -14,9 +14,9 @@ Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
       m_to(a_to),
       m_speed(a_speed),
       m_propagation_delay(a_delay),
-      m_from_egress(SimplePacketQueue(a_max_from_egress_buffer_size), m_id,
+      m_from_egress(SimplePacketQueue(a_max_from_egress_buffer_size), a_id,
                     LinkQueueType::FromEgress),
-      m_to_ingress(SimplePacketQueue(a_max_to_ingress_buffer_size), m_id,
+      m_to_ingress(SimplePacketQueue(a_max_to_ingress_buffer_size), a_id,
                    LinkQueueType::ToIngress) {
     if (a_from.expired() || a_to.expired()) {
         LOG_WARN("Passed link to device is expired");
