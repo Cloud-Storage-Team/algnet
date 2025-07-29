@@ -64,7 +64,7 @@ bool TcpSwiftCC::on_ack(TimeNs rtt,
     }
 
     m_cwnd = std::clamp(m_cwnd, MIN_CWND, MAX_CWND);
-    return true;
+    return false;
 }
 
 TimeNs TcpSwiftCC::get_pacing_delay() const {
