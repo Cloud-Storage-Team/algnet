@@ -26,7 +26,7 @@ SpeedGbps parse_speed(const std::string &throughput) {
     throw std::runtime_error("Unsupported throughput unit: " + unit);
 }
 
-TimeNs parse_latency(const std::string &latency) {
+TimeNs parse_time(const std::string &latency) {
     auto [value, unit] = parse_value_unit(latency);
     if (unit == "ns") {
         return TimeNs(value);

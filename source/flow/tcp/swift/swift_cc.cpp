@@ -9,17 +9,17 @@
 namespace sim {
 
 TcpSwiftCC::TcpSwiftCC(TimeNs a_base_target,
-                       double  a_additive_inc,
-                       double  a_md_beta,
-                       double  a_max_mdf,
-                       double  a_fs_range,
-                       double  a_fs_min_cwnd,
-                       double  a_fs_max_cwnd)
+                       long double  a_additive_inc,
+                       long double  a_md_beta,
+                       long double  a_max_mdf,
+                       long double  a_fs_range,
+                       long double  a_fs_min_cwnd,
+                       long double  a_fs_max_cwnd)
     : m_base_target(a_base_target),
       m_ai(a_additive_inc),
       m_beta_md(a_md_beta),
       m_max_mdf(a_max_mdf),
-      m_fs_range_ns(a_fs_range * a_base_target.value_nanoseconds()),
+      m_fs_range_ns(a_base_target * a_fs_range),
       m_fs_min_cwnd(a_fs_min_cwnd),
       m_fs_max_cwnd(a_fs_max_cwnd),
       m_cwnd(1.0L),
@@ -31,8 +31,8 @@ TcpSwiftCC::TcpSwiftCC(TimeNs a_base_target,
     const long double inv_sqrt_max = 1.0 / std::sqrt(m_fs_max_cwnd);
     const long double denom        = inv_sqrt_min - inv_sqrt_max;
     // α chosen so that flow_term == FS_RANGE at cwnd = FS_MIN_CWND
-    m_alpha = m_fs_range_ns.value_nanoseconds() / denom;
-    m_beta_flow = -(m_alpha / std::sqrt(m_fs_max_cwnd));   // ≤ 0
+    m_alpha_flow = m_fs_range_ns / denom;
+    m_beta_flow = m_alpha_flow / std::sqrt(m_fs_max_cwnd);
 }
 
 bool TcpSwiftCC::on_ack(TimeNs rtt,
@@ -88,9 +88,9 @@ std::string TcpSwiftCC::to_string() const {
 
 TimeNs TcpSwiftCC::compute_target_delay() const {
     long double cwnd_clamped = std::max(m_fs_min_cwnd, m_cwnd);
-    long double flow_term = (m_alpha / std::sqrt(cwnd_clamped)) + m_beta_flow;
-    flow_term = std::clamp(flow_term, 0.0L, m_fs_range_ns.value_nanoseconds());
-    return m_base_target + TimeNs(flow_term); // TO-DO: use m_base_target + TimeNs(flow_term) + h*hops_num
+    TimeNs flow_term = (m_alpha_flow / std::sqrt(cwnd_clamped)) - m_beta_flow;
+    flow_term = std::clamp(flow_term, TimeNs(0.0L), m_fs_range_ns);
+    return m_base_target + flow_term; // TO-DO: use m_base_target + TimeNs(flow_term) + h*hops_num
 }
 
 } // namespace sim

@@ -34,6 +34,7 @@ class Time {
 public:
     using ThisTime = Time<TTimeBase>;
 
+    constexpr Time() : m_value_ns(0.0L) {}
     template <IsTimeBase USizeBase>
     constexpr Time(Time<USizeBase> a_size)
         : m_value_ns(a_size.value_nanoseconds()) {}

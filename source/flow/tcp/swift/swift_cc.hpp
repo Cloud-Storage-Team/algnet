@@ -33,15 +33,15 @@ public:
      */
     TcpSwiftCC(
         TimeNs  a_base_target,
-        double  a_additive_inc   = 0.5,
-        double  a_md_beta        = 0.5,  // from [0.2, 0.5] diapason
-        double  a_max_mdf        = 0.3,
-        double  a_fs_range       = 1.5,
-        double  a_fs_min_cwnd    = 0.1,  // taken from the paper
-        double  a_fs_max_cwnd    = 100.0 // taken from the paper
+        long double  a_additive_inc   = 0.5L,
+        long double  a_md_beta        = 0.5L,  // from [0.2, 0.5] diapason
+        long double  a_max_mdf        = 0.3L,
+        long double  a_fs_range       = 1.5L,
+        long double  a_fs_min_cwnd    = 0.1L,  // taken from the paper
+        long double  a_fs_max_cwnd    = 100.0L // taken from the paper
     );
 
-    bool on_ack(TimeNs rtt_us, TimeNs avg_rtt, bool ecn_flag) override;
+    bool on_ack(TimeNs rtt, TimeNs avg_rtt, bool ecn_flag) override;
 
     [[nodiscard]] TimeNs get_pacing_delay() const override;
 
@@ -58,7 +58,7 @@ private:
     [[nodiscard]] TimeNs compute_target_delay() const;
 
     // ---------- Tunables ----------
-    const TimeNs m_base_target;   // base RTT budget (µs)
+    const TimeNs m_base_target;   // base RTT budget (ns)
     const double m_ai;            // additive‑increase constant
     const double m_beta_md;       // β for multiplicative decrease
     const double m_max_mdf;       // cap on MD factor per RTT
@@ -67,8 +67,9 @@ private:
     const TimeNs m_fs_range_ns;        // scale range ns (base target * fs range)
     const long double m_fs_min_cwnd;   // packets
     const long double m_fs_max_cwnd;   // packets
-    long double  m_alpha;         // derived coefficient α
-    long double  m_beta_flow;     // reused as flow‑scaling β (runtime‑set)
+    TimeNs  m_alpha_flow; // flow scaling α, ns
+    TimeNs  m_beta_flow;  // flow scaling β (runtime‑set), ns
+                          // a positive value (unlike the article), as the internal TimeNs type is used (not negative)
 
     // ---------- СС state ----------
     long double  m_cwnd;          // congestion window (packets)
