@@ -36,7 +36,7 @@ public:
         double  a_additive_inc   = 0.5,
         double  a_md_beta        = 0.5,  // from [0.2, 0.5] diapason
         double  a_max_mdf        = 0.3,
-        double  a_fs_range       = 5.0,  // taken from the paper
+        double  a_fs_range       = 1.5,
         double  a_fs_min_cwnd    = 0.1,  // taken from the paper
         double  a_fs_max_cwnd    = 100.0 // taken from the paper
     );

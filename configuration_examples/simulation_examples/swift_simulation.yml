@@ -4,67 +4,19 @@ flows:
   flow1:
     sender_id: "sender1"
     receiver_id: "receiver1"
-    packet_size: 64
-    number_of_packets: 1000000
+    packet_size: 256
+    number_of_packets: 10000
     cc:
       type: TcpSwiftCC
-      base_target: 10000
+      base_target: 4000
   flow2:
     sender_id: "sender2"
     receiver_id: "receiver1"
-    packet_size: 64
-    number_of_packets: 1000000
+    packet_size: 256
+    number_of_packets: 10000
     cc:
       type: TcpSwiftCC
-      base_target: 10000
-  flow3:
-    sender_id: "sender3"
-    receiver_id: "receiver1"
-    packet_size: 64
-    number_of_packets: 1000000
-    cc:
-      type: TcpSwiftCC
-      base_target: 10000
-  flow4:
-    sender_id: "sender4"
-    receiver_id: "receiver1"
-    packet_size: 64
-    number_of_packets: 1000000
-    cc:
-      type: TcpSwiftCC
-      base_target: 10000
-  flow5:
-    sender_id: "sender5"
-    receiver_id: "receiver1"
-    packet_size: 64
-    number_of_packets: 1000000
-    cc:
-      type: TcpSwiftCC
-      base_target: 10000
-  flow6:
-    sender_id: "sender6"
-    receiver_id: "receiver1"
-    packet_size: 64
-    number_of_packets: 1000000
-    cc:
-      type: TcpSwiftCC
-      base_target: 10000
-  flow7:
-    sender_id: "sender7"
-    receiver_id: "receiver1"
-    packet_size: 64
-    number_of_packets: 1000000
-    cc:
-      type: TcpSwiftCC
-      base_target: 10000
-  flow8:
-    sender_id: "sender8"
-    receiver_id: "receiver1"
-    packet_size: 64
-    number_of_packets: 1000000
-    cc:
-      type: TcpSwiftCC
-      base_target: 10000
+      base_target: 4000
 
 algorithm: tcp_swift
-simulation_time: 1000000
+simulation_time: 300000
