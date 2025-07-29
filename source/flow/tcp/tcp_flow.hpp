@@ -67,6 +67,7 @@ public:
             }
             if (!m_cc.on_ack(rtt, m_avg_rtt, packet.congestion_experienced)) {
                 // No congestion
+                // TODO: update m_delivered_data_size using packet.packet_num
                 m_delivered_data_size += m_packet_size;
             }
 
@@ -89,6 +90,7 @@ public:
                        m_src.lock()->get_id(), packet.sent_time,
                        packet.delivered_data_size_at_origin, packet.ecn_capable_transport,
                        packet.congestion_experienced);
+            // TODO: set packet_num (packet.num + packet.size)
             m_flag_manager.set_flag(ack, packet_type_label, PacketType::ACK);
             m_dest.lock()->enqueue_packet(ack);
         }
@@ -141,6 +143,7 @@ private:
 
     // Attention: this method DOES NOT set field sent_time to packet
     Packet generate_packet() {
+        // TODO: set packet_num
         sim::Packet packet;
         m_flag_manager.set_flag(packet, packet_type_label, PacketType::DATA);
         packet.size = m_packet_size;
