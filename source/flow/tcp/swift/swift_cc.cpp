@@ -72,8 +72,7 @@ TimeNs TcpSwiftCC::get_pacing_delay() const {
         return TimeNs(0);
     }     
     long double cwnd_clamped = std::max(m_fs_min_cwnd, m_cwnd);
-    long double gap_ns = m_last_rtt.value_nanoseconds() / cwnd_clamped;
-    return TimeNs(gap_ns);
+    return m_last_rtt / cwnd_clamped;
 }
 
 double TcpSwiftCC::get_cwnd() const {
