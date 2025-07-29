@@ -7,7 +7,7 @@ namespace test {
 
 class Start : public testing::Test {
 public:
-    void TearDown() override {}
+    void TearDown() override { sim::IdentifierFactory::get_instance().clear(); }
     void SetUp() override { sim::IdentifierFactory::get_instance().clear(); };
 };
 
