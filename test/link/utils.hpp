@@ -5,7 +5,7 @@
 
 #include "device/interfaces/i_routing_device.hpp"
 #include "link/link.hpp"
-#include "packet.hpp"
+#include "packet/packet.hpp"
 #include "scheduler.hpp"
 
 namespace test {

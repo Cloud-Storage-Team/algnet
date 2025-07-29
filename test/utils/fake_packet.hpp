@@ -2,15 +2,14 @@
 #include <cstdint>
 #include <string>
 
-#include "packet.hpp"
-
 #include "logger/logger.hpp"
+#include "packet/packet.hpp"
 namespace test {
 
-struct FakePacket: public sim::Packet {
-    FakePacket(std::shared_ptr<sim::IDevice> device) {
-        dest_id = device->get_id();
-    };
+struct FakePacket : public sim::Packet {
+    FakePacket(std::shared_ptr<sim::IDevice> device) : sim::Packet() {
+        route.dest.device_id = device->get_id();
+    }
 };
 
 }  // namespace test

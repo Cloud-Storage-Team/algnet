@@ -48,7 +48,7 @@ TimeNs Host::process() {
     LOG_INFO("Processing packet from link on host. Packet: " +
              packet.to_string());
 
-    if (packet.dest_id == get_id()) {
+    if (packet.route.dest.device_id == get_id()) {
         packet.flow->update(packet, get_type());
     } else {
         LOG_WARN(

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "bitset.hpp"
-#include "packet.hpp"
+#include "packet/packet.hpp"
 
 #include <unordered_map>
 #include <spdlog/fmt/fmt.h>

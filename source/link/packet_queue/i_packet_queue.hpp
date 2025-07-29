@@ -1,5 +1,5 @@
 #pragma once
-#include "packet.hpp"
+#include "packet/packet.hpp"
 #include "types.hpp"
 
 namespace sim {

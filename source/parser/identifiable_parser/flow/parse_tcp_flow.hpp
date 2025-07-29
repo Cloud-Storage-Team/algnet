@@ -1,4 +1,6 @@
 #pragma once
+#include <random>
+
 #include "flow/tcp/i_tcp_cc.hpp"
 #include "flow/tcp/tcp_flow.hpp"
 #include "parser/identifiable_parser/identifiable_parser.hpp"
@@ -11,16 +13,17 @@ class Parser<TcpFlow<TTcpCC>> {
 public:
     static std::shared_ptr<TcpFlow<TTcpCC>> parse_object(
         const YAML::Node& key_node, const YAML::Node& value_node) {
+        // will be deleted when Connection class will be created
+        constexpr unsigned RANDOM_SEED = 42;
+        static std::mt19937 rnd(RANDOM_SEED);  // for ports generation
+
         TTcpCC cc = parse_tcp_cc(key_node, value_node);
         Id id = key_node.as<Id>();
 
         Id sender_id = value_node["sender_id"].as<Id>();
-        std::shared_ptr<IHost> sender_ptr =
-            IdentifierFactory::get_instance().get_object<IHost>(sender_id);
-
+        Port sender_port = rnd();
         Id receiver_id = value_node["receiver_id"].as<Id>();
-        std::shared_ptr<IHost> receiver_ptr =
-            IdentifierFactory::get_instance().get_object<IHost>(receiver_id);
+        Port receiver_port = rnd();
 
         SizeByte packet_size =
             SizeByte(value_node["packet_size"].as<uint64_t>());
@@ -28,7 +31,10 @@ public:
             value_node["number_of_packets"].as<std::uint32_t>();
 
         return std::make_shared<TcpFlow<TTcpCC>>(
-            id, sender_ptr, receiver_ptr, cc, packet_size, number_of_packets);
+            id,
+            Route(Endpoint(sender_id, sender_port),
+                  Endpoint(receiver_id, receiver_port)),
+            cc, packet_size, number_of_packets);
     }
 
 private:

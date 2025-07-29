@@ -32,6 +32,23 @@ public:
         return std::dynamic_pointer_cast<TObject>(it->second);
     }
 
+    // Creates TObject by given args and registrate it
+    // Returns nullptr if object with such Id already exists,
+    // smart pointer to created object otherwise
+    template <typename TObject, typename... Args>
+    std::shared_ptr<TObject> create_object(Args&&... args) {
+        static_assert(std::is_constructible_v<TObject, Args&&...>,
+                      "TObject must be constructable from Args");
+        static_assert(std::is_base_of_v<Identifiable, TObject>,
+                      "TObject must implement Identifiable interface");
+        std::shared_ptr<TObject> ptr =
+            std::make_shared<TObject>(std::forward<Args>(args)...);
+        if (!add_object(ptr)) {
+            return nullptr;
+        }
+        return ptr;
+    }
+
     void clear();
 
 private:

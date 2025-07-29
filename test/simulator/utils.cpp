@@ -27,7 +27,7 @@ bool check_reachability(std::shared_ptr<sim::IDevice> src_device,
                         sim::Packet packet_to_dest) {
     std::set<std::shared_ptr<sim::IDevice>> used;
     auto curr_device = src_device;
-    while (curr_device->get_id() != packet_to_dest.dest_id) {
+    while (curr_device->get_id() != packet_to_dest.route.dest.device_id) {
         if (curr_device == nullptr || used.contains(curr_device)) {
             return false;
         }

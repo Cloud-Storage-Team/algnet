@@ -6,7 +6,7 @@
 #include "flow/i_flow.hpp"
 #include "i_tcp_cc.hpp"
 #include "metrics/metrics_collector.hpp"
-#include "packet.hpp"
+#include "packet/packet.hpp"
 #include "scheduler.hpp"
 #include "utils/flag_manager.hpp"
 
@@ -17,12 +17,10 @@ requires std::derived_from<TTcpCC, ITcpCC>
 class TcpFlow : public IFlow,
                 public std::enable_shared_from_this<TcpFlow<TTcpCC> > {
 public:
-    TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
-            std::shared_ptr<IHost> a_dest, TTcpCC a_cc, SizeByte a_packet_size,
+    TcpFlow(Id a_id, Route a_route, TTcpCC a_cc, SizeByte a_packet_size,
             std::uint32_t a_packets_to_send, bool a_ecn_capable = true)
         : m_id(std::move(a_id)),
-          m_src(a_src),
-          m_dest(a_dest),
+          m_route(std::move(a_route)),
           m_cc(std::move(a_cc)),
           m_packet_size(a_packet_size),
           m_packets_to_send(a_packets_to_send),
@@ -30,12 +28,6 @@ public:
           m_packets_in_flight(0),
           m_delivered_data_size(0),
           m_avg_rtt(0.0) {
-        if (m_src.lock() == nullptr) {
-            throw std::invalid_argument("Sender for TcpFlow is nullptr");
-        }
-        if (m_dest.lock() == nullptr) {
-            throw std::invalid_argument("Receiver for TcpFlow is nullptr");
-        }
         initialize_flag_manager();
     }
 
@@ -43,7 +35,7 @@ public:
 
     void update(Packet packet, DeviceType type) final {
         (void)type;
-        if (packet.dest_id == m_src.lock()->get_id() &&
+        if (packet.route.dest == m_route.source &&
             m_flag_manager.get_flag(packet, packet_type_label) ==
                 PacketType::ACK) {
             // ACK delivered to source device; calculate metrics, update
@@ -67,12 +59,15 @@ public:
             }
             if (!m_cc.on_ack(rtt, m_avg_rtt, packet.congestion_experienced)) {
                 // No congestion
-                // TODO: get packet size from some other source than m_packet_size (m_data_size does not expand on flows with varying packet sizes)
+                // TODO: get packet size from some other source than
+                // m_packet_size (m_data_size does not expand on flows with
+                // varying packet sizes)
                 m_delivered_data_size += m_packet_size;
             }
 
             SpeedGbps delivery_rate =
-                (m_delivered_data_size - packet.delivered_data_size_at_origin) / rtt;
+                (m_delivered_data_size - packet.delivered_data_size_at_origin) /
+                rtt;
             MetricsCollector::get_instance().add_delivery_rate(
                 packet.flow->get_id(), current_time, delivery_rate);
 
@@ -82,22 +77,36 @@ public:
                 MetricsCollector::get_instance().add_cwnd(m_id, current_time,
                                                           cwnd);
             }
-        } else if (packet.dest_id == m_dest.lock()->get_id() &&
+        } else if (packet.route.dest == m_route.dest &&
                    m_flag_manager.get_flag(packet, packet_type_label) ==
                        PacketType::DATA) {
             // data packet delivered to destination device; send ack
-            Packet ack(SizeByte(1), this, m_dest.lock()->get_id(),
-                       m_src.lock()->get_id(), packet.sent_time,
-                       packet.delivered_data_size_at_origin, packet.ecn_capable_transport,
+            Packet ack(SizeByte(1), this, Route(m_route.dest, m_route.source),
+                       packet.sent_time, packet.delivered_data_size_at_origin,
+                       packet.ecn_capable_transport,
                        packet.congestion_experienced);
             m_flag_manager.set_flag(ack, packet_type_label, PacketType::ACK);
-            m_dest.lock()->enqueue_packet(ack);
+
+            std::shared_ptr<IHost> receiver = get_receiver();
+
+            if (receiver == nullptr) {
+                LOG_ERROR("Receiver device was deleted; can not send ack");
+            } else {
+                receiver->enqueue_packet(ack);
+            }
         }
         send_packets();
     }
 
-    std::shared_ptr<IHost> get_sender() const final { return m_src.lock(); }
-    std::shared_ptr<IHost> get_receiver() const { return m_dest.lock(); }
+    std::shared_ptr<IHost> get_sender() const final {
+        return IdentifierFactory::get_instance().get_object<IHost>(
+            m_route.source.device_id);
+    }
+    std::shared_ptr<IHost> get_receiver() const {
+        return IdentifierFactory::get_instance().get_object<IHost>(
+            m_route.dest.device_id);
+    }
+
     Id get_id() const final { return m_id; }
 
     SizeByte get_delivered_bytes() const { return m_delivered_data_size; }
@@ -106,8 +115,7 @@ public:
         std::ostringstream oss;
         oss << "[TcpFlow; ";
         oss << "Id:" << m_id;
-        oss << ", src id: " << m_src.lock()->get_id();
-        oss << ", dest id: " << m_dest.lock()->get_id();
+        oss << ", route: " << m_route;
         oss << ", CC module: " << m_cc.to_string();
         oss << ", packet size: " << m_packet_size;
         oss << ", to send packets: " << m_packets_to_send;
@@ -146,8 +154,7 @@ private:
         m_flag_manager.set_flag(packet, packet_type_label, PacketType::DATA);
         packet.size = m_packet_size;
         packet.flow = this;
-        packet.source_id = get_sender()->get_id();
-        packet.dest_id = get_receiver()->get_id();
+        packet.route = m_route;
         packet.delivered_data_size_at_origin = m_delivered_data_size;
         packet.ecn_capable_transport = m_ecn_capable;
         return packet;
@@ -156,7 +163,12 @@ private:
     void send_packet_now(Packet packet) {
         // TODO: think about this place(should be here or in send_packets)
         packet.sent_time = Scheduler::get_instance().get_current_time();
-        m_src.lock()->enqueue_packet(std::move(packet));
+        std::shared_ptr<IHost> sender = get_sender();
+        if (sender == nullptr) {
+            LOG_ERROR("Sender device was deleted; can not send packet");
+            return;
+        }
+        sender->enqueue_packet(std::move(packet));
     }
 
     // Send (or plan sending) as many packets as possible
@@ -209,8 +221,7 @@ private:
 
     Id m_id;
 
-    std::weak_ptr<IHost> m_src;
-    std::weak_ptr<IHost> m_dest;
+    Route m_route;
 
     // Congestion control module
     TTcpCC m_cc;

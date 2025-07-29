@@ -3,7 +3,7 @@
 
 #include "device/routing_module.hpp"
 #include "link/i_link.hpp"
-#include "packet.hpp"
+#include "packet/packet.hpp"
 
 namespace test {
 

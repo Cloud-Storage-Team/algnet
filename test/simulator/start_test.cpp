@@ -8,18 +8,25 @@ namespace test {
 class Start : public testing::Test {
 public:
     void TearDown() override {}
-    void SetUp() override {};
+    void SetUp() override { sim::IdentifierFactory::get_instance().clear(); };
 };
 
 TEST_F(Start, TrivialTopology) {
     sim::BasicSimulator sim;
-    auto sender = std::make_shared<sim::Host>("sender");
+    Id sender_id = "sender";
+    auto sender =
+        sim::IdentifierFactory::get_instance().create_object<sim::Host>(
+            sender_id);
     sim.add_host(sender);
 
-    auto swtch = std::make_shared<sim::Switch>("switch");
+    Id switch_id = "switch";
+    auto swtch = std::make_shared<sim::Switch>(switch_id);
     sim.add_switch(swtch);
 
-    auto receiver = std::make_shared<sim::Host>("receiver");
+    Id receiver_id = "receiver";
+    auto receiver =
+        sim::IdentifierFactory::get_instance().create_object<sim::Host>(
+            receiver_id);
     sim.add_host(receiver);
 
     constexpr TimeNs stop_time(1000);
@@ -28,7 +35,8 @@ TEST_F(Start, TrivialTopology) {
 
     Id id = "flow";
     auto flow = std::make_shared<sim::BasicFlow>(
-        id, sender, receiver, sim::BasicCC(), packet_size, packets_to_send);
+        id, sim::Route(sender_id, receiver_id), sim::BasicCC(), packet_size,
+        packets_to_send);
     sim.add_flow(flow);
 
     add_two_way_links(sim, {{sender, swtch}, {swtch, receiver}});
@@ -40,24 +48,37 @@ TEST_F(Start, TrivialTopology) {
 
 TEST_F(Start, ThreeToOneTopology) {
     sim::BasicSimulator sim;
-    auto sender1 = std::make_shared<sim::Host>("sender1");
-    sim.add_host(sender1);
+    Id sender_1_id = "sender-1";
+    auto sender_1 =
+        sim::IdentifierFactory::get_instance().create_object<sim::Host>(
+            sender_1_id);
+    sim.add_host(sender_1);
 
-    auto sender2 = std::make_shared<sim::Host>("sender2");
-    sim.add_host(sender2);
+    Id sender_2_id = "sender-2";
+    auto sender_2 =
+        sim::IdentifierFactory::get_instance().create_object<sim::Host>(
+            sender_2_id);
+    sim.add_host(sender_2);
 
-    auto sender3 = std::make_shared<sim::Host>("sender3");
-    sim.add_host(sender3);
+    Id sender_3_id = "sender-3";
+    auto sender_3 =
+        sim::IdentifierFactory::get_instance().create_object<sim::Host>(
+            sender_3_id);
+    sim.add_host(sender_3);
 
-    auto swtch = std::make_shared<sim::Switch>("switch");
+    Id switch_id = "switch";
+    auto swtch = std::make_shared<sim::Switch>(switch_id);
     sim.add_switch(swtch);
 
-    auto receiver = std::make_shared<sim::Host>("receiver");
+    Id receiver_id = "receiver";
+    auto receiver =
+        sim::IdentifierFactory::get_instance().create_object<sim::Host>(
+            receiver_id);
     sim.add_host(receiver);
 
-    add_two_way_links(sim, {{sender1, swtch},
-                            {sender2, swtch},
-                            {sender3, swtch},
+    add_two_way_links(sim, {{sender_1, swtch},
+                            {sender_2, swtch},
+                            {sender_3, swtch},
                             {swtch, receiver}});
 
     constexpr TimeNs stop_time(10000);
@@ -67,21 +88,21 @@ TEST_F(Start, ThreeToOneTopology) {
     constexpr std::uint32_t packets_to_send_by_flow3 = 100;
 
     Id id_1 = "flow_1";
-    auto flow1 = std::make_shared<sim::BasicFlow>(id_1, sender1, receiver,
-                                                  sim::BasicCC(), packet_size,
-                                                  packets_to_send_by_flow1);
+    auto flow1 = std::make_shared<sim::BasicFlow>(
+        id_1, sim::Route(sender_1_id, receiver_id), sim::BasicCC(), packet_size,
+        packets_to_send_by_flow1);
     sim.add_flow(flow1);
 
     Id id_2 = "flow_2";
-    auto flow2 = std::make_shared<sim::BasicFlow>(id_2, sender2, receiver,
-                                                  sim::BasicCC(), packet_size,
-                                                  packets_to_send_by_flow2);
+    auto flow2 = std::make_shared<sim::BasicFlow>(
+        id_2, sim::Route(sender_2_id, receiver_id), sim::BasicCC(), packet_size,
+        packets_to_send_by_flow2);
     sim.add_flow(flow2);
 
     Id id_3 = "flow_3";
-    auto flow3 = std::make_shared<sim::BasicFlow>(id_3, sender3, receiver,
-                                                  sim::BasicCC(), packet_size,
-                                                  packets_to_send_by_flow3);
+    auto flow3 = std::make_shared<sim::BasicFlow>(
+        id_3, sim::Route(sender_3_id, receiver_id), sim::BasicCC(), packet_size,
+        packets_to_send_by_flow3);
     sim.add_flow(flow3);
 
     sim.start(stop_time);
