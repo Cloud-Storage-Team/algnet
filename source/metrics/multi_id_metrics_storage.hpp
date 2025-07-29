@@ -5,7 +5,6 @@
 #include <type_traits>
 
 #include "metrics_storage.hpp"
-    
 namespace sim {
 class MultiIdMetricsStorage {
 public:
