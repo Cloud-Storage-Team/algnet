@@ -13,7 +13,7 @@ Packet::Packet(SizeByte a_size, IFlow* a_flow, Id a_source_id, Id a_dest_id,
       size(a_size),
       flow(a_flow),
       sent_time(a_sent_time),
-      delivered_at_origin(a_delivered_at_origin),
+      delivered_data_size_at_origin(a_delivered_at_origin),
       ecn_capable_transport(a_ecn_capable_transport),
       congestion_experienced(a_congestion_experienced) {}
 

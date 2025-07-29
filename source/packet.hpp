@@ -26,7 +26,7 @@ struct Packet {
     IFlow* flow;
     TimeNs sent_time;  // Note: ACK's sent time is the data packet sent time
     SizeByte
-        delivered_at_origin;  // For ACK this is inherited from data packet
+        delivered_data_size_at_origin;  // For ACK this is inherited from data packet
     bool ecn_capable_transport;
     bool congestion_experienced;
 };
