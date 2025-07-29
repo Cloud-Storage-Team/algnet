@@ -67,7 +67,7 @@ public:
             }
             if (!m_cc.on_ack(rtt, m_avg_rtt, packet.congestion_experienced)) {
                 // No congestion
-                // TODO: update m_delivered_data_size using packet.packet_num
+                // TODO: get packet size from some other source than m_packet_size (m_data_size does not expand on flows with varying packet sizes)
                 m_delivered_data_size += m_packet_size;
             }
 
