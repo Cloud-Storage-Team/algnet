@@ -28,8 +28,7 @@ public:
           m_packets_to_send(a_packets_to_send),
           m_ecn_capable(a_ecn_capable),
           m_packets_in_flight(0),
-          m_packets_acked(0),
-          m_sent_bytes(0),
+          m_delivered_data_size(0),
           m_avg_rtt(0.0) {
         if (m_src.lock() == nullptr) {
             throw std::invalid_argument("Sender for TcpFlow is nullptr");
@@ -61,11 +60,6 @@ public:
             MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
                                                      current_time, rtt);
 
-            SpeedGbps delivery_bit_rate =
-                (m_sent_bytes - packet.sent_bytes_at_origin) / rtt;
-            MetricsCollector::get_instance().add_delivery_rate(
-                packet.flow->get_id(), current_time, delivery_bit_rate);
-
             double old_cwnd = m_cc.get_cwnd();
 
             if (m_packets_in_flight > 0) {
@@ -73,8 +67,14 @@ public:
             }
             if (!m_cc.on_ack(rtt, m_avg_rtt, packet.congestion_experienced)) {
                 // No congestion
-                m_packets_acked++;
+                // TODO: get packet size from some other source than m_packet_size (m_data_size does not expand on flows with varying packet sizes)
+                m_delivered_data_size += m_packet_size;
             }
+
+            SpeedGbps delivery_rate =
+                (m_delivered_data_size - packet.delivered_data_size_at_origin) / rtt;
+            MetricsCollector::get_instance().add_delivery_rate(
+                packet.flow->get_id(), current_time, delivery_rate);
 
             double cwnd = m_cc.get_cwnd();
 
@@ -88,8 +88,7 @@ public:
             // data packet delivered to destination device; send ack
             Packet ack(SizeByte(1), this, m_dest.lock()->get_id(),
                        m_src.lock()->get_id(), packet.sent_time,
-                       packet.sent_bytes_at_origin,
-                       packet.ecn_capable_transport,
+                       packet.delivered_data_size_at_origin, packet.ecn_capable_transport,
                        packet.congestion_experienced);
             m_flag_manager.set_flag(ack, packet_type_label, PacketType::ACK);
             m_dest.lock()->enqueue_packet(ack);
@@ -101,7 +100,7 @@ public:
     std::shared_ptr<IHost> get_receiver() const { return m_dest.lock(); }
     Id get_id() const final { return m_id; }
 
-    std::uint32_t get_packets_acked() const { return m_packets_acked; }
+    SizeByte get_delivered_bytes() const { return m_delivered_data_size; }
 
     std::string to_string() const {
         std::ostringstream oss;
@@ -113,7 +112,7 @@ public:
         oss << ", packet size: " << m_packet_size;
         oss << ", to send packets: " << m_packets_to_send;
         oss << ", packets_in_flight: " << m_packets_in_flight;
-        oss << ", acked packets: " << m_packets_acked;
+        oss << ", acked packets: " << m_delivered_data_size;
         oss << "]";
         return oss.str();
     }
@@ -149,14 +148,13 @@ private:
         packet.flow = this;
         packet.source_id = get_sender()->get_id();
         packet.dest_id = get_receiver()->get_id();
-        packet.sent_bytes_at_origin = m_sent_bytes;
+        packet.delivered_data_size_at_origin = m_delivered_data_size;
         packet.ecn_capable_transport = m_ecn_capable;
         return packet;
     }
 
     void send_packet_now(Packet packet) {
         // TODO: think about this place(should be here or in send_packets)
-        m_sent_bytes += packet.size;
         packet.sent_time = Scheduler::get_instance().get_current_time();
         m_src.lock()->enqueue_packet(std::move(packet));
     }
@@ -222,8 +220,7 @@ private:
     bool m_ecn_capable;
 
     std::uint32_t m_packets_in_flight;
-    std::uint32_t m_packets_acked;
-    SizeByte m_sent_bytes;
+    SizeByte m_delivered_data_size;
 
     TimeNs m_avg_rtt;
 };
