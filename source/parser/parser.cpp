@@ -20,10 +20,10 @@ std::pair<SimulatorVariant, TimeNs> YamlParser::build_simulator_from_config(
 
     auto parse_if_present =
         [](const YAML::Node &node,
-           std::function<void(const YAML::Node &)> node_parser,
+           std::function<void(const YAML::Node &)> parser,
            const char *error_message) {
             if (node) {
-                node_parser(node);
+                parser(node);
             } else {
                 LOG_ERROR(error_message);
             }
@@ -39,9 +39,16 @@ std::pair<SimulatorVariant, TimeNs> YamlParser::build_simulator_from_config(
         [this](auto node) { return process_switches(node); },
         "No swithces specified in the topology config");
 
-    process_links(topology_config);
+    parse_if_present(
+        topology_config["links"],
+        [this](auto node) { return process_links(node); },
+        "No swithces specified in the topology config");
 
-    process_flows(simulation_config);
+    parse_if_present(
+        simulation_config["flows"],
+        [this](auto node) { return process_flows(node); },
+        "No flows specified in the simulation config");
+
     return {m_simulator, parse_simulation_time(simulation_config)};
 }
 
@@ -93,14 +100,8 @@ void YamlParser::process_switches(const YAML::Node &swtiches_node) {
     }
 }
 
-void YamlParser::process_links(const YAML::Node &config) {
-    if (!config["links"]) {
-        LOG_WARN("No links specified in the topology config");
-        return;
-    }
-
-    const YAML::Node links = config["links"];
-    for (auto it = links.begin(); it != links.end(); ++it) {
+void YamlParser::process_links(const YAML::Node &links_node) {
+    for (auto it = links_node.begin(); it != links_node.end(); ++it) {
         const YAML::Node key_node = it->first;
         const YAML::Node value_node = it->second;
         std::visit(
@@ -119,14 +120,8 @@ void YamlParser::process_links(const YAML::Node &config) {
     }
 }
 
-void YamlParser::process_flows(const YAML::Node &config) {
-    if (!config["flows"]) {
-        LOG_ERROR("No flows specified in the simulation config");
-        return;
-    }
-
-    const YAML::Node &flows = config["flows"];
-    for (auto it = flows.begin(); it != flows.end(); ++it) {
+void YamlParser::process_flows(const YAML::Node &flows_node) {
+    for (auto it = flows_node.begin(); it != flows_node.end(); ++it) {
         const YAML::Node key_node = it->first;
         const YAML::Node val_node = it->second;
         std::visit(
