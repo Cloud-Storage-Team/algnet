@@ -13,7 +13,7 @@ std::string to_string(LinkQueueType type);
 // ingress queue of desination link device
 class LinkQueue : public IPacketQueue {
 public:
-    LinkQueue(SimplePacketQueue a_queue, Id a_link_id, LinkQueueType a_type);
+    LinkQueue(SizeByte a_max_size, Id a_link_id, LinkQueueType a_type);
     ~LinkQueue() = default;
 
     bool push(Packet packet) final;

@@ -19,9 +19,9 @@ std::string to_string(LinkQueueType type) {
     }
 }
 
-LinkQueue::LinkQueue(SimplePacketQueue a_queue, Id a_link_id,
+LinkQueue::LinkQueue(SizeByte a_queue_size, Id a_link_id,
                      LinkQueueType a_type)
-    : m_queue(std::move(a_queue)), m_link_id(a_link_id), m_type(a_type) {}
+    : m_queue(a_queue_size), m_link_id(a_link_id), m_type(a_type) {}
 
 bool LinkQueue::push(Packet packet) {
     bool result = m_queue.push(std::move(packet));
