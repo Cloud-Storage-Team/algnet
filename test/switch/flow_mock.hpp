@@ -11,7 +11,7 @@ public:
 
     void start() final;
 
-    void update(sim::Packet packet, sim::DeviceType type) final;
+    void update(sim::Packet packet) final;
 
     std::shared_ptr<sim::IHost> get_sender() const final;
     std::shared_ptr<sim::IHost> get_receiver() const final;

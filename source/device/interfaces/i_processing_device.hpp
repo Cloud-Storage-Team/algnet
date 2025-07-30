@@ -4,8 +4,6 @@
 
 namespace sim {
 
-enum DeviceType { SWITCH, SENDER, RECEIVER };
-
 class IProcessingDevice {
 public:
     virtual ~IProcessingDevice() = default;
@@ -14,8 +12,6 @@ public:
     // e.g. see next inlink, take one packet from it,
     // and do smth with it (send further, send ask etc)
     virtual TimeNs process() = 0;
-
-    virtual DeviceType get_type() const = 0;
 };
 
 }  // namespace sim

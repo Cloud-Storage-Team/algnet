@@ -15,8 +15,6 @@ bool Switch::notify_about_arrival(TimeNs arrival_time) {
                                                      weak_from_this());
 };
 
-DeviceType Switch::get_type() const { return DeviceType::SWITCH; }
-
 TimeNs Switch::process() {
     TimeNs total_processing_time = TimeNs(1);
     std::shared_ptr<ILink> link = next_inlink();
