@@ -3,7 +3,6 @@
 #include <cmath>
 #include <limits>
 
-#include "utils/filesystem.hpp"
 namespace sim {
 
 void write_to_csv(
