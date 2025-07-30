@@ -26,12 +26,12 @@ SpeedGbps parse_speed(const std::string &throughput) {
     throw std::runtime_error("Unsupported throughput unit: " + unit);
 }
 
-TimeNs parse_time(const std::string &latency) {
-    auto [value, unit] = parse_value_unit(latency);
+TimeNs parse_time(const std::string &time) {
+    auto [value, unit] = parse_value_unit(time);
     if (unit == "ns") {
         return TimeNs(value);
     }
-    throw std::runtime_error("Unsupported latency unit: " + unit);
+    throw std::runtime_error("Unsupported time unit: " + unit);
 }
 
 SizeByte parse_buffer_size(const std::string &buffer_size) {
