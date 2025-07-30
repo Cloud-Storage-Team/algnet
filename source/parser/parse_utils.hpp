@@ -10,7 +10,7 @@
 #include "types.hpp"
 
 SpeedGbps parse_speed(const std::string& throughput);
-TimeNs parse_latency(const std::string& latency);
+TimeNs parse_time(const std::string& time);
 SizeByte parse_buffer_size(const std::string& buffer_size);
 
 // Parses node[field_name] using value_parser if node contains field_name;
