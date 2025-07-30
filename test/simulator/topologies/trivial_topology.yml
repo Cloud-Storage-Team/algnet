@@ -2,13 +2,11 @@ topology_config_path: trivial_topology.yml # it's genious i think
 algorithm: basic
 simulation_time: 1000
 
-devices:
+hosts:
   sender:
-    type: host
-  switch:
-    type: switch
   receiver:
-    type: host
+switches:
+  switch:
 
 links:
   link1:
