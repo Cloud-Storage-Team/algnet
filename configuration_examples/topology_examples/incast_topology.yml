@@ -1,18 +1,13 @@
-devices:
+hosts:
   sender0:
-    type: host
   sender1:
-    type: host
   sender2:
-    type: host
   sender3:
-    type: host
   sender4:
-    type: host
   receiver0:
-    type: host
+
+switches:
   switch:
-    type: switch
     ecn:
       min: 0.01
       max: 0.04

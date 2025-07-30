@@ -18,7 +18,27 @@ std::pair<SimulatorVariant, TimeNs> YamlParser::build_simulator_from_config(
         path.parent_path() / parse_topology_config_path(simulation_config);
     const YAML::Node topology_config = YAML::LoadFile(m_topology_config_path);
 
-    process_devices(topology_config);
+    auto parse_if_present =
+        [](const YAML::Node &node,
+           std::function<void(const YAML::Node &)> node_parser,
+           const char *error_message) {
+            if (node) {
+                node_parser(node);
+            } else {
+                LOG_ERROR(error_message);
+            }
+        };
+
+    parse_if_present(
+        topology_config["hosts"],
+        [this](auto node) { return process_hosts(node); },
+        "No hosts specified in the topology config");
+
+    parse_if_present(
+        topology_config["switches"],
+        [this](auto node) { return process_switches(node); },
+        "No swithces specified in the topology config");
+
     process_links(topology_config);
 
     process_flows(simulation_config);
@@ -33,50 +53,43 @@ TimeNs YamlParser::parse_simulation_time(const YAML::Node &config) {
     return TimeNs(config["simulation_time"].as<uint32_t>());
 }
 
-void YamlParser::process_devices(const YAML::Node &config) {
-    if (!config["devices"]) {
-        LOG_WARN("No devices specified in the topology config");
-        return;
-    }
-    for (auto it = config["devices"].begin(); it != config["devices"].end();
-         ++it) {
+void YamlParser::process_hosts(const YAML::Node &hosts_node) {
+    for (auto it = hosts_node.begin(); it != hosts_node.end(); ++it) {
         const YAML::Node key_node = it->first;
         const YAML::Node val_node = it->second;
 
         auto device_name = key_node.as<Id>();
-        auto device_type = val_node["type"].as<std::string>();
+        std::visit(
+            [&key_node, &val_node](auto &sim) {
+                std::shared_ptr<Host> ptr =
+                    IdentifieableParser<Host>::parse_and_registrate(key_node,
+                                                                    val_node);
+                if (!sim.add_host(ptr)) {
+                    throw std::runtime_error("Can not add host with id " +
+                                             ptr.get()->get_id());
+                }
+            },
+            m_simulator);
+    }
+}
 
-        if (device_type == "host") {
-            std::visit(
-                [&key_node, &val_node](auto &sim) {
-                    using SimType = std::decay_t<decltype(sim)>;
-                    using HostType = typename SimType::Host_T;
-                    std::shared_ptr<HostType> ptr =
-                        IdentifieableParser<HostType>::parse_and_registrate(
-                            key_node, val_node);
-                    if (!sim.add_host(ptr)) {
-                        throw std::runtime_error("Can not add host with id " +
-                                                 ptr.get()->get_id());
-                    }
-                },
-                m_simulator);
-        } else if (device_type == "switch") {
-            std::visit(
-                [&key_node, &val_node](auto &simulator) {
-                    using SimType = std::decay_t<decltype(simulator)>;
-                    using SwitchType = typename SimType::Switch_T;
-                    std::shared_ptr<SwitchType> ptr =
-                        IdentifieableParser<SwitchType>::parse_and_registrate(
-                            key_node, val_node);
-                    if (!simulator.add_switch(ptr)) {
-                        throw std::runtime_error("Can not add switch with id " +
-                                                 ptr.get()->get_id());
-                    }
-                },
-                m_simulator);
-        } else {
-            throw std::runtime_error("Invalid host type: " + device_type);
-        }
+void YamlParser::process_switches(const YAML::Node &swtiches_node) {
+    for (auto it = swtiches_node.begin(); it != swtiches_node.end(); ++it) {
+        const YAML::Node key_node = it->first;
+        const YAML::Node val_node = it->second;
+
+        auto device_name = key_node.as<Id>();
+        std::visit(
+            [&key_node, &val_node](auto &simulator) {
+                std::shared_ptr<Switch> ptr =
+                    IdentifieableParser<Switch>::parse_and_registrate(key_node,
+                                                                      val_node);
+                if (!simulator.add_switch(ptr)) {
+                    throw std::runtime_error("Can not add switch with id " +
+                                             ptr.get()->get_id());
+                }
+            },
+            m_simulator);
     }
 }
 

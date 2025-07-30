@@ -1,14 +1,12 @@
-devices:
+hosts:
   sender:
-    type: host
   receiver:
-    type: host
+
+switches:
   switch-1:
-    type: switch
   switch-2:
-    type: switch
   switch-3:
-    type: switch
+
 links:
   link-1:
     from: sender

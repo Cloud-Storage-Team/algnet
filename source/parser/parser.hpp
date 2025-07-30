@@ -21,9 +21,11 @@ private:
     static std::string parse_algorithm(const YAML::Node& config);
     static TimeNs parse_simulation_time(const YAML::Node& config);
 
-    void process_devices(const YAML::Node& config);
-    void process_links(const YAML::Node& config);
-    void process_flows(const YAML::Node& config);
+    void process_hosts(const YAML::Node& hosts_node);
+    void process_switches(const YAML::Node& switches_node);
+
+    void process_links(const YAML::Node& links_node);
+    void process_flows(const YAML::Node& flows_node);
 
     SimulatorVariant m_simulator;
     std::filesystem::path m_topology_config_path;

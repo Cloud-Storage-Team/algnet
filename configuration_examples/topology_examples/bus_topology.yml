@@ -1,12 +1,10 @@
-devices:
+hosts:
   sender1:
-    type: host
   sender2:
-    type: host
   receiver1:
-    type: host
   receiver2:
-    type: host
+
+switches:
   bus:
     type: switch
     ecn:  
