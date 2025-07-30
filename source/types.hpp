@@ -17,3 +17,7 @@ using PacketFlagsBase = std::uint32_t;
 template <typename K, typename V>
 using MapWeakPtr =
     std::map<std::weak_ptr<K>, V, std::owner_less<std::weak_ptr<K>>>;
+
+// Type for summary of simulation; maps flow id to totoal count of bytes
+// delivered by it
+using Summary = std::map<Id, SizeByte>;

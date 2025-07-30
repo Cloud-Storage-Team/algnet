@@ -2,6 +2,7 @@
 
 #include "logger/logger.hpp"
 #include "metrics/metrics_collector.hpp"
+#include "metrics/write_to_csv.hpp"
 #include "parser/parser.hpp"
 
 int main(const int argc, char **argv) {
@@ -44,10 +45,13 @@ int main(const int argc, char **argv) {
     }
     sim::MetricsCollector::get_instance().export_metrics_to_files(output_dir);
 
-    std::filesystem::path summary_file(std::filesystem::path(output_dir) /
+    std::filesystem::path summary_path(std::filesystem::path(output_dir) /
                                        "summary.csv");
 
-    std::visit([&](auto &sim) { sim.write_summary(summary_file); }, simulator);
+    Summary summary =
+        std::visit([&](auto &sim) { return sim.get_summary(); }, simulator);
+
+    sim::write_to_csv(summary, summary_path);
 
     return 0;
 }

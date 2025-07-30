@@ -52,4 +52,17 @@ void write_to_csv(
     }
 }
 
+void write_to_csv(const Summary& summary, std::filesystem::path output_path) {
+    utils::create_all_directories(output_path);
+    std::ofstream out(output_path);
+    if (!out) {
+        throw std::runtime_error("Failed to create file for summary");
+    }
+    out << "Flow id, Delivered data (bytes)\n";
+    for (const auto& [flow_id, value] : summary) {
+        out << flow_id << ", " << value << "\n";
+    }
+    out.close();
+}
+
 }  // namespace sim
