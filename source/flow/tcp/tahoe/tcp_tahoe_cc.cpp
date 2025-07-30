@@ -13,7 +13,7 @@ TcpTahoeCC::TcpTahoeCC(TimeNs a_delay_threshold, double a_sstresh)
 
 bool TcpTahoeCC::on_ack([[maybe_unused]] TimeNs rtt, TimeNs avg_rtt,
                         bool ecn_flag) {
-    Time current_time = Scheduler::get_instance().get_current_time();
+    TimeNs current_time = Scheduler::get_instance().get_current_time();
     if (ecn_flag || avg_rtt > m_delay_threshold) {
         // trigger_congestion
         if (current_time > m_last_congestion_detected + avg_rtt) {

@@ -1,0 +1,16 @@
+topology_config_path: ../topology_examples/two_layers_fractal.yml
+
+flows:
+  flow1:
+    sender_id: "sender"
+    receiver_id: "receiver"
+    packet_size: 512
+    number_of_packets: 100
+  flow2:
+    sender_id: "sender"
+    receiver_id: "receiver"
+    packet_size: 256
+    number_of_packets: 200
+
+algorithm: tcp
+simulation_time: 1000000

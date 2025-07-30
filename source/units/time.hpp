@@ -34,6 +34,7 @@ class Time {
 public:
     using ThisTime = Time<TTimeBase>;
 
+    constexpr Time() : m_value_ns(0.0L) {}
     template <IsTimeBase USizeBase>
     constexpr Time(Time<USizeBase> a_size)
         : m_value_ns(a_size.value_nanoseconds()) {}
@@ -68,6 +69,10 @@ public:
 
     constexpr long double operator/(ThisTime time) const {
         return m_value_ns / time.value_nanoseconds();
+    }
+
+    constexpr ThisTime operator/(long double value) const {
+        return Time<Nanosecond>(m_value_ns / value);
     }
 
     constexpr void operator+=(ThisTime time) { m_value_ns += time.m_value_ns; }
