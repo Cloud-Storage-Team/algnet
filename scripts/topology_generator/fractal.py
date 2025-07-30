@@ -15,10 +15,11 @@ def generate_topology(
     receiver_name = "receiver"
 
     topology = {
-        "devices": {
-            sender_name : {"type" : "host"},
-            receiver_name : {"type" : "host"}
+        "hosts": {
+            sender_name : {},
+            receiver_name : {} 
         },
+        "switches":{},
         "links": {}
     }
     
@@ -45,7 +46,7 @@ def generate_topology(
     for _ in range (depth):
         for i, prev_layer_name in enumerate(prev_layer_names):
             for switch_name in current_layer_names[i]:
-                topology["devices"][switch_name] = {"type" : "switch"}
+                topology["switches"][switch_name] = {"type" : "switch"}
 
                 add_link(prev_layer_name, switch_name)
                 add_link(switch_name, prev_layer_name)

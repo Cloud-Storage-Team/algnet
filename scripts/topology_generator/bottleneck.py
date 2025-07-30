@@ -14,7 +14,11 @@ def generate_topology(
     ingress_buffer_size="1024000B",
     egress_buffer_size="1024000B",
 ):
-    topology = {"devices": {}, "links": {}}
+    topology = {
+        "hosts": {},
+        "switches": {},
+        "links": {}
+    }
     base_index = 0
 
     if switch_name == "sender" or switch_name == "receiver":
@@ -31,7 +35,7 @@ def generate_topology(
     for i in range(0, num_senders):
         sender_name = f"sender_{i}"
         sender_names.append(sender_name)
-        topology["devices"][sender_name] = {"type": "host"}
+        topology["hosts"][sender_name] = {}
 
         # Add link from sender to switch
         link_name = f"link_{base_index}"
@@ -61,7 +65,7 @@ def generate_topology(
     for i in range(0, num_receivers):
         receiver_name = f"receiver_{i}"
         receiver_names.append(receiver_name)
-        topology["devices"][receiver_name] = {"type": "host"}
+        topology["hosts"][receiver_name] = {}
 
         # Add link from switch to receiver
         link_name = f"link_{base_index}"
@@ -89,7 +93,7 @@ def generate_topology(
 
     # Add the switches
     for i in range(0, num_switches):
-        topology["devices"][switch_names[i]] = {"type": "switch", "threshold": 0.7}
+        topology["switches"][switch_names[i]] = {"threshold": 0.7}
 
     # Add links between switches
     for i in range(0, num_switches - 1):
@@ -190,7 +194,7 @@ def save_yaml(data, filename):
 
 
 def parse_arguments():
-    """Parse and validate command line arguments"""
+    """Parse and validate command line arguments"""  
     parser = argparse.ArgumentParser(
         description="Generate topology and simulation YAML files."
     )
