@@ -3,8 +3,9 @@
 #include <regex>
 #include <unordered_map>
 
+#include "link/packet_queue/link_queue.hpp"
+#include "links_queue_size_storage.hpp"
 #include "multi_id_metrics_storage.hpp"
-
 namespace sim {
 
 class MetricsCollector {
@@ -14,15 +15,16 @@ public:
     void add_cwnd(Id flow_id, TimeNs time, double cwnd);
     void add_delivery_rate(Id flow_id, TimeNs time, SpeedGbps value);
     void add_RTT(Id flow_id, TimeNs time, TimeNs value);
-    void add_queue_size(Id link_id, TimeNs time, SizeByte value);
+    void add_queue_size(Id link_id, TimeNs time, SizeByte value,
+                        LinkQueueType type = LinkQueueType::FromEgress);
 
     void export_metrics_to_files(std::filesystem::path metrics_dir) const;
     void draw_metric_plots(std::filesystem::path metrics_dir) const;
 
-    void set_metrics_filter(const std::string& filter);
+    static void set_metrics_filter(const std::string& filter);
 
 private:
-    MetricsCollector() {}
+    MetricsCollector();
     MetricsCollector(const MetricsCollector&) = delete;
     MetricsCollector& operator=(const MetricsCollector&) = delete;
 
@@ -31,14 +33,16 @@ private:
     void draw_RTT_plot(std::filesystem::path path) const;
     void draw_queue_size_plots(std::filesystem::path dir_path) const;
 
+    static std::string m_metrics_filter;
+    static bool m_is_initialised;
+
     // flow_ID --> vector of <time, ...> values
-    MultiIdMetricsStorage m_RTT_storage = MultiIdMetricsStorage("rtt");
-    MultiIdMetricsStorage m_cwnd_storage = MultiIdMetricsStorage("cwnd");
-    MultiIdMetricsStorage m_rate_storage = MultiIdMetricsStorage("rate");
+    MultiIdMetricsStorage m_RTT_storage;
+    MultiIdMetricsStorage m_cwnd_storage;
+    MultiIdMetricsStorage m_rate_storage;
 
     // link_ID --> vector of <time, queue size> values
-    MultiIdMetricsStorage m_queue_size_storage =
-        MultiIdMetricsStorage("queue_size");
+    LinksQueueSizeStorage m_links_queue_size_storage;
 };
 
 }  // namespace sim

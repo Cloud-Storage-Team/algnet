@@ -1,7 +1,6 @@
 #include "link/link.hpp"
 
 #include "logger/logger.hpp"
-#include "metrics/metrics_collector.hpp"
 #include "scheduler.hpp"
 
 namespace sim {
@@ -15,8 +14,10 @@ Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
       m_to(a_to),
       m_speed(a_speed),
       m_propagation_delay(a_delay),
-      m_from_egress(a_max_from_egress_buffer_size),
-      m_to_ingress(a_max_to_ingress_buffer_size) {
+      m_from_egress(a_max_from_egress_buffer_size, a_id,
+                    LinkQueueType::FromEgress),
+      m_to_ingress(a_max_to_ingress_buffer_size, a_id,
+                   LinkQueueType::ToIngress) {
     if (a_from.expired() || a_to.expired()) {
         LOG_WARN("Passed link to device is expired");
     } else if (a_speed == SpeedGbps(0)) {
@@ -141,10 +142,6 @@ void Link::arrive(Packet packet) {
                   " lost");
         return;
     }
-
-    MetricsCollector::get_instance().add_queue_size(
-        get_id(), Scheduler::get_instance().get_current_time(),
-        m_from_egress.get_size());
 
     m_to.lock()->notify_about_arrival(
         Scheduler::get_instance().get_current_time());

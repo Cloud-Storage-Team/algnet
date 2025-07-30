@@ -41,8 +41,7 @@ public:
 
     void start() final { send_packets(); }
 
-    void update(Packet packet, DeviceType type) final {
-        (void)type;
+    void update(Packet packet) final {
         if (packet.dest_id == m_src.lock()->get_id() &&
             m_flag_manager.get_flag(packet, packet_type_label) ==
                 PacketType::ACK) {

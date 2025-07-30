@@ -32,28 +32,28 @@ public:
     Simulator() = default;
     ~Simulator() = default;
 
-    bool add_host(std::shared_ptr<THost> host) {
+    bool add_host(std::shared_ptr<IHost> host) {
         if (host == nullptr) {
             return false;
         }
         return m_hosts.insert(host).second;
     }
 
-    bool add_switch(std::shared_ptr<TSwitch> switch_device) {
+    bool add_switch(std::shared_ptr<ISwitch> switch_device) {
         if (switch_device == nullptr) {
             return false;
         }
         return m_switches.insert(switch_device).second;
     }
 
-    bool add_flow(std::shared_ptr<TFlow> flow) {
+    bool add_flow(std::shared_ptr<IFlow> flow) {
         if (flow == nullptr) {
             return false;
         }
         return m_flows.insert(flow).second;
     }
 
-    bool add_link(std::shared_ptr<TLink> link) {
+    bool add_link(std::shared_ptr<ILink> link) {
         if (!is_valid_link(link)) {
             return false;
         }
@@ -131,8 +131,8 @@ public:
     }
 
 private:
-    std::unordered_set<std::shared_ptr<THost>> m_hosts;
-    std::unordered_set<std::shared_ptr<TSwitch>> m_switches;
+    std::unordered_set<std::shared_ptr<IHost>> m_hosts;
+    std::unordered_set<std::shared_ptr<ISwitch>> m_switches;
     std::unordered_set<std::shared_ptr<IFlow>> m_flows;
     std::unordered_set<std::shared_ptr<ILink>> m_links;
 };

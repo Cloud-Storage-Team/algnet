@@ -23,7 +23,6 @@ public:
     bool notify_about_arrival(TimeNs arrival_time) final;
 
     TimeNs process() final;
-    sim::DeviceType get_type() const final;
 
     Id get_id() const final;
 
