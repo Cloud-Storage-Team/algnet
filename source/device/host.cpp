@@ -14,8 +14,6 @@ bool Host::notify_about_arrival(TimeNs arrival_time) {
                                                      weak_from_this());
 };
 
-DeviceType Host::get_type() const { return DeviceType::SENDER; }
-
 void Host::enqueue_packet(Packet packet) {
     m_nic_buffer.push(packet);
     m_send_data_scheduler.notify_about_arriving(
@@ -49,7 +47,7 @@ TimeNs Host::process() {
              packet.to_string());
 
     if (packet.dest_id == get_id()) {
-        packet.flow->update(packet, get_type());
+        packet.flow->update(packet);
     } else {
         LOG_WARN(
             "Packet arrived to Host that is not its destination; use routing "

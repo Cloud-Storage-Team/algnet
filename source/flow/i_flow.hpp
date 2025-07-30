@@ -12,7 +12,7 @@ public:
 
     // Update the internal state according to some congestion control algorithm
     // Calls when data available for sending on corresponding device
-    virtual void update(Packet packet, DeviceType type) = 0;
+    virtual void update(Packet packet) = 0;
 
     virtual std::shared_ptr<IHost> get_sender() const = 0;
     virtual std::shared_ptr<IHost> get_receiver() const = 0;

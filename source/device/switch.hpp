@@ -17,7 +17,6 @@ public:
 
     bool notify_about_arrival(TimeNs arrival_time) final;
 
-    DeviceType get_type() const final;
     // Process a packet by moving it from ingress to egress
     // and schedule next process event after a delay.
     // Packets are taken from ingress buffers on a round-robin basis.

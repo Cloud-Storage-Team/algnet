@@ -18,7 +18,6 @@ public:
 
     bool notify_about_arrival(TimeNs arrive_time) final;
 
-    DeviceType get_type() const final;
     TimeNs process() final;
     TimeNs send_packet() final;
 

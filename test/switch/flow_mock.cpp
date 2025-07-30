@@ -7,7 +7,7 @@ FlowMock::FlowMock(std::shared_ptr<sim::IHost> m_receiver)
 
 void FlowMock::start() {}
 
-void FlowMock::update(sim::Packet packet, sim::DeviceType type) {};
+void FlowMock::update(sim::Packet packet) {};
 
 std::shared_ptr<sim::IHost> FlowMock::get_sender() const { return nullptr; }
 std::shared_ptr<sim::IHost> FlowMock::get_receiver() const {
