@@ -14,14 +14,19 @@ public:
 
 class RandomHasher : public IHasher {
 public:
-    ~RandomHasher() = default;
-
     std::uint32_t get_hash(Packet packet) const final;
 };
 
 class BaseHasher : public IHasher {
 public:
     ~BaseHasher() = default;
+
+    std::uint32_t get_hash(Packet packet) const final;
+};
+
+class SymmetricHasher : public IHasher {
+public:
+    ~SymmetricHasher() = default;
 
     std::uint32_t get_hash(Packet packet) const final;
 };
