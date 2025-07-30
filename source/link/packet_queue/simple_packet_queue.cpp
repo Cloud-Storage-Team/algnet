@@ -13,7 +13,7 @@ bool SimplePacketQueue::push(Packet packet) {
     return true;
 }
 
-Packet SimplePacketQueue::front() {
+Packet SimplePacketQueue::front() const {
     if (m_queue.empty()) {
         throw std::runtime_error("Can not get front packet from empty queue");
     }
