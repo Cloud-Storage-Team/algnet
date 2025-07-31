@@ -30,6 +30,7 @@ public:
           m_ecn_capable(a_ecn_capable),
           m_packets_in_flight(0),
           m_delivered_data_size(0),
+          m_next_packet_num(0),
           m_rtt_statistics(M_RTT_EXP_DECAY_FACTOR) {
         if (m_src.lock() == nullptr) {
             throw std::invalid_argument("Sender for TcpFlow is nullptr");
@@ -157,6 +158,7 @@ private:
         packet.flow = this;
         packet.source_id = get_sender()->get_id();
         packet.dest_id = get_receiver()->get_id();
+        packet.packet_num = m_next_packet_num++;
         packet.delivered_data_size_at_origin = m_delivered_data_size;
         packet.ecn_capable_transport = m_ecn_capable;
         return packet;
@@ -220,6 +222,7 @@ private:
 
     std::uint32_t m_packets_in_flight;
     SizeByte m_delivered_data_size;
+    std::uint32_t m_next_packet_num;
 
     utils::Statistics m_rtt_statistics;
 };
