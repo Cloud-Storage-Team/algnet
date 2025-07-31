@@ -46,7 +46,7 @@ static bool has_value_above_threshold(
     const std::vector<std::pair<sim::MetricsStorage, std::string>>& data,
     double threshold) {
     for (auto& [storage, _] : data) {
-        for (auto& [time, value] : storage.get_records()) {
+        for (auto& [_, value] : storage.get_records()) {
             if (value > threshold) {
                 return true;
             }
