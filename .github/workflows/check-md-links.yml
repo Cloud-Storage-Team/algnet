@@ -13,4 +13,4 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Check md files in root directory
-      run: python3 scripts/check-md-files.py -d . -i external
+      run: python3 scripts/check-md-files.py -d . -i external 1>/dev/null
