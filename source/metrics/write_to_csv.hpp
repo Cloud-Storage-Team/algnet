@@ -15,6 +15,4 @@ void write_to_csv(
     const std::vector<std::pair<MetricsStorage, std::string> >& storages,
     std::filesystem::path output_path);
 
-void write_to_csv(const Summary& summary, std::filesystem::path output_path);
-
 }  // namespace sim

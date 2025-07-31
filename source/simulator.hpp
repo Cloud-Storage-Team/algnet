@@ -109,13 +109,8 @@ public:
     }
 
     // returns summary in format [flow : size of delivered data]
-    Summary get_summary() const {
-        Summary result;
-        for (auto flow_ptr : m_flows) {
-            result.emplace(flow_ptr->get_id(),
-                           flow_ptr->get_delivered_data_size());
-        }
-        return result;
+    std::unordered_set<std::shared_ptr<IFlow>> get_flows() const {
+        return m_flows;
     }
 
 private:

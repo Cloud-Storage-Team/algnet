@@ -2,8 +2,8 @@
 
 #include "logger/logger.hpp"
 #include "metrics/metrics_collector.hpp"
-#include "metrics/write_to_csv.hpp"
 #include "parser/parser.hpp"
+#include "utils/summary.hpp"
 
 int main(const int argc, char **argv) {
     cxxopts::Options options("NoNS", "Discrete-event based simulator");
@@ -48,10 +48,10 @@ int main(const int argc, char **argv) {
     std::filesystem::path summary_path(std::filesystem::path(output_dir) /
                                        "summary.csv");
 
-    Summary summary =
-        std::visit([&](auto &sim) { return sim.get_summary(); }, simulator);
+    sim::Summary summary = std::visit(
+        [&](auto &sim) { return sim::Summary(sim.get_flows()); }, simulator);
 
-    sim::write_to_csv(summary, summary_path);
+    summary.write_to_csv(summary_path);
 
     return 0;
 }
