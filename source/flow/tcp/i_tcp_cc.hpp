@@ -8,7 +8,7 @@ class ITcpCC {
 public:
     // Callback that triggers every time ACK receives on sender
     // returns true if congestion detected; false otherwice
-    virtual bool on_ack(TimeNs rtt, TimeNs avg_rtt, bool ecn_flag) = 0;
+    virtual void on_ack(TimeNs rtt, TimeNs avg_rtt, bool ecn_flag) = 0;
 
     // Callback that triggers when ACK not delivered on timeout
     virtual void on_timeout() = 0;

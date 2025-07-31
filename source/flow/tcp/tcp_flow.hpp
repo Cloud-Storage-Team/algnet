@@ -47,7 +47,6 @@ public:
         if (packet.dest_id == m_src.lock()->get_id() &&
             m_flag_manager.get_flag(packet, packet_type_label) ==
                 PacketType::ACK) {
-            m_acked.insert(packet.packet_num);
             // ACK delivered to source device; calculate metrics, update
             // internal state
             TimeNs current_time = Scheduler::get_instance().get_current_time();
@@ -57,24 +56,30 @@ public:
                 return;
             }
 
+            if (m_acked.contains(packet.packet_num)) {
+                LOG_WARN(fmt::format("Got duplicate ack number {}; ignored",
+                                     packet.packet_num));
+                return;
+            }
+
             TimeNs rtt = current_time - packet.sent_time;
             m_rtt_statistics.add_record(rtt.value());
             MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
                                                      current_time, rtt);
-
-            double old_cwnd = m_cc.get_cwnd();
+            m_acked.insert(packet.packet_num);
 
             if (m_packets_in_flight > 0) {
                 m_packets_in_flight--;
             }
-            if (!m_cc.on_ack(rtt, TimeNs(m_rtt_statistics.get_mean()),
-                             packet.congestion_experienced)) {
-                // No congestion
-                // TODO: get packet size from some other source than
-                // m_packet_size (m_data_size does not expand on flows with
-                // varying packet sizes)
-                m_delivered_data_size += m_packet_size;
-            }
+
+            double old_cwnd = m_cc.get_cwnd();
+            m_cc.on_ack(rtt, TimeNs(m_rtt_statistics.get_mean()),
+                        packet.congestion_experienced);
+
+            // TODO: get packet size from some other source than
+            // m_packet_size (m_data_size does not expand on flows with
+            // varying packet sizes)
+            m_delivered_data_size += m_packet_size;
 
             SpeedGbps delivery_rate =
                 (m_delivered_data_size - packet.delivered_data_size_at_origin) /
@@ -164,11 +169,16 @@ private:
                 return;
             }
             auto flow = m_flow.lock();
-            if (!flow->m_acked.contains(m_packet_num)) {
-                LOG_WARN(fmt::format("Timeout for packet number {} expired",
-                                     m_packet_num));
-                //  TODO: call m_cc.on_timeout();
+
+            if (flow->m_acked.contains(m_packet_num)) {
+                return;
             }
+            LOG_WARN(
+                fmt::format("Timeout for packet number {} expired; looks "
+                            "like packet loss",
+                            m_packet_num));
+            flow->m_cc.on_timeout();
+            flow->retransmit_packet(m_packet_num);
         }
 
     private:
@@ -178,22 +188,43 @@ private:
 
 private:
     // Attention: this method DOES NOT set field sent_time to packet
-    Packet generate_packet() {
-        sim::Packet packet;
+    Packet create_packet(PacketNum packet_num) {
+        Packet packet;
         m_flag_manager.set_flag(packet, packet_type_label, PacketType::DATA);
         packet.size = m_packet_size;
         packet.flow = this;
         packet.source_id = get_sender()->get_id();
         packet.dest_id = get_receiver()->get_id();
-        packet.packet_num = m_next_packet_num++;
+        packet.packet_num = packet_num;
         packet.delivered_data_size_at_origin = m_delivered_data_size;
         packet.ecn_capable_transport = m_ecn_capable;
         return packet;
     }
 
+    // Attention: this method DOES NOT set field sent_time to packet
+    Packet generate_packet() { return create_packet(m_next_packet_num++); }
+
+    TimeNs get_max_timeout() const {
+        long double mean = m_rtt_statistics.get_mean();
+        long double std = m_rtt_statistics.get_std();
+        if (mean == 0) {
+            // no measurements
+            return TimeNs(std::numeric_limits<long double>::max());
+        }
+        return TimeNs(mean * 2 + std * 4);
+    }
+
     void send_packet_now(Packet packet) {
-        // TODO: think about this place(should be here or in send_packets)
-        packet.sent_time = Scheduler::get_instance().get_current_time();
+        TimeNs current_time = Scheduler::get_instance().get_current_time();
+
+        TimeNs max_timeout = get_max_timeout();
+        if (max_timeout != TimeNs(std::numeric_limits<long double>::max())) {
+            Scheduler::get_instance().add<Timeout>(current_time + max_timeout,
+                                                   this->shared_from_this(),
+                                                   packet.packet_num);
+        }
+
+        packet.sent_time = current_time;
         m_src.lock()->enqueue_packet(std::move(packet));
     }
 
@@ -219,6 +250,12 @@ private:
             m_packets_in_flight++;
             m_packets_to_send--;
         }
+    }
+
+    // Retransmits packet with given number
+    void retransmit_packet(PacketNum packet_num) {
+        Packet packet = create_packet(packet_num);
+        send_packet_now(std::move(packet));
     }
 
     static void initialize_flag_manager() {

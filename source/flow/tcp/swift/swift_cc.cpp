@@ -34,7 +34,7 @@ TcpSwiftCC::TcpSwiftCC(TimeNs a_base_target, long double a_additive_inc,
     m_beta_flow = m_alpha_flow / std::sqrt(m_fs_max_cwnd);
 }
 
-bool TcpSwiftCC::on_ack(TimeNs rtt, [[maybe_unused]] TimeNs avg_rtt,
+void TcpSwiftCC::on_ack(TimeNs rtt, [[maybe_unused]] TimeNs avg_rtt,
                         [[maybe_unused]] bool ecn_flag) {
     if (rtt < TimeNs(1.0L)) {
         throw std::runtime_error("Invalid rtt < 1");
@@ -62,7 +62,6 @@ bool TcpSwiftCC::on_ack(TimeNs rtt, [[maybe_unused]] TimeNs avg_rtt,
     }
 
     update_cwnd(new_cwnd);
-    return false;
 }
 
 void TcpSwiftCC::on_timeout() {

@@ -11,6 +11,7 @@ public:
 
     long double get_mean() const;
     long double get_variance() const;
+    long double get_std() const;
 
 private:
     const long double m_factor;

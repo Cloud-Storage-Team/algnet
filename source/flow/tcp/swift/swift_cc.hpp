@@ -38,7 +38,7 @@ public:
                long double a_fs_max_cwnd = 100.0L  // taken from the paper
     );
 
-    bool on_ack(TimeNs rtt, TimeNs avg_rtt, bool ecn_flag) final;
+    void on_ack(TimeNs rtt, TimeNs avg_rtt, bool ecn_flag) final;
     void on_timeout() final;
 
     [[nodiscard]] TimeNs get_pacing_delay() const final;

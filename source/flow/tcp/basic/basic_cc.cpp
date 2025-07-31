@@ -4,11 +4,9 @@
 
 namespace sim {
 
-bool BasicCC::on_ack([[maybe_unused]] TimeNs rtt,
+void BasicCC::on_ack([[maybe_unused]] TimeNs rtt,
                      [[maybe_unused]] TimeNs avg_rtt,
-                     [[maybe_unused]] bool ecn_flag) {
-    return false;
-}
+                     [[maybe_unused]] bool ecn_flag) {}
 
 void BasicCC::on_timeout() {}
 
