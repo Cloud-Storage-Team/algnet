@@ -55,7 +55,7 @@ void MetricsStorage::draw_on_plot(matplot::figure_handle& fig,
     std::transform(begin(m_records), end(m_records), std::back_inserter(y_data),
                    [](auto const& pair) { return pair.second; });
 
-    auto plot = fig->current_axes()->plot(x_data, y_data, "-");
+    auto plot = fig->current_axes()->plot(x_data, y_data, "-o");
     plot->line_width(1.5);
     plot->display_name(name);
 }

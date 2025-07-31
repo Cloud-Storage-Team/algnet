@@ -100,6 +100,9 @@ void LinksQueueSizeStorage::draw_plots(
         }
 
         ax->xlim({0, limits[1]});
+        ax->ylim({0, static_cast<double>(std::max(
+                         link->get_max_from_egress_buffer_size().value(),
+                         link->get_max_to_ingress_queue_size().value()))});
         ax->color("white");
 
         std::filesystem::path plot_path =
