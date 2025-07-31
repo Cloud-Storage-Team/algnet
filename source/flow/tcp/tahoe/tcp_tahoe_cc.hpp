@@ -8,15 +8,19 @@ public:
     ~TcpTahoeCC() = default;
 
     bool on_ack(TimeNs rtt, TimeNs avg_rtt, bool ecn_flag) final;
+    void on_timeout() final;
     TimeNs get_pacing_delay() const final;
     double get_cwnd() const final;
     std::string to_string() const final;
 
 private:
+    bool compute_can_decrease() const;
+
     TimeNs m_delay_threshold;  // delay threshold for update
 
     double m_ssthresh;  // Slow start threshold
     double m_cwnd;      // Congestion window
     TimeNs m_last_congestion_detected;
+    TimeNs m_last_rtt;
 };
 }  // namespace sim
