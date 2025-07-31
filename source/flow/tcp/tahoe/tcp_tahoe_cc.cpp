@@ -31,7 +31,7 @@ void TcpTahoeCC::on_timeout() {
     if (current_time > m_last_congestion_detected + m_last_rtt) {
         // To avoid too frequent cwnd and sstresh decreases
         m_last_congestion_detected = current_time;
-        m_ssthresh = m_cwnd / 2;
+        m_ssthresh = std::max(0.0, m_cwnd / 2);
         m_cwnd = 1.;
     }
 }

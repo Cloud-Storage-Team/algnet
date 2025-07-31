@@ -24,12 +24,7 @@ void Statistics::add_record(long double record) {
     } else {
         long double delta = record - m_mean;
         m_mean = m_mean * m_factor + record * (1 - m_factor);
-        long double old_variance = m_variance;
         m_variance = m_variance * m_factor + (delta * delta) * (1 - m_factor);
-        if (m_variance > old_variance * 2) {
-            LOG_WARN(
-                fmt::format("Big variance expention on record {}", record));
-        }
     }
 }
 
