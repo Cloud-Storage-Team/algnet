@@ -1,17 +1,17 @@
-#include "tcp_tahoe_cc.hpp"
+#include "tcp_aimd_cc.hpp"
 
 #include <spdlog/fmt/fmt.h>
 
 #include "scheduler.hpp"
 
 namespace sim {
-TcpTahoeCC::TcpTahoeCC(TimeNs a_delay_threshold, double a_sstresh)
+TcpAIMD_CC::TcpAIMD_CC(TimeNs a_delay_threshold, double a_sstresh)
     : m_delay_threshold(a_delay_threshold),
       m_ssthresh(a_sstresh),
       m_cwnd(1.0),
       m_last_congestion_detected(0) {}
 
-bool TcpTahoeCC::on_ack([[maybe_unused]] TimeNs rtt, TimeNs avg_rtt,
+bool TcpAIMD_CC::on_ack([[maybe_unused]] TimeNs rtt, TimeNs avg_rtt,
                         bool ecn_flag) {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
     if (ecn_flag || avg_rtt > m_delay_threshold) {
@@ -34,11 +34,11 @@ bool TcpTahoeCC::on_ack([[maybe_unused]] TimeNs rtt, TimeNs avg_rtt,
     return false;
 }
 
-TimeNs TcpTahoeCC::get_pacing_delay() const { return TimeNs(0); }
+TimeNs TcpAIMD_CC::get_pacing_delay() const { return TimeNs(0); }
 
-double TcpTahoeCC::get_cwnd() const { return m_cwnd; }
+double TcpAIMD_CC::get_cwnd() const { return m_cwnd; }
 
-std::string TcpTahoeCC::to_string() const {
+std::string TcpAIMD_CC::to_string() const {
     return fmt::format("[delay threshold: {}, cwnd: {}, ssthresh: {}]",
                        m_delay_threshold.value(), m_cwnd, m_ssthresh);
 }

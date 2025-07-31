@@ -2,10 +2,10 @@
 #include "flow/tcp/i_tcp_cc.hpp"
 
 namespace sim {
-class TcpTahoeCC : public ITcpCC {
+class TcpAIMD_CC : public ITcpCC {
 public:
-    TcpTahoeCC(TimeNs a_delay_threshold = TimeNs(4000), double a_ssthresh = 8);
-    ~TcpTahoeCC() = default;
+    TcpAIMD_CC(TimeNs a_delay_threshold = TimeNs(4000), double a_ssthresh = 8);
+    ~TcpAIMD_CC() = default;
 
     bool on_ack(TimeNs rtt, TimeNs avg_rtt, bool ecn_flag) final;
     TimeNs get_pacing_delay() const final;
