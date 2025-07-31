@@ -18,16 +18,15 @@ std::pair<SimulatorVariant, TimeNs> YamlParser::build_simulator_from_config(
         path.parent_path() / parse_topology_config_path(simulation_config);
     const YAML::Node topology_config = YAML::LoadFile(m_topology_config_path);
 
-    auto parse_if_present =
-        [](const YAML::Node &node,
-           std::function<void(const YAML::Node &)> parser,
-           const char *error_message) {
-            if (node) {
-                parser(node);
-            } else {
-                LOG_ERROR(error_message);
-            }
-        };
+    auto parse_if_present = [](const YAML::Node &node,
+                               std::function<void(const YAML::Node &)> parser,
+                               std::string error_message) {
+        if (node) {
+            parser(node);
+        } else {
+            LOG_ERROR(std::move(error_message));
+        }
+    };
 
     parse_if_present(
         topology_config["hosts"],
@@ -37,12 +36,12 @@ std::pair<SimulatorVariant, TimeNs> YamlParser::build_simulator_from_config(
     parse_if_present(
         topology_config["switches"],
         [this](auto node) { return process_switches(node); },
-        "No swithces specified in the topology config");
+        "No switches specified in the topology config");
 
     parse_if_present(
         topology_config["links"],
         [this](auto node) { return process_links(node); },
-        "No swithces specified in the topology config");
+        "No links specified in the topology config");
 
     parse_if_present(
         simulation_config["flows"],
@@ -85,7 +84,6 @@ void YamlParser::process_switches(const YAML::Node &swtiches_node) {
         const YAML::Node key_node = it->first;
         const YAML::Node val_node = it->second;
 
-        auto device_name = key_node.as<Id>();
         std::visit(
             [&key_node, &val_node](auto &simulator) {
                 std::shared_ptr<Switch> ptr =
