@@ -39,6 +39,7 @@ void TcpSwiftCC::on_ack(TimeNs rtt, [[maybe_unused]] TimeNs avg_rtt,
     if (rtt < TimeNs(1.0L)) {
         throw std::runtime_error("Invalid rtt < 1");
     }
+    m_retransmit_cnt = 0;
     m_last_rtt = rtt;
 
     // dynamic target_delay
