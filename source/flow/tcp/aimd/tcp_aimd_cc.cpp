@@ -5,9 +5,8 @@
 #include "scheduler.hpp"
 
 namespace sim {
-TcpAIMD_CC::TcpAIMD_CC(TimeNs a_delay_threshold, double a_sstresh)
+TcpAIMD_CC::TcpAIMD_CC(TimeNs a_delay_threshold)
     : m_delay_threshold(a_delay_threshold),
-      m_ssthresh(a_sstresh),
       m_cwnd(1.0),
       m_last_congestion_detected(0) {}
 
@@ -19,18 +18,11 @@ bool TcpAIMD_CC::on_ack([[maybe_unused]] TimeNs rtt, TimeNs avg_rtt,
         if (current_time > m_last_congestion_detected + avg_rtt) {
             // To avoid too frequent cwnd and sstresh decreases
             m_last_congestion_detected = current_time;
-            m_ssthresh = m_cwnd / 2;
-            m_cwnd = 1.;
+            m_cwnd = m_cwnd / 2.0;
         }
         return true;
     }
-    if (m_cwnd < m_ssthresh) {
-        // Slow start
-        m_cwnd++;
-    } else {
-        // Congestion avoidance
-        m_cwnd += 1 / m_cwnd;
-    }
+    m_cwnd += 1 / m_cwnd;
     return false;
 }
 
@@ -39,8 +31,8 @@ TimeNs TcpAIMD_CC::get_pacing_delay() const { return TimeNs(0); }
 double TcpAIMD_CC::get_cwnd() const { return m_cwnd; }
 
 std::string TcpAIMD_CC::to_string() const {
-    return fmt::format("[delay threshold: {}, cwnd: {}, ssthresh: {}]",
-                       m_delay_threshold.value(), m_cwnd, m_ssthresh);
+    return fmt::format("[delay threshold: {}, cwnd: {}]",
+                       m_delay_threshold.value(), m_cwnd);
 }
 
 }  // namespace sim
