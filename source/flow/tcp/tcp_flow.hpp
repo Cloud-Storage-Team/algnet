@@ -47,6 +47,7 @@ public:
         if (packet.dest_id == m_src.lock()->get_id() &&
             m_flag_manager.get_flag(packet, packet_type_label) ==
                 PacketType::ACK) {
+            m_acked.insert(packet.packet_num);
             // ACK delivered to source device; calculate metrics, update
             // internal state
             TimeNs current_time = Scheduler::get_instance().get_current_time();
@@ -96,6 +97,7 @@ public:
                        packet.delivered_data_size_at_origin,
                        packet.ecn_capable_transport,
                        packet.congestion_experienced);
+            ack.packet_num = packet.packet_num;
             m_flag_manager.set_flag(ack, packet_type_label, PacketType::ACK);
             m_dest.lock()->enqueue_packet(ack);
         }
@@ -150,6 +152,31 @@ private:
         Packet m_packet;
     };
 
+    class Timeout : public Event {
+    public:
+        Timeout(TimeNs a_time, std::weak_ptr<TcpFlow<TTcpCC> > a_flow,
+                PacketNum a_packet_num)
+            : Event(a_time), m_flow(a_flow), m_packet_num(a_packet_num) {}
+
+        void operator()() {
+            if (m_flow.expired()) {
+                LOG_ERROR("Pointer to flow expired");
+                return;
+            }
+            auto flow = m_flow.lock();
+            if (!flow->m_acked.contains(m_packet_num)) {
+                LOG_WARN(fmt::format("Timeout for packet number {} expired",
+                                     m_packet_num));
+                //  TODO: call m_cc.on_timeout();
+            }
+        }
+
+    private:
+        std::weak_ptr<TcpFlow<TTcpCC> > m_flow;
+        PacketNum m_packet_num;
+    };
+
+private:
     // Attention: this method DOES NOT set field sent_time to packet
     Packet generate_packet() {
         sim::Packet packet;
@@ -222,7 +249,10 @@ private:
 
     std::uint32_t m_packets_in_flight;
     SizeByte m_delivered_data_size;
-    std::uint32_t m_next_packet_num;
+    PacketNum m_next_packet_num;
+
+    // Contains numbers of all delivered acks
+    std::set<PacketNum> m_acked;
 
     utils::Statistics m_rtt_statistics;
 };

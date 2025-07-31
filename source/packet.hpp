@@ -7,6 +7,8 @@
 
 namespace sim {
 
+using PacketNum = std::uint32_t;
+
 struct Packet {
     Packet(SizeByte a_size = SizeByte(0), IFlow* a_flow = nullptr,
            Id a_source_id = "", Id a_dest_id = "",
@@ -18,15 +20,15 @@ struct Packet {
     bool operator==(const Packet& packet) const;
     std::string to_string() const;
 
-    std::uint32_t packet_num;
+    PacketNum packet_num;
     BitSet<PacketFlagsBase> flags;
     Id source_id;
     Id dest_id;
     SizeByte size;
     IFlow* flow;
     TimeNs sent_time;  // Note: ACK's sent time is the data packet sent time
-    SizeByte
-        delivered_data_size_at_origin;  // For ACK this is inherited from data packet
+    SizeByte delivered_data_size_at_origin;  // For ACK this is inherited from
+                                             // data packet
     bool ecn_capable_transport;
     bool congestion_experienced;
 };
