@@ -31,7 +31,7 @@ void LinksQueueSizeStorage::add_record(Id id, LinkQueueType type, TimeNs time,
 
 void LinksQueueSizeStorage::export_to_files(
     std::filesystem::path output_dir_path) const {
-    std::map<Id, std::vector<std::pair<MetricsStorage, std::string> > >
+    std::map<Id, std::vector<std::pair<MetricsStorage, std::string>>>
         multi_id_storage;
     for (const auto& [key, values] : data()) {
         auto [id, type] = key;
@@ -40,6 +40,19 @@ void LinksQueueSizeStorage::export_to_files(
     for (auto [id, storages] : multi_id_storage) {
         write_to_csv(storages, output_dir_path / get_metrics_filename(id));
     }
+}
+
+static bool has_value_above_threshold(
+    const std::vector<std::pair<sim::MetricsStorage, std::string>>& data,
+    double threshold) {
+    for (auto& [storage, _] : data) {
+        for (auto& [time, value] : storage.get_records()) {
+            if (value > threshold) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void LinksQueueSizeStorage::draw_plots(
@@ -74,10 +87,17 @@ void LinksQueueSizeStorage::draw_plots(
                 .display_name(name);
         };
 
-        draw_gorizontal_line(link->get_max_from_egress_buffer_size().value(),
-                             "max from egress", {1.f, 0.f, 0.f});
-        draw_gorizontal_line(link->get_max_to_ingress_queue_size().value(),
-                             "max to ingress", {0.f, 0.f, 1.f});
+        if (has_value_above_threshold(
+                data, 0.9 * link->get_max_from_egress_buffer_size().value())) {
+            draw_gorizontal_line(
+                link->get_max_from_egress_buffer_size().value(),
+                "max from egress", {1.f, 0.f, 0.f});
+        }
+        if (has_value_above_threshold(
+                data, 0.9 * link->get_max_to_ingress_queue_size().value())) {
+            draw_gorizontal_line(link->get_max_to_ingress_queue_size().value(),
+                                 "max to ingress", {0.f, 0.f, 1.f});
+        }
 
         ax->xlim({0, limits[1]});
         ax->color("white");
