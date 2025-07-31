@@ -9,6 +9,7 @@
 #include "packet.hpp"
 #include "scheduler.hpp"
 #include "utils/flag_manager.hpp"
+#include "utils/statistics.hpp"
 
 namespace sim {
 
@@ -29,7 +30,7 @@ public:
           m_ecn_capable(a_ecn_capable),
           m_packets_in_flight(0),
           m_delivered_data_size(0),
-          m_avg_rtt(0.0) {
+          m_rtt_statistics(M_RTT_EXP_DECAY_FACTOR) {
         if (m_src.lock() == nullptr) {
             throw std::invalid_argument("Sender for TcpFlow is nullptr");
         }
@@ -55,7 +56,7 @@ public:
             }
 
             TimeNs rtt = current_time - packet.sent_time;
-            update_avg_rtt(rtt);
+            m_rtt_statistics.add_record(rtt.value());
             MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
                                                      current_time, rtt);
 
@@ -64,7 +65,8 @@ public:
             if (m_packets_in_flight > 0) {
                 m_packets_in_flight--;
             }
-            if (!m_cc.on_ack(rtt, m_avg_rtt, packet.congestion_experienced)) {
+            if (!m_cc.on_ack(rtt, TimeNs(m_rtt_statistics.get_mean()),
+                             packet.congestion_experienced)) {
                 // No congestion
                 // TODO: get packet size from some other source than
                 // m_packet_size (m_data_size does not expand on flows with
@@ -198,18 +200,8 @@ private:
         }
     }
 
-    void update_avg_rtt(TimeNs rtt) {
-        if (m_avg_rtt == TimeNs(0.0)) {
-            // If not initialized before
-            m_avg_rtt = rtt;
-        } else {
-            m_avg_rtt = m_avg_rtt * M_RTT_WEIGHT_DECAY_FACTOR +
-                        rtt * (1 - M_RTT_WEIGHT_DECAY_FACTOR);
-        }
-    }
-
 private:
-    const static inline double M_RTT_WEIGHT_DECAY_FACTOR = 0.8;
+    const static inline double M_RTT_EXP_DECAY_FACTOR = 0.8;
 
     static bool m_is_flag_manager_initialized;
     static FlagManager<std::string, PacketFlagsBase> m_flag_manager;
@@ -229,7 +221,7 @@ private:
     std::uint32_t m_packets_in_flight;
     SizeByte m_delivered_data_size;
 
-    TimeNs m_avg_rtt;
+    utils::Statistics m_rtt_statistics;
 };
 
 template <typename TTcpCC>
