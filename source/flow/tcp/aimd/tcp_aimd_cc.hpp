@@ -15,7 +15,6 @@ public:
 private:
     TimeNs m_delay_threshold;  // delay threshold for update
 
-    double m_ssthresh;  // Slow start threshold
     double m_cwnd;      // Congestion window
     TimeNs m_last_congestion_detected;
 };
