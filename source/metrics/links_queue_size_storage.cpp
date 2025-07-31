@@ -87,6 +87,8 @@ void LinksQueueSizeStorage::draw_plots(
                 .display_name(name);
         };
 
+        // Draw horizontal line for max queue size if there is value > 90% of
+        // max queue size
         if (has_value_above_threshold(
                 data, 0.9 * link->get_max_from_egress_buffer_size().value())) {
             draw_gorizontal_line(
@@ -100,9 +102,16 @@ void LinksQueueSizeStorage::draw_plots(
         }
 
         ax->xlim({0, limits[1]});
-        ax->ylim({0, static_cast<double>(std::max(
-                         link->get_max_from_egress_buffer_size().value(),
-                         link->get_max_to_ingress_queue_size().value()))});
+
+        double max_queue_size = static_cast<double>(
+            std::max(link->get_max_from_egress_buffer_size().value(),
+                     link->get_max_to_ingress_queue_size().value()));
+
+        // Set y-axis limit to 110% of the max queue size if it is less
+        if (double y_max = ax->ylim()[1]; y_max < max_queue_size) {
+            ax->ylim({0, max_queue_size * 1.1});
+        }
+
         ax->color("white");
 
         std::filesystem::path plot_path =
