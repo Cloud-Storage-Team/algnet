@@ -11,6 +11,8 @@ using SizeByte = Size<Byte>;
 using SpeedGbps = Speed<GBit, Second>;
 using Id = std::string;
 
+using PacketNum = std::uint32_t;
+
 // Describes a type used by packet's bitset to store flags
 using PacketFlagsBase = std::uint32_t;
 

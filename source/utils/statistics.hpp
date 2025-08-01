@@ -16,7 +16,7 @@ template <typename T>
 requires ExplicitlyConvertable<T, long double>
 class Statistics {
 public:
-    Statistics(long double a_factor)
+    explicit Statistics(long double a_factor)
         : m_factor(a_factor), m_mean(0), m_variance(0) {
         if (m_factor < 0 || m_factor > 1) {
             LOG_ERROR(
