@@ -3,6 +3,7 @@
 #include "logger/logger.hpp"
 #include "metrics/metrics_collector.hpp"
 #include "parser/parser.hpp"
+#include "utils/statistics.hpp"
 #include "utils/summary.hpp"
 
 int main(const int argc, char **argv) {

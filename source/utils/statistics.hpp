@@ -26,7 +26,7 @@ public:
         }
     }
 
-    void add_record(T record) {
+    void add_record(const T& record) {
         long double value = static_cast<long double>(record);
         if (m_mean == 0 && m_variance == 0) {
             // first record
