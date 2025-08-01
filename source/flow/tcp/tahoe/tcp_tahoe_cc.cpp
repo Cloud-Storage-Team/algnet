@@ -10,11 +10,11 @@ TcpTahoeCC::TcpTahoeCC(TimeNs a_delay_threshold, double a_sstresh)
       m_ssthresh(a_sstresh),
       m_cwnd(1.0),
       m_last_congestion_detected(0),
-      m_last_rtt(0) {}
+      m_last_avg_rtt(0) {}
 
-void TcpTahoeCC::on_ack(TimeNs rtt, [[maybe_unused]] TimeNs avg_rtt,
+void TcpTahoeCC::on_ack([[maybe_unused]] TimeNs rtt, TimeNs avg_rtt,
                         bool ecn_flag) {
-    m_last_rtt = rtt;
+    m_last_avg_rtt = avg_rtt;
     if (ecn_flag) {
         on_timeout();
     } else if (m_cwnd < m_ssthresh) {
@@ -28,7 +28,7 @@ void TcpTahoeCC::on_ack(TimeNs rtt, [[maybe_unused]] TimeNs avg_rtt,
 
 void TcpTahoeCC::on_timeout() {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
-    if (current_time > m_last_congestion_detected + m_last_rtt) {
+    if (current_time > m_last_congestion_detected + m_last_avg_rtt) {
         // To avoid too frequent cwnd and sstresh decreases
         m_last_congestion_detected = current_time;
         m_ssthresh = std::max(0.0, m_cwnd / 2);

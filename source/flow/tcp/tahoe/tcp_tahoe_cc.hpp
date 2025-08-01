@@ -19,6 +19,6 @@ private:
     double m_ssthresh;  // Slow start threshold
     double m_cwnd;      // Congestion window
     TimeNs m_last_congestion_detected;
-    TimeNs m_last_rtt;
+    TimeNs m_last_avg_rtt;
 };
 }  // namespace sim
