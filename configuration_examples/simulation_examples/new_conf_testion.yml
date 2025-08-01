@@ -1,0 +1,25 @@
+topology_config_path: ../topology_examples/new_top_testing.yml
+
+connections:
+  conn1:
+    sender_id: sender1
+    receiver: receiver1
+    number_of_packets: 10000
+    packet_size: 1024
+    mplb_algorithm: round_robin
+flows:
+  flow1:
+    conn_id: conn1
+  flow2:
+    conn_id: conn1
+  flow3:
+    conn_id: conn1
+  flow4:
+    conn_id: conn1
+  flow5:
+    conn_id: conn1
+  flow6:
+    conn_id: conn1
+
+algorithm: basic
+simulation_time: 100000

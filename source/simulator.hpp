@@ -46,6 +46,24 @@ public:
         return m_switches.insert(switch_device).second;
     }
 
+    bool Simulator::add_connection(std::shared_ptr<Connection> conn) {
+        if (!conn) return false;
+        
+        const Id& id = conn->get_id();
+
+        if (m_connections.find(id) != m_connections.end()) {
+            return false;
+        }
+        
+        return m_connections.emplace(id, std::move(conn)).second;
+    }
+
+    std::shared_ptr<Connection> Simulator::get_connection(const Id& id) const
+    {
+        auto it = m_connections.find(id);
+        return it == m_connections.end() ? nullptr : it->second;
+    }
+
     bool add_flow(std::shared_ptr<IFlow> flow) {
         if (flow == nullptr) {
             return false;
