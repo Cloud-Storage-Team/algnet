@@ -63,7 +63,7 @@ public:
             }
 
             TimeNs rtt = current_time - packet.sent_time;
-            m_rtt_statistics.add_record(rtt.value());
+            m_rtt_statistics.add_record(rtt);
             MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
                                                      current_time, rtt);
             m_acked.insert(packet.packet_num);
@@ -73,7 +73,7 @@ public:
             }
 
             double old_cwnd = m_cc.get_cwnd();
-            m_cc.on_ack(rtt, TimeNs(m_rtt_statistics.get_mean()),
+            m_cc.on_ack(rtt, m_rtt_statistics.get_mean(),
                         packet.congestion_experienced);
 
             // TODO: get packet size from some other source than
@@ -205,13 +205,13 @@ private:
     Packet generate_packet() { return create_packet(m_next_packet_num++); }
 
     TimeNs get_max_timeout() const {
-        long double mean = m_rtt_statistics.get_mean();
-        long double std = m_rtt_statistics.get_std();
-        if (mean == 0) {
+        TimeNs mean = m_rtt_statistics.get_mean();
+        TimeNs std = m_rtt_statistics.get_std();
+        if (mean == TimeNs(0)) {
             // no measurements
             return TimeNs(std::numeric_limits<long double>::max());
         }
-        return TimeNs(mean * 2 + std * 4);
+        return mean * 2 + std * 4;
     }
 
     void send_packet_now(Packet packet) {
@@ -291,7 +291,7 @@ private:
     // Contains numbers of all delivered acks
     std::set<PacketNum> m_acked;
 
-    utils::Statistics m_rtt_statistics;
+    utils::Statistics<TimeNs> m_rtt_statistics;
 };
 
 template <typename TTcpCC>
