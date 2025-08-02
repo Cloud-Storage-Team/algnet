@@ -2,17 +2,17 @@
 
 #include <stdexcept>
 
-#include "identifiable_parser/flow/parse_tcp_flow.hpp"
+// #include "identifiable_parser/flow/parse_tcp_flow.hpp"
 #include "identifiable_parser/identifiable_parser.hpp"
 #include "logger/logger.hpp"
 
 namespace sim {
 
-std::pair<SimulatorVariant, TimeNs> YamlParser::build_simulator_from_config(
+std::pair<Simulator, TimeNs> YamlParser::build_simulator_from_config(
     const std::filesystem::path &path) {
     const YAML::Node simulation_config = YAML::LoadFile(path);
-    std::string algorithm = parse_algorithm(simulation_config);
-    m_simulator = create_simulator(algorithm);
+    // std::string algorithm = parse_algorithm(simulation_config);
+    m_simulator = Simulator();
 
     m_topology_config_path =
         path.parent_path() / parse_topology_config_path(simulation_config);
@@ -60,82 +60,35 @@ TimeNs YamlParser::parse_simulation_time(const YAML::Node &config) {
 }
 
 void YamlParser::process_hosts(const YAML::Node &hosts_node) {
-    for (auto it = hosts_node.begin(); it != hosts_node.end(); ++it) {
-        const YAML::Node key_node = it->first;
-        const YAML::Node val_node = it->second;
-
-        auto device_name = key_node.as<Id>();
-        std::visit(
-            [&key_node, &val_node](auto &sim) {
-                std::shared_ptr<Host> ptr =
-                    IdentifieableParser<Host>::parse_and_registrate(key_node,
-                                                                    val_node);
-                if (!sim.add_host(ptr)) {
-                    throw std::runtime_error("Can not add host with id " +
-                                             ptr.get()->get_id());
-                }
-            },
-            m_simulator);
-    }
+    process_identifiables<IHost>(
+        hosts_node,
+        [this](std::shared_ptr<IHost> host) { return m_simulator.add_host(host); },
+        "Can not add host."
+    );
 }
 
 void YamlParser::process_switches(const YAML::Node &swtiches_node) {
-    for (auto it = swtiches_node.begin(); it != swtiches_node.end(); ++it) {
-        const YAML::Node key_node = it->first;
-        const YAML::Node val_node = it->second;
-
-        std::visit(
-            [&key_node, &val_node](auto &simulator) {
-                std::shared_ptr<Switch> ptr =
-                    IdentifieableParser<Switch>::parse_and_registrate(key_node,
-                                                                      val_node);
-                if (!simulator.add_switch(ptr)) {
-                    throw std::runtime_error("Can not add switch with id " +
-                                             ptr.get()->get_id());
-                }
-            },
-            m_simulator);
-    }
+    process_identifiables<ISwitch>(
+        swtiches_node,
+        [this](std::shared_ptr<ISwitch> swtch) { return m_simulator.add_switch(swtch); },
+        "Can not add switch."
+    );
 }
 
 void YamlParser::process_links(const YAML::Node &links_node) {
-    for (auto it = links_node.begin(); it != links_node.end(); ++it) {
-        const YAML::Node key_node = it->first;
-        const YAML::Node value_node = it->second;
-        std::visit(
-            [&](auto &sim) {
-                using SimType = std::decay_t<decltype(sim)>;
-                using LinkType = typename SimType::Link_T;
-                std::shared_ptr<LinkType> ptr =
-                    IdentifieableParser<LinkType>::parse_and_registrate(
-                        key_node, value_node);
-                if (!sim.add_link(ptr)) {
-                    throw std::runtime_error("Can not add link with id " +
-                                             ptr.get()->get_id());
-                }
-            },
-            m_simulator);
-    }
+    process_identifiables<ILink>(
+        links_node,
+        [this](std::shared_ptr<ILink> link) { return m_simulator.add_link(link); },
+        "Can not add link."
+    );
 }
 
 void YamlParser::process_flows(const YAML::Node &flows_node) {
-    for (auto it = flows_node.begin(); it != flows_node.end(); ++it) {
-        const YAML::Node key_node = it->first;
-        const YAML::Node val_node = it->second;
-        std::visit(
-            [&](auto &sim) {
-                using SimType = std::decay_t<decltype(sim)>;
-                using FlowType = typename SimType::Flow_T;
-                std::shared_ptr<FlowType> ptr =
-                    IdentifieableParser<FlowType>::parse_and_registrate(
-                        key_node, val_node);
-                if (!sim.add_flow(ptr)) {
-                    throw std::runtime_error("can not add flow with id " +
-                                             ptr.get()->get_id());
-                }
-            },
-            m_simulator);
-    }
+    process_identifiables<IFlow>(
+        flows_node,
+        [this](std::shared_ptr<IFlow> flow) { return m_simulator.add_flow(flow); },
+        "Can not add flow."
+    );
 }
 
 std::filesystem::path YamlParser::parse_topology_config_path(

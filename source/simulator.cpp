@@ -4,17 +4,17 @@
 
 namespace sim {
 
-SimulatorVariant create_simulator(std::string_view algorithm) {
-    if (algorithm == "basic") {
-        return BasicSimulator();
-    }
-    if (algorithm == "tcp") {
-        return TcpSimulator();
-    }
-    if (algorithm == "tcp_swift") {
-        return TcpSwiftSimulator();
-    }
-    throw std::invalid_argument("Unknown algorithm: " + std::string(algorithm));
-}
+// Simulator create_simulator(std::string_view algorithm) {
+//     if (algorithm == "basic") {
+//         return BasicSimulator();
+//     }
+//     if (algorithm == "tcp") {
+//         return TcpSimulator();
+//     }
+//     if (algorithm == "tcp_swift") {
+//         return TcpSwiftSimulator();
+//     }
+//     throw std::invalid_argument("Unknown algorithm: " + std::string(algorithm));
+// }
 
 }  // namespace sim

@@ -10,25 +10,15 @@
 #include "device/switch.hpp"
 #include "event/start_flow.hpp"
 #include "event/stop.hpp"
-#include "flow/tcp/basic/bacic_flow.hpp"
-#include "flow/tcp/swift/swift_flow.hpp"
-#include "flow/tcp/tahoe/tcp_tahoe_flow.hpp"
+#include "flow/tcp/tcp_flow.hpp"
 #include "link/link.hpp"
 #include "utils/algorithms.hpp"
 #include "utils/validation.hpp"
 
 namespace sim {
 
-template <typename THost, typename TSwitch, typename TFlow, typename TLink>
-requires std::derived_from<THost, IHost> &&
-         std::derived_from<TSwitch, ISwitch> &&
-         std::derived_from<TFlow, IFlow> && std::derived_from<TLink, ILink>
 class Simulator {
 public:
-    using Host_T = THost;
-    using Switch_T = TSwitch;
-    using Flow_T = TFlow;
-    using Link_T = TLink;
     Simulator() = default;
     ~Simulator() = default;
 
@@ -120,13 +110,6 @@ private:
     std::unordered_set<std::shared_ptr<ILink>> m_links;
 };
 
-using BasicSimulator = Simulator<Host, Switch, BasicFlow, Link>;
-using TcpSimulator = Simulator<Host, Switch, TcpTahoeFlow, Link>;
-using TcpSwiftSimulator = Simulator<Host, Switch, TcpSwiftFlow, Link>;
-
-using SimulatorVariant =
-    std::variant<BasicSimulator, TcpSimulator, TcpSwiftSimulator>;
-
-SimulatorVariant create_simulator(std::string_view algorithm);
+// Simulator create_simulator(std::string_view algorithm);
 
 }  // namespace sim

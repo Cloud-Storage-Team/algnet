@@ -15,9 +15,9 @@ public:
 };
 
 static void check_pairwise_reachability(
-    const sim::SimulatorVariant& simulator) {
-    auto devices = std::visit([](const auto& sim) { return sim.get_devices(); },
-                              simulator);
+    const sim::Simulator& simulator) {
+    auto devices = simulator.get_devices();
+
     for (auto src : devices) {
         for (auto dest : devices) {
             if (src != dest) {
@@ -33,7 +33,7 @@ void test_topology(std::filesystem::path topology_path) {
     sim::YamlParser parser;
     auto [simulator, sim_time] =
         parser.build_simulator_from_config(topology_path);
-    std::visit([](auto& sim) { sim.recalculate_paths(); }, simulator);
+    simulator.recalculate_paths();
     check_pairwise_reachability(simulator);
 }
 
