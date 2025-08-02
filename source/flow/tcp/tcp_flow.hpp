@@ -13,13 +13,11 @@
 
 namespace sim {
 
-template <typename TTcpCC>
-requires std::derived_from<TTcpCC, ITcpCC>
 class TcpFlow : public IFlow,
-                public std::enable_shared_from_this<TcpFlow<TTcpCC> > {
+                public std::enable_shared_from_this<TcpFlow> {
 public:
     TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
-            std::shared_ptr<IHost> a_dest, TTcpCC a_cc, SizeByte a_packet_size,
+            std::shared_ptr<IHost> a_dest, std::unique_ptr<ITcpCC> a_cc, SizeByte a_packet_size,
             std::uint32_t a_packets_to_send, bool a_ecn_capable = true)
         : m_id(std::move(a_id)),
           m_src(a_src),
@@ -72,8 +70,8 @@ public:
                 m_packets_in_flight--;
             }
 
-            double old_cwnd = m_cc.get_cwnd();
-            m_cc.on_ack(rtt, m_rtt_statistics.get_mean(),
+            double old_cwnd = m_cc->get_cwnd();
+            m_cc->on_ack(rtt, m_rtt_statistics.get_mean(),
                         packet.congestion_experienced);
 
             // TODO: get packet size from some other source than
@@ -87,7 +85,7 @@ public:
             MetricsCollector::get_instance().add_delivery_rate(
                 packet.flow->get_id(), current_time, delivery_rate);
 
-            double cwnd = m_cc.get_cwnd();
+            double cwnd = m_cc->get_cwnd();
 
             if (old_cwnd != cwnd) {
                 MetricsCollector::get_instance().add_cwnd(m_id, current_time,
@@ -125,7 +123,7 @@ public:
         oss << "Id:" << m_id;
         oss << ", src id: " << m_src.lock()->get_id();
         oss << ", dest id: " << m_dest.lock()->get_id();
-        oss << ", CC module: " << m_cc.to_string();
+        oss << ", CC module: " << m_cc->to_string();
         oss << ", packet size: " << m_packet_size;
         oss << ", to send packets: " << m_packets_to_send;
         oss << ", packets_in_flight: " << m_packets_in_flight;
@@ -140,7 +138,7 @@ private:
 
     class SendAtTime : public Event {
     public:
-        SendAtTime(TimeNs a_time, std::weak_ptr<TcpFlow<TTcpCC> > a_flow,
+        SendAtTime(TimeNs a_time, std::weak_ptr<TcpFlow> a_flow,
                    Packet a_packet)
             : Event(a_time), m_flow(a_flow), m_packet(std::move(a_packet)) {}
         void operator()() final {
@@ -153,13 +151,13 @@ private:
         }
 
     private:
-        std::weak_ptr<TcpFlow<TTcpCC> > m_flow;
+        std::weak_ptr<TcpFlow> m_flow;
         Packet m_packet;
     };
 
     class Timeout : public Event {
     public:
-        Timeout(TimeNs a_time, std::weak_ptr<TcpFlow<TTcpCC> > a_flow,
+        Timeout(TimeNs a_time, std::weak_ptr<TcpFlow> a_flow,
                 PacketNum a_packet_num)
             : Event(a_time), m_flow(a_flow), m_packet_num(a_packet_num) {}
 
@@ -177,12 +175,12 @@ private:
                 fmt::format("Timeout for packet number {} expired; looks "
                             "like packet loss",
                             m_packet_num));
-            flow->m_cc.on_timeout();
+            flow->m_cc->on_timeout();
             flow->retransmit_packet(m_packet_num);
         }
 
     private:
-        std::weak_ptr<TcpFlow<TTcpCC> > m_flow;
+        std::weak_ptr<TcpFlow> m_flow;
         PacketNum m_packet_num;
     };
 
@@ -233,11 +231,11 @@ private:
         constexpr double EPS = 1e-6;
 
         TimeNs total_delay(0);
-        TimeNs pacing_delay = m_cc.get_pacing_delay();
+        TimeNs pacing_delay = m_cc->get_pacing_delay();
         TimeNs curr_time = Scheduler::get_instance().get_current_time();
 
         while (m_packets_to_send > 0 &&
-               m_packets_in_flight + 1 < m_cc.get_cwnd() + EPS) {
+               m_packets_in_flight + 1 < m_cc->get_cwnd() + EPS) {
             Packet packet = generate_packet();
             total_delay += pacing_delay;
             if (pacing_delay == TimeNs(0)) {
@@ -278,7 +276,7 @@ private:
     std::weak_ptr<IHost> m_dest;
 
     // Congestion control module
-    TTcpCC m_cc;
+    std::unique_ptr<ITcpCC> m_cc;
 
     SizeByte m_packet_size;
     std::uint32_t m_packets_to_send;
@@ -293,17 +291,5 @@ private:
 
     utils::Statistics<TimeNs> m_rtt_statistics;
 };
-
-template <typename TTcpCC>
-requires std::derived_from<TTcpCC, ITcpCC>
-std::string TcpFlow<TTcpCC>::packet_type_label = "type";
-
-template <typename TTcpCC>
-requires std::derived_from<TTcpCC, ITcpCC>
-FlagManager<std::string, PacketFlagsBase> TcpFlow<TTcpCC>::m_flag_manager;
-
-template <typename TTcpCC>
-requires std::derived_from<TTcpCC, ITcpCC>
-bool TcpFlow<TTcpCC>::m_is_flag_manager_initialized = false;
 
 }  // namespace sim

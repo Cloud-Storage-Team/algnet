@@ -1,5 +1,5 @@
 #include "device/switch.hpp"
-#include "identifiable_parser.hpp"
+#include "parser/identifiable_parser/identifiable_parser.hpp"
 
 namespace sim {
 static ECN parse_ecn(const YAML::Node& node) {

@@ -2,15 +2,20 @@ topology_config_path: ../topology_examples/bus_topology.yml
 
 flows:
   flow1:
+    type: tcp
     sender_id: "sender1"
     receiver_id: "receiver1"
     packet_size: 256
     number_of_packets: 500
+    cc:
+      type: tahoe
   flow2:
+    type: tcp
     sender_id: "sender2"
     receiver_id: "receiver2"
     packet_size: 256
     number_of_packets: 1000
+    cc:
+      type: tahoe
 
-algorithm: tcp
 simulation_time: 100000000

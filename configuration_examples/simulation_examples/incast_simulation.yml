@@ -1,29 +1,44 @@
 topology_config_path: ../topology_examples/incast_topology.yml
 flows:
   flow0:
+    type: tcp
     sender_id: sender0
     receiver_id: receiver0
     packet_size: 10000
     number_of_packets: 100
+    cc:
+      type: tahoe
   flow1:
+    type: tcp
     sender_id: sender1
     receiver_id: receiver0
     packet_size: 10000
     number_of_packets: 100
+    cc:
+      type: tahoe
   flow2:
+    type: tcp
     sender_id: sender2
     receiver_id: receiver0
     packet_size: 10000
     number_of_packets: 100
+    cc:
+      type: tahoe
   flow3:
+    type: tcp
     sender_id: sender3
     receiver_id: receiver0
     packet_size: 10000
     number_of_packets: 100
+    cc:
+      type: tahoe
   flow4:
+    type: tcp
     sender_id: sender4
     receiver_id: receiver0
     packet_size: 10000
     number_of_packets: 100
-algorithm: tcp
+    cc:
+      type: tahoe
+
 simulation_time: 5000000

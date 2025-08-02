@@ -39,7 +39,7 @@ int main(const int argc, char **argv) {
     sim::YamlParser parser;
     auto [simulator, simulation_time] =
         parser.build_simulator_from_config(flags["config"].as<std::string>());
-    std::visit([&](auto &sim) { sim.start(simulation_time); }, simulator);
+    simulator.start(simulation_time);
 
     if (!flags["no-plots"].as<bool>()) {
         sim::MetricsCollector::get_instance().draw_metric_plots(output_dir);
@@ -49,8 +49,7 @@ int main(const int argc, char **argv) {
     std::filesystem::path summary_path(std::filesystem::path(output_dir) /
                                        "summary.csv");
 
-    sim::Summary summary = std::visit(
-        [&](auto &sim) { return sim::Summary(sim.get_flows()); }, simulator);
+    sim::Summary summary = sim::Summary(simulator.get_flows());
 
     summary.write_to_csv(summary_path);
 

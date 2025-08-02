@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "simulator.hpp"
+#include "flow/tcp/basic/basic_cc.hpp"
 #include "utils.hpp"
 
 namespace test {
@@ -12,7 +13,7 @@ public:
 };
 
 TEST_F(Start, TrivialTopology) {
-    sim::BasicSimulator sim;
+    sim::Simulator sim;
     auto sender = std::make_shared<sim::Host>("sender");
     sim.add_host(sender);
 
@@ -27,8 +28,8 @@ TEST_F(Start, TrivialTopology) {
     constexpr std::uint32_t packets_to_send = 1;
 
     Id id = "flow";
-    auto flow = std::make_shared<sim::BasicFlow>(
-        id, sender, receiver, sim::BasicCC(), packet_size, packets_to_send);
+    auto flow = std::make_shared<sim::TcpFlow>(
+        id, sender, receiver, std::make_unique<sim::BasicCC>(), packet_size, packets_to_send);
     sim.add_flow(flow);
 
     add_two_way_links(sim, {{sender, swtch}, {swtch, receiver}});
@@ -39,7 +40,7 @@ TEST_F(Start, TrivialTopology) {
 }
 
 TEST_F(Start, ThreeToOneTopology) {
-    sim::BasicSimulator sim;
+    sim::Simulator sim;
     auto sender1 = std::make_shared<sim::Host>("sender1");
     sim.add_host(sender1);
 
@@ -67,20 +68,20 @@ TEST_F(Start, ThreeToOneTopology) {
     constexpr std::uint32_t packets_to_send_by_flow3 = 100;
 
     Id id_1 = "flow_1";
-    auto flow1 = std::make_shared<sim::BasicFlow>(id_1, sender1, receiver,
-                                                  sim::BasicCC(), packet_size,
+    auto flow1 = std::make_shared<sim::TcpFlow>(id_1, sender1, receiver,
+                                                  std::make_unique<sim::BasicCC>(), packet_size,
                                                   packets_to_send_by_flow1);
     sim.add_flow(flow1);
 
     Id id_2 = "flow_2";
-    auto flow2 = std::make_shared<sim::BasicFlow>(id_2, sender2, receiver,
-                                                  sim::BasicCC(), packet_size,
+    auto flow2 = std::make_shared<sim::TcpFlow>(id_2, sender2, receiver,
+                                                  std::make_unique<sim::BasicCC>(), packet_size,
                                                   packets_to_send_by_flow2);
     sim.add_flow(flow2);
 
     Id id_3 = "flow_3";
-    auto flow3 = std::make_shared<sim::BasicFlow>(id_3, sender3, receiver,
-                                                  sim::BasicCC(), packet_size,
+    auto flow3 = std::make_shared<sim::TcpFlow>(id_3, sender3, receiver,
+                                                  std::make_unique<sim::BasicCC>(), packet_size,
                                                   packets_to_send_by_flow3);
     sim.add_flow(flow3);
 

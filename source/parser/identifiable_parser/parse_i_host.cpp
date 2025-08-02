@@ -4,10 +4,9 @@
 namespace sim {
 
 template <>
-std::shared_ptr<Host> Parser<Host>::parse_object(
+std::shared_ptr<IHost> Parser<IHost>::parse_object(
     const YAML::Node& key_node, const YAML::Node& value_node) {
-    (void)value_node;
-    return std::make_shared<Host>(key_node.as<Id>());
+    return Parser<Host>::parse_object(key_node, value_node);
 }
 
 }  // namespace sim
