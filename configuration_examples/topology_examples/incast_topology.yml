@@ -9,9 +9,9 @@ hosts:
 switches:
   switch:
     ecn:
-      min: 0.01
-      max: 0.04
-      probability: 0.6
+      min: 0.1
+      max: 0.3
+      probability: 0.5
 
 links:
   link0:

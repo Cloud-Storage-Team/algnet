@@ -4,13 +4,13 @@ flows:
   flow1:
     sender_id: "sender"
     receiver_id: "receiver"
-    packet_size: 1024
+    packet_size: 4096
     number_of_packets: 200
   flow2:
     sender_id: "sender"
     receiver_id: "receiver"
     packet_size: 2048
-    number_of_packets: 100
+    number_of_packets: 400
 
 algorithm: tcp
-simulation_time: 100000
+simulation_time: 1000000

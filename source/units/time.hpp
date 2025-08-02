@@ -43,10 +43,13 @@ public:
     explicit constexpr Time(long double a_value)
         : m_value_ns(a_value * TTimeBase::to_nanoseconds_multiplier) {}
 
+
     constexpr long double value() const {
         // Round up here to get maximal time
         return m_value_ns / TTimeBase::to_nanoseconds_multiplier;
     }
+
+    explicit constexpr operator long double() const { return value(); }
 
     constexpr long double value_nanoseconds() const { return m_value_ns; }
 
