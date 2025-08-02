@@ -110,6 +110,4 @@ private:
     std::unordered_set<std::shared_ptr<ILink>> m_links;
 };
 
-// Simulator create_simulator(std::string_view algorithm);
-
 }  // namespace sim

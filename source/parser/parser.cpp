@@ -2,7 +2,6 @@
 
 #include <stdexcept>
 
-// #include "identifiable_parser/flow/parse_tcp_flow.hpp"
 #include "identifiable_parser/identifiable_parser.hpp"
 #include "logger/logger.hpp"
 
@@ -11,7 +10,7 @@ namespace sim {
 std::pair<Simulator, TimeNs> YamlParser::build_simulator_from_config(
     const std::filesystem::path &path) {
     const YAML::Node simulation_config = YAML::LoadFile(path);
-    // std::string algorithm = parse_algorithm(simulation_config);
+
     m_simulator = Simulator();
 
     m_topology_config_path =
@@ -98,14 +97,6 @@ std::filesystem::path YamlParser::parse_topology_config_path(
             "No topology_config_path specified in the simulation config");
     }
     return config["topology_config_path"].as<std::string>();
-}
-
-std::string YamlParser::parse_algorithm(const YAML::Node &config) {
-    if (!config["algorithm"]) {
-        throw std::runtime_error(
-            "No algorithm specified in the simulation config");
-    }
-    return config["algorithm"].as<std::string>();
 }
 
 }  // namespace sim

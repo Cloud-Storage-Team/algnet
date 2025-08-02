@@ -19,7 +19,6 @@ public:
 private:
     static std::filesystem::path parse_topology_config_path(
         const YAML::Node& config);
-    static std::string parse_algorithm(const YAML::Node& config);
     static TimeNs parse_simulation_time(const YAML::Node& config);
 
     template <typename T>
