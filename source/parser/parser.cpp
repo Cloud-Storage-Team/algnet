@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "identifiable_parser/identifiable_parser.hpp"
+#include "identifiable_parser/object_parser.hpp"
 #include "logger/logger.hpp"
 
 namespace sim {
@@ -62,6 +62,7 @@ void YamlParser::process_hosts(const YAML::Node &hosts_node) {
     process_identifiables<IHost>(
         hosts_node,
         [this](std::shared_ptr<IHost> host) { return m_simulator.add_host(host); },
+        Parser<IHost>::parse_object,
         "Can not add host."
     );
 }
@@ -70,6 +71,7 @@ void YamlParser::process_switches(const YAML::Node &swtiches_node) {
     process_identifiables<ISwitch>(
         swtiches_node,
         [this](std::shared_ptr<ISwitch> swtch) { return m_simulator.add_switch(swtch); },
+        Parser<ISwitch>::parse_object,
         "Can not add switch."
     );
 }
@@ -78,6 +80,7 @@ void YamlParser::process_links(const YAML::Node &links_node) {
     process_identifiables<ILink>(
         links_node,
         [this](std::shared_ptr<ILink> link) { return m_simulator.add_link(link); },
+        Parser<ILink>::parse_object,
         "Can not add link."
     );
 }
@@ -86,6 +89,7 @@ void YamlParser::process_flows(const YAML::Node &flows_node) {
     process_identifiables<IFlow>(
         flows_node,
         [this](std::shared_ptr<IFlow> flow) { return m_simulator.add_flow(flow); },
+        Parser<IFlow>::parse_object,
         "Can not add flow."
     );
 }

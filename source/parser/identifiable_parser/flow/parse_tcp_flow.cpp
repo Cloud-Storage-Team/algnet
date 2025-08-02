@@ -2,7 +2,7 @@
 #include "flow/tcp/swift/swift_cc.hpp"
 #include "flow/tcp/tahoe/tcp_tahoe_cc.hpp"
 #include "flow/tcp/tcp_flow.hpp"
-#include "parser/identifiable_parser/identifiable_parser.hpp"
+#include "parser/identifiable_parser/object_parser.hpp"
 #include "parser/parse_utils.hpp"
 
 namespace sim {
