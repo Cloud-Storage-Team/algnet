@@ -7,7 +7,7 @@
 
 namespace sim {
 static std::unique_ptr<ITcpCC> parse_tcp_cc([[maybe_unused]]const YAML::Node& key_node, const YAML::Node& value_node) {
-    std::string type = value_node["type"].as<std::string>();
+    std::string type = value_node["cc"]["type"].as<std::string>();
     if (type == "basic") {
         return std::make_unique<BasicCC>();
     } else if (type == "tahoe") {
