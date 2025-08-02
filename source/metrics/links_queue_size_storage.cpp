@@ -106,14 +106,6 @@ void LinksQueueSizeStorage::draw_plots(
 
         ax->xlim({0, limits[1]});
 
-        double max_queue_size = static_cast<double>(
-            std::max(link->get_max_from_egress_buffer_size().value(),
-                     link->get_max_to_ingress_queue_size().value()));
-
-        // Set y-axis limit to 110% of the max queue size if it is less
-        if (double y_max = ax->ylim()[1]; y_max < max_queue_size) {
-            ax->ylim({0, max_queue_size * 1.1});
-        }
 
         ax->color("white");
 
