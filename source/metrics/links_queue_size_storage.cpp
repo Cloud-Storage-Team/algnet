@@ -131,3 +131,4 @@ std::string LinksQueueSizeStorage::get_metrics_filename(Id id) const {
     return fmt::format("queue_size/{}.csv", id);
 }
 }  // namespace sim
+
