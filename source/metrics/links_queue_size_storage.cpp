@@ -87,16 +87,19 @@ void LinksQueueSizeStorage::draw_plots(
                 .display_name(name);
         };
 
-        // Draw horizontal line for max queue size if there is value > 90% of
+        // Draw horizontal line for max queue size if there is value > 30% of
         // max queue size
+        constexpr double MAX_SIZE_LINE_THRESHOLD = 0.3;
         if (has_value_above_threshold(
-                data, 0.9 * link->get_max_from_egress_buffer_size().value())) {
+                data, MAX_SIZE_LINE_THRESHOLD *
+                          link->get_max_from_egress_buffer_size().value())) {
             draw_gorizontal_line(
                 link->get_max_from_egress_buffer_size().value(),
                 "max from egress", {1.f, 0.f, 0.f});
         }
         if (has_value_above_threshold(
-                data, 0.9 * link->get_max_to_ingress_queue_size().value())) {
+                data, MAX_SIZE_LINE_THRESHOLD *
+                          link->get_max_to_ingress_queue_size().value())) {
             draw_gorizontal_line(link->get_max_to_ingress_queue_size().value(),
                                  "max to ingress", {0.f, 0.f, 1.f});
         }
