@@ -106,7 +106,6 @@ void LinksQueueSizeStorage::draw_plots(
 
         ax->xlim({0, limits[1]});
 
-
         ax->color("white");
 
         std::filesystem::path plot_path =
@@ -131,4 +130,3 @@ std::string LinksQueueSizeStorage::get_metrics_filename(Id id) const {
     return fmt::format("queue_size/{}.csv", id);
 }
 }  // namespace sim
-
