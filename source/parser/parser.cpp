@@ -3,6 +3,8 @@
 #include <stdexcept>
 
 #include "identifiable_parser/object_parser.hpp"
+#include "identifiable_parser/parse_i_flow_anon.hpp"
+#include "identifiable_parser/parse_i_flow_class.hpp"
 #include "logger/logger.hpp"
 
 namespace sim {
@@ -89,7 +91,8 @@ void YamlParser::process_flows(const YAML::Node &flows_node) {
     process_identifiables<IFlow>(
         flows_node,
         [this](std::shared_ptr<IFlow> flow) { return m_simulator.add_flow(flow); },
-        Parser<IFlow>::parse_object,
+        // parse_i_flow,
+        ParseFlow::parse_i_flow,
         "Can not add flow."
     );
 }
