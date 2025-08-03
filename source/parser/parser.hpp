@@ -7,7 +7,6 @@
 #include <utility>
 
 #include "simulator.hpp"
-#include "identifiable_parser/object_parser.hpp"
 
 namespace sim {
 
