@@ -1,5 +1,3 @@
-#pragma once
-
 #include "simulator.hpp"
 
 namespace sim {
