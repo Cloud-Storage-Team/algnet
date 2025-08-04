@@ -8,7 +8,7 @@ std::shared_ptr<ISwitch> ParseSwitch::parse_i_switch(const YAML::Node& key_node,
 }
 
 std::shared_ptr<Switch> ParseSwitch::parse_default_switch(const YAML::Node& key_node,
-                                            [[maybe_unused]] const YAML::Node& value_node) {
+                                                        const YAML::Node& value_node) {
     Id id = key_node.as<Id>();
     const YAML::Node& ecn_node = value_node["ecn"];
     if (ecn_node) {

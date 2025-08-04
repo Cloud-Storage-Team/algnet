@@ -13,11 +13,15 @@ std::shared_ptr<IFlow> ParseFlow::parse_i_flow(const YAML::Node& key_node,
     if (type == "tcp") {
         return parse_tcp_flow(key_node, value_node);
     }
-    throw "wow";
+    throw std::runtime_error("Unex");
 }
 
 
-std::unique_ptr<ITcpCC> ParseFlow::parse_i_tcp_cc([[maybe_unused]]const YAML::Node& key_node, const YAML::Node& value_node) {
+std::unique_ptr<ITcpCC> ParseFlow::ParseTcpCC::parse_i_tcp_cc(const YAML::Node& key_node, const YAML::Node& value_node) {
+    if (!value_node["cc"] || !value_node["cc"]["type"]) {
+        throw std::runtime_error("Missing 'cc.type' field in flow " + key_node.as<std::string>());
+    }
+
     std::string type = value_node["cc"]["type"].as<std::string>();
     if (type == "basic") {
         return std::make_unique<BasicCC>();

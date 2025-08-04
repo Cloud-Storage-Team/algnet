@@ -19,12 +19,18 @@ private:
     static std::filesystem::path parse_topology_config_path(
         const YAML::Node& config);
     static TimeNs parse_simulation_time(const YAML::Node& config);
-
+    
+    // node - contains information about set of identifiable objects
+    // add_func- function to add new object to simulator
+    // parse_func- function to parser single object from config
+    // message - error message, which will be printed in case of failing to add new object
     template <typename T>
     void process_identifiables(const YAML::Node &node, 
                                 std::function<bool(std::shared_ptr<T>)> add_func, 
                                 std::function<std::shared_ptr<T>(const YAML::Node &, const YAML::Node &)> parse_func, 
                                 const std::string& message) {
+        static_assert(std::is_base_of_v<T, Identifiable>, "T must be Identifiable");
+        
         for (auto it = node.begin(); it != node.end(); ++it) {
             const YAML::Node key_node = it->first;
             const YAML::Node val_node = it->second;
