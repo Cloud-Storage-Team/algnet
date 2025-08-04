@@ -168,7 +168,7 @@ void YamlParser::process_flows(const YAML::Node& flows_node)
             YAML::Node cfg = val_node;
             cfg["sender_id"]    = conn->get_sender_id();
             cfg["receiver_id"]  = conn->get_receiver_id();
-            cfg["packet_size"]  = conn->get_packet_size();
+            cfg["packet_size"]  = 1500; // conn->get_packet_size();
             cfg["number_of_packets"] = 0;
 
             std::shared_ptr<FlowType> flow =

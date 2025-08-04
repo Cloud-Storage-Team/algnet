@@ -16,6 +16,7 @@
 #include "link/link.hpp"
 #include "utils/algorithms.hpp"
 #include "utils/validation.hpp"
+#include "connection/connection.hpp"
 
 namespace sim {
 
@@ -46,7 +47,7 @@ public:
         return m_switches.insert(switch_device).second;
     }
 
-    bool Simulator::add_connection(std::shared_ptr<Connection> conn) {
+    bool add_connection(std::shared_ptr<Connection> conn) {
         if (!conn) return false;
         
         const Id& id = conn->get_id();
@@ -58,7 +59,7 @@ public:
         return m_connections.emplace(id, std::move(conn)).second;
     }
 
-    std::shared_ptr<Connection> Simulator::get_connection(const Id& id) const
+    std::shared_ptr<Connection> get_connection(const Id& id) const
     {
         auto it = m_connections.find(id);
         return it == m_connections.end() ? nullptr : it->second;
@@ -136,6 +137,7 @@ private:
     std::unordered_set<std::shared_ptr<ISwitch>> m_switches;
     std::unordered_set<std::shared_ptr<IFlow>> m_flows;
     std::unordered_set<std::shared_ptr<ILink>> m_links;
+    std::unordered_map<Id, std::shared_ptr<Connection>> m_connections;
 };
 
 using BasicSimulator = Simulator<Host, Switch, BasicFlow, Link>;

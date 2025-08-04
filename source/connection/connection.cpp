@@ -4,26 +4,29 @@
 
 namespace sim {
 
-Connection::Connection(Id id, Id sender_id, Id receiver_id, std::shared_ptr<MPLBPolicy> policy)
-    : m_id(id)
-    , m_sender_id(sender_id)
-    , m_receiver_id(receiver_id)
-    , m_policy(std::move(policy))
+Connection::Connection(Id a_id, Id a_sender_id, Id a_receiver_id, SizeByte a_packet_size ,std::shared_ptr<MPLBPolicy> a_policy, std::uint64_t a_packet_count)
+    : m_id(a_id)
+    , m_sender_id(a_sender_id)
+    , m_receiver_id(a_receiver_id)
+    , m_packet_size(a_packet_size)
+    , m_policy(std::move(a_policy))
+    , m_packets_left(a_packet_count)
 {}
 
-void Connection::configure(std::uint64_t packet_count, std::size_t packet_size)
+
+void Connection::configure(std::uint64_t packet_count)
 {
     m_packets_left = packet_count;
-    m_packet_size = packet_size;
-    for (const auto& flow : m_flows) {
-        flow->set_packet_size(packet_size);
-    }
+    // m_packet_size = packet_size;
+    // for (const auto& flow : m_flows) {
+    //     flow->set_packet_size(packet_size);
+    // }
 }
 void Connection::add_flow(std::shared_ptr<IFlow> flow)
 {
     m_flows.push_back(flow);
     flow->set_packet_size(m_packet_size);
-    flow->set_owner(shared_from_this());
+    //flow->set_owner(shared_from_this());
 }
 
 void Connection::kick()

@@ -266,6 +266,18 @@ private:
         }
     }
 
+    void set_packet_size(SizeByte size) final {
+        m_packet_size = size;
+    }
+
+    bool try_send_one() final {
+        if (m_packets_to_send > 0 && m_packets_in_flight < m_cc.get_cwnd()) {
+            send_packets();
+            return true;
+        }
+        return false;
+    }
+
 private:
     const static inline double M_RTT_EXP_DECAY_FACTOR = 0.8;
 

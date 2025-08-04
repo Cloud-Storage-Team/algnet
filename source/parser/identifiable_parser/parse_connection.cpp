@@ -1,40 +1,40 @@
-#pragma once
-
 #include <cstdint>
 #include <memory>
 #include <string>
 
 #include "connection/connection.hpp"
 #include "connection/mplb_policy_factory.hpp"
-#include "identifiable_parser/identifiable_parser.hpp"
+#include "parser/identifiable_parser/identifiable_parser.hpp"
+#include "parser/parse_utils.hpp"
 
 namespace sim {
 
 template <>
-class IdentifieableParser<Connection> {
-public:
-    // key_node: YAML key (connection ID)
-    // cfg     : YAML node with fields sender_id, receiver_id,
-    // number_of_packets, mplb_algorithm
-    static std::shared_ptr<Connection> parse_and_registrate(
-        const YAML::Node& key_node, const YAML::Node& cfg) {
-        Id conn_id = key_node.as<Id>();
-        Id sender_id = cfg["sender_id"].as<Id>();
-        Id receiver_id = cfg["receiver_id"].as<Id>();
-        std::uint64_t packets = cfg["number_of_packets"].as<std::uint64_t>();
-        std::size_t packet_size = cfg["packet_size"].as<std::size_t>();
+std::shared_ptr<Connection> IdentifieableParser<Connection>::parse_and_registrate(
+    const YAML::Node& key_node, const YAML::Node& cfg) {
 
-        std::string alg = cfg["mplb_algorithm"]
-                              ? cfg["mplb_algorithm"].as<std::string>()
-                              : "round_robin";
+    Id conn_id = key_node.as<Id>();
+    Id sender_id = cfg["sender_id"].as<Id>();
+    Id receiver_id = cfg["receiver_id"].as<Id>();
+    std::uint64_t packets = cfg["number_of_packets"].as<std::uint64_t>();
+    SizeByte packet_size = SizeByte(cfg["packet_size"].as<uint64_t>());
 
-        auto policy = make_mplb_policy(alg);
-        auto conn = std::make_shared<Connection>(conn_id, sender_id,
-                                                 receiver_id, policy);
-        conn->configure(packets, packet_size);
+    std::string alg = cfg["mplb_algorithm"]
+                          ? cfg["mplb_algorithm"].as<std::string>()
+                          : "round_robin";
 
-        return conn;
-    }
-};
+    auto policy = make_mplb_policy(alg);
+    auto conn = std::make_shared<Connection>(
+        conn_id, sender_id, receiver_id, packet_size, policy, packets);
+    conn->configure(packets);
+
+    return conn;
+}
+
+template <>
+std::shared_ptr<Connection> Parser<Connection>::parse_object(
+    const YAML::Node& key_node, const YAML::Node& value_node) {
+    return IdentifieableParser<Connection>::parse_and_registrate(key_node, value_node);
+}
 
 }  // namespace sim
