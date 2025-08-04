@@ -14,7 +14,7 @@ public:
                                                  const YAML::Node& value_node);
 private:
     class ParseTcpCC {
-    private:
+    public:
         static std::unique_ptr<ITcpCC> parse_i_tcp_cc(const YAML::Node& key_node,
                                                         const YAML::Node& value_node);
     };
