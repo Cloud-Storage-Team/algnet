@@ -38,22 +38,8 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
 
     edge_style = {"fontname": "Helvetica", "fontsize": "10", "penwidth": "2"}
 
-    # Add hosts with vertical alignment
-    devices = config.get("devices", {})
-    for device_id, device_info in devices.items():
-        node_shape = "none"
-
-        device_type = device_info.get("type", "")
-        if device_type == "host":
-            color = "#2E7D32"  # Dark green
-            icon = "🖥️"
-        elif device_type == "switch":
-            color = "#1565C0"  # Dark blue
-            icon = "🌐"
-            node_shape = "box3d"
-        else:
-            raise ValueError(f"Unknown device type: {device_type}")
-
+    def add_node(device_id, color, icon, shape = "none"):
+        nonlocal graph
         label = f"""<
             <table border="0" cellborder="0">
                 <tr><td><font face="Arial" point-size="14">{icon}</font></td></tr>
@@ -64,22 +50,36 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
         graph.node(
             device_id,
             label=label,
-            shape=node_shape,
+            shape=shape,
             color=color,
             fillcolor=f"{color}20",
             **node_style,
         )
+
+    key_labmda = lambda key_value : key_value[0]
+
+    # Add hosts with vertical alignment
+    hosts = config.get("hosts", {})
+    host_items = sorted(hosts.items(), key = key_labmda)
+    for host_id, host_info in host_items:
+        add_node(host_id, "#2E7D32", "🖥️")
+    
+    switches = config.get("switches", {})
+    switch_items = sorted(switches.items(), key= key_labmda)
+    for switch_id, switch_info in switch_items:
+        add_node(switch_id, "#1565C0", "🌐", "box3d")
 
     # Add styled links with metrics
     links = config.get("links", {})
     for link_id, link_info in links.items():
         from_node = link_info["from"]
         to_node = link_info["to"]
+        print(link_id, from_node, to_node)
+        latency = link_info['latency']
+        throughput = link_info['throughput']
         label = f"{link_id}\n"\
-                f"⏱ {link_info['latency']}\n" \
-                f"📶 {link_info['throughput']}\n" \
-                f"ingress {link_info['ingress_buffer_size']}\n" \
-                f"egress {link_info['egress_buffer_size']}"
+                f"⏱ {latency}\n" \
+                f"📶 {throughput}\n"
 
         graph.edge(
             from_node,
@@ -94,16 +94,14 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
 
     # Create hierarchical groups
     with graph.subgraph() as s:
-        s.attr(rank="min")
-        for device_id in devices:
-            if devices[device_id]["type"] == "sender":
-                s.node(device_id)
+        s.attr(rank="max")
+        for host_id, _ in host_items:
+            s.node(host_id)
 
     with graph.subgraph() as s:
-        s.attr(rank="max")
-        for device_id in devices:
-            if devices[device_id]["type"] == "receiver":
-                s.node(device_id)
+        s.attr(rank="min")
+        for switch_id, _ in switch_items:
+            s.node(switch_id)
 
     directory = os.path.dirname(output_file)
     file_name, extension = os.path.splitext(os.path.basename(output_file))
