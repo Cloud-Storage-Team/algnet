@@ -29,8 +29,8 @@ private:
                                 std::function<bool(std::shared_ptr<T>)> add_func, 
                                 std::function<std::shared_ptr<T>(const YAML::Node &, const YAML::Node &)> parse_func, 
                                 const std::string& message) {
-        static_assert(std::is_base_of_v<T, Identifiable>, "T must be Identifiable");
-        
+        static_assert(std::is_base_of_v<Identifiable, T>, "T must be Identifiable");
+
         for (auto it = node.begin(); it != node.end(); ++it) {
             const YAML::Node key_node = it->first;
             const YAML::Node val_node = it->second;
