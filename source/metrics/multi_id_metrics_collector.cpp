@@ -1,5 +1,6 @@
 #include <ranges>
 
+#include "draw_plots.hpp"
 #include "multi_id_metrics_storage.hpp"
 
 namespace sim {
@@ -30,6 +31,19 @@ void MultiIdMetricsStorage::export_to_files(
             values->export_to_file(output_dir_path / get_metrics_filename(id));
         }
     }
+}
+
+void MultiIdMetricsStorage::draw_on_plot(
+    std::filesystem::path path, PlotMetadata metadata,
+    std::function<std::string(const Id&)> id_to_curve_name) const {
+    PlotMetricsData data;
+    for (auto [id, maybe_storage] : m_storage) {
+        if (!maybe_storage) {
+            continue;
+        }
+        data.emplace_back(maybe_storage.value(), id_to_curve_name(id));
+    }
+    draw_on_same_plot(path, std::move(data), std::move(metadata));
 }
 
 std::unordered_map<Id, MetricsStorage> MultiIdMetricsStorage::data() const {
