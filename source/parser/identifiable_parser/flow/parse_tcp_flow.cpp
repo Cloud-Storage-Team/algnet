@@ -7,8 +7,11 @@ std::shared_ptr<TcpFlow> ParseFlow::parse_tcp_flow(const YAML::Node& key_node,
     std::unique_ptr<ITcpCC> cc = ParseTcpCC::parse_i_tcp_cc(key_node, value_node);
     Id id = key_node.as<Id>();
 
-    if (!value_node["sender_id"] || !value_node["receiver_id"]) {
-        throw std::runtime_error("Flow " + id + " missing sender or receiver");
+    if (!value_node["sender_id"]) {
+        throw std::runtime_error("Flow " + id + " missing sender");
+    }
+    if(!value_node["receiver_id"]) {
+        throw std::runtime_error("Flow " + id + " missing receiver");
     }
 
     Id sender_id = value_node["sender_id"].as<Id>();
