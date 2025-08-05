@@ -2,10 +2,10 @@
 
 #include <stdexcept>
 
-#include "parser/simulation/flow/parse_flow.hpp"
-#include "parser/topology/switch/parse_switch.hpp"
-#include "parser/topology/host/parse_host.hpp"
-#include "parser/topology/link/parse_link.hpp"
+#include "parser/simulation/flow/flow_parser.hpp"
+#include "parser/topology/switch/switch_parser.hpp"
+#include "parser/topology/host/host_parser.hpp"
+#include "parser/topology/link/link_parser.hpp"
 #include "logger/logger.hpp"
 
 namespace sim {
