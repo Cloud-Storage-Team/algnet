@@ -1,7 +1,7 @@
 
 #include <spdlog/fmt/fmt.h>
 
-#include "utils/hasher.hpp"
+#include "hasher.hpp"
 
 namespace sim {
 

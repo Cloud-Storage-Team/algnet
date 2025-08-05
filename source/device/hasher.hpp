@@ -6,27 +6,27 @@
 
 namespace sim {
 
-class IHasher {
+class IPacketHasher {
 public:
-    virtual ~IHasher() = default;
+    virtual ~IPacketHasher() = default;
     virtual std::uint32_t get_hash(Packet packet) const = 0;
 };
 
-class RandomHasher : public IHasher {
+class RandomHasher : public IPacketHasher {
 public:
     ~RandomHasher() = default;
 
     std::uint32_t get_hash(Packet packet) const final;
 };
 
-class BaseHasher : public IHasher {
+class BaseHasher : public IPacketHasher {
 public:
     ~BaseHasher() = default;
 
     std::uint32_t get_hash(Packet packet) const final;
 };
 
-class SymmetricHasher : public IHasher {
+class SymmetricHasher : public IPacketHasher {
 public:
     ~SymmetricHasher() = default;
 
