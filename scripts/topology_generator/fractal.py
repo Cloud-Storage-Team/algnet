@@ -15,6 +15,7 @@ def generate_topology(
     receiver_name = "receiver"
 
     topology = {
+        "packet-spraying" : {"type" : "ecmp"},
         "hosts": {
             sender_name : {},
             receiver_name : {} 

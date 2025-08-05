@@ -15,6 +15,7 @@ def generate_topology(
     egress_buffer_size="1024000B",
 ):
     topology = {
+        "packet-spraying" : {"type" : "ecmp"}, 
         "hosts": {},
         "switches": {},
         "links": {}
