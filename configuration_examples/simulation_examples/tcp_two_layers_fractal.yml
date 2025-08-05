@@ -2,15 +2,20 @@ topology_config_path: ../topology_examples/two_layers_fractal.yml
 
 flows:
   flow1:
+    type: tcp
     sender_id: "sender"
     receiver_id: "receiver"
     packet_size: 4096
     number_of_packets: 200
+    cc:
+      type: tahoe
   flow2:
+    type: tcp
     sender_id: "sender"
     receiver_id: "receiver"
     packet_size: 2048
     number_of_packets: 400
+    cc:
+      type: tahoe
 
-algorithm: tcp
 simulation_time: 1000000

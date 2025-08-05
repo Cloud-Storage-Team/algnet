@@ -48,16 +48,13 @@ E.g. if `--metrics-filter = "cwnd/.*"`, NoNS measures only CWND values, if `--me
 If you want to implement TCP-like algorithm, follow these steps:
 
 1. Create class (`YourCC` further) that implements [`ITcpCC`](source/flow/tcp/i_tcp_cc.hpp). It should be a class that contains all logic of your congestion control algorithm. See example: [`TcpTahoeCC`](source/flow/tcp/tahoe/tcp_tahoe_cc.cpp).
-2. Add alias for `TcpFlow<YourCC>` (`YourTcp` further). It is recommended to put it in the same directory with `YourCC`.
-3. Add implementation for `Parser<YourTcp>::parse_tcp_cc`. It is a function that parses `YourCC` from yaml file. See [implementation](source/parser/identifiable_parser/flow/parse_tcp_tahoe_cc.cpp) for `TchTahoe`
-4. Add alias (`YourSimulator` further) for simulator class based on `YourTcp` and put it in the end of [simulator.hpp](source/simulator.hpp) file.
-5. Add parsing of `YourSimulator` in [`create_simulator` function](source/simulator.cpp). The string you match `algorithm` will be used in simulation config. See [simulation config](configuration_examples/simulation_examples/tcp_simulation.yml) for `TcpTahoe` algorithm. 
+2. Add implementation of parsing for `YourCC` to [parsing file](source/parser/simulation/flow/tcp_flow_parser.cpp) and call it from `parse_i_tcp_cc`.
+3. Create configuration files for testing and running your algorithm. See [simulation config](configuration_examples/simulation_examples/tcp_simulation.yml) for `TcpTahoe` algorithm. 
 
 If your algorithm is not TCP-like (e.g. credit-based), do following:
 1. Create class (`YourFlow` further) that implements [`IFlow`](source/flow/i_flow.hpp). `YourFlow` should represent all logic of sending packets. See example: [`TcpFlow`](source/flow/tcp/tcp_flow.hpp).
-3. Add implementation for `Parser<YourFlow>::parse_object`. This function should parse `YourFlow` from yaml file. See [implementation](source/parser/identifiable_parser/flow/parse_tcp_flow.hpp) for `TcpFlow`
-4. Add alias (`YourSimulator` further) for simulator class based on `YourFlow` and put it in the end of [simulator.hpp](source/simulator.hpp) file.
-5. Add parsing of `YourSimulator` in [`create_simulator` function](source/simulator.cpp). The string you match `algorithm` will be used in simulation config. See [simulation config](configuration_examples/simulation_examples/tcp_simulation.yml) for `TcpTahoe` algorithm. 
+2. Add implementation of parsing `YourFlow` and put it to [directory](source/parser/simulation/flow/) with flow parsers and call it from [`common flow parser`](source/parser/simulation/flow/flow_parser.cpp)
+3. Create configuration files for testing and running your algorithm. See [simulation config](configuration_examples/simulation_examples/tcp_simulation.yml) for `TcpTahoe` algorithm. 
 
 ## Results of simulations
 

@@ -134,7 +134,7 @@ def generate_simulation(
     packet_interval,
     number_of_packets,
     packet_size=1500,
-    algorithm="tcp",
+    flow_type="tcp",
 ):
     """
     Generate a simulation YAML structure with flows between senders and receivers.
@@ -142,8 +142,11 @@ def generate_simulation(
     simulation = {
         "topology_config_path": topology_file,
         "flows": {},
-        "algorithm": algorithm,
         "simulation_time": simulation_time,
+    }
+
+    cc = {
+        "type": "tahoe",
     }
 
     num_senders = len(sender_names)
@@ -159,11 +162,13 @@ def generate_simulation(
             flow_name = f"flow_{flow_id}"
             flow_id += 1
             simulation["flows"][flow_name] = {
+                "type": flow_type,
                 "sender_id": sender_names[i],
                 "receiver_id": receiver_names[min(i, num_receivers - 1)],
                 "packet_size": packet_size,
                 "packet_interval": packet_interval,
                 "number_of_packets": number_of_packets,
+                "cc": cc
             }
         return simulation
 
@@ -175,11 +180,13 @@ def generate_simulation(
                 flow_name = f"flow_{flow_id}"
                 flow_id += 1
                 simulation["flows"][flow_name] = {
+                    "type": flow_type,
                     "sender_id": sender_names[i],
                     "receiver_id": receiver_names[j],
                     "packet_size": packet_size,
                     "packet_interval": packet_interval,
                     "number_of_packets": number_of_packets,
+                    "cc": cc
                 }
         return simulation
 

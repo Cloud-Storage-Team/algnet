@@ -2,15 +2,20 @@ topology_config_path: ../topology_examples/bus_topology.yml
 
 flows:
   flow1:
+    type: tcp
     sender_id: "sender1"
     receiver_id: "receiver1"
     packet_size: 64
     number_of_packets: 100
+    cc:
+      type: basic
   flow2:
+    type: tcp
     sender_id: "sender2"
     receiver_id: "receiver2"
     packet_size: 128
     number_of_packets: 100
+    cc:
+      type: basic
 
-algorithm: basic
 simulation_time: 100000
