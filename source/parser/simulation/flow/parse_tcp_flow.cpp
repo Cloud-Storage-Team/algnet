@@ -1,6 +1,23 @@
-#include "parser/simulator/flow/parse_flow.hpp"
+#include "parser/simulation/flow/parse_flow.hpp"
 
 namespace sim {
+
+std::unique_ptr<ITcpCC> ParseFlow::ParseTcpCC::parse_i_tcp_cc(Id flow_id, const YAML::Node& value_node) {
+    if (!value_node["type"]) {
+        throw std::runtime_error("Missing 'cc.type' field in flow " + flow_id);
+    }
+
+    std::string type = value_node["type"].as<std::string>();
+    if (type == "basic") {
+        return std::make_unique<BasicCC>();
+    } else if (type == "tahoe") {
+        return std::make_unique<TcpTahoeCC>();
+    } else if (type == "swift") {
+        TimeNs a_base_target = parse_time(value_node["base_target"].as<std::string>());
+        return std::make_unique<TcpSwiftCC>(a_base_target);
+    }
+    throw std::runtime_error(fmt::format("Unexpected type of CC module: {}", type));
+}
 
 std::shared_ptr<TcpFlow> ParseFlow::parse_tcp_flow(const YAML::Node& key_node,
                                             const YAML::Node& value_node) {

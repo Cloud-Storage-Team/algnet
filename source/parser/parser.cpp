@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "parser/simulator/flow/parse_flow.hpp"
+#include "parser/simulation/flow/parse_flow.hpp"
 #include "parser/topology/switch/parse_switch.hpp"
 #include "parser/topology/host/parse_host.hpp"
 #include "parser/topology/link/parse_link.hpp"
