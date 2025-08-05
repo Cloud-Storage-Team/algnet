@@ -40,7 +40,7 @@ std::shared_ptr<Link> ParseLink::parse_default_link(const YAML::Node& key_node,
         value_node, "egress_buffer_size", parse_buffer_size, SizeByte(4096u));
 
     return std::make_shared<Link>(id, from_ptr, to_ptr, speed, latency,
-                                  egress_buffer_size, ingress_buffer_size);                                     
+                                  egress_buffer_size, ingress_buffer_size);
 }
 
 }  // namespace sim
