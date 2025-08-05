@@ -8,7 +8,7 @@
 
 namespace sim {
 
-class ParseHost {
+class HostParser {
 public:
     static std::shared_ptr<IHost> parse_i_host(const YAML::Node& key_node,
                                                  const YAML::Node& value_node);

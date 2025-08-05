@@ -65,7 +65,7 @@ void YamlParser::process_hosts(const YAML::Node &hosts_node) {
     process_identifiables<IHost>(
         hosts_node,
         [this](std::shared_ptr<IHost> host) { return m_simulator.add_host(host); },
-        ParseHost::parse_i_host,
+        HostParser::parse_i_host,
         "Can not add host."
     );
 }
@@ -74,7 +74,7 @@ void YamlParser::process_switches(const YAML::Node &swtiches_node) {
     process_identifiables<ISwitch>(
         swtiches_node,
         [this](std::shared_ptr<ISwitch> swtch) { return m_simulator.add_switch(swtch); },
-        ParseSwitch::parse_i_switch,
+        SwitchParser::parse_i_switch,
         "Can not add switch."
     );
 }
@@ -83,7 +83,7 @@ void YamlParser::process_links(const YAML::Node &links_node) {
     process_identifiables<ILink>(
         links_node,
         [this](std::shared_ptr<ILink> link) { return m_simulator.add_link(link); },
-        ParseLink::parse_i_link,
+        LinkParser::parse_i_link,
         "Can not add link."
     );
 }
@@ -92,7 +92,7 @@ void YamlParser::process_flows(const YAML::Node &flows_node) {
     process_identifiables<IFlow>(
         flows_node,
         [this](std::shared_ptr<IFlow> flow) { return m_simulator.add_flow(flow); },
-        ParseFlow::parse_i_flow,
+        FlowParser::parse_i_flow,
         "Can not add flow."
     );
 }

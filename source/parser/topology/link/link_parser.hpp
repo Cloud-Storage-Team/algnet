@@ -8,7 +8,7 @@
 
 namespace sim {
 
-class ParseLink {
+class LinkParser {
 public:
     static std::shared_ptr<ILink> parse_i_link(const YAML::Node& key_node,
                                                  const YAML::Node& value_node);

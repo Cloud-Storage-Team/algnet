@@ -8,7 +8,7 @@
 
 namespace sim {
 
-class ParseSwitch {
+class SwitchParser {
 public:
     static std::shared_ptr<ISwitch> parse_i_switch(const YAML::Node& key_node,
                                                  const YAML::Node& value_node);

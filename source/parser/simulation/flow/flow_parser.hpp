@@ -8,7 +8,7 @@
 
 namespace sim {
 
-class ParseFlow {
+class FlowParser {
 public:
     static std::shared_ptr<IFlow> parse_i_flow(const YAML::Node& key_node,
                                                  const YAML::Node& value_node);

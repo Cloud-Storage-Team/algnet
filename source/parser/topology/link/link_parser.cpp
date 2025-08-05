@@ -3,12 +3,12 @@
 
 namespace sim {
     
-std::shared_ptr<ILink> ParseLink::parse_i_link(const YAML::Node& key_node,
+std::shared_ptr<ILink> LinkParser::parse_i_link(const YAML::Node& key_node,
                                                  const YAML::Node& value_node) {
     return parse_default_link(key_node, value_node);
 }
 
-std::shared_ptr<Link> ParseLink::parse_default_link(const YAML::Node& key_node,
+std::shared_ptr<Link> LinkParser::parse_default_link(const YAML::Node& key_node,
                                             const YAML::Node& value_node) {
     Id id = key_node.as<Id>();
     Id from_id = value_node["from"].as<Id>();
