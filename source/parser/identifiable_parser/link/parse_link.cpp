@@ -9,7 +9,7 @@ std::shared_ptr<ILink> ParseLink::parse_i_link(const YAML::Node& key_node,
 }
 
 std::shared_ptr<Link> ParseLink::parse_default_link(const YAML::Node& key_node,
-                                            [[maybe_unused]] const YAML::Node& value_node) {
+                                            const YAML::Node& value_node) {
     Id id = key_node.as<Id>();
     Id from_id = value_node["from"].as<Id>();
     Id to_id = value_node["to"].as<Id>();
