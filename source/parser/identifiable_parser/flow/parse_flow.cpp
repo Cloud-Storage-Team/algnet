@@ -31,7 +31,7 @@ std::unique_ptr<ITcpCC> ParseFlow::ParseTcpCC::parse_i_tcp_cc(const YAML::Node& 
         TimeNs a_base_target = parse_time(value_node["cc"]["base_target"].as<std::string>());
         return std::make_unique<TcpSwiftCC>(a_base_target);
     }
-    throw "wow";
+    throw std::runtime_errror(fmt::format("Unexpected type of CC module: {}", type));
 }
 
 }  // namespace sim
