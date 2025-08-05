@@ -11,7 +11,7 @@ namespace sim {
 RoutingModule::RoutingModule(Id a_id, std::unique_ptr<IPacketHasher> a_hasher)
     : m_id(a_id),
       m_hasher(a_hasher ? std::move(a_hasher)
-                        : std::make_unique<RandomHasher>()) {}
+                        : std::make_unique<ECMPHasher>()) {}
 
 Id RoutingModule::get_id() const { return m_id; }
 
