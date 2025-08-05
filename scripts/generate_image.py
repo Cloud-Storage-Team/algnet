@@ -38,8 +38,13 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
 
     edge_style = {"fontname": "Helvetica", "fontsize": "10", "penwidth": "2"}
 
-    def add_node(device_id, color, icon, shape = "none"):
+    def add_node(device_id, style):
         nonlocal graph
+
+        color = style["color"]
+        icon = style["icon"]
+        shape = style["shape"]
+
         label = f"""<
             <table border="0" cellborder="0">
                 <tr><td><font face="Arial" point-size="14">{icon}</font></td></tr>
@@ -56,25 +61,30 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
             **node_style,
         )
 
-    key_labmda = lambda key_value : key_value[0]
+    key_lambda = lambda key_value : key_value[0]
 
     # Add hosts with vertical alignment
     hosts = config.get("hosts", {})
-    host_items = sorted(hosts.items(), key = key_labmda)
+    host_items = sorted(hosts.items(), key = key_lambda)
+
+    DEVICE_STYLES = {
+        "host": {"color": "#2E7D32", "icon": "🖥️", "shape": "none"},
+        "switch": {"color": "#1565C0", "icon": "🌐", "shape": "box3d"},
+    }
+
     for host_id, host_info in host_items:
-        add_node(host_id, "#2E7D32", "🖥️")
+        add_node(host_id, DEVICE_STYLES["host"])
     
     switches = config.get("switches", {})
-    switch_items = sorted(switches.items(), key= key_labmda)
+    switch_items = sorted(switches.items(), key= key_lambda)
     for switch_id, switch_info in switch_items:
-        add_node(switch_id, "#1565C0", "🌐", "box3d")
+        add_node(switch_id, DEVICE_STYLES["switch"])
 
     # Add styled links with metrics
     links = config.get("links", {})
     for link_id, link_info in links.items():
         from_node = link_info["from"]
         to_node = link_info["to"]
-        print(link_id, from_node, to_node)
         latency = link_info['latency']
         throughput = link_info['throughput']
         label = f"{link_id}\n"\
