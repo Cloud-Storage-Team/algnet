@@ -20,8 +20,11 @@ std::shared_ptr<TcpFlow> ParseFlow::parse_tcp_flow(const YAML::Node& key_node,
         IdentifierFactory::get_instance().get_object<IHost>(receiver_id);
 
 
-    if (!value_node["packet_size"] || !value_node["number_of_packets"]) {
-        throw std::runtime_error("Flow " + id + " missing flow params (packet_size or number_of_packets)");
+    if (!value_node["packet_size"]) {
+        throw std::runtime_error("Flow " + id + " missing parameter packet_size");
+    }
+    if (!value_node["number_of_packets"]) {
+        throw std::runtime_error("Flow " + id + " missing parameter number_of_packets");
     }
 
     SizeByte packet_size =
