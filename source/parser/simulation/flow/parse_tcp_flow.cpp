@@ -1,5 +1,10 @@
 #include "parser/simulation/flow/parse_flow.hpp"
 
+#include "flow/tcp/basic/basic_cc.hpp"
+#include "flow/tcp/tahoe/tcp_tahoe_cc.hpp"
+#include "flow/tcp/swift/swift_cc.hpp"
+#include "parser/parse_utils.hpp"
+
 namespace sim {
 
 std::unique_ptr<ITcpCC> ParseFlow::ParseTcpCC::parse_i_tcp_cc(Id flow_id, const YAML::Node& value_node) {
