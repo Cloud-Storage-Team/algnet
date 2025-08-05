@@ -53,7 +53,7 @@ If you want to implement TCP-like algorithm, follow these steps:
 
 If your algorithm is not TCP-like (e.g. credit-based), do following:
 1. Create class (`YourFlow` further) that implements [`IFlow`](source/flow/i_flow.hpp). `YourFlow` should represent all logic of sending packets. See example: [`TcpFlow`](source/flow/tcp/tcp_flow.hpp).
-2. Add implementation for `Parser<YourFlow>::parse_object`. This function should parse `YourFlow` from yaml file. See [implementation](source/parser/simulation/flow/parse_tcp_flow.cpp) for `TcpFlow`
+2. Add implementation of parsing `YourFlow` and put it to to [directory](source/parser/simulation/flow/) with flow parsers and call it from [`common flow parser`](source/parser/simulation/flow/parse_flow.cpp)
 3. Create configuration files for testing and running your algorithm. See [simulation config](configuration_examples/simulation_examples/tcp_simulation.yml) for `TcpTahoe` algorithm. 
 
 ## Results of simulations
