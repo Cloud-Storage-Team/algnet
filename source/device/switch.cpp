@@ -7,8 +7,8 @@
 
 namespace sim {
 
-Switch::Switch(Id a_id, ECN&& a_ecn)
-    : RoutingModule(a_id), m_ecn(std::move(a_ecn)) {}
+Switch::Switch(Id a_id, ECN&& a_ecn, std::unique_ptr<IPacketHasher> a_hasher)
+    : RoutingModule(a_id, std::move(a_hasher)), m_ecn(std::move(a_ecn)) {}
 
 bool Switch::notify_about_arrival(TimeNs arrival_time) {
     return m_process_scheduler.notify_about_arriving(arrival_time,

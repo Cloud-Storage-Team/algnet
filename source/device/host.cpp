@@ -7,7 +7,8 @@
 
 namespace sim {
 
-Host::Host(Id a_id) : RoutingModule(a_id) {}
+Host::Host(Id a_id, std::unique_ptr<IPacketHasher> a_packet_hasher)
+    : RoutingModule(a_id, std::move(a_packet_hasher)) {}
 
 bool Host::notify_about_arrival(TimeNs arrival_time) {
     return m_process_scheduler.notify_about_arriving(arrival_time,
