@@ -8,17 +8,17 @@
 namespace sim {
 
 std::unique_ptr<ITcpCC> ParseFlow::ParseTcpCC::parse_i_tcp_cc(const YAML::Node& cc_node, Id flow_id) {
-    if (!value_node["type"]) {
+    if (!cc_node["type"]) {
         throw std::runtime_error("Missing 'cc.type' field in flow " + flow_id);
     }
 
-    std::string type = value_node["type"].as<std::string>();
+    std::string type = cc_node["type"].as<std::string>();
     if (type == "basic") {
         return std::make_unique<BasicCC>();
     } else if (type == "tahoe") {
         return std::make_unique<TcpTahoeCC>();
     } else if (type == "swift") {
-        TimeNs a_base_target = parse_time(value_node["base_target"].as<std::string>());
+        TimeNs a_base_target = parse_time(cc_node["base_target"].as<std::string>());
         return std::make_unique<TcpSwiftCC>(a_base_target);
     }
     throw std::runtime_error(fmt::format("Unexpected type of CC module: {}", type));
