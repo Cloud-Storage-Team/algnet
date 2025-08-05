@@ -7,7 +7,7 @@
 
 namespace sim {
 
-std::unique_ptr<ITcpCC> ParseFlow::ParseTcpCC::parse_i_tcp_cc(Id flow_id, const YAML::Node& value_node) {
+std::unique_ptr<ITcpCC> ParseFlow::ParseTcpCC::parse_i_tcp_cc(const YAML::Node& cc_node, Id flow_id) {
     if (!value_node["type"]) {
         throw std::runtime_error("Missing 'cc.type' field in flow " + flow_id);
     }
