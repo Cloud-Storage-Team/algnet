@@ -27,9 +27,22 @@ public:
 };
 
 class FLowletHasher : public IPacketHasher {
+public:
+    explicit FLowletHasher(TimeNs a_flowlet_threshold);
     ~FLowletHasher() = default;
 
     std::uint32_t get_hash(Packet packet, Id device_id) final;
+
+private:
+    TimeNs m_flowlet_threshold;
+
+    // Maps flow ids to shift for its packets hash
+    std::map<Id, std::uint32_t> m_flow_to_shift;
+
+    // By flow id gives last time some packet from it catched
+    std::map<Id, TimeNs> m_last_record;
+    
+    ECMPHasher m_ecmp_hasher;
 };
 
 class SymmetricHasher : public IPacketHasher {
