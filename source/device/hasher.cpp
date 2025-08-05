@@ -16,11 +16,11 @@ static Id get_flow_id(IFlow* flow_ptr) {
 }
 
 std::uint32_t ECMPHasher::get_hash(Packet packet) {
-    std::string flow_id_str = get_flow_id(packet.flow);
+    std::string flow_id = get_flow_id(packet.flow);
 
     std::hash<std::string> hasher;
     std::string header_str =
-        fmt::format("{} {} {}", flow_id_str, packet.source_id, packet.dest_id);
+        fmt::format("{} {} {}", flow_id, packet.source_id, packet.dest_id);
     return static_cast<uint32_t>(hasher(header_str));
 };
 
@@ -28,11 +28,11 @@ SaltECMPHasher::SaltECMPHasher(Id a_device_id)
     : m_device_id(std::move(a_device_id)) {}
 
 std::uint32_t SaltECMPHasher::get_hash(Packet packet) {
-    std::string flow_id_str = get_flow_id(packet.flow);
+    std::string flow_id = get_flow_id(packet.flow);
 
     std::hash<std::string> hasher;
     std::string header_str =
-        fmt::format("{} {} {} {}", flow_id_str, packet.source_id,
+        fmt::format("{} {} {} {}", flow_id, packet.source_id,
                     packet.dest_id, m_device_id);
     return static_cast<uint32_t>(hasher(header_str));
 }
@@ -78,9 +78,9 @@ std::uint32_t SymmetricHasher::get_hash(Packet packet) {
 
     std::string combined_id_str =
         std::to_string(hasher(packet.source_id) ^ hasher(packet.dest_id));
-    std::string flow_id_str = get_flow_id(packet.flow);
+    std::string flow_id = get_flow_id(packet.flow);
 
-    std::string header_str = fmt::format("{} {}", flow_id_str, combined_id_str);
+    std::string header_str = fmt::format("{} {}", flow_id, combined_id_str);
     return static_cast<uint32_t>(hasher(header_str));
 };
 
