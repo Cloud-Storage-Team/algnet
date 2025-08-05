@@ -17,9 +17,9 @@ std::shared_ptr<IFlow> ParseFlow::parse_i_flow(const YAML::Node& key_node,
 }
 
 
-std::unique_ptr<ITcpCC> ParseFlow::ParseTcpCC::parse_i_tcp_cc(const YAML::Node& key_node, const YAML::Node& value_node) {
-    if (!value_node["cc"] || !value_node["cc"]["type"]) {
-        throw std::runtime_error("Missing 'cc.type' field in flow " + key_node.as<std::string>());
+std::unique_ptr<ITcpCC> ParseFlow::ParseTcpCC::parse_i_tcp_cc(Id flow_id, const YAML::Node& value_node) {
+    if (!value_node["type"]) {
+        throw std::runtime_error("Missing 'cc.type' field in flow " + flow_id);
     }
 
     std::string type = value_node["cc"]["type"].as<std::string>();
