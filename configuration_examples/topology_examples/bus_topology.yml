@@ -4,6 +4,9 @@ hosts:
   receiver1:
   receiver2:
 
+packet-spraying:
+  type: ecmp
+
 switches:
   bus:
     ecn:  

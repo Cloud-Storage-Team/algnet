@@ -1,3 +1,7 @@
+packet-spraying:
+  type: flowlet
+  threshold: 1000ns
+
 hosts:
   sender:
   receiver:

@@ -13,7 +13,7 @@ class Host : public IHost,
              public RoutingModule,
              public std::enable_shared_from_this<Host> {
 public:
-    Host(Id id, std::unique_ptr<IPacketHasher> a_packet_hasher = nullptr);
+    Host(Id id);
     ~Host() = default;
 
     bool notify_about_arrival(TimeNs arrive_time) final;
