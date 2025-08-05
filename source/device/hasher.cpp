@@ -40,19 +40,17 @@ std::uint32_t FLowletHasher::get_hash(Packet packet, Id device_id) {
 
     Id flow_id = packet.flow->get_id();
     TimeNs curr_time = Scheduler::get_instance().get_current_time();
-    auto last_record_it = m_last_record.find(flow_id);
+    auto last_record_it = m_flow_table.find(flow_id);
 
-    if (last_record_it == m_last_record.end()) {
-        m_last_record[flow_id] = curr_time;
-        m_flow_to_shift[flow_id] = 0;
+    if (last_record_it == m_flow_table.end()) {
+        m_flow_table[flow_id] = {curr_time, 0};
         return ecmp_hash;
     }
 
-    TimeNs& last_seen = last_record_it->second;
+    auto& [last_seen, shift] = last_record_it->second;
     TimeNs elapced_from_last_seen = curr_time - last_seen;
-    last_seen = curr_time;
 
-    std::uint32_t& shift = m_flow_to_shift[flow_id];
+    last_seen = curr_time;
     if (elapced_from_last_seen > m_flowlet_threshold) {
         shift++;
     }

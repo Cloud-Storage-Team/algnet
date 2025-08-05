@@ -36,12 +36,12 @@ public:
 private:
     TimeNs m_flowlet_threshold;
 
-    // Maps flow ids to shift for its packets hash
-    std::map<Id, std::uint32_t> m_flow_to_shift;
+    // Maps flow ids to pair (last_time, shift)
+    // where last_time is the time last packet from given flow was catched
+    // and shift is a shift should be applied to ECMP hash for packets
+    // ftom this flow
+    std::map<Id, std::pair<TimeNs, std::uint32_t> > m_flow_table;
 
-    // By flow id gives last time some packet from it catched
-    std::map<Id, TimeNs> m_last_record;
-    
     ECMPHasher m_ecmp_hasher;
 };
 
