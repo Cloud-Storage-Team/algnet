@@ -6,7 +6,8 @@
 namespace sim {
 class SimplePacketReordering : public IPacketReordering {
 public:
-    SimplePacketReordering(long double a_smoothing_factor = 0.8);
+    SimplePacketReordering() = default;
+    explicit SimplePacketReordering(long double a_smoothing_factor);
     ~SimplePacketReordering() = default;
 
     void add_record(PacketNum packet_num) final;
