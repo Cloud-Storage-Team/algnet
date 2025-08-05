@@ -1,4 +1,4 @@
-#include "parser/simulation/flow/parse_flow.hpp"
+#include "parser/simulation/flow/flow_parser.hpp"
 
 #include "flow/tcp/basic/basic_cc.hpp"
 #include "flow/tcp/tahoe/tcp_tahoe_cc.hpp"
@@ -24,7 +24,7 @@ std::unique_ptr<ITcpCC> ParseFlow::ParseTcpCC::parse_i_tcp_cc(Id flow_id, const 
     throw std::runtime_error(fmt::format("Unexpected type of CC module: {}", type));
 }
 
-std::shared_ptr<TcpFlow> ParseFlow::parse_tcp_flow(const YAML::Node& key_node,
+std::shared_ptr<TcpFlow> ParseFlow::tcp_flow_parser(const YAML::Node& key_node,
                                             const YAML::Node& value_node) {
     Id id = key_node.as<Id>();
     if (!value_node["cc"]) {
