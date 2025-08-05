@@ -128,7 +128,7 @@ private:
 };
 
 void TcpFlow::update(Packet packet) {
-    PacketType type =  m_flag_manager.get_flag(packet, m_packet_type_label);
+    PacketType type =  static_cast<PacketType>(m_flag_manager.get_flag(packet, m_packet_type_label));
     if (packet.dest_id == m_src.lock()->get_id() && type == PacketType::ACK) {
         TimeNs current_time = Scheduler::get_instance().get_current_time();
         if (current_time < packet.sent_time) {
