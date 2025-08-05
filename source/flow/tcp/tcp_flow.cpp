@@ -128,9 +128,8 @@ private:
 };
 
 void TcpFlow::update(Packet packet) {
-    if (packet.dest_id == m_src.lock()->get_id() &&
-        m_flag_manager.get_flag(packet, m_packet_type_label) ==
-            PacketType::ACK) {
+    PacketType type =  m_flag_manager.get_flag(packet, m_packet_type_label);
+    if (packet.dest_id == m_src.lock()->get_id() && type == PacketType::ACK) {
         TimeNs current_time = Scheduler::get_instance().get_current_time();
         if (current_time < packet.sent_time) {
             LOG_ERROR("Packet " + packet.to_string() +
@@ -172,8 +171,7 @@ void TcpFlow::update(Packet packet) {
                                                       cwnd);
         }
     } else if (packet.dest_id == m_dest.lock()->get_id() &&
-               m_flag_manager.get_flag(packet, m_packet_type_label) ==
-                   PacketType::DATA) {
+               type == PacketType::DATA) {
         Packet ack(SizeByte(1), this, m_dest.lock()->get_id(),
                    m_src.lock()->get_id(), packet.sent_time,
                    packet.delivered_data_size_at_origin,

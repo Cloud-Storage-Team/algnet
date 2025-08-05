@@ -30,7 +30,7 @@ std::shared_ptr<TcpFlow> ParseFlow::parse_tcp_flow(const YAML::Node& key_node,
     if (!value_node["cc"]) {
         throw std::runtime_error("Missing 'cc' field in flow " + id);
     }
-    std::unique_ptr<ITcpCC> cc = ParseTcpCC::parse_i_tcp_cc(id, value_node["cc"]);
+    std::unique_ptr<ITcpCC> cc = ParseTcpCC::parse_i_tcp_cc(value_node["cc"], id);
 
     if (!value_node["sender_id"]) {
         throw std::runtime_error("Flow " + id + " missing sender");
