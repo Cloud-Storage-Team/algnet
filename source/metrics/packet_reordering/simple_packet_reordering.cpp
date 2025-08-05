@@ -10,10 +10,10 @@ void SimplePacketReordering::add_record(PacketNum packet_num) {
 
     std::size_t count_lower = m_packet_num_set.order_of_key(packet_num);
     std::size_t total_count = m_packet_num_set.size();
-    std::size_t count_upper = total_count - count_lower;
+    std::size_t count_upper = total_count - count_lower - 1;
 
     long double curr_metric =
-        count_upper / static_cast<long double>(count_upper);
+        count_upper / static_cast<long double>(total_count);
     m_metric_statistics.add_record(curr_metric);
 }
 

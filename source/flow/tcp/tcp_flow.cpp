@@ -7,8 +7,9 @@ FlagManager<std::string, PacketFlagsBase> TcpFlow::m_flag_manager;
 bool TcpFlow::m_is_flag_manager_initialized = false;
 
 TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
-        std::shared_ptr<IHost> a_dest, std::unique_ptr<ITcpCC> a_cc, SizeByte a_packet_size,
-        std::uint32_t a_packets_to_send, bool a_ecn_capable)
+                 std::shared_ptr<IHost> a_dest, std::unique_ptr<ITcpCC> a_cc,
+                 SizeByte a_packet_size, std::uint32_t a_packets_to_send,
+                 bool a_ecn_capable)
     : m_id(std::move(a_id)),
       m_src(a_src),
       m_dest(a_dest),
@@ -18,8 +19,7 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
       m_ecn_capable(a_ecn_capable),
       m_packets_in_flight(0),
       m_delivered_data_size(0),
-      m_next_packet_num(0),
-      m_rtt_statistics(M_RTT_EXP_DECAY_FACTOR) {
+      m_next_packet_num(0) {
     if (m_src.lock() == nullptr) {
         throw std::invalid_argument("Sender for TcpFlow is nullptr");
     }
@@ -29,29 +29,19 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
     initialize_flag_manager();
 }
 
-void TcpFlow::start() { 
-    send_packets(); 
+void TcpFlow::start() { send_packets(); }
+
+SizeByte TcpFlow::get_delivered_data_size() const {
+    return m_delivered_data_size;
 }
 
-SizeByte TcpFlow::get_delivered_data_size() const { 
-    return m_delivered_data_size; 
-}
+std::shared_ptr<IHost> TcpFlow::get_sender() const { return m_src.lock(); }
 
-std::shared_ptr<IHost> TcpFlow::get_sender() const { 
-    return m_src.lock(); 
-}
+std::shared_ptr<IHost> TcpFlow::get_receiver() const { return m_dest.lock(); }
 
-std::shared_ptr<IHost> TcpFlow::get_receiver() const { 
-    return m_dest.lock(); 
-}
+Id TcpFlow::get_id() const { return m_id; }
 
-Id TcpFlow::get_id() const { 
-    return m_id; 
-}
-
-SizeByte TcpFlow::get_delivered_bytes() const { 
-    return m_delivered_data_size; 
-}
+SizeByte TcpFlow::get_delivered_bytes() const { return m_delivered_data_size; }
 
 Packet TcpFlow::create_packet(PacketNum packet_num) {
     Packet packet;
@@ -66,9 +56,7 @@ Packet TcpFlow::create_packet(PacketNum packet_num) {
     return packet;
 }
 
-Packet TcpFlow::generate_packet() { 
-    return create_packet(m_next_packet_num++); 
-}
+Packet TcpFlow::generate_packet() { return create_packet(m_next_packet_num++); }
 
 void TcpFlow::initialize_flag_manager() {
     if (!m_is_flag_manager_initialized) {
@@ -80,10 +68,9 @@ void TcpFlow::initialize_flag_manager() {
 
 class TcpFlow::SendAtTime : public Event {
 public:
-    SendAtTime(TimeNs a_time, std::weak_ptr<TcpFlow> a_flow,
-               Packet a_packet)
+    SendAtTime(TimeNs a_time, std::weak_ptr<TcpFlow> a_flow, Packet a_packet)
         : Event(a_time), m_flow(a_flow), m_packet(std::move(a_packet)) {}
-    
+
     void operator()() final {
         if (m_flow.expired()) {
             LOG_ERROR("Pointer to flow expired");
@@ -128,9 +115,10 @@ private:
 };
 
 void TcpFlow::update(Packet packet) {
-    PacketType type =  static_cast<PacketType>(m_flag_manager.get_flag(packet, m_packet_type_label));
+    PacketType type = static_cast<PacketType>(
+        m_flag_manager.get_flag(packet, m_packet_type_label));
+    TimeNs current_time = Scheduler::get_instance().get_current_time();
     if (packet.dest_id == m_src.lock()->get_id() && type == PacketType::ACK) {
-        TimeNs current_time = Scheduler::get_instance().get_current_time();
         if (current_time < packet.sent_time) {
             LOG_ERROR("Packet " + packet.to_string() +
                       " current time less that sending time; ignored");
@@ -155,7 +143,7 @@ void TcpFlow::update(Packet packet) {
 
         double old_cwnd = m_cc->get_cwnd();
         m_cc->on_ack(rtt, m_rtt_statistics.get_mean(),
-                    packet.congestion_experienced);
+                     packet.congestion_experienced);
 
         m_delivered_data_size += m_packet_size;
 
@@ -167,16 +155,18 @@ void TcpFlow::update(Packet packet) {
 
         double cwnd = m_cc->get_cwnd();
         if (old_cwnd != cwnd) {
-            MetricsCollector::get_instance().add_cwnd(m_id, current_time,
-                                                      cwnd);
+            MetricsCollector::get_instance().add_cwnd(m_id, current_time, cwnd);
         }
     } else if (packet.dest_id == m_dest.lock()->get_id() &&
                type == PacketType::DATA) {
+        m_packet_reordering.add_record(packet.packet_num);
+        MetricsCollector::get_instance().add_packet_reordering(
+            m_id, current_time, m_packet_reordering.value());
+
         Packet ack(SizeByte(1), this, m_dest.lock()->get_id(),
                    m_src.lock()->get_id(), packet.sent_time,
                    packet.delivered_data_size_at_origin,
-                   packet.ecn_capable_transport,
-                   packet.congestion_experienced);
+                   packet.ecn_capable_transport, packet.congestion_experienced);
         ack.packet_num = packet.packet_num;
         m_flag_manager.set_flag(ack, m_packet_type_label, PacketType::ACK);
         m_dest.lock()->enqueue_packet(ack);
@@ -235,9 +225,9 @@ void TcpFlow::send_packets() {
         if (pacing_delay == TimeNs(0)) {
             send_packet_now(std::move(packet));
         } else {
-            Scheduler::get_instance().add<SendAtTime>(
-                curr_time + total_delay, this->shared_from_this(),
-                std::move(packet));
+            Scheduler::get_instance().add<SendAtTime>(curr_time + total_delay,
+                                                      this->shared_from_this(),
+                                                      std::move(packet));
         }
         m_packets_in_flight++;
         m_packets_to_send--;

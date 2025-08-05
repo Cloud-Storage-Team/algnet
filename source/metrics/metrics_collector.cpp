@@ -106,6 +106,7 @@ void MetricsCollector::draw_metric_plots(
     draw_cwnd_plot(metrics_dir / "cwnd.svg");
     draw_delivery_rate_plot(metrics_dir / "rate.svg");
     draw_RTT_plot(metrics_dir / "rtt.svg");
+    draw_packet_reordering_plot(metrics_dir / "packet_reordering.svg");
     draw_queue_size_plots(metrics_dir / "queue_size");
 }
 
