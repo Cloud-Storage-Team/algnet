@@ -1,12 +1,15 @@
-#include "identifiable_parser.hpp"
-#include "link/link.hpp"
+#include "link_parser.hpp"
 #include "parser/parse_utils.hpp"
 
 namespace sim {
-
-template <>
-std::shared_ptr<Link> Parser<Link>::parse_object(const YAML::Node& key_node,
+    
+std::shared_ptr<ILink> LinkParser::parse_i_link(const YAML::Node& key_node,
                                                  const YAML::Node& value_node) {
+    return parse_default_link(key_node, value_node);
+}
+
+std::shared_ptr<Link> LinkParser::parse_default_link(const YAML::Node& key_node,
+                                            const YAML::Node& value_node) {
     Id id = key_node.as<Id>();
     Id from_id = value_node["from"].as<Id>();
     Id to_id = value_node["to"].as<Id>();
@@ -39,4 +42,5 @@ std::shared_ptr<Link> Parser<Link>::parse_object(const YAML::Node& key_node,
     return std::make_shared<Link>(id, from_ptr, to_ptr, speed, latency,
                                   egress_buffer_size, ingress_buffer_size);
 }
+
 }  // namespace sim
