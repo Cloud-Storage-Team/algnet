@@ -13,7 +13,7 @@ std::shared_ptr<IFlow> ParseFlow::parse_i_flow(const YAML::Node& key_node,
     if (type == "tcp") {
         return parse_tcp_flow(key_node, value_node);
     }
-    throw std::runtime_error("Unex");
+    throw std::runtime_error(fmt::format("Unexpected flow type {}", type));
 }
 
 
