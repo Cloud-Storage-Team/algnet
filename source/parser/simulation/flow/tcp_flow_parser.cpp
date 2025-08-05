@@ -7,7 +7,7 @@
 
 namespace sim {
 
-std::unique_ptr<ITcpCC> FlowParser::ParseTcpCC::parse_i_tcp_cc(const YAML::Node& cc_node, Id flow_id) {
+std::unique_ptr<ITcpCC> FlowParser::TcpCCParser::parse_i_tcp_cc(const YAML::Node& cc_node, Id flow_id) {
     if (!cc_node["type"]) {
         throw std::runtime_error("Missing 'cc.type' field in flow " + flow_id);
     }
@@ -30,7 +30,7 @@ std::shared_ptr<TcpFlow> FlowParser::tcp_flow_parser(const YAML::Node& key_node,
     if (!value_node["cc"]) {
         throw std::runtime_error("Missing 'cc' field in flow " + id);
     }
-    std::unique_ptr<ITcpCC> cc = ParseTcpCC::parse_i_tcp_cc(value_node["cc"], id);
+    std::unique_ptr<ITcpCC> cc = TcpCCParser::parse_i_tcp_cc(value_node["cc"], id);
 
     if (!value_node["sender_id"]) {
         throw std::runtime_error("Flow " + id + " missing sender");
