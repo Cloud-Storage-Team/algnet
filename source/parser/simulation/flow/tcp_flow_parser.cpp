@@ -24,7 +24,7 @@ std::unique_ptr<ITcpCC> FlowParser::TcpCCParser::parse_i_tcp_cc(const YAML::Node
     throw std::runtime_error(fmt::format("Unexpected type of CC module: {}", type));
 }
 
-std::shared_ptr<TcpFlow> FlowParser::tcp_flow_parser(const YAML::Node& key_node,
+std::shared_ptr<TcpFlow> FlowParser::parse_tcp_flow(const YAML::Node& key_node,
                                             const YAML::Node& value_node) {
     Id id = key_node.as<Id>();
     if (!value_node["cc"]) {

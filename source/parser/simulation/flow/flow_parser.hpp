@@ -18,7 +18,7 @@ private:
         static std::unique_ptr<ITcpCC> parse_i_tcp_cc(const YAML::Node& cc_node, Id flow_id);
     };
 
-    static std::shared_ptr<TcpFlow> tcp_flow_parser(const YAML::Node& key_node,
+    static std::shared_ptr<TcpFlow> parse_tcp_flow(const YAML::Node& key_node,
                                                  const YAML::Node& value_node);
 };
 
