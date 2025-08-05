@@ -1,6 +1,9 @@
 topology_config_path: simple_topology.yml # it's genious i think
 simulation_time: 1000
 
+packet-spraying:
+  type: ecmp
+
 hosts:
   sender1:
   sender2:
