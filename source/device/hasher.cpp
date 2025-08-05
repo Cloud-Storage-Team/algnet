@@ -7,7 +7,7 @@
 
 namespace sim {
 
-std::uint32_t RandomHasher::get_hash(Packet, Id) {
+std::uint32_t RandomHasher::get_hash(Packet) {
     return static_cast<std::uint32_t>(std::rand());
 };
 
@@ -15,7 +15,7 @@ static Id get_flow_id(IFlow* flow_ptr) {
     return (flow_ptr == nullptr ? "" : flow_ptr->get_id());
 }
 
-std::uint32_t ECMPHasher::get_hash(Packet packet, Id) {
+std::uint32_t ECMPHasher::get_hash(Packet packet) {
     std::string flow_id_str = get_flow_id(packet.flow);
 
     std::hash<std::string> hasher;
@@ -24,13 +24,16 @@ std::uint32_t ECMPHasher::get_hash(Packet packet, Id) {
     return static_cast<uint32_t>(hasher(header_str));
 };
 
-std::uint32_t SaltECMPHasher::get_hash(Packet packet, Id device_id) {
+SaltECMPHasher::SaltECMPHasher(Id a_device_id)
+    : m_device_id(std::move(a_device_id)) {}
+
+std::uint32_t SaltECMPHasher::get_hash(Packet packet) {
     std::string flow_id_str = get_flow_id(packet.flow);
 
     std::hash<std::string> hasher;
     std::string header_str =
         fmt::format("{} {} {} {}", flow_id_str, packet.source_id,
-                    packet.dest_id, device_id);
+                    packet.dest_id, m_device_id);
     return static_cast<uint32_t>(hasher(header_str));
 }
 
@@ -47,9 +50,8 @@ static inline std::uint32_t sum_with_overflow(std::uint32_t first,
     return first + second;
 }
 
-std::uint32_t FLowletHasher::get_hash(Packet packet, Id device_id) {
-    std::uint32_t ecmp_hash =
-        m_ecmp_hasher.get_hash(packet, std::move(device_id));
+std::uint32_t FLowletHasher::get_hash(Packet packet) {
+    std::uint32_t ecmp_hash = m_ecmp_hasher.get_hash(packet);
 
     Id flow_id = get_flow_id(packet.flow);
     TimeNs curr_time = Scheduler::get_instance().get_current_time();
@@ -71,7 +73,7 @@ std::uint32_t FLowletHasher::get_hash(Packet packet, Id device_id) {
     return sum_with_overflow(ecmp_hash, shift);
 }
 
-std::uint32_t SymmetricHasher::get_hash(Packet packet, Id) {
+std::uint32_t SymmetricHasher::get_hash(Packet packet) {
     std::hash<std::string> hasher;
 
     std::string combined_id_str =

@@ -90,7 +90,7 @@ std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
         total_weight += weight;
     }
 
-    int random_value = m_hasher->get_hash(packet, m_id) % total_weight;
+    int random_value = m_hasher->get_hash(packet) % total_weight;
 
     int cumulative_weight = 0;
     for (const auto& [link, weight] : link_map) {
