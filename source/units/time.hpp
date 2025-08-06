@@ -34,24 +34,23 @@ class Time {
 public:
     using ThisTime = Time<TTimeBase>;
 
-    constexpr Time() : m_value_ns(0.0L) {}
+    constexpr Time() : m_value_ns(0.0) {}
     template <IsTimeBase USizeBase>
     constexpr Time(Time<USizeBase> a_size)
         : m_value_ns(a_size.value_nanoseconds()) {}
 
     // Attention: a_value given in TTimeBase units!
-    explicit constexpr Time(long double a_value)
+    explicit constexpr Time(double a_value)
         : m_value_ns(a_value * TTimeBase::to_nanoseconds_multiplier) {}
 
-
-    constexpr long double value() const {
+    constexpr double value() const {
         // Round up here to get maximal time
         return m_value_ns / TTimeBase::to_nanoseconds_multiplier;
     }
 
-    explicit constexpr operator long double() const { return value(); }
+    explicit constexpr operator double() const { return value(); }
 
-    constexpr long double value_nanoseconds() const { return m_value_ns; }
+    constexpr double value_nanoseconds() const { return m_value_ns; }
 
     constexpr ThisTime operator+(ThisTime time) const {
         return Time<Nanosecond>(m_value_ns + time.m_value_ns);
@@ -61,7 +60,7 @@ public:
         return Time<Nanosecond>(m_value_ns - time.m_value_ns);
     }
 
-    constexpr ThisTime operator*(long double mult) const {
+    constexpr ThisTime operator*(double mult) const {
         return Time<Nanosecond>(m_value_ns * mult);
     }
 
@@ -70,20 +69,20 @@ public:
         return *this;
     }
 
-    constexpr long double operator/(ThisTime time) const {
+    constexpr double operator/(ThisTime time) const {
         return m_value_ns / time.value_nanoseconds();
     }
 
-    constexpr ThisTime operator/(long double value) const {
+    constexpr ThisTime operator/(double value) const {
         return Time<Nanosecond>(m_value_ns / value);
     }
 
     constexpr void operator+=(ThisTime time) { m_value_ns += time.m_value_ns; }
     constexpr void operator-=(ThisTime time) { m_value_ns -= time.m_value_ns; }
 
-    constexpr void operator*=(long double mult) { m_value_ns *= mult; }
+    constexpr void operator*=(double mult) { m_value_ns *= mult; }
 
-    constexpr void operator/=(long double mult) { m_value_ns /= mult; }
+    constexpr void operator/=(double mult) { m_value_ns /= mult; }
 
     bool constexpr operator<(ThisTime time) const {
         return m_value_ns < time.m_value_ns;
@@ -100,7 +99,7 @@ public:
     bool constexpr operator!=(ThisTime time) const { return !operator==(time); }
 
 private:
-    long double m_value_ns;  // Time in nanoseconds
+    double m_value_ns;  // Time in nanoseconds
 };
 
 template <IsTimeBase TTimeBase>

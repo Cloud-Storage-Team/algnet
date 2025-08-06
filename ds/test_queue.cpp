@@ -78,7 +78,7 @@ void testDeQueueThrowsAnInvalidArgumentWhenQueueEmpty() {
 int main() {
     testConstructedQueueIsEmpty<int>();
     testConstructedQueueIsEmpty<double>();
-    testConstructedQueueIsEmpty<std::vector<long double>>();
+    testConstructedQueueIsEmpty<std::vector<double>>();
 
     testEnQueue();
     testDeQueue();
