@@ -55,6 +55,7 @@ private:
     void process_switches(const YAML::Node& switches_node);
 
     void process_links(const YAML::Node& links_node);
+    void process_connection(const YAML::Node& connections_node);
     void process_flows(const YAML::Node& flows_node);
 
     Simulator m_simulator;
