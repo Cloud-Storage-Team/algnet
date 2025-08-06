@@ -5,18 +5,21 @@
 #include "event/event.hpp"
 #include "link/i_link.hpp"
 #include "packet_queue/link_queue.hpp"
-#include "utils/rt_expected.hpp"
+#include "utils/str_expected.hpp"
 
 namespace sim {
 
 struct LinkInitArgs {
-    std::optional<Id> id;
-    std::optional<Id> from_id;
-    std::optional<Id> to_id;
-    std::optional<SpeedGbps> speed;
-    std::optional<TimeNs> delay;
-    std::optional<SizeByte> max_from_egress_buffer_size;
-    std::optional<SizeByte> max_to_ingress_buffer_size;
+    str_expected<Id> id = std::unexpected("Missing id");
+    str_expected<Id> from_id = std::unexpected("Missing from id");
+    str_expected<Id> to_id = std::unexpected("Missing to id");
+    str_expected<SpeedGbps> speed = std::unexpected("Missing speed");
+    str_expected<TimeNs> delay = std::unexpected("Missing delay");
+    str_expected<SizeByte> max_from_egress_buffer_size =
+        std::unexpected("Missing max from egress buffer size");
+    str_expected<SizeByte> max_to_ingress_buffer_size =
+        std::unexpected("Missing max to ingress buffer size");
+    ;
 };
 
 class Link : public ILink, public std::enable_shared_from_this<Link> {
