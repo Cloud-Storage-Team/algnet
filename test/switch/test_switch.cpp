@@ -119,6 +119,7 @@ void test_senders(size_t senders_count) {
     for (size_t i = 0; i < senders_count; i++) {
         packets[i] = sim::Packet(SizeByte(i), &flows[i], "",
                                  flows[i].get_receiver()->get_id());
+        packets[i].ttl = 2;
     }
 
     // create links
@@ -149,6 +150,10 @@ void test_senders(size_t senders_count) {
     }
     std::vector<sim::Packet> arrived_packets =
         switch_reciever_link->get_arrived_packets();
+
+    for (auto packet : packets) {
+        packet.ttl -= 2;
+    }
 
     std::sort(packets.begin(), packets.end(), compare_packets);
     std::sort(arrived_packets.begin(), arrived_packets.end(), compare_packets);
