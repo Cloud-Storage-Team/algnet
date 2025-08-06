@@ -35,6 +35,10 @@ if (BUILD_PROJECT)
     target_link_libraries(${TARGET_NAME} yaml-cpp matplot)
     target_compile_options(${TARGET_NAME} PRIVATE -Wall -Werror -Wextra)
 
+    if (DEFINED LOG_LEVEL)
+        target_compile_definitions(${TARGET_NAME} PRIVATE LOG_LEVEL=${LOG_LEVEL})
+    endif()
+
     target_include_directories(${TARGET_NAME} PUBLIC "source")
 endif()
 
