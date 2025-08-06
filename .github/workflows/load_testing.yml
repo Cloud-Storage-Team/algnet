@@ -23,7 +23,7 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Configure CMake for building project
-      run: cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF
+      run: cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF -DLOG_LEVEL=LOG_LEVEL_ERROR
 
     - name: Build project
       run: cmake --build ${{env.BUILD_DIR}} -j $(nproc)
