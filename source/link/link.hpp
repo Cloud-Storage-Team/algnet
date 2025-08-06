@@ -8,12 +8,23 @@
 
 namespace sim {
 
+struct LinkInitArgs {
+    Id id;
+    Id from_id;
+    Id to_id;
+    SpeedGbps speed;
+    TimeNs delay;
+    SizeByte max_from_egress_buffer_size;
+    SizeByte max_to_ingress_buffer_size;
+};
+
 class Link : public ILink, public std::enable_shared_from_this<Link> {
 public:
     Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
          SpeedGbps a_speed = SpeedGbps(1), TimeNs a_delay = TimeNs(0),
          SizeByte a_max_from_egress_buffer_size = SizeByte(4096),
          SizeByte a_max_to_ingress_buffer_size = SizeByte(4096));
+    explicit Link(LinkInitArgs args);
     ~Link() = default;
 
     void schedule_arrival(Packet packet) final;

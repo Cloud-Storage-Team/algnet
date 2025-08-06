@@ -4,6 +4,13 @@
 
 #include <stdexcept>
 
+YAML::Node get_if_present(const YAML::Node &node, std::string_view field_name) {
+    if (!node) {
+        return node;
+    }
+    return node[field_name];
+}
+
 static std::pair<uint32_t, std::string> parse_value_unit(
     const std::string &value_with_unit) {
     const size_t unit_pos = value_with_unit.find_first_not_of("0123456789");
