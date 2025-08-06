@@ -93,7 +93,12 @@ void YamlParser::process_links(
         [this](std::shared_ptr<ILink> link) {
             return m_simulator.add_link(link);
         },
-        LinkParser::parse_i_link, "Can not add link.");
+        [&link_preset_node](const YAML::Node &key_node,
+                            const YAML::Node &value_node) {
+            return LinkParser::parse_i_link(key_node, value_node,
+                                            link_preset_node);
+        },
+        "Can not add link.");
 }
 
 void YamlParser::process_flows(const YAML::Node &flows_node) {

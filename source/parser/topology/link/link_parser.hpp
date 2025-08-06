@@ -11,10 +11,13 @@ namespace sim {
 class LinkParser {
 public:
     static std::shared_ptr<ILink> parse_i_link(const YAML::Node& key_node,
-                                                 const YAML::Node& value_node);
+                                               const YAML::Node& value_node,
+                                               const YAML::Node& preset_node);
+
 private:
-    static std::shared_ptr<Link> parse_default_link(const YAML::Node& key_node,
-                                                 const YAML::Node& value_node);
+    static std::shared_ptr<Link> parse_default_link(
+        const YAML::Node& key_node, const YAML::Node& value_node,
+        const YAML::Node& preset_node);
 };
 
 }  // namespace sim
