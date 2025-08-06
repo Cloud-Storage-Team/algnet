@@ -25,12 +25,28 @@ Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
     }
 }
 
+template <typename T>
+static T value_or_rt(std::optional<T> opt, std::string rt_message) {
+    if (!opt.has_value()) {
+        throw std::runtime_error(rt_message);
+    }
+    return opt.value();
+}
+
 Link::Link(LinkInitArgs args)
-    : Link(args.id,
-           IdentifierFactory::get_instance().get_object<IDevice>(args.from_id),
-           IdentifierFactory::get_instance().get_object<IDevice>(args.to_id),
-           args.speed, args.delay, args.max_from_egress_buffer_size,
-           args.max_to_ingress_buffer_size) {}
+    : Link(value_or_rt(args.id, "Can not construct link; missed id"),
+           IdentifierFactory::get_instance().get_object<IDevice>(value_or_rt(
+               args.from_id, "Can not construct link; missed from id")),
+           IdentifierFactory::get_instance().get_object<IDevice>(
+               value_or_rt(args.to_id, "Can not construct link; missed to id")),
+           value_or_rt(args.speed, "Can not construct link; missed speed"),
+           value_or_rt(args.delay, "Can not construct link; missed delay"),
+           value_or_rt(
+               args.max_from_egress_buffer_size,
+               "Can not construct link; missed max from egress buffer size"),
+           value_or_rt(
+               args.max_to_ingress_buffer_size,
+               "Can not construct link; missed max to egress buffer size")) {}
 
 void Link::schedule_arrival(Packet packet) {
     if (m_to.expired()) {

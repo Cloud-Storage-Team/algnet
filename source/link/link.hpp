@@ -9,13 +9,13 @@
 namespace sim {
 
 struct LinkInitArgs {
-    Id id;
-    Id from_id;
-    Id to_id;
-    SpeedGbps speed;
-    TimeNs delay;
-    SizeByte max_from_egress_buffer_size;
-    SizeByte max_to_ingress_buffer_size;
+    std::optional<Id> id;
+    std::optional<Id> from_id;
+    std::optional<Id> to_id;
+    std::optional<SpeedGbps> speed;
+    std::optional<TimeNs> delay;
+    std::optional<SizeByte> max_from_egress_buffer_size;
+    std::optional<SizeByte> max_to_ingress_buffer_size;
 };
 
 class Link : public ILink, public std::enable_shared_from_this<Link> {

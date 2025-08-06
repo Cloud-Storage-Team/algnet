@@ -6,44 +6,50 @@ namespace sim {
 
 std::shared_ptr<ILink> LinkParser::parse_i_link(const YAML::Node& key_node,
                                                 const YAML::Node& value_node,
-                                                const YAML::Node& preset_node) {
-    return parse_default_link(key_node, value_node, preset_node);
+                                                LinkInitArgs preset_args) {
+    return parse_default_link(key_node, value_node, std::move(preset_args));
+}
+
+void LinkParser::parse_to_args(const YAML::Node& node, LinkInitArgs& args) {
+    auto from = node["from"];
+    if (from) {
+        args.from_id.emplace(from.as<Id>());
+    }
+
+    auto to = node["to"];
+    if (to) {
+        args.to_id.emplace(to.as<Id>());
+    }
+
+    auto latency = node["latency"];
+    if (latency) {
+        args.delay.emplace(parse_time(latency.as<std::string>()));
+    }
+
+    auto speed = node["throughput"];
+    if (speed) {
+        args.speed.emplace(parse_speed(speed.as<std::string>()));
+    }
+
+    auto max_from_egress_buffer_size = node["egress_buffer_size"];
+    if (max_from_egress_buffer_size) {
+        args.max_from_egress_buffer_size.emplace(
+            parse_buffer_size(max_from_egress_buffer_size.as<std::string>()));
+    }
+
+    auto max_to_ingress_buffer_size = node["ingress_buffer_size"];
+    if (max_to_ingress_buffer_size) {
+        args.max_to_ingress_buffer_size.emplace(
+            parse_buffer_size(max_to_ingress_buffer_size.as<std::string>()));
+    }
 }
 
 std::shared_ptr<Link> LinkParser::parse_default_link(
     const YAML::Node& key_node, const YAML::Node& value_node,
-    [[maybe_unused]] const YAML::Node& preset_node) {
-    Id id = key_node.as<Id>();
-    Id from_id = value_node["from"].as<Id>();
-    Id to_id = value_node["to"].as<Id>();
-    auto from_ptr =
-        IdentifierFactory::get_instance().get_object<IDevice>(from_id);
-    auto to_ptr = IdentifierFactory::get_instance().get_object<IDevice>(to_id);
-
-    if (from_ptr == nullptr) {
-        LOG_ERROR("Failed to find link's source");
-        return nullptr;
-    }
-
-    if (to_ptr == nullptr) {
-        LOG_ERROR("Failed to find link's destination");
-        return nullptr;
-    }
-
-    TimeNs latency = parse_with_default<TimeNs>(value_node, "latency",
-                                                parse_time, TimeNs(0));
-
-    SpeedGbps speed = parse_with_default<SpeedGbps>(value_node, "throughput",
-                                                    parse_speed, SpeedGbps(1));
-
-    SizeByte ingress_buffer_size = parse_with_default<SizeByte>(
-        value_node, "ingress_buffer_size", parse_buffer_size, SizeByte(4096u));
-
-    SizeByte egress_buffer_size = parse_with_default<SizeByte>(
-        value_node, "egress_buffer_size", parse_buffer_size, SizeByte(4096u));
-
-    return std::make_shared<Link>(id, from_ptr, to_ptr, speed, latency,
-                                  egress_buffer_size, ingress_buffer_size);
+    LinkInitArgs args) {
+    parse_to_args(value_node, args);
+    args.id.emplace(key_node.as<Id>());
+    return std::make_shared<Link>(std::move(args));
 }
 
 }  // namespace sim
