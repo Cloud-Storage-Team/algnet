@@ -18,7 +18,7 @@ struct Packet {
     bool operator==(const Packet& packet) const;
     std::string to_string() const;
 
-    PacketNum packet_num;
+    PacketNum packet_num = 0;
     BitSet<PacketFlagsBase> flags;
     Id source_id;
     Id dest_id;
@@ -27,6 +27,7 @@ struct Packet {
     TimeNs sent_time;  // Note: ACK's sent time is the data packet sent time
     SizeByte delivered_data_size_at_origin;  // For ACK this is inherited from
                                              // data packet
+    TTL ttl = 0;
     bool ecn_capable_transport;
     bool congestion_experienced;
 };
