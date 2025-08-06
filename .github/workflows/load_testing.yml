@@ -43,7 +43,7 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Configure CMake for profiling
-      run: cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF -DPROFILING=ON
+      run: cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF -DPROFILING=ON -DLOG_LEVEL=LOG_LEVEL_ERROR
 
     - name: Build project with profiling
       run: cmake --build ${{env.BUILD_DIR}} -j $(nproc)
@@ -77,7 +77,7 @@ jobs:
       run: git clone https://github.com/brendangregg/FlameGraph.git
 
     - name: Configure CMake for perf
-      run: cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF -DCMAKE_CXX_FLAGS="-g -fno-omit-frame-pointer"
+      run: cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF -DLOG_LEVEL=LOG_LEVEL_ERROR -DCMAKE_CXX_FLAGS="-g -fno-omit-frame-pointer"
 
     - name: Build project with profiling
       run: cmake --build ${{env.BUILD_DIR}} -j $(nproc)
