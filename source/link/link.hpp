@@ -5,6 +5,7 @@
 #include "event/event.hpp"
 #include "link/i_link.hpp"
 #include "packet_queue/link_queue.hpp"
+#include "utils/rt_expected.hpp"
 
 namespace sim {
 
