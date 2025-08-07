@@ -48,6 +48,7 @@ void MultiIdMetricsStorage::draw_on_plot(
 
 std::unordered_map<Id, MetricsStorage> MultiIdMetricsStorage::data() const {
     std::unordered_map<Id, MetricsStorage> result;
+    result.reserve(m_storage.size());
     for (auto [id, maybe_storage] : m_storage) {
         if (maybe_storage) {
             result[id] = maybe_storage.value();
