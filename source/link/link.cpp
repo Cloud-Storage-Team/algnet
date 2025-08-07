@@ -2,6 +2,7 @@
 
 #include "logger/logger.hpp"
 #include "scheduler.hpp"
+#include "utils/str_expected.hpp"
 
 namespace sim {
 
@@ -26,14 +27,15 @@ Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
 }
 
 Link::Link(LinkInitArgs args)
-    : Link(value_or_rt(args.id),
+    : Link(utils::value_or_base_error(args.id),
            IdentifierFactory::get_instance().get_object<IDevice>(
-               value_or_rt(args.from_id)),
+               utils::value_or_base_error(args.from_id)),
            IdentifierFactory::get_instance().get_object<IDevice>(
-               value_or_rt(args.to_id)),
-           value_or_rt(args.speed), value_or_rt(args.delay),
-           value_or_rt(args.max_from_egress_buffer_size),
-           value_or_rt(args.max_to_ingress_buffer_size)) {}
+               utils::value_or_base_error(args.to_id)),
+           utils::value_or_base_error(args.speed),
+           utils::value_or_base_error(args.delay),
+           utils::value_or_base_error(args.max_from_egress_buffer_size),
+           utils::value_or_base_error(args.max_to_ingress_buffer_size)) {}
 
 void Link::schedule_arrival(Packet packet) {
     if (m_to.expired()) {

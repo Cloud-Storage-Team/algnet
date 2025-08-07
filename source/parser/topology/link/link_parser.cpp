@@ -1,5 +1,8 @@
 #include "link_parser.hpp"
 
+#include "utils/errors/base_error.hpp"
+#include "utils/errors/error_with_id.hpp"
+
 namespace sim {
 
 std::shared_ptr<ILink> LinkParser::parse_i_link(const YAML::Node& key_node,
@@ -45,11 +48,21 @@ void LinkParser::parse_to_args(const YAML::Node& node, LinkInitArgs& args) {
 std::shared_ptr<Link> LinkParser::parse_default_link(
     const YAML::Node& key_node, const YAML::Node& value_node,
     const LinkPresets& presets) {
-    LinkInitArgs link_args = presets.get_preset(value_node);
+    Id link_id = key_node.as<Id>();
+    LinkInitArgs link_args = presets.get_preset(value_node, link_id);
 
     parse_to_args(value_node, link_args);
-    link_args.id.emplace(key_node.as<Id>());
-    return std::make_shared<Link>(std::move(link_args));
+    link_args.id = link_id;
+    try {
+        return std::make_shared<Link>(std::move(link_args));
+    } catch (const utils::ErrorWithId& error) {
+        // Now used now, but might be userful in future
+        throw error;
+    } catch (const utils::BaseError& base_error) {
+        throw utils::ErrorWithId(base_error, link_id);
+    } catch (...) {
+        throw;
+    }
 }
 
 }  // namespace sim

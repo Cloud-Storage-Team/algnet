@@ -2,6 +2,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include <functional>
+#include <optional>
 #include <string>
 #include <type_traits>
 #include <unordered_map>
@@ -36,7 +37,8 @@ public:
     // Gets preset with name node["preset-name"] from storage
     // If node does noit contain "preset-name", use default
     // If there is no preser with such name, return default TPreset
-    TPreset get_preset(const YAML::Node& node) const {
+    TPreset get_preset(const YAML::Node& node,
+                       std::optional<Id> object_id = std::nullopt) const {
         static_assert(std::is_default_constructible_v<TPreset>,
                       "Preset must be default constructable");
         YAML::Node preset_name_node = node["preset-name"];
@@ -48,17 +50,28 @@ public:
             if (it != this->end()) {
                 return it->second;
             }
-            throw std::runtime_error(
-                fmt::format("Can not find preset with name {}", preset_name));
+            std::string error_message =
+                fmt::format("Can not find preset with name {}", preset_name);
+            if (object_id.has_value()) {
+                error_message +=
+                    fmt::format("  for object {}", object_id.value());
+            }
+
+            throw std::runtime_error(std::move(error_message));
         } else {
             // Use default preset
             auto it = this->find(M_DEFAULT_PRESET_NAME);
             if (it != this->end()) {
                 return it->second;
             }
-            LOG_WARN(
+            std::string warn_message =
                 "Can not find default preset; use empty preset (get from "
-                "default constructor)");
+                "default constructor)";
+            if (object_id.has_value()) {
+                warn_message +=
+                    fmt::format(" for object {}", object_id.value());
+            }
+            LOG_WARN(std::move(warn_message));
             return TPreset();
         }
     };
