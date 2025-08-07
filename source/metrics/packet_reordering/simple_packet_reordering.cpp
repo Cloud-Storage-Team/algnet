@@ -1,5 +1,7 @@
 #include "simple_packet_reordering.hpp"
 
+#include <iostream>
+
 namespace sim {
 
 SimplePacketReordering::SimplePacketReordering(long double a_smoothing_factor)
@@ -10,11 +12,10 @@ SimplePacketReordering::SimplePacketReordering(long double a_smoothing_factor,
     : m_max_packets(a_max_packets), m_metric_statistics(a_smoothing_factor) {}
 
 void SimplePacketReordering::add_record(PacketNum packet_num) {
-    if (m_packet_num_set.insert(packet_num).second) {
+    if (!m_packet_num_set.insert(packet_num).second) {
         // packet with same id already in set; new one ignored
         return;
     }
-
     std::size_t count_lower = m_packet_num_set.order_of_key(packet_num);
     std::size_t total_count = m_packet_num_set.size();
     std::size_t count_upper = total_count - count_lower - 1;

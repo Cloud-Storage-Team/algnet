@@ -1,8 +1,12 @@
 #include "flow/tcp/tcp_flow.hpp"
 
+#include "metrics/metrics_collector.hpp"
+#include "scheduler.hpp"
+
 namespace sim {
 
 std::string TcpFlow::m_packet_type_label = "type";
+std::string TcpFlow::m_ack_ttl_label = "ack_ttl";
 FlagManager<std::string, PacketFlagsBase> TcpFlow::m_flag_manager;
 bool TcpFlow::m_is_flag_manager_initialized = false;
 
@@ -52,8 +56,27 @@ Packet TcpFlow::create_packet(PacketNum packet_num) {
     packet.dest_id = get_receiver()->get_id();
     packet.packet_num = packet_num;
     packet.delivered_data_size_at_origin = m_delivered_data_size;
+    packet.ttl = M_MAX_TTL;
     packet.ecn_capable_transport = m_ecn_capable;
     return packet;
+}
+
+Packet TcpFlow::create_ack(Packet data) {
+    Packet ack;
+    ack.packet_num = data.packet_num;
+    ack.source_id = m_dest.lock()->get_id();
+    ack.dest_id = m_src.lock()->get_id();
+    ack.size = SizeByte(1);
+    ack.flow = this;
+    ack.sent_time = data.sent_time;
+    ack.delivered_data_size_at_origin = data.delivered_data_size_at_origin;
+    ack.ttl = M_MAX_TTL;
+    ack.ecn_capable_transport = data.ecn_capable_transport;
+    ack.congestion_experienced = data.congestion_experienced;
+
+    m_flag_manager.set_flag(ack, m_packet_type_label, PacketType::ACK);
+    m_flag_manager.set_flag(ack, m_ack_ttl_label, data.ttl);
+    return ack;
 }
 
 Packet TcpFlow::generate_packet() { return create_packet(m_next_packet_num++); }
@@ -62,6 +85,7 @@ void TcpFlow::initialize_flag_manager() {
     if (!m_is_flag_manager_initialized) {
         m_flag_manager.register_flag_by_amount(m_packet_type_label,
                                                PacketType::ENUM_SIZE);
+        m_flag_manager.register_flag_by_amount(m_ack_ttl_label, M_MAX_TTL + 1);
         m_is_flag_manager_initialized = true;
     }
 }
@@ -163,12 +187,8 @@ void TcpFlow::update(Packet packet) {
         MetricsCollector::get_instance().add_packet_reordering(
             m_id, current_time, m_packet_reordering.value());
 
-        Packet ack(SizeByte(1), this, m_dest.lock()->get_id(),
-                   m_src.lock()->get_id(), packet.sent_time,
-                   packet.delivered_data_size_at_origin,
-                   packet.ecn_capable_transport, packet.congestion_experienced);
-        ack.packet_num = packet.packet_num;
-        m_flag_manager.set_flag(ack, m_packet_type_label, PacketType::ACK);
+        Packet ack = create_ack(std::move(packet));
+
         m_dest.lock()->enqueue_packet(ack);
     }
     send_packets();

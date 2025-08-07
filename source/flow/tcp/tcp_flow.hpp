@@ -8,7 +8,6 @@
 #include "metrics/metrics_collector.hpp"
 #include "metrics/packet_reordering/simple_packet_reordering.hpp"
 #include "packet.hpp"
-#include "scheduler.hpp"
 #include "utils/flag_manager.hpp"
 #include "utils/statistics.hpp"
 
@@ -32,22 +31,26 @@ public:
     std::string to_string() const;
 
 private:
+    static void initialize_flag_manager();
+    
     static std::string m_packet_type_label;
     enum PacketType { ACK, DATA, ENUM_SIZE };
+    static std::string m_ack_ttl_label;
+    static bool m_is_flag_manager_initialized;
+    static FlagManager<std::string, PacketFlagsBase> m_flag_manager;
+    const static inline TTL M_MAX_TTL = 31;
 
     class SendAtTime;
     class Timeout;
 
     Packet create_packet(PacketNum packet_num);
+    Packet create_ack(Packet data);
     Packet generate_packet();
+
     TimeNs get_max_timeout() const;
     void send_packet_now(Packet packet);
     void send_packets();
     void retransmit_packet(PacketNum packet_num);
-    static void initialize_flag_manager();
-
-    static bool m_is_flag_manager_initialized;
-    static FlagManager<std::string, PacketFlagsBase> m_flag_manager;
 
     Id m_id;
 

@@ -47,6 +47,9 @@ void MetricsCollector::add_queue_size(Id link_id, TimeNs time, SizeByte value,
 
 void MetricsCollector::add_packet_reordering(Id flow_id, TimeNs time,
                                              PacketReordering reordering) {
+    if (flow_id == "flow1") {
+        reordering = reordering + 0.1 - 0.1;
+    }
     m_packet_reordering_storage.add_record(flow_id, time, reordering);
 }
 

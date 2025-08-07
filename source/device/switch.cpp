@@ -59,6 +59,14 @@ TimeNs Switch::process() {
             packet.congestion_experienced = true;
         }
     }
+
+    if (packet.ttl == 0) {
+        LOG_ERROR(fmt::format("Packet ttl expired on device {}; packet {} lost",
+                              get_id(), packet.to_string()));
+        return total_processing_time;
+    }
+    packet.ttl--;
+
     // TODO: increase total_processing_time correctly
     next_link->schedule_arrival(packet);
 
