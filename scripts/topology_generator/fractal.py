@@ -15,6 +15,14 @@ def generate_topology(
     receiver_name = "receiver"
 
     topology = {
+        "presets" : {
+            "link" : {"default" : {
+                "latency" : f"{link_latency}ns",
+                "throughput" : f"{link_throughput}Gbps",
+                "ingress_buffer_size" : f"{ingress_buffer_size}B",
+                "egress_buffer_size" : f"{egress_buffer_size}B"
+            }}
+        },
         "hosts": {
             sender_name : {},
             receiver_name : {} 
@@ -31,11 +39,7 @@ def generate_topology(
         
         topology["links"][name] = {
             "from": src_device,
-            "to" : dest_device,
-            "latency" : f"{link_latency}ns",
-            "throughput" : f"{link_throughput}Gbps",
-            "ingress_buffer_size" : f"{ingress_buffer_size}B",
-            "egress_buffer_size" : f"{egress_buffer_size}B"
+            "to" : dest_device
         }
 
     switch_nums_range = range(1, number_switch_per_layer + 1)

@@ -81,7 +81,7 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
         add_node(switch_id, DEVICE_STYLES["switch"])
 
     presets = config.get("presets", {})
-    link_preset = presets.get("link", {})
+    link_preset = presets.get("link", {}).get("default", {})
 
     def get_with_preset(node : dict, preset_node : dict, field_name):
         if field_name in node:
