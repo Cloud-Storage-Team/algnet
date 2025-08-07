@@ -3,6 +3,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include <filesystem>
+#include <functional>
 #include <string>
 #include <utility>
 
