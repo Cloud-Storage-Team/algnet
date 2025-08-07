@@ -28,7 +28,7 @@ public:
 
             if (this->contains(preset_name)) {
                 throw std::runtime_error(fmt::format(
-                    "Preset with name {} alredy exists", preset_name));
+                    "Preset with name {} already exists", preset_name));
             }
 
             this->emplace(std::move(preset_name), preset_parser(body_node));
