@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include "parser/simulation/flow/flow_parser.hpp"
+#include "parser/simulation/connection/connection_parser.hpp"
 #include "parser/topology/switch/switch_parser.hpp"
 #include "parser/topology/host/host_parser.hpp"
 #include "parser/topology/link/link_parser.hpp"
@@ -44,6 +45,11 @@ std::pair<Simulator, TimeNs> YamlParser::build_simulator_from_config(
         topology_config["links"],
         [this](auto node) { return process_links(node); },
         "No links specified in the topology config");
+
+    parse_if_present(
+        simulation_config["connections"],
+        [this](auto node) { return process_connection(node); },
+        "No connections specified in the simulation config");
 
     parse_if_present(
         simulation_config["flows"],
@@ -88,7 +94,19 @@ void YamlParser::process_links(const YAML::Node &links_node) {
     );
 }
 
+void YamlParser::process_connection(const YAML::Node &connections_node) {
+    process_identifiables<Connection>(
+        connections_node,
+        [this](std::shared_ptr<Connection> connection) { return m_simulator.add_connection(connection); },
+        ConnectionParser::parse_connection,
+        "Can not add connection."
+    );
+}
+
 void YamlParser::process_flows(const YAML::Node &flows_node) {
+    if (m_simulator.has_connections()) {
+        return;
+    }
     process_identifiables<IFlow>(
         flows_node,
         [this](std::shared_ptr<IFlow> flow) { return m_simulator.add_flow(flow); },

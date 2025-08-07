@@ -1,5 +1,7 @@
 #include "flow/tcp/tcp_flow.hpp"
 
+#include "connection/connection.hpp"
+
 namespace sim {
 
 std::string TcpFlow::m_packet_type_label = "type";
@@ -7,8 +9,9 @@ FlagManager<std::string, PacketFlagsBase> TcpFlow::m_flag_manager;
 bool TcpFlow::m_is_flag_manager_initialized = false;
 
 TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
-        std::shared_ptr<IHost> a_dest, std::unique_ptr<ITcpCC> a_cc, SizeByte a_packet_size,
-        std::uint32_t a_packets_to_send, bool a_ecn_capable)
+                 std::shared_ptr<IHost> a_dest, std::unique_ptr<ITcpCC> a_cc,
+                 SizeByte a_packet_size, std::uint32_t a_packets_to_send,
+                 bool a_ecn_capable)
     : m_id(std::move(a_id)),
       m_src(a_src),
       m_dest(a_dest),
@@ -29,28 +32,27 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
     initialize_flag_manager();
 }
 
-void TcpFlow::start() { 
-    send_packets(); 
+void TcpFlow::start() {
+    if (!m_using_connection) {
+        send_packets();
+    }
 }
 
-SizeByte TcpFlow::get_delivered_data_size() const { 
-    return m_delivered_data_size; 
+SizeByte TcpFlow::get_delivered_data_size() const {
+    return m_delivered_data_size;
 }
 
-std::shared_ptr<IHost> TcpFlow::get_sender() const { 
-    return m_src.lock(); 
-}
+std::shared_ptr<IHost> TcpFlow::get_sender() const { return m_src.lock(); }
 
-std::shared_ptr<IHost> TcpFlow::get_receiver() const { 
-    return m_dest.lock(); 
-}
+std::shared_ptr<IHost> TcpFlow::get_receiver() const { return m_dest.lock(); }
 
-Id TcpFlow::get_id() const { 
-    return m_id; 
-}
+Id TcpFlow::get_id() const { return m_id; }
 
-SizeByte TcpFlow::get_delivered_bytes() const { 
-    return m_delivered_data_size; 
+SizeByte TcpFlow::get_delivered_bytes() const { return m_delivered_data_size; }
+
+bool TcpFlow::can_send() const {
+    constexpr double EPS = 1e-6;
+    return m_packets_in_flight + 1 < m_cc->get_cwnd() + EPS;
 }
 
 Packet TcpFlow::create_packet(PacketNum packet_num) {
@@ -66,9 +68,29 @@ Packet TcpFlow::create_packet(PacketNum packet_num) {
     return packet;
 }
 
-Packet TcpFlow::generate_packet() { 
-    return create_packet(m_next_packet_num++); 
+void TcpFlow::send_packet() {
+    Packet packet = create_packet(m_next_packet_num++);
+    TimeNs pacing_delay = m_cc->get_pacing_delay();
+    TimeNs now = Scheduler::get_instance().get_current_time();
+
+    if (pacing_delay == TimeNs(0)) {
+        send_packet_now(std::move(packet));
+    } else {
+        Scheduler::get_instance().add<SendAtTime>(
+            now + pacing_delay, this->shared_from_this(), std::move(packet));
+    }
+
+    m_packets_in_flight++;
 }
+
+void TcpFlow::set_conn(std::shared_ptr<Connection> connection) {
+    m_connection = std::move(connection);
+    m_using_connection = true;
+}
+
+std::shared_ptr<Connection> TcpFlow::get_conn() const { return m_connection; }
+
+Packet TcpFlow::generate_packet() { return create_packet(m_next_packet_num++); }
 
 void TcpFlow::initialize_flag_manager() {
     if (!m_is_flag_manager_initialized) {
@@ -80,10 +102,9 @@ void TcpFlow::initialize_flag_manager() {
 
 class TcpFlow::SendAtTime : public Event {
 public:
-    SendAtTime(TimeNs a_time, std::weak_ptr<TcpFlow> a_flow,
-               Packet a_packet)
+    SendAtTime(TimeNs a_time, std::weak_ptr<TcpFlow> a_flow, Packet a_packet)
         : Event(a_time), m_flow(a_flow), m_packet(std::move(a_packet)) {}
-    
+
     void operator()() final {
         if (m_flow.expired()) {
             LOG_ERROR("Pointer to flow expired");
@@ -128,7 +149,8 @@ private:
 };
 
 void TcpFlow::update(Packet packet) {
-    PacketType type =  static_cast<PacketType>(m_flag_manager.get_flag(packet, m_packet_type_label));
+    PacketType type = static_cast<PacketType>(
+        m_flag_manager.get_flag(packet, m_packet_type_label));
     if (packet.dest_id == m_src.lock()->get_id() && type == PacketType::ACK) {
         TimeNs current_time = Scheduler::get_instance().get_current_time();
         if (current_time < packet.sent_time) {
@@ -155,7 +177,7 @@ void TcpFlow::update(Packet packet) {
 
         double old_cwnd = m_cc->get_cwnd();
         m_cc->on_ack(rtt, m_rtt_statistics.get_mean(),
-                    packet.congestion_experienced);
+                     packet.congestion_experienced);
 
         m_delivered_data_size += m_packet_size;
 
@@ -167,21 +189,29 @@ void TcpFlow::update(Packet packet) {
 
         double cwnd = m_cc->get_cwnd();
         if (old_cwnd != cwnd) {
-            MetricsCollector::get_instance().add_cwnd(m_id, current_time,
-                                                      cwnd);
+            MetricsCollector::get_instance().add_cwnd(m_id, current_time, cwnd);
+        }
+        if (m_using_connection) {
+            FlowSample sample{.ack_recv_time = current_time,
+                              .packet_sent_time = packet.sent_time,
+                              .packets_in_flight = m_packets_in_flight,
+                              .curr_cwnd = cwnd,
+                              .delivery_rate = delivery_rate};
+            m_connection->update(shared_from_this(), sample);
         }
     } else if (packet.dest_id == m_dest.lock()->get_id() &&
                type == PacketType::DATA) {
         Packet ack(SizeByte(1), this, m_dest.lock()->get_id(),
                    m_src.lock()->get_id(), packet.sent_time,
                    packet.delivered_data_size_at_origin,
-                   packet.ecn_capable_transport,
-                   packet.congestion_experienced);
+                   packet.ecn_capable_transport, packet.congestion_experienced);
         ack.packet_num = packet.packet_num;
         m_flag_manager.set_flag(ack, m_packet_type_label, PacketType::ACK);
         m_dest.lock()->enqueue_packet(ack);
     }
-    send_packets();
+    if (!m_using_connection) {
+        send_packets();
+    }
 }
 
 std::string TcpFlow::to_string() const {
@@ -235,9 +265,9 @@ void TcpFlow::send_packets() {
         if (pacing_delay == TimeNs(0)) {
             send_packet_now(std::move(packet));
         } else {
-            Scheduler::get_instance().add<SendAtTime>(
-                curr_time + total_delay, this->shared_from_this(),
-                std::move(packet));
+            Scheduler::get_instance().add<SendAtTime>(curr_time + total_delay,
+                                                      this->shared_from_this(),
+                                                      std::move(packet));
         }
         m_packets_in_flight++;
         m_packets_to_send--;

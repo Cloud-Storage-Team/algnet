@@ -2,7 +2,7 @@
 
 namespace test {
 
-bool TestDevice::notify_about_arrival(TimeNs arrival_time) { return false; };
+bool TestDevice::notify_about_arrival([[maybe_unused]] TimeNs arrival_time) { return false; };
 
 TimeNs TestDevice::process() { return TimeNs(0); };
 
@@ -19,7 +19,7 @@ TestLink::TestLink(std::shared_ptr<sim::IDevice> a_src,
                    sim::Packet packet_to_return)
     : src(a_src), dst(a_dest), packet(packet_to_return) {}
 
-void TestLink::schedule_arrival(sim::Packet packet) {};
+void TestLink::schedule_arrival([[maybe_unused]] sim::Packet packet) {};
 
 std::optional<sim::Packet> TestLink::get_packet() { return {packet}; };
 

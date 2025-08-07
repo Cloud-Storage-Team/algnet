@@ -28,6 +28,10 @@ public:
     std::shared_ptr<IHost> get_receiver() const;
     Id get_id() const final;
     SizeByte get_delivered_bytes() const;
+    bool can_send() const final;
+    void send_packet() final;
+    void set_conn(std::shared_ptr<Connection> connection) final;
+    std::shared_ptr<Connection> get_conn() const final;
     std::string to_string() const;
 
 private:
@@ -54,6 +58,9 @@ private:
 
     std::weak_ptr<IHost> m_src;
     std::weak_ptr<IHost> m_dest;
+
+    std::shared_ptr<Connection> m_connection;
+    bool m_using_connection = false;
 
     // Congestion control module
     std::unique_ptr<ITcpCC> m_cc;

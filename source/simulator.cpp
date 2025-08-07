@@ -16,6 +16,17 @@ bool Simulator::add_switch(std::shared_ptr<ISwitch> switch_device) {
     return m_switches.insert(switch_device).second;
 }
 
+bool Simulator::add_connection(std::shared_ptr<Connection> connection) {
+    if (connection == nullptr) {
+        return false;
+    }
+    if (!m_connections.insert(connection).second) {
+        return false;
+    }
+    // connection->start();
+    return true;
+}
+
 bool Simulator::add_flow(std::shared_ptr<IFlow> flow) {
     if (flow == nullptr) {
         return false;
@@ -70,12 +81,23 @@ void Simulator::start(TimeNs a_stop_time) {
     Scheduler::get_instance().add<Stop>(a_stop_time);
     constexpr TimeNs start_time = TimeNs(0);
 
-    for (auto flow : m_flows) {
-        Scheduler::get_instance().add<StartFlow>(start_time, flow);
+    if (get_flows().empty()) {
+        for (auto connection : m_connections) {
+            Scheduler::get_instance().add<StartConnection>(start_time, connection);
+        }
+        ; // Sheduler::get_instance().add<StartConnection>(start_time);
+    } else {
+        for (auto flow : m_flows) {
+            Scheduler::get_instance().add<StartFlow>(start_time, flow);
+        }
     }
 
     while (Scheduler::get_instance().tick()) {
     }
+}
+
+bool Simulator::has_connections() const {
+    return !m_connections.empty();
 }
 
 // returns summary in format [flow : size of delivered data]

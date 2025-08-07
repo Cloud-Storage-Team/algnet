@@ -12,6 +12,10 @@ public:
     void start() final;
 
     void update(sim::Packet packet) final;
+    bool can_send() const final;
+    void send_packet() final;
+    void set_conn(std::shared_ptr<sim::Connection> connection) final;
+    std::shared_ptr<sim::Connection> get_conn() const final;
     virtual SizeByte get_delivered_data_size() const final;
 
     std::shared_ptr<sim::IHost> get_sender() const final;
