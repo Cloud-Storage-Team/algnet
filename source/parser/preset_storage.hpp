@@ -39,17 +39,32 @@ public:
     TPreset get_preset(const YAML::Node& node) const {
         static_assert(std::is_default_constructible_v<TPreset>,
                       "Preset must be default constructable");
-        std::string preset_name = parse_with_default<std::string>(
-            node, "preset-name", std::identity{}, "default");
+        YAML::Node preset_name_node = node["preset-name"];
 
-        // Get args from preset if it exists
-        auto it = this->find(preset_name);
-        if (it != this->end()) {
-            return it->second;
+        if (preset_name_node) {
+            // preset-name specified
+            std::string preset_name = preset_name_node.as<std::string>();
+            auto it = this->find(preset_name);
+            if (it != this->end()) {
+                return it->second;
+            }
+            throw std::runtime_error(
+                fmt::format("Can not find preset with name {}", preset_name));
+        } else {
+            // Use default preset
+            auto it = this->find(M_DEFAULT_PRESET_NAME);
+            if (it != this->end()) {
+                return it->second;
+            }
+            LOG_WARN(
+                "Can not find default preset; use empty preset (get from "
+                "default constructor)");
+            return TPreset();
         }
-
-        return TPreset();
     };
+
+private:
+    const static inline std::string M_DEFAULT_PRESET_NAME = "default";
 };
 
 }  // namespace sim
