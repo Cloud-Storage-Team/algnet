@@ -5,7 +5,6 @@
 #include "device/interfaces/i_host.hpp"
 #include "flow/i_flow.hpp"
 #include "i_tcp_cc.hpp"
-#include "metrics/metrics_collector.hpp"
 #include "metrics/packet_reordering/simple_packet_reordering.hpp"
 #include "packet.hpp"
 #include "utils/flag_manager.hpp"
@@ -32,7 +31,7 @@ public:
 
 private:
     static void initialize_flag_manager();
-    
+
     static std::string m_packet_type_label;
     enum PacketType { ACK, DATA, ENUM_SIZE };
     static std::string m_ack_ttl_label;
