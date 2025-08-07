@@ -1,7 +1,5 @@
 #include "simple_packet_reordering.hpp"
 
-#include <iostream>
-
 namespace sim {
 
 SimplePacketReordering::SimplePacketReordering(long double a_smoothing_factor)
