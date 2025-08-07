@@ -13,6 +13,9 @@ public:
     void add_record(Id id, TimeNs time, double value);
     void export_to_files(std::filesystem::path output_dir_path) const;
 
+    void draw_on_plot(std::filesystem::path path, PlotMetadata metadata,
+                      std::function<std::string(const Id&)> id_to_curve_name) const;
+
     std::unordered_map<Id, MetricsStorage> data() const;
 
 private:

@@ -5,6 +5,7 @@
 #include "device/interfaces/i_host.hpp"
 #include "flow/i_flow.hpp"
 #include "i_tcp_cc.hpp"
+#include "metrics/packet_reordering/simple_packet_reordering.hpp"
 #include "packet.hpp"
 #include "utils/flag_manager.hpp"
 #include "utils/statistics.hpp"
@@ -29,12 +30,14 @@ public:
     std::string to_string() const;
 
 private:
+    static void initialize_flag_manager();
+
     static std::string m_packet_type_label;
     enum PacketType { ACK, DATA, ENUM_SIZE };
     static std::string m_ack_ttl_label;
     static bool m_is_flag_manager_initialized;
     static FlagManager<std::string, PacketFlagsBase> m_flag_manager;
-    static void initialize_flag_manager();
+    const static inline TTL M_MAX_TTL = 31;
 
     class SendAtTime;
     class Timeout;
@@ -47,9 +50,6 @@ private:
     void send_packet_now(Packet packet);
     void send_packets();
     void retransmit_packet(PacketNum packet_num);
-
-    const static inline double M_RTT_EXP_DECAY_FACTOR = 0.8;
-    const static inline TTL M_MAX_TTL = 31;
 
     Id m_id;
 
@@ -70,6 +70,7 @@ private:
     // Contains numbers of all delivered acks
     std::set<PacketNum> m_acked;
 
+    SimplePacketReordering m_packet_reordering;
     utils::Statistics<TimeNs> m_rtt_statistics;
 };
 

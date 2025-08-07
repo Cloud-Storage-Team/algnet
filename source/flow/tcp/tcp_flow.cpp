@@ -23,8 +23,7 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
       m_ecn_capable(a_ecn_capable),
       m_packets_in_flight(0),
       m_delivered_data_size(0),
-      m_next_packet_num(0),
-      m_rtt_statistics(M_RTT_EXP_DECAY_FACTOR) {
+      m_next_packet_num(0) {
     if (m_src.lock() == nullptr) {
         throw std::invalid_argument("Sender for TcpFlow is nullptr");
     }
@@ -142,8 +141,8 @@ private:
 void TcpFlow::update(Packet packet) {
     PacketType type = static_cast<PacketType>(
         m_flag_manager.get_flag(packet, m_packet_type_label));
+    TimeNs current_time = Scheduler::get_instance().get_current_time();
     if (packet.dest_id == m_src.lock()->get_id() && type == PacketType::ACK) {
-        TimeNs current_time = Scheduler::get_instance().get_current_time();
         if (current_time < packet.sent_time) {
             LOG_ERROR("Packet " + packet.to_string() +
                       " current time less that sending time; ignored");
@@ -184,6 +183,10 @@ void TcpFlow::update(Packet packet) {
         }
     } else if (packet.dest_id == m_dest.lock()->get_id() &&
                type == PacketType::DATA) {
+        m_packet_reordering.add_record(packet.packet_num);
+        MetricsCollector::get_instance().add_packet_reordering(
+            m_id, current_time, m_packet_reordering.value());
+
         Packet ack = create_ack(std::move(packet));
 
         m_dest.lock()->enqueue_packet(ack);

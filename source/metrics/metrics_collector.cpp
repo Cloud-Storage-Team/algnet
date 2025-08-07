@@ -17,6 +17,7 @@ MetricsCollector::MetricsCollector()
     : m_RTT_storage("rtt", m_metrics_filter),
       m_cwnd_storage("cwnd", m_metrics_filter),
       m_rate_storage("rate", m_metrics_filter),
+      m_packet_reordering_storage("packet_reordering", m_metrics_filter),
       m_links_queue_size_storage(m_metrics_filter) {
     m_is_initialised = true;
 }
@@ -44,61 +45,55 @@ void MetricsCollector::add_queue_size(Id link_id, TimeNs time, SizeByte value,
     m_links_queue_size_storage.add_record(link_id, type, time, value.value());
 }
 
+void MetricsCollector::add_packet_reordering(Id flow_id, TimeNs time,
+                                             PacketReordering reordering) {
+    m_packet_reordering_storage.add_record(flow_id, time, reordering);
+}
+
 void MetricsCollector::export_metrics_to_files(
     std::filesystem::path metrics_dir) const {
-    m_RTT_storage.export_to_files(metrics_dir);
-    m_links_queue_size_storage.export_to_files(metrics_dir);
     m_cwnd_storage.export_to_files(metrics_dir);
+    m_RTT_storage.export_to_files(metrics_dir);
     m_rate_storage.export_to_files(metrics_dir);
+    m_packet_reordering_storage.export_to_files(metrics_dir);
+    m_links_queue_size_storage.export_to_files(metrics_dir);
 }
 
 void MetricsCollector::draw_cwnd_plot(std::filesystem::path path) const {
-    PlotMetricsData data;
-    std::transform(
-        begin(m_cwnd_storage.data()), end(m_cwnd_storage.data()),
-        std::back_inserter(data), [](auto const& pair) {
+    m_cwnd_storage.draw_on_plot(
+        path, PlotMetadata{"Time, ns", "CWND, packets", "CWND"},
+        [](const Id& flow_id) {
             auto flow =
-                IdentifierFactory::get_instance().get_object<IFlow>(pair.first);
-            std::string name =
-                fmt::format("{}->{}", flow->get_sender()->get_id(),
-                            flow->get_receiver()->get_id());
-            return std::make_pair(pair.second, name);
+                IdentifierFactory::get_instance().get_object<IFlow>(flow_id);
+            return fmt::format("{}->{}", flow->get_sender()->get_id(),
+                               flow->get_receiver()->get_id());
         });
-    draw_on_same_plot(path, std::move(data),
-                      {"Time, ns", "CWND, packets", "CWND"});
+}
+
+static std::string flow_id_to_curve_name(const Id& flow_id) {
+    auto flow = IdentifierFactory::get_instance().get_object<IFlow>(flow_id);
+    return fmt::format("{}->{}", flow->get_sender()->get_id(),
+                       flow->get_receiver()->get_id());
 }
 
 void MetricsCollector::draw_delivery_rate_plot(
     std::filesystem::path path) const {
-    PlotMetricsData data;
-    std::transform(
-        begin(m_rate_storage.data()), end(m_rate_storage.data()),
-        std::back_inserter(data), [](auto const& pair) {
-            auto flow =
-                IdentifierFactory::get_instance().get_object<IFlow>(pair.first);
-            std::string name =
-                fmt::format("{}->{}", flow->get_sender()->get_id(),
-                            flow->get_receiver()->get_id());
-            return std::make_pair(pair.second, name);
-        });
-    draw_on_same_plot(path, std::move(data),
-                      {"Time, ns", "Values, Gbps", "Delivery rate"});
+    m_rate_storage.draw_on_plot(
+        path, PlotMetadata{"Time, ns", "Values, Gbps", "Delivery rate"},
+        flow_id_to_curve_name);
 }
 
 void MetricsCollector::draw_RTT_plot(std::filesystem::path path) const {
-    PlotMetricsData data;
-    std::transform(
-        begin(m_RTT_storage.data()), end(m_RTT_storage.data()),
-        std::back_inserter(data), [](auto const& pair) {
-            auto flow =
-                IdentifierFactory::get_instance().get_object<IFlow>(pair.first);
-            std::string name =
-                fmt::format("{}->{}", flow->get_sender()->get_id(),
-                            flow->get_receiver()->get_id());
-            return std::make_pair(pair.second, name);
-        });
-    draw_on_same_plot(path, std::move(data),
-                      {"Time, ns", "RTT, ns", "Round Trip Time"});
+    m_RTT_storage.draw_on_plot(
+        path, PlotMetadata{"Time, ns", "RTT, ns", "Round Trip Time"},
+        flow_id_to_curve_name);
+}
+
+void MetricsCollector::draw_packet_reordering_plot(
+    std::filesystem::path path) const {
+    m_packet_reordering_storage.draw_on_plot(
+        path, PlotMetadata{"Time, ns", "Reordering, %", "Packet reordering"},
+        flow_id_to_curve_name);
 }
 
 void MetricsCollector::draw_queue_size_plots(
@@ -111,6 +106,7 @@ void MetricsCollector::draw_metric_plots(
     draw_cwnd_plot(metrics_dir / "cwnd.svg");
     draw_delivery_rate_plot(metrics_dir / "rate.svg");
     draw_RTT_plot(metrics_dir / "rtt.svg");
+    draw_packet_reordering_plot(metrics_dir / "packet_reordering.svg");
     draw_queue_size_plots(metrics_dir / "queue_size");
 }
 
