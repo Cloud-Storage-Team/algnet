@@ -1,13 +1,11 @@
 #include "link_parser.hpp"
 
-#include "parser/parse_utils.hpp"
-
 namespace sim {
 
 std::shared_ptr<ILink> LinkParser::parse_i_link(const YAML::Node& key_node,
                                                 const YAML::Node& value_node,
-                                                LinkInitArgs preset_args) {
-    return parse_default_link(key_node, value_node, std::move(preset_args));
+                                                const LinkPresets& presets) {
+    return parse_default_link(key_node, value_node, presets);
 }
 
 void LinkParser::parse_to_args(const YAML::Node& node, LinkInitArgs& args) {
@@ -46,10 +44,12 @@ void LinkParser::parse_to_args(const YAML::Node& node, LinkInitArgs& args) {
 
 std::shared_ptr<Link> LinkParser::parse_default_link(
     const YAML::Node& key_node, const YAML::Node& value_node,
-    LinkInitArgs args) {
-    parse_to_args(value_node, args);
-    args.id.emplace(key_node.as<Id>());
-    return std::make_shared<Link>(std::move(args));
+    const LinkPresets& presets) {
+    LinkInitArgs link_args = presets.get_preset(value_node);
+
+    parse_to_args(value_node, link_args);
+    link_args.id.emplace(key_node.as<Id>());
+    return std::make_shared<Link>(std::move(link_args));
 }
 
 }  // namespace sim

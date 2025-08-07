@@ -8,6 +8,7 @@
 #include "parser/topology/host/host_parser.hpp"
 #include "parser/topology/link/link_parser.hpp"
 #include "parser/topology/switch/switch_parser.hpp"
+#include "preset_storage.hpp"
 
 namespace sim {
 
@@ -86,19 +87,20 @@ void YamlParser::process_switches(const YAML::Node &swtiches_node) {
 }
 
 void YamlParser::process_links(const YAML::Node &links_node,
-                               const YAML::Node &link_preset_node) {
-    LinkInitArgs preset_args;
-    if (link_preset_node) {
-        LinkParser::parse_to_args(link_preset_node, preset_args);
-    }
+                               const YAML::Node &link_presets_node) {
+    // Maps preset name to preset body
+    LinkPresets presets(link_presets_node, [](const YAML::Node &preset_node) {
+        LinkInitArgs args;
+        LinkParser::parse_to_args(preset_node, args);
+        return args;
+    });
     process_identifiables<ILink>(
         links_node,
         [this](std::shared_ptr<ILink> link) {
             return m_simulator.add_link(link);
         },
-        [preset_args](const YAML::Node &key_node,
-                      const YAML::Node &value_node) {
-            return LinkParser::parse_i_link(key_node, value_node, preset_args);
+        [&presets](const YAML::Node &key_node, const YAML::Node &value_node) {
+            return LinkParser::parse_i_link(key_node, value_node, presets);
         },
         "Can not add link.");
 }
