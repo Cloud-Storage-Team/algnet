@@ -36,7 +36,7 @@ public:
     }
 
     // Gets preset with name node["preset-name"] from storage
-    // If node does noit contain "preset-name", use default
+    // If node does not contain "preset-name", use default
     // If there is no preser with such name, return default TPreset
     TPreset get_preset(const YAML::Node& node) const {
         static_assert(std::is_default_constructible_v<TPreset>,
