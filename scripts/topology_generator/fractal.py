@@ -23,20 +23,21 @@ def generate_topology(
                 "egress_buffer_size" : f"{egress_buffer_size}B"
             }}
         },
+        "packet-spraying" : {"type" : "ecmp"},
         "hosts": {
             sender_name : {},
-            receiver_name : {} 
+            receiver_name : {}
         },
         "switches":{},
         "links": {}
     }
-    
+
     base_index = 1
     def add_link(src_device : str, dest_device : str):
         nonlocal base_index
         name = f"link-{base_index}"
         base_index += 1
-        
+
         topology["links"][name] = {
             "from": src_device,
             "to" : dest_device

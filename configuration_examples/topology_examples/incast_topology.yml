@@ -5,6 +5,8 @@ presets:
       throughput: 100Gbps
       ingress_buffer_size: 1024000B
       egress_buffer_size: 1024000B
+packet-spraying:
+  type: ecmp
 
 hosts:
   sender0:

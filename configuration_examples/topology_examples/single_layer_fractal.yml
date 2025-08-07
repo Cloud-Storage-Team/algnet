@@ -5,6 +5,9 @@ presets:
       throughput: 10Gbps
       ingress_buffer_size: 16KB
       egress_buffer_size: 16KB
+packet-spraying:
+  type: flowlet
+  threshold: 1000ns
 
 hosts:
   sender:

@@ -23,6 +23,7 @@ def generate_topology(
                 "egress_buffer_size": egress_buffer_size,
             }}
         },
+        "packet-spraying" : {"type" : "ecmp"},
         "hosts": {},
         "switches": {},
         "links": {}
@@ -185,7 +186,7 @@ def save_yaml(data, filename):
 
 
 def parse_arguments():
-    """Parse and validate command line arguments"""  
+    """Parse and validate command line arguments"""
     parser = argparse.ArgumentParser(
         description="Generate topology and simulation YAML files."
     )

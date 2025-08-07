@@ -66,7 +66,7 @@ public:
     };
 
 private:
-    static constexpr std::string M_DEFAULT_PRESET_NAME = "default";
+    static inline std::string M_DEFAULT_PRESET_NAME = "default";
 };
 
 }  // namespace sim
