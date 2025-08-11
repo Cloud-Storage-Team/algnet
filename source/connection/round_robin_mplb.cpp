@@ -2,49 +2,50 @@
 
 namespace sim {
 
-void RoundRobinMPLB::add_flow(std::shared_ptr<IFlow> flow) {
-    m_flows.push_back(std::move(flow));
-}
-
-void RoundRobinMPLB::remove_flow(const std::shared_ptr<IFlow>& flow) {
-    m_flows.erase(
-        std::remove(m_flows.begin(), m_flows.end(), flow),
-        m_flows.end()
-    );
-
-    if (m_next_index >= m_flows.size()) {
-        m_next_index = 0;
+inline void RoundRobinMPLB::add_flow(const std::shared_ptr<IFlow>& flow) {
+    if (!flow) return;
+    if (m_flows.insert(flow).second && m_flows.size() == 1) {
+        m_current_flow = {m_flows.begin(), m_flows.end()};
     }
 }
 
-std::shared_ptr<IFlow> RoundRobinMPLB::select_flow() {
-    if (m_flows.empty()) {
-        return nullptr;
-    }
+inline void RoundRobinMPLB::remove_flow(const std::shared_ptr<IFlow>& flow) {
+    if (!flow) return;
 
-    const std::size_t flows_count = m_flows.size();
-    std::size_t checked = 0;
+    if (auto it = m_flows.find(flow); it != m_flows.end()) {
+        if (*m_current_flow == flow) {
+            ++m_current_flow;
+        }
+        m_flows.erase(it);
 
-    while (checked < flows_count) {
-        std::shared_ptr<IFlow> flow = m_flows[m_next_index];
-        m_next_index = (m_next_index + 1) % flows_count;
-        ++checked;
-
-        if (flow->can_send()) {
-            return flow;
+        if (m_flows.empty()) {
+            m_current_flow = {};
+        } else {
+            m_current_flow = {m_flows.begin(), m_flows.end()};
         }
     }
+}
 
-    // No flow can send
+inline std::shared_ptr<IFlow> RoundRobinMPLB::select_flow() {
+    if (m_flows.empty()) return nullptr;
+
+    const auto n = m_flows.size();
+    for (std::size_t i = 0; i < n; ++i) {
+        auto flow = *m_current_flow;
+        ++m_current_flow;
+        if (flow && flow->can_send()) return flow;
+    }
     return nullptr;
 }
 
-void RoundRobinMPLB::notify_ack_received(const std::shared_ptr<IFlow>&, const FlowSample) {
-    // Round-robin does not need an ACK update
+void RoundRobinMPLB::notify_packet_confirmed(const std::shared_ptr<IFlow>&,
+                                             FlowSample) {
+    // no-op for RR
 }
 
-void RoundRobinMPLB::notify_packet_sent(const std::shared_ptr<IFlow>&, const FlowSample) {
-    // Round-robin doesn't need logic when sending
+void RoundRobinMPLB::notify_packet_sent(const std::shared_ptr<IFlow>&,
+                                        FlowSample) {
+    // no-op for RR
 }
 
-}  // namespace sim
+} // namespace sim

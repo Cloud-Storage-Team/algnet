@@ -20,47 +20,51 @@ Id Connection::get_id() const { return m_id; }
 void Connection::start() { send_packets(); }
 
 void Connection::add_flow(std::shared_ptr<IFlow> flow) {
-    m_flows.push_back(flow);
+    m_flows.insert(flow);
     m_mplb->add_flow(flow);
 }
 
 void Connection::delete_flow(std::shared_ptr<IFlow> flow) {
-    m_flows.erase(std::remove(m_flows.begin(), m_flows.end(), flow),
-                  m_flows.end());
+    m_flows.erase(flow);
     m_mplb->remove_flow(flow);
 }
 
-void Connection::add_packets_to_send(std::uint64_t packets_num) {
-    m_packets_to_send += packets_num;
+void Connection::add_packets_to_send(std::uint64_t count_packets) {
+    m_packets_to_send += count_packets;
 }
 
 void Connection::update(std::shared_ptr<IFlow> flow, const FlowSample sample) {
     if (!flow) {
-        LOG_ERROR("Null flow in update()");
+        LOG_ERROR(
+            fmt::format("Null flow in Connection {} update; ignored", m_id));
         return;
     }
     // Notify MPLB about received packet for metric updates
-    m_mplb->notify_ack_received(flow, sample);
-
+    m_mplb->notify_packet_confirmed(flow, sample);
     // Trigger next possible sending attempt
     send_packets();
+}
+
+bool Connection::has_flows() const {
+    return !m_flows.empty();
+}
+
+void Connection::clear_flows() {
+    m_flows.clear();
 }
 
 void Connection::send_packets() {
     while (m_packets_to_send > 0) {
         auto flow = m_mplb->select_flow();
         if (!flow) {
-            LOG_WARN("No flow can send packets at the moment");
+            LOG_INFO(fmt::format("No flow can send packets at the moment in connection {}", m_id));
             break;
         }
-
         if (!flow->can_send()) {
             continue;
         }
-
         flow->send_packet();
-        m_packets_to_send--;
-
+        --m_packets_to_send;
         // m_mplb->notify_packet_sent(flow, packet);
     }
 }

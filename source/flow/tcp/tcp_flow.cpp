@@ -195,7 +195,6 @@ void TcpFlow::update(Packet packet) {
             FlowSample sample{.ack_recv_time = current_time,
                               .packet_sent_time = packet.sent_time,
                               .packets_in_flight = m_packets_in_flight,
-                              .curr_cwnd = cwnd,
                               .delivery_rate = delivery_rate};
             m_connection->update(shared_from_this(), sample);
         }

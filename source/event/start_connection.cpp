@@ -7,6 +7,7 @@ StartConnection::StartConnection(TimeNs a_time, std::weak_ptr<Connection> a_conn
 
 void StartConnection::operator()() {
     if (m_connection.expired()) {
+        LOG_ERROR("Connection expired; can not start it");
         return;
     }
 

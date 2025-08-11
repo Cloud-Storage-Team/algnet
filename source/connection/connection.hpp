@@ -30,15 +30,15 @@ public:
     void delete_flow(std::shared_ptr<IFlow> flow);
 
     // Adds more packets to the total amount to be sent
-    void add_packets_to_send(std::uint64_t packets_num);
+    void add_packets_to_send(std::uint64_t count_packets);
 
     // Called by a flow when an ACK is received to update connection state
     void update(std::shared_ptr<IFlow> flow, const FlowSample sample);
 
     // Returns true if the connection has any registered flows
-    bool has_flows() const { return !m_flows.empty(); }
+    bool has_flows() const;
 
-    void clear_flows() { m_flows.clear(); }
+    void clear_flows();
 
 private:
     // Tries to send packets using the MPLB-selected flow(s), as long as allowed.
@@ -50,7 +50,7 @@ private:
     SizeByte m_packet_size;
     std::shared_ptr<IMPLB> m_mplb;
     std::uint64_t m_packets_to_send;
-    std::vector<std::shared_ptr<IFlow>> m_flows;
+    std::set<std::shared_ptr<IFlow>> m_flows;
 };
 
 }  // namespace sim
