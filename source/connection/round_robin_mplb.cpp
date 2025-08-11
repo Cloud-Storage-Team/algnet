@@ -43,9 +43,4 @@ void RoundRobinMPLB::notify_packet_confirmed(const std::shared_ptr<IFlow>&,
     // no-op for RR
 }
 
-void RoundRobinMPLB::notify_packet_sent(const std::shared_ptr<IFlow>&,
-                                        FlowSample) {
-    // no-op for RR
-}
-
 } // namespace sim

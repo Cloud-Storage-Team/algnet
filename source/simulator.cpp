@@ -16,7 +16,7 @@ bool Simulator::add_switch(std::shared_ptr<ISwitch> switch_device) {
     return m_switches.insert(switch_device).second;
 }
 
-bool Simulator::add_connection(std::shared_ptr<Connection> connection) {
+bool Simulator::add_connection(std::shared_ptr<IConnection> connection) {
     if (connection == nullptr) {
         return false;
     }

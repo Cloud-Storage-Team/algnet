@@ -8,10 +8,9 @@
 
 #include "device/host.hpp"
 #include "device/switch.hpp"
-#include "event/start_flow.hpp"
 #include "event/start_connection.hpp"
 #include "event/stop.hpp"
-#include "connection/connection.hpp"
+#include "connection/i_connection.hpp"
 #include "flow/tcp/tcp_flow.hpp"
 #include "link/link.hpp"
 #include "utils/algorithms.hpp"
@@ -28,7 +27,7 @@ public:
 
     bool add_switch(std::shared_ptr<ISwitch> switch_device);
 
-    bool add_connection(std::shared_ptr<Connection> connection);
+    bool add_connection(std::shared_ptr<IConnection> connection);
 
     bool add_link(std::shared_ptr<ILink> link);
 
@@ -44,7 +43,7 @@ public:
 private:
     std::unordered_set<std::shared_ptr<IHost>> m_hosts;
     std::unordered_set<std::shared_ptr<ISwitch>> m_switches;
-    std::unordered_set<std::shared_ptr<Connection>> m_connections;
+    std::unordered_set<std::shared_ptr<IConnection>> m_connections;
     std::unordered_set<std::shared_ptr<ILink>> m_links;
 };
 

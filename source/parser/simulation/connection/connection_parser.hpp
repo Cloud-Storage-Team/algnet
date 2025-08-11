@@ -4,13 +4,13 @@
 
 #include <memory>
 
-#include "connection/connection.hpp"
+#include "connection/i_connection.hpp"
 
 namespace sim {
 
 class ConnectionParser {
 public:
-    static std::shared_ptr<Connection> parse_connection(const YAML::Node& key_node,
+    static std::shared_ptr<IConnection> parse_connection(const YAML::Node& key_node,
                                                  const YAML::Node& value_node);
 };
 

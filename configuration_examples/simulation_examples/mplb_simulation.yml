@@ -9,19 +9,13 @@ connections:
     flows:
       flow1:
         type: tcp
-        sender_id: sender1
-        receiver_id: receiver1
-        packet_size: 1024
-        number_of_packets: 0
+        packet_size: 256
         cc:
           type: swift
           base_target: 4000ns
       flow2:
         type: tcp
-        sender_id: sender1
-        receiver_id: receiver1
-        packet_size: 1024
-        number_of_packets: 0
+        packet_size: 256
         cc:
           type: swift
           base_target: 4000ns

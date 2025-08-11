@@ -9,6 +9,7 @@
 #include "packet.hpp"
 #include "utils/flag_manager.hpp"
 #include "utils/statistics.hpp"
+#include "utils/str_expected.hpp"
 
 namespace sim {
 
@@ -16,10 +17,7 @@ class TcpFlow : public IFlow, public std::enable_shared_from_this<TcpFlow> {
 public:
     TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
             std::shared_ptr<IHost> a_dest, std::unique_ptr<ITcpCC> a_cc,
-            SizeByte a_packet_size, std::uint32_t a_packets_to_send,
-            bool a_ecn_capable = true);
-
-    void start() final;
+            SizeByte a_packet_size, bool a_ecn_capable = true);
     void update(Packet packet) final;
 
     SizeByte get_delivered_data_size() const final;
@@ -29,8 +27,8 @@ public:
     SizeByte get_delivered_bytes() const;
     bool can_send() const final;
     void send_packet() final;
-    void set_conn(std::shared_ptr<Connection> connection) final;
-    std::shared_ptr<Connection> get_conn() const final;
+    void set_conn(std::shared_ptr<IConnection> connection) final;
+    std::shared_ptr<IConnection> get_conn() const final;
     std::string to_string() const;
 
 private:
@@ -52,7 +50,6 @@ private:
 
     TimeNs get_max_timeout() const;
     void send_packet_now(Packet packet);
-    void send_packets();
     void retransmit_packet(PacketNum packet_num);
 
     Id m_id;
@@ -60,14 +57,13 @@ private:
     std::weak_ptr<IHost> m_src;
     std::weak_ptr<IHost> m_dest;
 
-    std::shared_ptr<Connection> m_connection;
+    std::shared_ptr<IConnection> m_connection;
     bool m_using_connection = false;
 
     // Congestion control module
     std::unique_ptr<ITcpCC> m_cc;
 
     SizeByte m_packet_size;
-    std::uint32_t m_packets_to_send;
     bool m_ecn_capable;
 
     std::uint32_t m_packets_in_flight;

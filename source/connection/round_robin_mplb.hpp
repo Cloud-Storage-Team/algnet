@@ -17,7 +17,6 @@ public:
     std::shared_ptr<IFlow> select_flow() override;
 
     void notify_packet_confirmed(const std::shared_ptr<IFlow>&, FlowSample) override;
-    void notify_packet_sent(const std::shared_ptr<IFlow>&, FlowSample) override;
 
 private:
     using FlowPtr = std::shared_ptr<IFlow>;

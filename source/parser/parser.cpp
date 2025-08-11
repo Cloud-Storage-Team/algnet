@@ -120,9 +120,9 @@ void YamlParser::process_links(const YAML::Node &links_node,
 }
 
 void YamlParser::process_connection(const YAML::Node &connections_node) {
-    process_identifiables<Connection>(
+    process_identifiables<IConnection>(
         connections_node,
-        [this](std::shared_ptr<Connection> connection) { return m_simulator.add_connection(connection); },
+        [this](std::shared_ptr<IConnection> connection) { return m_simulator.add_connection(connection); },
         ConnectionParser::parse_connection,
         "Can not add connection."
     );

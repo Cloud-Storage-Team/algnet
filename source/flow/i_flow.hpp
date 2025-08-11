@@ -5,20 +5,17 @@
 
 namespace sim {
 
-class Connection;
+class IConnection;
 
 class IFlow : public Identifiable {
 public:
-    // Start sending packets
-    virtual void start() = 0;
-
     // Update the internal state according to some congestion control algorithm
     // Calls when data available for sending on corresponding device
     virtual void update(Packet packet) = 0;
     virtual bool can_send() const = 0;
     virtual void send_packet() = 0;
-    virtual void set_conn(std::shared_ptr<Connection> connection) = 0;
-    virtual std::shared_ptr<Connection> get_conn() const = 0;
+    virtual void set_conn(std::shared_ptr<IConnection> connection) = 0;
+    virtual std::shared_ptr<IConnection> get_conn() const = 0;
 
     virtual SizeByte get_delivered_data_size() const = 0;
 

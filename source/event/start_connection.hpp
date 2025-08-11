@@ -1,6 +1,6 @@
 #pragma once
 #include "event.hpp"
-#include "connection/connection.hpp"
+#include "connection/i_connection.hpp"
 
 namespace sim {
 
@@ -9,12 +9,12 @@ namespace sim {
  */
 class StartConnection : public Event {
 public:
-    StartConnection(TimeNs a_time, std::weak_ptr<Connection> connection);
+    StartConnection(TimeNs a_time, std::weak_ptr<IConnection> connection);
     ~StartConnection() = default;
     void operator()() final;
 
 private:
-    std::weak_ptr<Connection> m_connection;
+    std::weak_ptr<IConnection> m_connection;
 };
 
 }
