@@ -80,13 +80,21 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
     for switch_id, switch_info in switch_items:
         add_node(switch_id, DEVICE_STYLES["switch"])
 
+    presets = config.get("presets", {})
+    link_preset = presets.get("link", {}).get("default", {})
+
+    def get_with_preset(node : dict, preset_node : dict, field_name):
+        if field_name in node:
+            return node[field_name]
+        return preset_node[field_name]
+
     # Add styled links with metrics
     links = config.get("links", {})
     for link_id, link_info in links.items():
         from_node = link_info["from"]
         to_node = link_info["to"]
-        latency = link_info['latency']
-        throughput = link_info['throughput']
+        latency = get_with_preset(link_info, link_preset, 'latency')
+        throughput = get_with_preset(link_info, link_preset, 'throughput')
         label = f"{link_id}\n"\
                 f"⏱ {latency}\n" \
                 f"📶 {throughput}\n"

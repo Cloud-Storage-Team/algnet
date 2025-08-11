@@ -1,3 +1,13 @@
+presets:
+  link:
+    default:
+      latency: 1000ns
+      throughput: 10Gbps
+      ingress_buffer_size: 4096B
+      egress_buffer_size: 4096B
+packet-spraying:
+  type: ecmp
+
 hosts:
   sender1: {}
   sender2: {}
@@ -11,45 +21,21 @@ links:
   link1:
     from: sender1
     to: switch1
-    latency: 1000ns
-    throughput: 10Gbps
-    ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B
   link2:
     from: sender2
     to: switch1
-    latency: 1000ns
-    throughput: 10Gbps
-    ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B
 
   # bottleneck link
   link3_bottleneck:
     from: switch1
     to: receiver1
-    latency: 1000ns
     throughput: 5Gbps
-    ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B
-
   link4:
     from: receiver1
     to: switch1
-    latency: 1000ns
-    throughput: 10Gbps
-    ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B
   link5:
     from: switch1
     to: sender1
-    latency: 1000ns
-    throughput: 10Gbps
-    ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B
   link6:
     from: switch1
     to: sender2
-    latency: 1000ns
-    throughput: 10Gbps
-    ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B

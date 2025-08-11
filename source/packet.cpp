@@ -33,6 +33,7 @@ std::string Packet::to_string() const {
     oss << ", size(byte): " << size;
     oss << ", flow: " << (flow ? "set" : "null");
     oss << ", sent time: " << sent_time;
+    oss << ", TTL: " << ttl;
     oss << ", flags: " << flags.get_bits();
     oss << "]";
 
