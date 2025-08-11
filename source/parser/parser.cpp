@@ -103,16 +103,10 @@ void YamlParser::process_connection(const YAML::Node &connections_node) {
     );
 }
 
-void YamlParser::process_flows(const YAML::Node &flows_node) {
+void YamlParser::process_flows([[maybe_unused]]const YAML::Node &flows_node) {
     if (m_simulator.has_connections()) {
         return;
     }
-    process_identifiables<IFlow>(
-        flows_node,
-        [this](std::shared_ptr<IFlow> flow) { return m_simulator.add_flow(flow); },
-        FlowParser::parse_i_flow,
-        "Can not add flow."
-    );
 }
 
 std::filesystem::path YamlParser::parse_topology_config_path(

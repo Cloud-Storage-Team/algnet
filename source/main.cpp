@@ -49,9 +49,9 @@ int main(const int argc, char **argv) {
     std::filesystem::path summary_path(std::filesystem::path(output_dir) /
                                        "summary.csv");
 
-    sim::Summary summary = sim::Summary(simulator.get_flows());
+    // sim::Summary summary = sim::Summary(simulator.get_flows());
 
-    summary.write_to_csv(summary_path);
+    // summary.write_to_csv(summary_path);
 
     return 0;
 }
