@@ -21,6 +21,7 @@ private:
         const YAML::Node& config);
     static TimeNs parse_simulation_time(const YAML::Node& config);
 
+    enum class RegistrationPolicy { ByTemplate, ByParser };
     // node - contains information about set of identifiable objects
     // add_func- function to add new object to simulator
     // parse_func- function to parser single object from config
@@ -32,7 +33,8 @@ private:
         std::function<bool(std::shared_ptr<T>)> add_func,
         std::function<std::shared_ptr<T>(const YAML::Node&, const YAML::Node&)>
             parse_func,
-        const std::string& message) {
+        const std::string& message,
+        RegistrationPolicy policy = RegistrationPolicy::ByTemplate) {
         static_assert(std::is_base_of_v<Identifiable, T>,
                       "T must be Identifiable");
 
@@ -41,13 +43,16 @@ private:
             const YAML::Node val_node = it->second;
 
             std::shared_ptr<T> ptr = parse_func(key_node, val_node);
-            if (!IdentifierFactory::get_instance().add_object(ptr)) {
-                // TODO: think about moving inside add_object and make in return
-                // nothing instead of bool
-                throw std::runtime_error(fmt::format(
-                    "Can not add object with type {}; object with same id ({}) "
-                    "already exists",
-                    typeid(T).name(), ptr.get()->get_id()));
+            if (policy == RegistrationPolicy::ByTemplate) {
+                if (!IdentifierFactory::get_instance().add_object(ptr)) {
+                    // TODO: think about moving inside add_object and make in
+                    // return nothing instead of bool
+                    throw std::runtime_error(
+                        fmt::format("Can not add object with type {}; object "
+                                    "with same id ({}) "
+                                    "already exists",
+                                    typeid(T).name(), ptr.get()->get_id()));
+                }
             }
 
             if (!add_func(ptr)) {

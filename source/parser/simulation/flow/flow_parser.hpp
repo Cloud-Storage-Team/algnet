@@ -6,14 +6,13 @@
 
 #include "flow/tcp/tcp_flow.hpp"
 
-
 namespace sim {
 
 class FlowParser {
 public:
     static std::shared_ptr<IFlow> parse_i_flow(const YAML::Node& key_node,
                                                const YAML::Node& value_node,
-                                               Id sender_id, Id receiver_id);
+                                               Id conn_id);
 
 private:
     class TcpCCParser {
@@ -24,8 +23,7 @@ private:
 
     static std::shared_ptr<TcpFlow> parse_tcp_flow(const YAML::Node& key_node,
                                                    const YAML::Node& value_node,
-                                                   Id sender_id,
-                                                   Id receiver_id);
+                                                   Id conn_id);
 };
 
 }  // namespace sim

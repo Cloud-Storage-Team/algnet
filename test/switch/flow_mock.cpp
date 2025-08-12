@@ -7,9 +7,8 @@ FlowMock::FlowMock(std::shared_ptr<sim::IHost> m_receiver)
 
 void FlowMock::update([[maybe_unused]] sim::Packet packet) {};
 
-bool FlowMock::can_send() const { return true; }
+std::uint32_t FlowMock::get_sending_quota() const { return 1; }
 void FlowMock::send_packet() {}
-void FlowMock::set_conn([[maybe_unused]] std::shared_ptr<sim::IConnection> connection) {}
 std::shared_ptr<sim::IConnection> FlowMock::get_conn() const {
     return nullptr;
 }

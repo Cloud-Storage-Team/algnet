@@ -1,20 +1,8 @@
 topology_config_path: ../topology_examples/incast_topology.yml
 
 connections:
-  conn0:
-    sender_id: sender0
-    receiver_id: receiver0
-    packets_to_send: 100
-    mplb: round_robin
-    flows:
-      flow0:
-        type: tcp
-        packet_size: 10000
-        cc:
-          type: tahoe
-
   conn1:
-    sender_id: sender1
+    sender_id: sender0
     receiver_id: receiver0
     packets_to_send: 100
     mplb: round_robin
@@ -26,36 +14,48 @@ connections:
           type: tahoe
 
   conn2:
-    sender_id: sender2
+    sender_id: sender1
     receiver_id: receiver0
     packets_to_send: 100
     mplb: round_robin
     flows:
-      flow2:
+      flow1:
         type: tcp
         packet_size: 10000
         cc:
           type: tahoe
 
   conn3:
-    sender_id: sender3
+    sender_id: sender2
     receiver_id: receiver0
     packets_to_send: 100
     mplb: round_robin
     flows:
-      flow3:
+      flow1:
         type: tcp
         packet_size: 10000
         cc:
           type: tahoe
 
   conn4:
+    sender_id: sender3
+    receiver_id: receiver0
+    packets_to_send: 100
+    mplb: round_robin
+    flows:
+      flow1:
+        type: tcp
+        packet_size: 10000
+        cc:
+          type: tahoe
+
+  conn5:
     sender_id: sender4
     receiver_id: receiver0
     packets_to_send: 100
     mplb: round_robin
     flows:
-      flow4:
+      flow1:
         type: tcp
         packet_size: 10000
         cc:

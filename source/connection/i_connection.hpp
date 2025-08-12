@@ -24,12 +24,14 @@ public:
     // Delete a flow from the connection
     virtual void delete_flow(std::shared_ptr<IFlow> flow) = 0;
     // Adds more packets to the total amount to be sent
-    virtual void add_packets_to_send(std::uint64_t count) = 0;
+    virtual void add_packets_to_send(std::uint64_t count_packets) = 0;
     // Called by a flow when an ACK is received to update connection state
     virtual void update(const std::shared_ptr<IFlow>& flow, const FlowSample sample) = 0;
     // Returns true if the connection has any registered flows
     virtual bool has_flows() const = 0;
     virtual void clear_flows() = 0;
+    virtual std::shared_ptr<IHost> get_sender() const = 0;
+    virtual std::shared_ptr<IHost> get_receiver() const = 0;
 };
 
 }  // namespace sim

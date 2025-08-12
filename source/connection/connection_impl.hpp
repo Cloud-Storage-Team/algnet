@@ -15,8 +15,8 @@ class ConnectionImpl final
     : public IConnection,
       public std::enable_shared_from_this<ConnectionImpl> {
 public:
-    ConnectionImpl(Id a_id, Id a_sender_id, Id a_receiver_id,
-                   std::shared_ptr<IMPLB> mplb,
+    ConnectionImpl(Id a_id, std::shared_ptr<IHost> a_src,
+                   std::shared_ptr<IHost> a_dest, std::shared_ptr<IMPLB> a_mplb,
                    std::uint64_t a_num_packets_to_send = 0);
 
     ~ConnectionImpl() override = default;
@@ -38,14 +38,18 @@ public:
 
     void clear_flows() override;
 
+    std::shared_ptr<IHost> get_sender() const override;
+
+    std::shared_ptr<IHost> get_receiver() const override;
+
 private:
     // Tries to send packets using the MPLB-selected flow(s), as long as
     // allowed.
     void send_packets();
 
     Id m_id;
-    Id m_sender_id;
-    Id m_receiver_id;
+    std::weak_ptr<IHost> m_src;
+    std::weak_ptr<IHost> m_dest;
     std::shared_ptr<IMPLB> m_mplb;
     std::uint64_t m_packets_to_send;
     std::set<std::shared_ptr<IFlow>> m_flows;

@@ -19,7 +19,7 @@ connections:
     packets_to_send: 1000
     mplb: round_robin
     flows:
-      flow2:
+      flow1:
         type: tcp
         packet_size: 256
         cc:

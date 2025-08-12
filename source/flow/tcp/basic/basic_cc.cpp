@@ -10,7 +10,7 @@ void BasicCC::on_ack([[maybe_unused]] TimeNs rtt,
 
 void BasicCC::on_timeout() {}
 
-double BasicCC::get_cwnd() const { return std::numeric_limits<double>::max(); }
+double BasicCC::get_cwnd() const { return 1e6; }
 
 TimeNs BasicCC::get_pacing_delay() const { return TimeNs(0); }
 

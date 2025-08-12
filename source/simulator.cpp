@@ -23,7 +23,6 @@ bool Simulator::add_connection(std::shared_ptr<IConnection> connection) {
     if (!m_connections.insert(connection).second) {
         return false;
     }
-    // connection->start();
     return true;
 }
 

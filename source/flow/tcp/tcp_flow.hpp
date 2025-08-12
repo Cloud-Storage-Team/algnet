@@ -15,9 +15,9 @@ namespace sim {
 
 class TcpFlow : public IFlow, public std::enable_shared_from_this<TcpFlow> {
 public:
-    TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
-            std::shared_ptr<IHost> a_dest, std::unique_ptr<ITcpCC> a_cc,
-            SizeByte a_packet_size, bool a_ecn_capable = true);
+    TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
+            std::unique_ptr<ITcpCC> a_cc, SizeByte a_packet_size,
+            bool a_ecn_capable = true);
     void update(Packet packet) final;
 
     SizeByte get_delivered_data_size() const final;
@@ -25,9 +25,8 @@ public:
     std::shared_ptr<IHost> get_receiver() const;
     Id get_id() const final;
     SizeByte get_delivered_bytes() const;
-    bool can_send() const final;
+    std::uint32_t get_sending_quota() const;
     void send_packet() final;
-    void set_conn(std::shared_ptr<IConnection> connection) final;
     std::shared_ptr<IConnection> get_conn() const final;
     std::string to_string() const;
 
@@ -54,11 +53,10 @@ private:
 
     Id m_id;
 
+    std::shared_ptr<IConnection> m_connection;
+
     std::weak_ptr<IHost> m_src;
     std::weak_ptr<IHost> m_dest;
-
-    std::shared_ptr<IConnection> m_connection;
-    bool m_using_connection = false;
 
     // Congestion control module
     std::unique_ptr<ITcpCC> m_cc;

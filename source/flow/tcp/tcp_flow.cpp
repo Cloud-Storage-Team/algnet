@@ -11,12 +11,13 @@ std::string TcpFlow::m_ack_ttl_label = "ack_ttl";
 FlagManager<std::string, PacketFlagsBase> TcpFlow::m_flag_manager;
 bool TcpFlow::m_is_flag_manager_initialized = false;
 
-TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
-                 std::shared_ptr<IHost> a_dest, std::unique_ptr<ITcpCC> a_cc,
-                 SizeByte a_packet_size, bool a_ecn_capable)
+TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
+                 std::unique_ptr<ITcpCC> a_cc, SizeByte a_packet_size,
+                 bool a_ecn_capable)
     : m_id(std::move(a_id)),
-      m_src(a_src),
-      m_dest(a_dest),
+      m_connection(std::move(a_conn)),
+      m_src(m_connection->get_sender()),
+      m_dest(m_connection->get_receiver()),
       m_cc(std::move(a_cc)),
       m_packet_size(a_packet_size),
       m_ecn_capable(a_ecn_capable),
@@ -44,9 +45,10 @@ Id TcpFlow::get_id() const { return m_id; }
 
 SizeByte TcpFlow::get_delivered_bytes() const { return m_delivered_data_size; }
 
-bool TcpFlow::can_send() const {
+std::uint32_t TcpFlow::get_sending_quota() const {
     constexpr double EPS = 1e-6;
-    return m_packets_in_flight + 1 < m_cc->get_cwnd() + EPS;
+    const auto slots = static_cast<std::uint32_t>(m_cc->get_cwnd() + EPS);
+    return (m_packets_in_flight < slots) ? (slots - m_packets_in_flight) : 0;
 }
 
 Packet TcpFlow::create_packet(PacketNum packet_num) {
@@ -76,11 +78,6 @@ void TcpFlow::send_packet() {
     }
 
     m_packets_in_flight++;
-}
-
-void TcpFlow::set_conn(std::shared_ptr<IConnection> connection) {
-    m_connection = std::move(connection);
-    m_using_connection = true;
 }
 
 std::shared_ptr<IConnection> TcpFlow::get_conn() const { return m_connection; }
@@ -205,13 +202,12 @@ void TcpFlow::update(Packet packet) {
         if (old_cwnd != cwnd) {
             MetricsCollector::get_instance().add_cwnd(m_id, current_time, cwnd);
         }
-        if (m_using_connection) {
-            FlowSample sample{.ack_recv_time = current_time,
-                              .packet_sent_time = packet.sent_time,
-                              .packets_in_flight = m_packets_in_flight,
-                              .delivery_rate = delivery_rate};
-            m_connection->update(shared_from_this(), sample);
-        }
+        FlowSample sample{.ack_recv_time = current_time,
+                          .packet_sent_time = packet.sent_time,
+                          .packets_in_flight = m_packets_in_flight,
+                          .delivery_rate = delivery_rate,
+                          .send_quota = get_sending_quota()};
+        m_connection->update(shared_from_this(), sample);
     } else if (packet.dest_id == m_dest.lock()->get_id() &&
                type == PacketType::DATA) {
         m_packet_reordering.add_record(packet.packet_num);
