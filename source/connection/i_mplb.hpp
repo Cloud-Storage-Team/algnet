@@ -19,6 +19,12 @@ struct FlowSample {
     // add other metrics here as needed
 };
 
+// MPLB (Multi-Path Load Balancer) interface for load balancing flows
+// across multiple paths in a connection.
+// It allows adding/removing flows, selecting a flow for sending,
+// and notifying about packet confirmations.
+// The MPLB implementation can use various algorithms to balance the load,
+// such as round-robin, weighted fair queuing, etc.
 class IMPLB {
 public:
     // Adds a flow to the MPLB for consideration in load balancing
