@@ -4,7 +4,7 @@ connections:
   conn1:
     sender_id: sender1
     receiver_id: receiver1
-    packets_to_send: 10000
+    packets_to_send: 1000
     mplb: round_robin
     flows:
       flow1:
@@ -20,4 +20,4 @@ connections:
           type: swift
           base_target: 4000ns
 
-simulation_time: 300000
+simulation_time: 600000

@@ -66,6 +66,11 @@ Packet TcpFlow::create_packet(PacketNum packet_num) {
 }
 
 void TcpFlow::send_packet() {
+    if (get_sending_quota() == 0) {
+        LOG_WARN(fmt::format("No sending quota for flow {}; packet not sent",
+                             m_id));
+        return;
+    }
     Packet packet = create_packet(m_next_packet_num++);
     TimeNs pacing_delay = m_cc->get_pacing_delay();
     TimeNs now = Scheduler::get_instance().get_current_time();

@@ -52,7 +52,9 @@ void ConnectionImpl::update(const std::shared_ptr<IFlow>& flow,
     send_packets();
 }
 
-bool ConnectionImpl::has_flows() const { return !m_flows.empty(); }
+std::set<std::shared_ptr<IFlow>> ConnectionImpl::get_flows() const {
+    return m_flows;
+}
 
 void ConnectionImpl::clear_flows() {
     m_flows.clear();

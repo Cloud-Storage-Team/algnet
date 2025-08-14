@@ -38,7 +38,7 @@ public:
     // Create a Stop event at a_stop_time and start simulation
     void start(TimeNs a_stop_time);
 
-    bool has_connections() const;
+    std::unordered_set<std::shared_ptr<IConnection>> get_connections() const;
 
 private:
     std::unordered_set<std::shared_ptr<IHost>> m_hosts;

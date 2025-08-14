@@ -10,6 +10,9 @@ namespace sim {
 
 class ConnectionParser {
 public:
+    static std::shared_ptr<IConnection> parse_i_connection(
+        const YAML::Node& key_node, const YAML::Node& value_node);
+private:
     static std::shared_ptr<IConnection> parse_connection(
         const YAML::Node& key_node, const YAML::Node& value_node);
 };

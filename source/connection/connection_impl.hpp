@@ -34,7 +34,7 @@ public:
     void update(const std::shared_ptr<IFlow>& flow,
                 const FlowSample sample) override;
 
-    bool has_flows() const override;
+    std::set<std::shared_ptr<IFlow>> get_flows() const override;
 
     void clear_flows() override;
 

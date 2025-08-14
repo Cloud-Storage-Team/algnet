@@ -6,6 +6,11 @@
 
 namespace sim {
 
+std::shared_ptr<IConnection> ConnectionParser::parse_i_connection(
+    const YAML::Node& key_node, const YAML::Node& value_node) {
+    return parse_connection(key_node, value_node);
+}
+
 std::shared_ptr<IConnection> ConnectionParser::parse_connection(
     const YAML::Node& key_node, const YAML::Node& value_node) {
     Id conn_id = key_node.as<Id>();

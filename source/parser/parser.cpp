@@ -123,7 +123,7 @@ void YamlParser::process_connection(const YAML::Node &connections_node) {
     process_identifiables<IConnection>(
         connections_node,
         [this](std::shared_ptr<IConnection> connection) { return m_simulator.add_connection(connection); },
-        ConnectionParser::parse_connection,
+        ConnectionParser::parse_i_connection,
         "Can not add connection.",
         RegistrationPolicy::ByParser
     );

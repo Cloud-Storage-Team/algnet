@@ -82,8 +82,8 @@ void Simulator::start(TimeNs a_stop_time) {
     }
 }
 
-bool Simulator::has_connections() const {
-    return !m_connections.empty();
+std::unordered_set<std::shared_ptr<IConnection>> Simulator::get_connections() const {
+    return m_connections;
 }
 
 }  // namespace sim
