@@ -5,7 +5,7 @@
 
 #include "types.hpp"
 #include "flow/i_flow.hpp"
-#include "i_mplb.hpp"
+#include "mplb/i_mplb.hpp"
 
 namespace sim {
 

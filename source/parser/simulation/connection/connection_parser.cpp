@@ -1,4 +1,4 @@
-#include "connection/mplb_factory.hpp"
+#include "connection/mplb/mplb_factory.hpp"
 #include "parser/parse_utils.hpp"
 #include "parser/simulation/connection/connection_parser.hpp"
 #include "parser/simulation/flow/flow_parser.hpp"

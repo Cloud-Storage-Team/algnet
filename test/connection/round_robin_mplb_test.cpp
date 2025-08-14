@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 #include <algorithm>
-#include "connection/round_robin_mplb.hpp"
+#include "connection/mplb/round_robin_mplb.hpp"
 #include "../switch/flow_mock.hpp"
 
 namespace test {

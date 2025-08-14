@@ -3,7 +3,7 @@
 #include <memory>
 #include <set>
 
-#include "connection/i_mplb.hpp"
+#include "connection/mplb/i_mplb.hpp"
 #include "flow/i_flow.hpp"
 #include "utils/loop_iterator.hpp"
 
