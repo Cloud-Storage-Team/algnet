@@ -21,5 +21,7 @@ public:
 
     // For logs
     virtual std::string to_string() const = 0;
+
+    virtual ~ITcpCC() = default;
 };
 }  // namespace sim
