@@ -67,18 +67,45 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
     hosts = config.get("hosts", {})
     host_items = sorted(hosts.items(), key = key_lambda)
 
+    switches = config.get("switches", {})
+    switch_items = sorted(switches.items(), key= key_lambda)
+    
     DEVICE_STYLES = {
         "host": {"color": "#2E7D32", "icon": "🖥️", "shape": "none"},
         "switch": {"color": "#1565C0", "icon": "🌐", "shape": "box3d"},
     }
 
-    for host_id, host_info in host_items:
-        add_node(host_id, DEVICE_STYLES["host"])
+    # Define default layers for device types
+    DEFAULT_LAYERS = {
+        "host": 0,
+        "switch": 1
+    }
+
+    # Collect all devices with their layers
+    all_devices = []
     
-    switches = config.get("switches", {})
-    switch_items = sorted(switches.items(), key= key_lambda)
-    for switch_id, switch_info in switch_items:
-        add_node(switch_id, DEVICE_STYLES["switch"])
+    # Process hosts
+    for host_id, host_info in hosts.items():
+        layer = host_info.get("layer", DEFAULT_LAYERS["host"])
+        all_devices.append((host_id, "host", layer, host_info))
+    
+    # Process switches
+    for switch_id, switch_info in switches.items():
+        layer = switch_info.get("layer", DEFAULT_LAYERS["switch"])
+        all_devices.append((switch_id, "switch", layer, switch_info))
+
+    # Group devices by layer
+    layer_groups = {}
+    for device_id, dev_type, layer, _ in all_devices:
+        if layer not in layer_groups:
+            layer_groups[layer] = []
+        layer_groups[layer].append((device_id, dev_type))
+
+
+    for layer, devices in sorted(layer_groups.items()):
+        sorted_devices = sorted(devices, key = key_lambda)
+        for device_id, dev_type in sorted_devices:
+            add_node(device_id, DEVICE_STYLES[dev_type])
 
     presets = config.get("presets", {})
     link_preset = presets.get("link", {}).get("default", {})
@@ -110,16 +137,27 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
             **edge_style,
         )
 
-    # Create hierarchical groups
-    with graph.subgraph() as s:
-        s.attr(rank="max")
-        for host_id, _ in host_items:
-            s.node(host_id)
+    # # Create hierarchical groups
+    # with graph.subgraph() as s:
+    #     s.attr(rank="max")
+    #     for host_id, _ in host_items:
+    #         s.node(host_id)
 
-    with graph.subgraph() as s:
-        s.attr(rank="min")
-        for switch_id, _ in switch_items:
-            s.node(switch_id)
+    # with graph.subgraph() as s:
+    #     s.attr(rank="min")
+    #     for switch_id, _ in switch_items:
+    #         s.node(switch_id)
+
+    # Create subgraphs for each layer
+    for layer, devices in sorted(layer_groups.items()):
+        sorted_devices = sorted(devices, key = key_lambda)
+        print(sorted_devices)
+        with graph.subgraph() as s:
+            s.attr(rank="same")
+            for device_id, dev_type in sorted_devices:
+                # Add node with appropriate style
+                s.node(device_id)
+
 
     directory = os.path.dirname(output_file)
     file_name, extension = os.path.splitext(os.path.basename(output_file))
