@@ -16,11 +16,14 @@ bool Simulator::add_switch(std::shared_ptr<ISwitch> switch_device) {
     return m_switches.insert(switch_device).second;
 }
 
-bool Simulator::add_flow(std::shared_ptr<IFlow> flow) {
-    if (flow == nullptr) {
+bool Simulator::add_connection(std::shared_ptr<IConnection> connection) {
+    if (connection == nullptr) {
         return false;
     }
-    return m_flows.insert(flow).second;
+    if (!m_connections.insert(connection).second) {
+        return false;
+    }
+    return true;
 }
 
 bool Simulator::add_link(std::shared_ptr<ILink> link) {
@@ -70,17 +73,17 @@ void Simulator::start(TimeNs a_stop_time) {
     Scheduler::get_instance().add<Stop>(a_stop_time);
     constexpr TimeNs start_time = TimeNs(0);
 
-    for (auto flow : m_flows) {
-        Scheduler::get_instance().add<StartFlow>(start_time, flow);
+
+    for (auto connection : m_connections) {
+        Scheduler::get_instance().add<StartConnection>(start_time, connection);
     }
 
     while (Scheduler::get_instance().tick()) {
     }
 }
 
-// returns summary in format [flow : size of delivered data]
-std::unordered_set<std::shared_ptr<IFlow>> Simulator::get_flows() const {
-    return m_flows;
+std::unordered_set<std::shared_ptr<IConnection>> Simulator::get_connections() const {
+    return m_connections;
 }
 
 }  // namespace sim

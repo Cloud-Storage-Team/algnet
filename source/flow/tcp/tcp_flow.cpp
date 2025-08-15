@@ -1,5 +1,6 @@
 #include "flow/tcp/tcp_flow.hpp"
 
+#include "connection/i_connection.hpp"
 #include "metrics/metrics_collector.hpp"
 #include "scheduler.hpp"
 
@@ -10,16 +11,15 @@ std::string TcpFlow::m_ack_ttl_label = "ack_ttl";
 FlagManager<std::string, PacketFlagsBase> TcpFlow::m_flag_manager;
 bool TcpFlow::m_is_flag_manager_initialized = false;
 
-TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
-                 std::shared_ptr<IHost> a_dest, std::unique_ptr<ITcpCC> a_cc,
-                 SizeByte a_packet_size, std::uint32_t a_packets_to_send,
+TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
+                 std::unique_ptr<ITcpCC> a_cc, SizeByte a_packet_size,
                  bool a_ecn_capable)
     : m_id(std::move(a_id)),
-      m_src(a_src),
-      m_dest(a_dest),
+      m_connection(std::move(a_conn)),
+      m_src(m_connection->get_sender()),
+      m_dest(m_connection->get_receiver()),
       m_cc(std::move(a_cc)),
       m_packet_size(a_packet_size),
-      m_packets_to_send(a_packets_to_send),
       m_ecn_capable(a_ecn_capable),
       m_packets_in_flight(0),
       m_delivered_data_size(0),
@@ -33,8 +33,6 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IHost> a_src,
     initialize_flag_manager();
 }
 
-void TcpFlow::start() { send_packets(); }
-
 SizeByte TcpFlow::get_delivered_data_size() const {
     return m_delivered_data_size;
 }
@@ -46,6 +44,12 @@ std::shared_ptr<IHost> TcpFlow::get_receiver() const { return m_dest.lock(); }
 Id TcpFlow::get_id() const { return m_id; }
 
 SizeByte TcpFlow::get_delivered_bytes() const { return m_delivered_data_size; }
+
+std::uint32_t TcpFlow::get_sending_quota() const {
+    constexpr double EPS = 1e-6;
+    const auto slots = static_cast<std::uint32_t>(m_cc->get_cwnd() + EPS);
+    return (m_packets_in_flight < slots) ? (slots - m_packets_in_flight) : 0;
+}
 
 Packet TcpFlow::create_packet(PacketNum packet_num) {
     Packet packet;
@@ -60,6 +64,28 @@ Packet TcpFlow::create_packet(PacketNum packet_num) {
     packet.ecn_capable_transport = m_ecn_capable;
     return packet;
 }
+
+void TcpFlow::send_packet() {
+    if (get_sending_quota() == 0) {
+        LOG_WARN(fmt::format("No sending quota for flow {}; packet not sent",
+                             m_id));
+        return;
+    }
+    Packet packet = create_packet(m_next_packet_num++);
+    TimeNs pacing_delay = m_cc->get_pacing_delay();
+    TimeNs now = Scheduler::get_instance().get_current_time();
+
+    if (pacing_delay == TimeNs(0)) {
+        send_packet_now(std::move(packet));
+    } else {
+        Scheduler::get_instance().add<SendAtTime>(
+            now + pacing_delay, this->shared_from_this(), std::move(packet));
+    }
+
+    m_packets_in_flight++;
+}
+
+std::shared_ptr<IConnection> TcpFlow::get_conn() const { return m_connection; }
 
 Packet TcpFlow::create_ack(Packet data) {
     Packet ack;
@@ -181,6 +207,12 @@ void TcpFlow::update(Packet packet) {
         if (old_cwnd != cwnd) {
             MetricsCollector::get_instance().add_cwnd(m_id, current_time, cwnd);
         }
+        FlowSample sample{.ack_recv_time = current_time,
+                          .packet_sent_time = packet.sent_time,
+                          .packets_in_flight = m_packets_in_flight,
+                          .delivery_rate = delivery_rate,
+                          .send_quota = get_sending_quota()};
+        m_connection->update(shared_from_this(), sample);
     } else if (packet.dest_id == m_dest.lock()->get_id() &&
                type == PacketType::DATA) {
         m_packet_reordering.add_record(packet.packet_num);
@@ -191,7 +223,6 @@ void TcpFlow::update(Packet packet) {
 
         m_dest.lock()->enqueue_packet(ack);
     }
-    send_packets();
 }
 
 std::string TcpFlow::to_string() const {
@@ -202,7 +233,6 @@ std::string TcpFlow::to_string() const {
     oss << ", dest id: " << m_dest.lock()->get_id();
     oss << ", CC module: " << m_cc->to_string();
     oss << ", packet size: " << m_packet_size;
-    oss << ", to send packets: " << m_packets_to_send;
     oss << ", packets_in_flight: " << m_packets_in_flight;
     oss << ", acked packets: " << m_delivered_data_size;
     oss << "]";
@@ -230,28 +260,6 @@ void TcpFlow::send_packet_now(Packet packet) {
 
     packet.sent_time = current_time;
     m_src.lock()->enqueue_packet(std::move(packet));
-}
-
-void TcpFlow::send_packets() {
-    constexpr double EPS = 1e-6;
-    TimeNs total_delay(0);
-    TimeNs pacing_delay = m_cc->get_pacing_delay();
-    TimeNs curr_time = Scheduler::get_instance().get_current_time();
-
-    while (m_packets_to_send > 0 &&
-           m_packets_in_flight + 1 < m_cc->get_cwnd() + EPS) {
-        Packet packet = generate_packet();
-        total_delay += pacing_delay;
-        if (pacing_delay == TimeNs(0)) {
-            send_packet_now(std::move(packet));
-        } else {
-            Scheduler::get_instance().add<SendAtTime>(curr_time + total_delay,
-                                                      this->shared_from_this(),
-                                                      std::move(packet));
-        }
-        m_packets_in_flight++;
-        m_packets_to_send--;
-    }
 }
 
 void TcpFlow::retransmit_packet(PacketNum packet_num) {
