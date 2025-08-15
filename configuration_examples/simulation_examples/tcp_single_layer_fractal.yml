@@ -1,21 +1,28 @@
 topology_config_path: ../topology_examples/single_layer_fractal.yml
 
-flows:
-  flow1:
-    type: tcp
-    sender_id: "sender"
-    receiver_id: "receiver"
-    packet_size: 4096
-    number_of_packets: 200
-    cc:
-      type: tahoe
-  flow2:
-    type: tcp
-    sender_id: "sender"
-    receiver_id: "receiver"
-    packet_size: 2048
-    number_of_packets: 400
-    cc:
-      type: tahoe
+connections:
+  conn1:
+    sender_id: sender
+    receiver_id: receiver
+    packets_to_send: 200
+    mplb: round_robin
+    flows:
+      flow1:
+        type: tcp
+        packet_size: 4096
+        cc:
+          type: tahoe
+
+  conn2:
+    sender_id: sender
+    receiver_id: receiver
+    packets_to_send: 400
+    mplb: round_robin
+    flows:
+      flow1:
+        type: tcp
+        packet_size: 2048
+        cc:
+          type: tahoe
 
 simulation_time: 1000000
