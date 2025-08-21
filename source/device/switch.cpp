@@ -29,7 +29,6 @@ TimeNs Switch::process() {
                                   link->get_max_to_ingress_queue_size();
     std::optional<Packet> optional_packet = link->get_packet();
     if (!optional_packet.has_value()) {
-        LOG_WARN("No packet in link");
         return total_processing_time;
     }
     Packet packet = optional_packet.value();
