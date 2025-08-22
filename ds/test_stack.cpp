@@ -158,7 +158,7 @@ void testAssign() {
 }
 
 void testTopThrowsAnInvalidArgumentWhenStackEmpty() {
-    const stack<double> curStack;
+    const stack<long double> curStack;
     bool wasException = false;
     try {
         curStack.top();
