@@ -9,9 +9,10 @@ public:
     ~FlowMock() = default;
     FlowMock(std::shared_ptr<sim::IHost> a_receiver);
 
-    void start() final;
-
     void update(sim::Packet packet) final;
+    std::uint32_t get_sending_quota() const final;
+    void send_packet() final;
+    std::shared_ptr<sim::IConnection> get_conn() const final;
     virtual SizeByte get_delivered_data_size() const final;
 
     std::shared_ptr<sim::IHost> get_sender() const final;

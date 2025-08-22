@@ -15,6 +15,15 @@ def generate_topology(
     egress_buffer_size="1024000B",
 ):
     topology = {
+        "presets": {
+            "link" : {"default" : {
+                "latency": link_latency,
+                "throughput": link_throughput,
+                "ingress_buffer_size": ingress_buffer_size,
+                "egress_buffer_size": egress_buffer_size,
+            }}
+        },
+        "packet-spraying" : {"type" : "ecmp"},
         "hosts": {},
         "switches": {},
         "links": {}
@@ -43,10 +52,6 @@ def generate_topology(
         topology["links"][link_name] = {
             "from": sender_name,
             "to": sender_switch_name,
-            "latency": link_latency,
-            "throughput": link_throughput,
-            "ingress_buffer_size": ingress_buffer_size,
-            "egress_buffer_size": egress_buffer_size,
         }
 
         # Add link from switch to sender
@@ -55,10 +60,6 @@ def generate_topology(
         topology["links"][link_name] = {
             "from": sender_switch_name,
             "to": sender_name,
-            "latency": link_latency,
-            "throughput": link_throughput,
-            "ingress_buffer_size": ingress_buffer_size,
-            "egress_buffer_size": egress_buffer_size,
         }
 
     # Add receivers
@@ -72,11 +73,7 @@ def generate_topology(
         base_index += 1
         topology["links"][link_name] = {
             "from": receiver_switch_name,
-            "to": receiver_name,
-            "latency": link_latency,
-            "throughput": link_throughput,
-            "ingress_buffer_size": ingress_buffer_size,
-            "egress_buffer_size": egress_buffer_size,
+            "to": receiver_name
         }
 
         # Add link from receiver to switch
@@ -84,11 +81,7 @@ def generate_topology(
         base_index += 1
         topology["links"][link_name] = {
             "from": receiver_name,
-            "to": receiver_switch_name,
-            "latency": link_latency,
-            "throughput": link_throughput,
-            "ingress_buffer_size": ingress_buffer_size,
-            "egress_buffer_size": egress_buffer_size,
+            "to": receiver_switch_name
         }
 
     # Add the switches
@@ -103,11 +96,7 @@ def generate_topology(
         base_index += 1
         topology["links"][link_name] = {
             "from": switch_names[i],
-            "to": switch_names[i + 1],
-            "latency": link_latency,
-            "throughput": link_throughput,
-            "ingress_buffer_size": ingress_buffer_size,
-            "egress_buffer_size": egress_buffer_size,
+            "to": switch_names[i + 1]
         }
 
         # Backward link
@@ -115,11 +104,7 @@ def generate_topology(
         base_index += 1
         topology["links"][link_name] = {
             "from": switch_names[i + 1],
-            "to": switch_names[i],
-            "latency": link_latency,
-            "throughput": link_throughput,
-            "ingress_buffer_size": ingress_buffer_size,
-            "egress_buffer_size": egress_buffer_size,
+            "to": switch_names[i]
         }
 
     return topology, sender_names, receiver_names
@@ -201,7 +186,7 @@ def save_yaml(data, filename):
 
 
 def parse_arguments():
-    """Parse and validate command line arguments"""  
+    """Parse and validate command line arguments"""
     parser = argparse.ArgumentParser(
         description="Generate topology and simulation YAML files."
     )

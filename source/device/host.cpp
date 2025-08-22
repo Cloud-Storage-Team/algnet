@@ -58,6 +58,15 @@ TimeNs Host::process() {
             LOG_WARN("No link corresponds to destination device");
             return total_processing_time;
         }
+
+        if (packet.ttl == 0) {
+            LOG_ERROR(
+                fmt::format("Packet ttl expired on device {}; packet {} lost",
+                            get_id(), packet.to_string()));
+            return total_processing_time;
+        }
+        packet.ttl--;
+
         next_link->schedule_arrival(packet);
     }
 

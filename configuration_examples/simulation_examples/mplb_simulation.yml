@@ -1,0 +1,23 @@
+topology_config_path: ../topology_examples/for_swift_testing.yml
+
+connections:
+  conn1:
+    sender_id: sender1
+    receiver_id: receiver1
+    packets_to_send: 1000
+    mplb: round_robin
+    flows:
+      flow1:
+        type: tcp
+        packet_size: 256
+        cc:
+          type: swift
+          base_target: 4000ns
+      flow2:
+        type: tcp
+        packet_size: 256
+        cc:
+          type: swift
+          base_target: 4000ns
+
+simulation_time: 600000

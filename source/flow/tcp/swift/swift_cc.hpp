@@ -31,11 +31,11 @@ public:
      * a_fs_min_cwnd      cwnd where flow‑scaling hits fs_range.
      * a_fs_max_cwnd      cwnd where flow‑scaling goes to zero.
      */
-    TcpSwiftCC(TimeNs a_base_target, long double a_additive_inc = 0.5L,
-               long double a_md_beta = 0.5L,  // from [0.2, 0.5] diapason
-               long double a_max_mdf = 0.3L, long double a_fs_range = 1.5L,
-               long double a_fs_min_cwnd = 0.1L,   // taken from the paper
-               long double a_fs_max_cwnd = 100.0L  // taken from the paper
+    TcpSwiftCC(TimeNs a_base_target, double a_additive_inc = 0.5,
+               double a_md_beta = 0.5,  // from [0.2, 0.5] diapason
+               double a_max_mdf = 0.3, double a_fs_range = 1.5,
+               double a_fs_min_cwnd = 0.1,  // taken from the paper
+               double a_fs_max_cwnd = 100.  // taken from the paper
     );
 
     void on_ack(TimeNs rtt, TimeNs avg_rtt, bool ecn_flag) final;
@@ -57,7 +57,7 @@ private:
     // Based on m_last_rtt
     [[nodiscard]] bool compute_can_decreace() const;
 
-    void update_cwnd(long double neww_cwnd);
+    void update_cwnd(double neww_cwnd);
 
     // ---------- Tunables ----------
     const TimeNs m_base_target;  // base RTT budget (ns)
@@ -66,23 +66,23 @@ private:
     const double m_max_mdf;      // cap on MD factor per RTT
 
     // Flow‑scaling parameters (cf. Swift §3.1)
-    const TimeNs m_fs_range_ns;       // scale range ns (base target * fs range)
-    const long double m_fs_min_cwnd;  // packets
-    const long double m_fs_max_cwnd;  // packets
-    TimeNs m_alpha_flow;              // flow scaling α, ns
-    TimeNs m_beta_flow;               // flow scaling β (runtime‑set), ns
+    const TimeNs m_fs_range_ns;  // scale range ns (base target * fs range)
+    const double m_fs_min_cwnd;  // packets
+    const double m_fs_max_cwnd;  // packets
+    TimeNs m_alpha_flow;         // flow scaling α, ns
+    TimeNs m_beta_flow;          // flow scaling β (runtime‑set), ns
                          // a positive value (unlike the article), as the
                          // internal TimeNs type is used (not negative)
     static constexpr std::size_t M_RETX_RESET_THRESHOLD = 3;
     // ---------- СС state ----------
-    long double m_cwnd;      // congestion window (packets)
+    double m_cwnd;           // congestion window (packets)
     TimeNs m_last_decrease;  // last MD timestamp
     TimeNs m_last_rtt;       // last sampled RTT
     std::size_t m_retransmit_cnt;
 
     // ----------- Limits -----------
-    static constexpr long double M_MIN_CWND = 0.001L;  // taken from the paper
-    static constexpr long double M_MAX_CWND = 1e6;
+    static constexpr double M_MIN_CWND = 0.001;  // taken from the paper
+    static constexpr double M_MAX_CWND = 1e6;
 };
 
 }  // namespace sim
