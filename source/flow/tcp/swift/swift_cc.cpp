@@ -84,7 +84,7 @@ TimeNs TcpSwiftCC::get_pacing_delay() const {
     return m_last_rtt / cwnd_clamped;
 }
 
-double TcpSwiftCC::get_cwnd() const { return (std::max(m_cwnd, 1.0)); }
+double TcpSwiftCC::get_cwnd() const { return m_cwnd; }
 
 std::string TcpSwiftCC::to_string() const {
     return fmt::format("[target_now: {} ns, cwnd: {:0.3f}]",

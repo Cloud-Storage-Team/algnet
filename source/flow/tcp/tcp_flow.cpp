@@ -46,9 +46,9 @@ Id TcpFlow::get_id() const { return m_id; }
 SizeByte TcpFlow::get_delivered_bytes() const { return m_delivered_data_size; }
 
 std::uint32_t TcpFlow::get_sending_quota() const {
-    constexpr double EPS = 1e-6;
-    const auto slots = static_cast<std::uint32_t>(m_cc->get_cwnd() + EPS);
-    return (m_packets_in_flight < slots) ? (slots - m_packets_in_flight) : 0;
+    const auto slots =
+        static_cast<std::uint32_t>(std::max(m_cc->get_cwnd(), 1.0) + 1e-9);
+    return (slots > m_packets_in_flight) ? (slots - m_packets_in_flight) : 0;
 }
 
 Packet TcpFlow::create_packet(PacketNum packet_num) {
@@ -191,7 +191,6 @@ void TcpFlow::update(Packet packet) {
             m_packets_in_flight--;
         }
 
-        double old_cwnd = m_cc->get_cwnd();
         m_cc->on_ack(rtt, m_rtt_statistics.get_mean(),
                      packet.congestion_experienced);
 
@@ -203,10 +202,8 @@ void TcpFlow::update(Packet packet) {
         MetricsCollector::get_instance().add_delivery_rate(
             packet.flow->get_id(), current_time, delivery_rate);
 
-        double cwnd = m_cc->get_cwnd();
-        if (old_cwnd != cwnd) {
-            MetricsCollector::get_instance().add_cwnd(m_id, current_time, cwnd);
-        }
+        MetricsCollector::get_instance().add_cwnd(m_id, current_time,
+                                                  m_cc->get_cwnd());
         FlowSample sample{.ack_recv_time = current_time,
                           .packet_sent_time = packet.sent_time,
                           .packets_in_flight = m_packets_in_flight,
