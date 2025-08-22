@@ -1,6 +1,16 @@
 topology_config_path: trivial_topology.yml # it's genious i think
 simulation_time: 1000
 
+presets:
+  link:
+    default:
+      latency: 1ns
+      throughput: 1Gbps
+      ingress_buffer_size: 4096B
+      egress_buffer_size: 4096B
+packet-spraying:
+  type: ecmp
+
 hosts:
   sender:
   receiver:
@@ -11,28 +21,12 @@ links:
   link1:
     from: sender
     to: switch
-    latency: 1ns
-    throughput: 1Gbps
-    ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B
   link2:
     from: switch
     to: sender
-    latency: 1ns
-    throughput: 1Gbps
-    ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B
   link3:
     from: switch
     to: receiver
-    latency: 1ns
-    throughput: 1Gbps
-    ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B
   link4:
     from: receiver
     to: switch
-    latency: 1ns
-    throughput: 1Gbps
-    ingress_buffer_size: 4096B
-    egress_buffer_size: 4096B

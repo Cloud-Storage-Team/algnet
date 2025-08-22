@@ -15,27 +15,32 @@ def generate_topology(
     receiver_name = "receiver"
 
     topology = {
+        "presets" : {
+            "link" : {"default" : {
+                "latency" : f"{link_latency}ns",
+                "throughput" : f"{link_throughput}Gbps",
+                "ingress_buffer_size" : f"{ingress_buffer_size}B",
+                "egress_buffer_size" : f"{egress_buffer_size}B"
+            }}
+        },
+        "packet-spraying" : {"type" : "ecmp"},
         "hosts": {
             sender_name : {},
-            receiver_name : {} 
+            receiver_name : {}
         },
         "switches":{},
         "links": {}
     }
-    
+
     base_index = 1
     def add_link(src_device : str, dest_device : str):
         nonlocal base_index
         name = f"link-{base_index}"
         base_index += 1
-        
+
         topology["links"][name] = {
             "from": src_device,
-            "to" : dest_device,
-            "latency" : f"{link_latency}ns",
-            "throughput" : f"{link_throughput}Gbps",
-            "ingress_buffer_size" : f"{ingress_buffer_size}B",
-            "egress_buffer_size" : f"{egress_buffer_size}B"
+            "to" : dest_device
         }
 
     switch_nums_range = range(1, number_switch_per_layer + 1)

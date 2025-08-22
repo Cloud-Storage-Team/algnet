@@ -8,6 +8,8 @@ private:
     using ThisSpeed = Speed<TSizeBase, TTimeBase>;
 
 public:
+    constexpr explicit Speed() : m_value_bit_per_ns(0) {}
+    
     // Attention: value given in TSizeBase per TTimeBase units!
     constexpr explicit Speed(double value)
         : m_value_bit_per_ns(value * TSizeBase::to_bit_multiplier /

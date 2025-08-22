@@ -1,3 +1,13 @@
+presets:
+  link:
+    default:
+      latency: 0ns
+      throughput: 100Gbps
+      ingress_buffer_size: 1024000B
+      egress_buffer_size: 1024000B
+packet-spraying:
+  type: ecmp
+
 hosts:
   sender0:
   sender1:
@@ -17,84 +27,36 @@ links:
   link0:
     from: sender0
     to: switch
-    latency: 0ns
-    throughput: 100Gbps
-    ingress_buffer_size: 1024000B
-    egress_buffer_size: 1024000B
   link1:
     from: switch
     to: sender0
-    latency: 0ns
-    throughput: 100Gbps
-    ingress_buffer_size: 1024000B
-    egress_buffer_size: 1024000B
   link2:
     from: sender1
     to: switch
-    latency: 0ns
-    throughput: 100Gbps
-    ingress_buffer_size: 1024000B
-    egress_buffer_size: 1024000B
   link3:
     from: switch
     to: sender1
-    latency: 0ns
-    throughput: 100Gbps
-    ingress_buffer_size: 1024000B
-    egress_buffer_size: 1024000B
   link4:
     from: sender2
     to: switch
-    latency: 0ns
-    throughput: 100Gbps
-    ingress_buffer_size: 1024000B
-    egress_buffer_size: 1024000B
   link5:
     from: switch
     to: sender2
-    latency: 0ns
-    throughput: 100Gbps
-    ingress_buffer_size: 1024000B
-    egress_buffer_size: 1024000B
   link6:
     from: sender3
     to: switch
-    latency: 0ns
-    throughput: 100Gbps
-    ingress_buffer_size: 1024000B
-    egress_buffer_size: 1024000B
   link7:
     from: switch
     to: sender3
-    latency: 0ns
-    throughput: 100Gbps
-    ingress_buffer_size: 1024000B
-    egress_buffer_size: 1024000B
   link8:
     from: sender4
     to: switch
-    latency: 0ns
-    throughput: 100Gbps
-    ingress_buffer_size: 1024000B
-    egress_buffer_size: 1024000B
   link9:
     from: switch
     to: sender4
-    latency: 0ns
-    throughput: 100Gbps
-    ingress_buffer_size: 1024000B
-    egress_buffer_size: 1024000B
   link10:
     from: switch
     to: receiver0
-    latency: 0ns
-    throughput: 100Gbps
-    ingress_buffer_size: 1024000B
-    egress_buffer_size: 1024000B
   link11:
     from: receiver0
     to: switch
-    latency: 0ns
-    throughput: 100Gbps
-    ingress_buffer_size: 1024000B
-    egress_buffer_size: 1024000B
