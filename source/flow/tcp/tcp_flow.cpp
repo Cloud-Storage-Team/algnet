@@ -94,6 +94,7 @@ Packet TcpFlow::create_ack(Packet data) {
     ack.dest_id = m_src.lock()->get_id();
     ack.size = SizeByte(1);
     ack.flow = this;
+    ack.generated_time = data.generated_time;
     ack.sent_time = data.sent_time;
     ack.delivered_data_size_at_origin = data.delivered_data_size_at_origin;
     ack.ttl = M_MAX_TTL;
@@ -198,7 +199,7 @@ void TcpFlow::update(Packet packet) {
 
         SpeedGbps delivery_rate =
             (m_delivered_data_size - packet.delivered_data_size_at_origin) /
-            rtt;
+            (current_time - packet.generated_time);
         MetricsCollector::get_instance().add_delivery_rate(
             packet.flow->get_id(), current_time, delivery_rate);
 
