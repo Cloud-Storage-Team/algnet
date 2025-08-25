@@ -9,7 +9,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--flows", type=int, default=3, help="Number of flows"
-    ),    
+    )
     parser.add_argument(
         "--topology_file",
         default="incast_topology.yml",
@@ -35,8 +35,8 @@ def generate_topology(flows):
             "link" : {"default" : {
                 "latency": "5ns",
                 "throughput": "100Gbps",
-                "ingress_buffer_size": "1024000B",
-                "egress_buffer_size": "1024000B",
+                "ingress_buffer_size": "1000000B",
+                "egress_buffer_size": "1000000B",
             }}
         },
         "packet-spraying" : {"type" : "ecmp"},
