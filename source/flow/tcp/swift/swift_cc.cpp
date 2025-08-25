@@ -44,28 +44,25 @@ void TcpSwiftCC::on_ack(TimeNs rtt, [[maybe_unused]] TimeNs avg_rtt,
     // dynamic target_delay
     const TimeNs target_delay = compute_target_delay();
 
-    const bool can_decrease = compute_can_decreace();
+    const bool can_decrease = compute_can_decrease();
     double new_cwnd = m_cwnd;
     // ---------- AIMD ----------
     if (rtt < target_delay) {
         // Additive‑Increase
         if (new_cwnd > 1.0)
-            new_cwnd += (m_ai / new_cwnd);
+            new_cwnd += m_ai / new_cwnd;
         else
             new_cwnd += m_ai;
     } else if (can_decrease) {
         // Multiplicative‑Decrease based on «overshoot»
         const double overshoot = (rtt - target_delay) / rtt;
-        const double factor =
-            std::max(1. - m_beta_md * overshoot, 1. - m_max_mdf);
-        new_cwnd = std::max(M_MIN_CWND, new_cwnd * factor);
+        new_cwnd *= std::max(1. - m_beta_md * overshoot, 1. - m_max_mdf);
     }
-
     update_cwnd(new_cwnd);
 }
 
 void TcpSwiftCC::on_timeout() {
-    const bool can_decrease = compute_can_decreace();
+    const bool can_decrease = compute_can_decrease();
     m_retransmit_cnt++;
     double new_cwnd = m_cwnd;
     if (m_retransmit_cnt >= M_RETX_RESET_THRESHOLD) {
@@ -80,8 +77,7 @@ TimeNs TcpSwiftCC::get_pacing_delay() const {
     if (m_cwnd > 1.0) {
         return TimeNs(0);
     }
-    double cwnd_clamped = std::max(m_fs_min_cwnd, m_cwnd);
-    return m_last_rtt / cwnd_clamped;
+    return m_last_rtt * (1.0 / m_cwnd - 1.0);
 }
 
 double TcpSwiftCC::get_cwnd() const { return m_cwnd; }
@@ -92,14 +88,18 @@ std::string TcpSwiftCC::to_string() const {
 }
 
 TimeNs TcpSwiftCC::compute_target_delay() const {
-    double cwnd_clamped = std::max(m_fs_min_cwnd, m_cwnd);
-    TimeNs flow_term = (m_alpha_flow / std::sqrt(cwnd_clamped)) - m_beta_flow;
-    flow_term = std::clamp(flow_term, TimeNs(0.0), m_fs_range_ns);
-    return m_base_target + flow_term;  // TO-DO: use m_base_target +
-                                       // TimeNs(flow_term) + h*hops_num
+    if (m_cwnd < m_fs_min_cwnd) {
+        return m_base_target + m_fs_range_ns;
+    } else if (m_cwnd > m_fs_max_cwnd) {
+        return m_base_target;
+    } else {
+        // TO-DO: add hop scaling
+        TimeNs flow_term = (m_alpha_flow / std::sqrt(m_cwnd)) - m_beta_flow;
+        return m_base_target + flow_term;
+    }
 }
 
-bool TcpSwiftCC::compute_can_decreace() const {
+bool TcpSwiftCC::compute_can_decrease() const {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
     return (current_time - m_last_decrease) > m_last_rtt;
 }

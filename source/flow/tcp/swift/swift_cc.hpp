@@ -55,7 +55,7 @@ private:
 
     // Computes if cwnd might be decreased now
     // Based on m_last_rtt
-    [[nodiscard]] bool compute_can_decreace() const;
+    [[nodiscard]] bool compute_can_decrease() const;
 
     void update_cwnd(double neww_cwnd);
 
