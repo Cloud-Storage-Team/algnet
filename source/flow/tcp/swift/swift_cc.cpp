@@ -56,7 +56,7 @@ void TcpSwiftCC::on_ack(TimeNs rtt, [[maybe_unused]] TimeNs avg_rtt,
     } else if (can_decrease) {
         // Multiplicative‑Decrease based on «overshoot»
         const double overshoot = (rtt - target_delay) / rtt;
-        new_cwnd *= std::max(1. - m_beta_md * overshoot, 1. - m_max_mdf);
+        new_cwnd *= std::max(1.0 - m_beta_md * overshoot, 1.0 - m_max_mdf);
     }
     update_cwnd(new_cwnd);
 }
