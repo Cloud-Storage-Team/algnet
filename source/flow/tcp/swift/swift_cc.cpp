@@ -90,12 +90,12 @@ std::string TcpSwiftCC::to_string() const {
 TimeNs TcpSwiftCC::compute_target_delay() const {
     if (m_cwnd < m_fs_min_cwnd) {
         return m_base_target + m_fs_range_ns;
-    } else if (m_cwnd > m_fs_max_cwnd) {
-        return m_base_target;
-    } else {
+    } else if (m_cwnd < m_fs_max_cwnd) {
         // TO-DO: add hop scaling
         TimeNs flow_term = (m_alpha_flow / std::sqrt(m_cwnd)) - m_beta_flow;
         return m_base_target + flow_term;
+    } else {
+        return m_base_target;
     }
 }
 
