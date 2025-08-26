@@ -34,7 +34,7 @@ std::string Packet::to_string() const {
     oss << ", packet_num: " << packet_num;
     oss << ", size(byte): " << size;
     oss << ", flow: " << (flow ? "set" : "null");
-    oss << ", generate time: " << generated_time;
+    oss << ", generated time: " << generated_time;
     oss << ", sent time: " << sent_time;
     oss << ", TTL: " << ttl;
     oss << ", flags: " << flags.get_bits();
