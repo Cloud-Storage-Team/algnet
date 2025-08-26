@@ -19,7 +19,7 @@ cmake --build build
     [--output-dir output-dir-name]
     [--no-logs]
     [--no-plots]
-    [--export-metrics]
+    [--metrics-filter]
 ```
 
 Options:
@@ -37,7 +37,7 @@ Options:
 
 Examples of simulation configs placed in `configuration_examples/simulation_examples`
 
-### `export-metrics` flag format
+### `metrics-filter` flag format
 
 These flags represent regular expression that match generated **data file names** under metrics output directory. Plots generates accordingly to collected data.
 

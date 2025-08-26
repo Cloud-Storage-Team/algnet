@@ -47,9 +47,6 @@ def main(args):
     parser.add_argument(
         "--output-dir", help="Directory to export simulation results", default="metrics"
     )
-    parser.add_argument(
-        "--export-metrics", action="store_true", help="Export simulation metrics"
-    )
     parser.add_argument("--no-logs", action="store_true", help="Disable logging")
     parser.add_argument(
         "--no-plots", action="store_true", help="Disable plots generation"
@@ -102,8 +99,6 @@ def main(args):
             "--output-dir",
             metrics_dir,
         ]
-        if parsed_args.export_metrics:
-            simulator_args.append("--export-metrics")
         if parsed_args.no_logs:
             simulator_args.append("--no-logs")
         if parsed_args.no_plots:
