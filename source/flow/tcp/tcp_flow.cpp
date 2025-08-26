@@ -30,11 +30,17 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
     if (m_dest.lock() == nullptr) {
         throw std::invalid_argument("Receiver for TcpFlow is nullptr");
     }
+    m_init_time = Scheduler::get_instance().get_current_time();
     initialize_flag_manager();
 }
 
 SizeByte TcpFlow::get_delivered_data_size() const {
     return m_delivered_data_size;
+}
+
+TimeNs TcpFlow::get_fct() const {
+    TimeNs now = Scheduler::get_instance().get_current_time();
+    return now - m_init_time;
 }
 
 std::shared_ptr<IHost> TcpFlow::get_sender() const { return m_src.lock(); }
