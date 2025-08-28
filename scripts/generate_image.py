@@ -112,7 +112,7 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
             add_node(device_id, DEVICE_STYLES[dev_type])
 
     presets = config.get("presets", {})
-    link_preset = presets.get("link", {}).get("default", {})
+    link_presets = presets.get("link", {})
 
     def get_with_preset(node : dict, preset_node : dict, field_name):
         if field_name in node:
@@ -124,6 +124,8 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
     for link_id, link_info in links.items():
         from_node = link_info["from"]
         to_node = link_info["to"]
+        preset_name = link_info.get("preset_name", "default")
+        link_preset = link_presets.get(preset_name)
         latency = get_with_preset(link_info, link_preset, 'latency')
         throughput = get_with_preset(link_info, link_preset, 'throughput')
         label = f"{link_id}\n"\
