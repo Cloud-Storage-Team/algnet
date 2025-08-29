@@ -1,0 +1,1001 @@
+presets:
+  link:
+    default:
+      latency: 3000ns
+      throughput: 50Gbps
+      ingress_buffer_size: 1000000B
+      egress_buffer_size: 1000000B
+packet-spraying:
+  type: ecmp
+hosts:
+  sender1: {}
+  sender2: {}
+  sender3: {}
+  sender4: {}
+  sender5: {}
+  sender6: {}
+  sender7: {}
+  sender8: {}
+  sender9: {}
+  sender10: {}
+  sender11: {}
+  sender12: {}
+  sender13: {}
+  sender14: {}
+  sender15: {}
+  sender16: {}
+  sender17: {}
+  sender18: {}
+  sender19: {}
+  sender20: {}
+  sender21: {}
+  sender22: {}
+  sender23: {}
+  sender24: {}
+  sender25: {}
+  sender26: {}
+  sender27: {}
+  sender28: {}
+  sender29: {}
+  sender30: {}
+  sender31: {}
+  sender32: {}
+  sender33: {}
+  sender34: {}
+  sender35: {}
+  sender36: {}
+  sender37: {}
+  sender38: {}
+  sender39: {}
+  sender40: {}
+  sender41: {}
+  sender42: {}
+  sender43: {}
+  sender44: {}
+  sender45: {}
+  sender46: {}
+  sender47: {}
+  sender48: {}
+  sender49: {}
+  sender50: {}
+  sender51: {}
+  sender52: {}
+  sender53: {}
+  sender54: {}
+  sender55: {}
+  sender56: {}
+  sender57: {}
+  sender58: {}
+  sender59: {}
+  sender60: {}
+  sender61: {}
+  sender62: {}
+  sender63: {}
+  sender64: {}
+  sender65: {}
+  sender66: {}
+  sender67: {}
+  sender68: {}
+  sender69: {}
+  sender70: {}
+  sender71: {}
+  sender72: {}
+  sender73: {}
+  sender74: {}
+  sender75: {}
+  sender76: {}
+  sender77: {}
+  sender78: {}
+  sender79: {}
+  sender80: {}
+  sender81: {}
+  sender82: {}
+  sender83: {}
+  sender84: {}
+  sender85: {}
+  sender86: {}
+  sender87: {}
+  sender88: {}
+  sender89: {}
+  sender90: {}
+  sender91: {}
+  sender92: {}
+  sender93: {}
+  sender94: {}
+  sender95: {}
+  sender96: {}
+  sender97: {}
+  sender98: {}
+  sender99: {}
+  sender100: {}
+  sender101: {}
+  sender102: {}
+  sender103: {}
+  sender104: {}
+  sender105: {}
+  sender106: {}
+  sender107: {}
+  sender108: {}
+  sender109: {}
+  sender110: {}
+  sender111: {}
+  sender112: {}
+  sender113: {}
+  sender114: {}
+  sender115: {}
+  sender116: {}
+  sender117: {}
+  sender118: {}
+  sender119: {}
+  sender120: {}
+  sender121: {}
+  sender122: {}
+  sender123: {}
+  sender124: {}
+  sender125: {}
+  sender126: {}
+  sender127: {}
+  sender128: {}
+  sender129: {}
+  sender130: {}
+  sender131: {}
+  sender132: {}
+  sender133: {}
+  sender134: {}
+  sender135: {}
+  sender136: {}
+  sender137: {}
+  sender138: {}
+  sender139: {}
+  sender140: {}
+  receiver: {}
+switches:
+  switch:
+    threshold: 0.7
+links:
+  link1:
+    from: sender1
+    to: switch
+  link2:
+    from: switch
+    to: sender1
+  link3:
+    from: sender2
+    to: switch
+  link4:
+    from: switch
+    to: sender2
+  link5:
+    from: sender3
+    to: switch
+  link6:
+    from: switch
+    to: sender3
+  link7:
+    from: sender4
+    to: switch
+  link8:
+    from: switch
+    to: sender4
+  link9:
+    from: sender5
+    to: switch
+  link10:
+    from: switch
+    to: sender5
+  link11:
+    from: sender6
+    to: switch
+  link12:
+    from: switch
+    to: sender6
+  link13:
+    from: sender7
+    to: switch
+  link14:
+    from: switch
+    to: sender7
+  link15:
+    from: sender8
+    to: switch
+  link16:
+    from: switch
+    to: sender8
+  link17:
+    from: sender9
+    to: switch
+  link18:
+    from: switch
+    to: sender9
+  link19:
+    from: sender10
+    to: switch
+  link20:
+    from: switch
+    to: sender10
+  link21:
+    from: sender11
+    to: switch
+  link22:
+    from: switch
+    to: sender11
+  link23:
+    from: sender12
+    to: switch
+  link24:
+    from: switch
+    to: sender12
+  link25:
+    from: sender13
+    to: switch
+  link26:
+    from: switch
+    to: sender13
+  link27:
+    from: sender14
+    to: switch
+  link28:
+    from: switch
+    to: sender14
+  link29:
+    from: sender15
+    to: switch
+  link30:
+    from: switch
+    to: sender15
+  link31:
+    from: sender16
+    to: switch
+  link32:
+    from: switch
+    to: sender16
+  link33:
+    from: sender17
+    to: switch
+  link34:
+    from: switch
+    to: sender17
+  link35:
+    from: sender18
+    to: switch
+  link36:
+    from: switch
+    to: sender18
+  link37:
+    from: sender19
+    to: switch
+  link38:
+    from: switch
+    to: sender19
+  link39:
+    from: sender20
+    to: switch
+  link40:
+    from: switch
+    to: sender20
+  link41:
+    from: sender21
+    to: switch
+  link42:
+    from: switch
+    to: sender21
+  link43:
+    from: sender22
+    to: switch
+  link44:
+    from: switch
+    to: sender22
+  link45:
+    from: sender23
+    to: switch
+  link46:
+    from: switch
+    to: sender23
+  link47:
+    from: sender24
+    to: switch
+  link48:
+    from: switch
+    to: sender24
+  link49:
+    from: sender25
+    to: switch
+  link50:
+    from: switch
+    to: sender25
+  link51:
+    from: sender26
+    to: switch
+  link52:
+    from: switch
+    to: sender26
+  link53:
+    from: sender27
+    to: switch
+  link54:
+    from: switch
+    to: sender27
+  link55:
+    from: sender28
+    to: switch
+  link56:
+    from: switch
+    to: sender28
+  link57:
+    from: sender29
+    to: switch
+  link58:
+    from: switch
+    to: sender29
+  link59:
+    from: sender30
+    to: switch
+  link60:
+    from: switch
+    to: sender30
+  link61:
+    from: sender31
+    to: switch
+  link62:
+    from: switch
+    to: sender31
+  link63:
+    from: sender32
+    to: switch
+  link64:
+    from: switch
+    to: sender32
+  link65:
+    from: sender33
+    to: switch
+  link66:
+    from: switch
+    to: sender33
+  link67:
+    from: sender34
+    to: switch
+  link68:
+    from: switch
+    to: sender34
+  link69:
+    from: sender35
+    to: switch
+  link70:
+    from: switch
+    to: sender35
+  link71:
+    from: sender36
+    to: switch
+  link72:
+    from: switch
+    to: sender36
+  link73:
+    from: sender37
+    to: switch
+  link74:
+    from: switch
+    to: sender37
+  link75:
+    from: sender38
+    to: switch
+  link76:
+    from: switch
+    to: sender38
+  link77:
+    from: sender39
+    to: switch
+  link78:
+    from: switch
+    to: sender39
+  link79:
+    from: sender40
+    to: switch
+  link80:
+    from: switch
+    to: sender40
+  link81:
+    from: sender41
+    to: switch
+  link82:
+    from: switch
+    to: sender41
+  link83:
+    from: sender42
+    to: switch
+  link84:
+    from: switch
+    to: sender42
+  link85:
+    from: sender43
+    to: switch
+  link86:
+    from: switch
+    to: sender43
+  link87:
+    from: sender44
+    to: switch
+  link88:
+    from: switch
+    to: sender44
+  link89:
+    from: sender45
+    to: switch
+  link90:
+    from: switch
+    to: sender45
+  link91:
+    from: sender46
+    to: switch
+  link92:
+    from: switch
+    to: sender46
+  link93:
+    from: sender47
+    to: switch
+  link94:
+    from: switch
+    to: sender47
+  link95:
+    from: sender48
+    to: switch
+  link96:
+    from: switch
+    to: sender48
+  link97:
+    from: sender49
+    to: switch
+  link98:
+    from: switch
+    to: sender49
+  link99:
+    from: sender50
+    to: switch
+  link100:
+    from: switch
+    to: sender50
+  link101:
+    from: sender51
+    to: switch
+  link102:
+    from: switch
+    to: sender51
+  link103:
+    from: sender52
+    to: switch
+  link104:
+    from: switch
+    to: sender52
+  link105:
+    from: sender53
+    to: switch
+  link106:
+    from: switch
+    to: sender53
+  link107:
+    from: sender54
+    to: switch
+  link108:
+    from: switch
+    to: sender54
+  link109:
+    from: sender55
+    to: switch
+  link110:
+    from: switch
+    to: sender55
+  link111:
+    from: sender56
+    to: switch
+  link112:
+    from: switch
+    to: sender56
+  link113:
+    from: sender57
+    to: switch
+  link114:
+    from: switch
+    to: sender57
+  link115:
+    from: sender58
+    to: switch
+  link116:
+    from: switch
+    to: sender58
+  link117:
+    from: sender59
+    to: switch
+  link118:
+    from: switch
+    to: sender59
+  link119:
+    from: sender60
+    to: switch
+  link120:
+    from: switch
+    to: sender60
+  link121:
+    from: sender61
+    to: switch
+  link122:
+    from: switch
+    to: sender61
+  link123:
+    from: sender62
+    to: switch
+  link124:
+    from: switch
+    to: sender62
+  link125:
+    from: sender63
+    to: switch
+  link126:
+    from: switch
+    to: sender63
+  link127:
+    from: sender64
+    to: switch
+  link128:
+    from: switch
+    to: sender64
+  link129:
+    from: sender65
+    to: switch
+  link130:
+    from: switch
+    to: sender65
+  link131:
+    from: sender66
+    to: switch
+  link132:
+    from: switch
+    to: sender66
+  link133:
+    from: sender67
+    to: switch
+  link134:
+    from: switch
+    to: sender67
+  link135:
+    from: sender68
+    to: switch
+  link136:
+    from: switch
+    to: sender68
+  link137:
+    from: sender69
+    to: switch
+  link138:
+    from: switch
+    to: sender69
+  link139:
+    from: sender70
+    to: switch
+  link140:
+    from: switch
+    to: sender70
+  link141:
+    from: sender71
+    to: switch
+  link142:
+    from: switch
+    to: sender71
+  link143:
+    from: sender72
+    to: switch
+  link144:
+    from: switch
+    to: sender72
+  link145:
+    from: sender73
+    to: switch
+  link146:
+    from: switch
+    to: sender73
+  link147:
+    from: sender74
+    to: switch
+  link148:
+    from: switch
+    to: sender74
+  link149:
+    from: sender75
+    to: switch
+  link150:
+    from: switch
+    to: sender75
+  link151:
+    from: sender76
+    to: switch
+  link152:
+    from: switch
+    to: sender76
+  link153:
+    from: sender77
+    to: switch
+  link154:
+    from: switch
+    to: sender77
+  link155:
+    from: sender78
+    to: switch
+  link156:
+    from: switch
+    to: sender78
+  link157:
+    from: sender79
+    to: switch
+  link158:
+    from: switch
+    to: sender79
+  link159:
+    from: sender80
+    to: switch
+  link160:
+    from: switch
+    to: sender80
+  link161:
+    from: sender81
+    to: switch
+  link162:
+    from: switch
+    to: sender81
+  link163:
+    from: sender82
+    to: switch
+  link164:
+    from: switch
+    to: sender82
+  link165:
+    from: sender83
+    to: switch
+  link166:
+    from: switch
+    to: sender83
+  link167:
+    from: sender84
+    to: switch
+  link168:
+    from: switch
+    to: sender84
+  link169:
+    from: sender85
+    to: switch
+  link170:
+    from: switch
+    to: sender85
+  link171:
+    from: sender86
+    to: switch
+  link172:
+    from: switch
+    to: sender86
+  link173:
+    from: sender87
+    to: switch
+  link174:
+    from: switch
+    to: sender87
+  link175:
+    from: sender88
+    to: switch
+  link176:
+    from: switch
+    to: sender88
+  link177:
+    from: sender89
+    to: switch
+  link178:
+    from: switch
+    to: sender89
+  link179:
+    from: sender90
+    to: switch
+  link180:
+    from: switch
+    to: sender90
+  link181:
+    from: sender91
+    to: switch
+  link182:
+    from: switch
+    to: sender91
+  link183:
+    from: sender92
+    to: switch
+  link184:
+    from: switch
+    to: sender92
+  link185:
+    from: sender93
+    to: switch
+  link186:
+    from: switch
+    to: sender93
+  link187:
+    from: sender94
+    to: switch
+  link188:
+    from: switch
+    to: sender94
+  link189:
+    from: sender95
+    to: switch
+  link190:
+    from: switch
+    to: sender95
+  link191:
+    from: sender96
+    to: switch
+  link192:
+    from: switch
+    to: sender96
+  link193:
+    from: sender97
+    to: switch
+  link194:
+    from: switch
+    to: sender97
+  link195:
+    from: sender98
+    to: switch
+  link196:
+    from: switch
+    to: sender98
+  link197:
+    from: sender99
+    to: switch
+  link198:
+    from: switch
+    to: sender99
+  link199:
+    from: sender100
+    to: switch
+  link200:
+    from: switch
+    to: sender100
+  link201:
+    from: sender101
+    to: switch
+  link202:
+    from: switch
+    to: sender101
+  link203:
+    from: sender102
+    to: switch
+  link204:
+    from: switch
+    to: sender102
+  link205:
+    from: sender103
+    to: switch
+  link206:
+    from: switch
+    to: sender103
+  link207:
+    from: sender104
+    to: switch
+  link208:
+    from: switch
+    to: sender104
+  link209:
+    from: sender105
+    to: switch
+  link210:
+    from: switch
+    to: sender105
+  link211:
+    from: sender106
+    to: switch
+  link212:
+    from: switch
+    to: sender106
+  link213:
+    from: sender107
+    to: switch
+  link214:
+    from: switch
+    to: sender107
+  link215:
+    from: sender108
+    to: switch
+  link216:
+    from: switch
+    to: sender108
+  link217:
+    from: sender109
+    to: switch
+  link218:
+    from: switch
+    to: sender109
+  link219:
+    from: sender110
+    to: switch
+  link220:
+    from: switch
+    to: sender110
+  link221:
+    from: sender111
+    to: switch
+  link222:
+    from: switch
+    to: sender111
+  link223:
+    from: sender112
+    to: switch
+  link224:
+    from: switch
+    to: sender112
+  link225:
+    from: sender113
+    to: switch
+  link226:
+    from: switch
+    to: sender113
+  link227:
+    from: sender114
+    to: switch
+  link228:
+    from: switch
+    to: sender114
+  link229:
+    from: sender115
+    to: switch
+  link230:
+    from: switch
+    to: sender115
+  link231:
+    from: sender116
+    to: switch
+  link232:
+    from: switch
+    to: sender116
+  link233:
+    from: sender117
+    to: switch
+  link234:
+    from: switch
+    to: sender117
+  link235:
+    from: sender118
+    to: switch
+  link236:
+    from: switch
+    to: sender118
+  link237:
+    from: sender119
+    to: switch
+  link238:
+    from: switch
+    to: sender119
+  link239:
+    from: sender120
+    to: switch
+  link240:
+    from: switch
+    to: sender120
+  link241:
+    from: sender121
+    to: switch
+  link242:
+    from: switch
+    to: sender121
+  link243:
+    from: sender122
+    to: switch
+  link244:
+    from: switch
+    to: sender122
+  link245:
+    from: sender123
+    to: switch
+  link246:
+    from: switch
+    to: sender123
+  link247:
+    from: sender124
+    to: switch
+  link248:
+    from: switch
+    to: sender124
+  link249:
+    from: sender125
+    to: switch
+  link250:
+    from: switch
+    to: sender125
+  link251:
+    from: sender126
+    to: switch
+  link252:
+    from: switch
+    to: sender126
+  link253:
+    from: sender127
+    to: switch
+  link254:
+    from: switch
+    to: sender127
+  link255:
+    from: sender128
+    to: switch
+  link256:
+    from: switch
+    to: sender128
+  link257:
+    from: sender129
+    to: switch
+  link258:
+    from: switch
+    to: sender129
+  link259:
+    from: sender130
+    to: switch
+  link260:
+    from: switch
+    to: sender130
+  link261:
+    from: sender131
+    to: switch
+  link262:
+    from: switch
+    to: sender131
+  link263:
+    from: sender132
+    to: switch
+  link264:
+    from: switch
+    to: sender132
+  link265:
+    from: sender133
+    to: switch
+  link266:
+    from: switch
+    to: sender133
+  link267:
+    from: sender134
+    to: switch
+  link268:
+    from: switch
+    to: sender134
+  link269:
+    from: sender135
+    to: switch
+  link270:
+    from: switch
+    to: sender135
+  link271:
+    from: sender136
+    to: switch
+  link272:
+    from: switch
+    to: sender136
+  link273:
+    from: sender137
+    to: switch
+  link274:
+    from: switch
+    to: sender137
+  link275:
+    from: sender138
+    to: switch
+  link276:
+    from: switch
+    to: sender138
+  link277:
+    from: sender139
+    to: switch
+  link278:
+    from: switch
+    to: sender139
+  link279:
+    from: sender140
+    to: switch
+  link280:
+    from: switch
+    to: sender140
+  link281:
+    from: switch
+    to: receiver
+  link282:
+    from: receiver
+    to: switch

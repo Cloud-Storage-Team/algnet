@@ -33,8 +33,8 @@ def generate_topology(flows):
     topology = {
         "presets": {
             "link" : {"default" : {
-                "latency": "5ns",
-                "throughput": "100Gbps",
+                "latency": "3000ns",
+                "throughput": "50Gbps",
                 "ingress_buffer_size": "1000000B",
                 "egress_buffer_size": "1000000B",
             }}
@@ -101,22 +101,22 @@ def generate_simulation(
     simulation = {
         "topology_config_path": topology_file,
         "connections": {},
-        "simulation_time": 500000,
+        "simulation_time": 1000000,
     }
 
     for i in range(0, len(senders)):
         simulation["connections"][f"conn{i+1}"] = {
             "sender_id": senders[i],
             "receiver_id": "receiver",
-            "packets_to_send": 1000,
+            "packets_to_send": 100000,
             "mplb": "round_robin",
             "flows": {
                 "flow": {
                     "type": "tcp",
-                    "packet_size": 1500,
+                    "packet_size": 1000,
                     "cc": {
                         "type": "swift",
-                        "base_target": "200ns"
+                        "base_target": "12450ns"
                     }
                 }
             },
