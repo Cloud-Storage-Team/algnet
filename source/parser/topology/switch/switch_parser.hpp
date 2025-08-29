@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "device/switch.hpp"
+#include "parser/preset_storage.hpp"
 
 namespace sim {
 
