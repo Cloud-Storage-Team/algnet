@@ -13,7 +13,7 @@ Switch::Switch(Id a_id, ECN&& a_ecn, std::unique_ptr<IPacketHasher> a_hasher)
 Switch::Switch(SwitchInitArgs args)
     : Switch(utils::value_or_base_error(args.id),
            utils::value_or_base_error(args.ecn),
-           utils::value_or_base_error(std::move(args.hasher))) {}
+           utils::value_or_base_error(args.hasher)) {}
     
 bool Switch::notify_about_arrival(TimeNs arrival_time) {
     return m_process_scheduler.notify_about_arriving(arrival_time,
