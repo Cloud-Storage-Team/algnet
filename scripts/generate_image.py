@@ -86,7 +86,7 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
     
     # Process hosts
     for host_id, host_info in hosts.items():
-        if (not host_info):
+        if not host_info:
             continue
         layer = host_info.get("layer", DEFAULT_LAYERS["host"])
         all_devices.append((host_id, "host", layer, host_info))
@@ -157,7 +157,6 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
     # Create subgraphs for each layer
     for layer, devices in sorted(layer_groups.items()):
         sorted_devices = sorted(devices, key = key_lambda)
-        print(sorted_devices)
         with graph.subgraph() as s:
             s.attr(rank="same")
             for device_id, dev_type in sorted_devices:

@@ -1,5 +1,15 @@
 import yaml
 
+def add_bidirectional_link(config, from_node, to_node, link_counter, preset = "default"):
+    config["links"][f"link{link_counter}"] = {
+        "from": from_node, "to": to_node, "preset-name": preset
+    }
+    link_counter += 1
+    config["links"][f"link{link_counter}"] = {
+        "from": to_node, "to": from_node, "preset-name": preset
+    }
+    return link_counter + 1
+
 def generate_fat_tree_config(k):
     if k % 2 != 0 or k < 2:
         raise ValueError("k must be an even integer >= 2")
@@ -79,20 +89,7 @@ def generate_fat_tree_config(k):
                 host_num = pod * hosts_per_pod + (edge_idx - 1) * (k // 2) + h
                 host_type = "sender" if host_num <= total_hosts // 2 else "receiver"
                 actual_host_num = host_num if host_type == "sender" else host_num - senders
-                
-                config["links"][f"link{link_counter}"] = {
-                    "from": f"{host_type}{actual_host_num}",
-                    "to": f"edge{edge_id}",
-                    "preset-name": "default"
-                }
-                link_counter += 1
-                
-                config["links"][f"link{link_counter}"] = {
-                    "from": f"edge{edge_id}",
-                    "to": f"{host_type}{actual_host_num}",
-                    "preset-name": "default"
-                }
-                link_counter += 1
+                link_counter = add_bidirectional_link(config, f"{host_type}{actual_host_num}", f"edge{edge_id}", link_counter)
     
     # Aggr-edge
     for pod in range(num_pods):
@@ -100,20 +97,7 @@ def generate_fat_tree_config(k):
             edge_id = pod * edge_per_pod + edge_idx
             for aggr_idx in range(1, aggr_per_pod + 1):
                 aggr_id = pod * aggr_per_pod + aggr_idx
-                
-                config["links"][f"link{link_counter}"] = {
-                    "from": f"edge{edge_id}",
-                    "to": f"aggr{aggr_id}",
-                    "preset-name": "default"
-                }
-                link_counter += 1
-                
-                config["links"][f"link{link_counter}"] = {
-                    "from": f"aggr{aggr_id}",
-                    "to": f"edge{edge_id}",
-                    "preset-name": "default"
-                }
-                link_counter += 1
+                link_counter = add_bidirectional_link(config, f"edge{edge_id}", f"aggr{aggr_id}", link_counter, "medium_speed")
     
     # Aggr-core
     for pod in range(num_pods):
@@ -122,20 +106,7 @@ def generate_fat_tree_config(k):
             core_offset = (aggr_idx - 1) * (k // 2)
             for core_idx in range(1, (k // 2) + 1):
                 core_id = core_offset + core_idx
-                
-                config["links"][f"link{link_counter}"] = {
-                    "from": f"aggr{aggr_id}",
-                    "to": f"core{core_id}",
-                    "preset-name": "high_speed"
-                }
-                link_counter += 1
-                
-                config["links"][f"link{link_counter}"] = {
-                    "from": f"core{core_id}",
-                    "to": f"aggr{aggr_id}",
-                    "preset-name": "high_speed"
-                }
-                link_counter += 1
+                link_counter = add_bidirectional_link(config, f"aggr{aggr_id}", f"core{core_id}", link_counter, "high_speed")
     
     return config
 
