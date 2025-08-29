@@ -2,8 +2,8 @@
 #include <filesystem>
 #include <unordered_set>
 
-#include "flow/i_flow.hpp"
 #include "connection/i_connection.hpp"
+#include "flow/i_flow.hpp"
 #include "types.hpp"
 
 namespace sim {
@@ -12,13 +12,14 @@ namespace sim {
 // Maps flow Ids to count of delivered bytes
 class Summary {
 public:
-    Summary(std::map<Id, std::map<Id, SizeByte>> values);
-    Summary(const std::unordered_set<std::shared_ptr<IConnection>>& connections);
+    Summary(std::map<Id, std::map<Id, SpeedGbps>> values);
+    Summary(
+        const std::unordered_set<std::shared_ptr<IConnection>>& connections);
 
     void write_to_csv(std::filesystem::path output_path) const;
 
 private:
-    std::map<Id, std::map<Id, SizeByte>> m_values;
+    std::map<Id, std::map<Id, SpeedGbps>> m_values;
 };
 
 }  // namespace sim

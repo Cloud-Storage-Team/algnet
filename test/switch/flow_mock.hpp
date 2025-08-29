@@ -14,6 +14,7 @@ public:
     void send_packet() final;
     std::shared_ptr<sim::IConnection> get_conn() const final;
     virtual SizeByte get_delivered_data_size() const final;
+    virtual TimeNs get_fct() const final;
 
     std::shared_ptr<sim::IHost> get_sender() const final;
     std::shared_ptr<sim::IHost> get_receiver() const final;

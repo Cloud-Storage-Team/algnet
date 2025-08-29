@@ -30,11 +30,17 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
     if (m_dest.lock() == nullptr) {
         throw std::invalid_argument("Receiver for TcpFlow is nullptr");
     }
+    m_init_time = Scheduler::get_instance().get_current_time();
     initialize_flag_manager();
 }
 
 SizeByte TcpFlow::get_delivered_data_size() const {
     return m_delivered_data_size;
+}
+
+TimeNs TcpFlow::get_fct() const {
+    TimeNs now = Scheduler::get_instance().get_current_time();
+    return now - m_init_time;
 }
 
 std::shared_ptr<IHost> TcpFlow::get_sender() const { return m_src.lock(); }
@@ -46,9 +52,9 @@ Id TcpFlow::get_id() const { return m_id; }
 SizeByte TcpFlow::get_delivered_bytes() const { return m_delivered_data_size; }
 
 std::uint32_t TcpFlow::get_sending_quota() const {
-    constexpr double EPS = 1e-6;
-    const auto slots = static_cast<std::uint32_t>(m_cc->get_cwnd() + EPS);
-    return (m_packets_in_flight < slots) ? (slots - m_packets_in_flight) : 0;
+    const auto slots =
+        static_cast<std::uint32_t>(std::max(m_cc->get_cwnd(), 1.0) + 1e-9);
+    return (slots > m_packets_in_flight) ? (slots - m_packets_in_flight) : 0;
 }
 
 Packet TcpFlow::create_packet(PacketNum packet_num) {
@@ -67,8 +73,8 @@ Packet TcpFlow::create_packet(PacketNum packet_num) {
 
 void TcpFlow::send_packet() {
     if (get_sending_quota() == 0) {
-        LOG_WARN(fmt::format("No sending quota for flow {}; packet not sent",
-                             m_id));
+        LOG_WARN(
+            fmt::format("No sending quota for flow {}; packet not sent", m_id));
         return;
     }
     Packet packet = create_packet(m_next_packet_num++);
@@ -94,6 +100,7 @@ Packet TcpFlow::create_ack(Packet data) {
     ack.dest_id = m_src.lock()->get_id();
     ack.size = SizeByte(1);
     ack.flow = this;
+    ack.generated_time = data.generated_time;
     ack.sent_time = data.sent_time;
     ack.delivered_data_size_at_origin = data.delivered_data_size_at_origin;
     ack.ttl = M_MAX_TTL;
@@ -191,7 +198,6 @@ void TcpFlow::update(Packet packet) {
             m_packets_in_flight--;
         }
 
-        double old_cwnd = m_cc->get_cwnd();
         m_cc->on_ack(rtt, m_rtt_statistics.get_mean(),
                      packet.congestion_experienced);
 
@@ -199,14 +205,12 @@ void TcpFlow::update(Packet packet) {
 
         SpeedGbps delivery_rate =
             (m_delivered_data_size - packet.delivered_data_size_at_origin) /
-            rtt;
+            (current_time - packet.generated_time);
         MetricsCollector::get_instance().add_delivery_rate(
             packet.flow->get_id(), current_time, delivery_rate);
 
-        double cwnd = m_cc->get_cwnd();
-        if (old_cwnd != cwnd) {
-            MetricsCollector::get_instance().add_cwnd(m_id, current_time, cwnd);
-        }
+        MetricsCollector::get_instance().add_cwnd(m_id, current_time,
+                                                  m_cc->get_cwnd());
         FlowSample sample{.ack_recv_time = current_time,
                           .packet_sent_time = packet.sent_time,
                           .packets_in_flight = m_packets_in_flight,
@@ -243,7 +247,7 @@ TimeNs TcpFlow::get_max_timeout() const {
     TimeNs mean = m_rtt_statistics.get_mean();
     TimeNs std = m_rtt_statistics.get_std();
     if (mean == TimeNs(0)) {
-        return TimeNs(std::numeric_limits<long double>::max());
+        return TimeNs(std::numeric_limits<double>::max());
     }
     return mean * 2 + std * 4;
 }
@@ -252,7 +256,7 @@ void TcpFlow::send_packet_now(Packet packet) {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
 
     TimeNs max_timeout = get_max_timeout();
-    if (max_timeout != TimeNs(std::numeric_limits<long double>::max())) {
+    if (max_timeout != TimeNs(std::numeric_limits<double>::max())) {
         Scheduler::get_instance().add<Timeout>(current_time + max_timeout,
                                                this->shared_from_this(),
                                                packet.packet_num);
