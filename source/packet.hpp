@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "flow/i_flow.hpp"
 #include "utils/bitset.hpp"
