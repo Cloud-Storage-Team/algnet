@@ -22,7 +22,7 @@ value_or_base_error(const str_expected<T>& opt) {
 
 template <typename T>
 typename std::enable_if<!std::is_copy_constructible<T>::value, T>::type
-value_or_base_error(str_expected<T>& opt) {
+value_or_base_error(str_expected<T>&& opt) {
     if (!opt.has_value()) {
         throw BaseError(opt.error());
     }
