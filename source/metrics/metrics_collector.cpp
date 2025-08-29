@@ -18,8 +18,8 @@ MetricsCollector::MetricsCollector()
       m_cwnd_storage("cwnd", m_metrics_filter),
       m_rate_storage("rate", m_metrics_filter),
       m_packet_reordering_storage("packet_reordering", m_metrics_filter),
-      m_arrived_packets("telemetry", m_metrics_filter),
-      m_links_queue_size_storage(m_metrics_filter) {
+      m_links_queue_size_storage(m_metrics_filter),
+      m_arrived_packets("telemetry", m_metrics_filter) {
     m_is_initialised = true;
 }
 
