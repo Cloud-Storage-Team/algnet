@@ -4,6 +4,7 @@
 
 #include "logger/logger.hpp"
 #include "utils/validation.hpp"
+#include "metrics/metrics_collector.hpp"
 
 namespace sim {
 
@@ -49,7 +50,7 @@ TimeNs Host::process() {
 
     if (packet.dest_id == get_id()) {
         packet.flow->update(packet);
-        LOG_ERROR(packet.get_telemetry_string());
+        MetricsCollector::get_instance().add_arrived_packet(get_id(), packet);
     } else {
         LOG_WARN(
             "Packet arrived to Host that is not its destination; use routing "
