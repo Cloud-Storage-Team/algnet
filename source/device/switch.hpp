@@ -5,8 +5,15 @@
 #include "device/scheduling_module.hpp"
 #include "ecn.hpp"
 #include "event/process.hpp"
+#include "utils/str_expected.hpp"
 
 namespace sim {
+
+struct SwitchInitArgs {
+    utils::str_expected<Id> id = std::unexpected("Missing id");
+    utils::str_expected<ECN> ecn = std::unexpected("Missing ecn settings");
+    utils::str_expected<std::unique_ptr<IPacketHasher>> hasher = std::unexpected("Missing hasher");
+};
 
 class Switch : public ISwitch,
                public RoutingModule,
@@ -14,6 +21,7 @@ class Switch : public ISwitch,
 public:
     Switch(Id a_id, ECN&& a_ecn = ECN(1.0, 1.0, 0.0),
            std::unique_ptr<IPacketHasher> a_packet_hasher = nullptr);
+    explicit Switch(SwitchInitArgs args);
     ~Switch() = default;
 
     bool notify_about_arrival(TimeNs arrival_time) final;
