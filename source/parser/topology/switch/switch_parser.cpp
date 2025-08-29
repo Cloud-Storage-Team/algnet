@@ -1,6 +1,8 @@
 #include "switch_parser.hpp"
 
 #include "parser/parse_utils.hpp"
+#include "utils/errors/base_error.hpp"
+#include "utils/errors/error_with_id.hpp"
 
 namespace sim {
 
