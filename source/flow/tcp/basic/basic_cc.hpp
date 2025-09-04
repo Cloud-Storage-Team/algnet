@@ -9,6 +9,7 @@ public:
     void on_timeout() final;
     TimeNs get_pacing_delay() const final;
     double get_cwnd() const final;
+    SizeByte get_packet_size() const final;
     std::string to_string() const final;
 };
 }  // namespace sim

@@ -40,6 +40,8 @@ TimeNs TcpTahoeCC::get_pacing_delay() const { return TimeNs(0); }
 
 double TcpTahoeCC::get_cwnd() const { return m_cwnd; }
 
+SizeByte TcpTahoeCC::get_packet_size() const { return DEFAULT_PACKET_SIZE; };
+
 std::string TcpTahoeCC::to_string() const {
     return fmt::format("[delay threshold: {}, cwnd: {}, ssthresh: {}]",
                        m_delay_threshold.value(), m_cwnd, m_ssthresh);

@@ -19,9 +19,15 @@ public:
     // Current congestion window (in packets)
     virtual double get_cwnd() const = 0;
 
+    // Currect maximal size of packets
+    virtual SizeByte get_packet_size() const = 0;
+
     // For logs
     virtual std::string to_string() const = 0;
 
     virtual ~ITcpCC() = default;
 };
+
+const static inline SizeByte DEFAULT_PACKET_SIZE(1500);
+
 }  // namespace sim

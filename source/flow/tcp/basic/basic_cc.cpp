@@ -14,6 +14,8 @@ double BasicCC::get_cwnd() const { return 1e6; }
 
 TimeNs BasicCC::get_pacing_delay() const { return TimeNs(0); }
 
+SizeByte BasicCC::get_packet_size() const { return DEFAULT_PACKET_SIZE; };
+
 std::string BasicCC::to_string() const { return ""; }
 
 }  // namespace sim

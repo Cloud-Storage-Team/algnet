@@ -45,6 +45,8 @@ public:
 
     [[nodiscard]] double get_cwnd() const final;
 
+    [[nodiscard]] SizeByte get_packet_size() const final;
+
     [[nodiscard]] std::string to_string() const final;
 
     // TO‑DO: fast‑recovery hook

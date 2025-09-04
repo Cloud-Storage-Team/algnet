@@ -82,6 +82,8 @@ TimeNs TcpSwiftCC::get_pacing_delay() const {
 
 double TcpSwiftCC::get_cwnd() const { return m_cwnd; }
 
+SizeByte TcpSwiftCC::get_packet_size() const { return DEFAULT_PACKET_SIZE; };
+
 std::string TcpSwiftCC::to_string() const {
     return fmt::format("[target_now: {} ns, cwnd: {:0.3f}]",
                        compute_target_delay().value_nanoseconds(), m_cwnd);
