@@ -20,17 +20,9 @@ jobs:
     - name: Set up Clang Format
       run: sudo apt-get install clang-format
 
-    - name: Collect files for Clang
+    - name: Check Clang format
       run:
-        files_for_clang="
-        main.cpp
-        $(
-          find source -type f -name "*.cpp" -o -name "*.hpp";
-          find test -type f -name "*.cpp" -o -name "*.hpp"
-        )"
-    - name: Clang format
-      run:
-        clang-format --dry-run -Werror $files_for_clang
+        clang-format --dry-run -Werror $(git ls-files 'source/*.cpp' 'source/*.hpp' 'test/*.cpp' 'test/*.hpp')
   build:
     runs-on: ubuntu-latest
     steps:

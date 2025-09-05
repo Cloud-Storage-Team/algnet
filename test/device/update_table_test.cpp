@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "utils.hpp"
 #include "../utils/fake_packet.hpp"
+#include "utils.hpp"
 
 namespace test {
 
@@ -21,12 +21,15 @@ TEST_F(UpdateTable, RouteIsPresent) {
         std::make_shared<TestLink>(TestLink(source, neighbour));
 
     EXPECT_EQ(source->get_link_to_destination(FakePacket(dest)), nullptr);
-    EXPECT_EQ(source->get_link_to_destination(FakePacket(another_dest)), nullptr);
+    EXPECT_EQ(source->get_link_to_destination(FakePacket(another_dest)),
+              nullptr);
 
     source->update_routing_table(dest->get_id(), link_neighbour);
 
-    EXPECT_EQ(source->get_link_to_destination(FakePacket(dest)), link_neighbour);
-    EXPECT_EQ(source->get_link_to_destination(FakePacket(another_dest)), nullptr);
+    EXPECT_EQ(source->get_link_to_destination(FakePacket(dest)),
+              link_neighbour);
+    EXPECT_EQ(source->get_link_to_destination(FakePacket(another_dest)),
+              nullptr);
 }
 
 }  // namespace test

@@ -48,7 +48,8 @@ std::unique_ptr<IPacketHasher> SwitchParser::parse_hasher(
     if (type == "salt") {
         return std::make_unique<SaltECMPHasher>(std::move(switch_id));
     }
-    throw std::runtime_error(fmt::format("Unexpected packet sprayng type: {}", type));
+    throw std::runtime_error(
+        fmt::format("Unexpected packet sprayng type: {}", type));
 }
 
 }  // namespace sim

@@ -1,6 +1,6 @@
 #pragma once
-#include "event.hpp"
 #include "connection/i_connection.hpp"
+#include "event.hpp"
 
 namespace sim {
 
@@ -17,4 +17,4 @@ private:
     std::weak_ptr<IConnection> m_connection;
 };
 
-}
+}  // namespace sim

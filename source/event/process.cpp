@@ -5,7 +5,7 @@
 namespace sim {
 
 Process::Process(TimeNs a_time, std::weak_ptr<IProcessingDevice> a_device)
-    : Event(a_time), m_device(a_device) {};
+    : Event(a_time), m_device(a_device){};
 
 void Process::operator()() {
     if (m_device.expired()) {
@@ -23,4 +23,4 @@ void Process::operator()() {
     Scheduler::get_instance().add<Process>(m_time + process_time, m_device);
 };
 
-}
+}  // namespace sim
