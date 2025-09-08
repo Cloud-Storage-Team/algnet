@@ -75,14 +75,14 @@ links:
 
 - `to`: Destination device name.
 
-- `latency`: Transmission delay in [time format](../README.md#units-data-format)
+- `latency`: Transmission delay in [time format](../README.md)
 
-- `throughput`: Link bandwidth in [speed format](../README.md#units-data-format)
+- `throughput`: Link bandwidth in [speed format](../README.md)
 
-- `ingress_buffer_size`: Link ingress buffer size in [size format](../README.md#units-data-format)
+- `ingress_buffer_size`: Link ingress buffer size in [size format](../README.md)
 
-- `egress_buffer_size`: Link egress buffer size in [size format](../README.md#units-data-format)
+- `egress_buffer_size`: Link egress buffer size in [size format](../README.md)
 
 ### Examples images
 
-You may generate images of topologies using the [generator](../scripts/generate_image.py) script.
+You may generate images of topologies using the [generator](../../scripts/generate_image.py) script.
