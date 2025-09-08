@@ -9,7 +9,7 @@ connections:
     flows:
       flow1:
         type: tcp
-        packet_size: 4096
+        packet_size: 4096B
         cc:
           type: tahoe
 
@@ -21,7 +21,7 @@ connections:
     flows:
       flow1:
         type: tcp
-        packet_size: 2048
+        packet_size: 2048B
         cc:
           type: tahoe
 

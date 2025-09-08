@@ -9,7 +9,7 @@ connections:
     flows:
       flow1:
         type: tcp
-        packet_size: 10000
+        packet_size: 10000B
         cc:
           type: tahoe
 
@@ -21,7 +21,7 @@ connections:
     flows:
       flow1:
         type: tcp
-        packet_size: 10000
+        packet_size: 10000B
         cc:
           type: tahoe
 
@@ -33,7 +33,7 @@ connections:
     flows:
       flow1:
         type: tcp
-        packet_size: 10000
+        packet_size: 10000B
         cc:
           type: tahoe
 
@@ -45,7 +45,7 @@ connections:
     flows:
       flow1:
         type: tcp
-        packet_size: 10000
+        packet_size: 10000B
         cc:
           type: tahoe
 
@@ -57,7 +57,7 @@ connections:
     flows:
       flow1:
         type: tcp
-        packet_size: 10000
+        packet_size: 10000B
         cc:
           type: tahoe
 

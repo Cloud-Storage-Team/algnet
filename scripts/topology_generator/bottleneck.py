@@ -118,7 +118,7 @@ def generate_simulation(
     simulation_time,
     packet_interval,
     number_of_packets,
-    packet_size=1500,
+    packet_size_bytes=1500,
     flow_type="tcp",
 ):
     """
@@ -150,7 +150,7 @@ def generate_simulation(
                 "type": flow_type,
                 "sender_id": sender_names[i],
                 "receiver_id": receiver_names[min(i, num_receivers - 1)],
-                "packet_size": packet_size,
+                "packet_size": f"{packet_size_bytes}B",
                 "packet_interval": packet_interval,
                 "number_of_packets": number_of_packets,
                 "cc": cc
@@ -168,7 +168,7 @@ def generate_simulation(
                     "type": flow_type,
                     "sender_id": sender_names[i],
                     "receiver_id": receiver_names[j],
-                    "packet_size": packet_size,
+                    "packet_size": "f{packet_size}B",
                     "packet_interval": packet_interval,
                     "number_of_packets": number_of_packets,
                     "cc": cc

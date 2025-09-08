@@ -113,7 +113,7 @@ def generate_simulation(
             "flows": {
                 "flow": {
                     "type": "tcp",
-                    "packet_size": 1500,
+                    "packet_size": "1500B",
                     "cc": {
                         "type": "swift",
                         "base_target": "200ns"

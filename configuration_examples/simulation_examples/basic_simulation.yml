@@ -9,7 +9,7 @@ connections:
     flows:
       flow1:
         type: tcp
-        packet_size: 64
+        packet_size: 64B
         cc:
           type: basic
   conn2:
@@ -20,7 +20,7 @@ connections:
     flows:
       flow1:
         type: tcp
-        packet_size: 128
+        packet_size: 128B
         cc:
           type: basic
 

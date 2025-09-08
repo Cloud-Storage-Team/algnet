@@ -41,8 +41,8 @@ TimeNs parse_time(const std::string &time) {
     throw std::runtime_error("Unsupported time unit: " + unit);
 }
 
-SizeByte parse_buffer_size(const std::string &buffer_size) {
-    auto [value, unit] = parse_value_unit(buffer_size);
+SizeByte parse_size(const std::string &size) {
+    auto [value, unit] = parse_value_unit(size);
     if (unit == "B") {
         return SizeByte(value);
     }
