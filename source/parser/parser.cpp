@@ -69,7 +69,7 @@ YamlParser::build_simulator_from_config(const std::filesystem::path &path) {
 
 std::optional<TimeNs> YamlParser::parse_simulation_time(
     const YAML::Node &config) {
-    auto value = config["simulation_time"]; 
+    auto value = config["simulation_time"];
     if (!value) {
         return std::nullopt;
     }
