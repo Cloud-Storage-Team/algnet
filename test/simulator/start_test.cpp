@@ -54,7 +54,8 @@ TEST_F(Start, TrivialTopology) {
     auto flow = add_connection_with_single_flow(sim, "conn1", sender, receiver,
                                                 packet_size, packets_to_send);
 
-    sim.start(stop_time);
+    sim.set_stop_time(stop_time);
+    sim.start();
 
     ASSERT_EQ(flow->get_delivered_bytes(), packet_size * packets_to_send);
 }
@@ -89,7 +90,8 @@ TEST_F(Start, ThreeToOneTopology) {
         flows.push_back(flow);
     }
 
-    sim.start(stop_time);
+    sim.set_stop_time(stop_time);
+    sim.start();
 
     for (int i = 0; i < 3; ++i) {
         ASSERT_EQ(packet_size * pkts[i], flows[i]->get_delivered_bytes())
