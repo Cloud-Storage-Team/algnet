@@ -18,7 +18,31 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Set up Clang Format
-      run: sudo apt-get install clang-format
+      run: |
+        sudo apt-get install clang-format
+        clang-format --version
+        sudo apt-get install clang-format-14
+        sudo apt-get install clang-format-15
+        sudo apt-get install clang-format-16
+        sudo apt-get install clang-format-17
+        sudo apt-get install clang-format-18
+        sudo apt-get install clang-format-19
+        sudo apt-get install clang-format-20
+        sudo apt-get install clang-format-21
+        sudo apt-get install clang-format-22
+        sudo apt-get install clang-format-23
+        sudo apt-get install clang-format-24
+        clang-format-14 --version
+        clang-format-15 --version
+        clang-format-16 --version
+        clang-format-17 --version
+        clang-format-18 --version
+        clang-format-19 --version
+        clang-format-20 --version
+        clang-format-21 --version
+        clang-format-22 --version
+        clang-format-23 --version
+        clang-format-24 --version 
 
     - name: Check Clang format
       run:
