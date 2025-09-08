@@ -40,9 +40,9 @@ int main(const int argc, char **argv) {
     auto [simulator, simulation_time] =
         parser.build_simulator_from_config(flags["config"].as<std::string>());
 
-    // if (simulation_time.has_value()) {
-    simulator.set_stop_time(simulation_time /*.value()*/);
-    // }
+    if (simulation_time.has_value()) {
+        simulator.set_stop_time(simulation_time.value());
+    }
 
     simulator.start();
 

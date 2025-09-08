@@ -127,8 +127,9 @@ def generate_simulation(
     simulation = {
         "topology_config_path": topology_file,
         "flows": {},
-        "simulation_time": simulation_time,
     }
+    if simulation_time is not None:
+        simulation["simulation_time"] = simulation_time
 
     cc = {
         "type": "tahoe",
@@ -213,7 +214,7 @@ def parse_arguments():
         help="Path to the output simulation config file",
     )
     parser.add_argument(
-        "--simulation-time", type=int, default=50000, help="Time of the simulation, ns"
+        "--simulation-time", type=int, default=None, help="Time of the simulation, ns"
     )
     parser.add_argument(
         "--packets",

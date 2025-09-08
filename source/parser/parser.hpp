@@ -13,13 +13,14 @@ namespace sim {
 
 class YamlParser {
 public:
-    std::pair<Simulator, TimeNs> build_simulator_from_config(
+    std::pair<Simulator, std::optional<TimeNs> > build_simulator_from_config(
         const std::filesystem::path& path);
 
 private:
     static std::filesystem::path parse_topology_config_path(
         const YAML::Node& config);
-    static TimeNs parse_simulation_time(const YAML::Node& config);
+    static std::optional<TimeNs> parse_simulation_time(
+        const YAML::Node& config);
     // TODO: This enum is a temporary solution that solves the following
     // problem: Inside parse_i_connection, flows are created. However, flow
     // requires a pointer to the connection in the constructor. By default, the

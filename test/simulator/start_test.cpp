@@ -47,14 +47,12 @@ TEST_F(Start, TrivialTopology) {
 
     add_two_way_links(sim, {{sender, swtch}, {swtch, receiver}});
 
-    constexpr TimeNs stop_time(1000);
     constexpr SizeByte packet_size(1024);
     constexpr std::uint32_t packets_to_send = 1;
 
     auto flow = add_connection_with_single_flow(sim, "conn1", sender, receiver,
                                                 packet_size, packets_to_send);
 
-    sim.set_stop_time(stop_time);
     sim.start();
 
     ASSERT_EQ(flow->get_delivered_bytes(), packet_size * packets_to_send);
@@ -77,7 +75,6 @@ TEST_F(Start, ThreeToOneTopology) {
     }
     add_two_way_links(sim, {{swtch, receiver}});
 
-    const TimeNs stop_time{10000};
     const SizeByte packet_size{10};
 
     const std::uint32_t pkts[] = {10, 50, 100};
@@ -90,7 +87,6 @@ TEST_F(Start, ThreeToOneTopology) {
         flows.push_back(flow);
     }
 
-    sim.set_stop_time(stop_time);
     sim.start();
 
     for (int i = 0; i < 3; ++i) {
