@@ -22,8 +22,8 @@ concept BitStorageType = std::is_unsigned_v<T>;
 template <BitStorageType BitStorage>
 class BitSet {
 public:
-    BitSet() : m_data(0){};
-    explicit BitSet(BitStorage initial) : m_data(initial){};
+    BitSet() : m_data(0) {};
+    explicit BitSet(BitStorage initial) : m_data(initial) {};
 
     bool set_bit(std::uint8_t pos, bool value) {
         if (pos >= sizeof_bits(m_data)) {
