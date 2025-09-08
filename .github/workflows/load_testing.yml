@@ -14,7 +14,7 @@ env:
 
 jobs:
   load_testing:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v4
@@ -35,7 +35,7 @@ jobs:
         python3 scripts/run_incast_simulation.py -e ${{env.EXECUTABLE_PATH}} --senders 1000 --receivers 30 --time 100000000 --packets 20000
 
   profiling_load_testing:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
 
@@ -63,7 +63,7 @@ jobs:
         head profile.txt
 
   flamegraph:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     permissions:
       contents: write
 
