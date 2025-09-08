@@ -52,7 +52,7 @@ switches:
       probability:
 ```
 - `switch_name` is unique name of switch
-- `ecn` is optional and describes settings ecn settings. You can see more about it [here](https://en.wikipedia.org/wiki/Weighted_random_early_detection) and [here](https://man7.org/linux/man-pages/man8/tc-red.8.html)  
+- `ecn` is optional and describes settings Explicit Congestion Notification settings. You can see more about it [here](https://man7.org/linux/man-pages/man8/tc-red.8.html)  
 
 ### Links
 

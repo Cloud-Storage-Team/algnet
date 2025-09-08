@@ -37,6 +37,7 @@ def check_links_in_markdown(file_path : str):
                 raise requests.exceptions.ConnectionError(f"Can not access to {link_url}")
             print(f"{link_url} is link to an avaliable site")
         except requests.exceptions.RequestException:
+            print(f"{link_url} is not an avaliable site; returned code {response.status_code}")
             incorrect_links.append(link_url)
     if len(incorrect_links) == 0:
         print()
