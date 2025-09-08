@@ -10,13 +10,19 @@ void LinkTest::TearDown() { sim::Scheduler::get_instance().clear(); }
 
 Id DeviceMock::get_id() const { return ""; };
 
-bool DeviceMock::add_inlink([[maybe_unused]] std::shared_ptr<sim::ILink> link) { return false; }
+bool DeviceMock::add_inlink([[maybe_unused]] std::shared_ptr<sim::ILink> link) {
+    return false;
+}
 
-bool DeviceMock::add_outlink([[maybe_unused]] std::shared_ptr<sim::ILink> link) { return false; }
+bool DeviceMock::add_outlink(
+    [[maybe_unused]] std::shared_ptr<sim::ILink> link) {
+    return false;
+}
 
-bool DeviceMock::update_routing_table([[maybe_unused]] Id dest_id,
-                                      [[maybe_unused]] std::shared_ptr<sim::ILink> link,
-                                      [[maybe_unused]] size_t paths_count) {
+bool DeviceMock::update_routing_table(
+    [[maybe_unused]] Id dest_id,
+    [[maybe_unused]] std::shared_ptr<sim::ILink> link,
+    [[maybe_unused]] size_t paths_count) {
     return false;
 }
 
@@ -29,7 +35,9 @@ std::shared_ptr<sim::ILink> DeviceMock::get_link_to_destination(
 
 std::shared_ptr<sim::ILink> DeviceMock::next_inlink() { return {}; }
 
-bool DeviceMock::notify_about_arrival([[maybe_unused]] TimeNs arrival_time) { return false; };
+bool DeviceMock::notify_about_arrival([[maybe_unused]] TimeNs arrival_time) {
+    return false;
+};
 
 TimeNs DeviceMock::process() { return TimeNs(0); };
 

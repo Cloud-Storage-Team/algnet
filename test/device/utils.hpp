@@ -13,7 +13,7 @@ std::vector<std::shared_ptr<sim::IDevice>> createTestDevices(size_t count);
 
 class TestDevice : public virtual sim::IDevice, public sim::RoutingModule {
 public:
-    TestDevice(Id a_id = "") : sim::RoutingModule(a_id) {};
+    TestDevice(Id a_id = "") : sim::RoutingModule(a_id){};
     ~TestDevice() = default;
 
     bool notify_about_arrival(TimeNs arrival_time) final;

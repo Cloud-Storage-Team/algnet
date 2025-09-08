@@ -5,7 +5,7 @@
 
 namespace sim {
 
-Event::Event(TimeNs a_time) : m_time(a_time) {};
+Event::Event(TimeNs a_time) : m_time(a_time){};
 
 TimeNs Event::get_time() const { return m_time; }
 

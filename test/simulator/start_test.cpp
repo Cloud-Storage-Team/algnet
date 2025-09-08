@@ -62,7 +62,7 @@ TEST_F(Start, TrivialTopology) {
 TEST_F(Start, ThreeToOneTopology) {
     sim::Simulator sim;
 
-    auto swtch    = std::make_shared<sim::Switch>("switch");
+    auto swtch = std::make_shared<sim::Switch>("switch");
     auto receiver = std::make_shared<sim::Host>("receiver");
     sim.add_switch(swtch);
     sim.add_host(receiver);
@@ -76,7 +76,7 @@ TEST_F(Start, ThreeToOneTopology) {
     }
     add_two_way_links(sim, {{swtch, receiver}});
 
-    const TimeNs   stop_time{10000};
+    const TimeNs stop_time{10000};
     const SizeByte packet_size{10};
 
     const std::uint32_t pkts[] = {10, 50, 100};
@@ -84,8 +84,8 @@ TEST_F(Start, ThreeToOneTopology) {
     std::vector<std::shared_ptr<sim::TcpFlow>> flows;
     for (int i = 0; i < 3; ++i) {
         auto flow = add_connection_with_single_flow(
-            sim, "conn" + std::to_string(i + 1),
-            senders[i], receiver, packet_size, pkts[i]);
+            sim, "conn" + std::to_string(i + 1), senders[i], receiver,
+            packet_size, pkts[i]);
         flows.push_back(flow);
     }
 
