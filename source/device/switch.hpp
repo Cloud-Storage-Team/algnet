@@ -13,6 +13,8 @@ struct SwitchInitArgs {
     utils::str_expected<Id> id = std::unexpected("Missing id");
     utils::str_expected<ECN> ecn = std::unexpected("Missing ecn settings");
     utils::str_expected<std::unique_ptr<IPacketHasher>> hasher = std::unexpected("Missing hasher");
+
+    SwitchInitArgs(const SwitchInitArgs& other);
 };
 
 class Switch : public ISwitch,
