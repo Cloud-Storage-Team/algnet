@@ -74,13 +74,11 @@ def generate_fat_tree_config(switch_ports_count):
     for i in range(1, core_switches + 1):
         config["switches"][f"core{i}"] = {"preset-name": "core-preset", "layer": 0}
     
-    for p in range(num_pods):
+    for p in range(1, num_pods + 1):
         for a in range(1, aggr_per_pod + 1):
-            aggr_id = p * aggr_per_pod + a
-            config["switches"][f"aggr{aggr_id}"] = {"preset-name": "aggr-preset", "layer": 1}
+            config["switches"][aggr_name(p, a)] = {"preset-name": "aggr-preset", "layer": 1}
         for e in range(1, edge_per_pod + 1):
-            edge_id = p * edge_per_pod + e
-            config["switches"][f"edge{edge_id}"] = {"preset-name": "edge-preset", "layer": 2}
+            config["switches"][edge_name(p, e)] = {"preset-name": "edge-preset", "layer": 2}
 
     link_counter = 1
     
