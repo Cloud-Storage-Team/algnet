@@ -14,6 +14,7 @@ struct SwitchInitArgs {
     utils::str_expected<ECN> ecn = std::unexpected("Missing ecn settings");
     utils::str_expected<std::unique_ptr<IPacketHasher>> hasher = std::unexpected("Missing hasher");
 
+    SwitchInitArgs() = default;
     SwitchInitArgs(const SwitchInitArgs& other);
 };
 
