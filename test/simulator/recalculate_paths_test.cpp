@@ -31,7 +31,7 @@ static void check_pairwise_reachability(const sim::Simulator& simulator) {
 void test_topology(std::filesystem::path topology_path) {
     sim::IdentifierFactory::get_instance().clear();
     sim::YamlParser parser;
-    auto [simulator, sim_time] =
+    sim::Simulator simulator =
         parser.build_simulator_from_config(topology_path);
     simulator.recalculate_paths();
     check_pairwise_reachability(simulator);

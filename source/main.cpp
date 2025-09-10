@@ -37,12 +37,8 @@ int main(const int argc, char **argv) {
         flags["metrics-filter"].as<std::string>());
 
     sim::YamlParser parser;
-    auto [simulator, simulation_time] =
+    sim::Simulator simulator =
         parser.build_simulator_from_config(flags["config"].as<std::string>());
-
-    if (simulation_time.has_value()) {
-        simulator.set_stop_time(simulation_time.value());
-    }
 
     simulator.start();
 

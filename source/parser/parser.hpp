@@ -13,8 +13,7 @@ namespace sim {
 
 class YamlParser {
 public:
-    std::pair<Simulator, std::optional<TimeNs> > build_simulator_from_config(
-        const std::filesystem::path& path);
+    Simulator build_simulator_from_config(const std::filesystem::path& path);
 
 private:
     static std::filesystem::path parse_topology_config_path(
