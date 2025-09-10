@@ -10,4 +10,4 @@ public:
     std::string what_str() const;
 };
 
-}  // namespace sim
+}  // namespace utils

@@ -3,7 +3,7 @@
 
 namespace sim {
 
-using PacketReordering = long double;
+using PacketReordering = uint64_t;
 
 // Metrics that shows degree of packet reordering
 class IPacketReordering {

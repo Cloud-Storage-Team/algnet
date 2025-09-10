@@ -1,17 +1,20 @@
+#include "connection/mplb/round_robin_mplb.hpp"
+
 #include <gtest/gtest.h>
+
+#include <algorithm>
 #include <map>
 #include <memory>
 #include <vector>
-#include <algorithm>
-#include "connection/mplb/round_robin_mplb.hpp"
+
 #include "../switch/flow_mock.hpp"
 
 namespace test {
 
 class RoundRobinMPLBTest : public ::testing::Test {
 protected:
-    using FlowPtr   = std::shared_ptr<sim::IFlow>;
-    using FlowList  = std::vector<FlowPtr>;
+    using FlowPtr = std::shared_ptr<sim::IFlow>;
+    using FlowList = std::vector<FlowPtr>;
     using FlowCount = std::map<FlowPtr, std::size_t, std::owner_less<FlowPtr>>;
 
     sim::RoundRobinMPLB mplb;
@@ -29,7 +32,8 @@ protected:
     static FlowList makeFlows(std::size_t flow_count) {
         FlowList flows;
         flows.reserve(flow_count);
-        for (std::size_t i = 0; i < flow_count; ++i) flows.emplace_back(makeFlow());
+        for (std::size_t i = 0; i < flow_count; ++i)
+            flows.emplace_back(makeFlow());
         return flows;
     }
 
@@ -50,13 +54,16 @@ protected:
         return flow_count;
     }
 
-    static void expectFair(const FlowCount& flow_count, const FlowPtr& flow_1, const FlowPtr& flow_2) {
-        int diff = static_cast<int>(flow_count.at(flow_1)) - static_cast<int>(flow_count.at(flow_2));
+    static void expectFair(const FlowCount& flow_count, const FlowPtr& flow_1,
+                           const FlowPtr& flow_2) {
+        int diff = static_cast<int>(flow_count.at(flow_1)) -
+                   static_cast<int>(flow_count.at(flow_2));
         EXPECT_LE(std::abs(diff), 1);
     }
 };
 
-// Add two flows with the same quota and make sure that they are selected equally
+// Add two flows with the same quota and make sure that they are selected
+// equally
 TEST_F(RoundRobinMPLBTest, AddAndRotateFair) {
     auto flow_1 = makeFlow(), flow_2 = makeFlow();
     mplb.add_flow(flow_1, makeSample(1000));
@@ -110,9 +117,11 @@ TEST_F(RoundRobinMPLBTest, RemoveLast) {
     EXPECT_EQ(mplb.select_flow(), nullptr);
 }
 
-// Remove two of the four flows and check that the remaining ones continue to be selected equally
+// Remove two of the four flows and check that the remaining ones continue to be
+// selected equally
 TEST_F(RoundRobinMPLBTest, RemoveSomeKeepsFairness) {
-    auto flow_1 = makeFlow(), flow_2 = makeFlow(), flow_3 = makeFlow(), flow_4 = makeFlow();
+    auto flow_1 = makeFlow(), flow_2 = makeFlow(), flow_3 = makeFlow(),
+         flow_4 = makeFlow();
     mplb.add_flow(flow_1, makeSample(200));
     mplb.add_flow(flow_2, makeSample(200));
     mplb.add_flow(flow_3, makeSample(200));
@@ -145,7 +154,8 @@ TEST_F(RoundRobinMPLBTest, QuotaExhausted) {
     EXPECT_EQ(mplb.select_flow(), nullptr);
 }
 
-// Check that selecting a flow with zero quota does not affect the round-robin cycle
+// Check that selecting a flow with zero quota does not affect the round-robin
+// cycle
 TEST_F(RoundRobinMPLBTest, SingleFlowCycle) {
     auto flow = makeFlow();
     mplb.add_flow(flow, makeSample(3));
@@ -155,4 +165,4 @@ TEST_F(RoundRobinMPLBTest, SingleFlowCycle) {
     EXPECT_EQ(mplb.select_flow(), nullptr);
 }
 
-} // namespace test
+}  // namespace test

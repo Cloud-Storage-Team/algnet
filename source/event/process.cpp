@@ -23,4 +23,4 @@ void Process::operator()() {
     Scheduler::get_instance().add<Process>(m_time + process_time, m_device);
 };
 
-}
+}  // namespace sim

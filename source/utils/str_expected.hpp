@@ -29,4 +29,4 @@ value_or_base_error(str_expected<T>&& opt) {
     return std::move(opt.value());
 }
 
-}
+}  // namespace utils
