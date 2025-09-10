@@ -129,7 +129,7 @@ def generate_simulation(
         "flows": {},
     }
     if simulation_time is not None:
-        simulation["simulation_time"] = simulation_time
+        simulation["simulation_time"] = f"{simulation_time}ns"
 
     cc = {
         "type": "tahoe",
@@ -154,7 +154,7 @@ def generate_simulation(
                 "packet_size": f"{packet_size_bytes}B",
                 "packet_interval": packet_interval,
                 "number_of_packets": number_of_packets,
-                "cc": cc
+                "cc": cc.copy()
             }
         return simulation
 
