@@ -8,7 +8,7 @@ switches, and links between them.
 The topology file is divided into multiple sections, each representing a different network topology. Each topology
 consists of:
 
-- `packet-spraying`: defines packet spraying type and its setting is need
+- `packet-spraying`: defines packet spraying type and its settings if needed
 
 - `hosts`: Defines hosts
 
