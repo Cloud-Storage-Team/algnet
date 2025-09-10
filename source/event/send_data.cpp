@@ -5,7 +5,7 @@
 namespace sim {
 
 SendData::SendData(TimeNs a_time, std::weak_ptr<IHost> a_device)
-    : Event(a_time), m_device(a_device){};
+    : Event(a_time), m_device(a_device) {};
 
 void SendData::operator()() {
     if (m_device.expired()) {
