@@ -12,7 +12,7 @@ def add_bidirectional_link(config, from_node, to_node, link_counter, preset = "d
 
 def generate_fat_tree_config(switch_ports_count):
     if k % 2 != 0 or k < 2:
-        raise ValueError("k must be an even integer >= 2")
+        raise ValueError(f"Switch's number of ports must be an even integer >= 2, but got {switch_ports_count}")
     
     num_pods = k
     edge_per_pod = k // 2
