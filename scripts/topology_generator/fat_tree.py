@@ -66,10 +66,9 @@ def generate_fat_tree_config(switch_ports_count):
     aggr_name = lambda pod_idx, aggr_idx: f"pod{pod_idx}_aggr{aggr_idx}"
     edge_name = lambda pod_idx, edge_idx: f"pod{pod_idx}_edge{edge_idx}"
     core_name = lambda core_idx: f"core{core_idx}"
-    for i in range(1, senders + 1):
-        config["hosts"][f"sender{i}"] = {"layer": 3}
-    for i in range(1, receivers + 1):
-        config["hosts"][f"receiver{i}"] = {"layer": 3}
+    for p in range(1, num_pods + 1):
+        for h in range(1, hosts_per_pod + 1):
+            config["hosts"][host_name(p, h)] = {"layer": 3}
     
     for i in range(1, core_switches + 1):
         config["switches"][f"core{i}"] = {"preset-name": "core-preset", "layer": 0}
