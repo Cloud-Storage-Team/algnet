@@ -9,24 +9,33 @@ namespace sim {
 class IPacketHasher {
 public:
     virtual ~IPacketHasher() = default;
+    virtual std::unique_ptr<IPacketHasher> clone() = 0;
     virtual std::uint32_t get_hash(Packet packet) = 0;
 };
 
-class RandomHasher : public IPacketHasher {
+template <typename Derived>
+class ClonebleHasher : public IPacketHasher {
+public:
+    std::unique_ptr<IPacketHasher> clone() override {
+        return std::make_unique<Derived>(static_cast<const Derived&>(*this));
+    }
+};
+
+class RandomHasher :  public ClonebleHasher<RandomHasher> {
 public:
     ~RandomHasher() = default;
 
     std::uint32_t get_hash(Packet packet) final;
 };
 
-class ECMPHasher : public IPacketHasher {
+class ECMPHasher :  public ClonebleHasher<ECMPHasher> {
 public:
     ~ECMPHasher() = default;
 
     std::uint32_t get_hash(Packet packet) final;
 };
 
-class SaltECMPHasher : public IPacketHasher {
+class SaltECMPHasher :  public ClonebleHasher<SaltECMPHasher> {
 public:
     SaltECMPHasher(Id a_device_id);
     ~SaltECMPHasher() = default;
@@ -37,7 +46,7 @@ private:
     Id m_device_id;
 };
 
-class FLowletHasher : public IPacketHasher {
+class FLowletHasher :  public ClonebleHasher<FLowletHasher> {
 public:
     explicit FLowletHasher(TimeNs a_flowlet_threshold);
     ~FLowletHasher() = default;
@@ -56,7 +65,7 @@ private:
     ECMPHasher m_ecmp_hasher;
 };
 
-class SymmetricHasher : public IPacketHasher {
+class SymmetricHasher :  public ClonebleHasher<SymmetricHasher> {
 public:
     ~SymmetricHasher() = default;
 

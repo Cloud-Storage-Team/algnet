@@ -11,7 +11,7 @@ SwitchInitArgs::SwitchInitArgs(const SwitchInitArgs& other)
     : id(other.id),
       ecn(other.ecn) {
     if (other.hasher.has_value()) {
-        hasher = std::make_unique<IPacketHasher>(other.hasher.value().get());
+        hasher = other.hasher.value()->clone();
     } else {
         hasher = std::unexpected(other.hasher.error());
     }
