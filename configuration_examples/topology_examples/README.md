@@ -41,7 +41,7 @@ hosts:
 
 ### Switches
 
-Each swtiches entry represents a switch:
+Each switches entry represents a switch:
 
 ```yaml
 switches:
