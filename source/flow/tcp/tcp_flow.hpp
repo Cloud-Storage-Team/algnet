@@ -69,7 +69,7 @@ private:
     // is send_packet called at least once
     bool m_sending_started;
     TimeNs m_init_time;
-    TimeNs m_last_update_time;
+    TimeNs m_last_ack_arrive_time;
 
     SizeByte m_packet_size;
     bool m_ecn_capable;

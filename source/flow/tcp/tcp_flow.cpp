@@ -21,7 +21,7 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
       m_cc(std::move(a_cc)),
       m_sending_started(false),
       m_init_time(0),
-      m_last_update_time(0),
+      m_last_ack_arrive_time(0),
       m_packet_size(a_packet_size),
       m_ecn_capable(a_ecn_capable),
       m_packets_in_flight(0),
@@ -44,7 +44,7 @@ TimeNs TcpFlow::get_fct() const {
     if (!m_sending_started) {
         return TimeNs(0);
     }
-    return m_last_update_time - m_init_time;
+    return m_last_ack_arrive_time - m_init_time;
 }
 
 std::shared_ptr<IHost> TcpFlow::get_sender() const { return m_src.lock(); }
@@ -82,7 +82,6 @@ void TcpFlow::send_packet() {
         m_init_time = now;
         m_sending_started = true;
     }
-    m_last_update_time = now;
 
     if (get_sending_quota() == 0) {
         LOG_WARN(
@@ -192,6 +191,8 @@ void TcpFlow::update(Packet packet) {
                       " current time less that sending time; ignored");
             return;
         }
+
+        m_last_ack_arrive_time = current_time;
 
         if (m_acked.contains(packet.packet_num)) {
             LOG_WARN(fmt::format("Got duplicate ack number {}; ignored",
