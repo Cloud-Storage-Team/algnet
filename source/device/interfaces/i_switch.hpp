@@ -9,5 +9,4 @@ public:
     virtual ~ISwitch() = default;
 };
 
-
 }  // namespace sim

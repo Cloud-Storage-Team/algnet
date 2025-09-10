@@ -1,21 +1,16 @@
-#include <gtest/gtest.h>
-
 #include "utils/flag_manager.hpp"
+
+#include <gtest/gtest.h>
 
 namespace test {
 
-enum TestFlagId {
-    FlagA,
-    FlagB,
-    FlagC,
-    FlagD
-};
+enum TestFlagId { FlagA, FlagB, FlagC, FlagD };
 
 class FlagManagerTest : public ::testing::Test {
 protected:
     // int here is an alias for TestFlagId
     // Can not use TestFlagId  because `fmt` used for logs in sim::FlagManager
-    // does not work with enums 
+    // does not work with enums
     sim::FlagManager<int, PacketFlagsBase> flag_manager;
     sim::Packet packet;
 };
@@ -30,7 +25,7 @@ TEST_F(FlagManagerTest, RegisterFlagByAmount_Valid) {
 
 TEST_F(FlagManagerTest, RegisterFlagByLength_ValidAndInvalid) {
     EXPECT_TRUE(flag_manager.register_flag_by_length(TestFlagId::FlagA, 5));
-    EXPECT_FALSE(flag_manager.register_flag_by_length(TestFlagId::FlagB, 0)); 
+    EXPECT_FALSE(flag_manager.register_flag_by_length(TestFlagId::FlagB, 0));
     EXPECT_FALSE(flag_manager.register_flag_by_length(TestFlagId::FlagB, 33));
 
     EXPECT_TRUE(flag_manager.register_flag_by_length(TestFlagId::FlagB, 27));
@@ -73,4 +68,4 @@ TEST_F(FlagManagerTest, Reset_ClearsFlags) {
     EXPECT_TRUE(flag_manager.register_flag_by_length(TestFlagId::FlagA, 3));
 }
 
-} // namespace test
+}  // namespace test

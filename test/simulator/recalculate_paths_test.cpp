@@ -2,9 +2,9 @@
 
 #include <filesystem>
 
+#include "logger/logger.hpp"
 #include "parser/parser.hpp"
 #include "utils.hpp"
-#include "logger/logger.hpp"
 
 namespace test {
 
@@ -14,14 +14,14 @@ public:
     void SetUp() override {};
 };
 
-static void check_pairwise_reachability(
-    const sim::Simulator& simulator) {
+static void check_pairwise_reachability(const sim::Simulator& simulator) {
     auto devices = simulator.get_devices();
 
     for (auto src : devices) {
         for (auto dest : devices) {
             if (src != dest) {
-                sim::Packet packet_to_dest = sim::Packet(SizeByte(0), nullptr, src->get_id(), dest->get_id());
+                sim::Packet packet_to_dest = sim::Packet(
+                    SizeByte(0), nullptr, src->get_id(), dest->get_id());
                 EXPECT_TRUE(check_reachability(src, packet_to_dest));
             }
         }

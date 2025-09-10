@@ -20,11 +20,11 @@ private:
     static std::filesystem::path parse_topology_config_path(
         const YAML::Node& config);
     static TimeNs parse_simulation_time(const YAML::Node& config);
-    // TODO: This enum is a temporary solution that solves the following problem: 
-    // Inside parse_i_connection, flows are created. However,
-    // flow requires a pointer to the connection in the constructor.
-    // By default, the object is registered in IdentifierFactory after parsing.
-    // Therefore, it is necessary to register the connection directly within the parser.
+    // TODO: This enum is a temporary solution that solves the following
+    // problem: Inside parse_i_connection, flows are created. However, flow
+    // requires a pointer to the connection in the constructor. By default, the
+    // object is registered in IdentifierFactory after parsing. Therefore, it is
+    // necessary to register the connection directly within the parser.
     enum class RegistrationPolicy { ByTemplate, ByParser };
     // node - contains information about set of identifiable objects
     // add_func- function to add new object to simulator

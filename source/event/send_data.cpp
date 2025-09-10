@@ -22,4 +22,4 @@ void SendData::operator()() {
     Scheduler::get_instance().add<SendData>(m_time + process_time, m_device);
 };
 
-}
+}  // namespace sim

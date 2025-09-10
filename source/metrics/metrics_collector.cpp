@@ -92,7 +92,9 @@ void MetricsCollector::draw_RTT_plot(std::filesystem::path path) const {
 void MetricsCollector::draw_packet_reordering_plot(
     std::filesystem::path path) const {
     m_packet_reordering_storage.draw_on_plot(
-        path, PlotMetadata{"Time, ns", "Reordering, %", "Packet reordering"},
+        path,
+        PlotMetadata{"Time, ns", "Reordering (inversions count)",
+                     "Packet reordering"},
         flow_id_to_curve_name);
 }
 

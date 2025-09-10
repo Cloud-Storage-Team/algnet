@@ -22,10 +22,10 @@ void ConnectionImpl::start() { send_packets(); }
 void ConnectionImpl::add_flow(std::shared_ptr<IFlow> flow) {
     m_flows.insert(flow);
     FlowSample init_sample{.ack_recv_time = TimeNs(0),
-                          .packet_sent_time = TimeNs(0),
-                          .packets_in_flight = 0,
-                          .delivery_rate = SpeedGbps(0),
-                          .send_quota = flow->get_sending_quota()};
+                           .packet_sent_time = TimeNs(0),
+                           .packets_in_flight = 0,
+                           .delivery_rate = SpeedGbps(0),
+                           .send_quota = flow->get_sending_quota()};
 
     m_mplb->add_flow(flow, init_sample);
 }

@@ -13,4 +13,4 @@ public:
     void operator()() final;
 };
 
-}
+}  // namespace sim
