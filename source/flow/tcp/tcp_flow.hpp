@@ -21,7 +21,11 @@ public:
     void update(Packet packet) final;
 
     SizeByte get_delivered_data_size() const final;
+
+    // Returns time elapced from flow start (firsrt call of send_packet)
+    // to last update call
     TimeNs get_fct() const final;
+
     std::shared_ptr<IHost> get_sender() const final;
     std::shared_ptr<IHost> get_receiver() const;
     Id get_id() const final;
@@ -49,7 +53,6 @@ private:
     Packet generate_packet();
 
     TimeNs get_max_timeout() const;
-    TimeNs m_init_time;
     void send_packet_now(Packet packet);
     void retransmit_packet(PacketNum packet_num);
 
@@ -62,6 +65,11 @@ private:
 
     // Congestion control module
     std::unique_ptr<ITcpCC> m_cc;
+
+    // is send_packet called at least once
+    bool m_sending_started;
+    TimeNs m_init_time;
+    TimeNs m_last_ack_arrive_time;
 
     SizeByte m_packet_size;
     bool m_ecn_capable;

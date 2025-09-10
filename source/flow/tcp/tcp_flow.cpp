@@ -19,6 +19,9 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
       m_src(m_connection->get_sender()),
       m_dest(m_connection->get_receiver()),
       m_cc(std::move(a_cc)),
+      m_sending_started(false),
+      m_init_time(0),
+      m_last_ack_arrive_time(0),
       m_packet_size(a_packet_size),
       m_ecn_capable(a_ecn_capable),
       m_packets_in_flight(0),
@@ -30,7 +33,6 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
     if (m_dest.lock() == nullptr) {
         throw std::invalid_argument("Receiver for TcpFlow is nullptr");
     }
-    m_init_time = Scheduler::get_instance().get_current_time();
     initialize_flag_manager();
 }
 
@@ -39,8 +41,10 @@ SizeByte TcpFlow::get_delivered_data_size() const {
 }
 
 TimeNs TcpFlow::get_fct() const {
-    TimeNs now = Scheduler::get_instance().get_current_time();
-    return now - m_init_time;
+    if (!m_sending_started) {
+        return TimeNs(0);
+    }
+    return m_last_ack_arrive_time - m_init_time;
 }
 
 std::shared_ptr<IHost> TcpFlow::get_sender() const { return m_src.lock(); }
@@ -72,6 +76,13 @@ Packet TcpFlow::create_packet(PacketNum packet_num) {
 }
 
 void TcpFlow::send_packet() {
+    TimeNs now = Scheduler::get_instance().get_current_time();
+
+    if (!m_sending_started) {
+        m_init_time = now;
+        m_sending_started = true;
+    }
+
     if (get_sending_quota() == 0) {
         LOG_WARN(
             fmt::format("No sending quota for flow {}; packet not sent", m_id));
@@ -79,7 +90,6 @@ void TcpFlow::send_packet() {
     }
     Packet packet = create_packet(m_next_packet_num++);
     TimeNs pacing_delay = m_cc->get_pacing_delay();
-    TimeNs now = Scheduler::get_instance().get_current_time();
 
     if (pacing_delay == TimeNs(0)) {
         send_packet_now(std::move(packet));
@@ -181,6 +191,8 @@ void TcpFlow::update(Packet packet) {
                       " current time less that sending time; ignored");
             return;
         }
+
+        m_last_ack_arrive_time = current_time;
 
         if (m_acked.contains(packet.packet_num)) {
             LOG_WARN(fmt::format("Got duplicate ack number {}; ignored",

@@ -100,8 +100,7 @@ def generate_simulation(
     """
     simulation = {
         "topology_config_path": topology_file,
-        "connections": {},
-        "simulation_time": 500000,
+        "connections": {}
     }
 
     for i in range(0, len(senders)):
@@ -113,7 +112,7 @@ def generate_simulation(
             "flows": {
                 "flow": {
                     "type": "tcp",
-                    "packet_size": 1500,
+                    "packet_size": "1500B",
                     "cc": {
                         "type": "swift",
                         "base_target": "200ns"
