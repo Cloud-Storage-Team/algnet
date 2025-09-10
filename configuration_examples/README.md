@@ -2,16 +2,16 @@
 
 ## Units data format
 
-In all configs you may see fields that contains time, size and speed. All of them have same format: `<value><unit>` where `value` is an integer and `unit` is small string suffix. For each unit where are fixed list of avaliable units that you may see below.
+In all configs you may see fields that contains time, size and speed. All of them have same format: `<value><unit>` where `value` is an integer and `unit` is small string suffix. For each unit where are fixed list of available units that you may see below.
 
-### Avaliable time units:
+### Available time units:
 
 - `ns`: Nanosecond
 - `us`: Microsecond
-- `ms`: Milisecond
+- `ms`: Millisecond
 - `s`: Second
 
-### Avaliable size units:
+### Available size units:
 
 - `b`: bit
 - `B`: Byte
@@ -20,7 +20,7 @@ In all configs you may see fields that contains time, size and speed. All of the
 - `Gb`: Gigabit
 - `GB`: Gigabyte
 
-### Avaliable speed units:
+### Available speed units:
 
 - `Mbps`: Megabits per second
 - `Gbps`: Gigabits per second
@@ -32,7 +32,7 @@ Examples:
 
 ## Presets
 
-For some config parts you may create presets - common set of fields for the objects. Foe example, in topology configs it may looks like
+For some config parts you may create presets - common set of fields for the objects. For example, in topology configs it may looks like
 ```yaml
 presets:
   links:
@@ -54,7 +54,7 @@ presets:
         probability: 0.0
 ```
 
-To use your preset, fill in `preset-name` feild in cocrete object description:
+To use your preset, fill in `preset-name` field in concrete object description:
 
 ```yaml
 switches:
@@ -92,7 +92,7 @@ links:
       to: device-2
       # other fields takes from default preset
     link-1:
-      preset-name: default # works similary with link-1
+      preset-name: default # works similarly with link-1
       from: device-2
       to: device-1
 

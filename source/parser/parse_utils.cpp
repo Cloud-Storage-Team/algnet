@@ -42,7 +42,7 @@ TimeNs parse_time(const std::string &time) {
         return Time<Microsecond>(value);
     }
     if (unit == "ms") {
-        return Time<Milisecond>(value);
+        return Time<Millisecond>(value);
     }
     if (unit == "s") {
         return Time<Second>(value);
