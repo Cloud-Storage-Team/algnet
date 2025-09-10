@@ -30,7 +30,7 @@ If type is flowlet, it needs to set field `threshold` in [time format](../README
 
 ### Hosts
 
-Each hosts entry represents a host:
+Each host entry represents a host:
 
 ```yaml
 hosts:
