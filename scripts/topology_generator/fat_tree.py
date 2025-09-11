@@ -106,13 +106,18 @@ def generate_fat_tree_config(switch_ports_count):
                 )
     
     # Aggr-core
-    for pod in range(num_pods):
+    for pod_idx in range(1, num_pods + 1):
         for aggr_idx in range(1, aggr_per_pod + 1):
-            aggr_id = pod * aggr_per_pod + aggr_idx
-            core_offset = (aggr_idx - 1) * (k // 2)
-            for core_idx in range(1, (k // 2) + 1):
+            core_offset = (aggr_idx - 1) * core_per_aggr
+            for core_idx in range(1, core_per_aggr + 1):
                 core_id = core_offset + core_idx
-                link_counter = add_bidirectional_link(config, f"aggr{aggr_id}", f"core{core_id}", link_counter, "high_speed")
+                link_counter = add_bidirectional_link(
+                    config,
+                    aggr_name(pod_idx, aggr_idx),
+                    core_name(core_id),
+                    link_counter,
+                    "high_speed"
+                )
     
     return config
 
