@@ -1,6 +1,7 @@
 import yaml
 import argparse
 import sys
+import os
 
 def load_config(config_file):
     try:
@@ -132,8 +133,9 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    # Load configuration from file
-    config_params = load_config(args.config)
+    file_location = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(file_location, args.config)
+    config_params = load_config(config_path)
     
     # Generate and write the fat-tree configuration
     output_file = write_config_to_file(config_params)
