@@ -63,7 +63,7 @@ def generate_fat_tree_config(config_params):
             config["hosts"][host_name(p, h)] = {"layer": 3}
     
     for i in range(1, core_switches + 1):
-        config["switches"][f"core{i}"] = {"preset-name": "core-preset", "layer": 0}
+        config["switches"][f"core{i}"] = {"preset-name": "core", "layer": 0}
     
     for p in range(1, num_pods + 1):
         for a in range(1, aggr_per_pod + 1):
