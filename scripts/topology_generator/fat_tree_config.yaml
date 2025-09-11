@@ -19,17 +19,17 @@ link_presets:
     egress_buffer_size: 4096B
 
 switch_presets:
-  edge-preset:
+  edge:
     ecn:
       min: 0.2
       max: 0.3
       probability: 0.5
-  aggr-preset:
+  aggr:
     ecn:
       min: 0.2
       max: 0.3
       probability: 0.7
-  core-preset:
+  core:
     ecn:
       min: 0.2
       max: 0.3
