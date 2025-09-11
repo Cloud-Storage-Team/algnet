@@ -133,7 +133,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-c', '--config', 
                         default=default_config_abs_path,
-                        help=f'Path to configuration file (default: {default_config_abs_path})')
+                        help=f'Path to configuration file (default: {default_config_abs_path}). See given default to get format & structure of this config')
 
     
     args = parser.parse_args()
