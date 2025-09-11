@@ -48,7 +48,7 @@ private:
     class SendAtTime;
     class Timeout;
 
-    Packet create_packet(PacketNum packet_num);
+    Packet generate_data_packet(PacketNum packet_num);
     Packet create_ack(Packet data);
     Packet generate_packet();
 

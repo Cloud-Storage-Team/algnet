@@ -61,7 +61,7 @@ std::uint32_t TcpFlow::get_sending_quota() const {
     return (slots > m_packets_in_flight) ? (slots - m_packets_in_flight) : 0;
 }
 
-Packet TcpFlow::create_packet(PacketNum packet_num) {
+Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     Packet packet;
     m_flag_manager.set_flag(packet, m_packet_type_label, PacketType::DATA);
     packet.size = m_packet_size;
@@ -70,6 +70,7 @@ Packet TcpFlow::create_packet(PacketNum packet_num) {
     packet.dest_id = get_receiver()->get_id();
     packet.packet_num = packet_num;
     packet.delivered_data_size_at_origin = m_delivered_data_size;
+    packet.generated_time = Scheduler::get_instance().get_current_time();
     packet.ttl = M_MAX_TTL;
     packet.ecn_capable_transport = m_ecn_capable;
     return packet;
@@ -88,7 +89,7 @@ void TcpFlow::send_packet() {
             fmt::format("No sending quota for flow {}; packet not sent", m_id));
         return;
     }
-    Packet packet = create_packet(m_next_packet_num++);
+    Packet packet = generate_data_packet(m_next_packet_num++);
     TimeNs pacing_delay = m_cc->get_pacing_delay();
 
     if (pacing_delay == TimeNs(0)) {
@@ -122,7 +123,9 @@ Packet TcpFlow::create_ack(Packet data) {
     return ack;
 }
 
-Packet TcpFlow::generate_packet() { return create_packet(m_next_packet_num++); }
+Packet TcpFlow::generate_packet() {
+    return generate_data_packet(m_next_packet_num++);
+}
 
 void TcpFlow::initialize_flag_manager() {
     if (!m_is_flag_manager_initialized) {
@@ -279,7 +282,7 @@ void TcpFlow::send_packet_now(Packet packet) {
 }
 
 void TcpFlow::retransmit_packet(PacketNum packet_num) {
-    Packet packet = create_packet(packet_num);
+    Packet packet = generate_data_packet(packet_num);
     send_packet_now(std::move(packet));
 }
 
