@@ -82,7 +82,8 @@ def generate_fat_tree_config(config_params):
                     config,
                     host_name(pod_idx, host_idx),
                     edge_name(pod_idx, edge_idx),
-                    link_counter
+                    link_counter,
+                    "edge-host"
                 )
     
     # Aggr-edge
