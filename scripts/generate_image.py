@@ -124,7 +124,7 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
     for link_id, link_info in links.items():
         from_node = link_info["from"]
         to_node = link_info["to"]
-        preset_name = link_info.get("preset_name", "default")
+        preset_name = link_info.get("preset-name", "default")
         link_preset = link_presets.get(preset_name)
         latency = get_with_preset(link_info, link_preset, 'latency')
         throughput = get_with_preset(link_info, link_preset, 'throughput')
