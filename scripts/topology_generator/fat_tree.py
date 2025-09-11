@@ -82,7 +82,8 @@ def generate_fat_tree_config(config_params):
                     config,
                     host_name(pod_idx, host_idx),
                     edge_name(pod_idx, edge_idx),
-                    link_counter
+                    link_counter,
+                    "edge-host"
                 )
     
     # Aggr-edge
@@ -94,7 +95,7 @@ def generate_fat_tree_config(config_params):
                     edge_name(pod_idx, edge_idx),
                     aggr_name(pod_idx, aggr_idx),
                     link_counter,
-                    "medium_speed"
+                    "aggr-edge"
                 )
     
     # Aggr-core
@@ -108,7 +109,7 @@ def generate_fat_tree_config(config_params):
                     aggr_name(pod_idx, aggr_idx),
                     core_name(core_id),
                     link_counter,
-                    "high_speed"
+                    "aggr-core"
                 )
     
     return config
@@ -125,7 +126,7 @@ def write_config_to_file(config_params):
 
 if __name__ == "__main__":
     # Set up command-line argument parsing
-    parser = argparse.ArgumentParser(description='Generate Fat-Tree network configuration')
+    parser = argparse.ArgumentParser(description='Generate Fat-Tree network configuration. You may see more about it here https://packetpushers.net/blog/demystifying-dcn-topologies-clos-fat-trees-part2/')
     curr_file_path = os.path.realpath(__file__)
     curr_dir_path = os.path.dirname(curr_file_path)
     default_config_full_path = os.path.join(curr_dir_path, "fat_tree_config.yaml")
@@ -133,7 +134,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-c', '--config', 
                         default=default_config_abs_path,
-                        help=f'Path to configuration file (default: {default_config_abs_path})')
+                        help=f'Path to configuration file (default: {default_config_abs_path}). See given default to get format & structure of this config')
 
     
     args = parser.parse_args()
