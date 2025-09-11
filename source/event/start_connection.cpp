@@ -2,7 +2,8 @@
 
 namespace sim {
 
-StartConnection::StartConnection(TimeNs a_time, std::weak_ptr<IConnection> a_connection)
+StartConnection::StartConnection(TimeNs a_time,
+                                 std::weak_ptr<IConnection> a_connection)
     : Event(a_time), m_connection(a_connection) {}
 
 void StartConnection::operator()() {
@@ -14,4 +15,4 @@ void StartConnection::operator()() {
     m_connection.lock()->start();
 }
 
-}
+}  // namespace sim

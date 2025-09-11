@@ -61,18 +61,23 @@ void Simulator::recalculate_paths() {
             bfs(dynamic_pointer_cast<IRoutingDevice>(src_device));
         for (auto [dest_device_id, links] : routing_table) {
             for (auto [link, paths_count] : links) {
-                src_device->update_routing_table(dest_device_id,
-                                                 link.lock(), paths_count);
+                src_device->update_routing_table(dest_device_id, link.lock(),
+                                                 paths_count);
             }
         }
     }
 }
-// Create a Stop event at a_stop_time and start simulation
-void Simulator::start(TimeNs a_stop_time) {
-    recalculate_paths();
-    Scheduler::get_instance().add<Stop>(a_stop_time);
-    constexpr TimeNs start_time = TimeNs(0);
 
+void Simulator::set_stop_time(TimeNs stop_time) { m_stop_time = stop_time; }
+
+void Simulator::start() {
+    recalculate_paths();
+
+    if (m_stop_time.has_value()) {
+        Scheduler::get_instance().add<Stop>(m_stop_time.value());
+    }
+
+    constexpr TimeNs start_time = TimeNs(0);
 
     for (auto connection : m_connections) {
         Scheduler::get_instance().add<StartConnection>(start_time, connection);
@@ -82,7 +87,8 @@ void Simulator::start(TimeNs a_stop_time) {
     }
 }
 
-std::unordered_set<std::shared_ptr<IConnection>> Simulator::get_connections() const {
+std::unordered_set<std::shared_ptr<IConnection>> Simulator::get_connections()
+    const {
     return m_connections;
 }
 

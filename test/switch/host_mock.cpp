@@ -2,13 +2,18 @@
 
 namespace test {
 
-bool HostMock::add_inlink([[maybe_unused]] std::shared_ptr<sim::ILink> link) { return false; }
+bool HostMock::add_inlink([[maybe_unused]] std::shared_ptr<sim::ILink> link) {
+    return false;
+}
 
-bool HostMock::add_outlink([[maybe_unused]] std::shared_ptr<sim::ILink> link) { return false; }
+bool HostMock::add_outlink([[maybe_unused]] std::shared_ptr<sim::ILink> link) {
+    return false;
+}
 
-bool HostMock::update_routing_table([[maybe_unused]] Id dest_id,
-                                    [[maybe_unused]] std::shared_ptr<sim::ILink> link,
-                                    [[maybe_unused]] size_t paths_count) {
+bool HostMock::update_routing_table(
+    [[maybe_unused]] Id dest_id,
+    [[maybe_unused]] std::shared_ptr<sim::ILink> link,
+    [[maybe_unused]] size_t paths_count) {
     return false;
 }
 
@@ -19,7 +24,9 @@ std::shared_ptr<sim::ILink> HostMock::get_link_to_destination(
     return nullptr;
 }
 
-bool HostMock::notify_about_arrival([[maybe_unused]] TimeNs arrival_time) { return false; }
+bool HostMock::notify_about_arrival([[maybe_unused]] TimeNs arrival_time) {
+    return false;
+}
 
 TimeNs HostMock::process() { return TimeNs(1); }
 

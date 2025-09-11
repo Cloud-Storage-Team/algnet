@@ -1,8 +1,8 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <stdexcept>
+#include <string>
 
 #include "i_mplb.hpp"
 #include "round_robin_mplb.hpp"

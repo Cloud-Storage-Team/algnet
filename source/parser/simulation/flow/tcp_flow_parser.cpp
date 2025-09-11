@@ -41,7 +41,8 @@ std::shared_ptr<TcpFlow> FlowParser::parse_tcp_flow(
                                  " missing parameter packet_size");
     }
 
-    SizeByte packet_size = SizeByte(value_node["packet_size"].as<uint64_t>());
+    SizeByte packet_size =
+        SizeByte(parse_size(value_node["packet_size"].as<std::string>()));
 
     std::shared_ptr<IConnection> conn =
         IdentifierFactory::get_instance().get_object<IConnection>(conn_id);

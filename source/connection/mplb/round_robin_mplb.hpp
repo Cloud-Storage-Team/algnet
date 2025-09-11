@@ -24,11 +24,11 @@ public:
     void clear_flows() override;
 
 private:
-    using FlowPtr   = std::shared_ptr<IFlow>;
+    using FlowPtr = std::shared_ptr<IFlow>;
     using FlowTable = std::map<FlowPtr, FlowSample, std::owner_less<FlowPtr>>;
 
     FlowTable m_flows;
-    LoopIterator<FlowTable::iterator> m_current_flow;   
+    LoopIterator<FlowTable::iterator> m_current_flow;
 };
 
 }  // namespace sim

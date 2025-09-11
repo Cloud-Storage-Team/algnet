@@ -77,7 +77,7 @@ TEST_F(EcnTest, TestBetweenMinAndMax) {
                                             (QUERY_FILLING - MIN_THESHOLD) /
                                             (MAX_THESHOLD - MIN_THESHOLD);
     float observed_mark_probability = mark_count / (float)REPEAT_COUNT;
-    const float VARIANCE = 1 / 12.f; 
+    const float VARIANCE = 1 / 12.f;
     ASSERT_NEAR(observed_mark_probability, EXPECTED_MARK_PROBABILITY,
                 VARIANCE * 3);
 }

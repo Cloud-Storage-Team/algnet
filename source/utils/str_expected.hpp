@@ -19,4 +19,4 @@ T value_or_base_error(str_expected<T> opt) {
     return opt.value();
 }
 
-}
+}  // namespace utils

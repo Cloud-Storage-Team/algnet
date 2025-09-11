@@ -2,9 +2,9 @@
 
 #include <filesystem>
 
+#include "logger/logger.hpp"
 #include "parser/parser.hpp"
 #include "utils.hpp"
-#include "logger/logger.hpp"
 
 namespace test {
 
@@ -14,14 +14,14 @@ public:
     void SetUp() override {};
 };
 
-static void check_pairwise_reachability(
-    const sim::Simulator& simulator) {
+static void check_pairwise_reachability(const sim::Simulator& simulator) {
     auto devices = simulator.get_devices();
 
     for (auto src : devices) {
         for (auto dest : devices) {
             if (src != dest) {
-                sim::Packet packet_to_dest = sim::Packet(SizeByte(0), nullptr, src->get_id(), dest->get_id());
+                sim::Packet packet_to_dest = sim::Packet(
+                    SizeByte(0), nullptr, src->get_id(), dest->get_id());
                 EXPECT_TRUE(check_reachability(src, packet_to_dest));
             }
         }
@@ -31,7 +31,7 @@ static void check_pairwise_reachability(
 void test_topology(std::filesystem::path topology_path) {
     sim::IdentifierFactory::get_instance().clear();
     sim::YamlParser parser;
-    auto [simulator, sim_time] =
+    sim::Simulator simulator =
         parser.build_simulator_from_config(topology_path);
     simulator.recalculate_paths();
     check_pairwise_reachability(simulator);
