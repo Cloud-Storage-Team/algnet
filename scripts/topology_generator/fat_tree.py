@@ -127,15 +127,20 @@ def write_config_to_file(config_params):
 if __name__ == "__main__":
     # Set up command-line argument parsing
     parser = argparse.ArgumentParser(description='Generate Fat-Tree network configuration')
+    curr_file_path = os.path.realpath(__file__)
+    curr_dir_path = os.path.dirname(curr_file_path)
+    default_config_full_path = os.path.join(curr_dir_path, "fat_tree_config.yaml")
+    default_config_abs_path = os.path.relpath(default_config_full_path, os.getcwd())
+
     parser.add_argument('-c', '--config', 
-                        default='fat_tree_config.yaml',
-                        help='Path to configuration file (default: fat_tree_config.yaml)')
+                        default=default_config_abs_path,
+                        help=f'Path to configuration file (default: {default_config_abs_path})')
+
     
     args = parser.parse_args()
     
-    file_location = os.path.dirname(os.path.abspath(__file__))
-    config_path = os.path.join(file_location, args.config)
-    config_params = load_config(config_path)
+    # Load configuration from file
+    config_params = load_config(args.config)
     
     # Generate and write the fat-tree configuration
     output_file = write_config_to_file(config_params)
