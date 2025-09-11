@@ -143,17 +143,6 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
             **edge_style,
         )
 
-    # # Create hierarchical groups
-    # with graph.subgraph() as s:
-    #     s.attr(rank="max")
-    #     for host_id, _ in host_items:
-    #         s.node(host_id)
-
-    # with graph.subgraph() as s:
-    #     s.attr(rank="min")
-    #     for switch_id, _ in switch_items:
-    #         s.node(switch_id)
-
     # Create subgraphs for each layer
     for layer, devices in sorted(layer_groups.items()):
         sorted_devices = sorted(devices, key = key_lambda)

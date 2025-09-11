@@ -25,7 +25,6 @@ def add_bidirectional_link(config, from_node, to_node, link_counter, preset = "d
     return link_counter + 1
 
 def generate_fat_tree_config(config_params):
-    # Extract parameters from config
     switch_ports_count = config_params["switch_ports_count"]
     link_presets = config_params["link_presets"]
     switch_presets = config_params["switch_presets"]
