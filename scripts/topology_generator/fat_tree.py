@@ -82,14 +82,16 @@ def generate_fat_tree_config(switch_ports_count):
     link_counter = 1
     
     # Edge-host
-    for pod in range(num_pods):
+    for pod_idx in range(1, num_pods + 1):
         for edge_idx in range(1, edge_per_pod + 1):
-            edge_id = pod * edge_per_pod + edge_idx
-            for h in range(1, k // 2 + 1):
-                host_num = pod * hosts_per_pod + (edge_idx - 1) * (k // 2) + h
-                host_type = "sender" if host_num <= total_hosts // 2 else "receiver"
-                actual_host_num = host_num if host_type == "sender" else host_num - senders
-                link_counter = add_bidirectional_link(config, f"{host_type}{actual_host_num}", f"edge{edge_id}", link_counter)
+            for h in range(1, hosts_per_edge + 1):
+                host_idx = (edge_idx - 1) * hosts_per_edge + h
+                link_counter = add_bidirectional_link(
+                    config,
+                    host_name(pod_idx, host_idx),
+                    edge_name(pod_idx, edge_idx),
+                    link_counter
+                )
     
     # Aggr-edge
     for pod in range(num_pods):
