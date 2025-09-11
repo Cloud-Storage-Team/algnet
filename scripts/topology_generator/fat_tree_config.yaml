@@ -2,17 +2,17 @@ switch_ports_count: 4
 output_file: "fat_tree_k4.yaml"
 
 link_presets:
-  default:
+  edge-host:
     latency: 1ns
     throughput: 1Gbps
     ingress_buffer_size: 4096B
     egress_buffer_size: 4096B
-  medium_speed:
+  aggr-edge:
     latency: 1ns
     throughput: 10Gbps
     ingress_buffer_size: 4096B
     egress_buffer_size: 4096B
-  high_speed:
+  aggr-core:
     latency: 1ns
     throughput: 100Gbps
     ingress_buffer_size: 4096B
