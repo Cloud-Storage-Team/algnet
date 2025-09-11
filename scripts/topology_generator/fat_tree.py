@@ -67,7 +67,7 @@ def generate_fat_tree_config(config_params):
     
     for p in range(1, num_pods + 1):
         for a in range(1, aggr_per_pod + 1):
-            config["switches"][aggr_name(p, a)] = {"preset-name": "aggr-preset", "layer": 1}
+            config["switches"][aggr_name(p, a)] = {"preset-name": "aggr", "layer": 1}
         for e in range(1, edge_per_pod + 1):
             config["switches"][edge_name(p, e)] = {"preset-name": "edge", "layer": 2}
 
