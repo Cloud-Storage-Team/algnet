@@ -108,7 +108,7 @@ def generate_fat_tree_config(config_params):
                     aggr_name(pod_idx, aggr_idx),
                     core_name(core_id),
                     link_counter,
-                    "high_speed"
+                    "aggr-core"
                 )
     
     return config
