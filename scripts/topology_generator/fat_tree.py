@@ -94,7 +94,7 @@ def generate_fat_tree_config(config_params):
                     edge_name(pod_idx, edge_idx),
                     aggr_name(pod_idx, aggr_idx),
                     link_counter,
-                    "medium_speed"
+                    "aggr-edge"
                 )
     
     # Aggr-core
