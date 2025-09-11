@@ -103,6 +103,11 @@ private:
 };
 
 template <IsTimeBase TTimeBase>
+Time<TTimeBase> operator*(double mult, Time<TTimeBase> time) {
+    return time * mult;
+}
+
+template <IsTimeBase TTimeBase>
 std::ostream& operator<<(std::ostream& out, Time<TTimeBase> time) {
     return out << time.value();
 }

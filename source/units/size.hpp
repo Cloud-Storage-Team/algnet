@@ -114,6 +114,11 @@ private:
 };
 
 template <IsSizeBase TSizeBase>
+constexpr Size<TSizeBase> operator*(size_t mult, Size<TSizeBase> size) {
+    return size * mult;
+}
+
+template <IsSizeBase TSizeBase>
 std::ostream& operator<<(std::ostream& out, Size<TSizeBase> size) {
     return out << size.value();
 }
