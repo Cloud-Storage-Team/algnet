@@ -20,7 +20,7 @@ options:
                         Default value: bottleneck_simulation.yml
   --simulation-time SIMULATION_TIME
                         Time of the simulation, ns. 
-                        Default value: 50000
+                        Default value: None
   --packets PACKETS     Number of packets sending by each sender. 
                         Default value: 100
   --packet-interval PACKET_INTERVAL

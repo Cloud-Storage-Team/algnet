@@ -118,7 +118,7 @@ def generate_simulation(
     simulation_time,
     packet_interval,
     number_of_packets,
-    packet_size=1500,
+    packet_size_bytes=1500,
     flow_type="tcp",
 ):
     """
@@ -127,8 +127,9 @@ def generate_simulation(
     simulation = {
         "topology_config_path": topology_file,
         "flows": {},
-        "simulation_time": simulation_time,
     }
+    if simulation_time is not None:
+        simulation["simulation_time"] = f"{simulation_time}ns"
 
     cc = {
         "type": "tahoe",
@@ -150,10 +151,10 @@ def generate_simulation(
                 "type": flow_type,
                 "sender_id": sender_names[i],
                 "receiver_id": receiver_names[min(i, num_receivers - 1)],
-                "packet_size": packet_size,
+                "packet_size": f"{packet_size_bytes}B",
                 "packet_interval": packet_interval,
                 "number_of_packets": number_of_packets,
-                "cc": cc
+                "cc": cc.copy()
             }
         return simulation
 
@@ -168,7 +169,7 @@ def generate_simulation(
                     "type": flow_type,
                     "sender_id": sender_names[i],
                     "receiver_id": receiver_names[j],
-                    "packet_size": packet_size,
+                    "packet_size": "f{packet_size}B",
                     "packet_interval": packet_interval,
                     "number_of_packets": number_of_packets,
                     "cc": cc
@@ -213,7 +214,7 @@ def parse_arguments():
         help="Path to the output simulation config file",
     )
     parser.add_argument(
-        "--simulation-time", type=int, default=50000, help="Time of the simulation, ns"
+        "--simulation-time", type=int, default=None, help="Time of the simulation, ns"
     )
     parser.add_argument(
         "--packets",

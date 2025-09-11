@@ -8,8 +8,8 @@
 
 namespace test {
 
-using two_way_link_t = std::pair<std::shared_ptr<sim::IDevice>,
-                                 std::shared_ptr<sim::IDevice>>;
+using two_way_link_t =
+    std::pair<std::shared_ptr<sim::IDevice>, std::shared_ptr<sim::IDevice>>;
 
 void add_two_way_links(sim::Simulator& sim,
                        std::initializer_list<two_way_link_t> links);

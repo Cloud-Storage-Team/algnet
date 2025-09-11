@@ -35,13 +35,13 @@ void LinkParser::parse_to_args(const YAML::Node& node, LinkInitArgs& args) {
     auto max_from_egress_buffer_size = node["egress_buffer_size"];
     if (max_from_egress_buffer_size) {
         args.max_from_egress_buffer_size.emplace(
-            parse_buffer_size(max_from_egress_buffer_size.as<std::string>()));
+            parse_size(max_from_egress_buffer_size.as<std::string>()));
     }
 
     auto max_to_ingress_buffer_size = node["ingress_buffer_size"];
     if (max_to_ingress_buffer_size) {
         args.max_to_ingress_buffer_size.emplace(
-            parse_buffer_size(max_to_ingress_buffer_size.as<std::string>()));
+            parse_size(max_to_ingress_buffer_size.as<std::string>()));
     }
 }
 

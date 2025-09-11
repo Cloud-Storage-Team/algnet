@@ -3,9 +3,8 @@
 #include <stdexcept>
 
 #include "logger/logger.hpp"
-#include "parser/simulation/flow/flow_parser.hpp"
 #include "parser/simulation/connection/connection_parser.hpp"
-#include "parser/topology/switch/switch_parser.hpp"
+#include "parser/simulation/flow/flow_parser.hpp"
 #include "parser/topology/host/host_parser.hpp"
 #include "parser/topology/link/link_parser.hpp"
 #include "parser/topology/switch/switch_parser.hpp"
@@ -13,7 +12,7 @@
 
 namespace sim {
 
-std::pair<Simulator, TimeNs> YamlParser::build_simulator_from_config(
+Simulator YamlParser::build_simulator_from_config(
     const std::filesystem::path &path) {
     const YAML::Node simulation_config = YAML::LoadFile(path);
 
@@ -65,15 +64,21 @@ std::pair<Simulator, TimeNs> YamlParser::build_simulator_from_config(
         [this](auto node) { return process_connection(node); },
         "No connections specified in the simulation config");
 
-    return {m_simulator, parse_simulation_time(simulation_config)};
+    std::optional<TimeNs> maybe_stop_time =
+        parse_simulation_time(simulation_config);
+    if (maybe_stop_time.has_value()) {
+        m_simulator.set_stop_time(maybe_stop_time.value());
+    }
+    return m_simulator;
 }
 
-TimeNs YamlParser::parse_simulation_time(const YAML::Node &config) {
-    if (!config["simulation_time"]) {
-        throw std::runtime_error(
-            "No simulation time specified in the simulation config");
+std::optional<TimeNs> YamlParser::parse_simulation_time(
+    const YAML::Node &config) {
+    auto value = config["simulation_time"];
+    if (!value) {
+        return std::nullopt;
     }
-    return TimeNs(config["simulation_time"].as<uint32_t>());
+    return parse_time(value.as<std::string>());
 }
 
 void YamlParser::process_hosts(const YAML::Node &hosts_node) {
@@ -122,11 +127,11 @@ void YamlParser::process_links(const YAML::Node &links_node,
 void YamlParser::process_connection(const YAML::Node &connections_node) {
     process_identifiables<IConnection>(
         connections_node,
-        [this](std::shared_ptr<IConnection> connection) { return m_simulator.add_connection(connection); },
-        ConnectionParser::parse_i_connection,
-        "Can not add connection.",
-        RegistrationPolicy::ByParser
-    );
+        [this](std::shared_ptr<IConnection> connection) {
+            return m_simulator.add_connection(connection);
+        },
+        ConnectionParser::parse_i_connection, "Can not add connection.",
+        RegistrationPolicy::ByParser);
 }
 
 std::filesystem::path YamlParser::parse_topology_config_path(

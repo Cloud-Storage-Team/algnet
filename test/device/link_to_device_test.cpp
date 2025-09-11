@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
+#include "../utils/fake_packet.hpp"
 #include "device/routing_module.hpp"
 #include "utils.hpp"
-#include "../utils/fake_packet.hpp"
 
 namespace test {
 
@@ -35,11 +35,14 @@ TEST_F(LinkToDevice, LinkIsPresent) {
     source->update_routing_table(dest->get_id(), link_dest);
 
     EXPECT_EQ(source->get_link_to_destination(FakePacket(dest)), link_dest);
-    EXPECT_EQ(source->get_link_to_destination(FakePacket(neighbour)), link_neighbour);
-    EXPECT_EQ(source->get_link_to_destination(FakePacket(another_dest)), nullptr);
+    EXPECT_EQ(source->get_link_to_destination(FakePacket(neighbour)),
+              link_neighbour);
+    EXPECT_EQ(source->get_link_to_destination(FakePacket(another_dest)),
+              nullptr);
     source->update_routing_table(another_dest->get_id(), link_neighbour);
 
-    EXPECT_EQ(source->get_link_to_destination(FakePacket(another_dest)), link_neighbour);
+    EXPECT_EQ(source->get_link_to_destination(FakePacket(another_dest)),
+              link_neighbour);
 }
 
 }  // namespace test
