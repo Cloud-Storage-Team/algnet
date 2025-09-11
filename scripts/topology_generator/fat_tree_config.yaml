@@ -1,0 +1,43 @@
+# Fat-Tree Network Configuration
+switch_ports_count: 4  # Must be even integer ≥ 2
+output_file: "fat_tree_k4.yaml"  # Output filename
+
+# Link Preset Configurations
+link_presets:
+  default:
+    latency: "1ns"
+    throughput: "1Gbps"
+    ingress_buffer_size: "4096B"
+    egress_buffer_size: "4096B"
+  medium_speed:
+    latency: "1ns"
+    throughput: "10Gbps"
+    ingress_buffer_size: "4096B"
+    egress_buffer_size: "4096B"
+  high_speed:
+    latency: "1ns"
+    throughput: "100Gbps"
+    ingress_buffer_size: "4096B"
+    egress_buffer_size: "4096B"
+
+# Switch Preset Configurations
+switch_presets:
+  edge-preset:
+    ecn:
+      min: 0.2
+      max: 0.3
+      probability: 0.5
+  aggr-preset:
+    ecn:
+      min: 0.2
+      max: 0.3
+      probability: 0.7
+  core-preset:
+    ecn:
+      min: 0.2
+      max: 0.3
+      probability: 1.0
+
+# Packet Spraying Configuration
+packet_spraying:
+  type: "ecmp"

@@ -1,4 +1,17 @@
 import yaml
+import argparse
+import sys
+
+def load_config(config_file):
+    try:
+        with open(config_file, 'r') as f:
+            return yaml.safe_load(f)
+    except FileNotFoundError:
+        print(f"Error: Configuration file '{config_file}' not found.")
+        sys.exit(1)
+    except yaml.YAMLError as e:
+        print(f"Error: Invalid YAML in configuration file: {e}")
+        sys.exit(1)
 
 def add_bidirectional_link(config, from_node, to_node, link_counter, preset = "default"):
     config["links"][f"link{link_counter}"] = {
@@ -10,62 +23,41 @@ def add_bidirectional_link(config, from_node, to_node, link_counter, preset = "d
     }
     return link_counter + 1
 
-def generate_fat_tree_config(switch_ports_count):
-    if k % 2 != 0 or k < 2:
+def generate_fat_tree_config(config_params):
+    # Extract parameters from config
+    switch_ports_count = config_params["switch_ports_count"]
+    link_presets = config_params["link_presets"]
+    switch_presets = config_params["switch_presets"]
+    packet_spraying = config_params["packet_spraying"]
+    
+    if switch_ports_count % 2 != 0 or switch_ports_count < 2:
         raise ValueError(f"Switch's number of ports must be an even integer >= 2, but got {switch_ports_count}")
     
-    num_pods = k
-    edge_per_pod = k // 2
-    aggr_per_pod = k // 2
-    hosts_per_pod = edge_per_pod * (k // 2)
-    core_switches = (k // 2) ** 2
-    total_hosts = (k ** 3) // 4
-    senders = total_hosts // 2
-    receivers = total_hosts // 2
+    num_pods = switch_ports_count
+    edge_per_pod = switch_ports_count // 2
+    aggr_per_pod = switch_ports_count // 2
+    hosts_per_pod = edge_per_pod * (switch_ports_count // 2)
+    core_switches = (switch_ports_count // 2) ** 2
+    total_hosts = (switch_ports_count ** 3) // 4
+    hosts_per_edge = switch_ports_count // 2
+    core_per_aggr = switch_ports_count // 2
     
     config = {
         "presets": {
-            "link": {
-                "default": {
-                    "latency": "1ns",
-                    "throughput": "1Gbps",
-                    "ingress_buffer_size": "4096B",
-                    "egress_buffer_size": "4096B"
-                },
-                "medium_speed": {
-                    "latency": "1ns",
-                    "throughput": "10Gbps",
-                    "ingress_buffer_size": "4096B",
-                    "egress_buffer_size": "4096B"
-                },
-                "high_speed": {
-                    "latency": "1ns",
-                    "throughput": "100Gbps",
-                    "ingress_buffer_size": "4096B",
-                    "egress_buffer_size": "4096B"
-                }
-            },
-            "switch": {
-                "edge-preset": {
-                    "ecn": {"min": 0.2, "max": 0.3, "probability": 0.5}
-                },
-                "aggr-preset": {
-                    "ecn": {"min": 0.2, "max": 0.3, "probability": 0.7}
-                },
-                "core-preset": {
-                    "ecn": {"min": 0.2, "max": 0.3, "probability": 1.0}
-                }
-            }
+            "link": link_presets,
+            "switch": switch_presets
         },
-        "packet-spraying": {"type": "ecmp"},
+        "packet-spraying": packet_spraying,
         "hosts": {},
         "switches": {},
         "links": {}
     }
+
     host_name = lambda pod_idx, host_idx: f"pod{pod_idx}_host{host_idx}"
     aggr_name = lambda pod_idx, aggr_idx: f"pod{pod_idx}_aggr{aggr_idx}"
     edge_name = lambda pod_idx, edge_idx: f"pod{pod_idx}_edge{edge_idx}"
     core_name = lambda core_idx: f"core{core_idx}"
+    
     for p in range(1, num_pods + 1):
         for h in range(1, hosts_per_pod + 1):
             config["hosts"][host_name(p, h)] = {"layer": 3}
@@ -121,9 +113,9 @@ def generate_fat_tree_config(switch_ports_count):
     
     return config
 
-def write_config_to_file(k):
-    config = generate_fat_tree_config(k)
-    filename = f"fat_tree_k{k}.yaml"
+def write_config_to_file(config_params):
+    config = generate_fat_tree_config(config_params)
+    filename = config_params["output_file"]
     
     with open(filename, 'w') as f:
         yaml.dump(config, f, sort_keys=False, width=120, indent=2)
@@ -132,5 +124,16 @@ def write_config_to_file(k):
     return filename
 
 if __name__ == "__main__":
-    k_value = 8
-    output_file = write_config_to_file(k_value)
+    # Set up command-line argument parsing
+    parser = argparse.ArgumentParser(description='Generate Fat-Tree network configuration')
+    parser.add_argument('-c', '--config', 
+                        default='fat_tree_config.yaml',
+                        help='Path to configuration file (default: fat_tree_config.yaml)')
+    
+    args = parser.parse_args()
+    
+    # Load configuration from file
+    config_params = load_config(args.config)
+    
+    # Generate and write the fat-tree configuration
+    output_file = write_config_to_file(config_params)
