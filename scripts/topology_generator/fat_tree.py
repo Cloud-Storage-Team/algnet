@@ -38,7 +38,6 @@ def generate_fat_tree_config(config_params):
     aggr_per_pod = switch_ports_count // 2
     hosts_per_pod = edge_per_pod * (switch_ports_count // 2)
     core_switches = (switch_ports_count // 2) ** 2
-    total_hosts = (switch_ports_count ** 3) // 4
     hosts_per_edge = switch_ports_count // 2
     core_per_aggr = switch_ports_count // 2
     
