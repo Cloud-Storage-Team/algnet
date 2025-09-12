@@ -13,7 +13,7 @@ std::shared_ptr<ISwitch> SwitchParser::parse_i_switch(
 }
 
 void SwitchParser::parse_to_args(const YAML::Node& node, SwitchInitArgs& args) {
-    ECN ecn(1.0, 1.0, 0.0);
+    ECN ecn;
 
     auto ecn_node = node["ecn"];
     if (ecn_node) {
