@@ -1,62 +1,99 @@
-# Datacenter Topology File Format
+# General configs information
 
-This document describes the structure of the YAML file used to define datacenter network topologies, including hosts,
-switches, and links between them.
+## Units data format
 
-## Structure Overview
+In all configs you may see fields that contains time, size and speed. All of them have same format: `<value><unit>` where `value` is an integer and `unit` is small string suffix. For each unit where are fixed list of available units that you may see below.
 
-The topology file is divided into multiple sections, each representing a different network topology. Each topology
-consists of:
+### Available time units:
 
-- `devices`: Defines devices: senders, receivers and switches.
+- `ns`: Nanosecond
+- `us`: Microsecond
+- `ms`: Millisecond
+- `s`: Second
 
-- `links`: Specifies connections between devices with network parameters.
+### Available size units:
 
-## Sections
+- `b`: bit
+- `B`: Byte
+- `Mb`: Megabit
+- `MB`: Megabyte
+- `Gb`: Gigabit
+- `GB`: Gigabyte
 
-### Devices
+### Available speed units:
 
-Each host entry represents a device:
+- `Mbps`: Megabits per second
+- `Gbps`: Gigabits per second
 
+Examples:
+- Time: `1ns`, `2s`,
+- Size: `1Mb`, `5GB`
+- Speed: `2Gpbs`, `3Mbps`
+
+## Presets
+
+For some config parts you may create presets - common set of fields for the objects. For example, in topology configs it may looks like
 ```yaml
-devices:
-  device_name:
-    type: [ sender | receiver | switch ]
+presets:
+  links:
+    best-link:
+      latency: 1000ns
+      throughput: 10Gbps
+      ingress_buffer_size: 4096B
+      egress_buffer_size: 4096B
+  switches:
+    really-best-switch:
+      ecn:
+        min: 0.2
+        max: 0.4
+        probability: 0.8
+    bad-switch:
+      ecn:
+        min: 1.0
+        max: 1.0
+        probability: 0.0
 ```
 
-- `device_name`: Unique identifier for the device.
-
-- `type`: Defines device type.
-
-### Links
-
-Each link defines a connection between two devices:
+To use your preset, fill in `preset-name` field in concrete object description:
 
 ```yaml
+switches:
+  switch-1:
+    preset-name: really-best-switch
+  switch-2:
+    preset-name: bad-switch
 links:
-  link_id:
-    from: <source_device>
-    to: <destination_device>
-    latency: <value><unit>
-    throughput: <value><unit>
-    ingress_buffer_size: <value>B
-    egress_buffer_size: <value>B
+  link1-2:
+    preset-name:  best-link
+    from: switch-1
+    to: switch-2
+  link2-1:
+    preset-name: best-link
+    from: switch-2
+    to: switch-1
+    throughput: 10Gpps # overrides value from preset
 ```
 
-- `link_id`: Unique identifier for the link.
+## Default preset
 
-- `from`: Source device name.
+To shorten the configs length, you may fill default preset that used for all objects in description of which `preset-name` does not set (or set to `default`):
 
-- `to`: Destination device name.
+```yaml
+presets:
+  links:
+    default:
+      latency: 1000ns
+      throughput: 10Gbps
+      ingress_buffer_size: 4096B
+      egress_buffer_size: 4096B
+links:
+   link-1:
+      from: device-1
+      to: device-2
+      # other fields takes from default preset
+    link-1:
+      preset-name: default # works similarly with link-1
+      from: device-2
+      to: device-1
 
-- `latency`: Transmission delay (e.g., 5ns).
-
-- `throughput`: Link bandwidth (e.g., 1Gbps).
-
-- `ingress_buffer_size`: Link ingress buffer size in bytes (e.g., 1024B)
-
-- `egress_buffer_size`: Link egress buffer size in bytes (e.g., 1024B)
-
-### Examples images
-
-You may generate images of topologies using the [generator](../scripts/generate_image.py) script.
+```

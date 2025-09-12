@@ -9,15 +9,13 @@ connections:
     flows:
       flow1:
         type: tcp
-        packet_size: 256
+        packet_size: 256B
         cc:
           type: swift
           base_target: 4000ns
       flow2:
         type: tcp
-        packet_size: 256
+        packet_size: 256B
         cc:
           type: swift
           base_target: 4000ns
-
-simulation_time: 600000

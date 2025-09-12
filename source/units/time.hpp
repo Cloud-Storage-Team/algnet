@@ -15,7 +15,7 @@ struct Microsecond {
     static constexpr uint64_t to_nanoseconds_multiplier = 1'000;
 };
 
-struct Milisecond {
+struct Millisecond {
     static constexpr uint64_t to_nanoseconds_multiplier = 1'000'000;
 };
 
