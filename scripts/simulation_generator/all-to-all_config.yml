@@ -1,0 +1,19 @@
+# Number of flows in each connection
+flows_per_connection: 1
+
+# Path to topology config
+topology_config_path: ../../configuration_examples/topology_examples/bus_topology.yml
+
+# Presets for connection & flow
+# See more about connection & flows presets in its readme:
+# configuration_examples/simulation_examples/README.md
+presets:
+  connection:
+    default:
+      packets_to_send: 100
+  flow:
+    default:
+      type: tcp
+      packet_size: 1500B
+      cc:
+        type: tahoe
