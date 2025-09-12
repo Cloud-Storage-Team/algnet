@@ -37,9 +37,10 @@ int main(const int argc, char **argv) {
         flags["metrics-filter"].as<std::string>());
 
     sim::YamlParser parser;
-    auto [simulator, simulation_time] =
+    sim::Simulator simulator =
         parser.build_simulator_from_config(flags["config"].as<std::string>());
-    simulator.start(simulation_time);
+
+    simulator.start();
 
     if (!flags["no-plots"].as<bool>()) {
         sim::MetricsCollector::get_instance().draw_metric_plots(output_dir);

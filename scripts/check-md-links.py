@@ -35,21 +35,22 @@ def check_links_in_markdown(file_path : str):
             response = requests.head(link_url, allow_redirects=True)
             if response.status_code != 200:
                 raise requests.exceptions.ConnectionError(f"Can not access to {link_url}")
-            print(f"{link_url} is link to an avaliable site")
+            print(f"{link_url} is link to an available site")
         except requests.exceptions.RequestException:
+            print(f"{link_url} is not an available site; returned code {response.status_code}")
             incorrect_links.append(link_url)
     if len(incorrect_links) == 0:
         print()
         print("All links are correct!")
         return True
-    print("Found incorrect links. Each of them is neither the correct path to a file nor a link to an avaliable site:", file=sys.stderr)
+    print("Found incorrect links. Each of them is neither the correct path to a file nor a link to an available site:", file=sys.stderr)
     for link in incorrect_links:
         print(f"link: {link}", file=sys.stderr)
         print("====================", file=sys.stderr)
     return False
 def main():
     parser = argparse.ArgumentParser(
-        description="Check that all the links in given markdown file are correct pathes to some files or the links to the avaliable sites"
+        description="Check that all the links in given markdown file are correct pathes to some files or the links to the available sites"
     )
     parser.add_argument("-f", "--file", help="Path to the file to be checked", required=True)
     args = parser.parse_args()

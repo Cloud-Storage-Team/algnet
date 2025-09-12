@@ -12,7 +12,7 @@
 
 namespace sim {
 
-std::pair<Simulator, TimeNs> YamlParser::build_simulator_from_config(
+Simulator YamlParser::build_simulator_from_config(
     const std::filesystem::path &path) {
     const YAML::Node simulation_config = YAML::LoadFile(path);
 
@@ -64,15 +64,21 @@ std::pair<Simulator, TimeNs> YamlParser::build_simulator_from_config(
         [this](auto node) { return process_connection(node); },
         "No connections specified in the simulation config");
 
-    return {m_simulator, parse_simulation_time(simulation_config)};
+    std::optional<TimeNs> maybe_stop_time =
+        parse_simulation_time(simulation_config);
+    if (maybe_stop_time.has_value()) {
+        m_simulator.set_stop_time(maybe_stop_time.value());
+    }
+    return m_simulator;
 }
 
-TimeNs YamlParser::parse_simulation_time(const YAML::Node &config) {
-    if (!config["simulation_time"]) {
-        throw std::runtime_error(
-            "No simulation time specified in the simulation config");
+std::optional<TimeNs> YamlParser::parse_simulation_time(
+    const YAML::Node &config) {
+    auto value = config["simulation_time"];
+    if (!value) {
+        return std::nullopt;
     }
-    return TimeNs(config["simulation_time"].as<uint32_t>());
+    return parse_time(value.as<std::string>());
 }
 
 void YamlParser::process_hosts(const YAML::Node &hosts_node) {

@@ -67,10 +67,16 @@ void Simulator::recalculate_paths() {
         }
     }
 }
-// Create a Stop event at a_stop_time and start simulation
-void Simulator::start(TimeNs a_stop_time) {
+
+void Simulator::set_stop_time(TimeNs stop_time) { m_stop_time = stop_time; }
+
+void Simulator::start() {
     recalculate_paths();
-    Scheduler::get_instance().add<Stop>(a_stop_time);
+
+    if (m_stop_time.has_value()) {
+        Scheduler::get_instance().add<Stop>(m_stop_time.value());
+    }
+
     constexpr TimeNs start_time = TimeNs(0);
 
     for (auto connection : m_connections) {

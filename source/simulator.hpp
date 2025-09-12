@@ -35,12 +35,16 @@ public:
 
     // Calls BFS for each device to build the routing table
     void recalculate_paths();
-    // Create a Stop event at a_stop_time and start simulation
-    void start(TimeNs a_stop_time);
+
+    void set_stop_time(TimeNs stop_time);
+
+    // Start simulation
+    void start();
 
     std::unordered_set<std::shared_ptr<IConnection>> get_connections() const;
 
 private:
+    std::optional<TimeNs> m_stop_time;
     std::unordered_set<std::shared_ptr<IHost>> m_hosts;
     std::unordered_set<std::shared_ptr<ISwitch>> m_switches;
     std::unordered_set<std::shared_ptr<IConnection>> m_connections;
