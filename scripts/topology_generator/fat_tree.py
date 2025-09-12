@@ -3,6 +3,11 @@ import argparse
 import sys
 import os
 
+def save_yaml(data, filename):
+    """Save data as YAML to a file"""
+    with open(filename, "w") as f:
+        yaml.dump(data, f, sort_keys=False, default_flow_style=False)
+
 def load_config(config_file):
     try:
         with open(config_file, 'r') as f:
@@ -114,15 +119,12 @@ def generate_fat_tree_config(config_params):
     
     return config
 
-def write_config_to_file(config_params):
-    config = generate_fat_tree_config(config_params)
-    filename = config_params["output_file"]
-    
-    with open(filename, 'w') as f:
+def write_config_to_file(config, output_path):   
+    with open(output_path, 'w') as f:
         yaml.dump(config, f, sort_keys=False, width=120, indent=2)
     
-    print(f"Configuration written to {filename}")
-    return filename
+    print(f"Configuration written to {output_path}")
+    return output_path
 
 if __name__ == "__main__":
     # Set up command-line argument parsing
@@ -135,6 +137,11 @@ if __name__ == "__main__":
     parser.add_argument('-c', '--config', 
                         default=default_config_abs_path,
                         help=f'Path to configuration file (default: {default_config_abs_path}). See given default to get format & structure of this config')
+    
+    parser.add_argument('-o', '--output_path',
+        default='fat_tree_topology.yaml',
+        help='Path to the output topology config file',
+    )
 
     
     args = parser.parse_args()
@@ -143,4 +150,5 @@ if __name__ == "__main__":
     config_params = load_config(args.config)
     
     # Generate and write the fat-tree configuration
-    output_file = write_config_to_file(config_params)
+    topology = generate_fat_tree_config(config_params)
+    save_yaml(topology, args.output_path)
