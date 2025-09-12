@@ -127,7 +127,10 @@ def write_config_to_file(config, output_path):
 
 if __name__ == "__main__":
     # Set up command-line argument parsing
-    parser = argparse.ArgumentParser(description='Generate Fat-Tree network configuration. You may see more about it here https://packetpushers.net/blog/demystifying-dcn-topologies-clos-fat-trees-part2/')
+    parser = argparse.ArgumentParser(
+        description='Generate Fat-Tree network configuration.'\
+        'You may see more about it here: '\
+        'https://packetpushers.net/blog/demystifying-dcn-topologies-clos-fat-trees-part2/')
     curr_file_path = os.path.realpath(__file__)
     curr_dir_path = os.path.dirname(curr_file_path)
     default_config_full_path = os.path.join(curr_dir_path, "fat_tree_config.yaml")
