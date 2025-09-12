@@ -7,7 +7,7 @@ namespace sim {
 
 class ECN {
 public:
-    ECN(float a_min, float a_max, float a_probability);
+    ECN(float a_min = 1.0, float a_max = 1.0, float a_probability = 0.0);
     // Returns true if congestion detected for a given queue filling
     bool get_congestion_mark(float queue_filling) const;
 

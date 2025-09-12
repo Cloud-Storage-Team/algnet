@@ -13,11 +13,11 @@ public:
     virtual std::uint32_t get_hash(Packet packet) = 0;
 };
 
-template <typename Derived>
+template <typename Hasher>
 class ClonebleHasher : public IPacketHasher {
 public:
     std::unique_ptr<IPacketHasher> clone() override {
-        return std::make_unique<Derived>(static_cast<const Derived&>(*this));
+        return std::make_unique<Hasher>(static_cast<const Hasher&>(*this));
     }
 };
 
