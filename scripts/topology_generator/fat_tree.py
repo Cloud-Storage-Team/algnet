@@ -131,7 +131,7 @@ if __name__ == "__main__":
     curr_file_path = os.path.realpath(__file__)
     curr_dir_path = os.path.dirname(curr_file_path)
     default_config_full_path = os.path.join(curr_dir_path, "fat_tree_config.yaml")
-    default_config_abs_path = os.path.relpath(default_config_full_path, os.getcwd())
+    default_config_rel_path = os.path.relpath(default_config_full_path, os.getcwd())
 
     parser.add_argument('-c', '--config', 
                         default=default_config_abs_path,
