@@ -37,6 +37,13 @@ def generate_topology(flows):
                 "throughput": "100Gbps",
                 "ingress_buffer_size": "1000000B",
                 "egress_buffer_size": "1000000B",
+            }},
+            "switch" : {"default" : {
+                "ecn": {
+                    "min": 0.7,
+                    "max": 0.7,
+                    "probability": 1.0
+                }
             }}
         },
         "packet-spraying" : {"type" : "ecmp"},
@@ -86,7 +93,7 @@ def generate_topology(flows):
     link_idx += 1    
 
     # Add switch
-    topology["switches"]["switch"] = {"threshold": 0.7}
+    topology["switches"]["switch"] = {}
 
     return topology, senders
 

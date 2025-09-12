@@ -5,6 +5,12 @@ presets:
       throughput: 100Gbps
       ingress_buffer_size: 1024000B
       egress_buffer_size: 1024000B
+  switch:
+    default:   
+      ecn:
+        min: 0.1
+        max: 0.3
+        probability: 0.5
 packet-spraying:
   type: ecmp
 
@@ -18,10 +24,6 @@ hosts:
 
 switches:
   switch:
-    ecn:
-      min: 0.1
-      max: 0.3
-      probability: 0.5
 
 links:
   link0:

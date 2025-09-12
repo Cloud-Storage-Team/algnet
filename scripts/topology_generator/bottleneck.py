@@ -21,6 +21,13 @@ def generate_topology(
                 "throughput": link_throughput,
                 "ingress_buffer_size": ingress_buffer_size,
                 "egress_buffer_size": egress_buffer_size,
+            }},
+            "switch" : {"default" : {
+                "ecn": {
+                    "min": 0.7,
+                    "max": 0.7,
+                    "probability": 1.0
+                }
             }}
         },
         "packet-spraying" : {"type" : "ecmp"},
@@ -86,7 +93,7 @@ def generate_topology(
 
     # Add the switches
     for i in range(0, num_switches):
-        topology["switches"][switch_names[i]] = {"threshold": 0.7}
+        topology["switches"][switch_names[i]] = {}
 
     # Add links between switches
     for i in range(0, num_switches - 1):
