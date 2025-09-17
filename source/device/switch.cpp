@@ -7,9 +7,24 @@
 
 namespace sim {
 
+SwitchInitArgs::SwitchInitArgs(const SwitchInitArgs& other)
+    : id(other.id),
+      ecn(other.ecn) {
+    if (other.hasher.has_value()) {
+        hasher = other.hasher.value()->clone();
+    } else {
+        hasher = std::unexpected(other.hasher.error());
+    }
+}
+    
 Switch::Switch(Id a_id, ECN&& a_ecn, std::unique_ptr<IPacketHasher> a_hasher)
     : RoutingModule(a_id, std::move(a_hasher)), m_ecn(std::move(a_ecn)) {}
 
+Switch::Switch(SwitchInitArgs&& args)
+    : Switch(utils::value_or_base_error(args.id),
+           utils::value_or_base_error(args.ecn),
+           utils::value_or_base_error(std::move(args.hasher))) {}
+    
 bool Switch::notify_about_arrival(TimeNs arrival_time) {
     return m_process_scheduler.notify_about_arriving(arrival_time,
                                                      weak_from_this());

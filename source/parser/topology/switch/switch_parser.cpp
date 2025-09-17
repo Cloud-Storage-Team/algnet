@@ -1,19 +1,42 @@
 #include "switch_parser.hpp"
 
 #include "parser/parse_utils.hpp"
+#include "utils/errors/base_error.hpp"
+#include "utils/errors/error_with_id.hpp"
 
 namespace sim {
 
 std::shared_ptr<ISwitch> SwitchParser::parse_i_switch(
     const YAML::Node& key_node, const YAML::Node& value_node,
-    const YAML::Node& packet_spraying_node) {
-    return parse_default_switch(key_node, value_node, packet_spraying_node);
+    const YAML::Node& packet_spraying_node, const SwitchPresets& presets) {
+    return parse_default_switch(key_node, value_node, packet_spraying_node, presets);
+}
+
+void SwitchParser::parse_to_args(const YAML::Node& node, SwitchInitArgs& args) {
+    ECN ecn;
+
+    auto ecn_node = node["ecn"];
+    if (ecn_node) {
+        ecn = parse_ecn(ecn_node);
+    }
+    args.ecn.emplace(ecn);
 }
 
 std::shared_ptr<Switch> SwitchParser::parse_default_switch(
     const YAML::Node& key_node, const YAML::Node& value_node,
-    const YAML::Node& packet_spraying_node) {
+    const YAML::Node& packet_spraying_node, const SwitchPresets& presets) {
     Id id = key_node.as<Id>();
+    try {
+        SwitchInitArgs switch_args = presets.get_preset(value_node);
+        switch_args.id = id;
+        parse_to_args(value_node, switch_args);
+        switch_args.hasher = std::move(parse_hasher(packet_spraying_node, id));
+        return std::make_shared<Switch>(std::move(switch_args));
+    } catch (const utils::BaseError& base_error) {
+        throw utils::ErrorWithId(base_error, id);
+    } catch (...) {
+        throw;
+    }
     const YAML::Node& ecn_node = value_node["ecn"];
     ECN ecn(1.0, 1.0, 0.0);
     if (ecn_node) {

@@ -46,8 +46,8 @@ Simulator YamlParser::build_simulator_from_config(
 
     parse_if_present(
         topology_config["switches"],
-        [this, &packet_spraying_node](auto node) {
-            return process_switches(node, packet_spraying_node);
+        [this, &topology_presets_node, &packet_spraying_node](auto node) {
+            return process_switches(node, packet_spraying_node, get_if_present(topology_presets_node, "switch"));
         },
         "No switches specified in the topology config");
 
@@ -91,16 +91,24 @@ void YamlParser::process_hosts(const YAML::Node &hosts_node) {
 }
 
 void YamlParser::process_switches(const YAML::Node &swtiches_node,
-                                  const YAML::Node &packet_spraying_node) {
+                                  const YAML::Node &packet_spraying_node,
+                                  const YAML::Node &switch_preset_node) {
+    // Maps preset name to preset body
+    SwitchPresets presets(switch_preset_node, [](const YAML::Node &preset_node) {
+        SwitchInitArgs args;
+        SwitchParser::parse_to_args(preset_node, args);
+        return args;
+    });
+
     process_identifiables<ISwitch>(
         swtiches_node,
         [this](std::shared_ptr<ISwitch> swtch) {
             return m_simulator.add_switch(swtch);
         },
-        [&packet_spraying_node](const YAML::Node &key_node,
+        [&packet_spraying_node, &presets](const YAML::Node &key_node,
                                 const YAML::Node &value_node) {
             return SwitchParser::parse_i_switch(key_node, value_node,
-                                                packet_spraying_node);
+                                                packet_spraying_node, presets);
         },
         "Can not add switch.");
 }

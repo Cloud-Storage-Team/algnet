@@ -5,19 +5,24 @@
 #include <memory>
 
 #include "device/switch.hpp"
+#include "parser/preset_storage.hpp"
 
 namespace sim {
+
+using SwitchPresets = PresetStorage<SwitchInitArgs>;
 
 class SwitchParser {
 public:
     static std::shared_ptr<ISwitch> parse_i_switch(
         const YAML::Node& key_node, const YAML::Node& value_node,
-        const YAML::Node& packet_spraying_node);
+        const YAML::Node& packet_spraying_node, const SwitchPresets& presets);
+
+    static void parse_to_args(const YAML::Node& node, SwitchInitArgs& args);
 
 private:
     static std::shared_ptr<Switch> parse_default_switch(
         const YAML::Node& key_node, const YAML::Node& value_node,
-        const YAML::Node& packet_spraying_node);
+        const YAML::Node& packet_spraying_node, const SwitchPresets& presets);
 
     static ECN parse_ecn(const YAML::Node& node);
 

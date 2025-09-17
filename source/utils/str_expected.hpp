@@ -12,11 +12,21 @@ template <typename T>
 using str_expected = std::expected<T, std::string>;
 
 template <typename T>
-T value_or_base_error(str_expected<T> opt) {
+typename std::enable_if<std::is_copy_constructible<T>::value, T>::type
+value_or_base_error(const str_expected<T>& opt) {
     if (!opt.has_value()) {
         throw BaseError(opt.error());
     }
     return opt.value();
+}
+
+template <typename T>
+typename std::enable_if<std::is_move_constructible<T>::value, T>::type
+value_or_base_error(str_expected<T>&& opt) {
+    if (!opt.has_value()) {
+        throw BaseError(opt.error());
+    }
+    return std::move(opt.value());
 }
 
 }  // namespace utils
