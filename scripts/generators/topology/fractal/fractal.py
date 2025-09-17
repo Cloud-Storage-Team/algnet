@@ -3,7 +3,8 @@ import argparse
 import sys
 import os
 
-from parse_args import parse_args
+from ..parse_args import parse_args
+from common import *
 
 def generate_topology(
     number_switch_per_layer,
@@ -70,10 +71,10 @@ def generate_topology(
     return topology
 
 
-def save_yaml(data, filename):
-    """Save data as YAML to a file"""
-    with open(filename, "w") as f:
-        yaml.dump(data, f, sort_keys=False, default_flow_style=False)
+# def save_yaml(data, filename):
+#     """Save data as YAML to a file"""
+#     with open(filename, "w") as f:
+#         yaml.dump(data, f, sort_keys=False, default_flow_style=False)
 
 
 def main():
@@ -81,7 +82,9 @@ def main():
     
     args = parse_args(os.path.join(os.path.dirname(__file__), "default_config.yml"))
 
-    print(args.config)
+    config = load_yaml(args.config)
+
+    print(config)
 
     # Generate topology
     topology = generate_topology(
