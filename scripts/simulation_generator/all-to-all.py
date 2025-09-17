@@ -7,7 +7,9 @@ import yaml
 curr_file_path = os.path.abspath(__file__)
 curr_file_dir_path = os.path.dirname(curr_file_path)
 common_dir_path = os.path.dirname(curr_file_dir_path)
-sys.path.append(common_dir_path)
+
+if common_dir_path not in sys.path:
+    sys.path.append(common_dir_path)
 
 from common import load_config, save_yaml
 
@@ -47,7 +49,7 @@ def generate_simulation_config(
         topology_config_path : str) -> dict:
     
     try:
-        flows_per_connectrion = config["flows_per_connection"]
+        flows_per_connection = config["flows_per_connection"]
         presets = config["presets"]
     except KeyError as e:
         raise RuntimeError(f"Config missing field {e}")
@@ -58,21 +60,19 @@ def generate_simulation_config(
         "connections" : {}
     }
 
-    hosts_count = len(host_names)
-
-    for i in range(hosts_count):
-        for j in range(hosts_count):
-            if i == j:
+    for sender_id in host_names:
+        for receiver_id in host_names:
+            if sender_id == receiver_id:
                 continue
-            connection_name = f"conn_from_{host_names[i]}_to_{host_names[j]}"
+            connection_name = f"conn_from_{sender_id}_to_{receiver_id}"
 
             connection = {
-                "sender_id": host_names[i],
-                "receiver_id": host_names[j],
+                "sender_id": sender_id,
+                "receiver_id": receiver_id,
                 "flows" : {}
             }
 
-            for flow_num in range(1, flows_per_connectrion + 1):
+            for flow_num in range(1, flows_per_connection + 1):
                 connection["flows"][f"flow_{flow_num}"] = {}
             
             simulation_config["connections"][connection_name] = connection 
