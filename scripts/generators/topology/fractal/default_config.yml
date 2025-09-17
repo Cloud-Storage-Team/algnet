@@ -1,0 +1,13 @@
+presets:
+  link:
+    default: # used for all links
+      latency: 0ns
+      throughput: 10Gbps
+      ingress_buffer_size: 4096B
+      egress_buffer_size: 4096B
+  
+packet-spraying:
+  type: ecmp
+
+depth: 3 # count of layers
+num_chulds: 2 # count of childs of each device
