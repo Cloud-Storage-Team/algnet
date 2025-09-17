@@ -78,7 +78,8 @@ def save_yaml(data, filename):
 
 def main():
     # Parse command line arguments
-    args = parse_args()
+    
+    args = parse_args(os.path.join(os.path.dirname(__file__), "default_config.yml"))
 
     print(args.config)
 

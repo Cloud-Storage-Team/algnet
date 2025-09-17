@@ -4,16 +4,12 @@ import sys
 import yaml
 
 # To import common
-curr_file_path = os.path.abspath(__file__)
-curr_file_dir_path = os.path.dirname(curr_file_path)
-common_dir_path = os.path.dirname(curr_file_dir_path)
 
-if common_dir_path not in sys.path:
-    sys.path.append(common_dir_path)
-
-from common import load_config, save_yaml
+from common import load_yaml, save_yaml
 
 def parse_args():
+    curr_file_path = os.path.abspath(__file__)
+    curr_file_dir_path = os.path.dirname(curr_file_path)
     default_config_full_path = os.path.join(curr_file_dir_path, "all-to-all_config.yml")
     default_config_rel_path = os.path.relpath(default_config_full_path, os.getcwd())
 
@@ -86,9 +82,9 @@ def main():
     config_dir = os.path.dirname(config_path)
     output_path = args.output_path
 
-    config = load_config(config_path)
+    config = load_yaml(config_path)
     topology_path = get_topology_path(config, config_dir)
-    topology = load_config(topology_path)
+    topology = load_yaml(topology_path)
     host_names = get_host_names(topology)
 
     output_dir = os.path.dirname(output_path)

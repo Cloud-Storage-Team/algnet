@@ -1,11 +1,8 @@
 import os
 import argparse
 
-def parse_args(config_name = "default_config.yml"):
-    curr_file_path = os.path.abspath(__file__)
-    curr_file_dir_path = os.path.dirname(curr_file_path)
-    default_config_full_path = os.path.join(curr_file_dir_path, config_name)
-    default_config_rel_path = os.path.relpath(default_config_full_path, os.getcwd())
+def parse_args(config_path : str):
+    default_config_rel_path = os.path.relpath(config_path, os.getcwd())
 
     parser = argparse.ArgumentParser(description="Generator of simulation config with all-to-all connections between hosts")
 
