@@ -76,6 +76,12 @@ private:
 };
 
 template <IsSizeBase TSizeBase, IsTimeBase TTimeBase>
+constexpr Speed<TSizeBase, TTimeBase> operator*(
+    size_t mult, Speed<TSizeBase, TTimeBase> speed) {
+    return speed * mult;
+}
+
+template <IsSizeBase TSizeBase, IsTimeBase TTimeBase>
 std::ostream& operator<<(std::ostream& out, Speed<TSizeBase, TTimeBase> speed) {
     return out << speed.value();
 }
