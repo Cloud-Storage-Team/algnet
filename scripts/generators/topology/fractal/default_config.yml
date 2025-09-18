@@ -10,4 +10,4 @@ packet-spraying:
   type: ecmp
 
 depth: 3 # count of layers
-num_chulds: 2 # count of childs of each device
+num_chulds_per_switch: 2 # count of childs of each device
