@@ -19,9 +19,10 @@ def load_yaml(path : str) -> dict:
 def save_yaml(data, filename):
     """Save data as YAML to a file"""
     with open(filename, "w") as f:
-        yaml.dump(data, f, sort_keys=False, default_flow_style=False)
+        yaml.Dumper.ignore_aliases = lambda _, __: True
+        yaml.dump(data, f, sort_keys=False, default_flow_style=False, Dumper=yaml.Dumper)
 
-def parse_args(config_path : str, help_description = ""):
+def parse_generator_args(config_path : str, help_description = ""):
     default_config_rel_path = os.path.relpath(config_path, os.getcwd())
 
     parser = argparse.ArgumentParser(description=help_description)

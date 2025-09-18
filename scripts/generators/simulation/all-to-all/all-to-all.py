@@ -58,7 +58,7 @@ def generate_simulation_config(
 def main():
     
     default_config_path = os.path.join(os.path.dirname(__file__), "default_config.yml")
-    args = parse_args(default_config_path)
+    args = parse_generator_args(default_config_path)
 
     config_path = args.config
     config_dir = os.path.dirname(config_path)

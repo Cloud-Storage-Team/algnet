@@ -1,0 +1,100 @@
+presets:
+  link:
+    default:
+      latency: 5ns
+      throughput: 100Gbps
+      ingress_buffer_size: 1000000B
+      egress_buffer_size: 1000000B
+  connection:
+    default:
+      packets_to_send: 1000
+      mplb: round_robin
+  flow:
+    default:
+      type: tcp
+      packet_size: 1500B
+      cc:
+        type: swift
+        base_target: 200ns
+  switch:
+    default:
+      ecn:
+        min: 0.7
+        max: 0.7
+        probability: 1.0
+packet-spraying:
+  type: ecmp
+hosts:
+  sender1: {}
+  sender2: {}
+  sender3: {}
+  receiver: {}
+links:
+  link_0:
+    from: sender1
+    to: switch
+  link_1:
+    from: switch
+    to: sender1
+  link_2:
+    from: sender2
+    to: switch
+  link_3:
+    from: switch
+    to: sender2
+  link_4:
+    from: sender3
+    to: switch
+  link_5:
+    from: switch
+    to: sender3
+  link_6:
+    from: switch
+    to: receiver
+  link_7:
+    from: receiver
+    to: switch
+switches:
+  switch:
+    ecn:
+      min: 0.7
+      max: 0.7
+      probability: 1.0
+connections:
+  conn1:
+    packets_to_send: 1000
+    mplb: round_robin
+    sender_id: sender1
+    receiver_id: receiver
+    flows:
+      flow:
+        type: tcp
+        packet_size: 1500B
+        cc:
+          type: swift
+          base_target: 200ns
+  conn2:
+    packets_to_send: 1000
+    mplb: round_robin
+    sender_id: sender2
+    receiver_id: receiver
+    flows:
+      flow:
+        type: tcp
+        packet_size: 1500B
+        cc:
+          type: swift
+          base_target: 200ns
+  conn3:
+    packets_to_send: 1000
+    mplb: round_robin
+    sender_id: sender3
+    receiver_id: receiver
+    flows:
+      flow:
+        type: tcp
+        packet_size: 1500B
+        cc:
+          type: swift
+          base_target: 200ns
+topology_config_path: sfsdfsd.yml

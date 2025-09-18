@@ -1,146 +1,129 @@
-import yaml
-import argparse
 import os
 
-def parse_arguments():
-    """Parse and validate command line arguments"""
-    parser = argparse.ArgumentParser(
-        description="Generate topology and simulation YAML files for the incast scenario."
-    )
-    parser.add_argument(
-        "--flows", type=int, default=3, help="Number of flows"
-    )
-    parser.add_argument(
-        "--topology_file",
-        default="incast_topology.yml",
-        help="Topology config file",
-    )
-    parser.add_argument(
-        "--simulation_file",
-        default="incast_simulation.yml",
-        help="Simulation config file",
-    )
-    return parser.parse_args()
+from generators.common import *
+from generators.topology.common import *
 
+# TODO: eliminate tthis class when all presets (switch, flow, connection) will be available
+class InputConfig:
+    def __init__(self, config : dict):
+        # Gets required fields from config
+        try:
+            self.packet_spraying = config["packet-spraying"]
+            self.senders_count = int(config["senders_count"])
+            self.topology_name = config["topology_name"]
+            
+            presets = config["presets"]
+            try:
+                self.link_presets = presets["link"]
+                switch_presets = presets["switch"]
+                try:
+                    self.default_switch_preset = switch_presets["default"]
+                except KeyError as e:
+                    raise KeyError(f"switch->{e}")
+                
+                connection_presets = presets["connection"]
+                try:
+                    self.default_connection_preset = connection_presets["default"]
+                except KeyError as e:
+                    raise KeyError(f"connection->{e}")
+                
+                flow_presets = presets["flow"]
+                try:
+                    self.default_flow_preset = flow_presets["default"].copy()
+                except KeyError as e:
+                    raise KeyError(f"flow->{e}")
+                
+            except KeyError as e:
+                raise KeyError(f"presets->{e}")
+        except KeyError as e:
+            raise KeyError(f"Config missing value {e}")
 
-def save_yaml(data, filename):
-    """Save data as YAML to a file"""
-    with open(filename, "w") as f:
-        yaml.dump(data, f, sort_keys=False, default_flow_style=False)
+class OutputConfig:
+    def __init__(self):
+        self.config = {}
+        self.senders = []
 
+    def _add_presets(self, presets : dict):
+        self.config["presets"] = presets
 
-def generate_topology(flows):
-    topology = {
-        "presets": {
-            "link" : {"default" : {
-                "latency": "5ns",
-                "throughput": "100Gbps",
-                "ingress_buffer_size": "1000000B",
-                "egress_buffer_size": "1000000B",
-            }}
-        },
-        "packet-spraying" : {"type" : "ecmp"},
-        "hosts": {},
-        "switches": {},
-        "links": {}
-    }
+    # private method
+    def _add_topology(self, input_config : InputConfig) -> list[str]:
+        """
+        Adds topology part and updated self.senders_list
+        """
+        self.config["packet-spraying"] = input_config.packet_spraying
+        link_generator = LinkGenerator(self.config)
 
-    link_idx = 1
-    senders = []
+        switch_id = "switch"
 
-    # Add senders
-    for i in range(0, flows):
-        sender = f"sender{i+1}"
-        senders.append(sender)
-        topology["hosts"][sender] = {}
+        # Add senders
+        self.config["hosts"] = {}
+        for i in range(1, input_config.senders_count + 1):
+            sender_id = f"sender{i}"
+            self.senders.append(sender_id)
+            self.config["hosts"][sender_id] = {}
 
-        # Add link from sender to switch
-        topology["links"][f"link{link_idx}"] = {
-            "from": sender,
-            "to": "switch",
-        }
-        link_idx += 1        
+            # Add links between sender and switch
+            link_generator.add_bidirectional_link(sender_id, switch_id)   
 
-        # Add link from switch to sender
-        topology["links"][f"link{link_idx}"] = {
-            "from": "switch",
-            "to": sender,
-        }
-        link_idx += 1        
+        # Add switch
+        # TODO: replace default_switch_preset with {} when switch presets will be available
+        self.config["switches"] = {switch_id : input_config.default_switch_preset}
 
-    # Add receiver
-    topology["hosts"]["receiver"] = {}
+        # Add receiver
+        receiver_id = "receiver"
+        self.config["hosts"][receiver_id] = {}
 
-    # Add link from switch to receiver
-    topology["links"][f"link{link_idx}"] = {
-        "from": "switch",
-        "to": "receiver"
-    }
-    link_idx += 1    
+        link_generator.add_bidirectional_link(switch_id, receiver_id) 
+    
+    def _add_simulation(self, input_config : InputConfig):
+        """
+        Adds simulation part
+        Run it ONLY when self.senders are correct
+        """
+        self.config["connections"] = {}
+        for i in range(len(self.senders)):
+            # TODO: delete this line when connection presets will be available
+            self.config["connections"][f"conn{i+1}"] = input_config.default_connection_preset | {
+                "sender_id": self.senders[i],
+                "receiver_id": "receiver",
+                "flows": {
+                    # TODO: replace config.default_flow_preset with {} when flow presets will be available
+                    "flow": input_config.default_flow_preset
+                },
+            }
 
-    # Add link from receiver to switch
-    topology["links"][f"link{link_idx}"] = {
-        "from": "receiver",
-        "to": "switch"
-    }
-    link_idx += 1    
-
-    # Add switch
-    topology["switches"]["switch"] = {"threshold": 0.7}
-
-    return topology, senders
-
-
-def generate_simulation(
-    topology_file,
-    senders
-):
-    """
-    Generate a simulation YAML structure with flows between senders and 1 receiver.
-    """
-    simulation = {
-        "topology_config_path": topology_file,
-        "connections": {}
-    }
-
-    for i in range(0, len(senders)):
-        simulation["connections"][f"conn{i+1}"] = {
-            "sender_id": senders[i],
-            "receiver_id": "receiver",
-            "packets_to_send": 1000,
-            "mplb": "round_robin",
-            "flows": {
-                "flow": {
-                    "type": "tcp",
-                    "packet_size": "1500B",
-                    "cc": {
-                        "type": "swift",
-                        "base_target": "200ns"
-                    }
-                }
-            },
-        }
-    return simulation
+    def generate(self, config : dict) -> dict:
+        """
+        Generates incast config
+        Contains both simulation & topology parts
+        ATTENTION: value of 'topology_config_path' does not set!
+        """
+        self._add_presets(config["presets"])
+        
+        input_config = InputConfig(config)
+        self._add_topology(input_config)
+        self._add_simulation(input_config)
+        return self.config
+    
+    def generate_and_save(self, config : dict, output_path : str):
+        self.generate(config)
+        output_filename = os.path.basename(output_path)
+        self.config["topology_config_path"] = output_filename
+        save_yaml(self.config, output_path)
 
 
 def main():
     # Parse command line arguments
-    args = parse_arguments()
+    args = parse_generator_args(os.path.join(os.path.dirname(__file__), "default_config.yml"),
+        "Generates incast topology & simulation (in one config).")
+    
+    output_path = args.output_path
+    config = load_yaml(args.config)
+    output_config = OutputConfig()
 
-    # Generate topology config file
-    topology, senders = generate_topology(args.flows)
-    save_yaml(topology, args.topology_file)
-    print(f"Topology config saved in {args.topology_file}")
-
-    # Generate simulation config file
-    simulation = generate_simulation(
-        os.path.relpath(
-            args.topology_file, start=os.path.dirname(args.simulation_file)
-        ),
-        senders
-    )
-    save_yaml(simulation, args.simulation_file)
-    print(f"Simulation config saved in {args.simulation_file}")
+    output_config.generate_and_save(config, output_path)
+    print(f"Incast config saved in {output_path}")
 
 
 if __name__ == "__main__":

@@ -10,6 +10,9 @@ class LinkGenerator:
         Link id is link_<next_link_num>
         """
         link_name = f"link_{self.next_link_num}"
+
+        if "links" not in self.topology:
+            self.topology["links"] = {}    
         
         self.topology["links"][link_name] = {
             "from" : source_id,
