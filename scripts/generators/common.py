@@ -21,10 +21,10 @@ def save_yaml(data, filename):
     with open(filename, "w") as f:
         yaml.dump(data, f, sort_keys=False, default_flow_style=False)
 
-def parse_args(config_path : str):
+def parse_args(config_path : str, help_description = ""):
     default_config_rel_path = os.path.relpath(config_path, os.getcwd())
 
-    parser = argparse.ArgumentParser(description="Generator of simulation config with all-to-all connections between hosts")
+    parser = argparse.ArgumentParser(description=help_description)
 
     parser.add_argument(
         "-c",

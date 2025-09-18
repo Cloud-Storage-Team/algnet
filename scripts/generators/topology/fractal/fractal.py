@@ -6,7 +6,7 @@ from generators.topology.common import *
 def generate_topology(config : dict):
     try:
         presets = config["presets"]
-        num_chulds_per_switch = int(config["num_chulds_per_switch"])
+        num_switches_per_device = int(config["num_switches_per_device"])
         packet_spraying = config["packet-spraying"]
         depth = int(config["depth"])
     except KeyError as e:
@@ -27,7 +27,7 @@ def generate_topology(config : dict):
 
     link_generator = LinkGenerator(topology)
 
-    switch_nums_range = range(1, num_chulds_per_switch + 1)
+    switch_nums_range = range(1, num_switches_per_device + 1)
 
     prev_layer_names = [sender_name]
     current_layer_names = [[f"switch-{i}" for i in switch_nums_range]]
@@ -37,7 +37,7 @@ def generate_topology(config : dict):
             for switch_name in current_layer_names[i]:
                 topology["switches"][switch_name] = {"type" : "switch"}
 
-                link_generator.add_bidirectional_link(prev_layer_name, switch_name, )
+                link_generator.add_bidirectional_link(prev_layer_name, switch_name)
 
         prev_layer_names = [name for names in current_layer_names for name in names]
         current_layer_names = [[f"{name}-{i}" for i in switch_nums_range] for name in prev_layer_names]
@@ -50,14 +50,12 @@ def generate_topology(config : dict):
 
 def main():
     # Parse command line arguments
-    
-    args = parse_args(os.path.join(os.path.dirname(__file__), "default_config.yml"))
+    args = parse_args(
+        os.path.join(os.path.dirname(__file__), "default_config.yml"),
+        "Generator of fractal topology. For more information see README.md near this script"
+    )
 
     config = load_yaml(args.config)
-
-    print(config)
-    print(args.output_path)
-
     # Generate topology
     topology = generate_topology(config)
 
