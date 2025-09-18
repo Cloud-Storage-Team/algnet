@@ -28,6 +28,21 @@ def generate_simulation_config(
     try:
         flows_per_connection = config["flows_per_connection"]
         presets = config["presets"]
+        try:
+            connection_presets = presets["connection"]
+            try:
+                default_connection_preset = connection_presets["default"]
+            except KeyError as e:
+                raise RuntimeError(f"connection->{e}")
+        
+            flow_presets = presets["flow"]
+            try:
+                default_flow_preset = flow_presets["default"]
+            except KeyError as e:
+                raise RuntimeError(f"flow->{e}")
+            
+        except KeyError as e:
+            raise RuntimeError(f"presets->{e}")    
     except KeyError as e:
         raise RuntimeError(f"Config missing field {e}")
 
@@ -43,14 +58,14 @@ def generate_simulation_config(
                 continue
             connection_name = f"conn_from_{sender_id}_to_{receiver_id}"
 
-            connection = {
+            connection = default_connection_preset|  {
                 "sender_id": sender_id,
                 "receiver_id": receiver_id,
                 "flows" : {}
             }
 
             for flow_num in range(1, flows_per_connection + 1):
-                connection["flows"][f"flow_{flow_num}"] = {}
+                connection["flows"][f"flow_{flow_num}"] = default_flow_preset
             
             simulation_config["connections"][connection_name] = connection 
     

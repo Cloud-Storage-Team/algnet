@@ -11,6 +11,7 @@ presets:
   connection:
     default:
       packets_to_send: 100
+      mplb: round_robin
   flow:
     default:
       type: tcp
