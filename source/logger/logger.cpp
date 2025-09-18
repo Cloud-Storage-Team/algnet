@@ -36,7 +36,7 @@ Logger::Logger() {
     console_sink->set_level(spdlog::level::warn);
 
     auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
-        m_output_dir + "/nons_logs.txt", true);
+        std::filesystem::path(m_output_dir) / "nons_logs.txt", true);
     file_sink->set_level(spdlog::level::trace);
 
     auto logger = std::make_shared<spdlog::logger>(

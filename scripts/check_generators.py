@@ -38,7 +38,11 @@ def process_simulation_generator(nons_path : str, simulation_generator_dir_path 
             "-o",
             temp_file.name
         ]
-        result = subprocess.run(generator_args, capture_output=True, text=True, check=True)
+        result = subprocess.run(generator_args, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"Command {generator_args} failed; stderr:")
+            print(result.stderr)
+            exit(-1)
         print(result.stdout)
         with tempfile.TemporaryDirectory() as temp_dir:
             nons_args = [
