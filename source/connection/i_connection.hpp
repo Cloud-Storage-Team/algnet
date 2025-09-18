@@ -24,7 +24,7 @@ public:
     // Delete a flow from the connection
     virtual void delete_flow(std::shared_ptr<IFlow> flow) = 0;
     // Adds more packets to the total amount to be sent
-    virtual void add_packets_to_send(std::uint64_t count_packets) = 0;
+    virtual void add_data_to_send(SizeByte count_packets) = 0;
     // Called by a flow when an ACK is received to update connection state
     virtual void update(const std::shared_ptr<IFlow>& flow,
                         const FlowSample sample) = 0;

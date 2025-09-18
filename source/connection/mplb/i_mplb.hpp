@@ -11,12 +11,11 @@ namespace sim {
 
 // Captures per-packet flow-level statistics used by MPLB logic
 struct FlowSample {
-    TimeNs ack_recv_time;
-    TimeNs packet_sent_time;
-    std::uint32_t packets_in_flight;
+    TimeNs rtt;
+    SizeByte inflight;  // How many bytes are currently in flight in this flow
     SpeedGbps delivery_rate;
-    std::uint32_t
-        send_quota;  // How many packets can be sent in this flow at the moment
+    SizeByte
+        send_quota;  // How many bytes can be sent in this flow at the moment
     // add other metrics here as needed
 };
 

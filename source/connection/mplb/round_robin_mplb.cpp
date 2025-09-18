@@ -29,8 +29,7 @@ std::shared_ptr<IFlow> RoundRobinMPLB::select_flow() {
     for (std::size_t i = 0; i < n; ++i) {
         auto& [flow, sample] = *m_current_flow;
         ++m_current_flow;
-        if (flow && sample.send_quota > 0) {
-            --sample.send_quota;
+        if (flow && sample.send_quota > SizeByte(0)) {
             return flow;
         }
     }

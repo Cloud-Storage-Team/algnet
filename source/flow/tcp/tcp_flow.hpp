@@ -30,8 +30,8 @@ public:
     std::shared_ptr<IHost> get_receiver() const;
     Id get_id() const final;
     SizeByte get_delivered_bytes() const;
-    std::uint32_t get_sending_quota() const;
-    void send_packet() final;
+    SizeByte get_sending_quota() const;
+    void send_data(SizeByte data) final;
     std::shared_ptr<IConnection> get_conn() const final;
     std::string to_string() const;
 
@@ -74,7 +74,7 @@ private:
     SizeByte m_packet_size;
     bool m_ecn_capable;
 
-    std::uint32_t m_packets_in_flight;
+    SizeByte m_inflight;
     SizeByte m_delivered_data_size;
     PacketNum m_next_packet_num;
 
