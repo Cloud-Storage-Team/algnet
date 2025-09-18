@@ -26,8 +26,7 @@ public:
     // Adds more packets to the total amount to be sent
     virtual void add_data_to_send(SizeByte count_packets) = 0;
     // Called by a flow when an ACK is received to update connection state
-    virtual void update(const std::shared_ptr<IFlow>& flow,
-                        const FlowSample sample) = 0;
+    virtual void update(const std::shared_ptr<IFlow>& flow) = 0;
     virtual std::set<std::shared_ptr<IFlow>> get_flows() const = 0;
     virtual void clear_flows() = 0;
     virtual std::shared_ptr<IHost> get_sender() const = 0;

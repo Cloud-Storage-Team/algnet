@@ -21,12 +21,12 @@ void ConnectionImpl::start() { send_data(); }
 
 void ConnectionImpl::add_flow(std::shared_ptr<IFlow> flow) {
     m_flows.insert(flow);
-    FlowSample init_sample{.rtt = TimeNs(0),
+    FlowSample initial_sample{.rtt = TimeNs(0),
                            .inflight = SizeByte(0),
                            .delivery_rate = SpeedGbps(0),
                            .send_quota = flow->get_sending_quota()};
 
-    m_mplb->add_flow(flow, init_sample);
+    m_mplb->add_flow(flow, initial_sample);
 }
 
 void ConnectionImpl::delete_flow(std::shared_ptr<IFlow> flow) {
@@ -34,19 +34,16 @@ void ConnectionImpl::delete_flow(std::shared_ptr<IFlow> flow) {
     m_mplb->remove_flow(flow);
 }
 
-void ConnectionImpl::add_data_to_send(SizeByte data) {
-    m_data_to_send += data;
-}
+void ConnectionImpl::add_data_to_send(SizeByte data) { m_data_to_send += data; }
 
-void ConnectionImpl::update(const std::shared_ptr<IFlow>& flow,
-                            const FlowSample sample) {
+void ConnectionImpl::update(const std::shared_ptr<IFlow>& flow) {
     if (!flow) {
         LOG_ERROR(fmt::format("Null flow in ConnectionImpl {} update; ignored",
                               m_id));
         return;
     }
     // Notify MPLB about received packet for metric updates
-    m_mplb->notify_packet_confirmed(flow, sample);
+    m_mplb->notify_packet_confirmed(flow);
     // Trigger next possible sending attempt
     send_data();
 }
@@ -77,7 +74,6 @@ void ConnectionImpl::send_data() {
         }
         flow->send_data(quota);
         m_data_to_send -= quota;
-        
     }
 }
 

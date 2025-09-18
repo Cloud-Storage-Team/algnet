@@ -12,14 +12,13 @@ namespace sim {
 class RoundRobinMPLB final : public IMPLB {
 public:
     void add_flow(const std::shared_ptr<IFlow>& flow,
-                  FlowSample init_sample) override;
+                  FlowSample initial_sample) override;
 
     void remove_flow(const std::shared_ptr<IFlow>& flow) override;
 
     std::shared_ptr<IFlow> select_flow() override;
 
-    void notify_packet_confirmed(const std::shared_ptr<IFlow>&,
-                                 FlowSample) override;
+    void notify_packet_confirmed(const std::shared_ptr<IFlow>& flow) override;
 
     void clear_flows() override;
 

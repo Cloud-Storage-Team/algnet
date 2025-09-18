@@ -225,11 +225,7 @@ void TcpFlow::update(Packet packet) {
 
         MetricsCollector::get_instance().add_cwnd(m_id, current_time,
                                                   m_cc->get_cwnd());
-        FlowSample sample{.rtt = rtt,
-                          .inflight = inflight,
-                          .delivery_rate = delivery_rate,
-                          .send_quota = get_sending_quota()};
-        m_connection->update(shared_from_this(), sample);
+        m_connection->update(shared_from_this());
     } else if (packet.dest_id == m_dest.lock()->get_id() &&
                type == PacketType::DATA) {
         m_packet_reordering.add_record(packet.packet_num);

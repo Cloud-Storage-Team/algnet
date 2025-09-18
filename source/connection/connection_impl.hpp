@@ -31,8 +31,7 @@ public:
 
     void add_data_to_send(SizeByte data) override;
 
-    void update(const std::shared_ptr<IFlow>& flow,
-                const FlowSample sample) override;
+    void update(const std::shared_ptr<IFlow>& flow) override;
 
     std::set<std::shared_ptr<IFlow>> get_flows() const override;
 

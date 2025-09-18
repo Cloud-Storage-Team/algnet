@@ -36,12 +36,11 @@ std::shared_ptr<IFlow> RoundRobinMPLB::select_flow() {
     return nullptr;
 }
 
-void RoundRobinMPLB::notify_packet_confirmed(const std::shared_ptr<IFlow>& flow,
-                                             FlowSample updated_sample) {
+void RoundRobinMPLB::notify_packet_confirmed(const std::shared_ptr<IFlow>& flow) {
     auto it = m_flows.find(flow);
+    SizeByte quota = it->first.get()->get_sending_quota();
     if (it != m_flows.end()) {
-        it->second = std::move(updated_sample);
-    }
+        it->second.send_quota = quota;
 }
 
 void RoundRobinMPLB::clear_flows() {
