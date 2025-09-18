@@ -15,6 +15,7 @@ public:
 
     void logExample();
     void disable_logs();
+    static void set_output_dir(std::string dir);
 
     void trace(std::string&& msg, const std::source_location& loc =
                                       std::source_location::current());
@@ -33,6 +34,9 @@ private:
     Logger();
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
+
+    static std::string m_output_dir;
+    static bool m_is_initialized;
 };
 
 #define LOG_LEVEL_TRACE 0

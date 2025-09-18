@@ -7,9 +7,23 @@
 
 #include <filesystem>
 
+std::string Logger::m_output_dir = "";
+bool Logger::m_is_initialized = false;
+
 Logger& Logger::get_instance() {
     static Logger instance;
     return instance;
+}
+
+void Logger::set_output_dir(std::string dir) {
+    if (m_is_initialized) {
+        LOG_ERROR(fmt::format(
+            "Set logger output dir {} when LOgger already initialized "
+            "with output_dir {}; no effect",
+            dir, m_output_dir));
+        return;
+    }
+    m_output_dir = dir;
 }
 
 void Logger::disable_logs() {
@@ -22,7 +36,7 @@ Logger::Logger() {
     console_sink->set_level(spdlog::level::warn);
 
     auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
-        "logs/simulator_logs.txt", true);
+        m_output_dir + "/nons_logs.txt", true);
     file_sink->set_level(spdlog::level::trace);
 
     auto logger = std::make_shared<spdlog::logger>(
@@ -30,6 +44,7 @@ Logger::Logger() {
     logger->set_pattern("[%H:%M:%S] [%^%l%$] [%!] %v");
     logger->set_level(spdlog::level::trace);
     spdlog::set_default_logger(logger);
+    m_is_initialized = true;
 }
 
 void Logger::logExample() {
