@@ -120,3 +120,17 @@ jobs:
     - name: Run tests
       working-directory: build
       run: ./${{env.TEST_EXECUTABLE_NAME}}
+
+  check-generators:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Download nons executable
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifact
+
+    - name: Add executable flag
+      run: chmod +x ${{env.EXECUTABLE_NAME}}
+    - name: Check generators in script directory
+      run: python3 scripts/check_generators.py -g scripts/generators/ -e ${{env.EXECUTABLE_NAME}}
