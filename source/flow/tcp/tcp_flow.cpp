@@ -24,7 +24,7 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
       m_last_ack_arrive_time(0),
       m_packet_size(a_packet_size),
       m_ecn_capable(a_ecn_capable),
-      m_packets_in_flight(0),
+      m_inflight(0),
       m_delivered_data_size(0),
       m_next_packet_num(0) {
     if (m_src.lock() == nullptr) {
@@ -55,11 +55,26 @@ Id TcpFlow::get_id() const { return m_id; }
 
 SizeByte TcpFlow::get_delivered_bytes() const { return m_delivered_data_size; }
 
-std::uint32_t TcpFlow::get_sending_quota() const {
-    const auto slots =
-        static_cast<std::uint32_t>(std::max(m_cc->get_cwnd(), 1.0) + 1e-9);
-    return (slots > m_packets_in_flight) ? (slots - m_packets_in_flight) : 0;
+SizeByte TcpFlow::get_sending_quota() const {
+    const double cwnd = m_cc->get_cwnd();
+
+    // Effective window: the whole part of cwnd; if cwnd < 1 and inflight == 0,
+    // allow 1 packet
+    const std::uint32_t eff_cwnd_pkts =
+        (cwnd >= 1.0) ? static_cast<std::uint32_t>(std::floor(cwnd))
+                      : (m_inflight == SizeByte(0) ? 1 : 0);
+
+    // How many packages are already in flight (rounded down)
+    const std::uint32_t inflight_pkts = m_inflight / m_packet_size;
+
+    const std::uint32_t quota_pkts =
+        (eff_cwnd_pkts > inflight_pkts) ? (eff_cwnd_pkts - inflight_pkts) : 0;
+
+    // Quota in bytes, multiple of the packet size
+    return quota_pkts * m_packet_size;
 }
+
+SizeByte TcpFlow::get_packet_size() const { return m_packet_size; }
 
 Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     Packet packet;
@@ -76,7 +91,7 @@ Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     return packet;
 }
 
-void TcpFlow::send_packet() {
+void TcpFlow::send_data(SizeByte data) {
     TimeNs now = Scheduler::get_instance().get_current_time();
 
     if (!m_sending_started) {
@@ -84,22 +99,25 @@ void TcpFlow::send_packet() {
         m_sending_started = true;
     }
 
-    if (get_sending_quota() == 0) {
-        LOG_WARN(
-            fmt::format("No sending quota for flow {}; packet not sent", m_id));
-        return;
-    }
-    Packet packet = generate_data_packet(m_next_packet_num++);
-    TimeNs pacing_delay = m_cc->get_pacing_delay();
-
-    if (pacing_delay == TimeNs(0)) {
-        send_packet_now(std::move(packet));
-    } else {
-        Scheduler::get_instance().add<SendAtTime>(
-            now + pacing_delay, this->shared_from_this(), std::move(packet));
+    if (data > get_sending_quota()) {
+        throw std::runtime_error(fmt::format(
+            "Trying to send {} bytes on flow {} with quota {} bytes",
+            data.value(), m_id, get_sending_quota().value()));
     }
 
-    m_packets_in_flight++;
+    while (data != SizeByte(0)) {
+        Packet packet = generate_data_packet(m_next_packet_num++);
+        TimeNs pacing_delay = m_cc->get_pacing_delay();
+        if (pacing_delay == TimeNs(0)) {
+            send_packet_now(std::move(packet));
+        } else {
+            Scheduler::get_instance().add<SendAtTime>(now + pacing_delay,
+                                                      this->shared_from_this(),
+                                                      std::move(packet));
+        }
+        data -= std::min(data, m_packet_size);
+        m_inflight += m_packet_size;
+    }
 }
 
 std::shared_ptr<IConnection> TcpFlow::get_conn() const { return m_connection; }
@@ -209,8 +227,8 @@ void TcpFlow::update(Packet packet) {
                                                  current_time, rtt);
         m_acked.insert(packet.packet_num);
 
-        if (m_packets_in_flight > 0) {
-            m_packets_in_flight--;
+        if (m_inflight >= m_packet_size) {
+            m_inflight -= m_packet_size;
         }
 
         m_cc->on_ack(rtt, m_rtt_statistics.get_mean(),
@@ -226,12 +244,7 @@ void TcpFlow::update(Packet packet) {
 
         MetricsCollector::get_instance().add_cwnd(m_id, current_time,
                                                   m_cc->get_cwnd());
-        FlowSample sample{.ack_recv_time = current_time,
-                          .packet_sent_time = packet.sent_time,
-                          .packets_in_flight = m_packets_in_flight,
-                          .delivery_rate = delivery_rate,
-                          .send_quota = get_sending_quota()};
-        m_connection->update(shared_from_this(), sample);
+        m_connection->update(shared_from_this());
     } else if (packet.dest_id == m_dest.lock()->get_id() &&
                type == PacketType::DATA) {
         m_packet_reordering.add_record(packet.packet_num);
@@ -244,6 +257,8 @@ void TcpFlow::update(Packet packet) {
     }
 }
 
+TimeNs TcpFlow::get_last_rtt() const { return m_rtt_statistics.get_last(); }
+
 std::string TcpFlow::to_string() const {
     std::ostringstream oss;
     oss << "[TcpFlow; ";
@@ -252,7 +267,7 @@ std::string TcpFlow::to_string() const {
     oss << ", dest id: " << m_dest.lock()->get_id();
     oss << ", CC module: " << m_cc->to_string();
     oss << ", packet size: " << m_packet_size;
-    oss << ", packets_in_flight: " << m_packets_in_flight;
+    oss << ", bytes in flight: " << m_inflight;
     oss << ", acked packets: " << m_delivered_data_size;
     oss << "]";
     return oss.str();

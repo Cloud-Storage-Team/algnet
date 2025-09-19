@@ -20,14 +20,14 @@ The topology file is divided into multiple sections:
 connections:
   sender_id: <source_device>
   receiver_id: <destination_device>
-  packet_to_send: <count_of_packets>
+  data_to_send: <size>
   mpld: round_robin
   flows:
     # flows section; see it below
 ```
 
 - `sender_id` and receiver_id should be the names of hosts  from topology config.
-- `packets_to_send` is an integer
+- `data_to_send` is an number in [size format](../README.md)
 - `mplb` is multipath load ballansing type. The only availabe value is `round_robin`
 
 # Flows section

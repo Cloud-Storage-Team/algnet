@@ -14,10 +14,10 @@ std::shared_ptr<sim::TcpFlow> add_connection_with_single_flow(
     sim::Simulator& sim, const Id& conn_id,
     const std::shared_ptr<sim::Host>& sender,
     const std::shared_ptr<sim::Host>& receiver, SizeByte packet_size,
-    std::uint32_t packets_to_send) {
+    SizeByte data_to_send) {
     auto connection = std::make_shared<sim::ConnectionImpl>(
         conn_id, sender, receiver, std::make_shared<sim::RoundRobinMPLB>(),
-        packets_to_send);
+        data_to_send);
 
     auto flow = std::make_shared<sim::TcpFlow>(conn_id + "_flow1", connection,
                                                std::make_unique<sim::BasicCC>(),
@@ -48,14 +48,14 @@ TEST_F(Start, TrivialTopology) {
     add_two_way_links(sim, {{sender, swtch}, {swtch, receiver}});
 
     constexpr SizeByte packet_size(1024);
-    constexpr std::uint32_t packets_to_send = 1;
+    constexpr SizeByte data_to_send = SizeByte(1024);
 
     auto flow = add_connection_with_single_flow(sim, "conn1", sender, receiver,
-                                                packet_size, packets_to_send);
+                                                packet_size, data_to_send);
 
     sim.start();
 
-    ASSERT_EQ(flow->get_delivered_bytes(), packet_size * packets_to_send);
+    ASSERT_EQ(flow->get_delivered_bytes(), data_to_send);
 }
 
 TEST_F(Start, ThreeToOneTopology) {
@@ -83,7 +83,7 @@ TEST_F(Start, ThreeToOneTopology) {
     for (int i = 0; i < 3; ++i) {
         auto flow = add_connection_with_single_flow(
             sim, "conn" + std::to_string(i + 1), senders[i], receiver,
-            packet_size, pkts[i]);
+            packet_size, pkts[i] * packet_size);
         flows.push_back(flow);
     }
 

@@ -22,7 +22,7 @@ public:
 
     SizeByte get_delivered_data_size() const final;
 
-    // Returns time elapced from flow start (firsrt call of send_packet)
+    // Returns time elapced from flow start (firsrt call of send_data)
     // to last update call
     TimeNs get_fct() const final;
 
@@ -30,9 +30,11 @@ public:
     std::shared_ptr<IHost> get_receiver() const;
     Id get_id() const final;
     SizeByte get_delivered_bytes() const;
-    std::uint32_t get_sending_quota() const;
-    void send_packet() final;
+    SizeByte get_sending_quota() const;
+    SizeByte get_packet_size() const;
+    void send_data(SizeByte data) final;
     std::shared_ptr<IConnection> get_conn() const final;
+    TimeNs get_last_rtt() const;
     std::string to_string() const;
 
 private:
@@ -74,7 +76,7 @@ private:
     SizeByte m_packet_size;
     bool m_ecn_capable;
 
-    std::uint32_t m_packets_in_flight;
+    SizeByte m_inflight;
     SizeByte m_delivered_data_size;
     PacketNum m_next_packet_num;
 

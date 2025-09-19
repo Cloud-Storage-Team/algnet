@@ -4,7 +4,7 @@ connections:
   conn1:
     sender_id: sender1
     receiver_id: receiver1
-    packets_to_send: 100
+    data_to_send: 6400B
     mplb: round_robin
     flows:
       flow1:
@@ -15,7 +15,7 @@ connections:
   conn2:
     sender_id: sender2
     receiver_id: receiver2
-    packets_to_send: 100
+    data_to_send: 12800B
     mplb: round_robin
     flows:
       flow1:
