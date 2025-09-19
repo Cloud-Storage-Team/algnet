@@ -56,32 +56,22 @@ Id TcpFlow::get_id() const { return m_id; }
 SizeByte TcpFlow::get_delivered_bytes() const { return m_delivered_data_size; }
 
 SizeByte TcpFlow::get_sending_quota() const {
-    SizeByte quota = std::max(m_cc->get_cwnd() * m_packet_size, m_packet_size);
-    return (quota - m_inflight >= m_packet_size)
-               ? std::max(quota - m_inflight, m_packet_size)
-               : SizeByte(0);
-    const double cwnd_pkts = m_cc->get_cwnd();
+    const double cwnd = m_cc->get_cwnd();
 
-    std::uint32_t eff_cwnd_pkts;
-    if (cwnd_pkts >= 1.0) {
-        // Getting the integer part of the window in packets
-        eff_cwnd_pkts = static_cast<std::uint32_t>(std::floor(cwnd_pkts));
-    } else if (m_inflight == SizeByte(0)) {
-        // When cwnd < 1 and nothing is inflight, then we allow 1 packet (pacing
-        // will fill the gap)
-        eff_cwnd_pkts = 1u;
-    } else {
-        // cwnd < 1 and something is already inflight - no new packets allowed
-        eff_cwnd_pkts = 0u;
-    }
+    // Effective window: the whole part of cwnd; if cwnd < 1 and inflight == 0,
+    // allow 1 packet
+    const std::uint32_t eff_cwnd_pkts =
+        (cwnd >= 1.0) ? static_cast<std::uint32_t>(std::floor(cwnd))
+                      : (m_inflight == SizeByte(0) ? 1 : 0);
 
-    // Window budget in bytes, rounded DOWN to whole packets
-    const SizeByte window_bytes = eff_cwnd_pkts * m_packet_size;
+    // How many packages are already in flight (rounded down)
+    const std::uint32_t inflight_pkts = m_inflight / m_packet_size;
 
-    if (window_bytes <= m_inflight) return SizeByte(0);
+    const std::uint32_t quota_pkts =
+        (eff_cwnd_pkts > inflight_pkts) ? (eff_cwnd_pkts - inflight_pkts) : 0;
 
-    // Return quota that multiple of the packet size
-    return ((window_bytes - m_inflight) / m_packet_size) * m_packet_size;
+    // Quota in bytes, multiple of the packet size
+    return quota_pkts * m_packet_size;
 }
 
 SizeByte TcpFlow::get_packet_size() const { return m_packet_size; }
@@ -111,8 +101,8 @@ void TcpFlow::send_data(SizeByte data) {
 
     if (data > get_sending_quota()) {
         throw std::runtime_error(fmt::format(
-            "Trying to send {} bytes on flow {} with quota {} bytes", data.value(),
-            m_id, get_sending_quota().value()));
+            "Trying to send {} bytes on flow {} with quota {} bytes",
+            data.value(), m_id, get_sending_quota().value()));
     }
 
     while (data != SizeByte(0)) {

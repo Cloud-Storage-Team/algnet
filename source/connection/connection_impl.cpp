@@ -64,27 +64,9 @@ void ConnectionImpl::send_data() {
         SizeByte quota = flow->get_sending_quota();
         SizeByte data = std::min(quota, m_data_to_send);
 
-        // if (m_data_to_send < flow->get_packet_size()) {
-        //     flow->send_packet();
-        //     m_data_to_send = SizeByte(0);
-        //     break;
-        // } else if (quota == SizeByte(0)) {
-        //     throw std::runtime_error(fmt::format(
-        //         "MPLB returned flow {} with zero quota in connection {}",
-        //         flow->get_id(), m_id));
-        // } else if (quota < flow->get_packet_size()) {
-        //     // Waiting for the quota to be at least the size of the package
-        //     break;
-        // }
-
         flow->send_data(data);
         m_data_to_send -= data;
     }
-    if (m_data_to_send.value() == 1) {
-        std::cout << "11111111";
-    }
-    std::cout << "Connection " << m_id << " has " << m_data_to_send.value()
-              << " bytes left to send\n";
 }
 
 std::shared_ptr<IHost> ConnectionImpl::get_sender() const {
