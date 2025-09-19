@@ -21,12 +21,7 @@ void ConnectionImpl::start() { send_data(); }
 
 void ConnectionImpl::add_flow(std::shared_ptr<IFlow> flow) {
     m_flows.insert(flow);
-    FlowSample initial_sample{.rtt = TimeNs(0),
-                           .inflight = SizeByte(0),
-                           .delivery_rate = SpeedGbps(0),
-                           .send_quota = flow->get_sending_quota()};
-
-    m_mplb->add_flow(flow, initial_sample);
+    m_mplb->add_flow(flow);
 }
 
 void ConnectionImpl::delete_flow(std::shared_ptr<IFlow> flow) {
@@ -67,12 +62,17 @@ void ConnectionImpl::send_data() {
             break;
         }
         SizeByte quota = flow->get_sending_quota();
+        if (m_data_to_send < flow->get_packet_size()) {
+            flow->send_data();
+            m_data_to_send = SizeByte(0);
+            break;
+        }
         if (quota == SizeByte(0)) {
             throw std::runtime_error(fmt::format(
                 "MPLB returned flow {} with zero quota in connection {}",
                 flow->get_id(), m_id));
         }
-        flow->send_data(quota);
+        flow->send_data();
         m_data_to_send -= quota;
     }
 }

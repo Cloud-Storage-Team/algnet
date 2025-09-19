@@ -11,8 +11,7 @@ namespace sim {
 
 class RoundRobinMPLB final : public IMPLB {
 public:
-    void add_flow(const std::shared_ptr<IFlow>& flow,
-                  FlowSample initial_sample) override;
+    void add_flow(const std::shared_ptr<IFlow>& flow) override;
 
     void remove_flow(const std::shared_ptr<IFlow>& flow) override;
 
@@ -24,10 +23,10 @@ public:
 
 private:
     using FlowPtr = std::shared_ptr<IFlow>;
-    using FlowTable = std::map<FlowPtr, FlowSample, std::owner_less<FlowPtr>>;
+    using FlowSet = std::set<FlowPtr, std::owner_less<FlowPtr>>;
 
-    FlowTable m_flows;
-    LoopIterator<FlowTable::iterator> m_current_flow;
+    FlowSet m_flows;
+    LoopIterator<FlowSet::iterator> m_current_flow;
 };
 
 }  // namespace sim

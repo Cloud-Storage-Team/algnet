@@ -101,6 +101,14 @@ public:
         return m_value_bits > size.m_value_bits;
     }
 
+    bool constexpr operator<=(ThisSize size) const {
+        return m_value_bits <= size.m_value_bits;
+    }
+
+    bool constexpr operator>=(ThisSize size) const {
+        return m_value_bits >= size.m_value_bits;
+    }
+
     bool constexpr operator==(ThisSize size) const {
         return m_value_bits == size.m_value_bits;
     }

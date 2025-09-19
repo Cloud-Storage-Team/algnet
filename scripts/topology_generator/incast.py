@@ -107,7 +107,7 @@ def generate_simulation(
         simulation["connections"][f"conn{i+1}"] = {
             "sender_id": senders[i],
             "receiver_id": "receiver",
-            "packets_to_send": 1000,
+            "data_to_send": "150000B",
             "mplb": "round_robin",
             "flows": {
                 "flow": {

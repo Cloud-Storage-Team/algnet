@@ -24,7 +24,7 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
       m_last_ack_arrive_time(0),
       m_packet_size(a_packet_size),
       m_ecn_capable(a_ecn_capable),
-      inflight(0),
+      m_inflight(0),
       m_delivered_data_size(0),
       m_next_packet_num(0) {
     if (m_src.lock() == nullptr) {
@@ -57,8 +57,11 @@ SizeByte TcpFlow::get_delivered_bytes() const { return m_delivered_data_size; }
 
 SizeByte TcpFlow::get_sending_quota() const {
     SizeByte quota = std::max(m_cc->get_cwnd() * m_packet_size, m_packet_size);
-    return (quota - m_inflight > m_packet_size) ? (quota - m_inflight) : SizeByte(0);
+    return (quota - m_inflight >= m_packet_size) ? (quota - m_inflight)
+                                                 : SizeByte(0);
 }
+
+SizeByte TcpFlow::get_packet_size() const { return m_packet_size; }
 
 Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     Packet packet;
@@ -75,7 +78,7 @@ Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     return packet;
 }
 
-void TcpFlow::send_data(SizeByte data) {
+void TcpFlow::send_data() {
     TimeNs now = Scheduler::get_instance().get_current_time();
 
     if (!m_sending_started) {
@@ -83,7 +86,7 @@ void TcpFlow::send_data(SizeByte data) {
         m_sending_started = true;
     }
 
-    if (get_sending_quota() == 0) {
+    if (get_sending_quota() == SizeByte(0)) {
         LOG_WARN(
             fmt::format("No sending quota for flow {}; packet not sent", m_id));
         return;
@@ -208,8 +211,8 @@ void TcpFlow::update(Packet packet) {
                                                  current_time, rtt);
         m_acked.insert(packet.packet_num);
 
-        if (inflight > packet.size) {
-            inflight -= packet.size;
+        if (m_inflight >= m_packet_size) {
+            m_inflight -= m_packet_size;
         }
 
         m_cc->on_ack(rtt, m_rtt_statistics.get_mean(),
@@ -238,6 +241,8 @@ void TcpFlow::update(Packet packet) {
     }
 }
 
+TimeNs TcpFlow::get_last_rtt() const { return m_rtt_statistics.get_last(); }
+
 std::string TcpFlow::to_string() const {
     std::ostringstream oss;
     oss << "[TcpFlow; ";
@@ -246,7 +251,7 @@ std::string TcpFlow::to_string() const {
     oss << ", dest id: " << m_dest.lock()->get_id();
     oss << ", CC module: " << m_cc->to_string();
     oss << ", packet size: " << m_packet_size;
-    oss << ", packets_in_flight: " << inflight;
+    oss << ", bytes in flight: " << m_inflight;
     oss << ", acked packets: " << m_delivered_data_size;
     oss << "]";
     return oss.str();
