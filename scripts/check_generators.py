@@ -6,7 +6,9 @@ import sys
 
 def process_simulation_generator(nons_path : str, simulation_generator_dir_path : str) -> bool:
     """"
-    Checks given simulationm generator
+    Checks given simulation generator:
+    1) Generate simulation using generator
+    2) Runs nons on it
     Returns true if check succeed, false otherwise
     """
     python_generator_path = None
@@ -87,8 +89,16 @@ def process_simulation_generators(nons_path : str, simulation_generators_dir : s
 def process_topology_generator(
         nons_path : str,
         topology_generator_dir : str,
-        universal_simulation_generator_dir : str):
+        universal_simulation_generator : str):
+    """
+    Checks given topology generator:
+    1) Generates topology using script from topology_generator_dir
+    2) Generates simulation using universal_simulation_generator
+    3) Runs nons on given simulation
+    Returns true if check succeed, false otherwise
+    """
     pass
+
 
 def main():
     parser = argparse.ArgumentParser()
