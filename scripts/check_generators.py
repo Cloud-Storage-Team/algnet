@@ -55,17 +55,6 @@ def get_generators_scripts(generators_dir : str) -> list[str]:
         )
     )
 
-def run_subprocess(subprocess_args : list[str], check_fails : bool = True):
-    """
-    Runs subprocess with given args
-    Returns result of subprocess
-    """
-    result = subprocess.run(subprocess_args, capture_output=True, text=True)
-    if result.returncode != 0 and check_fails:
-        print(f"Command {subprocess_args} failed; stderr:", file=sys.stderr)
-        print(result.stderr, file=sys.stderr)
-    return result
-
 def get_topology_config_path(simulation_config_path : str):
     simulation_config = load_yaml(simulation_config_path)
     return simulation_config["topology_config_path"]
