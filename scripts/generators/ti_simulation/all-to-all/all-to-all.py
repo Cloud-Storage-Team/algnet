@@ -1,10 +1,6 @@
-import argparse
 import os
-import sys
-import yaml
 
-# To import common
-
+from generators.ti_simulation.common import *
 from generators.common import *
 
 def get_host_names(topology : dict) -> list[str]:
@@ -12,13 +8,6 @@ def get_host_names(topology : dict) -> list[str]:
         return list(topology["hosts"].keys())
     except KeyError as e:
         raise RuntimeError(f"Topology config missing field {e}")
-
-def get_topology_path(config : dict, config_dir : str) -> str:
-    try:
-        topology_path_from_config = config["topology_config_path"]
-        return os.path.join(config_dir, topology_path_from_config)
-    except KeyError as e:
-        raise RuntimeError(f"Config missing field {e}")
     
 def generate_simulation_config(
         host_names : list[str],
@@ -73,14 +62,13 @@ def generate_simulation_config(
 def main():
     
     default_config_path = os.path.join(os.path.dirname(__file__), "default_config.yml")
-    args = parse_generator_args(default_config_path)
+    args = parse_ti_simulation_generator_args(default_config_path)
 
     config_path = args.config
-    config_dir = os.path.dirname(config_path)
     output_path = args.output_path
 
     config = load_yaml(config_path)
-    topology_path = get_topology_path(config, config_dir)
+    topology_path = args.topology
     topology = load_yaml(topology_path)
     host_names = get_host_names(topology)
 
