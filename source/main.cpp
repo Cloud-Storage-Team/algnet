@@ -23,6 +23,7 @@ int main(const int argc, char **argv) {
 
     auto flags = options.parse(argc, argv);
     auto output_dir = flags["output-dir"].as<std::string>();
+    Logger::set_output_dir(output_dir);
 
     if (flags.contains("help")) {
         std::cout << options.help() << std::endl;
