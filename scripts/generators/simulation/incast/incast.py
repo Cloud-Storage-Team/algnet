@@ -10,7 +10,6 @@ class InputConfig:
         try:
             self.packet_spraying = config["packet-spraying"]
             self.senders_count = int(config["senders_count"])
-            self.topology_name = config["topology_name"]
             
             presets = config["presets"]
             try:
