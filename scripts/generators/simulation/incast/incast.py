@@ -1,5 +1,6 @@
 import os
 
+from common import *
 from generators.common import *
 from generators.topology.common import *
 

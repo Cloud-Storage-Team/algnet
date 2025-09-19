@@ -1,7 +1,7 @@
 import os
 
 from generators.ti_simulation.common import *
-from generators.common import *
+from common import *
 
 def get_host_names(topology : dict) -> list[str]:
     try:
