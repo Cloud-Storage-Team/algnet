@@ -3,6 +3,7 @@ import os
 import tempfile
 import subprocess
 import sys
+from collections.abc import Callable
 
 from common import *
 
@@ -17,7 +18,7 @@ def run_subprocess(subprocess_args : list[str], check_fails : bool = True):
         print(result.stderr, file=sys.stderr)
     return result
 
-def find_generator(generator_dir : str) -> str:
+def find_generator_script(generator_dir : str) -> str:
     """
     Searchs for generator (python script different from __init__.py) in generator_dir
     If there are suitable scripts or more that one, outs erro to stderr and retuns Nons
@@ -87,7 +88,7 @@ def run_nons(
     return True
 
 
-def process_simulation_generator(nons_path : str, simulation_generator_dir_path : str) -> bool:
+def check_simulation_generator(nons_path : str, simulation_generator_dir_path : str) -> bool:
     """"
     Checks given simulation generator:
     1) Generate simulation using generator
@@ -95,7 +96,7 @@ def process_simulation_generator(nons_path : str, simulation_generator_dir_path 
     Returns true if check succeed, false otherwise
     """
     
-    python_generator_path = find_generator(simulation_generator_dir_path)
+    python_generator_path = find_generator_script(simulation_generator_dir_path)
     if python_generator_path is None :
         return False
     
@@ -111,22 +112,22 @@ def process_simulation_generator(nons_path : str, simulation_generator_dir_path 
             return False
         print(f"Simulation generator {python_generator_path} generated config {temp_simulation_config.name}")
         return run_nons(nons_path, temp_simulation_config.name)
-
-def process_simulation_generators(nons_path : str, simulation_generators_dir : str) -> list[str]:
+    
+def find_generator_dirs(generators_dir : str):
     """
-    Checks all simulation generators in given direcrory
-    Returns list of failed generators
+    Returns list of generators (all directories excecpt __pycache__) in generators_dir
     """
-    failed_generators = []
-    for item in sorted(os.listdir(simulation_generators_dir)):
-        item_path = os.path.join(simulation_generators_dir, item)
-        if not os.path.isdir(item_path) or item == "__pycache__":
-            continue
-        if not process_simulation_generator(nons_path, item_path):
-            failed_generators.append(item_path)
-    return failed_generators
-
-def process_topology_generator(
+    return list(
+        filter(
+            lambda dir_path : os.path.isdir(dir_path) and os.path.basename(dir_path) != "__pycache__",
+            map(
+                lambda dirname : os.path.join(generators_dir, dirname),
+                sorted(os.listdir(generators_dir))
+            )
+        )
+    )
+    
+def check_topology_generator(
         nons_path : str,
         topology_generator_dir : str,
         topology_independent_simulation_generator : str):
@@ -137,7 +138,7 @@ def process_topology_generator(
     3) Runs nons on given simulation
     Returns true if check succeed, false otherwise
     """
-    topology_generator = find_generator(topology_generator_dir)
+    topology_generator = find_generator_script(topology_generator_dir)
     if topology_generator is None:
         return False
     with tempfile.NamedTemporaryFile(delete=True) as temp_topology_file:
@@ -169,23 +170,18 @@ def process_topology_generator(
             print(f"Simuation generator {topology_generator} generated config {temp_simulation_file.name}"
                   f" for topology {temp_topology_file.name}")
             return run_nons(nons_path, temp_simulation_file.name)
-        
-def process_topology_generators(
-    nons_path : str,
-    topology_generators_dir : str,
-    topology_independent_simulation_generator : str) -> list[str]:
+
+def get_failed_generators(generators : list[str], generator_checker : Callable[[str], bool]) -> list[str]:
     """
-    Checks all simulation generators in given direcrory
-    Returns list of failed generators
+    Runs generator_checker on each item from generators
+    Returns list of generators that failes generator_checker
     """
-    failed_generators = []
-    for item in sorted(os.listdir(topology_generators_dir)):
-        item_path = os.path.join(topology_generators_dir, item)
-        if not os.path.isdir(item_path) or item == "__pycache__":
-            continue
-        if not process_topology_generator(nons_path, item_path, topology_independent_simulation_generator):
-            failed_generators.append(item_path)
-    return failed_generators
+    return list(
+        filter(
+            lambda generator : not generator_checker(generator),
+            generators
+        )
+    )
         
 def main():
     parser = argparse.ArgumentParser()
@@ -203,28 +199,50 @@ def main():
     nons_path = args.executable
     generators_path = args.generators
 
-    simulation_generators_dir = os.path.join(generators_path, "simulation")
-    failed_simulation_generators = process_simulation_generators(nons_path, simulation_generators_dir)
-
     retcode = 0
-    if len(failed_simulation_generators) !=- 0:
-        print("List of failed simulation generators: ", file=sys.stderr)
-        print(*failed_simulation_generators)
-        retcode = -1
-    else:
-        print("All simulation generators succeed!")
-    
-    print()
+
+    def check_generators(generators : list[str], generator_checker : Callable[[str], bool], generator_type : str):
+        nonlocal retcode
+        failed_generators = get_failed_generators(
+            generators,
+            generator_checker
+        )
+
+        if len(failed_generators) != 0:
+            print(f"List of failed {generator_type} generators: ", file=sys.stderr)
+            print(*failed_generators)
+            retcode = -1
+        else:
+            print(f"All {generator_type} generators succeed!")
+        print()
     
     topology_generators_dir = os.path.join(generators_path, "topology")
-    topology_independent_simulation_generator = os.path.join(generators_path, "ti_simulation", "all-to-all", "all-to-all.py")
-    failed_toplogy_generators = process_topology_generators(nons_path, topology_generators_dir, topology_independent_simulation_generator)
-    if len(failed_toplogy_generators) != 0:
-        print("List of failed topology generators: ", file=sys.stderr)
-        print(*failed_toplogy_generators)
-        retcode = -1
-    else:
-        print("All topology generators succeed!")
+    ti_simulation_generators_dir = os.path.join(generators_path, "ti_simulation")
+    simulation_generators_dir = os.path.join(generators_path, "simulation")
+    
+    topology_generators_dir = find_generator_dirs(topology_generators_dir)
+    simulation_generators_dirs = find_generator_dirs(simulation_generators_dir)
+    ti_simulation_generators_dirs = find_generator_dirs(ti_simulation_generators_dir)
+
+    # Checks topology generators using fiest topology independent generator
+    if len(ti_simulation_generators_dirs) == 0:
+        print(f"Can not check topology generators: not topology independent generators under {ti_simulation_generators_dir}")
+        exit(-1)
+    
+    ti_simulation_generator = find_generator_script(ti_simulation_generators_dirs[0])
+    if ti_simulation_generator is None:
+        print("Can not find script in directory of first topology independent generator", file=sys.stderr)
+    check_generators(
+        topology_generators_dir,
+        lambda generator : check_topology_generator(nons_path, generator, ti_simulation_generator),
+        "topology"
+    )
+
+    check_generators(
+        simulation_generators_dirs,
+        lambda generator : check_simulation_generator(nons_path, generator),
+        "simulation"
+    )
 
     exit(retcode)
 
