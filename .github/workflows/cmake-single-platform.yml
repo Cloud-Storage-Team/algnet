@@ -136,7 +136,7 @@ jobs:
       run: chmod +x ${{env.EXECUTABLE_NAME}}
     
     - name: Update PYTHONPOATH
-      run: export PYTHONPATH=${PYTHONPATH}:${GITHUB_WORKSPACE}/scripts 
+      run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
     - name: Print PYTHONPATH
       run: echo ${PYTHONPATH}
