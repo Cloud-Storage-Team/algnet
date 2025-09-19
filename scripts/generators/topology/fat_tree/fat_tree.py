@@ -1,33 +1,8 @@
-import yaml
-import argparse
-import sys
 import os
 
-def save_yaml(data, filename):
-    """Save data as YAML to a file"""
-    with open(filename, "w") as f:
-        yaml.dump(data, f, sort_keys=False, default_flow_style=False)
-
-def load_config(config_file):
-    try:
-        with open(config_file, 'r') as f:
-            return yaml.safe_load(f)
-    except FileNotFoundError:
-        print(f"Error: Configuration file '{config_file}' not found.")
-        sys.exit(1)
-    except yaml.YAMLError as e:
-        print(f"Error: Invalid YAML in configuration file: {e}")
-        sys.exit(1)
-
-def add_bidirectional_link(config, from_node, to_node, link_counter, preset = "default"):
-    config["links"][f"link{link_counter}"] = {
-        "from": from_node, "to": to_node, "preset-name": preset
-    }
-    link_counter += 1
-    config["links"][f"link{link_counter}"] = {
-        "from": to_node, "to": from_node, "preset-name": preset
-    }
-    return link_counter + 1
+from common import *
+from generators.common import *
+from generators.topology.common import *
 
 def generate_fat_tree_config(config_params):
     switch_ports_count = config_params["switch_ports_count"]
@@ -75,18 +50,15 @@ def generate_fat_tree_config(config_params):
         for e in range(1, edge_per_pod + 1):
             config["switches"][edge_name(p, e)] = {"preset-name": "edge", "layer": 2}
 
-    link_counter = 1
-    
+    link_generator = LinkGenerator(config)
     # Edge-host
     for pod_idx in range(1, num_pods + 1):
         for edge_idx in range(1, edge_per_pod + 1):
             for h in range(1, hosts_per_edge + 1):
                 host_idx = (edge_idx - 1) * hosts_per_edge + h
-                link_counter = add_bidirectional_link(
-                    config,
+                link_generator.add_bidirectional_link_same_preset(
                     host_name(pod_idx, host_idx),
                     edge_name(pod_idx, edge_idx),
-                    link_counter,
                     "edge-host"
                 )
     
@@ -94,11 +66,9 @@ def generate_fat_tree_config(config_params):
     for pod_idx in range(1, num_pods + 1):
         for edge_idx in range(1, edge_per_pod + 1):
             for aggr_idx in range(1, aggr_per_pod + 1):
-                link_counter = add_bidirectional_link(
-                    config,
+                link_generator.add_bidirectional_link_same_preset(
                     edge_name(pod_idx, edge_idx),
                     aggr_name(pod_idx, aggr_idx),
-                    link_counter,
                     "aggr-edge"
                 )
     
@@ -108,49 +78,26 @@ def generate_fat_tree_config(config_params):
             core_offset = (aggr_idx - 1) * core_per_aggr
             for core_idx in range(1, core_per_aggr + 1):
                 core_id = core_offset + core_idx
-                link_counter = add_bidirectional_link(
-                    config,
+                link_generator.add_bidirectional_link_same_preset(
                     aggr_name(pod_idx, aggr_idx),
                     core_name(core_id),
-                    link_counter,
-                    "aggr-core"
+                    "aggr-core",
                 )
     
     return config
 
-def write_config_to_file(config, output_path):   
-    with open(output_path, 'w') as f:
-        yaml.dump(config, f, sort_keys=False, width=120, indent=2)
-    
-    print(f"Configuration written to {output_path}")
-    return output_path
-
 if __name__ == "__main__":
-    # Set up command-line argument parsing
-    parser = argparse.ArgumentParser(
-        description='Generate Fat-Tree network configuration.'\
+    args = parse_generator_args(
+        os.path.join(os.path.dirname(__file__), "default_config.yml"),
+        'Generate Fat-Tree network configuration.'\
         'You may see more about it here: '\
-        'https://packetpushers.net/blog/demystifying-dcn-topologies-clos-fat-trees-part2/')
-    curr_file_path = os.path.realpath(__file__)
-    curr_dir_path = os.path.dirname(curr_file_path)
-    default_config_full_path = os.path.join(curr_dir_path, "fat_tree_config.yaml")
-    default_config_rel_path = os.path.relpath(default_config_full_path, os.getcwd())
-
-    parser.add_argument('-c', '--config', 
-                        default=default_config_abs_path,
-                        help=f'Path to configuration file (default: {default_config_abs_path}). See given default to get format & structure of this config')
-    
-    parser.add_argument('-o', '--output_path',
-        default='fat_tree_topology.yaml',
-        help='Path to the output topology config file',
+        'https://packetpushers.net/blog/demystifying-dcn-topologies-clos-fat-trees-part2/'
     )
-
-    
-    args = parser.parse_args()
     
     # Load configuration from file
-    config_params = load_config(args.config)
+    config_params = load_yaml(args.config)
     
     # Generate and write the fat-tree configuration
     topology = generate_fat_tree_config(config_params)
     save_yaml(topology, args.output_path)
+    print(f"Fat-tree topology saved to {args.output_path}")

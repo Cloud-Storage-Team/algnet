@@ -35,3 +35,9 @@ class LinkGenerator:
         next_link_num = self.add_directed_link(first_device_id, second_device_id, forward_preset_name)
         next_link_num = self.add_directed_link(second_device_id, first_device_id, backwards_preset_name)
         return next_link_num
+    
+    def add_bidirectional_link_same_preset(self,
+                               first_device_id : str,
+                               second_device_id : str,
+                               preset_name : str):
+        self.add_bidirectional_link(first_device_id, second_device_id, preset_name, preset_name)
