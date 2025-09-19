@@ -23,12 +23,6 @@ protected:
         return std::make_shared<test::FlowMock>(std::shared_ptr<sim::IHost>{});
     }
 
-    static sim::FlowSample makeSample(uint32_t quota) {
-        sim::FlowSample sample;
-        sample.send_quota = quota;
-        return sample;
-    }
-
     static FlowList makeFlows(std::size_t flow_count) {
         FlowList flows;
         flows.reserve(flow_count);
@@ -66,8 +60,8 @@ protected:
 // equally
 TEST_F(RoundRobinMPLBTest, AddAndRotateFair) {
     auto flow_1 = makeFlow(), flow_2 = makeFlow();
-    mplb.add_flow(flow_1, makeSample(1000));
-    mplb.add_flow(flow_2, makeSample(1000));
+    mplb.add_flow(flow_1);
+    mplb.add_flow(flow_2);
     auto flow_count = count(pick(1000));
     ASSERT_EQ(flow_count.size(), 2u);
     expectFair(flow_count, flow_1, flow_2);
@@ -76,7 +70,7 @@ TEST_F(RoundRobinMPLBTest, AddAndRotateFair) {
 // Add three flows and check that they are selected in turn in multiple loops
 TEST_F(RoundRobinMPLBTest, RotateMultiCycle) {
     auto flows = makeFlows(3);
-    for (auto& flow : flows) mplb.add_flow(flow, makeSample(100));
+    for (auto& flow : flows) mplb.add_flow(flow);
     auto flow_count = count(pick(300));
     ASSERT_EQ(flow_count.size(), 3u);
     for (auto& flow : flows) EXPECT_EQ(flow_count[flow], 100u);
@@ -85,8 +79,8 @@ TEST_F(RoundRobinMPLBTest, RotateMultiCycle) {
 // Re-adding the same flow must be ignored
 TEST_F(RoundRobinMPLBTest, DuplicateAddIgnored) {
     auto flow = makeFlow();
-    mplb.add_flow(flow, makeSample(1));
-    mplb.add_flow(flow, makeSample(100));
+    mplb.add_flow(flow);
+    mplb.add_flow(flow);
     auto cnt = count(pick(50));
     ASSERT_EQ(cnt.size(), 1u);
     EXPECT_EQ(cnt[flow], 1u);
@@ -95,9 +89,9 @@ TEST_F(RoundRobinMPLBTest, DuplicateAddIgnored) {
 // Deleting the currently selected flow should correctly shift the pointer
 TEST_F(RoundRobinMPLBTest, RemoveCurrentAdvances) {
     auto flow_1 = makeFlow(), flow_2 = makeFlow(), flow_3 = makeFlow();
-    mplb.add_flow(flow_1, makeSample(100));
-    mplb.add_flow(flow_2, makeSample(100));
-    mplb.add_flow(flow_3, makeSample(100));
+    mplb.add_flow(flow_1);
+    mplb.add_flow(flow_2);
+    mplb.add_flow(flow_3);
     auto first = mplb.select_flow();
     ASSERT_NE(first, nullptr);
     auto next = mplb.select_flow();
@@ -111,7 +105,7 @@ TEST_F(RoundRobinMPLBTest, RemoveCurrentAdvances) {
 // If the last flow is deleted, the selection should return nullptr
 TEST_F(RoundRobinMPLBTest, RemoveLast) {
     auto flow = makeFlow();
-    mplb.add_flow(flow, makeSample(1));
+    mplb.add_flow(flow);
     ASSERT_EQ(mplb.select_flow(), flow);
     mplb.remove_flow(flow);
     EXPECT_EQ(mplb.select_flow(), nullptr);
@@ -122,10 +116,10 @@ TEST_F(RoundRobinMPLBTest, RemoveLast) {
 TEST_F(RoundRobinMPLBTest, RemoveSomeKeepsFairness) {
     auto flow_1 = makeFlow(), flow_2 = makeFlow(), flow_3 = makeFlow(),
          flow_4 = makeFlow();
-    mplb.add_flow(flow_1, makeSample(200));
-    mplb.add_flow(flow_2, makeSample(200));
-    mplb.add_flow(flow_3, makeSample(200));
-    mplb.add_flow(flow_4, makeSample(200));
+    mplb.add_flow(flow_1);
+    mplb.add_flow(flow_2);
+    mplb.add_flow(flow_3);
+    mplb.add_flow(flow_4);
     mplb.remove_flow(flow_2);
     mplb.remove_flow(flow_4);
     auto flow_count = count(pick(200));
@@ -136,11 +130,11 @@ TEST_F(RoundRobinMPLBTest, RemoveSomeKeepsFairness) {
 // Clear all flows, then add them again and make sure everything works
 TEST_F(RoundRobinMPLBTest, ClearResets) {
     auto flows = makeFlows(3);
-    for (auto& flow : flows) mplb.add_flow(flow, makeSample(10));
+    for (auto& flow : flows) mplb.add_flow(flow);
     ASSERT_NE(mplb.select_flow(), nullptr);
     mplb.clear_flows();
     EXPECT_EQ(mplb.select_flow(), nullptr);
-    for (auto& flow : flows) mplb.add_flow(flow, makeSample(100));
+    for (auto& flow : flows) mplb.add_flow(flow);
     auto flow_count = count(pick(300));
     ASSERT_EQ(flow_count.size(), 3u);
 }
@@ -148,8 +142,8 @@ TEST_F(RoundRobinMPLBTest, ClearResets) {
 // Check that selecting a flow with zero quota returns nullptr
 TEST_F(RoundRobinMPLBTest, QuotaExhausted) {
     auto flow_1 = makeFlow(), flow_2 = makeFlow();
-    mplb.add_flow(flow_1, makeSample(1));
-    mplb.add_flow(flow_2, makeSample(0));
+    mplb.add_flow(flow_1);
+    mplb.add_flow(flow_2);
     EXPECT_EQ(mplb.select_flow(), flow_1);
     EXPECT_EQ(mplb.select_flow(), nullptr);
 }
@@ -158,7 +152,7 @@ TEST_F(RoundRobinMPLBTest, QuotaExhausted) {
 // cycle
 TEST_F(RoundRobinMPLBTest, SingleFlowCycle) {
     auto flow = makeFlow();
-    mplb.add_flow(flow, makeSample(3));
+    mplb.add_flow(flow);
     EXPECT_EQ(mplb.select_flow(), flow);
     EXPECT_EQ(mplb.select_flow(), flow);
     EXPECT_EQ(mplb.select_flow(), flow);

@@ -78,7 +78,7 @@ Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     return packet;
 }
 
-void TcpFlow::send_data() {
+void TcpFlow::send_packet() {
     TimeNs now = Scheduler::get_instance().get_current_time();
 
     if (!m_sending_started) {

@@ -10,7 +10,8 @@ public:
     FlowMock(std::shared_ptr<sim::IHost> a_receiver);
 
     void update(sim::Packet packet) final;
-    std::uint32_t get_sending_quota() const final;
+    SizeByte get_sending_quota() const final;
+    SizeByte get_packet_size() const final; 
     void send_packet() final;
     std::shared_ptr<sim::IConnection> get_conn() const final;
     virtual SizeByte get_delivered_data_size() const final;

@@ -63,7 +63,7 @@ void ConnectionImpl::send_data() {
         }
         SizeByte quota = flow->get_sending_quota();
         if (m_data_to_send < flow->get_packet_size()) {
-            flow->send_data();
+            flow->send_packet();
             m_data_to_send = SizeByte(0);
             break;
         }
@@ -72,7 +72,7 @@ void ConnectionImpl::send_data() {
                 "MPLB returned flow {} with zero quota in connection {}",
                 flow->get_id(), m_id));
         }
-        flow->send_data();
+        flow->send_packet();
         m_data_to_send -= quota;
     }
 }

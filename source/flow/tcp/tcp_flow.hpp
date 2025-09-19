@@ -32,7 +32,7 @@ public:
     SizeByte get_delivered_bytes() const;
     SizeByte get_sending_quota() const;
     SizeByte get_packet_size() const;
-    void send_data() final;
+    void send_packet() final;
     std::shared_ptr<IConnection> get_conn() const final;
     TimeNs get_last_rtt() const;
     std::string to_string() const;
