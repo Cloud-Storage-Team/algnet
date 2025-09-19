@@ -7,7 +7,7 @@ FlowMock::FlowMock(std::shared_ptr<sim::IHost> m_receiver)
 
 void FlowMock::update([[maybe_unused]] sim::Packet packet) {};
 
-SizeByte FlowMock::get_sending_quota() const { return SizeByte(1); }
+SizeByte FlowMock::get_sending_quota() const { return SizeByte(64); }
 SizeByte FlowMock::get_packet_size() const { return SizeByte(64); }
 void FlowMock::send_packet() {}
 std::shared_ptr<sim::IConnection> FlowMock::get_conn() const { return nullptr; }

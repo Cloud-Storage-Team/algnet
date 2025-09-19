@@ -22,7 +22,7 @@ public:
 
     SizeByte get_delivered_data_size() const final;
 
-    // Returns time elapced from flow start (firsrt call of send_packet)
+    // Returns time elapced from flow start (firsrt call of send_data)
     // to last update call
     TimeNs get_fct() const final;
 
@@ -32,7 +32,7 @@ public:
     SizeByte get_delivered_bytes() const;
     SizeByte get_sending_quota() const;
     SizeByte get_packet_size() const;
-    void send_packet() final;
+    void send_data(SizeByte data) final;
     std::shared_ptr<IConnection> get_conn() const final;
     TimeNs get_last_rtt() const;
     std::string to_string() const;

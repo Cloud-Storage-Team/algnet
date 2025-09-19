@@ -57,8 +57,31 @@ SizeByte TcpFlow::get_delivered_bytes() const { return m_delivered_data_size; }
 
 SizeByte TcpFlow::get_sending_quota() const {
     SizeByte quota = std::max(m_cc->get_cwnd() * m_packet_size, m_packet_size);
-    return (quota - m_inflight >= m_packet_size) ? (quota - m_inflight)
-                                                 : SizeByte(0);
+    return (quota - m_inflight >= m_packet_size)
+               ? std::max(quota - m_inflight, m_packet_size)
+               : SizeByte(0);
+    const double cwnd_pkts = m_cc->get_cwnd();
+
+    std::uint32_t eff_cwnd_pkts;
+    if (cwnd_pkts >= 1.0) {
+        // Getting the integer part of the window in packets
+        eff_cwnd_pkts = static_cast<std::uint32_t>(std::floor(cwnd_pkts));
+    } else if (m_inflight == SizeByte(0)) {
+        // When cwnd < 1 and nothing is inflight, then we allow 1 packet (pacing
+        // will fill the gap)
+        eff_cwnd_pkts = 1u;
+    } else {
+        // cwnd < 1 and something is already inflight - no new packets allowed
+        eff_cwnd_pkts = 0u;
+    }
+
+    // Window budget in bytes, rounded DOWN to whole packets
+    const SizeByte window_bytes = eff_cwnd_pkts * m_packet_size;
+
+    if (window_bytes <= m_inflight) return SizeByte(0);
+
+    // Return quota that multiple of the packet size
+    return ((window_bytes - m_inflight) / m_packet_size) * m_packet_size;
 }
 
 SizeByte TcpFlow::get_packet_size() const { return m_packet_size; }
@@ -78,7 +101,7 @@ Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     return packet;
 }
 
-void TcpFlow::send_packet() {
+void TcpFlow::send_data(SizeByte data) {
     TimeNs now = Scheduler::get_instance().get_current_time();
 
     if (!m_sending_started) {
@@ -86,22 +109,25 @@ void TcpFlow::send_packet() {
         m_sending_started = true;
     }
 
-    if (get_sending_quota() == SizeByte(0)) {
-        LOG_WARN(
-            fmt::format("No sending quota for flow {}; packet not sent", m_id));
-        return;
-    }
-    Packet packet = generate_data_packet(m_next_packet_num++);
-    TimeNs pacing_delay = m_cc->get_pacing_delay();
-
-    if (pacing_delay == TimeNs(0)) {
-        send_packet_now(std::move(packet));
-    } else {
-        Scheduler::get_instance().add<SendAtTime>(
-            now + pacing_delay, this->shared_from_this(), std::move(packet));
+    if (data > get_sending_quota()) {
+        throw std::runtime_error(fmt::format(
+            "Trying to send {} bytes on flow {} with quota {} bytes", data.value(),
+            m_id, get_sending_quota().value()));
     }
 
-    m_inflight += packet.size;
+    while (data != SizeByte(0)) {
+        Packet packet = generate_data_packet(m_next_packet_num++);
+        TimeNs pacing_delay = m_cc->get_pacing_delay();
+        if (pacing_delay == TimeNs(0)) {
+            send_packet_now(std::move(packet));
+        } else {
+            Scheduler::get_instance().add<SendAtTime>(now + pacing_delay,
+                                                      this->shared_from_this(),
+                                                      std::move(packet));
+        }
+        data -= std::min(data, m_packet_size);
+        m_inflight += m_packet_size;
+    }
 }
 
 std::shared_ptr<IConnection> TcpFlow::get_conn() const { return m_connection; }
