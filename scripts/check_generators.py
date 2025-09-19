@@ -120,7 +120,7 @@ def process_simulation_generators(nons_path : str, simulation_generators_dir : s
     failed_generators = []
     for item in sorted(os.listdir(simulation_generators_dir)):
         item_path = os.path.join(simulation_generators_dir, item)
-        if not os.path.isdir(item_path):
+        if not os.path.isdir(item_path) or item == "__pycache__":
             continue
         if not process_simulation_generator(nons_path, item_path):
             failed_generators.append(item_path)
@@ -170,6 +170,23 @@ def process_topology_generator(
                   f" for topology {temp_topology_file.name}")
             return run_nons(nons_path, temp_simulation_file.name)
         
+def process_topology_generators(
+    nons_path : str,
+    topology_generators_dir : str,
+    topology_independent_simulation_generator : str) -> list[str]:
+    """
+    Checks all simulation generators in given direcrory
+    Returns list of failed generators
+    """
+    failed_generators = []
+    for item in sorted(os.listdir(topology_generators_dir)):
+        item_path = os.path.join(topology_generators_dir, item)
+        if not os.path.isdir(item_path) or item == "__pycache__":
+            continue
+        if not process_topology_generator(nons_path, item_path, topology_independent_simulation_generator):
+            failed_generators.append(item_path)
+    return failed_generators
+        
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -187,7 +204,6 @@ def main():
     generators_path = args.generators
 
     simulation_generators_dir = os.path.join(generators_path, "simulation")
-
     failed_simulation_generators = process_simulation_generators(nons_path, simulation_generators_dir)
 
     retcode = 0
@@ -197,6 +213,20 @@ def main():
         retcode = -1
     else:
         print("All simulation generators succeed!")
+    
+    print()
+    
+    topology_generators_dir = os.path.join(generators_path, "topology")
+    topology_independent_simulation_generator = os.path.join(generators_path, "ti_simulation", "all-to-all", "all-to-all.py")
+    failed_toplogy_generators = process_topology_generators(nons_path, topology_generators_dir, topology_independent_simulation_generator)
+    if len(failed_toplogy_generators) != 0:
+        print("List of failed topology generators: ", file=sys.stderr)
+        print(*failed_toplogy_generators)
+        retcode = -1
+    else:
+        print("All topology generators succeed!")
+
+    exit(retcode)
 
 if __name__ == "__main__":
     main()
