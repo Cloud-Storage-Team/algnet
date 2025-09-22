@@ -62,13 +62,10 @@ SizeByte TcpFlow::get_sending_quota() const {
     // allow 1 packet
     const std::uint32_t eff_cwnd_pkts =
         (cwnd >= 1.0) ? static_cast<std::uint32_t>(std::floor(cwnd))
-                      : (m_inflight == SizeByte(0) ? 1 : 0);
-
-    // How many packages are already in flight (rounded down)
-    const std::uint32_t inflight_pkts = m_inflight / m_packet_size;
+                      : (m_inflight == 0 ? 1 : 0);
 
     const std::uint32_t quota_pkts =
-        (eff_cwnd_pkts > inflight_pkts) ? (eff_cwnd_pkts - inflight_pkts) : 0;
+        (eff_cwnd_pkts > m_inflight) ? (eff_cwnd_pkts - m_inflight) : 0;
 
     // Quota in bytes, multiple of the packet size
     return quota_pkts * m_packet_size;
@@ -116,7 +113,7 @@ void TcpFlow::send_data(SizeByte data) {
                                                       std::move(packet));
         }
         data -= std::min(data, m_packet_size);
-        m_inflight += m_packet_size;
+        m_inflight++;
     }
 }
 
@@ -227,8 +224,8 @@ void TcpFlow::update(Packet packet) {
                                                  current_time, rtt);
         m_acked.insert(packet.packet_num);
 
-        if (m_inflight >= m_packet_size) {
-            m_inflight -= m_packet_size;
+        if (m_inflight > 0) {
+            m_inflight--;
         }
 
         m_cc->on_ack(rtt, m_rtt_statistics.get_mean(),
@@ -267,7 +264,7 @@ std::string TcpFlow::to_string() const {
     oss << ", dest id: " << m_dest.lock()->get_id();
     oss << ", CC module: " << m_cc->to_string();
     oss << ", packet size: " << m_packet_size;
-    oss << ", bytes in flight: " << m_inflight;
+    oss << ", packets in flight: " << m_inflight;
     oss << ", acked packets: " << m_delivered_data_size;
     oss << "]";
     return oss.str();

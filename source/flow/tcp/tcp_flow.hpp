@@ -76,7 +76,7 @@ private:
     SizeByte m_packet_size;
     bool m_ecn_capable;
 
-    SizeByte m_inflight;
+    std::uint32_t m_inflight;
     SizeByte m_delivered_data_size;
     PacketNum m_next_packet_num;
 
