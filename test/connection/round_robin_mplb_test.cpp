@@ -76,16 +76,6 @@ TEST_F(RoundRobinMPLBTest, RotateMultiCycle) {
     for (auto& flow : flows) EXPECT_EQ(flow_count[flow], 100u);
 }
 
-// Re-adding the same flow must be ignored
-// TEST_F(RoundRobinMPLBTest, DuplicateAddIgnored) {
-//     auto flow = makeFlow();
-//     mplb.add_flow(flow);
-//     mplb.add_flow(flow);
-//     auto cnt = count(pick(50));
-//     ASSERT_EQ(cnt.size(), 1u);
-//     EXPECT_EQ(cnt[flow], 1u);
-// }
-
 // Deleting the currently selected flow should correctly shift the pointer
 TEST_F(RoundRobinMPLBTest, RemoveCurrentAdvances) {
     auto flow_1 = makeFlow(), flow_2 = makeFlow(), flow_3 = makeFlow();
@@ -138,25 +128,5 @@ TEST_F(RoundRobinMPLBTest, ClearResets) {
     auto flow_count = count(pick(300));
     ASSERT_EQ(flow_count.size(), 3u);
 }
-
-// Check that selecting a flow with zero quota returns nullptr
-// TEST_F(RoundRobinMPLBTest, QuotaExhausted) {
-//     auto flow_1 = makeFlow(), flow_2 = makeFlow();
-//     mplb.add_flow(flow_1);
-//     mplb.add_flow(flow_2);
-//     EXPECT_EQ(mplb.select_flow(), flow_1);
-//     EXPECT_EQ(mplb.select_flow(), nullptr);
-// }
-
-// Check that selecting a flow with zero quota does not affect the round-robin
-// cycle
-// TEST_F(RoundRobinMPLBTest, SingleFlowCycle) {
-//     auto flow = makeFlow();
-//     mplb.add_flow(flow);
-//     EXPECT_EQ(mplb.select_flow(), flow);
-//     EXPECT_EQ(mplb.select_flow(), flow);
-//     EXPECT_EQ(mplb.select_flow(), flow);
-//     EXPECT_EQ(mplb.select_flow(), nullptr);
-// }
 
 }  // namespace test
