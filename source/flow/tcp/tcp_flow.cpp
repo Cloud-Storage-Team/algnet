@@ -24,7 +24,7 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
       m_last_ack_arrive_time(0),
       m_packet_size(a_packet_size),
       m_ecn_capable(a_ecn_capable),
-      m_inflight(0),
+      m_packets_in_flight(0),
       m_delivered_data_size(0),
       m_next_packet_num(0) {
     if (m_src.lock() == nullptr) {
@@ -60,18 +60,18 @@ SizeByte TcpFlow::get_sending_quota() const {
 
     // Effective window: the whole part of cwnd; if cwnd < 1 and inflight == 0,
     // allow 1 packet
-    const std::uint32_t eff_cwnd_pkts =
+    const std::uint32_t effective_cwnd =
         (cwnd >= 1.0) ? static_cast<std::uint32_t>(std::floor(cwnd))
-                      : (m_inflight == 0 ? 1 : 0);
+                      : (m_packets_in_flight == 0 ? 1 : 0);
 
     const std::uint32_t quota_pkts =
-        (eff_cwnd_pkts > m_inflight) ? (eff_cwnd_pkts - m_inflight) : 0;
+        (effective_cwnd > m_packets_in_flight)
+            ? (effective_cwnd - m_packets_in_flight)
+            : 0;
 
     // Quota in bytes, multiple of the packet size
     return quota_pkts * m_packet_size;
 }
-
-SizeByte TcpFlow::get_packet_size() const { return m_packet_size; }
 
 Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     Packet packet;
@@ -113,7 +113,7 @@ void TcpFlow::send_data(SizeByte data) {
                                                       std::move(packet));
         }
         data -= std::min(data, m_packet_size);
-        m_inflight++;
+        m_packets_in_flight++;
     }
 }
 
@@ -224,8 +224,8 @@ void TcpFlow::update(Packet packet) {
                                                  current_time, rtt);
         m_acked.insert(packet.packet_num);
 
-        if (m_inflight > 0) {
-            m_inflight--;
+        if (m_packets_in_flight > 0) {
+            m_packets_in_flight--;
         }
 
         m_cc->on_ack(rtt, m_rtt_statistics.get_mean(),
@@ -264,7 +264,7 @@ std::string TcpFlow::to_string() const {
     oss << ", dest id: " << m_dest.lock()->get_id();
     oss << ", CC module: " << m_cc->to_string();
     oss << ", packet size: " << m_packet_size;
-    oss << ", packets in flight: " << m_inflight;
+    oss << ", packets in flight: " << m_packets_in_flight;
     oss << ", acked packets: " << m_delivered_data_size;
     oss << "]";
     return oss.str();

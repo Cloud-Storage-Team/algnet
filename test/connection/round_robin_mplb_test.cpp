@@ -19,15 +19,20 @@ protected:
 
     sim::RoundRobinMPLB mplb;
 
-    static FlowPtr makeFlow() {
-        return std::make_shared<test::FlowMock>(std::shared_ptr<sim::IHost>{});
+    static FlowPtr makeFlow(uint32_t pckts_count = 1,
+                            SizeByte packet_size = SizeByte(64)) {
+        FlowStat stat = {packet_size * pckts_count, TimeNs(0)};
+        auto flow = std::make_shared<test::FlowMock>(
+            std::shared_ptr<sim::IHost>{}, packet_size, stat);
+        return flow;
     }
 
-    static FlowList makeFlows(std::size_t flow_count) {
+    static FlowList makeFlows(std::size_t flow_count, uint32_t pckts_count = 1,
+                              SizeByte packet_size = SizeByte(64)) {
         FlowList flows;
         flows.reserve(flow_count);
         for (std::size_t i = 0; i < flow_count; ++i)
-            flows.emplace_back(makeFlow());
+            flows.emplace_back(makeFlow(pckts_count, packet_size));
         return flows;
     }
 
@@ -35,8 +40,10 @@ protected:
         FlowList flows;
         flows.reserve(k);
         for (std::size_t i = 0; i < k; ++i) {
-            auto flow = mplb.select_flow();
+            auto flow =
+                std::dynamic_pointer_cast<test::FlowMock>(mplb.select_flow());
             if (!flow) break;
+            flow.get()->send_data(flow.get()->get_packet_size());
             flows.emplace_back(flow);
         }
         return flows;
@@ -59,29 +66,29 @@ protected:
 // Add two flows with the same quota and make sure that they are selected
 // equally
 TEST_F(RoundRobinMPLBTest, AddAndRotateFair) {
-    auto flow_1 = makeFlow(), flow_2 = makeFlow();
+    // First flow can send 500 packets, second - also 500 packets
+    auto flow_1 = makeFlow(500);
+    auto flow_2 = makeFlow(500);
     mplb.add_flow(flow_1);
     mplb.add_flow(flow_2);
-    auto flow_count = count(pick(1000));
+    auto flow_count = count(pick(1005));
     ASSERT_EQ(flow_count.size(), 2u);
     expectFair(flow_count, flow_1, flow_2);
 }
 
 // Add three flows and check that they are selected in turn in multiple loops
 TEST_F(RoundRobinMPLBTest, RotateMultiCycle) {
-    auto flows = makeFlows(3);
+    auto flows = makeFlows(3, 100);
     for (auto& flow : flows) mplb.add_flow(flow);
-    auto flow_count = count(pick(300));
+    auto flow_count = count(pick(305));
     ASSERT_EQ(flow_count.size(), 3u);
     for (auto& flow : flows) EXPECT_EQ(flow_count[flow], 100u);
 }
 
 // Deleting the currently selected flow should correctly shift the pointer
 TEST_F(RoundRobinMPLBTest, RemoveCurrentAdvances) {
-    auto flow_1 = makeFlow(), flow_2 = makeFlow(), flow_3 = makeFlow();
-    mplb.add_flow(flow_1);
-    mplb.add_flow(flow_2);
-    mplb.add_flow(flow_3);
+    auto flows = makeFlows(3, 100);
+    for (auto& flow : flows) mplb.add_flow(flow);
     auto first = mplb.select_flow();
     ASSERT_NE(first, nullptr);
     auto next = mplb.select_flow();
@@ -104,29 +111,47 @@ TEST_F(RoundRobinMPLBTest, RemoveLast) {
 // Remove two of the four flows and check that the remaining ones continue to be
 // selected equally
 TEST_F(RoundRobinMPLBTest, RemoveSomeKeepsFairness) {
-    auto flow_1 = makeFlow(), flow_2 = makeFlow(), flow_3 = makeFlow(),
-         flow_4 = makeFlow();
-    mplb.add_flow(flow_1);
-    mplb.add_flow(flow_2);
-    mplb.add_flow(flow_3);
-    mplb.add_flow(flow_4);
-    mplb.remove_flow(flow_2);
-    mplb.remove_flow(flow_4);
+    auto flows = makeFlows(4, 200);
+    for (auto& flow : flows) mplb.add_flow(flow);
+    mplb.remove_flow(flows[1]);
+    mplb.remove_flow(flows[3]);
     auto flow_count = count(pick(200));
     ASSERT_EQ(flow_count.size(), 2u);
-    expectFair(flow_count, flow_1, flow_3);
+    expectFair(flow_count, flows[0], flows[2]);
 }
 
 // Clear all flows, then add them again and make sure everything works
 TEST_F(RoundRobinMPLBTest, ClearResets) {
-    auto flows = makeFlows(3);
+    auto flows = makeFlows(3, 10);
     for (auto& flow : flows) mplb.add_flow(flow);
     ASSERT_NE(mplb.select_flow(), nullptr);
     mplb.clear_flows();
     EXPECT_EQ(mplb.select_flow(), nullptr);
     for (auto& flow : flows) mplb.add_flow(flow);
-    auto flow_count = count(pick(300));
+    auto flow_count = count(pick(30));
     ASSERT_EQ(flow_count.size(), 3u);
+}
+
+// Check that selecting a flow with zero quota returns nullptr
+TEST_F(RoundRobinMPLBTest, QuotaExhausted) {
+    auto flow_1 = makeFlow(1), flow_2 = makeFlow(0);
+    mplb.add_flow(flow_1);
+    mplb.add_flow(flow_2);
+    auto flow_count = count(pick(2));
+    ASSERT_EQ(flow_count.size(), 1u);
+    ASSERT_TRUE(flow_count.contains(flow_1));
+    ASSERT_FALSE(flow_count.contains(flow_2));
+}
+
+// Check that selecting a flow with zero quota does not affect the round-robin
+// cycle
+TEST_F(RoundRobinMPLBTest, SingleFlowCycle) {
+    auto flow = makeFlow(3);
+    mplb.add_flow(flow);
+    auto flow_count = count(pick(4));
+    ASSERT_EQ(flow_count.size(), 1u);
+    ASSERT_TRUE(flow_count.contains(flow));
+    ASSERT_EQ(flow_count.at(flow), 3u);
 }
 
 }  // namespace test

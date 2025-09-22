@@ -8,7 +8,6 @@
 #include "metrics/packet_reordering/simple_packet_reordering.hpp"
 #include "packet.hpp"
 #include "utils/flag_manager.hpp"
-#include "utils/statistics.hpp"
 #include "utils/str_expected.hpp"
 
 namespace sim {
@@ -31,10 +30,9 @@ public:
     Id get_id() const final;
     SizeByte get_delivered_bytes() const;
     SizeByte get_sending_quota() const;
-    SizeByte get_packet_size() const;
     void send_data(SizeByte data) final;
     std::shared_ptr<IConnection> get_conn() const final;
-    TimeNs get_last_rtt() const;
+    TimeNs get_last_rtt() const final;
     std::string to_string() const;
 
 private:
@@ -76,7 +74,7 @@ private:
     SizeByte m_packet_size;
     bool m_ecn_capable;
 
-    std::uint32_t m_inflight;
+    std::uint32_t m_packets_in_flight;
     SizeByte m_delivered_data_size;
     PacketNum m_next_packet_num;
 

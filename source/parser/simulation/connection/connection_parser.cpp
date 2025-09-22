@@ -40,8 +40,8 @@ std::shared_ptr<IConnection> ConnectionParser::parse_connection(
     SizeByte data_to_send =
         SizeByte(parse_size(value_node["data_to_send"].as<std::string>()));
     if (data_to_send == SizeByte(0)) {
-        throw std::runtime_error(
-            "Data to send is not specified for connection " + conn_id);
+        throw std::runtime_error("Data to send is set to zero for connection " +
+                                 conn_id);
     }
 
     std::string mplb_name = value_node["mplb"].as<std::string>();
