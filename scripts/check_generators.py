@@ -38,7 +38,7 @@ def find_generator_script(generator_dir : str) -> str:
     )
     if len(python_scripts) == 1:
         return python_scripts[0]
-    print(f"Found follofing python scripts in {generator_dir}: {python_scripts}; expected only one", file=sys.stderr)
+    print(f"Found following python scripts in {generator_dir}: {python_scripts}; expected only one", file=sys.stderr)
     return None
 
 def get_generators_scripts(generators_dir : str) -> list[str]:
