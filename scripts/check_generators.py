@@ -159,7 +159,7 @@ def check_two_generators(
             result = run_subprocess(simulation_generator_args)
             if result.returncode != 0:
                 return False
-            print(f"Simuation generator {topology_generator_script} generated config {temp_simulation_file.name}"
+            print(f"Simulation generator {topology_generator_script} generated config {temp_simulation_file.name}"
                   f" for topology {temp_topology_file.name}")
             return run_nons(nons_path, temp_simulation_file.name)
 
