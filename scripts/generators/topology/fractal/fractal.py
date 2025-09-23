@@ -43,7 +43,7 @@ def generate_topology(config : dict):
         prev_layer_names = [name for names in current_layer_names for name in names]
         current_layer_names = [[f"{name}-{i}" for i in switch_nums_range] for name in prev_layer_names]
 
-    # Add links betwwen last layer and receiver
+    # Add links between last layer and receiver
     for name in prev_layer_names:
         link_generator.add_bidirectional_link(name, receiver_name)
     return topology
