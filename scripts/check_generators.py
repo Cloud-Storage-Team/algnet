@@ -23,7 +23,7 @@ def get_generator_dirs(generators_dir : str) -> list[str]:
 
 def find_generator_script(generator_dir : str) -> str:
     """
-    Searchs for generator (python script different from __init__.py) in generator_dir
+    Searches for generator (python script different from __init__.py) in generator_dir
     If there are suitable scripts or more that one, outs erro to stderr and retuns None
     Otherwise returns path to generator
     """
