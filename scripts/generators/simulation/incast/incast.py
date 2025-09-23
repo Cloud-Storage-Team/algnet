@@ -47,7 +47,7 @@ class OutputConfig:
         self.config["presets"] = presets
 
     # private method
-    def _add_topology(self, input_config : InputConfig) -> list[str]:
+    def _add_topology(self, input_config : InputConfig):
         """
         Adds topology part and updated self.senders_list
         """
