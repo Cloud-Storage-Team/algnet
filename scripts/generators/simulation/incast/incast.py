@@ -4,7 +4,7 @@ from common import *
 from generators.common import *
 from generators.topology.common import *
 
-# TODO: eliminate tthis class when all presets (switch, flow, connection) will be available
+# TODO: eliminate this class when all presets (switch, flow, connection) will be available
 class InputConfig:
     def __init__(self, config : dict):
         # Gets required fields from config
