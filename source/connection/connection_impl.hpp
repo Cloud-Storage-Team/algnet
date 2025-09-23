@@ -16,10 +16,15 @@ class ConnectionImpl final
       public std::enable_shared_from_this<ConnectionImpl> {
 public:
     ConnectionImpl(Id a_id, std::shared_ptr<IHost> a_src,
-                   std::shared_ptr<IHost> a_dest, std::shared_ptr<IMPLB> a_mplb,
-                   SizeByte a_data_to_send = SizeByte(0));
+                   std::shared_ptr<IHost> a_dest,
+                   std::shared_ptr<IMPLB> a_mplb);
 
     ~ConnectionImpl() override = default;
+
+    struct ScheduledChunk {
+        TimeNs at;
+        SizeByte amount;
+    };
 
     Id get_id() const override;
 
@@ -41,6 +46,8 @@ public:
 
     std::shared_ptr<IHost> get_receiver() const override;
 
+    void set_data_schedule(std::vector<ScheduledChunk> s);
+
 private:
     // Tries to send data using the MPLB-selected flow(s), as long as
     // allowed.
@@ -52,6 +59,7 @@ private:
     std::shared_ptr<IMPLB> m_mplb;
     SizeByte m_data_to_send;
     std::set<std::shared_ptr<IFlow>> m_flows;
+    std::vector<ScheduledChunk> m_schedule;
 };
 
 }  // namespace sim
