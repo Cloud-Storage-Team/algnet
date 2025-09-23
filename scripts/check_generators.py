@@ -167,7 +167,7 @@ def check_two_generators(
 def get_failed_generators(generators : list[str], generator_checker : Callable[[str], bool]) -> list[str]:
     """
     Runs generator_checker on each item from generators
-    Returns list of generators that failes generator_checker
+    Returns list of generators that fails generator_checker
     """
     return list(
         filter(
