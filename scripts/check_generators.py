@@ -29,7 +29,7 @@ def find_generator_script(generator_dir : str) -> str:
     """
     python_scripts = list(
         filter(
-            lambda path : path.endswith("py") and os.path.basename(path) != "__init__.py",
+            lambda path : path.endswith(".py") and os.path.basename(path) != "__init__.py",
             map(
                 lambda item : os.path.join(generator_dir, item),
                 os.listdir(generator_dir)
