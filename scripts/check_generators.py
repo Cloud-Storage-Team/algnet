@@ -230,7 +230,7 @@ def main():
 
     if len(ti_simulation_generators_scripts) > 1:
         if len(topology_generators_scripts) == 0:
-            print(f"Can not check topology independent generators: not topology generators under {topology_generators_dir}")
+            print(f"Can not check topology independent generators: no topology generators under {topology_generators_dir}")
             exit(-1)
         
         check_generators(
