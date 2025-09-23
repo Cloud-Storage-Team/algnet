@@ -217,7 +217,7 @@ def main():
     simulation_generators_scripts = get_generators_scripts(simulation_generators_dir)
     ti_simulation_generators_scripts = get_generators_scripts(ti_simulation_generators_dir)
 
-    # Checks topology generators using fiest topology independent generator
+    # Checks topology generators using first topology independent generator
     if len(ti_simulation_generators_scripts) == 0:
         print(f"Can not check topology generators: not topology independent generators under {ti_simulation_generators_dir}")
         exit(-1)
