@@ -55,7 +55,7 @@ def get_generators_scripts(generators_dir : str) -> list[str]:
         )
     )
 
-def get_topology_config_path(simulation_config_path : str):
+def get_topology_config_path(simulation_config_path : str) -> str:
     simulation_config = load_yaml(simulation_config_path)
     return simulation_config["topology_config_path"]
 
