@@ -21,7 +21,7 @@ def get_generator_dirs(generators_dir : str) -> list[str]:
         )
     )
 
-def find_generator_script(generator_dir : str) -> Optional[str]:
+def find_generator_script(generator_dir : str) -> str | None:
     """
     Searches for generator (python script different from __init__.py) in generator_dir
     If there are suitable scripts or more that one, outs erro to stderr and retuns None
