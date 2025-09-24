@@ -60,10 +60,10 @@ SizeByte TcpFlow::get_sending_quota() const {
 
     // Effective window: the whole part of cwnd; if cwnd < 1 and inflight == 0,
     // allow 1 packet
-    const std::uint32_t effective_cwnd =
-        (cwnd >= 1.0) ? static_cast<std::uint32_t>(std::floor(cwnd))
-                      : (m_packets_in_flight == 0 ? 1 : 0);
-
+    std::uint32_t effective_cwnd = static_cast<std::uint32_t>(std::floor(cwnd));
+    if (m_packets_in_flight == 0 && cwnd < 1.0) {
+        effective_cwnd = 1;
+    }
     const std::uint32_t quota_pkts =
         (effective_cwnd > m_packets_in_flight)
             ? (effective_cwnd - m_packets_in_flight)
@@ -96,10 +96,11 @@ void TcpFlow::send_data(SizeByte data) {
         m_sending_started = true;
     }
 
-    if (data > get_sending_quota()) {
+    SizeByte quota = get_sending_quota();
+    if (data > quota) {
         throw std::runtime_error(fmt::format(
             "Trying to send {} bytes on flow {} with quota {} bytes",
-            data.value(), m_id, get_sending_quota().value()));
+            data.value(), m_id, quota.value()));
     }
 
     while (data != SizeByte(0)) {

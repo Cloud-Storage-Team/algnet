@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-#include "../switch/flow_mock.hpp"
+#include "../_mocks/flow_mock.hpp"
 
 namespace test {
 
@@ -21,9 +21,9 @@ protected:
 
     static FlowPtr makeFlow(uint32_t pckts_count = 1,
                             SizeByte packet_size = SizeByte(64)) {
-        FlowStat stat = {packet_size * pckts_count, TimeNs(0)};
         auto flow = std::make_shared<test::FlowMock>(
-            std::shared_ptr<sim::IHost>{}, packet_size, stat);
+            std::shared_ptr<sim::IHost>{}, packet_size,
+            packet_size * pckts_count, TimeNs(0));
         return flow;
     }
 
@@ -152,6 +152,16 @@ TEST_F(RoundRobinMPLBTest, SingleFlowCycle) {
     ASSERT_EQ(flow_count.size(), 1u);
     ASSERT_TRUE(flow_count.contains(flow));
     ASSERT_EQ(flow_count.at(flow), 3u);
+}
+
+// Re-adding the same flow must be ignored
+TEST_F(RoundRobinMPLBTest, DuplicateAddIgnored) {
+    auto flow = makeFlow(100);
+    mplb.add_flow(flow);
+    mplb.add_flow(flow);
+    auto cnt = count(pick(200));
+    ASSERT_EQ(cnt.size(), 1u);
+    EXPECT_EQ(cnt[flow], 100u);
 }
 
 }  // namespace test
