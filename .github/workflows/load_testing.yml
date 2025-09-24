@@ -41,11 +41,14 @@ jobs:
     - name: Build project
       run: cmake --build ${{env.BUILD_DIR}} -j $(nproc)
 
+    - name: Update PYTHONPOATH
+      run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
+
     - name: Run simulations
       run: | 
-        python3 scripts/run_load_testing.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc .${{env.FAT_TREE_SMALL_CONFIG}}
-        python3 scripts/run_load_testing.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc .${{env.FAT_TREE_MEDIUM_CONFIG}}
-        python3 scripts/run_load_testing.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc .${{env.FAT_TREE_LARGE_CONFIG}}
+        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc .${{env.FAT_TREE_SMALL_CONFIG}}
+        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc .${{env.FAT_TREE_MEDIUM_CONFIG}}
+        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc .${{env.FAT_TREE_LARGE_CONFIG}}
       
 
   profiling_load_testing:
@@ -61,6 +64,9 @@ jobs:
 
     - name: Build project with profiling
       run: cmake --build ${{env.BUILD_DIR}} -j $(nproc)
+
+    - name: Update PYTHONPOATH
+      run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
     - name: Run simulations with profiling
       run: | 
@@ -95,6 +101,9 @@ jobs:
 
     - name: Build project with profiling
       run: cmake --build ${{env.BUILD_DIR}} -j $(nproc)
+
+    - name: Update PYTHONPOATH
+      run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
     - name: Generate simulation config  
       run:

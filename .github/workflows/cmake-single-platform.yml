@@ -138,8 +138,5 @@ jobs:
     - name: Update PYTHONPOATH
       run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
-    - name: Print PYTHONPATH
-      run: echo ${PYTHONPATH}
-
     - name: Check generators in script directory
       run: python3 scripts/check_generators.py -g scripts/generators/ -e ./${{env.EXECUTABLE_NAME}}
