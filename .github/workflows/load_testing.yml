@@ -46,9 +46,9 @@ jobs:
 
     - name: Run simulations
       run: | 
-        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc .${{env.FAT_TREE_SMALL_CONFIG}}
-        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc .${{env.FAT_TREE_MEDIUM_CONFIG}}
-        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc .${{env.FAT_TREE_LARGE_CONFIG}}
+        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_SMALL_CONFIG}}
+        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_MEDIUM_CONFIG}}
+        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_LARGE_CONFIG}}
       
 
   profiling_load_testing:
@@ -70,15 +70,15 @@ jobs:
 
     - name: Run simulations with profiling
       run: | 
-        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc .${{env.FAT_TREE_SMALL_CONFIG}}
+        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_SMALL_CONFIG}}
         gprof ${{env.EXECUTABLE_PATH}} > profile.txt
         head profile.txt
         
-        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc .${{env.FAT_TREE_MEDIUM_CONFIG}}
+        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_MEDIUM_CONFIG}}
         gprof ${{env.EXECUTABLE_PATH}} > profile.txt
         head profile.txt
         
-        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc .${{env.FAT_TREE_LARGE_CONFIG}}
+        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_LARGE_CONFIG}}
         gprof ${{env.EXECUTABLE_PATH}} > profile.txt
         head profile.txt
 
@@ -105,10 +105,11 @@ jobs:
     - name: Update PYTHONPOATH
       run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
-    - name: Generate simulation config  
-      run:
-        python3 ${{env.FAT_TREE_GENERATOR}} -o ${{env.FLAMEGRAPH_TOPOLOGY_NAME}}
-        python3 ${{env.ALL_TO_ALL_GENERATOR}} -t ${{env.FLAMEGRAPH_TOPOLOGY_NAME}} -o ${{env.FLAMEGRAPH_SIMULATION_NAME}}
+    - name: Generate topology config  
+      run: python3 ${{env.FAT_TREE_GENERATOR}} -o ${{env.FLAMEGRAPH_TOPOLOGY_NAME}}
+    
+    - name: Generate simulation config
+      run: python3 ${{env.ALL_TO_ALL_GENERATOR}} -t ${{env.FLAMEGRAPH_TOPOLOGY_NAME}} -o ${{env.FLAMEGRAPH_SIMULATION_NAME}}
 
     - name: Run perf
       run: |
