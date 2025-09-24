@@ -1,14 +1,16 @@
 import os
 
 from common import *
-from generators.common import *
 from generators.topology.common import *
 
 def generate_fat_tree_config(config_params):
-    switch_ports_count = config_params["switch_ports_count"]
-    link_presets = config_params["link_presets"]
-    switch_presets = config_params["switch_presets"]
-    packet_spraying = config_params["packet_spraying"]
+    try:
+        presets = config_params["presets"]
+        switch_ports_count = config_params["switch_ports_count"]
+        packet_spraying = config_params["packet_spraying"]
+    except KeyError as e:
+        raise KeyError(f"Config missing value {e}")
+        
     
     if switch_ports_count % 2 != 0 or switch_ports_count < 2:
         raise ValueError(f"Switch's number of ports must be an even integer >= 2, but got {switch_ports_count}")
@@ -22,10 +24,7 @@ def generate_fat_tree_config(config_params):
     core_per_aggr = switch_ports_count // 2
     
     config = {
-        "presets": {
-            "link": link_presets,
-            "switch": switch_presets
-        },
+        "presets": presets,
         "packet-spraying": packet_spraying,
         "hosts": {},
         "switches": {},
@@ -87,7 +86,7 @@ def generate_fat_tree_config(config_params):
     return config
 
 if __name__ == "__main__":
-    args = parse_generator_args(
+    args = parse_topology_generator_args(
         os.path.join(os.path.dirname(__file__), "default_config.yml"),
         'Generate Fat-Tree network configuration.'\
         'You may see more about it here: '\

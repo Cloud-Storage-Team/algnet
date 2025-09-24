@@ -4,9 +4,9 @@ import tempfile
 import sys
 
 from common import *
-from generators.simulation.generate_simulation import *
-from generators.ti_simulation.generate_ti_simulation import *
-from generators.topology.generate_topology import *
+from generators.simulation.common import *
+from generators.ti_simulation.common import *
+from generators.topology.common import *
 
 def get_generator_dirs(generators_dir : str) -> list[str]:
     """

@@ -2,10 +2,11 @@ import os
 import sys
 import argparse
 import tempfile
+import time
 
 from common import *
-from generators.topology.common import TOPOLOGY_GENERATORS_DIR
-from generators.ti_simulation.common import TI_SIMULATION_GENERATORS_DIR
+from generators.topology.common import *
+from generators.ti_simulation.common import *
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -30,18 +31,6 @@ def parse_args():
     )
     return parser.parse_args()
 
-def run_generator(generator_sript : str, generator_config : str | None, output_file : str) -> int:
-    """
-    Run generator_script on generator config (or use default if config is None),
-    puts result ti output_file. Returns result of subprocess run
-    """
-    args = ["python3", generator_sript, "-o", output_file]
-    if generator_config is not None:
-        args += ["-c", generator_config]
-    
-    result = run_subprocess(args)
-    return result.returncode
-
 def main():
     args = parse_args()
     topology_generator_script = args.topology_generator
@@ -54,19 +43,25 @@ def main():
 
     with tempfile.NamedTemporaryFile(delete=True) as temp_topology_file:
         # Generate topology
-        run_generator(topology_generator_script, topology_generator_config, temp_topology_file.name)
+        generate_topology(topology_generator_script, temp_topology_file.name, topology_generator_config)
         with tempfile.NamedTemporaryFile(delete=True) as temp_simulation_file:
             # Generate topology
-            run_generator(simulation_genrator_script, simulation_generator_config, temp_simulation_file.name)
+            generate_simulation_by_topology(
+                simulation_genrator_script,
+                temp_topology_file.name,
+                temp_simulation_file.name,
+                simulation_generator_config
+            )
 
-            executable_args = {
-                executable,
-                "-c",
-                temp_simulation_file,
-            }
-            # Run executale
-            result = run_subprocess(executable_args)
-            sys.exit(result.returncode)
+            # Run Nons
+            start_time = time.perf_counter()
+            result = run_nons_in_temp_dir(executable, temp_simulation_file.name)
+            if (result.returncode != 0):
+                exit(result.returncode)
+            end_time = time.perf_counter()
+            elapced = end_time - start_time
+            print(f"Elapced {elapced:.3f} sec")
+            
 
 
 if __name__ == "__main__":

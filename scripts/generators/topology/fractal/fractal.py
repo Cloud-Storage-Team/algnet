@@ -1,7 +1,6 @@
 import os
 
 from common import *
-from generators.common import *
 from generators.topology.common import *
 
 def generate_topology(config : dict):
@@ -51,7 +50,7 @@ def generate_topology(config : dict):
 
 def main():
     # Parse command line arguments
-    args = parse_generator_args(
+    args = parse_topology_generator_args(
         os.path.join(os.path.dirname(__file__), "default_config.yml"),
         "Generator of fractal topology. For more information see README.md near this script"
     )

@@ -1,7 +1,6 @@
 import os
 
 from common import *
-from generators.common import *
 from generators.topology.common import *
 
 # TODO: eliminate this class when all presets (switch, flow, connection) will be available
@@ -115,7 +114,7 @@ class OutputConfig:
 
 def main():
     # Parse command line arguments
-    args = parse_generator_args(os.path.join(os.path.dirname(__file__), "default_config.yml"),
+    args = parse_topology_generator_args(os.path.join(os.path.dirname(__file__), "default_config.yml"),
         "Generates incast topology & simulation (in one config).")
     
     output_path = args.output_path
