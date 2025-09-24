@@ -53,10 +53,10 @@ def main():
     executable = args.executable
 
     with tempfile.NamedTemporaryFile(delete=True) as temp_topology_file:
-        # Generates topology
+        # Generate topology
         run_generator(topology_generator_script, topology_generator_config, temp_topology_file.name)
         with tempfile.NamedTemporaryFile(delete=True) as temp_simulation_file:
-            # Generates topology
+            # Generate topology
             run_generator(simulation_genrator_script, simulation_generator_config, temp_simulation_file.name)
 
             executable_args = {
