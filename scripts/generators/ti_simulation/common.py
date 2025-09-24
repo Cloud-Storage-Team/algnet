@@ -1,6 +1,8 @@
 import argparse
 import os
 
+TI_SIMULATION_GENERATORS_DIR = os.path.dirname(__file__)
+
 def parse_ti_simulation_generator_args(config_path : str, help_description = ""):
     default_config_rel_path = os.path.relpath(config_path, os.getcwd())
 

@@ -52,4 +52,4 @@ if __name__== "__main__":
     parser.add_argument("-i", "--ignore_prefix", help="Directories prefix", required=True)
     args = parser.parse_args()
     if not main(args.directory, args.ignore_prefix):
-        exit(-1)
+        sys.exit(-1)

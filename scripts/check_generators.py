@@ -1,7 +1,6 @@
 import argparse
 import os
 import tempfile
-import subprocess
 import sys
 from collections.abc import Callable
 
@@ -220,7 +219,7 @@ def main():
     # Checks topology generators using first topology independent generator
     if len(ti_simulation_generators_scripts) == 0:
         print(f"Can not check topology generators: not topology independent generators under {ti_simulation_generators_dir}")
-        exit(-1)
+        sys.exit(-1)
     
     check_generators(
         topology_generators_scripts,
@@ -231,7 +230,7 @@ def main():
     if len(ti_simulation_generators_scripts) > 1:
         if len(topology_generators_scripts) == 0:
             print(f"Can not check topology independent generators: no topology generators under {topology_generators_dir}")
-            exit(-1)
+            sys.exit(-1)
         
         check_generators(
             ti_simulation_generators_scripts,
@@ -245,7 +244,7 @@ def main():
         "simulation"
     )
 
-    exit(retcode)
+    sys.exit(retcode)
 
 if __name__ == "__main__":
     main()

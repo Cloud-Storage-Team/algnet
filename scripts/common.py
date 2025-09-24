@@ -1,6 +1,9 @@
 import yaml
 import sys
 import subprocess
+import os
+
+SCRIPTS_DIR = os.path.dirname(__file__)
 
 # Reads yaml from file by given path
 def load_yaml(path : str) -> dict | None:

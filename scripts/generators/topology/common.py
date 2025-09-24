@@ -1,4 +1,8 @@
 
+import os
+
+TOPOLOGY_GENERATORS_DIR = os.path.dirname(__file__)
+
 class LinkGenerator:
     def __init__(self, topology : dict):
         self.next_link_num = 0
