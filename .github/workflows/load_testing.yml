@@ -106,7 +106,7 @@ jobs:
       run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
     - name: Generate topology config  
-      run: python3 ${{env.FAT_TREE_GENERATOR}} -o ${{env.FLAMEGRAPH_TOPOLOGY_NAME}}
+      run: python3 ${{env.FAT_TREE_GENERATOR}} -c ${{env.FAT_TREE_MEDIUM_CONFIG}} -o ${{env.FLAMEGRAPH_TOPOLOGY_NAME}}
     
     - name: Generate simulation config
       run: python3 ${{env.ALL_TO_ALL_GENERATOR}} -t ${{env.FLAMEGRAPH_TOPOLOGY_NAME}} -o ${{env.FLAMEGRAPH_SIMULATION_NAME}}
