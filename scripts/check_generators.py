@@ -55,9 +55,9 @@ def get_generators_scripts(generators_dir : str) -> list[str]:
         )
     )
 
-def get_topology_config_path(simulation_config_path : str) -> str:
+def get_topology_config_path(simulation_config_path : str) -> str | None:
     simulation_config = load_yaml(simulation_config_path)
-    return simulation_config["topology_config_path"]
+    return simulation_config.get("topology_config_path", None)
 
 def run_nons(
         nons_path : str,
@@ -88,7 +88,7 @@ def run_nons(
             topology_config_path = get_topology_config_path(simulation_config_path)            
             if topology_config_path != simulation_config_path:
                 print(f"Topology config (location: {topology_config_path}) content:", file=sys.stderr)
-                with open(simulation_config_path, "r") as f:
+                with open(topology_config_path, "r") as f:
                     print(f.read(), file=sys.stderr)
 
             print("=" * 30, file=sys.stderr)

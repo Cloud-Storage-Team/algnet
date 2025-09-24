@@ -49,9 +49,9 @@ def run_generator(generator_args : str, generator_config : str | None, output_fi
     if result.returncode != 0:
         exit(-1)
 
-def main(args):
+def main():
     args = parse_args()
-    topology_genrator_script = args.topology_generator
+    topology_generator_script = args.topology_generator
     topology_generator_config = args.topology_generator_config
 
     simulation_genrator_script = args.ti_simulation_generator
@@ -65,7 +65,7 @@ def main(args):
             "python3",
             
         ]
-        run_generator(topology_genrator_script, topology_generator_config, temp_topology_file.name)
+        run_generator(topology_generator_script, topology_generator_config, temp_topology_file.name)
         with tempfile.NamedTemporaryFile(delete=True) as temp_simulation_file:
             # Generates topology
             run_generator(simulation_genrator_script, simulation_generator_config, temp_simulation_file.name)
@@ -80,4 +80,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

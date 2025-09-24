@@ -32,10 +32,9 @@ class LinkGenerator:
         for link first->second used forward_preset_name
         for link second->first used backward_preset_name
         """
-        next_link_num = self.add_directed_link(first_device_id, second_device_id, forward_preset_name)
-        next_link_num = self.add_directed_link(second_device_id, first_device_id, backwards_preset_name)
-        return next_link_num
-    
+        self.add_directed_link(first_device_id, second_device_id, forward_preset_name)
+        self.add_directed_link(second_device_id, first_device_id, backwards_preset_name)
+        
     def add_bidirectional_link_same_preset(self,
                                first_device_id : str,
                                second_device_id : str,

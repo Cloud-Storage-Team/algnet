@@ -3,7 +3,7 @@ import sys
 import subprocess
 
 # Reads yaml from file by given path
-def load_yaml(path : str) -> dict:
+def load_yaml(path : str) -> dict | None:
     """Loads yaml conig from given file"""
     try:
         with open(path, 'r') as f:

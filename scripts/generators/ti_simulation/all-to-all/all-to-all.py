@@ -5,7 +5,7 @@ from common import *
 
 def get_host_names(topology : dict) -> list[str]:
     try:
-        return list(topology["hosts"].keys())
+        return sorted(topology["hosts"].keys())
     except KeyError as e:
         raise RuntimeError(f"Topology config missing field {e}")
     
