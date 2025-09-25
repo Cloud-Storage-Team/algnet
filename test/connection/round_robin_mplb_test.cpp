@@ -85,6 +85,16 @@ TEST_F(RoundRobinMPLBTest, RotateMultiCycle) {
     for (auto& flow : flows) EXPECT_EQ(flow_count[flow], 100u);
 }
 
+// Re-adding the same flow must be ignored
+TEST_F(RoundRobinMPLBTest, DuplicateAddIgnored) {
+    auto flow = makeFlow(100);
+    mplb.add_flow(flow);
+    mplb.add_flow(flow);
+    auto cnt = count(pick(200));
+    ASSERT_EQ(cnt.size(), 1u);
+    EXPECT_EQ(cnt[flow], 100u);
+}
+
 // Deleting the currently selected flow should correctly shift the pointer
 TEST_F(RoundRobinMPLBTest, RemoveCurrentAdvances) {
     auto flows = makeFlows(3, 100);
@@ -152,16 +162,6 @@ TEST_F(RoundRobinMPLBTest, SingleFlowCycle) {
     ASSERT_EQ(flow_count.size(), 1u);
     ASSERT_TRUE(flow_count.contains(flow));
     ASSERT_EQ(flow_count.at(flow), 3u);
-}
-
-// Re-adding the same flow must be ignored
-TEST_F(RoundRobinMPLBTest, DuplicateAddIgnored) {
-    auto flow = makeFlow(100);
-    mplb.add_flow(flow);
-    mplb.add_flow(flow);
-    auto cnt = count(pick(200));
-    ASSERT_EQ(cnt.size(), 1u);
-    EXPECT_EQ(cnt[flow], 100u);
 }
 
 }  // namespace test
