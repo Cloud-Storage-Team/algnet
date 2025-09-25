@@ -55,7 +55,7 @@ def main():
     parser.add_argument("-f", "--file", help="Path to the file to be checked", required=True)
     args = parser.parse_args()
     if not(check_links_in_markdown(args.file)):
-        exit(-1)
+        sys.exit(-1)
 
 if __name__ == "__main__":
     main()

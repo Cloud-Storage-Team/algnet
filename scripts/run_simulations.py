@@ -88,7 +88,7 @@ def main(args):
         if result.returncode != 0:
             print(f"Error running image generator.")
             print(f"SCript output: {result.stderr.decode()}")
-            exit(1)
+            sys.exit(1)
 
         print(f"Run {simulator_path} {simulation_config_filepath} {metrics_dir}")
 
@@ -108,7 +108,7 @@ def main(args):
         if result.returncode != 0:
             print(f"Error running nons on {simulation_config_filepath}.")
             print(f"Simulator output: {result.stderr.decode()}")
-            exit(1)
+            sys.exit(1)
 
 
 if __name__ == "__main__":

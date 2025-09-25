@@ -74,6 +74,11 @@ void ConnectionImpl::send_data() {
             break;
         }
         SizeByte quota = flow->get_sending_quota();
+        if (quota == SizeByte(0)) {
+            throw std::runtime_error(fmt::format(
+                "MPLB returned flow {} with zero quota in connection {}",
+                flow->get_id(), m_id));
+        }
         SizeByte data = std::min(quota, m_data_to_send);
 
         flow->send_data(data);

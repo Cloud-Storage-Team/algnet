@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-#include "../switch/flow_mock.hpp"
+#include "../_mocks/flow_mock.hpp"
 
 namespace test {
 
@@ -21,9 +21,9 @@ protected:
 
     static FlowPtr makeFlow(uint32_t pckts_count = 1,
                             SizeByte packet_size = SizeByte(64)) {
-        FlowStat stat = {packet_size * pckts_count, TimeNs(0)};
         auto flow = std::make_shared<test::FlowMock>(
-            std::shared_ptr<sim::IHost>{}, packet_size, stat);
+            std::shared_ptr<sim::IHost>{}, packet_size,
+            packet_size * pckts_count, TimeNs(0));
         return flow;
     }
 
@@ -83,6 +83,16 @@ TEST_F(RoundRobinMPLBTest, RotateMultiCycle) {
     auto flow_count = count(pick(305));
     ASSERT_EQ(flow_count.size(), 3u);
     for (auto& flow : flows) EXPECT_EQ(flow_count[flow], 100u);
+}
+
+// Re-adding the same flow must be ignored
+TEST_F(RoundRobinMPLBTest, DuplicateAddIgnored) {
+    auto flow = makeFlow(100);
+    mplb.add_flow(flow);
+    mplb.add_flow(flow);
+    auto cnt = count(pick(200));
+    ASSERT_EQ(cnt.size(), 1u);
+    EXPECT_EQ(cnt[flow], 100u);
 }
 
 // Deleting the currently selected flow should correctly shift the pointer

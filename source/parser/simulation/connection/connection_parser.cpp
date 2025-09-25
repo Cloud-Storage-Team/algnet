@@ -47,7 +47,7 @@ std::shared_ptr<IConnection> ConnectionParser::parse_connection(
     if (data_node.IsScalar()) {
         schedule.push_back(
             {TimeNs(0), SizeByte(parse_size(data_node.as<std::string>()))});
-        // New format with schedule of chunks
+    // New format with schedule of chunks
     } else if (data_node.IsSequence()) {
         for (const auto& item : data_node) {
             if (!item["at"] || !item["amount"]) {

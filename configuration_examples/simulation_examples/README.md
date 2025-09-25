@@ -27,9 +27,8 @@ connections:
 ```
 
 - `sender_id` and receiver_id should be the names of hosts  from topology config.
-- `data_to_send` — either a number in [size format](../README.md) (sent at 0ns),  
-  or a list of `{at, amount}` records for scheduling data over time.  
-- `mplb` is multipath load ballansing type. The only availabe value is `round_robin`
+- `data_to_send` is an number in [size format](../README.md)
+- `mplb` is multipath load ballansing type. The availabe value is `round_robin` or `srct`
 
 # Flows section
 
