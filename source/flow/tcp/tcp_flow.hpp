@@ -2,14 +2,13 @@
 
 #include <type_traits>
 
+#include "connection/i_connection.hpp"
 #include "device/interfaces/i_host.hpp"
 #include "flow/i_flow.hpp"
-#include "connection/i_connection.hpp"
 #include "i_tcp_cc.hpp"
 #include "metrics/packet_reordering/simple_packet_reordering.hpp"
 #include "packet.hpp"
 #include "utils/flag_manager.hpp"
-#include "utils/statistics.hpp"
 #include "utils/str_expected.hpp"
 
 namespace sim {
@@ -20,9 +19,10 @@ public:
             std::unique_ptr<ITcpCC> a_cc, SizeByte a_packet_size,
             bool a_ecn_capable = true);
     void update(Packet packet) final;
-    void send_packet() final;
-
-    std::uint32_t get_sending_quota() const;
+    void send_data(SizeByte data) final;
+    
+    SizeByte get_sending_quota() const;
+    TimeNs get_last_rtt() const final;
     SizeByte get_delivered_data_size() const final;
     const FlowFlagsManager& get_flag_mamager() const final;
     // Returns time elapced from flow start (firsrt call of send_packet)
@@ -30,10 +30,10 @@ public:
     TimeNs get_fct() const final;
 
     std::shared_ptr<IHost> get_sender() const final;
-    std::shared_ptr<IHost> get_receiver() const;
+    std::shared_ptr<IHost> get_receiver() const final;
+    
     Id get_id() const final;
     SizeByte get_delivered_bytes() const;
-
     std::string to_string() const;
 
 private:

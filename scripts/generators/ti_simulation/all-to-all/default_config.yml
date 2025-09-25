@@ -10,7 +10,7 @@ topology_config_path: ../../../../configuration_examples/topology_examples/bus_t
 presets:
   connection:
     default:
-      packets_to_send: 100
+      data_to_send: 150000B
       mplb: round_robin
   flow:
     default:

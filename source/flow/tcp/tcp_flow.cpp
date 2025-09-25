@@ -60,10 +60,22 @@ Id TcpFlow::get_id() const { return m_id; }
 
 SizeByte TcpFlow::get_delivered_bytes() const { return m_delivered_data_size; }
 
-std::uint32_t TcpFlow::get_sending_quota() const {
-    const auto slots =
-        static_cast<std::uint32_t>(std::max(m_cc->get_cwnd(), 1.0) + 1e-9);
-    return (slots > m_packets_in_flight) ? (slots - m_packets_in_flight) : 0;
+SizeByte TcpFlow::get_sending_quota() const {
+    const double cwnd = m_cc->get_cwnd();
+
+    // Effective window: the whole part of cwnd; if cwnd < 1 and inflight == 0,
+    // allow 1 packet
+    std::uint32_t effective_cwnd = static_cast<std::uint32_t>(std::floor(cwnd));
+    if (m_packets_in_flight == 0 && cwnd < 1.0) {
+        effective_cwnd = 1;
+    }
+    const std::uint32_t quota_pkts =
+        (effective_cwnd > m_packets_in_flight)
+            ? (effective_cwnd - m_packets_in_flight)
+            : 0;
+
+    // Quota in bytes, multiple of the packet size
+    return quota_pkts * m_packet_size;
 }
 
 Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
@@ -82,7 +94,7 @@ Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     return packet;
 }
 
-void TcpFlow::send_packet() {
+void TcpFlow::send_data(SizeByte data) {
     TimeNs now = Scheduler::get_instance().get_current_time();
 
     if (!m_sending_started) {
@@ -90,22 +102,26 @@ void TcpFlow::send_packet() {
         m_sending_started = true;
     }
 
-    if (get_sending_quota() == 0) {
-        LOG_WARN(
-            fmt::format("No sending quota for flow {}; packet not sent", m_id));
-        return;
-    }
-    Packet packet = generate_data_packet(m_next_packet_num++);
-    TimeNs pacing_delay = m_cc->get_pacing_delay();
-
-    if (pacing_delay == TimeNs(0)) {
-        send_packet_now(std::move(packet));
-    } else {
-        Scheduler::get_instance().add<SendAtTime>(
-            now + pacing_delay, this->shared_from_this(), std::move(packet));
+    SizeByte quota = get_sending_quota();
+    if (data > quota) {
+        throw std::runtime_error(fmt::format(
+            "Trying to send {} bytes on flow {} with quota {} bytes",
+            data.value(), m_id, quota.value()));
     }
 
-    m_packets_in_flight++;
+    while (data != SizeByte(0)) {
+        Packet packet = generate_data_packet(m_next_packet_num++);
+        TimeNs pacing_delay = m_cc->get_pacing_delay();
+        if (pacing_delay == TimeNs(0)) {
+            send_packet_now(std::move(packet));
+        } else {
+            Scheduler::get_instance().add<SendAtTime>(now + pacing_delay,
+                                                      this->shared_from_this(),
+                                                      std::move(packet));
+        }
+        data -= std::min(data, m_packet_size);
+        m_packets_in_flight++;
+    }
 }
 
 Packet TcpFlow::create_ack(Packet data) {
@@ -230,12 +246,7 @@ void TcpFlow::update(Packet packet) {
 
         MetricsCollector::get_instance().add_cwnd(m_id, current_time,
                                                   m_cc->get_cwnd());
-        FlowSample sample{.ack_recv_time = current_time,
-                          .packet_sent_time = packet.sent_time,
-                          .packets_in_flight = m_packets_in_flight,
-                          .delivery_rate = delivery_rate,
-                          .send_quota = get_sending_quota()};
-        m_connection->update(shared_from_this(), sample);
+        m_connection->update(shared_from_this());
     } else if (packet.dest_id == m_dest.lock()->get_id() &&
                type == PacketType::DATA) {
         m_packet_reordering.add_record(packet.packet_num);
@@ -248,6 +259,8 @@ void TcpFlow::update(Packet packet) {
     }
 }
 
+TimeNs TcpFlow::get_last_rtt() const { return m_rtt_statistics.get_last(); }
+
 std::string TcpFlow::to_string() const {
     std::ostringstream oss;
     oss << "[TcpFlow; ";
@@ -256,7 +269,7 @@ std::string TcpFlow::to_string() const {
     oss << ", dest id: " << m_dest.lock()->get_id();
     oss << ", CC module: " << m_cc->to_string();
     oss << ", packet size: " << m_packet_size;
-    oss << ", packets_in_flight: " << m_packets_in_flight;
+    oss << ", packets in flight: " << m_packets_in_flight;
     oss << ", acked packets: " << m_delivered_data_size;
     oss << "]";
     return oss.str();

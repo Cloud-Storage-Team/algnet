@@ -8,26 +8,20 @@ namespace sim {
 ConnectionImpl::ConnectionImpl(Id a_id, std::shared_ptr<IHost> a_src,
                                std::shared_ptr<IHost> a_dest,
                                std::shared_ptr<IMPLB> a_mplb,
-                               std::uint64_t a_num_packets_to_send)
+                               SizeByte a_data_to_send)
     : m_id(a_id),
       m_src(a_src),
       m_dest(a_dest),
       m_mplb(std::move(a_mplb)),
-      m_packets_to_send(a_num_packets_to_send) {}
+      m_data_to_send(a_data_to_send) {}
 
 Id ConnectionImpl::get_id() const { return m_id; }
 
-void ConnectionImpl::start() { send_packets(); }
+void ConnectionImpl::start() { send_data(); }
 
 void ConnectionImpl::add_flow(std::shared_ptr<IFlow> flow) {
     m_flows.insert(flow);
-    FlowSample init_sample{.ack_recv_time = TimeNs(0),
-                           .packet_sent_time = TimeNs(0),
-                           .packets_in_flight = 0,
-                           .delivery_rate = SpeedGbps(0),
-                           .send_quota = flow->get_sending_quota()};
-
-    m_mplb->add_flow(flow, init_sample);
+    m_mplb->add_flow(flow);
 }
 
 void ConnectionImpl::delete_flow(std::shared_ptr<IFlow> flow) {
@@ -35,21 +29,18 @@ void ConnectionImpl::delete_flow(std::shared_ptr<IFlow> flow) {
     m_mplb->remove_flow(flow);
 }
 
-void ConnectionImpl::add_packets_to_send(std::uint64_t count_packets) {
-    m_packets_to_send += count_packets;
-}
+void ConnectionImpl::add_data_to_send(SizeByte data) { m_data_to_send += data; }
 
-void ConnectionImpl::update(const std::shared_ptr<IFlow>& flow,
-                            const FlowSample sample) {
+void ConnectionImpl::update(const std::shared_ptr<IFlow>& flow) {
     if (!flow) {
         LOG_ERROR(fmt::format("Null flow in ConnectionImpl {} update; ignored",
                               m_id));
         return;
     }
     // Notify MPLB about received packet for metric updates
-    m_mplb->notify_packet_confirmed(flow, sample);
+    m_mplb->notify_packet_confirmed(flow);
     // Trigger next possible sending attempt
-    send_packets();
+    send_data();
 }
 
 std::set<std::shared_ptr<IFlow>> ConnectionImpl::get_flows() const {
@@ -61,8 +52,8 @@ void ConnectionImpl::clear_flows() {
     m_mplb->clear_flows();
 }
 
-void ConnectionImpl::send_packets() {
-    while (m_packets_to_send > 0) {
+void ConnectionImpl::send_data() {
+    while (m_data_to_send > SizeByte(0)) {
         auto flow = m_mplb->select_flow();
         if (!flow) {
             LOG_INFO(fmt::format(
@@ -70,13 +61,16 @@ void ConnectionImpl::send_packets() {
                 m_id));
             break;
         }
-        if (!flow->get_sending_quota()) {
+        SizeByte quota = flow->get_sending_quota();
+        if (quota == SizeByte(0)) {
             throw std::runtime_error(fmt::format(
                 "MPLB returned flow {} with zero quota in connection {}",
                 flow->get_id(), m_id));
         }
-        flow->send_packet();
-        --m_packets_to_send;
+        SizeByte data = std::min(quota, m_data_to_send);
+
+        flow->send_data(data);
+        m_data_to_send -= data;
     }
 }
 

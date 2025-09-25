@@ -28,6 +28,7 @@ public:
 
     void add_record(const T& record) {
         double value = static_cast<double>(record);
+        m_last = value;
         if (m_mean == 0 && m_variance == 0) {
             // first record
             m_mean = value;
@@ -39,6 +40,8 @@ public:
         }
     }
 
+    T get_last() const { return T(m_last); }
+
     T get_mean() const { return T(m_mean); }
 
     double get_variance() { return m_variance; }
@@ -47,6 +50,7 @@ public:
 
 private:
     const double m_factor;
+    double m_last;
     double m_mean;
     double m_variance;
 };

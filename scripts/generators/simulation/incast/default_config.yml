@@ -7,7 +7,7 @@ presets:
       egress_buffer_size: 1000000B
   connection:
     default:
-      packets_to_send: 1000
+      data_to_send: 1500000B
       mplb: round_robin
   flow:
     default:
