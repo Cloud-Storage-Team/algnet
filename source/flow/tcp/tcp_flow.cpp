@@ -2,6 +2,7 @@
 
 #include "connection/i_connection.hpp"
 #include "metrics/metrics_collector.hpp"
+#include "packet.hpp"
 #include "scheduler.hpp"
 
 namespace sim {
@@ -47,6 +48,10 @@ TimeNs TcpFlow::get_fct() const {
     return m_last_ack_arrive_time - m_init_time;
 }
 
+const FlowFlagsManager& TcpFlow::get_flag_mamager() const {
+    return m_flag_manager;
+}
+
 std::shared_ptr<IHost> TcpFlow::get_sender() const { return m_src.lock(); }
 
 std::shared_ptr<IHost> TcpFlow::get_receiver() const { return m_dest.lock(); }
@@ -63,7 +68,8 @@ std::uint32_t TcpFlow::get_sending_quota() const {
 
 Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     Packet packet;
-    m_flag_manager.set_flag(packet, m_packet_type_label, PacketType::DATA);
+    m_flag_manager.set_flag(packet.flags, m_packet_type_label,
+                            PacketType::DATA);
     packet.size = m_packet_size;
     packet.flow = this;
     packet.source_id = get_sender()->get_id();
@@ -102,8 +108,6 @@ void TcpFlow::send_packet() {
     m_packets_in_flight++;
 }
 
-std::shared_ptr<IConnection> TcpFlow::get_conn() const { return m_connection; }
-
 Packet TcpFlow::create_ack(Packet data) {
     Packet ack;
     ack.packet_num = data.packet_num;
@@ -118,8 +122,8 @@ Packet TcpFlow::create_ack(Packet data) {
     ack.ecn_capable_transport = data.ecn_capable_transport;
     ack.congestion_experienced = data.congestion_experienced;
 
-    m_flag_manager.set_flag(ack, m_packet_type_label, PacketType::ACK);
-    m_flag_manager.set_flag(ack, m_ack_ttl_label, data.ttl);
+    m_flag_manager.set_flag(ack.flags, m_packet_type_label, PacketType::ACK);
+    m_flag_manager.set_flag(ack.flags, m_ack_ttl_label, data.ttl);
     return ack;
 }
 
@@ -186,7 +190,7 @@ private:
 
 void TcpFlow::update(Packet packet) {
     PacketType type = static_cast<PacketType>(
-        m_flag_manager.get_flag(packet, m_packet_type_label));
+        m_flag_manager.get_flag(packet.flags, m_packet_type_label));
     TimeNs current_time = Scheduler::get_instance().get_current_time();
     if (packet.dest_id == m_src.lock()->get_id() && type == PacketType::ACK) {
         if (current_time < packet.sent_time) {

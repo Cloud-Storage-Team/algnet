@@ -2,6 +2,8 @@
 
 #include <gtest/gtest.h>
 
+#include "types.hpp"
+
 namespace test {
 
 enum TestFlagId { FlagA, FlagB, FlagC, FlagD };
@@ -12,7 +14,7 @@ protected:
     // Can not use TestFlagId  because `fmt` used for logs in sim::FlagManager
     // does not work with enums
     sim::FlagManager<int, PacketFlagsBase> flag_manager;
-    sim::Packet packet;
+    sim::BitSet<PacketFlagsBase> flags;
 };
 
 TEST_F(FlagManagerTest, RegisterFlagByAmount_Valid) {
@@ -41,27 +43,27 @@ TEST_F(FlagManagerTest, SetAndGetFlag_Valid) {
     EXPECT_TRUE(flag_manager.register_flag_by_length(TestFlagId::FlagA, 3));
     EXPECT_TRUE(flag_manager.register_flag_by_length(TestFlagId::FlagB, 5));
 
-    flag_manager.set_flag(packet, TestFlagId::FlagA, 5);
-    flag_manager.set_flag(packet, TestFlagId::FlagB, 17);
+    flag_manager.set_flag(flags, TestFlagId::FlagA, 5);
+    flag_manager.set_flag(flags, TestFlagId::FlagB, 17);
 
-    EXPECT_EQ(flag_manager.get_flag(packet, TestFlagId::FlagA), 5);
-    EXPECT_EQ(flag_manager.get_flag(packet, TestFlagId::FlagB), 17);
+    EXPECT_EQ(flag_manager.get_flag(flags, TestFlagId::FlagA), 5);
+    EXPECT_EQ(flag_manager.get_flag(flags, TestFlagId::FlagB), 17);
 }
 
 TEST_F(FlagManagerTest, SetGetFlag_UnregisteredFlag) {
-    auto original = flag_manager.get_flag(packet, TestFlagId::FlagA);
+    auto original = flag_manager.get_flag(flags, TestFlagId::FlagA);
     if (original == 1) {
-        flag_manager.set_flag(packet, TestFlagId::FlagA, 0);
+        flag_manager.set_flag(flags, TestFlagId::FlagA, 0);
     } else {
-        flag_manager.set_flag(packet, TestFlagId::FlagA, 1);
+        flag_manager.set_flag(flags, TestFlagId::FlagA, 1);
     }
-    EXPECT_EQ(flag_manager.get_flag(packet, TestFlagId::FlagA), original);
+    EXPECT_EQ(flag_manager.get_flag(flags, TestFlagId::FlagA), original);
 }
 
 TEST_F(FlagManagerTest, Reset_ClearsFlags) {
     EXPECT_TRUE(flag_manager.register_flag_by_length(TestFlagId::FlagA, 3));
-    flag_manager.set_flag(packet, TestFlagId::FlagA, 7);
-    EXPECT_EQ(flag_manager.get_flag(packet, TestFlagId::FlagA), 7u);
+    flag_manager.set_flag(flags, TestFlagId::FlagA, 7);
+    EXPECT_EQ(flag_manager.get_flag(flags, TestFlagId::FlagA), 7u);
 
     flag_manager.reset();
 

@@ -1,24 +1,29 @@
 #pragma once
 
 #include "device/interfaces/i_host.hpp"
+#include "utils/flag_manager.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
 
-class IConnection;
+using FlowFlagsManager = FlagManager<std::string, PacketFlagsBase>;
 
 class IFlow : public Identifiable {
 public:
     // Update the internal state according to some congestion control algorithm
     // Calls when data available for sending on corresponding device
     virtual void update(Packet packet) = 0;
-    virtual std::uint32_t get_sending_quota() const = 0;
     virtual void send_packet() = 0;
-    virtual std::shared_ptr<IConnection> get_conn() const = 0;
+
+    virtual std::uint32_t get_sending_quota() const = 0;
     virtual SizeByte get_delivered_data_size() const = 0;
+    virtual const FlowFlagsManager& get_flag_mamager() const = 0;
     virtual TimeNs get_fct() const = 0;
     virtual std::shared_ptr<IHost> get_sender() const = 0;
     virtual std::shared_ptr<IHost> get_receiver() const = 0;
+
+private:
+    FlowFlagsManager m_man;
 };
 
 }  // namespace sim

@@ -4,6 +4,7 @@
 
 #include "device/interfaces/i_host.hpp"
 #include "flow/i_flow.hpp"
+#include "connection/i_connection.hpp"
 #include "i_tcp_cc.hpp"
 #include "metrics/packet_reordering/simple_packet_reordering.hpp"
 #include "packet.hpp"
@@ -19,9 +20,11 @@ public:
             std::unique_ptr<ITcpCC> a_cc, SizeByte a_packet_size,
             bool a_ecn_capable = true);
     void update(Packet packet) final;
+    void send_packet() final;
 
+    std::uint32_t get_sending_quota() const;
     SizeByte get_delivered_data_size() const final;
-
+    const FlowFlagsManager& get_flag_mamager() const final;
     // Returns time elapced from flow start (firsrt call of send_packet)
     // to last update call
     TimeNs get_fct() const final;
@@ -30,9 +33,7 @@ public:
     std::shared_ptr<IHost> get_receiver() const;
     Id get_id() const final;
     SizeByte get_delivered_bytes() const;
-    std::uint32_t get_sending_quota() const;
-    void send_packet() final;
-    std::shared_ptr<IConnection> get_conn() const final;
+
     std::string to_string() const;
 
 private:

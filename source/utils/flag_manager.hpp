@@ -6,7 +6,6 @@
 
 #include "bitset.hpp"
 #include "logger/logger.hpp"
-#include "packet.hpp"
 
 namespace sim {
 
@@ -45,7 +44,7 @@ public:
         return true;
     }
 
-    void set_flag(Packet& packet, FlagId id, BitStorage value) {
+    void set_flag(BitSet<BitStorage>& bitset, FlagId id, BitStorage value) {
         auto it = m_flag_manager.find(id);
         if (it == m_flag_manager.end()) {
             LOG_ERROR(fmt::format("Flag with id '{}' not found", id));
@@ -53,17 +52,17 @@ public:
         }
 
         const FlagInfo& info = it->second;
-        packet.flags.set_range(info.start, info.start + info.length - 1, value);
+        bitset.set_range(info.start, info.start + info.length - 1, value);
     }
 
-    BitStorage get_flag(const Packet& packet, FlagId id) const {
+    BitStorage get_flag(const BitSet<BitStorage>& bitset, FlagId id) const {
         auto it = m_flag_manager.find(id);
         if (it == m_flag_manager.end()) {
             LOG_ERROR(fmt::format("Flag with id '{}' not found.", id));
             return 0;
         }
         const FlagInfo& info = it->second;
-        return packet.flags.get_range(info.start, info.start + info.length - 1);
+        return bitset.get_range(info.start, info.start + info.length - 1);
     }
 
     void reset() {
