@@ -1,5 +1,10 @@
 #include "switch_parser.hpp"
 
+#include "device/hashers/ecmp_hasher.hpp"
+#include "device/hashers/flowlet_hasher.hpp"
+#include "device/hashers/random_hasher.hpp"
+#include "device/hashers/salt_ecmp_hasher.hpp"
+#include "device/hashers/symmetric_hasher.hpp"
 #include "parser/parse_utils.hpp"
 
 namespace sim {
