@@ -13,6 +13,7 @@
 #include <type_traits>
 
 #include "logger/logger.hpp"
+#include "types.hpp"
 
 namespace sim {
 
@@ -119,5 +120,7 @@ private:
                    : (ONE << length) - 1;
     }
 };
+
+using BaseBitset = BitSet<PacketFlagsBase>;
 
 }  // namespace sim

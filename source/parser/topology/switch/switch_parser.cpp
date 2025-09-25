@@ -52,7 +52,8 @@ std::unique_ptr<IPacketHasher> SwitchParser::parse_hasher(
         return std::make_unique<FLowletHasher>(threshold);
     }
     if (type == "adaptive_flowlet") {
-        return std::make_unique<AdaptiveFlowletHasher>();
+        double factor = packet_spraying_node["factor"].as<double>();
+        return std::make_unique<AdaptiveFlowletHasher>(factor);
     }
     if (type == "salt") {
         return std::make_unique<SaltECMPHasher>(std::move(switch_id));

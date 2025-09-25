@@ -24,7 +24,7 @@ public:
     SizeByte get_sending_quota() const;
     TimeNs get_last_rtt() const final;
     SizeByte get_delivered_data_size() const final;
-    const FlowFlagsManager& get_flag_mamager() const final;
+    const BaseFlagManager& get_flag_mamager() const final;
     // Returns time elapced from flow start (firsrt call of send_packet)
     // to last update call
     TimeNs get_fct() const final;
@@ -41,8 +41,9 @@ private:
 
     static std::string m_packet_type_label;
     enum PacketType { ACK, DATA, ENUM_SIZE };
+
     static std::string m_ack_ttl_label;
-    static std::string m_packet_avg_rtt_label;
+
     static bool m_is_flag_manager_initialized;
     static FlagManager<std::string, PacketFlagsBase> m_flag_manager;
     const static inline TTL M_MAX_TTL = 31;

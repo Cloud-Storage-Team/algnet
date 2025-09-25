@@ -1,7 +1,13 @@
 #include "adaptive_flowlet_hasher.hpp"
+
 #include "scheduler.hpp"
+#include "utils/avg_rtt_packet_flag.hpp"
 
 namespace sim {
+
+AdaptiveFlowletHasher::AdaptiveFlowletHasher(double a_factor)
+    : m_factor(a_factor) {}
+
 std::uint32_t AdaptiveFlowletHasher::get_hash(Packet packet) {
     std::uint32_t ecmp_hash = m_ecmp_hasher.get_hash(packet);
 
@@ -25,16 +31,17 @@ std::uint32_t AdaptiveFlowletHasher::get_hash(Packet packet) {
     auto& [last_seen, shift] = it->second;
     TimeNs elapsed_from_last_seen = curr_time - last_seen;
 
-    const FlowFlagsManager& flag_manager = flow->get_flag_mamager();
-    auto flowlet_threshold = flag_manager.get_flag(packet.flags, "avg_rtt");
-    if (flowlet_threshold == 0) {
+    const BaseFlagManager& flag_manager = flow->get_flag_mamager();
+    TimeNs flowlet_threshold =
+        get_avg_rtt_label(flag_manager, packet.flags) * m_factor;
+    if (flowlet_threshold == TimeNs(0)) {
         LOG_ERROR(
             "Adaptive flowlet hasher can not filnd avg rtt; returned previous "
             "hash");
         return ecmp_hash + shift;
     }
 
-    if (elapsed_from_last_seen > TimeNs(flowlet_threshold)) {
+    if (elapsed_from_last_seen > flowlet_threshold) {
         shift++;
     }
     last_seen = curr_time;

@@ -14,12 +14,14 @@ class FlagManager {
 public:
     FlagManager() : m_next_pos(0) {}
 
-    bool register_flag_by_amount(FlagId id, BitStorage different_values) {
+    [[nodiscard]] bool register_flag_by_amount(FlagId id,
+                                               BitStorage different_values) {
         return register_flag_by_length(
             id, required_bits_for_values(different_values));
     }
 
-    bool register_flag_by_length(FlagId id, BitStorage flag_length) {
+    [[nodiscard]] bool register_flag_by_length(FlagId id,
+                                               BitStorage flag_length) {
         if (flag_length == 0) {
             LOG_ERROR("Passed zero flag length, should be at least 1");
             return false;
@@ -44,7 +46,8 @@ public:
         return true;
     }
 
-    void set_flag(BitSet<BitStorage>& bitset, FlagId id, BitStorage value) {
+    void set_flag(BitSet<BitStorage>& bitset, FlagId id,
+                  BitStorage value) const {
         auto it = m_flag_manager.find(id);
         if (it == m_flag_manager.end()) {
             LOG_ERROR(fmt::format("Flag with id '{}' not found", id));
@@ -82,11 +85,19 @@ private:
         }
 
         max_values--;
-        return sizeof_bits(max_values) - __builtin_clz(max_values);
+        BitStorage result = 0;
+        while (max_values > 0) {
+            ++result;
+            max_values >>= (BitStorage)1;
+        }
+
+        return result;
     }
 
     BitStorage m_next_pos = 0;
     std::unordered_map<FlagId, FlagInfo> m_flag_manager;
 };
+
+using BaseFlagManager = FlagManager<std::string, PacketFlagsBase>;
 
 }  // namespace sim

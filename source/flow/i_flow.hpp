@@ -7,8 +7,6 @@
 
 namespace sim {
 
-using FlowFlagsManager = FlagManager<std::string, PacketFlagsBase>;
-
 class IFlow : public Identifiable {
 public:
     // Update the internal state according to some congestion control algorithm
@@ -19,13 +17,13 @@ public:
     virtual SizeByte get_sending_quota() const = 0;
     virtual TimeNs get_last_rtt() const = 0;
     virtual SizeByte get_delivered_data_size() const = 0;
-    virtual const FlowFlagsManager& get_flag_mamager() const = 0;
+    virtual const BaseFlagManager& get_flag_mamager() const = 0;
     virtual TimeNs get_fct() const = 0;
     virtual std::shared_ptr<IHost> get_sender() const = 0;
     virtual std::shared_ptr<IHost> get_receiver() const = 0;
 
 private:
-    FlowFlagsManager m_man;
+    BaseFlagManager m_man;
 };
 
 }  // namespace sim

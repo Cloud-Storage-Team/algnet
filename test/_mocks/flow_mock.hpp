@@ -16,10 +16,10 @@ public:
     SizeByte get_sending_quota() const final;
     void send_data(SizeByte data) final;
     TimeNs get_last_rtt() const final;
-    
+
     virtual SizeByte get_delivered_data_size() const final;
     virtual TimeNs get_fct() const final;
-    const sim::FlowFlagsManager& get_flag_mamager() const final;
+    const sim::BaseFlagManager& get_flag_mamager() const final;
 
     std::shared_ptr<sim::IHost> get_sender() const final;
     std::shared_ptr<sim::IHost> get_receiver() const final;
@@ -31,7 +31,7 @@ public:
 
 private:
     std::weak_ptr<sim::IHost> m_receiver;
-    sim::FlowFlagsManager m_flag_manager;
+    sim::BaseFlagManager m_flag_manager;
     SizeByte m_packet_size;
     SizeByte m_sending_quota;
     TimeNs m_last_rtt;

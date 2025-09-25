@@ -4,12 +4,12 @@
 #include "metrics/metrics_collector.hpp"
 #include "packet.hpp"
 #include "scheduler.hpp"
+#include "utils/avg_rtt_packet_flag.hpp"
 
 namespace sim {
 
 std::string TcpFlow::m_packet_type_label = "type";
 std::string TcpFlow::m_ack_ttl_label = "ack_ttl";
-std::string TcpFlow::m_packet_avg_rtt_label = "avg_rtt";
 FlagManager<std::string, PacketFlagsBase> TcpFlow::m_flag_manager;
 bool TcpFlow::m_is_flag_manager_initialized = false;
 
@@ -49,7 +49,7 @@ TimeNs TcpFlow::get_fct() const {
     return m_last_ack_arrive_time - m_init_time;
 }
 
-const FlowFlagsManager& TcpFlow::get_flag_mamager() const {
+const BaseFlagManager& TcpFlow::get_flag_mamager() const {
     return m_flag_manager;
 }
 
@@ -83,6 +83,8 @@ Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     Packet packet;
     m_flag_manager.set_flag(packet.flags, m_packet_type_label,
                             PacketType::DATA);
+    set_avg_rtt_label(m_flag_manager, packet.flags,
+                      m_rtt_statistics.get_mean());
     packet.size = m_packet_size;
     packet.flow = this;
     packet.source_id = get_sender()->get_id();
@@ -141,6 +143,8 @@ Packet TcpFlow::create_ack(Packet data) {
 
     m_flag_manager.set_flag(ack.flags, m_packet_type_label, PacketType::ACK);
     m_flag_manager.set_flag(ack.flags, m_ack_ttl_label, data.ttl);
+    set_avg_rtt_label(m_flag_manager, ack.flags,
+                      m_rtt_statistics.get_mean());
     return ack;
 }
 
@@ -150,11 +154,17 @@ Packet TcpFlow::generate_packet() {
 
 void TcpFlow::initialize_flag_manager() {
     if (!m_is_flag_manager_initialized) {
-        m_flag_manager.register_flag_by_amount(m_packet_type_label,
-                                               PacketType::ENUM_SIZE);
-        m_flag_manager.register_flag_by_amount(m_ack_ttl_label, M_MAX_TTL + 1);
-        m_flag_manager.register_flag_by_amount(m_packet_avg_rtt_label,
-                                               sizeof(double));
+        if (!m_flag_manager.register_flag_by_amount(m_packet_type_label,
+                                                    PacketType::ENUM_SIZE)) {
+            throw std::runtime_error("Can not registrate packet type label");
+        }
+        if (!m_flag_manager.register_flag_by_amount(m_ack_ttl_label,
+                                                    M_MAX_TTL + 1)) {
+            throw std::runtime_error("Can not registrate ack ttl label");
+        }
+        if (!registate_packet_avg_rtt_flag(m_flag_manager)) {
+            throw std::runtime_error("Can not registrate packet avg rtt label");
+        }
         m_is_flag_manager_initialized = true;
     }
 }
