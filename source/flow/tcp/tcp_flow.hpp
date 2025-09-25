@@ -20,7 +20,7 @@ public:
             bool a_ecn_capable = true);
     void update(Packet packet) final;
     void send_data(SizeByte data) final;
-    
+
     SizeByte get_sending_quota() const;
     TimeNs get_last_rtt() const final;
     SizeByte get_delivered_data_size() const final;
@@ -31,7 +31,7 @@ public:
 
     std::shared_ptr<IHost> get_sender() const final;
     std::shared_ptr<IHost> get_receiver() const final;
-    
+
     Id get_id() const final;
     SizeByte get_delivered_bytes() const;
     std::string to_string() const;
@@ -42,6 +42,7 @@ private:
     static std::string m_packet_type_label;
     enum PacketType { ACK, DATA, ENUM_SIZE };
     static std::string m_ack_ttl_label;
+    static std::string m_packet_avg_rtt_label;
     static bool m_is_flag_manager_initialized;
     static FlagManager<std::string, PacketFlagsBase> m_flag_manager;
     const static inline TTL M_MAX_TTL = 31;

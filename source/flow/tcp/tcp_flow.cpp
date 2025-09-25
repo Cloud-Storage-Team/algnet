@@ -9,6 +9,7 @@ namespace sim {
 
 std::string TcpFlow::m_packet_type_label = "type";
 std::string TcpFlow::m_ack_ttl_label = "ack_ttl";
+std::string TcpFlow::m_packet_avg_rtt_label = "avg_rtt";
 FlagManager<std::string, PacketFlagsBase> TcpFlow::m_flag_manager;
 bool TcpFlow::m_is_flag_manager_initialized = false;
 
@@ -152,6 +153,8 @@ void TcpFlow::initialize_flag_manager() {
         m_flag_manager.register_flag_by_amount(m_packet_type_label,
                                                PacketType::ENUM_SIZE);
         m_flag_manager.register_flag_by_amount(m_ack_ttl_label, M_MAX_TTL + 1);
+        m_flag_manager.register_flag_by_amount(m_packet_avg_rtt_label,
+                                               sizeof(double));
         m_is_flag_manager_initialized = true;
     }
 }
