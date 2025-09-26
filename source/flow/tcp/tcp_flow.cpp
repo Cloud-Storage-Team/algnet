@@ -118,8 +118,6 @@ void TcpFlow::send_data(SizeByte data) {
     }
 }
 
-std::shared_ptr<IConnection> TcpFlow::get_conn() const { return m_connection; }
-
 Packet TcpFlow::create_ack(Packet data) {
     Packet ack;
     ack.packet_num = data.packet_num;

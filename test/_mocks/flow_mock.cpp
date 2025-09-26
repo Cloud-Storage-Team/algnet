@@ -19,7 +19,6 @@ void FlowMock::send_data(SizeByte data) {
     }
     m_sending_quota -= data;
 }
-std::shared_ptr<sim::IConnection> FlowMock::get_conn() const { return nullptr; }
 SizeByte FlowMock::get_delivered_data_size() const { return SizeByte(0); }
 TimeNs FlowMock::get_fct() const { return TimeNs(0); }
 

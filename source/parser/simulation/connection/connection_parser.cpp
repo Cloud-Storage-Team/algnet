@@ -37,13 +37,6 @@ std::shared_ptr<IConnection> ConnectionParser::parse_connection(
     std::shared_ptr<IHost> receiver_ptr =
         IdentifierFactory::get_instance().get_object<IHost>(receiver_id);
 
-    SizeByte data_to_send =
-        SizeByte(parse_size(value_node["data_to_send"].as<std::string>()));
-    if (data_to_send == SizeByte(0)) {
-        throw std::runtime_error("Data to send is set to zero for connection " +
-                                 conn_id);
-    }
-
     std::string mplb_name = value_node["mplb"].as<std::string>();
     if (mplb_name.empty()) {
         throw std::runtime_error(
@@ -51,8 +44,8 @@ std::shared_ptr<IConnection> ConnectionParser::parse_connection(
     }
     auto mplb = make_mplb(mplb_name);
 
-    auto conn = std::make_shared<ConnectionImpl>(
-        conn_id, sender_ptr, receiver_ptr, std::move(mplb), data_to_send);
+    auto conn = std::make_shared<ConnectionImpl>(conn_id, sender_ptr,
+                                                 receiver_ptr, std::move(mplb));
 
     auto& idf = IdentifierFactory::get_instance();
     idf.add_object(conn);

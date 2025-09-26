@@ -5,6 +5,7 @@
 #include "logger/logger.hpp"
 #include "parser/simulation/connection/connection_parser.hpp"
 #include "parser/simulation/flow/flow_parser.hpp"
+#include "parser/simulation/scenario/scenario_parser.hpp"
 #include "parser/topology/host/host_parser.hpp"
 #include "parser/topology/link/link_parser.hpp"
 #include "parser/topology/switch/switch_parser.hpp"
@@ -64,11 +65,17 @@ Simulator YamlParser::build_simulator_from_config(
         [this](auto node) { return process_connection(node); },
         "No connections specified in the simulation config");
 
+    parse_if_present(
+        simulation_config["scenario"],
+        [this](auto node) { return process_scenario(node); },
+        "No scenario specified in the simulation config");
+
     std::optional<TimeNs> maybe_stop_time =
         parse_simulation_time(simulation_config);
     if (maybe_stop_time.has_value()) {
         m_simulator.set_stop_time(maybe_stop_time.value());
     }
+
     return m_simulator;
 }
 
@@ -132,6 +139,11 @@ void YamlParser::process_connection(const YAML::Node &connections_node) {
         },
         ConnectionParser::parse_i_connection, "Can not add connection.",
         RegistrationPolicy::ByParser);
+}
+
+void YamlParser::process_scenario(const YAML::Node &scenario_node) {
+    auto scenario = ScenarioParser::parse(scenario_node);
+    m_simulator.set_scenario(std::move(scenario));
 }
 
 std::filesystem::path YamlParser::parse_topology_config_path(

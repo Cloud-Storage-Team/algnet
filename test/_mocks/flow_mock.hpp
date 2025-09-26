@@ -4,6 +4,12 @@
 
 namespace test {
 
+// It is used for testing mplb algorithms
+struct FlowStat {
+    SizeByte sending_quota = SizeByte(0);
+    TimeNs last_rtt = TimeNs(0);
+};
+
 class FlowMock : public sim::IFlow {
 public:
     ~FlowMock() = default;
@@ -16,7 +22,6 @@ public:
     SizeByte get_sending_quota() const final;
     TimeNs get_last_rtt() const final;
     void send_data(SizeByte data) final;
-    std::shared_ptr<sim::IConnection> get_conn() const final;
     virtual SizeByte get_delivered_data_size() const final;
     virtual TimeNs get_fct() const final;
 

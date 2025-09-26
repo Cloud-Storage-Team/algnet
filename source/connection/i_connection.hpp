@@ -17,8 +17,6 @@ public:
     virtual ~IConnection() = default;
 
     virtual Id get_id() const = 0;
-    // Start sending packets to flow-level
-    virtual void start() = 0;
     // Add a flow to the connection
     virtual void add_flow(std::shared_ptr<IFlow> flow) = 0;
     // Delete a flow from the connection
