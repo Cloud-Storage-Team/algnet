@@ -37,7 +37,7 @@ Simulator YamlParser::build_simulator_from_config(
     const YAML::Node packet_spraying_node = topology_config["packet-spraying"];
     if (!packet_spraying_node) {
         throw std::runtime_error(
-            "Packet spraying type oes not set in topology config");
+            "Packet spraying type does not set in topology config");
     }
     parse_if_present(
         topology_config["hosts"],

@@ -2,6 +2,7 @@
 
 #include <type_traits>
 
+#include "connection/i_connection.hpp"
 #include "device/interfaces/i_host.hpp"
 #include "flow/i_flow.hpp"
 #include "i_tcp_cc.hpp"
@@ -18,21 +19,21 @@ public:
             std::unique_ptr<ITcpCC> a_cc, SizeByte a_packet_size,
             bool a_ecn_capable = true);
     void update(Packet packet) final;
+    void send_data(SizeByte data) final;
 
+    SizeByte get_sending_quota() const;
+    TimeNs get_last_rtt() const final;
     SizeByte get_delivered_data_size() const final;
-
-    // Returns time elapced from flow start (firsrt call of send_data)
+    const BaseFlagManager& get_flag_mamager() const final;
+    // Returns time elapced from flow start (firsrt call of send_packet)
     // to last update call
     TimeNs get_fct() const final;
 
     std::shared_ptr<IHost> get_sender() const final;
-    std::shared_ptr<IHost> get_receiver() const;
+    std::shared_ptr<IHost> get_receiver() const final;
+
     Id get_id() const final;
     SizeByte get_delivered_bytes() const;
-    SizeByte get_sending_quota() const;
-    void send_data(SizeByte data) final;
-    std::shared_ptr<IConnection> get_conn() const final;
-    TimeNs get_last_rtt() const final;
     std::string to_string() const;
 
 private:
@@ -40,7 +41,9 @@ private:
 
     static std::string m_packet_type_label;
     enum PacketType { ACK, DATA, ENUM_SIZE };
+
     static std::string m_ack_ttl_label;
+
     static bool m_is_flag_manager_initialized;
     static FlagManager<std::string, PacketFlagsBase> m_flag_manager;
     const static inline TTL M_MAX_TTL = 31;

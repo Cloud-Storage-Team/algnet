@@ -14,11 +14,12 @@ public:
 
     void update(sim::Packet packet) final;
     SizeByte get_sending_quota() const final;
-    TimeNs get_last_rtt() const final;
     void send_data(SizeByte data) final;
-    std::shared_ptr<sim::IConnection> get_conn() const final;
+    TimeNs get_last_rtt() const final;
+
     virtual SizeByte get_delivered_data_size() const final;
     virtual TimeNs get_fct() const final;
+    const sim::BaseFlagManager& get_flag_mamager() const final;
 
     std::shared_ptr<sim::IHost> get_sender() const final;
     std::shared_ptr<sim::IHost> get_receiver() const final;
@@ -30,6 +31,7 @@ public:
 
 private:
     std::weak_ptr<sim::IHost> m_receiver;
+    sim::BaseFlagManager m_flag_manager;
     SizeByte m_packet_size;
     SizeByte m_sending_quota;
     TimeNs m_last_rtt;

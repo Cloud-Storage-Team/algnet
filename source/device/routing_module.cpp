@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "hashers/ecmp_hasher.hpp"
 #include "link/i_link.hpp"
 #include "logger/logger.hpp"
 #include "utils/validation.hpp"

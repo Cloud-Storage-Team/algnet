@@ -1,5 +1,11 @@
 #include "switch_parser.hpp"
 
+#include "device/hashers/adaptive_flowlet_hasher.hpp"
+#include "device/hashers/ecmp_hasher.hpp"
+#include "device/hashers/flowlet_hasher.hpp"
+#include "device/hashers/random_hasher.hpp"
+#include "device/hashers/salt_ecmp_hasher.hpp"
+#include "device/hashers/symmetric_hasher.hpp"
 #include "parser/parse_utils.hpp"
 
 namespace sim {
@@ -44,6 +50,10 @@ std::unique_ptr<IPacketHasher> SwitchParser::parse_hasher(
         TimeNs threshold =
             parse_time(packet_spraying_node["threshold"].as<std::string>());
         return std::make_unique<FLowletHasher>(threshold);
+    }
+    if (type == "adaptive_flowlet") {
+        double factor = packet_spraying_node["factor"].as<double>();
+        return std::make_unique<AdaptiveFlowletHasher>(factor);
     }
     if (type == "salt") {
         return std::make_unique<SaltECMPHasher>(std::move(switch_id));
