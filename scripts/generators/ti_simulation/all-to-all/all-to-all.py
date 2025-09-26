@@ -29,6 +29,12 @@ def generate_simulation_config(
                 default_flow_preset = flow_presets["default"]
             except KeyError as e:
                 raise RuntimeError(f"flow->{e}")
+
+            scenario_presets = presets["scenario"]
+            try:
+                default_scenario_preset = scenario_presets["default"]
+            except KeyError as e:
+                raise RuntimeError(f"scenario->{e}")
             
         except KeyError as e:
             raise RuntimeError(f"presets->{e}")    
@@ -56,7 +62,18 @@ def generate_simulation_config(
             for flow_num in range(1, flows_per_connection + 1):
                 connection["flows"][f"flow_{flow_num}"] = default_flow_preset
             
-            simulation_config["connections"][connection_name] = connection 
+            simulation_config["connections"][connection_name] = connection
+
+    simulation_config["scenarios"] = [
+        {
+            "action": "send_data_conn",
+            "when": default_scenario_preset["when"],
+            "size": default_scenario_preset["size"],
+            "connections": default_scenario_preset["connections"],
+            "num": default_scenario_preset.get("num", 1),
+            "gap": default_scenario_preset.get("gap", "0ns"),
+        }
+    ]
     
     return simulation_config
 def main():

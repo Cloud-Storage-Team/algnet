@@ -7,7 +7,6 @@ presets:
       egress_buffer_size: 1000000B
   connection:
     default:
-      data_to_send: 1500000B
       mplb: round_robin
   flow:
     default:
@@ -22,6 +21,12 @@ presets:
         min: 0.7
         max: 0.7
         probability: 1.0
+  scenario:
+    default:
+      when: 0ns
+      size: 1500000B
+      connections: "^conn"
+
 packet-spraying:
   type: ecmp
 

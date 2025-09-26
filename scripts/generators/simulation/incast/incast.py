@@ -32,6 +32,13 @@ class InputConfig:
                 except KeyError as e:
                     raise KeyError(f"flow->{e}")
                 
+                scenario_presets = presets["scenario"]
+                try:
+                    self.default_scenario_preset = scenario_presets["default"].copy()
+                except KeyError as e:
+                    raise KeyError(f"scenario->{e}")
+
+                
             except KeyError as e:
                 raise KeyError(f"presets->{e}")
         except KeyError as e:
@@ -92,6 +99,28 @@ class OutputConfig:
                 },
             }
 
+    def _add_scenarios(self, input_config: InputConfig):
+        """
+        Adds scenario part
+        """
+        p = input_config.default_scenario_preset
+
+        # required fields
+        scenario_item = {
+            "action": "send_data_conn",
+            "when": p["when"],
+            "size": p["size"],
+            "connections": p["connections"],
+        }
+
+        # optional fields
+        if "num" in p:
+            scenario_item["num"] = int(p["num"])
+        if "gap" in p:
+            scenario_item["gap"] = p["gap"]
+
+        self.config["scenarios"] = [scenario_item]
+
     def generate(self, config : dict) -> dict:
         """
         Generates incast config
@@ -103,6 +132,7 @@ class OutputConfig:
         input_config = InputConfig(config)
         self._add_topology(input_config)
         self._add_simulation(input_config)
+        self._add_scenarios(input_config)
         return self.config
     
     def generate_and_save(self, config : dict, output_path : str):

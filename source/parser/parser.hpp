@@ -73,9 +73,11 @@ private:
     void process_connection(const YAML::Node& connections_node);
     void process_links(const YAML::Node& links_node,
                        const YAML::Node& link_preset_node);
+    void process_scenario(const YAML::Node& scenario_node);
 
     Simulator m_simulator;
     std::filesystem::path m_topology_config_path;
+    std::unique_ptr<IScenario> m_scenario;
 };
 
 }  // namespace sim

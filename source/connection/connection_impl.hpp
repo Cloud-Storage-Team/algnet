@@ -28,8 +28,6 @@ public:
 
     Id get_id() const override;
 
-    void start() override;
-
     void add_flow(std::shared_ptr<IFlow> flow) override;
 
     void delete_flow(std::shared_ptr<IFlow> flow) override;
@@ -59,7 +57,6 @@ private:
     std::shared_ptr<IMPLB> m_mplb;
     SizeByte m_data_to_send;
     std::set<std::shared_ptr<IFlow>> m_flows;
-    std::vector<ScheduledChunk> m_schedule;
 };
 
 }  // namespace sim
