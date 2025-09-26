@@ -9,6 +9,22 @@
 
 namespace sim {
 
+template <typename TFlagId>
+class FlagNotRegistratedException : std::invalid_argument {
+public:
+    explicit FlagNotRegistratedException(TFlagId id)
+        : std::invalid_argument(
+              fmt::format("Flag {} not registrated", std::move(id))) {};
+};
+
+template <typename TFlagId>
+class FlagNotSetException : std::invalid_argument {
+public:
+    explicit FlagNotSetException(TFlagId id)
+        : std::invalid_argument(
+              fmt::format("Flag {} is not set", std::move(id))) {};
+};
+
 template <typename FlagId, BitStorageType BitStorage>
 class FlagManager {
 public:
@@ -41,30 +57,31 @@ public:
             return false;
         }
 
-        m_flag_manager[id] = FlagInfo{m_next_pos, flag_length};
+        m_flag_manager[id] = FlagInfo{m_next_pos, flag_length, false};
         m_next_pos += flag_length;
         return true;
     }
 
-    void set_flag(BitSet<BitStorage>& bitset, FlagId id,
-                  BitStorage value) const {
+    void set_flag(BitSet<BitStorage>& bitset, FlagId id, BitStorage value) {
         auto it = m_flag_manager.find(id);
         if (it == m_flag_manager.end()) {
-            LOG_ERROR(fmt::format("Flag with id '{}' not found", id));
-            return;
+            throw FlagNotRegistratedException(id);
         }
 
-        const FlagInfo& info = it->second;
+        FlagInfo& info = it->second;
         bitset.set_range(info.start, info.start + info.length - 1, value);
+        info.is_set = true;
     }
 
     BitStorage get_flag(const BitSet<BitStorage>& bitset, FlagId id) const {
         auto it = m_flag_manager.find(id);
         if (it == m_flag_manager.end()) {
-            LOG_ERROR(fmt::format("Flag with id '{}' not found.", id));
-            return 0;
+            throw FlagNotRegistratedException(id);
         }
         const FlagInfo& info = it->second;
+        if (!info.is_set) {
+            throw FlagNotSetException(id);
+        }
         return bitset.get_range(info.start, info.start + info.length - 1);
     }
 
@@ -77,6 +94,7 @@ private:
     struct FlagInfo {
         BitStorage start;
         BitStorage length;
+        bool is_set;
     };
 
     inline BitStorage required_bits_for_values(BitStorage max_values) {
@@ -98,6 +116,10 @@ private:
     std::unordered_map<FlagId, FlagInfo> m_flag_manager;
 };
 
-using BaseFlagManager = FlagManager<std::string, PacketFlagsBase>;
+using BaseFlagType = std::string;
+using BaseFlagManager = FlagManager<BaseFlagType, PacketFlagsBase>;
+using BaseFlagNotRegistratedException =
+    FlagNotRegistratedException<BaseFlagType>;
+using BaseFlagNotSetException = FlagNotSetException<BaseFlagType>;
 
 }  // namespace sim

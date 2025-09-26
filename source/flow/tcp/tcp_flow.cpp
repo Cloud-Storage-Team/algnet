@@ -143,8 +143,7 @@ Packet TcpFlow::create_ack(Packet data) {
 
     m_flag_manager.set_flag(ack.flags, m_packet_type_label, PacketType::ACK);
     m_flag_manager.set_flag(ack.flags, m_ack_ttl_label, data.ttl);
-    set_avg_rtt_label(m_flag_manager, ack.flags,
-                      m_rtt_statistics.get_mean());
+    set_avg_rtt_label(m_flag_manager, ack.flags, m_rtt_statistics.get_mean());
     return ack;
 }
 

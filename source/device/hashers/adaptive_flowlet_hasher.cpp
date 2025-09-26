@@ -34,20 +34,28 @@ std::uint32_t AdaptiveFlowletHasher::get_hash(Packet packet) {
     TimeNs elapsed_from_last_seen = curr_time - last_seen;
 
     const BaseFlagManager& flag_manager = flow->get_flag_mamager();
-    TimeNs flowlet_threshold =
-        get_avg_rtt_label(flag_manager, packet.flags) * m_factor;
-    if (flowlet_threshold == TimeNs(0)) {
+    try {
+        TimeNs flowlet_threshold =
+            get_avg_rtt_label(flag_manager, packet.flags) * m_factor;
+
+        if (elapsed_from_last_seen > flowlet_threshold) {
+            shift++;
+        }
+        last_seen = curr_time;
+
+        return ecmp_hash + shift;
+    } catch (BaseFlagNotRegistratedException& e) {
         LOG_ERROR(
-            "Adaptive flowlet hasher can not filnd avg rtt; returned previous "
+            "Adaptive flowlet hasher can not find avg rtt (packet flag not "
+            "registrated); returned previous "
+            "hash");
+        return ecmp_hash + shift;
+    } catch (BaseFlagNotSetException& e) {
+        LOG_ERROR(
+            "Adaptive flowlet hasher can not find avg rtt (packet flag not "
+            "set); returned previous "
             "hash");
         return ecmp_hash + shift;
     }
-
-    if (elapsed_from_last_seen > flowlet_threshold) {
-        shift++;
-    }
-    last_seen = curr_time;
-
-    return ecmp_hash + shift;
 }
 }  // namespace sim
