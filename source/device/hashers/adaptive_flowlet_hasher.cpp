@@ -15,7 +15,9 @@ std::uint32_t AdaptiveFlowletHasher::get_hash(Packet packet) {
 
     if (!flow) {
         LOG_ERROR(
-            "Try to use AdaptiveFlowletHasher on packet with not set flow");
+            fmt::format("Try to use AdaptiveFlowletHasher on packet {}; "
+                        "flow does not set!",
+                        packet.to_string()));
         return ecmp_hash;
     }
 

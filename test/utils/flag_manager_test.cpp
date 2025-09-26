@@ -28,9 +28,9 @@ TEST_F(FlagManagerTest, RegisterFlagByAmount_Valid) {
 TEST_F(FlagManagerTest, RegisterFlagByLength_ValidAndInvalid) {
     EXPECT_TRUE(flag_manager.register_flag_by_length(TestFlagId::FlagA, 5));
     EXPECT_FALSE(flag_manager.register_flag_by_length(TestFlagId::FlagB, 0));
-    EXPECT_FALSE(flag_manager.register_flag_by_length(TestFlagId::FlagB, 33));
+    EXPECT_FALSE(flag_manager.register_flag_by_length(TestFlagId::FlagB, 60));
 
-    EXPECT_TRUE(flag_manager.register_flag_by_length(TestFlagId::FlagB, 27));
+    EXPECT_TRUE(flag_manager.register_flag_by_length(TestFlagId::FlagB, 59));
     EXPECT_FALSE(flag_manager.register_flag_by_length(TestFlagId::FlagC, 1));
 }
 
