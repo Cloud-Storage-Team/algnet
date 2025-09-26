@@ -4,11 +4,6 @@ connections:
   conn1:
     sender_id: sender1
     receiver_id: receiver1
-    data_to_send:
-      - at: 0ns
-        amount: 128000B
-      - at: 500000ns
-        amount: 128001B
     mplb: round_robin
     flows:
       flow1:
@@ -23,3 +18,12 @@ connections:
         cc:
           type: swift
           base_target: 4000ns
+
+scenario:
+  - action: send_data_conn
+    when: 0ns
+    size: 128002B
+    num: 5
+    connections: "^conn.*"
+    gap: 500000ns
+    

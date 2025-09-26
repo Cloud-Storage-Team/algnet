@@ -37,34 +37,6 @@ std::shared_ptr<IConnection> ConnectionParser::parse_connection(
     std::shared_ptr<IHost> receiver_ptr =
         IdentifierFactory::get_instance().get_object<IHost>(receiver_id);
 
-    YAML::Node data_node = value_node["data_to_send"];
-    if (!data_node) {
-        throw std::runtime_error("Data to send is not specified for " +
-                                 conn_id);
-    }
-    std::vector<ConnectionImpl::ScheduledChunk> schedule;
-    // Backward compatibility when we specify only the initial value in bytes
-    if (data_node.IsScalar()) {
-        schedule.push_back(
-            {TimeNs(0), SizeByte(parse_size(data_node.as<std::string>()))});
-    // New format with schedule of chunks
-    } else if (data_node.IsSequence()) {
-        for (const auto& item : data_node) {
-            if (!item["at"] || !item["amount"]) {
-                throw std::runtime_error(
-                    "Each chunk in data_to_send must have 'at' and 'amount' "
-                    "fields for " +
-                    conn_id);
-            }
-            schedule.push_back(
-                {parse_time(item["at"].as<std::string>()),
-                 SizeByte(parse_size(item["amount"].as<std::string>()))});
-        }
-    } else {
-        throw std::runtime_error("Unsupported data_to_send format for " +
-                                 conn_id);
-    }
-
     std::string mplb_name = value_node["mplb"].as<std::string>();
     if (mplb_name.empty()) {
         throw std::runtime_error(
@@ -74,8 +46,6 @@ std::shared_ptr<IConnection> ConnectionParser::parse_connection(
 
     auto conn = std::make_shared<ConnectionImpl>(conn_id, sender_ptr,
                                                  receiver_ptr, std::move(mplb));
-
-    conn->set_data_schedule(std::move(schedule));
 
     auto& idf = IdentifierFactory::get_instance();
     idf.add_object(conn);

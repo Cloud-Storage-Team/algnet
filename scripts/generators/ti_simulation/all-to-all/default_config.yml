@@ -10,7 +10,6 @@ topology_config_path: ../../../../configuration_examples/topology_examples/bus_t
 presets:
   connection:
     default:
-      data_to_send: 150000B
       mplb: round_robin
   flow:
     default:
@@ -18,3 +17,8 @@ presets:
       packet_size: 1500B
       cc:
         type: tahoe
+  scenario:
+    default:
+      when: 0ns
+      size: 150000B
+      connections: "^conn"

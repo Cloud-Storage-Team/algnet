@@ -17,17 +17,6 @@ ConnectionImpl::ConnectionImpl(Id a_id, std::shared_ptr<IHost> a_src,
 
 Id ConnectionImpl::get_id() const { return m_id; }
 
-void ConnectionImpl::start() {
-    if (m_schedule.empty()) {
-        throw std::runtime_error(fmt::format(
-            "Empty schedule in connection {}; can not start", m_id));
-    }
-    for (const auto& ch : m_schedule) {
-        Scheduler::get_instance().add<AddDataToConnection>(
-            ch.at, shared_from_this(), ch.amount);
-    }
-}
-
 void ConnectionImpl::add_flow(std::shared_ptr<IFlow> flow) {
     m_flows.insert(flow);
     m_mplb->add_flow(flow);
@@ -92,10 +81,6 @@ std::shared_ptr<IHost> ConnectionImpl::get_sender() const {
 
 std::shared_ptr<IHost> ConnectionImpl::get_receiver() const {
     return m_dest.lock();
-}
-
-void ConnectionImpl::set_data_schedule(std::vector<ScheduledChunk> s) {
-    m_schedule = std::move(s);
 }
 
 }  // namespace sim
