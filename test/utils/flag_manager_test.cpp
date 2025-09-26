@@ -2,6 +2,8 @@
 
 #include <gtest/gtest.h>
 
+#include <random>
+
 #include "types.hpp"
 
 namespace test {
@@ -17,37 +19,110 @@ protected:
     sim::BitSet<PacketFlagsBase> flags;
 };
 
-TEST_F(FlagManagerTest, RegisterFlagByAmount_Valid) {
-    EXPECT_TRUE(flag_manager.register_flag_by_amount(TestFlagId::FlagA, 2));
-    EXPECT_TRUE(flag_manager.register_flag_by_amount(TestFlagId::FlagB, 5));
+static int RANDOM_SEED = 42;
 
-    EXPECT_FALSE(flag_manager.register_flag_by_amount(TestFlagId::FlagC, 1));
-    EXPECT_FALSE(flag_manager.register_flag_by_amount(TestFlagId::FlagA, 5));
+std::uint64_t random_in_range(std::mt19937_64& rnd, std::uint64_t min,
+                              std::uint64_t max) {
+    if (min > max) {
+        throw std::invalid_argument(
+            "Can not generate random number: minimal value greater than "
+            "maximal");
+    }
+    std::uint64_t random_value = rnd();
+    return (max - min == std::numeric_limits<std::uint64_t>::max()
+                ? random_value
+                : min + random_value % (max - min + 1));
 }
 
-TEST_F(FlagManagerTest, RegisterFlagByLength_ValidAndInvalid) {
-    EXPECT_TRUE(flag_manager.register_flag_by_length(TestFlagId::FlagA, 5));
-    EXPECT_FALSE(flag_manager.register_flag_by_length(TestFlagId::FlagB, 0));
-    EXPECT_FALSE(flag_manager.register_flag_by_length(TestFlagId::FlagB, 60));
-
-    EXPECT_TRUE(flag_manager.register_flag_by_length(TestFlagId::FlagB, 59));
-    EXPECT_FALSE(flag_manager.register_flag_by_length(TestFlagId::FlagC, 1));
+std::uint64_t random_unsigned_value(std::mt19937_64& rnd, int bits_count) {
+    int max_bits = sizeof_bits(std::uint64_t);
+    if (bits_count > max_bits) {
+        throw std::invalid_argument(
+            fmt::format("Can not generate random 64bits value: given bits "
+                        "count ({}) are too large",
+                        bits_count));
+    }
+    std::uint64_t max_value =
+        (bits_count == max_bits ? std::numeric_limits<std::uint64_t>::max()
+                                : (1ull << bits_count) - 1);
+    return random_in_range(rnd, 0, max_value);
 }
 
-TEST_F(FlagManagerTest, RegisterFlag_Duplicate) {
-    EXPECT_TRUE(flag_manager.register_flag_by_length(TestFlagId::FlagA, 5));
-    EXPECT_FALSE(flag_manager.register_flag_by_length(TestFlagId::FlagA, 3));
+template <sim::BitStorageType TBitStorage>
+void test_register_by_amount() {
+    int bits_count = sizeof_bits(TBitStorage);
+    sim::FlagManager<int, TBitStorage> flag_manager;
+
+    // Can not registrate flag with only possible value
+    EXPECT_FALSE(flag_manager.register_flag_by_amount(TestFlagId::FlagA, 1));
+
+    TBitStorage half_amont = ((TBitStorage)1 << (bits_count >> 1));
+
+    // twicely registrate half of total space
+    EXPECT_TRUE(
+        flag_manager.register_flag_by_amount(TestFlagId::FlagA, half_amont));
+    EXPECT_TRUE(
+        flag_manager.register_flag_by_amount(TestFlagId::FlagB, half_amont));
+
+    // All bits are taken
+    EXPECT_FALSE(flag_manager.register_flag_by_amount(TestFlagId::FlagB, 2));
 }
 
-TEST_F(FlagManagerTest, SetAndGetFlag_Valid) {
-    EXPECT_TRUE(flag_manager.register_flag_by_length(TestFlagId::FlagA, 3));
-    EXPECT_TRUE(flag_manager.register_flag_by_length(TestFlagId::FlagB, 5));
+TEST_F(FlagManagerTest, RegisterFlagByAmount) {
+    test_register_by_amount<std::uint8_t>();
+    test_register_by_amount<std::uint16_t>();
+    test_register_by_amount<std::uint32_t>();
+    test_register_by_amount<std::uint64_t>();
+}
 
-    flag_manager.set_flag(flags, TestFlagId::FlagA, 5);
-    flag_manager.set_flag(flags, TestFlagId::FlagB, 17);
+template <sim::BitStorageType TBitStorageType>
+void test_register_flag_duplicate() {
+    sim::FlagManager<int, TBitStorageType> flag_manager;
+    EXPECT_TRUE(flag_manager.register_flag_by_length(TestFlagId::FlagA, 2));
+    EXPECT_FALSE(flag_manager.register_flag_by_length(TestFlagId::FlagA, 2));
+}
 
-    EXPECT_EQ(flag_manager.get_flag(flags, TestFlagId::FlagA), 5);
-    EXPECT_EQ(flag_manager.get_flag(flags, TestFlagId::FlagB), 17);
+TEST_F(FlagManagerTest, RegisterDuplicateFlag) {
+    test_register_flag_duplicate<std::uint8_t>();
+    test_register_flag_duplicate<std::uint16_t>();
+    test_register_flag_duplicate<std::uint32_t>();
+    test_register_flag_duplicate<std::uint64_t>();
+}
+
+template <sim::BitStorageType TBitStirageType>
+void test_set_and_get_flag() {
+    std::mt19937_64 rnd(RANDOM_SEED);
+    sim::FlagManager<int, TBitStirageType> flag_manager;
+    sim::BitSet<TBitStirageType> flags;
+
+    int total_bits = sizeof_bits(TBitStirageType);
+
+    // May resitrate without chechs at least 8 bits
+    int first_flag_length = 3;
+    int second_flag_length = 4;
+    int thirst_flag_length =
+        total_bits - first_flag_length - second_flag_length;
+
+    auto process_flag = [&rnd, &flag_manager, &flags](int flag_length) {
+        static int flag_num = 0;
+        EXPECT_TRUE(
+            flag_manager.register_flag_by_length(flag_num, flag_length));
+        TBitStirageType value = random_unsigned_value(rnd, flag_length);
+        flag_manager.set_flag(flags, flag_num, value);
+        EXPECT_EQ(flag_manager.get_flag(flags, flag_num), value);
+        flag_num++;
+    };
+
+    process_flag(first_flag_length);
+    process_flag(second_flag_length);
+    process_flag(thirst_flag_length);
+}
+
+TEST_F(FlagManagerTest, SetAndGetFlag) {
+    test_set_and_get_flag<std::uint8_t>();
+    test_set_and_get_flag<std::uint16_t>();
+    test_set_and_get_flag<std::uint32_t>();
+    test_set_and_get_flag<std::uint64_t>();
 }
 
 TEST_F(FlagManagerTest, SetGetFlag_UnregisteredFlag) {
