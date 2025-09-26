@@ -22,7 +22,8 @@ inline bool registate_packet_avg_rtt_flag(BaseFlagManager& flag_manager) {
 inline void set_avg_rtt_label(BaseFlagManager& flag_manager, BaseBitset& bitset,
                               TimeNs rtt) {
     AvgRttCastType value = rtt.value_nanoseconds();
-    AvgRttFlagType casted_value = *reinterpret_cast<AvgRttFlagType*>(&value);
+    AvgRttFlagType casted_value;
+    std::memcpy(&casted_value, &value, sizeof(casted_value));
     flag_manager.set_flag(bitset, packet_avg_rtt_label, casted_value);
 }
 
@@ -30,7 +31,9 @@ inline TimeNs get_avg_rtt_label(const BaseFlagManager& flag_manager,
                                 BaseBitset& bitset) {
     AvgRttFlagType casted_value =
         flag_manager.get_flag(bitset, packet_avg_rtt_label);
-    return TimeNs(*reinterpret_cast<AvgRttCastType*>(&casted_value));
+    AvgRttCastType value;
+    std::memcpy(&value, &casted_value,sizeof(value));
+    return TimeNs(value);
 }
 
 }  // namespace sim
