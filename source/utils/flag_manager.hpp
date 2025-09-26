@@ -9,20 +9,20 @@
 
 namespace sim {
 
-template <typename TFlagId>
 class FlagNotRegistratedException : std::invalid_argument {
 public:
+    template <typename TFlagId>
     explicit FlagNotRegistratedException(TFlagId id)
         : std::invalid_argument(
-              fmt::format("Flag {} not registrated", std::move(id))) {};
+              fmt::format("Flag {} not registrated", std::move(id))){};
 };
 
-template <typename TFlagId>
 class FlagNotSetException : std::invalid_argument {
 public:
+    template <typename TFlagId>
     explicit FlagNotSetException(TFlagId id)
         : std::invalid_argument(
-              fmt::format("Flag {} is not set", std::move(id))) {};
+              fmt::format("Flag {} is not set", std::move(id))){};
 };
 
 template <typename FlagId, BitStorageType BitStorage>
@@ -118,8 +118,5 @@ private:
 
 using BaseFlagType = std::string;
 using BaseFlagManager = FlagManager<BaseFlagType, PacketFlagsBase>;
-using BaseFlagNotRegistratedException =
-    FlagNotRegistratedException<BaseFlagType>;
-using BaseFlagNotSetException = FlagNotSetException<BaseFlagType>;
 
 }  // namespace sim

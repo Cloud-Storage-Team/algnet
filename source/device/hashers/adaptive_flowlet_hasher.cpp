@@ -44,13 +44,13 @@ std::uint32_t AdaptiveFlowletHasher::get_hash(Packet packet) {
         last_seen = curr_time;
 
         return ecmp_hash + shift;
-    } catch (BaseFlagNotRegistratedException& e) {
+    } catch (FlagNotRegistratedException& e) {
         LOG_ERROR(
             "Adaptive flowlet hasher can not find avg rtt (packet flag not "
             "registrated); returned previous "
             "hash");
         return ecmp_hash + shift;
-    } catch (BaseFlagNotSetException& e) {
+    } catch (FlagNotSetException& e) {
         LOG_ERROR(
             "Adaptive flowlet hasher can not find avg rtt (packet flag not "
             "set); returned previous "

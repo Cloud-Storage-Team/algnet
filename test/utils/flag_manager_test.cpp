@@ -132,9 +132,9 @@ void test_set_and_get_unregistred_flag() {
     sim::FlagManager<int, TBitsStorageType> flag_manager;
     sim::BitSet<TBitsStorageType> flags;
     EXPECT_THROW(flag_manager.set_flag(flags, TestFlagId::FlagA, 0),
-                 sim::FlagNotRegistratedException<int>);
+                 sim::FlagNotRegistratedException);
     EXPECT_THROW(flag_manager.get_flag(flags, TestFlagId::FlagA),
-                 sim::FlagNotRegistratedException<int>);
+                 sim::FlagNotRegistratedException);
 }
 
 TEST_F(FlagManagerTest, SetGetFlag_UnregisteredFlag) {
@@ -150,7 +150,7 @@ void test_get_not_set_flag() {
     sim::BitSet<TBitsStorageType> flags;
     EXPECT_TRUE(flag_manager.register_flag_by_length(TestFlagId::FlagA, 1));
     EXPECT_THROW(flag_manager.get_flag(flags, TestFlagId::FlagA),
-                 sim::FlagNotSetException<int>);
+                 sim::FlagNotSetException);
 }
 
 TEST_F(FlagManagerTest, GetFlag_NotSetFlag) {
@@ -175,8 +175,16 @@ void test_clear_flags() {
 
     flag_manager.reset();
 
+    EXPECT_THROW(flag_manager.set_flag(flags, TestFlagId::FlagA, value),
+                 sim::FlagNotRegistratedException);
+    EXPECT_THROW(flag_manager.get_flag(flags, TestFlagId::FlagA),
+                 sim::FlagNotRegistratedException);
+
     EXPECT_TRUE(
         flag_manager.register_flag_by_length(TestFlagId::FlagA, flag_size));
+
+    flag_manager.set_flag(flags, TestFlagId::FlagA, value);
+    EXPECT_EQ(flag_manager.get_flag(flags, TestFlagId::FlagA), value);
 }
 
 TEST_F(FlagManagerTest, Reset_ClearsFlags) {
