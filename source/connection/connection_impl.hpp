@@ -21,11 +21,6 @@ public:
 
     ~ConnectionImpl() override = default;
 
-    struct ScheduledChunk {
-        TimeNs at;
-        SizeByte amount;
-    };
-
     Id get_id() const override;
 
     void add_flow(std::shared_ptr<IFlow> flow) override;
@@ -43,8 +38,6 @@ public:
     std::shared_ptr<IHost> get_sender() const override;
 
     std::shared_ptr<IHost> get_receiver() const override;
-
-    void set_data_schedule(std::vector<ScheduledChunk> s);
 
 private:
     // Tries to send data using the MPLB-selected flow(s), as long as

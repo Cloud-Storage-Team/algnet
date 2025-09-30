@@ -17,8 +17,9 @@ presets:
       packet_size: 1500B
       cc:
         type: tahoe
-  scenario:
-    default:
-      when: 0ns
-      size: 150000B
-      connections: "^conn"
+
+scenario:
+  - action: send_data
+    connections: .*
+    when: 0ns
+    size: 1500000B

@@ -21,13 +21,14 @@ presets:
         min: 0.7
         max: 0.7
         probability: 1.0
-  scenario:
-    default:
-      when: 0ns
-      size: 1500000B
-      connections: "^conn"
 
 packet-spraying:
   type: ecmp
+
+scenario:
+  - action: send_data
+    connections: .*
+    when: 0ns
+    size: 1500000B
 
 senders_count: 3 # count of senders in topology; for every sender will be created one connection

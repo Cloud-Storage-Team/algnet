@@ -77,7 +77,7 @@ private:
 
     Simulator m_simulator;
     std::filesystem::path m_topology_config_path;
-    std::unique_ptr<IScenario> m_scenario;
+    std::unique_ptr<Scenario> m_scenario;
 };
 
 }  // namespace sim

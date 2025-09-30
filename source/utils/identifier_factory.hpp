@@ -34,13 +34,13 @@ public:
     }
 
     template <typename TObject>
-    std::vector<Id> get_all_ids() {
+    std::vector<std::shared_ptr<TObject> > get_objects() {
         static_assert(std::is_base_of_v<Identifiable, TObject>,
                       "TObject must implement Identifiable interface");
-        std::vector<Id> result;
-        for (auto& [id, ptr] : m_id_table) {
-            if (std::dynamic_pointer_cast<TObject>(ptr)) {
-                result.push_back(id);
+        std::vector<std::shared_ptr<TObject> > result;
+        for (auto& [id, base_ptr] : m_id_table) {
+            if (auto obj = std::dynamic_pointer_cast<TObject>(base_ptr); obj) {
+                result.push_back(obj);
             }
         }
         return result;

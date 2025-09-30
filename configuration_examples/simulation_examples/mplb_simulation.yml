@@ -20,10 +20,9 @@ connections:
           base_target: 4000ns
 
 scenario:
-  - action: send_data_conn
+  - action: send_data
     when: 0ns
     size: 128002B
-    num: 5
-    connections: "^conn.*"
-    gap: 500000ns
-    
+    repeat_count: 5
+    connections: ^conn.*
+    repeat_interval: 500000ns

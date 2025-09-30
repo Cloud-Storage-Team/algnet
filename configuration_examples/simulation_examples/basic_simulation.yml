@@ -23,11 +23,11 @@ connections:
           type: basic
 
 scenario:
-  - action: send_data_conn
+  - action: send_data
     when: 0ns
     size: 6400B
     connections: conn1
-  - action: send_data_conn
+  - action: send_data
     when: 0ns
     size: 12800B
     connections: conn2

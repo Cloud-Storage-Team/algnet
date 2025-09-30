@@ -10,13 +10,13 @@ namespace sim {
 class AddDataToConnection : public Event {
 public:
     AddDataToConnection(TimeNs when, std::shared_ptr<IConnection> conn,
-                        SizeByte amount);
+                        SizeByte size);
     ~AddDataToConnection() = default;
     void operator()() final;
 
 private:
     std::weak_ptr<IConnection> m_connection;
-    SizeByte m_amount;
+    SizeByte m_size;
 };
 
 }  // namespace sim

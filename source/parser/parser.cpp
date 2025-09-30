@@ -76,7 +76,7 @@ Simulator YamlParser::build_simulator_from_config(
         m_simulator.set_stop_time(maybe_stop_time.value());
     }
 
-    return m_simulator;
+    return std::move(m_simulator);
 }
 
 std::optional<TimeNs> YamlParser::parse_simulation_time(

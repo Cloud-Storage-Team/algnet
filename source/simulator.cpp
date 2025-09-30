@@ -40,8 +40,8 @@ bool Simulator::add_link(std::shared_ptr<ILink> link) {
     return true;
 }
 
-void Simulator::set_scenario(std::shared_ptr<IScenario> scenario) {
-    m_scenario = scenario;
+void Simulator::set_scenario(Scenario&& scenario) {
+    m_scenario = std::move(scenario);
 }
 
 std::vector<std::shared_ptr<IDevice>> Simulator::get_devices() const {
@@ -81,9 +81,7 @@ void Simulator::start() {
         Scheduler::get_instance().add<Stop>(m_stop_time.value());
     }
 
-    if (m_scenario) {
-        m_scenario->start();
-    }
+    m_scenario.start();
 
     while (Scheduler::get_instance().tick()) {
     }

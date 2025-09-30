@@ -4,12 +4,6 @@
 
 namespace test {
 
-// It is used for testing mplb algorithms
-struct FlowStat {
-    SizeByte sending_quota = SizeByte(0);
-    TimeNs last_rtt = TimeNs(0);
-};
-
 class FlowMock : public sim::IFlow {
 public:
     ~FlowMock() = default;

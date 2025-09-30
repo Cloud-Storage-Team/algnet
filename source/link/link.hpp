@@ -74,7 +74,7 @@ private:
 
     TimeNs get_transmission_delay(const Packet& packet) const;
 
-    // Shedule Transmit event
+    // Schedule Transmit event
     void start_head_packet_sending();
 
     Id m_id;

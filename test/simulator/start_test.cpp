@@ -3,7 +3,8 @@
 #include "connection/connection_impl.hpp"
 #include "connection/mplb/round_robin_mplb.hpp"
 #include "flow/tcp/basic/basic_cc.hpp"
-#include "scenario/scenario_impl.hpp"
+#include "scenario/action/send_data_action.hpp"
+#include "scenario/scenario.hpp"
 #include "simulator.hpp"
 #include "utils.hpp"
 
@@ -53,17 +54,17 @@ TEST_F(Start, TrivialTopology) {
     auto flow = add_connection_with_single_flow(sim, "conn1", sender, receiver,
                                                 packet_size);
 
-    auto scenario = std::make_shared<sim::ScenarioImpl>();
+    auto scenario = sim::Scenario();
+    std::vector<std::weak_ptr<sim::IConnection>> conns;
 
     for (const auto& connection : sim.get_connections()) {
-        Id id_con = connection->get_id();
-        sim::ScenarioImpl::SendDataConnBatch batch;
-        batch.size = data_to_send;
-        batch.conns.push_back(connection);
-        scenario->add_send_data_conn_batch(std::move(batch));
+        conns.push_back(connection);
     }
 
-    sim.set_scenario(scenario);
+    scenario.add_action(std::make_unique<sim::SendDataAction>(
+        TimeNs(0), data_to_send, conns, 1, TimeNs(0)));
+
+    sim.set_scenario(std::move(scenario));
 
     sim.start();
 
@@ -103,15 +104,18 @@ TEST_F(Start, ThreeToOneTopology) {
                                  SizeByte(pkts[i] * packet_size));
     }
 
-    auto scenario = std::make_shared<sim::ScenarioImpl>();
+    auto scenario = sim::Scenario();
 
     for (const auto& connection : sim.get_connections()) {
-        sim::ScenarioImpl::SendDataConnBatch batch;
-        batch.size = data_to_send_map.at(connection->get_id());
-        batch.conns.push_back(connection);
-        scenario->add_send_data_conn_batch(batch);
+        const auto size = data_to_send_map.at(connection->get_id());
+
+        std::vector<std::weak_ptr<sim::IConnection>> conns;
+        conns.emplace_back(connection);
+
+        scenario.add_action(std::make_unique<sim::SendDataAction>(
+            TimeNs(0), size, conns, 1, TimeNs(0)));
     }
-    sim.set_scenario(scenario);
+    sim.set_scenario(std::move(scenario));
 
     sim.start();
 
