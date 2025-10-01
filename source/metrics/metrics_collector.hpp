@@ -6,6 +6,7 @@
 #include "link/packet_queue/link_queue.hpp"
 #include "links_queue_size_storage.hpp"
 #include "multi_id_metrics_storage.hpp"
+#include "packet_storage.hpp"
 #include "packet_reordering/i_packet_reordering.hpp"
 namespace sim {
 
@@ -22,6 +23,9 @@ public:
     // Link metrics
     void add_queue_size(Id link_id, TimeNs time, SizeByte value,
                         LinkQueueType type = LinkQueueType::FromEgress);
+
+    // Device metrics
+    void add_arrived_packet(Id device_Id, Packet packet);
 
     // Layout
     void export_metrics_to_files(std::filesystem::path metrics_dir) const;
@@ -52,6 +56,9 @@ private:
 
     // link_ID --> vector of <time, queue size> values
     LinksQueueSizeStorage m_links_queue_size_storage;
+
+    // device_ID --> all successfully arrived packets
+    PacketStorage m_arrived_packets;
 };
 
 }  // namespace sim

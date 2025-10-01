@@ -47,6 +47,7 @@ TimeNs Switch::process() {
     // TODO: add some switch ID for easier packet path tracing
     LOG_INFO("Processing packet from link on switch. Packet: " +
              packet.to_string());
+    packet.network_telemetry_data.push_back(DeviceVisitingTime(get_id(), Scheduler::get_instance().get_current_time()));
 
     // ECN mark for data packets
     if (packet.ecn_capable_transport) {

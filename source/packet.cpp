@@ -25,6 +25,17 @@ bool Packet::operator==(const Packet& packet) const {
            flags == packet.flags;
 }
 
+std::string Packet::get_telemetry_string() const {
+    std::ostringstream oss;
+    oss << "Visited devices: ";
+    for (auto record: network_telemetry_data) {
+        oss << "(device id: " << record.device_id;
+        oss << ", time: " << record.visiting_time << "); ";
+    }
+    oss << std::endl;
+    return oss.str();
+}
+
 // TODO: think about some ID for packet (currently its impossible to distinguish
 // packets)
 std::string Packet::to_string() const {
