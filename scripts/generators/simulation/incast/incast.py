@@ -10,6 +10,7 @@ class InputConfig:
         try:
             self.packet_spraying = config["packet-spraying"]
             self.senders_count = int(config["senders_count"])
+            self.scenario = config["scenario"]
             
             presets = config["presets"]
             try:
@@ -31,7 +32,7 @@ class InputConfig:
                     self.default_flow_preset = flow_presets["default"].copy()
                 except KeyError as e:
                     raise KeyError(f"flow->{e}")
-                
+
             except KeyError as e:
                 raise KeyError(f"presets->{e}")
         except KeyError as e:
@@ -92,6 +93,12 @@ class OutputConfig:
                 },
             }
 
+    def _add_scenario(self, input_config: InputConfig):
+        """
+        Adds scenario part
+        """
+        self.config["scenario"] = input_config.scenario
+
     def generate(self, config : dict) -> dict:
         """
         Generates incast config
@@ -103,6 +110,7 @@ class OutputConfig:
         input_config = InputConfig(config)
         self._add_topology(input_config)
         self._add_simulation(input_config)
+        self._add_scenario(input_config)
         return self.config
     
     def generate_and_save(self, config : dict, output_path : str):

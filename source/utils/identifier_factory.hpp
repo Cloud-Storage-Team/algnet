@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include "types.hpp"
 
@@ -30,6 +31,19 @@ public:
             return nullptr;
         }
         return std::dynamic_pointer_cast<TObject>(it->second);
+    }
+
+    template <typename TObject>
+    std::vector<std::shared_ptr<TObject> > get_objects() {
+        static_assert(std::is_base_of_v<Identifiable, TObject>,
+                      "TObject must implement Identifiable interface");
+        std::vector<std::shared_ptr<TObject> > result;
+        for (auto& [id, base_ptr] : m_id_table) {
+            if (auto obj = std::dynamic_pointer_cast<TObject>(base_ptr); obj) {
+                result.push_back(obj);
+            }
+        }
+        return result;
     }
 
     void clear();

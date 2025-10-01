@@ -9,10 +9,10 @@
 #include "connection/i_connection.hpp"
 #include "device/host.hpp"
 #include "device/switch.hpp"
-#include "event/start_connection.hpp"
 #include "event/stop.hpp"
 #include "flow/tcp/tcp_flow.hpp"
 #include "link/link.hpp"
+#include "scenario/scenario.hpp"
 #include "utils/algorithms.hpp"
 #include "utils/validation.hpp"
 
@@ -23,6 +23,12 @@ public:
     Simulator() = default;
     ~Simulator() = default;
 
+    Simulator(const Simulator&) = delete;
+    Simulator& operator=(const Simulator&) = delete;
+
+    Simulator(Simulator&&) noexcept = default;
+    Simulator& operator=(Simulator&&) noexcept = default;
+
     bool add_host(std::shared_ptr<IHost> host);
 
     bool add_switch(std::shared_ptr<ISwitch> switch_device);
@@ -30,6 +36,8 @@ public:
     bool add_connection(std::shared_ptr<IConnection> connection);
 
     bool add_link(std::shared_ptr<ILink> link);
+
+    void set_scenario(Scenario&& scenario);
 
     std::vector<std::shared_ptr<IDevice>> get_devices() const;
 
@@ -49,6 +57,7 @@ private:
     std::unordered_set<std::shared_ptr<ISwitch>> m_switches;
     std::unordered_set<std::shared_ptr<IConnection>> m_connections;
     std::unordered_set<std::shared_ptr<ILink>> m_links;
+    Scenario m_scenario;
 };
 
 }  // namespace sim

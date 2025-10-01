@@ -16,14 +16,12 @@ class ConnectionImpl final
       public std::enable_shared_from_this<ConnectionImpl> {
 public:
     ConnectionImpl(Id a_id, std::shared_ptr<IHost> a_src,
-                   std::shared_ptr<IHost> a_dest, std::shared_ptr<IMPLB> a_mplb,
-                   SizeByte a_data_to_send = SizeByte(0));
+                   std::shared_ptr<IHost> a_dest,
+                   std::shared_ptr<IMPLB> a_mplb);
 
     ~ConnectionImpl() override = default;
 
     Id get_id() const override;
-
-    void start() override;
 
     void add_flow(std::shared_ptr<IFlow> flow) override;
 

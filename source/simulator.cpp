@@ -40,6 +40,10 @@ bool Simulator::add_link(std::shared_ptr<ILink> link) {
     return true;
 }
 
+void Simulator::set_scenario(Scenario&& scenario) {
+    m_scenario = std::move(scenario);
+}
+
 std::vector<std::shared_ptr<IDevice>> Simulator::get_devices() const {
     std::vector<std::shared_ptr<IDevice>> devices;
 
@@ -77,11 +81,7 @@ void Simulator::start() {
         Scheduler::get_instance().add<Stop>(m_stop_time.value());
     }
 
-    constexpr TimeNs start_time = TimeNs(0);
-
-    for (auto connection : m_connections) {
-        Scheduler::get_instance().add<StartConnection>(start_time, connection);
-    }
+    m_scenario.start();
 
     while (Scheduler::get_instance().tick()) {
     }

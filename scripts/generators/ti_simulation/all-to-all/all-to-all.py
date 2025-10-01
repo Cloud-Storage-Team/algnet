@@ -29,7 +29,6 @@ def generate_simulation_config(
                 default_flow_preset = flow_presets["default"]
             except KeyError as e:
                 raise RuntimeError(f"flow->{e}")
-            
         except KeyError as e:
             raise RuntimeError(f"presets->{e}")    
     except KeyError as e:
@@ -56,11 +55,14 @@ def generate_simulation_config(
             for flow_num in range(1, flows_per_connection + 1):
                 connection["flows"][f"flow_{flow_num}"] = default_flow_preset
             
-            simulation_config["connections"][connection_name] = connection 
+            simulation_config["connections"][connection_name] = connection
+
+    simulation_config["scenario"] = config["scenario"]
     
     return simulation_config
+
 def main():
-    
+
     default_config_path = os.path.join(os.path.dirname(__file__), "default_config.yml")
     args = parse_ti_simulation_generator_args(default_config_path)
 

@@ -4,7 +4,6 @@ connections:
   conn1:
     sender_id: sender
     receiver_id: receiver
-    data_to_send: 256000B
     mplb: round_robin
     flows:
       flow1:
@@ -19,3 +18,9 @@ connections:
         cc:
           type: swift
           base_target: 4000ns
+
+scenario:
+  - action: send_data
+    when: 0ns
+    size: 256000B
+    connections: conn1

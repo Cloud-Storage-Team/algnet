@@ -1,5 +1,6 @@
 #include "connection/connection_impl.hpp"
 
+#include "event/add_data_to_connection.hpp"
 #include "logger/logger.hpp"
 #include "scheduler.hpp"
 
@@ -7,17 +8,14 @@ namespace sim {
 
 ConnectionImpl::ConnectionImpl(Id a_id, std::shared_ptr<IHost> a_src,
                                std::shared_ptr<IHost> a_dest,
-                               std::shared_ptr<IMPLB> a_mplb,
-                               SizeByte a_data_to_send)
+                               std::shared_ptr<IMPLB> a_mplb)
     : m_id(a_id),
       m_src(a_src),
       m_dest(a_dest),
       m_mplb(std::move(a_mplb)),
-      m_data_to_send(a_data_to_send) {}
+      m_data_to_send(0) {}
 
 Id ConnectionImpl::get_id() const { return m_id; }
-
-void ConnectionImpl::start() { send_data(); }
 
 void ConnectionImpl::add_flow(std::shared_ptr<IFlow> flow) {
     m_flows.insert(flow);
@@ -29,7 +27,10 @@ void ConnectionImpl::delete_flow(std::shared_ptr<IFlow> flow) {
     m_mplb->remove_flow(flow);
 }
 
-void ConnectionImpl::add_data_to_send(SizeByte data) { m_data_to_send += data; }
+void ConnectionImpl::add_data_to_send(SizeByte data) {
+    m_data_to_send += data;
+    send_data();
+}
 
 void ConnectionImpl::update(const std::shared_ptr<IFlow>& flow) {
     if (!flow) {

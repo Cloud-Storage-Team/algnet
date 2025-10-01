@@ -4,7 +4,6 @@ connections:
   conn1:
     sender_id: sender1
     receiver_id: receiver1
-    data_to_send: 6400B
     mplb: round_robin
     flows:
       flow1:
@@ -15,7 +14,6 @@ connections:
   conn2:
     sender_id: sender2
     receiver_id: receiver2
-    data_to_send: 12800B
     mplb: round_robin
     flows:
       flow1:
@@ -23,3 +21,13 @@ connections:
         packet_size: 128B
         cc:
           type: basic
+
+scenario:
+  - action: send_data
+    when: 0ns
+    size: 6400B
+    connections: conn1
+  - action: send_data
+    when: 0ns
+    size: 12800B
+    connections: conn2

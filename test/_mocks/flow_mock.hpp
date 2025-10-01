@@ -15,7 +15,6 @@ public:
     void update(sim::Packet packet) final;
     SizeByte get_sending_quota() const final;
     void send_data(SizeByte data) final;
-    TimeNs get_last_rtt() const final;
 
     virtual SizeByte get_delivered_data_size() const final;
     virtual TimeNs get_fct() const final;

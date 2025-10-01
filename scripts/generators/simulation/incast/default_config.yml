@@ -7,7 +7,6 @@ presets:
       egress_buffer_size: 1000000B
   connection:
     default:
-      data_to_send: 1500000B
       mplb: round_robin
   flow:
     default:
@@ -22,7 +21,14 @@ presets:
         min: 0.7
         max: 0.7
         probability: 1.0
+
 packet-spraying:
   type: ecmp
+
+scenario:
+  - action: send_data
+    connections: .*
+    when: 0ns
+    size: 1500000B
 
 senders_count: 3 # count of senders in topology; for every sender will be created one connection
