@@ -4,8 +4,8 @@
 namespace sim {
 class TcpTahoeCC : public ITcpCC {
 public:
-    static constexpr double DEFAULT_START_CWND = 1.0;
-    static constexpr double DEFAULT_SSTRESH = 8;
+    static constexpr double DEFAULT_START_CWND = 1.;
+    static constexpr double DEFAULT_SSTRESH = 8.;
 
     explicit TcpTahoeCC(double a_start_cwnd = DEFAULT_START_CWND,
                         double a_ssthresh = DEFAULT_SSTRESH);

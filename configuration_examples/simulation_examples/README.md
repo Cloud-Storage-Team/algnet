@@ -61,7 +61,9 @@ cc:
 `type` describes type of congestion control:
 
 - `basic`: no congestion control; no specific fields
-- `tahoe`: [tcp tahoe](https://www.geeksforgeeks.org/computer-networks/tcp-tahoe-and-tcp-reno/) congestion control; no specific values
+- `tahoe`: [tcp tahoe](https://www.geeksforgeeks.org/computer-networks/tcp-tahoe-and-tcp-reno/) congestion control; spicific optional fields (all are real numbers):
+  + `start_cwnd`: Initial cwnd value; default: `1.0`
+  + `sstresh`: Initial sstresh value; default: `8.0`
 - `swift`: [swift](https://2022-cs244.github.io/papers/L5-swift.pdf) congestion control (especially see pseudocode on page 516); specific fields:
   
   Required:
