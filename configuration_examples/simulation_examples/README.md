@@ -69,7 +69,7 @@ cc:
   Required:
     + `target_delay`: value from paper above in [time format](../README.md)
 
-  Optional (all fields are real numbers):
+  Optional (all are real numbers):
     + `ai`: Additive‑increase constant; default: `0.5`.
     + `md`: Multiplicative decrease constant; default: `0.5`.
     + `max_mdf`: Upper bound on MD factor per RTT; default: `0.3`.
