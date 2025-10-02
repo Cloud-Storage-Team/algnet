@@ -23,7 +23,7 @@ consists of:
 Structure:
 ```yaml
 packet-spraying:
-  type: random|ecmp|salt|flowlet 
+  type: random|ecmp|salt|flowlet|adaptive_flowlet
 ```
 
 If type is flowlet, it needs to set field `threshold` in [time format](../README.md)

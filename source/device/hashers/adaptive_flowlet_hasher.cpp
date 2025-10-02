@@ -51,9 +51,9 @@ std::uint32_t AdaptiveFlowletHasher::get_hash(Packet packet) {
             "hash");
         return ecmp_hash + shift;
     } catch (FlagNotSetException& e) {
-        LOG_ERROR(
+        LOG_WARN(
             "Adaptive flowlet hasher can not find avg rtt (packet flag not "
-            "set); returned previous "
+            "set); looks like packet from first flowlet; returned previous "
             "hash");
         return ecmp_hash + shift;
     }

@@ -86,12 +86,12 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
     
     # Process hosts
     for host_id, host_info in hosts.items():
-        layer = host_info["layer"] if host_info is not None and "host" in host_info else DEFAULT_LAYERS["host"]
+        layer = host_info["layer"] if host_info is not None and "layer" in host_info else DEFAULT_LAYERS["host"]
         all_devices.append((host_id, "host", layer, host_info))
     
     # Process switches
     for switch_id, switch_info in switches.items():
-        layer = switch_info["layer"] if switch_info is not None and "switch" in switch_info else DEFAULT_LAYERS["switch"]
+        layer = switch_info["layer"] if switch_info is not None and "layer" in switch_info else DEFAULT_LAYERS["switch"]
         all_devices.append((switch_id, "switch", layer, switch_info))
 
     # Group devices by layer

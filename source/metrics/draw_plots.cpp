@@ -16,6 +16,7 @@ void draw_on_same_plot(std::filesystem::path path, PlotMetricsData data,
 
 matplot::figure_handle put_on_same_plot(PlotMetricsData data,
                                         PlotMetadata metadata) {
+    const static std::size_t MAX_LEGENG_SIZE = 4;
     auto fig = matplot::figure(true);
     auto ax = fig->current_axes();
     ax->hold(matplot::on);
@@ -26,7 +27,9 @@ matplot::figure_handle put_on_same_plot(PlotMetricsData data,
     ax->xlabel(metadata.x_label);
     ax->ylabel(metadata.y_label);
     ax->title(metadata.title);
-    ax->legend(std::vector<std::string>());
+    if (data.size() <= MAX_LEGENG_SIZE) {
+        ax->legend(std::vector<std::string>());
+    }
     return fig;
 }
 

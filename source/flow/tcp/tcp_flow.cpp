@@ -83,8 +83,12 @@ Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     Packet packet;
     m_flag_manager.set_flag(packet.flags, m_packet_type_label,
                             PacketType::DATA);
-    set_avg_rtt_label(m_flag_manager, packet.flags,
-                      m_rtt_statistics.get_mean());
+    TimeNs avg_rtt = m_rtt_statistics.get_mean();
+    if (avg_rtt != TimeNs(0)) {
+        // Threre were some rtt measurements
+        set_avg_rtt_label(m_flag_manager, packet.flags,
+                          m_rtt_statistics.get_mean());
+    }
     packet.size = m_packet_size;
     packet.flow = this;
     packet.source_id = get_sender()->get_id();
