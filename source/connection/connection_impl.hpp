@@ -4,8 +4,8 @@
 #include <memory>
 #include <set>
 
+#include "connection/flow/i_flow.hpp"
 #include "connection/i_connection.hpp"
-#include "flow/i_flow.hpp"
 #include "packet.hpp"
 #include "utils/identifier_factory.hpp"
 

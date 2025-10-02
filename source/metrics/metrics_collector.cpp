@@ -2,8 +2,8 @@
 
 #include <spdlog/fmt/fmt.h>
 
+#include "connection/flow/i_flow.hpp"
 #include "draw_plots.hpp"
-#include "flow/i_flow.hpp"
 #include "link/i_link.hpp"
 #include "utils/identifier_factory.hpp"
 #include "utils/safe_matplot.hpp"

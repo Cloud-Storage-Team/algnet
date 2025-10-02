@@ -2,9 +2,9 @@
 
 #include <type_traits>
 
+#include "connection/flow/i_flow.hpp"
 #include "connection/i_connection.hpp"
 #include "device/interfaces/i_host.hpp"
-#include "flow/i_flow.hpp"
 #include "i_tcp_cc.hpp"
 #include "metrics/packet_reordering/simple_packet_reordering.hpp"
 #include "packet.hpp"

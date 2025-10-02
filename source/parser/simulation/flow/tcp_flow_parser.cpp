@@ -1,7 +1,7 @@
+#include "connection/flow/tcp/basic/basic_cc.hpp"
 #include "connection/i_connection.hpp"
-#include "flow/tcp/basic/basic_cc.hpp"
-#include "flow/tcp/swift/swift_cc.hpp"
-#include "flow/tcp/tahoe/tcp_tahoe_cc.hpp"
+#include "connection/flow/tcp/swift/swift_cc.hpp"
+#include "connection/flow/tcp/tahoe/tcp_tahoe_cc.hpp"
 #include "parser/parse_utils.hpp"
 #include "parser/simulation/flow/flow_parser.hpp"
 

@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include "flow/tcp/i_tcp_cc.hpp"
+#include "connection/flow/tcp/i_tcp_cc.hpp"
 
 namespace sim {
 

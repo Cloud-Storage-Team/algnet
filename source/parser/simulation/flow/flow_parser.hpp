@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include "flow/tcp/tcp_flow.hpp"
+#include "connection/flow/tcp/tcp_flow.hpp"
 
 namespace sim {
 

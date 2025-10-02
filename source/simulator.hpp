@@ -6,11 +6,11 @@
 #include <unordered_set>
 #include <variant>
 
+#include "connection/flow/tcp/tcp_flow.hpp"
 #include "connection/i_connection.hpp"
 #include "device/host.hpp"
 #include "device/switch.hpp"
 #include "event/stop.hpp"
-#include "flow/tcp/tcp_flow.hpp"
 #include "link/link.hpp"
 #include "scenario/scenario.hpp"
 #include "utils/algorithms.hpp"
