@@ -10,20 +10,11 @@ namespace sim {
 
 class FlowParser {
 public:
+    // ATTENTION: do not change std::shared_ptr with std::unique_ptr (because
+    // TcpFlow is inherit from std::enable_shared_from_this)
     static std::shared_ptr<IFlow> parse_i_flow(const YAML::Node& key_node,
                                                const YAML::Node& value_node,
                                                Id conn_id);
-
-private:
-    class TcpCCParser {
-    public:
-        static std::unique_ptr<ITcpCC> parse_i_tcp_cc(const YAML::Node& cc_node,
-                                                      Id flow_id);
-    };
-
-    static std::shared_ptr<TcpFlow> parse_tcp_flow(const YAML::Node& key_node,
-                                                   const YAML::Node& value_node,
-                                                   Id conn_id);
 };
 
 }  // namespace sim
