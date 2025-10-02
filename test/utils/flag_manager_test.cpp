@@ -58,7 +58,7 @@ void test_register_by_amount() {
 
     TBitStorage half_amont = ((TBitStorage)1 << (bits_count >> 1));
 
-    // twicely registrate half of total space
+    // twicely registier half of total space
     EXPECT_TRUE(
         flag_manager.register_flag_by_amount(TestFlagId::FlagA, half_amont));
     EXPECT_TRUE(
