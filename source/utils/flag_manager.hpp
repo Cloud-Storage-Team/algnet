@@ -9,7 +9,7 @@
 
 namespace sim {
 
-class FlagNotRegistratedException : std::invalid_argument {
+class FlagNotRegistratedException : public std::invalid_argument {
 public:
     template <typename TFlagId>
     explicit FlagNotRegistratedException(TFlagId id)
@@ -17,7 +17,7 @@ public:
               fmt::format("Flag {} not registrated", std::move(id))){};
 };
 
-class FlagNotSetException : std::invalid_argument {
+class FlagNotSetException : public std::invalid_argument {
 public:
     template <typename TFlagId>
     explicit FlagNotSetException(TFlagId id)
