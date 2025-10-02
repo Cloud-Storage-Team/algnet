@@ -24,7 +24,7 @@ public:
     SizeByte get_sending_quota() const;
     TimeNs get_last_rtt() const final;
     SizeByte get_delivered_data_size() const final;
-    const BaseFlagManager& get_flag_mamager() const final;
+    const BaseFlagManager& get_flag_manager() const final;
     // Returns time elapced from flow start (firsrt call of send_packet)
     // to last update call
     TimeNs get_fct() const final;

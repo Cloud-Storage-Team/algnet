@@ -33,7 +33,7 @@ std::uint32_t AdaptiveFlowletHasher::get_hash(Packet packet) {
     auto& [last_seen, shift] = it->second;
     TimeNs elapsed_from_last_seen = curr_time - last_seen;
 
-    const BaseFlagManager& flag_manager = flow->get_flag_mamager();
+    const BaseFlagManager& flag_manager = flow->get_flag_manager();
     try {
         TimeNs flowlet_threshold =
             get_avg_rtt_label(flag_manager, packet.flags) * m_factor;

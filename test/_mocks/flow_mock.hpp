@@ -19,7 +19,7 @@ public:
     virtual SizeByte get_delivered_data_size() const final;
     virtual TimeNs get_fct() const final;
     virtual TimeNs get_last_rtt() const;
-    const sim::BaseFlagManager& get_flag_mamager() const final;
+    const sim::BaseFlagManager& get_flag_manager() const final;
 
     std::shared_ptr<sim::IHost> get_sender() const final;
     std::shared_ptr<sim::IHost> get_receiver() const final;

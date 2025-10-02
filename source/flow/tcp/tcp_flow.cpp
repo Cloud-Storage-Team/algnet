@@ -49,7 +49,7 @@ TimeNs TcpFlow::get_fct() const {
     return m_last_ack_arrive_time - m_init_time;
 }
 
-const BaseFlagManager& TcpFlow::get_flag_mamager() const {
+const BaseFlagManager& TcpFlow::get_flag_manager() const {
     return m_flag_manager;
 }
 
