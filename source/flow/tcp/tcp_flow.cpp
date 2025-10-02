@@ -86,8 +86,8 @@ Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     TimeNs avg_rtt = m_rtt_statistics.get_mean();
     if (avg_rtt != TimeNs(0)) {
         // Threre were some rtt measurements
-        set_avg_rtt_label(m_flag_manager, packet.flags,
-                          m_rtt_statistics.get_mean());
+        set_avg_rtt_flag(m_flag_manager, packet.flags,
+                         m_rtt_statistics.get_mean());
     }
     packet.size = m_packet_size;
     packet.flow = this;
@@ -147,7 +147,7 @@ Packet TcpFlow::create_ack(Packet data) {
 
     m_flag_manager.set_flag(ack.flags, m_packet_type_label, PacketType::ACK);
     m_flag_manager.set_flag(ack.flags, m_ack_ttl_label, data.ttl);
-    set_avg_rtt_label(m_flag_manager, ack.flags, m_rtt_statistics.get_mean());
+    set_avg_rtt_flag(m_flag_manager, ack.flags, m_rtt_statistics.get_mean());
     return ack;
 }
 
@@ -165,7 +165,7 @@ void TcpFlow::initialize_flag_manager() {
                                                     M_MAX_TTL + 1)) {
             throw std::runtime_error("Can not registrate ack ttl label");
         }
-        if (!registate_packet_avg_rtt_flag(m_flag_manager)) {
+        if (!register_packet_avg_rtt_flag(m_flag_manager)) {
             throw std::runtime_error("Can not registrate packet avg rtt label");
         }
         m_is_flag_manager_initialized = true;

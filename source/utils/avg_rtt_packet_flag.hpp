@@ -14,13 +14,13 @@ using AvgRttFlagType = uint32_t;
 static_assert(sizeof(AvgRttCastType) == sizeof(AvgRttFlagType),
               "Rtt cast type and flag type should have same size");
 
-inline bool registate_packet_avg_rtt_flag(BaseFlagManager& flag_manager) {
+inline bool register_packet_avg_rtt_flag(BaseFlagManager& flag_manager) {
     return flag_manager.register_flag_by_length(packet_avg_rtt_label,
                                                 sizeof_bits(AvgRttCastType));
 }
 
-inline void set_avg_rtt_label(BaseFlagManager& flag_manager, BaseBitset& bitset,
-                              TimeNs rtt) {
+inline void set_avg_rtt_flag(BaseFlagManager& flag_manager, BaseBitset& bitset,
+                             TimeNs rtt) {
     AvgRttCastType value = rtt.value_nanoseconds();
     AvgRttFlagType casted_value;
     auto casted_value = std::bit_cast<AvgRttFlagType>(value);
