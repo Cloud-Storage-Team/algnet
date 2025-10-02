@@ -1,4 +1,4 @@
-#include "parser/simulation/flow/flow_parser.hpp"
+#include "flow_parser.hpp"
 
 namespace sim {
 
