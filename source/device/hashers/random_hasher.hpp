@@ -8,7 +8,7 @@ public:
     RandomHasher() = default;
     ~RandomHasher() = default;
 
-    std::uint32_t get_hash(Packet packet) final;
+    std::uint32_t get_hash(const Packet& packet) final;
 };
 
 }

@@ -4,7 +4,7 @@
 #include "get_flow_id.hpp"
 
 namespace sim {
-std::uint32_t SymmetricHasher::get_hash(Packet packet) {
+std::uint32_t SymmetricHasher::get_hash(const Packet& packet) {
     std::hash<std::string> hasher;
 
     std::string combined_id_str =

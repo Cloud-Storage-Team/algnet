@@ -8,7 +8,7 @@ namespace sim {
 AdaptiveFlowletHasher::AdaptiveFlowletHasher(double a_factor)
     : m_factor(a_factor) {}
 
-std::uint32_t AdaptiveFlowletHasher::get_hash(Packet packet) {
+std::uint32_t AdaptiveFlowletHasher::get_hash(const Packet& packet) {
     std::uint32_t ecmp_hash = m_ecmp_hasher.get_hash(packet);
 
     IFlow* flow = packet.flow;

@@ -7,7 +7,7 @@ namespace sim {
 SaltECMPHasher::SaltECMPHasher(Id a_device_id)
     : m_device_id(std::move(a_device_id)) {}
 
-std::uint32_t SaltECMPHasher::get_hash(Packet packet) {
+std::uint32_t SaltECMPHasher::get_hash(const Packet& packet) {
     std::string flow_id = get_flow_id(packet.flow);
 
     std::hash<std::string> hasher;

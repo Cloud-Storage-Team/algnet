@@ -28,11 +28,11 @@ inline void set_avg_rtt_label(BaseFlagManager& flag_manager, BaseBitset& bitset,
 }
 
 inline TimeNs get_avg_rtt_label(const BaseFlagManager& flag_manager,
-                                BaseBitset& bitset) {
+                                const BaseBitset& bitset) {
     AvgRttFlagType casted_value =
         flag_manager.get_flag(bitset, packet_avg_rtt_label);
     AvgRttCastType value;
-    std::memcpy(&value, &casted_value,sizeof(value));
+    std::memcpy(&value, &casted_value, sizeof(value));
     return TimeNs(value);
 }
 

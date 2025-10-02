@@ -1,4 +1,5 @@
 #include "flowlet_hasher.hpp"
+
 #include "get_flow_id.hpp"
 #include "scheduler.hpp"
 
@@ -7,7 +8,7 @@ namespace sim {
 FLowletHasher::FLowletHasher(TimeNs a_flowlet_threshold)
     : m_flowlet_threshold(a_flowlet_threshold) {}
 
-std::uint32_t FLowletHasher::get_hash(Packet packet) {
+std::uint32_t FLowletHasher::get_hash(const Packet& packet) {
     std::uint32_t ecmp_hash = m_ecmp_hasher.get_hash(packet);
 
     Id flow_id = get_flow_id(packet.flow);
@@ -30,4 +31,4 @@ std::uint32_t FLowletHasher::get_hash(Packet packet) {
     return ecmp_hash + shift;
 }
 
-}
+}  // namespace sim

@@ -7,7 +7,7 @@ class AdaptiveFlowletHasher : public IPacketHasher {
 public:
     explicit AdaptiveFlowletHasher(double a_factor = 0.5);
     ~AdaptiveFlowletHasher() = default;
-    std::uint32_t get_hash(Packet packet) final;
+    std::uint32_t get_hash(const Packet& packet) final;
 
 private:
     double m_factor;

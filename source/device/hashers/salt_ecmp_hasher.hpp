@@ -7,7 +7,7 @@ public:
     SaltECMPHasher(Id a_device_id);
     ~SaltECMPHasher() = default;
 
-    std::uint32_t get_hash(Packet packet) final;
+    std::uint32_t get_hash(const Packet& packet) final;
 
 private:
     Id m_device_id;

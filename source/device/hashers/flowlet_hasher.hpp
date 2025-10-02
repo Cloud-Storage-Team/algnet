@@ -8,7 +8,7 @@ public:
     explicit FLowletHasher(TimeNs a_flowlet_threshold);
     ~FLowletHasher() = default;
 
-    std::uint32_t get_hash(Packet packet) final;
+    std::uint32_t get_hash(const Packet& packet) final;
 
 private:
     TimeNs m_flowlet_threshold;
