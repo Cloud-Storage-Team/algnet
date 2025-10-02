@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <optional>
 #include <type_traits>
 
 #include "logger/logger.hpp"
@@ -17,7 +18,7 @@ requires ExplicitlyConvertable<T, double>
 class Statistics {
 public:
     explicit Statistics(double a_factor = 0.8)
-        : m_factor(a_factor), m_mean(0), m_variance(0) {
+        : m_have_records(false), m_factor(a_factor), m_mean(0), m_variance(0) {
         if (m_factor < 0 || m_factor > 1) {
             LOG_ERROR(
                 fmt::format("Passed incorrect factor; expected value in [0, "
@@ -27,6 +28,7 @@ public:
     }
 
     void add_record(const T& record) {
+        m_have_records = true;
         double value = static_cast<double>(record);
         m_last = value;
         if (m_mean == 0 && m_variance == 0) {
@@ -40,15 +42,20 @@ public:
         }
     }
 
-    T get_last() const { return T(m_last); }
+    std::optional<T> get_last() const {
+        return (m_have_records ? std::make_optional<T>(m_last) : std::nullopt);
+    }
 
-    T get_mean() const { return T(m_mean); }
+    std::optional<T> get_mean() const {
+        return (m_have_records ? std::make_optional<T>(m_mean) : std::nullopt);
+    }
 
     double get_variance() { return m_variance; }
 
     T get_std() const { return T(std::sqrt(m_variance)); }
 
 private:
+    bool m_have_records;
     const double m_factor;
     double m_last;
     double m_mean;

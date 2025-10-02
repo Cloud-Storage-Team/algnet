@@ -18,7 +18,7 @@ public:
 
     virtual SizeByte get_delivered_data_size() const final;
     virtual TimeNs get_fct() const final;
-    virtual TimeNs get_last_rtt() const;
+    virtual std::optional<TimeNs> get_last_rtt() const;
     const sim::BaseFlagManager& get_flag_manager() const final;
 
     std::shared_ptr<sim::IHost> get_sender() const final;
@@ -26,7 +26,7 @@ public:
 
     Id get_id() const final;
     void set_sending_quota(SizeByte quota);
-    void set_last_rtt(TimeNs rtt);
+    void set_last_rtt(std::optional<TimeNs> rtt);
     SizeByte get_packet_size() const;
 
 private:
@@ -34,7 +34,7 @@ private:
     sim::BaseFlagManager m_flag_manager;
     SizeByte m_packet_size;
     SizeByte m_sending_quota;
-    TimeNs m_last_rtt;
+    std::optional<TimeNs> m_last_rtt;
 };
 
 }  // namespace test

@@ -12,7 +12,7 @@ FlowMock::FlowMock(std::shared_ptr<sim::IHost> a_receiver, SizeByte packet_size,
 void FlowMock::update([[maybe_unused]] sim::Packet packet) {};
 
 SizeByte FlowMock::get_sending_quota() const { return m_sending_quota; }
-TimeNs FlowMock::get_last_rtt() const { return m_last_rtt; }
+std::optional<TimeNs> FlowMock::get_last_rtt() const { return m_last_rtt; }
 void FlowMock::send_data(SizeByte data) {
     if (data > m_sending_quota) {
         throw std::runtime_error("FlowMock::send_data: data > sending_quota");
@@ -34,7 +34,7 @@ std::shared_ptr<sim::IHost> FlowMock::get_receiver() const {
 Id FlowMock::get_id() const { return ""; }
 
 void FlowMock::set_sending_quota(SizeByte quota) { m_sending_quota = quota; }
-void FlowMock::set_last_rtt(TimeNs rtt) { m_last_rtt = rtt; }
+void FlowMock::set_last_rtt(std::optional<TimeNs> rtt) { m_last_rtt = rtt; }
 
 SizeByte FlowMock::get_packet_size() const { return m_packet_size; }
 

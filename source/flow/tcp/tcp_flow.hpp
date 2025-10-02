@@ -22,7 +22,7 @@ public:
     void send_data(SizeByte data) final;
 
     SizeByte get_sending_quota() const;
-    TimeNs get_last_rtt() const final;
+    std::optional<TimeNs> get_last_rtt() const final;
     SizeByte get_delivered_data_size() const final;
     const BaseFlagManager& get_flag_manager() const final;
     // Returns time elapced from flow start (firsrt call of send_packet)
@@ -52,6 +52,7 @@ private:
     class Timeout;
 
     Packet generate_data_packet(PacketNum packet_num);
+    void set_avg_rtt_if_present(Packet& packet);
     Packet create_ack(Packet data);
     Packet generate_packet();
 
