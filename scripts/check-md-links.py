@@ -31,13 +31,14 @@ def check_links_in_markdown(file_path : str):
             continue
         # Check path as a link
         link_url = link_path
+        response = None
         try:
             response = requests.head(link_url, allow_redirects=True)
             if response.status_code != 200:
                 raise requests.exceptions.ConnectionError(f"Can not access to {link_url}")
             print(f"{link_url} is link to an available site")
         except requests.exceptions.RequestException:
-            print(f"{link_url} is not an available site; returned code {response.status_code}")
+            print(f"{link_url} is not an available site; returned code {response.status_code if response is not None else None}")
             incorrect_links.append(link_url)
     if len(incorrect_links) == 0:
         print()
