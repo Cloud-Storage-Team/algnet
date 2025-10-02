@@ -53,7 +53,7 @@ void test_register_by_amount() {
     int bits_count = sizeof_bits(TBitStorage);
     sim::FlagManager<int, TBitStorage> flag_manager;
 
-    // Can not registrate flag with only possible value
+    // Can not register flag with only possible value
     EXPECT_FALSE(flag_manager.register_flag_by_amount(TestFlagId::FlagA, 1));
 
     TBitStorage half_amont = ((TBitStorage)1 << (bits_count >> 1));
