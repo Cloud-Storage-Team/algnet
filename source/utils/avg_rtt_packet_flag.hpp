@@ -23,7 +23,7 @@ inline void set_avg_rtt_label(BaseFlagManager& flag_manager, BaseBitset& bitset,
                               TimeNs rtt) {
     AvgRttCastType value = rtt.value_nanoseconds();
     AvgRttFlagType casted_value;
-    std::memcpy(&casted_value, &value, sizeof(casted_value));
+    auto casted_value = std::bit_cast<AvgRttFlagType>(value);
     flag_manager.set_flag(bitset, packet_avg_rtt_label, casted_value);
 }
 
