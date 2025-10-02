@@ -5,10 +5,9 @@
 #include "scheduler.hpp"
 
 namespace sim {
-TcpTahoeCC::TcpTahoeCC(TimeNs a_delay_threshold, double a_sstresh)
-    : m_delay_threshold(a_delay_threshold),
-      m_ssthresh(a_sstresh),
-      m_cwnd(1.0),
+TcpTahoeCC::TcpTahoeCC(double a_start_cwnd, double a_sstresh)
+    : m_ssthresh(a_sstresh),
+      m_cwnd(a_start_cwnd),
       m_last_congestion_detected(0),
       m_last_avg_rtt(0) {}
 
@@ -41,8 +40,7 @@ TimeNs TcpTahoeCC::get_pacing_delay() const { return TimeNs(0); }
 double TcpTahoeCC::get_cwnd() const { return m_cwnd; }
 
 std::string TcpTahoeCC::to_string() const {
-    return fmt::format("[delay threshold: {}, cwnd: {}, ssthresh: {}]",
-                       m_delay_threshold.value(), m_cwnd, m_ssthresh);
+    return fmt::format("[cwnd: {}, ssthresh: {}]", m_cwnd, m_ssthresh);
 }
 
 }  // namespace sim
