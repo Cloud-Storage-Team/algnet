@@ -6,13 +6,23 @@
 #include <vector>
 
 namespace sim {
+
+class ConfigNodeError : public std::runtime_error {
+public:
+    ConfigNodeError(std::string a_what);
+};
+
+// Path by node names from root to current node
+using NodeStacktrace = std::vector<std::string>;
+
+std::ostream& operator<<(std::ostream& out, const NodeStacktrace& stacktrace);
+
+std::string to_string(const NodeStacktrace& stacktrace);
+
 class ConfigNode {
 public:
-    using iterator = YAML::iterator;
-    using const_iterator = YAML::const_iterator;
-
     ConfigNode(YAML::Node a_node = YAML::Node(),
-               std::vector<std::string> a_node_names_path = {});
+               NodeStacktrace a_node_names_path = {});
 
     // yaml-cpp functional
 
@@ -30,11 +40,11 @@ public:
     // access
     template <typename T>
     T as() const {
-        return m_node.as<T>()
+        return m_node.as<T>();
     }
     template <typename T, typename S>
     T as(const S& fallback) const {
-        return m_node.as<T>(s);
+        return m_node.as<T>(fallback);
     }
     const std::string& Scalar() const;
 
@@ -47,11 +57,11 @@ public:
     // size/iterator
     std::size_t size() const;
 
-    const_iterator begin() const;
-    iterator begin();
+    // const_iterator begin() const;
+    // iterator begin();
 
-    const_iterator end() const;
-    iterator end();
+    // const_iterator end() const;
+    // iterator end();
 
     // indexing
     const ConfigNode operator[](std::string_view key) const;
@@ -63,7 +73,7 @@ public:
 
 private:
     YAML::Node m_node;
-    std::vector<std::string> m_node_names_path;
+    NodeStacktrace m_node_names_path;
 };
 
 std::ostream& operator<<(std::ostream& out, const ConfigNode& node);
