@@ -1,9 +1,8 @@
 #pragma once
 
-#include <yaml-cpp/yaml.h>
-
 #include <memory>
 
+#include "parser/config_node.hpp"
 #include "parser/parse_utils.hpp"
 #include "scenario/action/i_action.hpp"
 

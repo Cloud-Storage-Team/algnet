@@ -1,12 +1,11 @@
 #pragma once
 
-#include <yaml-cpp/yaml.h>
-
 #include <filesystem>
 #include <functional>
 #include <string>
 #include <utility>
 
+#include "parser/config_node.hpp"
 #include "simulator.hpp"
 
 namespace sim {

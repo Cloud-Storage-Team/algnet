@@ -1,10 +1,10 @@
 #pragma once
 #include <spdlog/fmt/fmt.h>
-#include <yaml-cpp/yaml.h>
 
 #include <memory>
 
 #include "connection/i_connection.hpp"
+#include "parser/config_node.hpp"
 
 namespace sim {
 

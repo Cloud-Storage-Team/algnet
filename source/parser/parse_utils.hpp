@@ -1,12 +1,12 @@
 #pragma once
 #include <spdlog/fmt/fmt.h>
-#include <yaml-cpp/yaml.h>
 
 #include <cstdint>
 #include <functional>
 #include <string>
 
 #include "logger/logger.hpp"
+#include "parser/config_node.hpp"
 #include "types.hpp"
 
 SpeedGbps parse_speed(const std::string& throughput);
