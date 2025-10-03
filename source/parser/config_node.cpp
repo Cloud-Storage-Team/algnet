@@ -5,16 +5,32 @@ namespace sim {
 ConfigNodeError::ConfigNodeError(std::string a_what)
     : std::runtime_error(std::move(a_what)) {}
 
-NodeStacktrace::NodeStacktrace() : m_parent_ptr(nullptr), m_key() {}
+NodeStacktrace::NodeStacktrace() : m_parent_ptr(nullptr), m_key(std::nullopt) {}
 
-NodeStacktrace::NodeStacktrace(NodeStacktracePtr a_link_to_prev,
+NodeStacktrace::NodeStacktrace(NodeStacktracePtr a_parent_ptr,
                                std::string a_key)
-    : m_parent_ptr(a_link_to_prev), m_key(a_key) {
+    : m_parent_ptr(a_parent_ptr), m_key(a_key) {
     if (m_parent_ptr == nullptr) {
         throw std::invalid_argument(
             "Link to parent node should not be null; if you want to create "
             "root node, use default constructor");
     }
+    if (m_key.value().empty()) {
+        throw std::invalid_argument(
+            "Key is empty; if you want to create root node, use default "
+            "constructor");
+    }
+}
+
+NodePath NodeStacktrace::get_full_path() const {
+    NodePath result;
+    auto node = shared_from_this();
+    while (node != nullptr) {
+        result.emplace_back(node->m_key.value());
+        node = node->m_parent_ptr;
+    }
+    std::reverse(result.begin(), result.end());
+    return result;
 }
 
 NodeStacktracePtr NodeStacktrace::create_child(std::string key) {
@@ -22,16 +38,8 @@ NodeStacktracePtr NodeStacktrace::create_child(std::string key) {
                                                      std::move(key));
 }
 
-NodePath NodeStacktrace::get_full_path() const {
-    NodePath result;
-    auto node = shared_from_this();
-    while (node != nullptr) {
-        result.emplace_back(node->m_key);
-        node = node->m_parent_ptr;
-    }
-    std::reverse(result.begin(), result.end());
-    return result;
-}
+std::optional<std::string> NodeStacktrace::get_key() const { return m_key; }
+
 std::ostream& operator<<(std::ostream& out, NodeStacktracePtr node) {
     NodePath path = node->get_full_path();
     std::string prefix_space = "";
@@ -68,20 +76,27 @@ std::string NodeStacktrace::to_string() const {
 }
 
 ConfigNode::ConfigNode(YAML::Node a_node)
-    : ConfigNode(std::move(a_node), nullptr) {};
+    : ConfigNode(std::move(a_node), NodeStacktraceFactory::create_root()) {};
 
 ConfigNode::ConfigNode(YAML::Node a_node, NodeStacktracePtr a_ptr)
-    : m_node(std::move(a_node)), m_stacktrace(a_ptr) {
+    : m_node(std::move(a_node)), m_stacktrace_node(a_ptr) {
+    if (m_stacktrace_node == nullptr) {
+        throw ConfigNodeError(
+            "Can not construct ConfigNode: stacktrace node pointer is null");
+    }
     if (!m_node) {
-        std::string errorMessage =
+        throw ConfigNodeError(
             "Can not construct ConfigNode: given YAML::Node is "
-            "invalid";
-        if (m_stacktrace != nullptr) {
-            errorMessage += "; stacktrace:\n" + m_stacktrace->to_string();
-        }
-        throw ConfigNodeError(std::move(errorMessage));
+            "invalid; stacktrace:\n" +
+            m_stacktrace_node->to_string());
     }
 }
+
+std::optional<std::string> ConfigNode::get_name() const {
+    return m_stacktrace_node->get_key();
+}
+
+const YAML::Node& ConfigNode::get_node() const { return m_node; }
 
 YAML::NodeType::value ConfigNode::Type() const { return m_node.Type(); }
 
@@ -103,19 +118,19 @@ const std::string& ConfigNode::Tag() const { return m_node.Tag(); }
 std::size_t ConfigNode::size() const { return m_node.size(); }
 
 ConfigNode::ConstIterator ConfigNode::begin() const {
-    return ConstIterator(m_node.begin(), m_stacktrace);
+    return ConstIterator(m_node.begin(), m_stacktrace_node);
 }
 
 ConfigNode::ConstIterator ConfigNode::end() const {
-    return ConstIterator(m_node.end(), m_stacktrace);
+    return ConstIterator(m_node.end(), m_stacktrace_node);
 }
 
 ConfigNode::MutableIterator ConfigNode::begin() {
-    return MutableIterator(m_node.begin(), m_stacktrace);
+    return MutableIterator(m_node.begin(), m_stacktrace_node);
 }
 
 ConfigNode::MutableIterator ConfigNode::end() {
-    return MutableIterator(m_node.end(), m_stacktrace);
+    return MutableIterator(m_node.end(), m_stacktrace_node);
 }
 
 const ConfigNode ConfigNode::operator[](std::string_view key) const {
@@ -123,18 +138,14 @@ const ConfigNode ConfigNode::operator[](std::string_view key) const {
     if (!child_node) {
         std::stringstream ss;
         ss << "Key error: node\n";
-        ss << m_stacktrace << '\n';
+        ss << m_stacktrace_node << '\n';
         ss << "have no key `" << key << "\'";
         throw ConfigNodeError(ss.str());
     }
     NodeStacktracePtr child_stacktrace =
-        m_stacktrace->create_child(std::string(key));
+        m_stacktrace_node->create_child(std::string(key));
     return ConfigNode(std::move(child_node), child_stacktrace);
 };
-
-const YAML::Node& ConfigNode::get_node() const { return m_node; }
-
-YAML::Node ConfigNode::get_node() { return m_node; }
 
 ConfigNode load_file(std::filesystem::path path) {
     return ConfigNode(YAML::LoadFile(path));

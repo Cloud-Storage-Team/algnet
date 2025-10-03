@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -28,6 +29,8 @@ public:
     NodePath get_full_path() const;
     NodeStacktracePtr create_child(std::string key);
 
+    std::optional<std::string> get_key() const;
+
     friend std::ostream& operator<<(std::ostream& out,
                                     NodeStacktracePtr stacktrace);
 
@@ -43,8 +46,11 @@ private:
     // Creates node py parent node and key by that this one got
     NodeStacktrace(NodeStacktracePtr a_parent_node, std::string a_key);
 
+    // Invariant: only two states are present:
+    // 1) m_parent_ptr = nullptr, m_key is std::nullopt
+    // 2) m_parent_ptr is correct pointer, m_key contains NOT EMPTY value
     NodeStacktracePtr m_parent_ptr;
-    std::string m_key;
+    std::optional<std::string> m_key;
 };
 
 class NodeStacktraceFactory {
@@ -61,6 +67,12 @@ class ConfigNode {
 public:
     // Creates ROOT ConfigNode from YAML::Node
     explicit ConfigNode(YAML::Node a_node = YAML::Node());
+
+    // Some functional over yaml-cpp
+
+    std::optional<std::string> get_name() const;
+
+    const YAML::Node& get_node() const;
 
     // yaml-cpp functional
 
@@ -82,7 +94,7 @@ public:
             return m_node.as<T>();
         } catch (const YAML::Exception& e) {
             throw ConfigNodeError("Can not apply 'as' to node\n" +
-                                  m_stacktrace->to_string() +
+                                  m_stacktrace_node->to_string() +
                                   "\n; original error: " + e.what());
         }
     }
@@ -92,7 +104,7 @@ public:
             return m_node.as<T>(fallback);
         } catch (const YAML::Exception& e) {
             throw ConfigNodeError("Can not apply 'as' with fallback to node\n" +
-                                  m_stacktrace->to_string() +
+                                  m_stacktrace_node->to_string() +
                                   "\n; original error: " + e.what());
         }
     }
@@ -114,7 +126,7 @@ public:
         using ThisIterator = Iterator<IsConst>;
 
         Iterator(YamlIterator a_it, NodeStacktracePtr a_stacktrace)
-            : m_iterator(a_it), m_stacktrace(a_stacktrace) {}
+            : m_iterator(a_it), m_stacktrace_node(a_stacktrace) {}
 
         ThisIterator& operator++() {
             ++m_iterator;
@@ -137,13 +149,13 @@ public:
 
         TypeName operator*() const {
             return TypeName(m_iterator->second,
-                            m_stacktrace->create_child(
+                            m_stacktrace_node->create_child(
                                 m_iterator->first.template as<std::string>()));
         }
 
     private:
         YamlIterator m_iterator;
-        NodeStacktracePtr m_stacktrace;
+        NodeStacktracePtr m_stacktrace_node;
     };
 
     using ConstIterator = Iterator<true>;
@@ -158,16 +170,12 @@ public:
     // indexing
     const ConfigNode operator[](std::string_view key) const;
 
-    // node getters (use them is some functional is missing)
-
-    const YAML::Node& get_node() const;
-    YAML::Node get_node();
-
 private:
     ConfigNode(YAML::Node a_node, NodeStacktracePtr a_node_ptr);
 
+    // Invariant: m_node is correct, m_stacktrace_node is not null
     YAML::Node m_node;
-    NodeStacktracePtr m_stacktrace;
+    NodeStacktracePtr m_stacktrace_node;
 };
 
 std::ostream& operator<<(std::ostream& out, const ConfigNode& node);
