@@ -6,7 +6,7 @@
 #include <string>
 
 #include "logger/logger.hpp"
-#include "parser/config_node.hpp"
+#include "parser/config_reader/config_node.hpp"
 #include "types.hpp"
 
 SpeedGbps parse_speed(const std::string& throughput);

@@ -5,7 +5,7 @@
 #include <string>
 #include <utility>
 
-#include "parser/config_node.hpp"
+#include "parser/config_reader/config_node.hpp"
 #include "simulator.hpp"
 
 namespace sim {

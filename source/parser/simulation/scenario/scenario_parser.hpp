@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "parser/config_node.hpp"
+#include "parser/config_reader/config_node.hpp"
 #include "scenario/scenario.hpp"
 
 namespace sim {

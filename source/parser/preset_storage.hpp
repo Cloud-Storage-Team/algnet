@@ -6,7 +6,7 @@
 #include <unordered_map>
 
 #include "parse_utils.hpp"
-#include "parser/config_node.hpp"
+#include "parser/config_reader/config_node.hpp"
 #include "utils/errors/base_error.hpp"
 
 namespace sim {
