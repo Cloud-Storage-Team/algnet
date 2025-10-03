@@ -55,15 +55,27 @@ flows:
 ```yaml
 cc:
   type: basic|tahoe|swift
-  # rest values specific for given congestion control type
+  # rest fields specific for given congestion control type
 ```
 
 `type` describes type of congestion control:
 
-- `basic`: no congestion control; no specific values
-- `tahoe`: [tcp tahoe](https://www.geeksforgeeks.org/computer-networks/tcp-tahoe-and-tcp-reno/) congestion control; no specific values
-- `swift`: [swift](https://2022-cs244.github.io/papers/L5-swift.pdf) congestion control (especially see pseudocode on page 516); one specific value:
-  + `target_delay`: value from paper above in [time format](../README.md)
+- `basic`: no congestion control; no specific fields
+- `tahoe`: [tcp tahoe](https://www.geeksforgeeks.org/computer-networks/tcp-tahoe-and-tcp-reno/) congestion control; spicific optional fields (all are real numbers):
+  + `start_cwnd`: Initial cwnd value; default: `1.0`
+  + `sstresh`: Initial sstresh value; default: `8.0`
+- `swift`: [swift](https://2022-cs244.github.io/papers/L5-swift.pdf) congestion control (especially see pseudocode on page 516); specific fields:
+  
+  Required:
+    + `target_delay`: value from paper above in [time format](../README.md)
+
+  Optional (all are real numbers):
+    + `ai`: Additive‑increase constant; default: `0.5`.
+    + `md`: Multiplicative decrease constant; default: `0.5`.
+    + `max_mdf`: Upper bound on MD factor per RTT; default: `0.3`.
+    + `fs_range`: Max queue head‑room (flow‑scaling term); default: `0.3`.
+    + `fs_min_cwnd`: Cwnd where flow‑scaling hits fs_range; default: `0.1`.
+    + `fs_max_cwnd`: Cwnd where flow‑scaling goes to zero; default: `100`.
 
 # Scenario section
 
