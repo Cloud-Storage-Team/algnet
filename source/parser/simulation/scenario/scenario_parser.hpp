@@ -1,9 +1,8 @@
 #pragma once
 
-#include <yaml-cpp/yaml.h>
-
 #include <memory>
 
+#include "parser/config_reader/config_node.hpp"
 #include "scenario/scenario.hpp"
 
 namespace sim {
