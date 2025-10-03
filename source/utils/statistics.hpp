@@ -50,9 +50,15 @@ public:
         return (m_have_records ? std::make_optional<T>(m_mean) : std::nullopt);
     }
 
-    double get_variance() { return m_variance; }
+    std::optional<double> get_variance() {
+        return (m_have_records ? std::make_optional<double>(m_variance)
+                               : std::nullopt);
+    }
 
-    T get_std() const { return T(std::sqrt(m_variance)); }
+    std::optional<T> get_std() const {
+        return (m_have_records ? std::make_optional<T>(std::sqrt(m_variance))
+                               : std::nullopt);
+    }
 
 private:
     bool m_have_records;

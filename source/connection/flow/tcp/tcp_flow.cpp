@@ -300,7 +300,7 @@ TimeNs TcpFlow::get_max_timeout() const {
     if (!mean.has_value()) {
         return TimeNs(std::numeric_limits<double>::max());
     }
-    TimeNs std = m_rtt_statistics.get_std();
+    TimeNs std = m_rtt_statistics.get_std().value();
     return mean.value() * 2 + std * 4;
 }
 
