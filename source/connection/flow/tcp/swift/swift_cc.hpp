@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include "flow/tcp/i_tcp_cc.hpp"
+#include "connection/flow/tcp/i_tcp_cc.hpp"
 
 namespace sim {
 
@@ -22,21 +22,30 @@ namespace sim {
  */
 class TcpSwiftCC : public ITcpCC {
 public:
+    static constexpr double DEFAULT_START_CWND = 1.0;
+    static constexpr double DEFAULT_AI = 0.5;
+    static constexpr double DEFAULT_MD = 0.5;
+    static constexpr double DEFAULT_MAX_MDF = 0.3;
+    static constexpr double DEFAULT_FS_RANGE = 0.3;
+    static constexpr double DEFAULT_FS_MIN_CWND = 0.1;   // taken from the paper
+    static constexpr double DEFAULT_FS_MAX_CWND = 100.;  // taken from the paper
     /**
      * a_base_target      Minimal (fabric link with 1 hop) RTT, ns.
-     * a_additive_inc     Additive‑increase constant.
-     * a_md_beta          β for multiplicative decrease.
+     * a_start_cwnd       Initial value of cwnd
+     * a_ai               Additive‑increase constant.
+     * a_md               β for multiplicative decrease.
      * a_max_mdf          Upper bound on MD factor per RTT.
      * a_fs_range         Max queue head‑room (flow‑scaling term).
      * a_fs_min_cwnd      cwnd where flow‑scaling hits fs_range.
      * a_fs_max_cwnd      cwnd where flow‑scaling goes to zero.
      */
-    TcpSwiftCC(TimeNs a_base_target, double a_additive_inc = 0.5,
-               double a_md_beta = 0.5,  // from [0.2, 0.5] diapason
-               double a_max_mdf = 0.3, double a_fs_range = 1.5,
-               double a_fs_min_cwnd = 0.1,  // taken from the paper
-               double a_fs_max_cwnd = 100.  // taken from the paper
-    );
+    TcpSwiftCC(TimeNs a_base_target, double a_start_cwnd = DEFAULT_START_CWND,
+               double a_ai = DEFAULT_AI,
+               double a_md = DEFAULT_MD,  // from [0.2, 0.5] diapason
+               double a_max_mdf = DEFAULT_MAX_MDF,
+               double a_fs_range = DEFAULT_FS_RANGE,
+               double a_fs_min_cwnd = DEFAULT_FS_MIN_CWND,
+               double a_fs_max_cwnd = DEFAULT_FS_MAX_CWND);
 
     void on_ack(TimeNs rtt, TimeNs avg_rtt, bool ecn_flag) final;
     void on_timeout() final;

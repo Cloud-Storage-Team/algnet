@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "flow/i_flow.hpp"
+#include "connection/flow/i_flow.hpp"
 #include "packet.hpp"
 #include "types.hpp"
 

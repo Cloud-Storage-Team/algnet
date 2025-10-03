@@ -4,7 +4,6 @@
 
 #include "logger/logger.hpp"
 #include "parser/simulation/connection/connection_parser.hpp"
-#include "parser/simulation/flow/flow_parser.hpp"
 #include "parser/simulation/scenario/scenario_parser.hpp"
 #include "parser/topology/host/host_parser.hpp"
 #include "parser/topology/link/link_parser.hpp"

@@ -15,16 +15,17 @@ SizeByte parse_size(const std::string& buffer_size);
 
 YAML::Node get_if_present(const YAML::Node& node, std::string_view field_name);
 
-// Parses node[field_name] using value_parser if node contains field_name;
-// Returns default_value otherwise
+// Parses node[field_name].as<T> if node contains field_name;
+// Returns default_value otherwise;
+// Commonly used for simple types like std::string, int, double etc
 template <typename T>
-T parse_with_default(const YAML::Node& node, std::string_view field_name,
-                     std::function<T(const std::string&)> value_parser,
-                     T&& default_value) {
-    if (!node[field_name]) {
-        LOG_WARN(
-            fmt::format("{} does not set ; use default value", field_name));
-        return std::forward<T>(default_value);
+T simple_parse_with_default(const YAML::Node& node, std::string_view field_name,
+                            T default_value) {
+    static_assert(std::is_copy_constructible_v<T>,
+                  "T must be copy constructible");
+
+    if (auto value_node = node[field_name]; value_node) {
+        return value_node.as<T>();
     }
-    return value_parser(node[field_name].as<std::string>());
+    return default_value;
 }

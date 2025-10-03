@@ -1,4 +1,4 @@
-#include "flow/tcp/tcp_flow.hpp"
+#include "connection/flow/tcp/tcp_flow.hpp"
 
 #include "connection/i_connection.hpp"
 #include "metrics/metrics_collector.hpp"
@@ -79,16 +79,18 @@ SizeByte TcpFlow::get_sending_quota() const {
     return quota_pkts * m_packet_size;
 }
 
+void TcpFlow::set_avg_rtt_if_present(Packet& packet) {
+    std::optional<TimeNs> avg_rtt = m_rtt_statistics.get_mean();
+    if (avg_rtt.has_value()) {
+        set_avg_rtt_flag(m_flag_manager, packet.flags, avg_rtt.value());
+    }
+}
+
 Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     Packet packet;
     m_flag_manager.set_flag(packet.flags, m_packet_type_label,
                             PacketType::DATA);
-    TimeNs avg_rtt = m_rtt_statistics.get_mean();
-    if (avg_rtt != TimeNs(0)) {
-        // Threre were some rtt measurements
-        set_avg_rtt_flag(m_flag_manager, packet.flags,
-                         m_rtt_statistics.get_mean());
-    }
+    set_avg_rtt_if_present(packet);
     packet.size = m_packet_size;
     packet.flow = this;
     packet.source_id = get_sender()->get_id();
@@ -147,7 +149,7 @@ Packet TcpFlow::create_ack(Packet data) {
 
     m_flag_manager.set_flag(ack.flags, m_packet_type_label, PacketType::ACK);
     m_flag_manager.set_flag(ack.flags, m_ack_ttl_label, data.ttl);
-    set_avg_rtt_flag(m_flag_manager, ack.flags, m_rtt_statistics.get_mean());
+    set_avg_rtt_if_present(ack);
     return ack;
 }
 
@@ -249,7 +251,7 @@ void TcpFlow::update(Packet packet) {
             m_packets_in_flight--;
         }
 
-        m_cc->on_ack(rtt, m_rtt_statistics.get_mean(),
+        m_cc->on_ack(rtt, m_rtt_statistics.get_mean().value(),
                      packet.congestion_experienced);
 
         m_delivered_data_size += m_packet_size;
@@ -275,7 +277,9 @@ void TcpFlow::update(Packet packet) {
     }
 }
 
-TimeNs TcpFlow::get_last_rtt() const { return m_rtt_statistics.get_last(); }
+std::optional<TimeNs> TcpFlow::get_last_rtt() const {
+    return m_rtt_statistics.get_last();
+}
 
 std::string TcpFlow::to_string() const {
     std::ostringstream oss;
@@ -292,12 +296,12 @@ std::string TcpFlow::to_string() const {
 }
 
 TimeNs TcpFlow::get_max_timeout() const {
-    TimeNs mean = m_rtt_statistics.get_mean();
-    TimeNs std = m_rtt_statistics.get_std();
-    if (mean == TimeNs(0)) {
+    std::optional<TimeNs> mean = m_rtt_statistics.get_mean();
+    if (!mean.has_value()) {
         return TimeNs(std::numeric_limits<double>::max());
     }
-    return mean * 2 + std * 4;
+    TimeNs std = m_rtt_statistics.get_std().value();
+    return mean.value() * 2 + std * 4;
 }
 
 void TcpFlow::send_packet_now(Packet packet) {

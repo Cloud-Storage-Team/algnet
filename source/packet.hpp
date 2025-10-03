@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "flow/i_flow.hpp"
+#include "connection/flow/i_flow.hpp"
 #include "utils/bitset.hpp"
 
 namespace sim {

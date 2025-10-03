@@ -2,8 +2,8 @@
 
 #include "connection/connection_impl.hpp"
 #include "connection/mplb/mplb_factory.hpp"
+#include "flow/flow_parser.hpp"
 #include "parser/parse_utils.hpp"
-#include "parser/simulation/flow/flow_parser.hpp"
 
 namespace sim {
 
@@ -60,7 +60,8 @@ std::shared_ptr<IConnection> ConnectionParser::parse_connection(
         const YAML::Node& flow_key = it->first;
         const YAML::Node& flow_value = it->second;
 
-        auto flow = FlowParser::parse_i_flow(flow_key, flow_value, conn_id);
+        std::shared_ptr<IFlow> flow(
+            FlowParser::parse_i_flow(flow_key, flow_value, conn_id));
 
         idf.add_object(flow);
         conn->add_flow(flow);

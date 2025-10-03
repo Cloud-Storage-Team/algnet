@@ -10,8 +10,9 @@
 
 namespace sim {
 
-TcpSwiftCC::TcpSwiftCC(TimeNs a_base_target, double a_additive_inc,
-                       double a_md_beta, double a_max_mdf, double a_fs_range,
+TcpSwiftCC::TcpSwiftCC(TimeNs a_base_target, double a_start_cwnd,
+                       double a_additive_inc, double a_md_beta,
+                       double a_max_mdf, double a_fs_range,
                        double a_fs_min_cwnd, double a_fs_max_cwnd)
     : m_base_target(a_base_target),
       m_ai(a_additive_inc),
@@ -20,7 +21,7 @@ TcpSwiftCC::TcpSwiftCC(TimeNs a_base_target, double a_additive_inc,
       m_fs_range_ns(a_base_target * a_fs_range),
       m_fs_min_cwnd(a_fs_min_cwnd),
       m_fs_max_cwnd(a_fs_max_cwnd),
-      m_cwnd(1.0),
+      m_cwnd(a_start_cwnd),
       m_last_decrease(Scheduler::get_instance().get_current_time()),
       m_last_rtt(a_base_target),
       m_retransmit_cnt(0) {

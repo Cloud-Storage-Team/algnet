@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "flow/i_flow.hpp"
+#include "connection/flow/i_flow.hpp"
 #include "mplb/i_mplb.hpp"
 #include "types.hpp"
 
