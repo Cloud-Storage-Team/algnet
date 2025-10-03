@@ -28,14 +28,14 @@ public:
 
     YAML::NodeType::value Type() const;
     bool IsDefined() const;
-    bool IsNull() const { return Type() == YAML::NodeType::Null; }
-    bool IsScalar() const { return Type() == YAML::NodeType::Scalar; }
-    bool IsSequence() const { return Type() == YAML::NodeType::Sequence; }
-    bool IsMap() const { return Type() == YAML::NodeType::Map; }
+    bool IsNull() const;
+    bool IsScalar() const;
+    bool IsSequence() const;
+    bool IsMap() const;
 
     // bool conversions
-    explicit operator bool() const { return IsDefined(); }
-    bool operator!() const { return !IsDefined(); }
+    explicit operator bool() const;
+    bool operator!() const;
 
     // access
     template <typename T>
@@ -49,10 +49,6 @@ public:
     const std::string& Scalar() const;
 
     const std::string& Tag() const;
-    void SetTag(const std::string& tag);
-
-    // assignment
-    bool is(const ConfigNode& rhs) const;
 
     // size/iterator
     std::size_t size() const;
@@ -73,7 +69,7 @@ public:
 
 private:
     YAML::Node m_node;
-    NodeStacktrace m_node_names_path;
+    NodeStacktrace m_stacktrace;
 };
 
 std::ostream& operator<<(std::ostream& out, const ConfigNode& node);
