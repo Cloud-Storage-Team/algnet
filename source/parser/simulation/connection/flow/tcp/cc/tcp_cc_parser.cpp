@@ -15,7 +15,7 @@ std::unique_ptr<ITcpCC> TcpCCParser::parse_i_tcp_cc(const ConfigNode& node) {
     } else if (type == "tahoe") {
         return TahoeCCParser::parse_tahoe_cc(node);
     } else if (type == "swift") {
-        return SwiftCCParser::parse_swift_cc(node.get_node());
+        return SwiftCCParser::parse_swift_cc(node);
     }
 
     std::stringstream ss;
