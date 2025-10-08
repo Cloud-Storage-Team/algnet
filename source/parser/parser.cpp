@@ -89,10 +89,9 @@ void YamlParser::process_switches(const ConfigNode &swtiches_node,
         [this](std::shared_ptr<ISwitch> swtch) {
             return m_simulator.add_switch(swtch);
         },
-        [&packet_spraying_node](const YAML::Node &key_node,
-                                const YAML::Node &value_node) {
-            return SwitchParser::parse_i_switch(
-                key_node, value_node, packet_spraying_node.get_node());
+        [&packet_spraying_node](const ConfigNode &switch_node) {
+            return SwitchParser::parse_i_switch(switch_node,
+                                                packet_spraying_node);
         },
         "Can not add switch.");
 }
@@ -100,19 +99,19 @@ void YamlParser::process_switches(const ConfigNode &swtiches_node,
 void YamlParser::process_links(const ConfigNode &links_node,
                                const ConfigNode &link_presets_node) {
     // Maps preset name to preset body
-    LinkPresets presets(link_presets_node.get_node(),
-                        [](const YAML::Node &preset_node) {
-                            LinkInitArgs args;
-                            LinkParser::parse_to_args(preset_node, args);
-                            return args;
-                        });
+    LinkPresets presets = LinkPresets::parse_presets(
+        link_presets_node, [](const ConfigNode &preset_node) {
+            LinkInitArgs args;
+            LinkParser::parse_to_args(preset_node, args);
+            return args;
+        });
     process_identifiables<ILink>(
         links_node,
         [this](std::shared_ptr<ILink> link) {
             return m_simulator.add_link(link);
         },
-        [&presets](const YAML::Node &key_node, const YAML::Node &value_node) {
-            return LinkParser::parse_i_link(key_node, value_node, presets);
+        [&presets](const ConfigNode &link_node) {
+            return LinkParser::parse_i_link(link_node, presets);
         },
         "Can not add link.");
 }

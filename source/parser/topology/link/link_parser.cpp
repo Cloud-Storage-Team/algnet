@@ -5,53 +5,50 @@
 
 namespace sim {
 
-std::shared_ptr<ILink> LinkParser::parse_i_link(const YAML::Node& key_node,
-                                                const YAML::Node& value_node,
+std::shared_ptr<ILink> LinkParser::parse_i_link(const ConfigNode& link_node,
                                                 const LinkPresets& presets) {
-    return parse_default_link(key_node, value_node, presets);
+    return parse_default_link(link_node, presets);
 }
 
-void LinkParser::parse_to_args(const YAML::Node& node, LinkInitArgs& args) {
-    auto from = node["from"];
-    if (from) {
-        args.from_id.emplace(from.as<Id>());
-    }
+void LinkParser::parse_to_args(const ConfigNode& node, LinkInitArgs& args) {
+    node["from"].apply_if_present([&args](const ConfigNode& from) {
+        args.from_id.emplace(from.as<Id>().value_or_throw());
+    });
 
-    auto to = node["to"];
-    if (to) {
-        args.to_id.emplace(to.as<Id>());
-    }
+    node["to"].apply_if_present([&args](const ConfigNode& to) {
+        args.to_id.emplace(to.as<Id>().value_or_throw());
+    });
 
-    auto latency = node["latency"];
-    if (latency) {
-        args.delay.emplace(parse_time(latency.as<std::string>()));
-    }
+    node["latency"].apply_if_present([&args](const ConfigNode& latency) {
+        args.delay.emplace(
+            parse_time(latency.as<std::string>().value_or_throw()));
+    });
 
-    auto speed = node["throughput"];
-    if (speed) {
-        args.speed.emplace(parse_speed(speed.as<std::string>()));
-    }
+    node["throughput"].apply_if_present([&args](const ConfigNode& speed) {
+        args.speed.emplace(
+            parse_speed(speed.as<std::string>().value_or_throw()));
+    });
 
-    auto max_from_egress_buffer_size = node["egress_buffer_size"];
-    if (max_from_egress_buffer_size) {
-        args.max_from_egress_buffer_size.emplace(
-            parse_size(max_from_egress_buffer_size.as<std::string>()));
-    }
+    node["egress_buffer_size"].apply_if_present(
+        [&args](const ConfigNode& max_from_egress_buffer_size) {
+            args.max_from_egress_buffer_size.emplace(
+                parse_size(max_from_egress_buffer_size.as<std::string>()
+                               .value_or_throw()));
+        });
 
-    auto max_to_ingress_buffer_size = node["ingress_buffer_size"];
-    if (max_to_ingress_buffer_size) {
-        args.max_to_ingress_buffer_size.emplace(
-            parse_size(max_to_ingress_buffer_size.as<std::string>()));
-    }
+    node["ingress_buffer_size"].apply_if_present(
+        [&args](const ConfigNode& max_to_ingress_buffer_size) {
+            args.max_to_ingress_buffer_size.emplace(parse_size(
+                max_to_ingress_buffer_size.as<std::string>().value_or_throw()));
+        });
 }
 
 std::shared_ptr<Link> LinkParser::parse_default_link(
-    const YAML::Node& key_node, const YAML::Node& value_node,
-    const LinkPresets& presets) {
-    Id link_id = key_node.as<Id>();
+    const ConfigNode& link_node, const LinkPresets& presets) {
+    Id link_id = link_node.get_name().value();
     try {
-        LinkInitArgs link_args = presets.get_preset(value_node);
-        parse_to_args(value_node, link_args);
+        LinkInitArgs link_args = presets.get_preset(link_node);
+        parse_to_args(link_node, link_args);
         link_args.id = link_id;
         return std::make_shared<Link>(std::move(link_args));
     } catch (const utils::BaseError& base_error) {

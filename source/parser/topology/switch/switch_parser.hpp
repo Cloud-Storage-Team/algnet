@@ -11,13 +11,11 @@ namespace sim {
 class SwitchParser {
 public:
     static std::shared_ptr<ISwitch> parse_i_switch(
-        const YAML::Node& key_node, const YAML::Node& value_node,
-        const YAML::Node& packet_spraying_node);
+        const ConfigNode& switch_node, const ConfigNode& packet_spraying_node);
 
 private:
     static std::shared_ptr<Switch> parse_default_switch(
-        const YAML::Node& key_node, const YAML::Node& value_node,
-        const YAML::Node& packet_spraying_node);
+        const ConfigNode& switch_node, const ConfigNode& packet_spraying_node);
 
     static ECN parse_ecn(const YAML::Node& node);
 

@@ -46,12 +46,18 @@ public:
     }
 
     template <typename U>
-    void apply_or(std::function<U(const T&)> aplly_value,
-                  std::function<U(const std::string&)> apply_error) {
+    U apply_or(std::function<U(const T&)> aplly_value,
+               std::function<U(const std::string&)> apply_error) {
         if (this->has_value()) {
             return apply_value(this->value());
         } else {
             return apply_error(this->error());
+        }
+    }
+
+    void apply_if_present(std::function<void(const T&)> apply_func) {
+        if (this->has_value()) {
+            apply_func(this->value());
         }
     }
 };

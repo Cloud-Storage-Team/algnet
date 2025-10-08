@@ -11,22 +11,20 @@
 namespace sim {
 
 std::shared_ptr<ISwitch> SwitchParser::parse_i_switch(
-    const YAML::Node& key_node, const YAML::Node& value_node,
-    const YAML::Node& packet_spraying_node) {
-    return parse_default_switch(key_node, value_node, packet_spraying_node);
+    const ConfigNode& switch_node, const ConfigNode& packet_spraying_node) {
+    return parse_default_switch(switch_node, packet_spraying_node);
 }
 
 std::shared_ptr<Switch> SwitchParser::parse_default_switch(
-    const YAML::Node& key_node, const YAML::Node& value_node,
-    const YAML::Node& packet_spraying_node) {
-    Id id = key_node.as<Id>();
-    const YAML::Node& ecn_node = value_node["ecn"];
+    const ConfigNode& switch_node, const ConfigNode& packet_spraying_node) {
+    Id id = switch_node.get_name().value();
+    ConfigNodeExpected ecn_node = switch_node["ecn"];
     ECN ecn(1.0, 1.0, 0.0);
     if (ecn_node) {
-        ecn = parse_ecn(ecn_node);
+        ecn = parse_ecn(ecn_node.value().get_node());
     }
-    return std::make_shared<Switch>(id, std::move(ecn),
-                                    parse_hasher(packet_spraying_node, id));
+    return std::make_shared<Switch>(
+        id, std::move(ecn), parse_hasher(packet_spraying_node.get_node(), id));
 }
 
 ECN SwitchParser::parse_ecn(const YAML::Node& node) {

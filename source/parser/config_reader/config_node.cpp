@@ -28,6 +28,10 @@ std::optional<std::string> ConfigNode::get_name() const {
 
 const YAML::Node& ConfigNode::get_node() const { return m_node; }
 
+NodeStacktracePtr ConfigNode::get_stacktrace() const {
+    return m_stacktrace_node;
+}
+
 YAML::NodeType::value ConfigNode::Type() const { return m_node.Type(); }
 
 bool ConfigNode::IsNull() const { return m_node.IsNull(); }

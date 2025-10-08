@@ -34,6 +34,8 @@ public:
 
     const YAML::Node& get_node() const;
 
+    NodeStacktracePtr get_stacktrace() const;
+
     // yaml-cpp functional
 
     YAML::NodeType::value Type() const;

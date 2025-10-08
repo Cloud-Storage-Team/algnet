@@ -14,37 +14,42 @@ namespace sim {
 template <typename TPreset>
 class PresetStorage : public std::unordered_map<std::string, TPreset> {
 public:
-    PresetStorage(const YAML::Node& presets_node,
-                  std::function<TPreset(const YAML::Node&)> preset_parser) {
-        std::unordered_map<std::string, TPreset> presets;
-        if (!presets_node) {
-            return;
-        }
-        for (auto it = presets_node.begin(); it != presets_node.end(); ++it) {
-            const YAML::Node key_node = it->first;
-            const YAML::Node body_node = it->second;
-            std::string preset_name = key_node.as<std::string>();
+    PresetStorage() = default;
 
-            if (this->contains(preset_name)) {
-                throw std::runtime_error(fmt::format(
-                    "Preset with name {} already exists", preset_name));
+    static PresetStorage<TPreset> parse_presets(
+        const ConfigNode& presets_node,
+        std::function<TPreset(const ConfigNode&)> preset_parser) {
+        PresetStorage<TPreset> storage;
+        for (auto it = presets_node.begin(); it != presets_node.end(); ++it) {
+            ConfigNode preset_node = *it;
+            std::string preset_name = preset_node.get_name().value();
+
+            if (storage.contains(preset_name)) {
+                std::stringstream ss;
+                ss << "Error while parsing\n";
+                ss << preset_node.get_stacktrace()->to_string() << "\n";
+                ss << "Preset with name" << preset_name << "already exists";
+
+                throw ConfigNodeError(ss.str());
             }
 
-            this->emplace(std::move(preset_name), preset_parser(body_node));
+            storage.emplace(std::move(preset_name), preset_parser(preset_node));
         }
+        return storage;
     }
 
     // Gets preset with name node["preset-name"] from storage
     // If node does not contain "preset-name", use default
     // If there is no preset with such name, return default TPreset
-    TPreset get_preset(const YAML::Node& node) const {
+    TPreset get_preset(const ConfigNode& node) const {
         static_assert(std::is_default_constructible_v<TPreset>,
                       "Preset must be default constructable");
-        YAML::Node preset_name_node = node["preset-name"];
+        ConfigNodeExpected preset_name_node = node["preset-name"];
 
         if (preset_name_node) {
             // preset-name specified
-            std::string preset_name = preset_name_node.as<std::string>();
+            std::string preset_name =
+                preset_name_node.value().as<std::string>().value_or_throw();
             auto it = this->find(preset_name);
             if (it != this->end()) {
                 return it->second;
