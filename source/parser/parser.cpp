@@ -75,7 +75,7 @@ std::optional<TimeNs> YamlParser::parse_simulation_time(
 
 void YamlParser::process_hosts(const ConfigNode &hosts_node) {
     process_identifiables<IHost>(
-        hosts_node.get_node(),
+        hosts_node,
         [this](std::shared_ptr<IHost> host) {
             return m_simulator.add_host(host);
         },
@@ -85,7 +85,7 @@ void YamlParser::process_hosts(const ConfigNode &hosts_node) {
 void YamlParser::process_switches(const ConfigNode &swtiches_node,
                                   const ConfigNode &packet_spraying_node) {
     process_identifiables<ISwitch>(
-        swtiches_node.get_node(),
+        swtiches_node,
         [this](std::shared_ptr<ISwitch> swtch) {
             return m_simulator.add_switch(swtch);
         },
@@ -107,7 +107,7 @@ void YamlParser::process_links(const ConfigNode &links_node,
                             return args;
                         });
     process_identifiables<ILink>(
-        links_node.get_node(),
+        links_node,
         [this](std::shared_ptr<ILink> link) {
             return m_simulator.add_link(link);
         },
@@ -119,7 +119,7 @@ void YamlParser::process_links(const ConfigNode &links_node,
 
 void YamlParser::process_connection(const ConfigNode &connections_node) {
     process_identifiables<IConnection>(
-        connections_node.get_node(),
+        connections_node,
         [this](std::shared_ptr<IConnection> connection) {
             return m_simulator.add_connection(connection);
         },

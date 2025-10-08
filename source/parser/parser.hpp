@@ -32,7 +32,7 @@ private:
     // new object
     template <typename T>
     void process_identifiables(
-        const YAML::Node& node,
+        const ConfigNode& node,
         std::function<bool(std::shared_ptr<T>)> add_func,
         std::function<std::shared_ptr<T>(const YAML::Node&, const YAML::Node&)>
             parse_func,
@@ -42,8 +42,10 @@ private:
                       "T must be Identifiable");
 
         for (auto it = node.begin(); it != node.end(); ++it) {
-            const YAML::Node key_node = it->first;
-            const YAML::Node val_node = it->second;
+            ConfigNode config_val_node = *it;
+            std::string node_name = config_val_node.get_name().value();
+            YAML::Node key_node = YAML::Load(node_name);
+            YAML::Node val_node = config_val_node.get_node();
 
             std::shared_ptr<T> ptr = parse_func(key_node, val_node);
             if (policy == RegistrationPolicy::ByTemplate) {
