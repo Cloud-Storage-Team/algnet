@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "node_stacktrace.hpp"
+#include "utils/str_expected.hpp"
 
 namespace sim {
 
@@ -32,15 +33,10 @@ public:
     // yaml-cpp functional
 
     YAML::NodeType::value Type() const;
-    bool IsDefined() const;
     bool IsNull() const;
     bool IsScalar() const;
     bool IsSequence() const;
     bool IsMap() const;
-
-    // bool conversions
-    explicit operator bool() const;
-    bool operator!() const;
 
     // access
     template <typename T>

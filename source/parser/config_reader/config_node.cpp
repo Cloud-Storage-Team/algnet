@@ -30,15 +30,10 @@ const YAML::Node& ConfigNode::get_node() const { return m_node; }
 
 YAML::NodeType::value ConfigNode::Type() const { return m_node.Type(); }
 
-bool ConfigNode::IsDefined() const { return m_node.IsDefined(); }
 bool ConfigNode::IsNull() const { return m_node.IsNull(); }
 bool ConfigNode::IsScalar() const { return m_node.IsScalar(); }
 bool ConfigNode::IsSequence() const { return m_node.IsSequence(); }
 bool ConfigNode::IsMap() const { return m_node.IsMap(); }
-
-// bool conversions
-ConfigNode::operator bool() const { return m_node.operator bool(); }
-bool ConfigNode::operator!() const { return m_node.operator!(); }
 
 const std::string& ConfigNode::Scalar() const { return m_node.Scalar(); }
 
