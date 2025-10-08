@@ -19,8 +19,10 @@ Simulator YamlParser::build_simulator_from_config(
     m_simulator = Simulator();
 
     m_topology_config_path =
-        path.parent_path() /
-        parse_topology_config_path(simulation_config.get_node());
+        path.parent_path() / simulation_config["topology_config_path"]
+                                 .value_or_throw()
+                                 .as<std::string>()
+                                 .value_or_throw();
     const ConfigNode topology_config = load_file(m_topology_config_path);
 
     auto parse_if_present = [](ConfigNodeExpected node,
@@ -55,22 +57,13 @@ Simulator YamlParser::build_simulator_from_config(
     parse_if_present(simulation_config["scenario"],
                      [this](auto node) { return process_scenario(node); });
 
-    std::optional<TimeNs> maybe_stop_time =
-        parse_simulation_time(simulation_config.get_node());
+    ConfigNodeExpected maybe_stop_time = simulation_config["simulation_time"];
     if (maybe_stop_time.has_value()) {
-        m_simulator.set_stop_time(maybe_stop_time.value());
+        m_simulator.set_stop_time(parse_time(
+            maybe_stop_time.value().as<std::string>().value_or_throw()));
     }
 
     return std::move(m_simulator);
-}
-
-std::optional<TimeNs> YamlParser::parse_simulation_time(
-    const YAML::Node &config) {
-    auto value = config["simulation_time"];
-    if (!value) {
-        return std::nullopt;
-    }
-    return parse_time(value.as<std::string>());
 }
 
 void YamlParser::process_hosts(const ConfigNode &hosts_node) {
@@ -129,15 +122,6 @@ void YamlParser::process_connection(const ConfigNode &connections_node) {
 void YamlParser::process_scenario(const ConfigNode &scenario_node) {
     auto scenario = ScenarioParser::parse(scenario_node.get_node());
     m_simulator.set_scenario(std::move(scenario));
-}
-
-std::filesystem::path YamlParser::parse_topology_config_path(
-    const YAML::Node &config) {
-    if (!config["topology_config_path"]) {
-        throw std::runtime_error(
-            "No topology_config_path specified in the simulation config");
-    }
-    return config["topology_config_path"].as<std::string>();
 }
 
 }  // namespace sim
