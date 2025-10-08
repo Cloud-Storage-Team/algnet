@@ -10,7 +10,7 @@ std::shared_ptr<TcpFlow> TcpFlowParser::parse_tcp_flow(const ConfigNode& node,
                                                        Id conn_id) {
     Id flow_id = node.get_name().value() + "_" + conn_id;
     std::unique_ptr<ITcpCC> cc =
-        TcpCCParser::parse_i_tcp_cc(node["cc"].value_or_throw().get_node());
+        TcpCCParser::parse_i_tcp_cc(node["cc"].value_or_throw());
 
     SizeByte packet_size = SizeByte(parse_size(node["packet_size"]
                                                    .value_or_throw()
