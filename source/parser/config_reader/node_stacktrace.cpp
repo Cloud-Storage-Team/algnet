@@ -63,7 +63,7 @@ NodeStacktracePtr NodeStacktraceFactory::create_root() {
 
 NodeStacktracePtr NodeStacktraceFactory::create_from_parent(
     NodeStacktracePtr parent, std::string key) {
-    // used raw contsructor because std::make_shared can not be used
+    // used raw constructor because std::make_shared can not be used
     // (std::shared_ptr is not a friend of NodeStacktrace but uses private
     // constructor)
     return NodeStacktracePtr(new NodeStacktrace(parent, std::move(key)));
