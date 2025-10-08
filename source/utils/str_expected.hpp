@@ -55,6 +55,16 @@ public:
         }
     }
 
+    template <typename U>
+    U apply_or_default(std::function<U(const T&)> aplly_value,
+                       U default_value) {
+        if (this->has_value()) {
+            return aplly_value(this->value());
+        } else {
+            return default_value;
+        }
+    }
+
     void apply_if_present(std::function<void(const T&)> apply_func) {
         if (this->has_value()) {
             apply_func(this->value());
