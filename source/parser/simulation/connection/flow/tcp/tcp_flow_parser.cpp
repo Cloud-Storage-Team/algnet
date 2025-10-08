@@ -6,21 +6,16 @@
 
 namespace sim {
 
-std::shared_ptr<TcpFlow> TcpFlowParser::parse_tcp_flow(
-    const YAML::Node& key_node, const YAML::Node& value_node, Id conn_id) {
-    Id flow_id = key_node.as<Id>() + "_" + conn_id;
-    if (!value_node["cc"]) {
-        throw std::runtime_error("Missing 'cc' field in flow " + flow_id);
-    }
-    std::unique_ptr<ITcpCC> cc = TcpCCParser::parse_i_tcp_cc(value_node["cc"]);
+std::shared_ptr<TcpFlow> TcpFlowParser::parse_tcp_flow(const ConfigNode& node,
+                                                       Id conn_id) {
+    Id flow_id = node.get_name().value() + "_" + conn_id;
+    std::unique_ptr<ITcpCC> cc =
+        TcpCCParser::parse_i_tcp_cc(node["cc"].value_or_throw().get_node());
 
-    if (!value_node["packet_size"]) {
-        throw std::runtime_error("Flow " + flow_id +
-                                 " missing parameter packet_size");
-    }
-
-    SizeByte packet_size =
-        SizeByte(parse_size(value_node["packet_size"].as<std::string>()));
+    SizeByte packet_size = SizeByte(parse_size(node["packet_size"]
+                                                   .value_or_throw()
+                                                   .as<std::string>()
+                                                   .value_or_throw()));
 
     std::shared_ptr<IConnection> conn =
         IdentifierFactory::get_instance().get_object<IConnection>(conn_id);

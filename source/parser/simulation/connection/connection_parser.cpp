@@ -45,8 +45,7 @@ std::shared_ptr<IConnection> ConnectionParser::parse_connection(
         ConfigNode flow_node = *it;
 
         std::shared_ptr<IFlow> flow(
-            FlowParser::parse_i_flow(YAML::Load(flow_node.get_name().value()),
-                                     flow_node.get_node(), conn_id));
+            FlowParser::parse_i_flow(flow_node, conn_id));
 
         idf.add_object(flow);
         conn->add_flow(flow);
