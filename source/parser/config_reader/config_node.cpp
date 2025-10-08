@@ -105,7 +105,7 @@ const ConfigNode ConfigNode::operator[](std::string_view key) const {
         std::stringstream ss;
         ss << "Key error: node\n";
         ss << m_stacktrace_node << '\n';
-        ss << "does not have key `" << key << '`'
+        ss << "does not have key `" << key << '`';
         throw ConfigNodeError(ss.str());
     }
     NodeStacktracePtr child_stacktrace =
