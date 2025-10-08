@@ -4,7 +4,6 @@ connections:
   conn1:
     sender_id: sender
     receiver_id: receiver
-    data_to_send: 819200B
     mplb: round_robin
     flows:
       flow1:
@@ -16,7 +15,6 @@ connections:
   conn2:
     sender_id: sender
     receiver_id: receiver
-    data_to_send: 819200B
     mplb: round_robin
     flows:
       flow1:
@@ -24,3 +22,9 @@ connections:
         packet_size: 2048B
         cc:
           type: tahoe
+
+scenario:
+  - action: send_data
+    when: 0ns
+    size: 819200B
+    connections: ^conn.*
