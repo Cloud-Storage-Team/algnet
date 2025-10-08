@@ -12,7 +12,7 @@ class NodeStacktrace;
 using NodeStacktracePtr = std::shared_ptr<const NodeStacktrace>;
 using NodePath = std::vector<std::string>;
 
-// Simpli linked list like std::list, but on std::shared_ptr
+// Simple linked list like std::list, but on std::shared_ptr
 class NodeStacktrace
     : public std::enable_shared_from_this<const NodeStacktrace> {
 public:
