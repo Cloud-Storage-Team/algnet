@@ -21,23 +21,26 @@ std::shared_ptr<Switch> SwitchParser::parse_default_switch(
     ConfigNodeExpected ecn_node = switch_node["ecn"];
     ECN ecn(1.0, 1.0, 0.0);
     if (ecn_node) {
-        ecn = parse_ecn(ecn_node.value().get_node());
+        ecn = parse_ecn(ecn_node.value());
     }
-    return std::make_shared<Switch>(
-        id, std::move(ecn), parse_hasher(packet_spraying_node.get_node(), id));
+    return std::make_shared<Switch>(id, std::move(ecn),
+                                    parse_hasher(packet_spraying_node, id));
 }
 
-ECN SwitchParser::parse_ecn(const YAML::Node& node) {
-    float min = node["min"].as<float>();
-    float max = node["max"].as<float>();
-    float probability = node["probability"].as<float>();
+ECN SwitchParser::parse_ecn(const ConfigNode& node) {
+    float min = node["min"].value_or_throw().as<float>().value_or_throw();
+    float max = node["max"].value_or_throw().as<float>().value_or_throw();
+    float probability =
+        node["probability"].value_or_throw().as<float>().value_or_throw();
     return ECN(min, max, probability);
 }
 
 std::unique_ptr<IPacketHasher> SwitchParser::parse_hasher(
-    const YAML::Node& packet_spraying_node, Id switch_id) {
-    auto type_node = packet_spraying_node["type"];
-    std::string type = type_node.as<std::string>();
+    const ConfigNode& packet_spraying_node, Id switch_id) {
+    std::string type = packet_spraying_node["type"]
+                           .value_or_throw()
+                           .as<std::string>()
+                           .value_or_throw();
     if (type == "random") {
         return std::make_unique<RandomHasher>();
     }
@@ -45,14 +48,16 @@ std::unique_ptr<IPacketHasher> SwitchParser::parse_hasher(
         return std::make_unique<ECMPHasher>();
     }
     if (type == "flowlet") {
-        TimeNs threshold =
-            parse_time(packet_spraying_node["threshold"].as<std::string>());
+        TimeNs threshold = parse_time(packet_spraying_node["threshold"]
+                                          .value_or_throw()
+                                          .as<std::string>()
+                                          .value_or_throw());
         return std::make_unique<FLowletHasher>(threshold);
     }
     if (type == "adaptive_flowlet") {
         auto factor_node = packet_spraying_node["factor"];
         if (factor_node) {
-            double factor = factor_node.as<double>();
+            double factor = factor_node.value().as<double>().value_or_throw();
             return std::make_unique<AdaptiveFlowletHasher>(factor);
         } else {
             return std::make_unique<AdaptiveFlowletHasher>();

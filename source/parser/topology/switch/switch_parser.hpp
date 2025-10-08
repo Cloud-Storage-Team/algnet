@@ -17,10 +17,10 @@ private:
     static std::shared_ptr<Switch> parse_default_switch(
         const ConfigNode& switch_node, const ConfigNode& packet_spraying_node);
 
-    static ECN parse_ecn(const YAML::Node& node);
+    static ECN parse_ecn(const ConfigNode& node);
 
     static std::unique_ptr<IPacketHasher> parse_hasher(
-        const YAML::Node& packet_spraying_node, Id switch_id);
+        const ConfigNode& packet_spraying_node, Id switch_id);
 };
 
 }  // namespace sim
