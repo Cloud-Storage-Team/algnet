@@ -65,14 +65,14 @@ private:
         }
     }
 
-    void process_hosts(const YAML::Node& hosts_node);
-    void process_switches(const YAML::Node& switches_node,
-                          const YAML::Node& packet_spraying_node);
+    void process_hosts(const ConfigNode& hosts_node);
+    void process_switches(const ConfigNode& switches_node,
+                          const ConfigNode& packet_spraying_node);
 
-    void process_connection(const YAML::Node& connections_node);
-    void process_links(const YAML::Node& links_node,
-                       const YAML::Node& link_preset_node);
-    void process_scenario(const YAML::Node& scenario_node);
+    void process_connection(const ConfigNode& connections_node);
+    void process_links(const ConfigNode& links_node,
+                       const ConfigNode& link_preset_node);
+    void process_scenario(const ConfigNode& scenario_node);
 
     Simulator m_simulator;
     std::filesystem::path m_topology_config_path;
