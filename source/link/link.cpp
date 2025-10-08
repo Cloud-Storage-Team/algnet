@@ -27,15 +27,14 @@ Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
 }
 
 Link::Link(LinkInitArgs args)
-    : Link(utils::value_or_base_error(args.id),
+    : Link(args.id.value_or_throw(),
            IdentifierFactory::get_instance().get_object<IDevice>(
-               utils::value_or_base_error(args.from_id)),
+               args.from_id.value_or_throw()),
            IdentifierFactory::get_instance().get_object<IDevice>(
-               utils::value_or_base_error(args.to_id)),
-           utils::value_or_base_error(args.speed),
-           utils::value_or_base_error(args.delay),
-           utils::value_or_base_error(args.max_from_egress_buffer_size),
-           utils::value_or_base_error(args.max_to_ingress_buffer_size)) {}
+               args.to_id.value_or_throw()),
+           args.speed.value_or_throw(), args.delay.value_or_throw(),
+           args.max_from_egress_buffer_size.value_or_throw(),
+           args.max_to_ingress_buffer_size.value_or_throw()) {}
 
 void Link::schedule_arrival(Packet packet) {
     if (m_to.expired()) {

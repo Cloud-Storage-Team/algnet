@@ -19,6 +19,10 @@ public:
     ConfigNodeError(std::string a_what);
 };
 
+class ConfigNode;
+
+using ConfigNodeExpected = utils::StrExpected<ConfigNode>;
+
 class ConfigNode {
 public:
     // Creates ROOT ConfigNode from YAML::Node
@@ -40,23 +44,24 @@ public:
 
     // access
     template <typename T>
-    T as() const {
+    utils::StrExpected<T> as() const {
         try {
             return m_node.as<T>();
         } catch (const YAML::Exception& e) {
-            throw ConfigNodeError("Can not apply 'as' to node\n" +
-                                  m_stacktrace_node->to_string() +
-                                  "\n; original error: " + e.what());
+            return std::unexpected("Can not apply 'as' to node\n" +
+                                   m_stacktrace_node->to_string() +
+                                   "\n; original error: " + e.what());
         }
     }
     template <typename T, typename S>
-    T as(const S& fallback) const {
+    utils::StrExpected<T> as(const S& fallback) const {
         try {
             return m_node.as<T>(fallback);
         } catch (const YAML::Exception& e) {
-            throw ConfigNodeError("Can not apply 'as' with fallback to node\n" +
-                                  m_stacktrace_node->to_string() +
-                                  "\n; original error: " + e.what());
+            return std::unexpected(
+                "Can not apply 'as' with fallback to node\n" +
+                m_stacktrace_node->to_string() +
+                "\n; original error: " + e.what());
         }
     }
     const std::string& Scalar() const;
@@ -89,7 +94,8 @@ public:
     Iterator end() const;
 
     // indexing
-    const ConfigNode operator[](std::string_view key) const;
+
+    ConfigNodeExpected operator[](std::string_view key) const;
 
 private:
     ConfigNode(YAML::Node a_node, NodeStacktracePtr a_node_ptr);
@@ -98,10 +104,6 @@ private:
     const YAML::Node m_node;
     NodeStacktracePtr m_stacktrace_node;
 };
-
-std::ostream& operator<<(std::ostream& out, const ConfigNode& node);
-
-bool operator==(const ConfigNode& lhs, const ConfigNode& rhs);
 
 ConfigNode load_file(std::filesystem::path path);
 

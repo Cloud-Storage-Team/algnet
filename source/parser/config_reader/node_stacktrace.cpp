@@ -25,7 +25,7 @@ NodeStacktrace::NodeStacktrace(NodeStacktracePtr a_parent_ptr,
 NodePath NodeStacktrace::get_full_path() const {
     NodePath result;
     auto node = shared_from_this();
-    while (node != nullptr) {
+    while (node->m_parent_ptr != nullptr) {
         result.emplace_back(node->m_key.value());
         node = node->m_parent_ptr;
     }

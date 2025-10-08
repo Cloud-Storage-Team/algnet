@@ -94,14 +94,15 @@ ConfigNode::Iterator ConfigNode::end() const {
     return Iterator(m_node.end(), m_stacktrace_node);
 }
 
-const ConfigNode ConfigNode::operator[](std::string_view key) const {
+utils::StrExpected<ConfigNode> ConfigNode::operator[](
+    std::string_view key) const {
     const YAML::Node child_node = m_node[key];
     if (!child_node) {
         std::stringstream ss;
         ss << "Key error: node\n";
         ss << m_stacktrace_node << '\n';
         ss << "does not have key `" << key << '`';
-        throw ConfigNodeError(ss.str());
+        return std::unexpected(ss.str());
     }
     NodeStacktracePtr child_stacktrace =
         m_stacktrace_node->create_child(std::string(key));

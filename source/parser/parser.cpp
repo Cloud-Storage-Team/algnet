@@ -14,63 +14,54 @@ namespace sim {
 
 Simulator YamlParser::build_simulator_from_config(
     const std::filesystem::path &path) {
-    const YAML::Node simulation_config = YAML::LoadFile(path);
+    const ConfigNode simulation_config = load_file(path);
 
     m_simulator = Simulator();
 
     m_topology_config_path =
-        path.parent_path() / parse_topology_config_path(simulation_config);
-    const YAML::Node topology_config = YAML::LoadFile(m_topology_config_path);
+        path.parent_path() /
+        parse_topology_config_path(simulation_config.get_node());
+    const ConfigNode topology_config = load_file(m_topology_config_path);
 
-    auto parse_if_present = [](const YAML::Node &node,
-                               std::function<void(const YAML::Node &)> parser,
-                               std::string error_message) {
-        if (node) {
-            parser(node);
-        } else {
-            LOG_ERROR(std::move(error_message));
-        }
+    auto parse_if_present = [](ConfigNodeExpected node,
+                               std::function<void(ConfigNode)> parser) {
+        node.apply_or(parser,
+                      [](std::string error) { LOG_ERROR(std::move(error)); });
     };
 
-    YAML::Node topology_presets_node = topology_config["presets"];
+    ConfigNodeExpected topology_presets_node = topology_config["presets"];
 
-    const YAML::Node packet_spraying_node = topology_config["packet-spraying"];
-    if (!packet_spraying_node) {
-        throw std::runtime_error(
-            "Packet spraying type does not set in topology config");
-    }
-    parse_if_present(
-        topology_config["hosts"],
-        [this](auto node) { return process_hosts(node); },
-        "No hosts specified in the topology config");
+    const ConfigNode packet_spraying_node =
+        topology_config["packet-spraying"].value_or_throw<std::runtime_error>();
+    parse_if_present(topology_config["hosts"], [this](ConfigNode node) {
+        process_hosts(node.get_node());
+    });
 
-    parse_if_present(
-        topology_config["switches"],
-        [this, &packet_spraying_node](auto node) {
-            return process_switches(node, packet_spraying_node);
-        },
-        "No switches specified in the topology config");
+    parse_if_present(topology_config["switches"],
+                     [this, &packet_spraying_node](ConfigNode node) {
+                         return process_switches(
+                             node.get_node(), packet_spraying_node.get_node());
+                     });
 
-    parse_if_present(
-        topology_config["links"],
-        [this, &topology_presets_node](auto node) {
-            return process_links(node,
-                                 get_if_present(topology_presets_node, "link"));
-        },
-        "No links specified in the topology config");
+    parse_if_present(topology_config["links"], [this, &topology_presets_node](
+                                                   ConfigNode node) {
+        YAML::Node links_preset_node =
+            topology_presets_node.value_or(ConfigNode())["link"]
+                .value_or(ConfigNode())
+                .get_node();
+        process_links(node.get_node(), links_preset_node);
+    });
 
-    parse_if_present(
-        simulation_config["connections"],
-        [this](auto node) { return process_connection(node); },
-        "No connections specified in the simulation config");
+    parse_if_present(simulation_config["connections"], [this](ConfigNode node) {
+        process_connection(node.get_node());
+    });
 
-    parse_if_present(
-        simulation_config["scenario"],
-        [this](auto node) { return process_scenario(node); },
-        "No scenario specified in the simulation config");
+    parse_if_present(simulation_config["scenario"], [this](auto node) {
+        return process_scenario(node.get_node());
+    });
 
     std::optional<TimeNs> maybe_stop_time =
-        parse_simulation_time(simulation_config);
+        parse_simulation_time(simulation_config.get_node());
     if (maybe_stop_time.has_value()) {
         m_simulator.set_stop_time(maybe_stop_time.value());
     }
