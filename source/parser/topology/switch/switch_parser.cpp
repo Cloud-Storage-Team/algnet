@@ -64,7 +64,7 @@ std::unique_ptr<IPacketHasher> SwitchParser::parse_hasher(
     if (type == "salt") {
         return std::make_unique<SaltECMPHasher>(std::move(switch_id));
     }
-    throw std::runtime_error(
+    throw packet_spraying_node.create_parsing_error(
         fmt::format("Unexpected packet sprayng type: {}", type));
 }
 
