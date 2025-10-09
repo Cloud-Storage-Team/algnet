@@ -1,8 +1,5 @@
 #include "link_parser.hpp"
 
-#include "utils/errors/base_error.hpp"
-#include "utils/errors/error_with_id.hpp"
-
 namespace sim {
 
 std::shared_ptr<ILink> LinkParser::parse_i_link(const ConfigNode& link_node,
@@ -43,16 +40,10 @@ void LinkParser::parse_to_args(const ConfigNode& node, LinkInitArgs& args) {
 std::shared_ptr<Link> LinkParser::parse_default_link(
     const ConfigNode& link_node, const LinkPresets& presets) {
     Id link_id = link_node.get_name_or_throw();
-    try {
-        LinkInitArgs link_args = presets.get_preset(link_node);
-        parse_to_args(link_node, link_args);
-        link_args.id = link_id;
-        return std::make_shared<Link>(std::move(link_args));
-    } catch (const utils::BaseError& base_error) {
-        throw utils::ErrorWithId(base_error, link_id);
-    } catch (...) {
-        throw;
-    }
+    LinkInitArgs link_args = presets.get_preset(link_node);
+    parse_to_args(link_node, link_args);
+    link_args.id = link_id;
+    return std::make_shared<Link>(std::move(link_args));
 }
 
 }  // namespace sim

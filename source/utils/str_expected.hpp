@@ -5,8 +5,6 @@
 #include <string>
 #include <type_traits>
 
-#include "errors/base_error.hpp"
-
 namespace utils {
 
 template <typename T>

@@ -7,7 +7,6 @@
 
 #include "parse_utils.hpp"
 #include "parser/config_reader/config_node.hpp"
-#include "utils/errors/base_error.hpp"
 
 namespace sim {
 
@@ -50,8 +49,8 @@ public:
             if (it != this->end()) {
                 return it->second;
             }
-            throw utils::BaseError(
-                fmt::format("Can not find preset with name {}", preset_name));
+            throw node.create_parsing_error("Can not find preset with name " +
+                                            preset_name);
         } else {
             // Use default preset
             auto it = this->find(M_DEFAULT_PRESET_NAME);
