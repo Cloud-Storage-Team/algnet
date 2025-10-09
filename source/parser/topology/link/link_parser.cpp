@@ -43,7 +43,11 @@ std::shared_ptr<Link> LinkParser::parse_default_link(
     LinkInitArgs link_args = presets.get_preset(link_node);
     parse_to_args(link_node, link_args);
     link_args.id = link_id;
-    return std::make_shared<Link>(std::move(link_args));
+    try {
+        return std::make_shared<Link>(std::move(link_args));
+    } catch (const std::exception& e) {
+        throw link_node.create_parsing_error(e.what());
+    }
 }
 
 }  // namespace sim
