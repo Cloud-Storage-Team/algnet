@@ -8,12 +8,17 @@
 #include "logger/logger.hpp"
 #include "parser/config_reader/config_node.hpp"
 #include "types.hpp"
+#include "utils/str_expected.hpp"
 
-SpeedGbps parse_speed(const std::string& throughput);
-TimeNs parse_time(const std::string& time);
-SizeByte parse_size(const std::string& buffer_size);
+namespace sim {
 
-YAML::Node get_if_present(const YAML::Node& node, std::string_view field_name);
+utils::StrExpected<SpeedGbps> parse_speed(const std::string& throughput);
+utils::StrExpected<TimeNs> parse_time(const std::string& time);
+utils::StrExpected<SizeByte> parse_size(const std::string& size);
+
+SpeedGbps parse_speed(const ConfigNode& throughput_node);
+TimeNs parse_time(const ConfigNode& time_node);
+SizeByte parse_size(const ConfigNode& size_node);
 
 // Parses node[field_name].as<T> if node contains field_name;
 // Returns default_value otherwise;
@@ -29,3 +34,5 @@ T simple_parse_with_default(const sim::ConfigNode& node,
     }
     return default_value;
 }
+
+}  // namespace sim

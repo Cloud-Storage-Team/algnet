@@ -37,8 +37,10 @@ std::unique_ptr<IAction> ActionParser::parse_send_data(const YAML::Node& node) {
             throw std::runtime_error("send_data requires `" + key + "`");
         return node[key];
     };
-    const TimeNs when = parse_time(require_field("when").as<std::string>());
-    const SizeByte size = parse_size(require_field("size").as<std::string>());
+    const TimeNs when =
+        parse_time(require_field("when").as<std::string>()).value_or_throw();
+    const SizeByte size =
+        parse_size(require_field("size").as<std::string>()).value_or_throw();
     const YAML::Node cs = require_field("connections");
 
     const int repeat_count =
@@ -49,6 +51,7 @@ std::unique_ptr<IAction> ActionParser::parse_send_data(const YAML::Node& node) {
     const TimeNs repeat_interval =
         node["repeat_interval"]
             ? parse_time(node["repeat_interval"].as<std::string>())
+                  .value_or_throw()
             : TimeNs(0);
     auto conns = get_target_connections(node);
 

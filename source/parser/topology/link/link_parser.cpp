@@ -20,26 +20,23 @@ void LinkParser::parse_to_args(const ConfigNode& node, LinkInitArgs& args) {
     });
 
     node["latency"].apply_if_present([&args](const ConfigNode& latency) {
-        args.delay.emplace(
-            parse_time(latency.as<std::string>().value_or_throw()));
+        args.delay.emplace(parse_time(latency));
     });
 
     node["throughput"].apply_if_present([&args](const ConfigNode& speed) {
-        args.speed.emplace(
-            parse_speed(speed.as<std::string>().value_or_throw()));
+        args.speed.emplace(parse_speed(speed));
     });
 
     node["egress_buffer_size"].apply_if_present(
         [&args](const ConfigNode& max_from_egress_buffer_size) {
             args.max_from_egress_buffer_size.emplace(
-                parse_size(max_from_egress_buffer_size.as<std::string>()
-                               .value_or_throw()));
+                parse_size(max_from_egress_buffer_size));
         });
 
     node["ingress_buffer_size"].apply_if_present(
         [&args](const ConfigNode& max_to_ingress_buffer_size) {
-            args.max_to_ingress_buffer_size.emplace(parse_size(
-                max_to_ingress_buffer_size.as<std::string>().value_or_throw()));
+            args.max_to_ingress_buffer_size.emplace(
+                parse_size(max_to_ingress_buffer_size));
         });
 }
 

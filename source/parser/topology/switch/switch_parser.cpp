@@ -48,10 +48,8 @@ std::unique_ptr<IPacketHasher> SwitchParser::parse_hasher(
         return std::make_unique<ECMPHasher>();
     }
     if (type == "flowlet") {
-        TimeNs threshold = parse_time(packet_spraying_node["threshold"]
-                                          .value_or_throw()
-                                          .as<std::string>()
-                                          .value_or_throw());
+        TimeNs threshold =
+            parse_time(packet_spraying_node["threshold"].value_or_throw());
         return std::make_unique<FLowletHasher>(threshold);
     }
     if (type == "adaptive_flowlet") {

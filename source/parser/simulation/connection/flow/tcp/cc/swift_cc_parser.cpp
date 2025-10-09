@@ -18,10 +18,7 @@ std::unique_ptr<TcpSwiftCC> SwiftCCParser::parse_swift_cc(
     double fs_max_cwnd = simple_parse_with_default(
         node, "fs_max_cwnd", TcpSwiftCC::DEFAULT_FS_MAX_CWND);
 
-    TimeNs base_target = parse_time(node["base_target"]
-                                        .value_or_throw()
-                                        .as<std::string>()
-                                        .value_or_throw());
+    TimeNs base_target = parse_time(node["base_target"].value_or_throw());
 
     return std::make_unique<TcpSwiftCC>(base_target, start_cwnd, ai, md,
                                         max_mdf, fs_range, fs_min_cwnd,

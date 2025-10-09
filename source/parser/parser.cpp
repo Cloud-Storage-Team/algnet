@@ -59,8 +59,7 @@ Simulator YamlParser::build_simulator_from_config(
 
     ConfigNodeExpected maybe_stop_time = simulation_config["simulation_time"];
     if (maybe_stop_time.has_value()) {
-        m_simulator.set_stop_time(parse_time(
-            maybe_stop_time.value().as<std::string>().value_or_throw()));
+        m_simulator.set_stop_time(parse_time(maybe_stop_time.value()));
     }
 
     return std::move(m_simulator);

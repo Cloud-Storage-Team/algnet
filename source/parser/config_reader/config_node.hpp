@@ -36,6 +36,8 @@ public:
 
     NodeStacktracePtr get_stacktrace() const;
 
+    ConfigNodeError create_parsing_error(std::string_view error) const;
+
     // yaml-cpp functional
 
     YAML::NodeType::value Type() const;
@@ -55,6 +57,12 @@ public:
                                    "\n; original error: " + e.what());
         }
     }
+
+    template <typename T>
+    T as_or_throw() const {
+        return as<T>().value_or_throw();
+    }
+
     template <typename T, typename S>
     utils::StrExpected<T> as(const S& fallback) const {
         try {

@@ -32,6 +32,14 @@ NodeStacktracePtr ConfigNode::get_stacktrace() const {
     return m_stacktrace_node;
 }
 
+ConfigNodeError ConfigNode::create_parsing_error(std::string_view error) const {
+    std::stringstream ss;
+    ss << "Error while parsing node\n";
+    ss << m_stacktrace_node << '\n';
+    ss << error << '\n';
+    return ConfigNodeError(ss.str());
+}
+
 YAML::NodeType::value ConfigNode::Type() const { return m_node.Type(); }
 
 bool ConfigNode::IsNull() const { return m_node.IsNull(); }

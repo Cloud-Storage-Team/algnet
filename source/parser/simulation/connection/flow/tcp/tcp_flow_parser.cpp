@@ -12,10 +12,8 @@ std::shared_ptr<TcpFlow> TcpFlowParser::parse_tcp_flow(const ConfigNode& node,
     std::unique_ptr<ITcpCC> cc =
         TcpCCParser::parse_i_tcp_cc(node["cc"].value_or_throw());
 
-    SizeByte packet_size = SizeByte(parse_size(node["packet_size"]
-                                                   .value_or_throw()
-                                                   .as<std::string>()
-                                                   .value_or_throw()));
+    SizeByte packet_size =
+        SizeByte(parse_size(node["packet_size"].value_or_throw()));
 
     std::shared_ptr<IConnection> conn =
         IdentifierFactory::get_instance().get_object<IConnection>(conn_id);
