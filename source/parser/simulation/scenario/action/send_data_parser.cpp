@@ -2,7 +2,6 @@
 #include <regex>
 
 #include "action_parser.hpp"
-#include "parser/config_reader/regex_convert.hpp"
 #include "scenario/action/send_data_action.hpp"
 
 namespace sim {
@@ -25,7 +24,7 @@ std::unique_ptr<IAction> ActionParser::parse_send_data(const ConfigNode& node) {
     const TimeNs when = parse_time(node["when"].value_or_throw());
     const SizeByte size = parse_size(node["size"].value_or_throw());
     const std::regex connections =
-        node["connections"].value_or_throw().as_or_throw<std::regex>();
+        parse_regex(node["connections"].value_or_throw());
 
     const std::uint32_t repeat_count =
         simple_parse_with_default(node, "repeat_count", 1u);
@@ -35,6 +34,11 @@ std::unique_ptr<IAction> ActionParser::parse_send_data(const ConfigNode& node) {
         (repeat_interval_node ? parse_time(repeat_interval_node.value())
                               : TimeNs(0));
     auto conns = get_target_connections(connections);
+
+    if (conns.empty()) {
+        throw node.create_parsing_error(
+            "No connections specified for send data action");
+    }
 
     return std::make_unique<SendDataAction>(when, size, conns, repeat_count,
                                             repeat_interval);

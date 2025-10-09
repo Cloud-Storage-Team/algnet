@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <regex>
 #include <string>
 
 #include "logger/logger.hpp"
@@ -19,6 +20,7 @@ utils::StrExpected<SizeByte> parse_size(const std::string& size);
 SpeedGbps parse_speed(const ConfigNode& throughput_node);
 TimeNs parse_time(const ConfigNode& time_node);
 SizeByte parse_size(const ConfigNode& size_node);
+std::regex parse_regex(const ConfigNode& regex_node);
 
 // Parses node[field_name].as<T> if node contains field_name;
 // Returns default_value otherwise;

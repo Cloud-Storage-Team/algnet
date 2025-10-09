@@ -33,6 +33,8 @@ public:
 
     std::runtime_error create_parsing_error(std::string_view error) const;
 
+    friend std::ostream& operator<<(std::ostream& out, const ConfigNode& node);
+
     // yaml-cpp functional
 
     YAML::NodeType::value Type() const;
@@ -85,14 +87,12 @@ public:
     Iterator end() const;
 
     // indexing
-
     ConfigNodeExpected operator[](std::string_view key) const;
 
-    friend std::ostream& operator<<(std::ostream& out, const ConfigNode& node);
-
 private:
-    // Invariant: m_node is correct, m_stacktrace_node is not null
+    // Always correct
     const YAML::Node m_node;
+
     const std::optional<std::string> m_name;
 };
 

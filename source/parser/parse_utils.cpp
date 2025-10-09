@@ -136,4 +136,13 @@ SizeByte parse_size(const ConfigNode &size_node) {
     return result.value();
 }
 
+std::regex parse_regex(const ConfigNode &regex_node) {
+    try {
+        return std::regex(regex_node.as_or_throw<std::string>());
+    } catch (const std::regex_error &e) {
+        throw regex_node.create_parsing_error("Can not construct regex: " +
+                                              std::string(e.what()));
+    }
+}
+
 }  // namespace sim

@@ -32,6 +32,16 @@ std::runtime_error ConfigNode::create_parsing_error(
     return std::runtime_error(ss.str());
 }
 
+std::ostream& operator<<(std::ostream& out, const ConfigNode& node) {
+    YAML::Mark mark = node.m_node.Mark();
+    if (node.m_name) {
+        out << "name: '" << node.m_name.value() << "'";
+    } else {
+        out << "without name";
+    }
+    return out << " at line " << mark.line + 1 << " column " << mark.column + 1;
+}
+
 YAML::NodeType::value ConfigNode::Type() const { return m_node.Type(); }
 
 bool ConfigNode::IsNull() const { return m_node.IsNull(); }
@@ -116,16 +126,6 @@ utils::StrExpected<ConfigNode> ConfigNode::operator[](
     }
     return ConfigNode(std::move(child_node), std::string(key));
 };
-
-std::ostream& operator<<(std::ostream& out, const ConfigNode& node) {
-    YAML::Mark mark = node.m_node.Mark();
-    if (node.m_name) {
-        out << "name: '" << node.m_name.value() << "'";
-    } else {
-        out << "without name";
-    }
-    return out << " at line " << mark.line + 1 << " column " << mark.column + 1;
-}
 
 ConfigNode load_file(std::filesystem::path path) {
     return ConfigNode(YAML::LoadFile(path.string()));
