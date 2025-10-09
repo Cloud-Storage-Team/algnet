@@ -13,11 +13,6 @@
 
 namespace sim {
 
-class ConfigNodeError : public std::runtime_error {
-public:
-    ConfigNodeError(std::string a_what);
-};
-
 class ConfigNode;
 
 using ConfigNodeExpected = utils::StrExpected<ConfigNode>;
@@ -36,7 +31,7 @@ public:
 
     const std::string& get_name_or_throw() const;
 
-    ConfigNodeError create_parsing_error(std::string_view error) const;
+    std::runtime_error create_parsing_error(std::string_view error) const;
 
     // yaml-cpp functional
 

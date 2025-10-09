@@ -2,12 +2,10 @@
 
 namespace sim {
 
-ConfigNodeError::ConfigNodeError(std::string a_what)
-    : std::runtime_error(std::move(a_what)) {}
 ConfigNode::ConfigNode(YAML::Node a_node, std::optional<std::string> a_name)
     : m_node(std::move(a_node)), m_name(std::move(a_name)) {
     if (!m_node) {
-        throw ConfigNodeError(
+        throw std::runtime_error(
             "Can not construct ConfigNode: given YAML::Node is "
             "invalid");
     }
@@ -26,11 +24,12 @@ const std::string& ConfigNode::get_name_or_throw() const {
     return m_name.value();
 }
 
-ConfigNodeError ConfigNode::create_parsing_error(std::string_view error) const {
+std::runtime_error ConfigNode::create_parsing_error(
+    std::string_view error) const {
     std::stringstream ss;
     ss << "Error while parsing node " << *this << ":\n";
     ss << error << '\n';
-    return ConfigNodeError(ss.str());
+    return std::runtime_error(ss.str());
 }
 
 YAML::NodeType::value ConfigNode::Type() const { return m_node.Type(); }
@@ -91,7 +90,7 @@ ConfigNode ConfigNode::Iterator::operator*() const {
         YAML::Node key_node = m_iterator->first;
         YAML::Node value_node = m_iterator->second;
         if (!key_node || !value_node) {
-            throw ConfigNodeError(
+            throw std::runtime_error(
                 "Can not take value under config node iterator; all possile "
                 "nodes are invalid");
         }
