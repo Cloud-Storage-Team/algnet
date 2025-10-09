@@ -9,11 +9,11 @@ std::shared_ptr<ILink> LinkParser::parse_i_link(const ConfigNode& link_node,
 
 void LinkParser::parse_to_args(const ConfigNode& node, LinkInitArgs& args) {
     node["from"].apply_if_present([&args](const ConfigNode& from) {
-        args.from_id.emplace(from.as<Id>().value_or_throw());
+        args.from_id.emplace(from.as_or_throw<Id>());
     });
 
     node["to"].apply_if_present([&args](const ConfigNode& to) {
-        args.to_id.emplace(to.as<Id>().value_or_throw());
+        args.to_id.emplace(to.as_or_throw<Id>());
     });
 
     node["latency"].apply_if_present([&args](const ConfigNode& latency) {

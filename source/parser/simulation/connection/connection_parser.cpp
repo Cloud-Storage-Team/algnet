@@ -17,10 +17,9 @@ std::shared_ptr<IConnection> ConnectionParser::parse_connection(
     Id conn_id = node.get_name_or_throw();
 
     Id sender_id =
-        node["sender_id"].value_or_throw().as<std::string>().value_or_throw();
+        node["sender_id"].value_or_throw().as_or_throw<std::string>();
 
-    Id receiver_id =
-        node["receiver_id"].value_or_throw().as<Id>().value_or_throw();
+    Id receiver_id = node["receiver_id"].value_or_throw().as_or_throw<Id>();
 
     std::shared_ptr<IHost> sender_ptr =
         IdentifierFactory::get_instance().get_object<IHost>(sender_id);
@@ -29,7 +28,7 @@ std::shared_ptr<IConnection> ConnectionParser::parse_connection(
         IdentifierFactory::get_instance().get_object<IHost>(receiver_id);
 
     std::string mplb_name =
-        node["mplb"].value_or_throw().as<std::string>().value_or_throw();
+        node["mplb"].value_or_throw().as_or_throw<std::string>();
 
     auto mplb = make_mplb(mplb_name);
 

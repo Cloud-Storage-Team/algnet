@@ -32,7 +32,7 @@ T simple_parse_with_default(const sim::ConfigNode& node,
                   "T must be copy constructible");
 
     if (sim::ConfigNodeExpected value_node = node[field_name]; value_node) {
-        return value_node.value().as<T>().value_or_throw();
+        return value_node.value().as_or_throw<T>();
     }
     return default_value;
 }

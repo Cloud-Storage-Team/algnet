@@ -19,7 +19,6 @@ using ConfigNodeExpected = utils::StrExpected<ConfigNode>;
 
 class ConfigNode {
 public:
-    // Creates ROOT ConfigNode from YAML::Node
     explicit ConfigNode(YAML::Node a_node = YAML::Node(),
                         std::optional<std::string> a_name = std::nullopt);
 

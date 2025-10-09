@@ -28,10 +28,10 @@ std::shared_ptr<Switch> SwitchParser::parse_default_switch(
 }
 
 ECN SwitchParser::parse_ecn(const ConfigNode& node) {
-    float min = node["min"].value_or_throw().as<float>().value_or_throw();
-    float max = node["max"].value_or_throw().as<float>().value_or_throw();
+    float min = node["min"].value_or_throw().as_or_throw<float>();
+    float max = node["max"].value_or_throw().as_or_throw<float>();
     float probability =
-        node["probability"].value_or_throw().as<float>().value_or_throw();
+        node["probability"].value_or_throw().as_or_throw<float>();
     return ECN(min, max, probability);
 }
 
@@ -55,7 +55,7 @@ std::unique_ptr<IPacketHasher> SwitchParser::parse_hasher(
     if (type == "adaptive_flowlet") {
         auto factor_node = packet_spraying_node["factor"];
         if (factor_node) {
-            double factor = factor_node.value().as<double>().value_or_throw();
+            double factor = factor_node.value().as_or_throw<double>();
             return std::make_unique<AdaptiveFlowletHasher>(factor);
         } else {
             return std::make_unique<AdaptiveFlowletHasher>();

@@ -8,8 +8,7 @@
 
 namespace sim {
 std::unique_ptr<ITcpCC> TcpCCParser::parse_i_tcp_cc(const ConfigNode& node) {
-    std::string type =
-        node["type"].value_or_throw().as<std::string>().value_or_throw();
+    std::string type = node["type"].value_or_throw().as_or_throw<std::string>();
     if (type == "basic") {
         return std::make_unique<BasicCC>();
     } else if (type == "tahoe") {

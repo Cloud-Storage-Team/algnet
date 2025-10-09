@@ -44,7 +44,7 @@ public:
         if (preset_name_node) {
             // preset-name specified
             std::string preset_name =
-                preset_name_node.value().as<std::string>().value_or_throw();
+                preset_name_node.value().as_or_throw<std::string>();
             auto it = this->find(preset_name);
             if (it != this->end()) {
                 return it->second;
