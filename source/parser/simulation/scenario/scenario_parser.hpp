@@ -9,7 +9,7 @@ namespace sim {
 
 class ScenarioParser {
 public:
-    static Scenario parse(const YAML::Node& scenario_node);
+    static Scenario parse(const ConfigNode& scenario_node);
 };
 
 }  // namespace sim

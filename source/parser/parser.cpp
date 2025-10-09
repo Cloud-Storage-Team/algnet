@@ -119,7 +119,7 @@ void YamlParser::process_connection(const ConfigNode &connections_node) {
 }
 
 void YamlParser::process_scenario(const ConfigNode &scenario_node) {
-    auto scenario = ScenarioParser::parse(scenario_node.get_node());
+    auto scenario = ScenarioParser::parse(scenario_node);
     m_simulator.set_scenario(std::move(scenario));
 }
 

@@ -2,58 +2,39 @@
 #include <regex>
 
 #include "action_parser.hpp"
+#include "parser/config_reader/regex_convert.hpp"
 #include "scenario/action/send_data_action.hpp"
 
 namespace sim {
 
 // Get target connections from the YAML node
 static std::vector<std::weak_ptr<IConnection>> get_target_connections(
-    const YAML::Node& node) {
+    std::regex re) {
     std::vector<std::weak_ptr<IConnection>> conns;
+
     auto& factory = IdentifierFactory::get_instance();
-
-    const auto cs = node["connections"];
-    if (!cs || !cs.IsScalar()) {
-        throw std::runtime_error(
-            "send_data requires `connections` as a scalar string");
-    }
-    const std::string pattern = cs.as<std::string>();
-    const std::regex re(pattern);
-
     for (const auto& conn : factory.get_objects<IConnection>()) {
         if (std::regex_match(conn->get_id(), re)) {
             conns.push_back(conn);
         }
     }
-    if (conns.empty()) {
-        throw std::runtime_error("No connections matched regex: " + pattern);
-    }
     return conns;
 }
 
-std::unique_ptr<IAction> ActionParser::parse_send_data(const YAML::Node& node) {
-    auto require_field = [&node](const std::string& key) -> YAML::Node {
-        if (!node[key])
-            throw std::runtime_error("send_data requires `" + key + "`");
-        return node[key];
-    };
-    const TimeNs when =
-        parse_time(require_field("when").as<std::string>()).value_or_throw();
-    const SizeByte size =
-        parse_size(require_field("size").as<std::string>()).value_or_throw();
-    const YAML::Node cs = require_field("connections");
+std::unique_ptr<IAction> ActionParser::parse_send_data(const ConfigNode& node) {
+    const TimeNs when = parse_time(node["when"].value_or_throw());
+    const SizeByte size = parse_size(node["size"].value_or_throw());
+    const std::regex connections =
+        node["connections"].value_or_throw().as_or_throw<std::regex>();
 
-    const int repeat_count =
-        node["repeat_count"] ? node["repeat_count"].as<int>() : 1;
-    if (repeat_count <= 0)
-        throw std::runtime_error("`repeat_count` must be > 0");
+    const std::uint32_t repeat_count =
+        simple_parse_with_default(node, "repeat_count", 1u);
 
+    auto repeat_interval_node = node["repeat_interval"];
     const TimeNs repeat_interval =
-        node["repeat_interval"]
-            ? parse_time(node["repeat_interval"].as<std::string>())
-                  .value_or_throw()
-            : TimeNs(0);
-    auto conns = get_target_connections(node);
+        (repeat_interval_node ? parse_time(repeat_interval_node.value())
+                              : TimeNs(0));
+    auto conns = get_target_connections(connections);
 
     return std::make_unique<SendDataAction>(when, size, conns, repeat_count,
                                             repeat_interval);

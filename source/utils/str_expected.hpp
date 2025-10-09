@@ -24,7 +24,7 @@ public:
     StrExpected(T a_value)
         : std::expected<T, std::string>(std::move(a_value)) {}
 
-    template <typename TErr = BaseError>
+    template <typename TErr = std::runtime_error>
     T value_or_throw() const {
         static_assert(std::is_base_of_v<std::exception, TErr>,
                       "TErr must inhetir std::exception");

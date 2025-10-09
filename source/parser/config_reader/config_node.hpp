@@ -9,7 +9,6 @@
 #include <type_traits>
 #include <vector>
 
-#include "node_stacktrace.hpp"
 #include "utils/str_expected.hpp"
 
 namespace sim {
@@ -26,15 +25,16 @@ using ConfigNodeExpected = utils::StrExpected<ConfigNode>;
 class ConfigNode {
 public:
     // Creates ROOT ConfigNode from YAML::Node
-    explicit ConfigNode(YAML::Node a_node = YAML::Node());
+    explicit ConfigNode(YAML::Node a_node = YAML::Node(),
+                        std::optional<std::string> a_name = std::nullopt);
 
     // Some functional over yaml-cpp
 
-    std::optional<std::string> get_name() const;
-
     const YAML::Node& get_node() const;
 
-    NodeStacktracePtr get_stacktrace() const;
+    const std::optional<std::string>& get_name() const;
+
+    const std::string& get_name_or_throw() const;
 
     ConfigNodeError create_parsing_error(std::string_view error) const;
 
@@ -52,9 +52,7 @@ public:
         try {
             return m_node.as<T>();
         } catch (const YAML::Exception& e) {
-            return std::unexpected("Can not apply 'as' to node\n" +
-                                   m_stacktrace_node->to_string() +
-                                   "\n; original error: " + e.what());
+            return std::unexpected(e.what());
         }
     }
 
@@ -63,17 +61,6 @@ public:
         return as<T>().value_or_throw();
     }
 
-    template <typename T, typename S>
-    utils::StrExpected<T> as(const S& fallback) const {
-        try {
-            return m_node.as<T>(fallback);
-        } catch (const YAML::Exception& e) {
-            return std::unexpected(
-                "Can not apply 'as' with fallback to node\n" +
-                m_stacktrace_node->to_string() +
-                "\n; original error: " + e.what());
-        }
-    }
     const std::string& Scalar() const;
 
     const std::string& Tag() const;
@@ -82,7 +69,7 @@ public:
 
     class Iterator {
     public:
-        Iterator(YAML::const_iterator a_it, NodeStacktracePtr a_stacktrace);
+        Iterator(YAML::const_iterator a_it);
 
         Iterator& operator++();
 
@@ -97,7 +84,6 @@ public:
     private:
         // Invariant: m_stacktrace_node is not null
         YAML::const_iterator m_iterator;
-        NodeStacktracePtr m_stacktrace_node;
     };
 
     Iterator begin() const;
@@ -107,12 +93,12 @@ public:
 
     ConfigNodeExpected operator[](std::string_view key) const;
 
-private:
-    ConfigNode(YAML::Node a_node, NodeStacktracePtr a_node_ptr);
+    friend std::ostream& operator<<(std::ostream& out, const ConfigNode& node);
 
+private:
     // Invariant: m_node is correct, m_stacktrace_node is not null
     const YAML::Node m_node;
-    NodeStacktracePtr m_stacktrace_node;
+    const std::optional<std::string> m_name;
 };
 
 ConfigNode load_file(std::filesystem::path path);

@@ -10,12 +10,7 @@ std::shared_ptr<IFlow> FlowParser::parse_i_flow(const ConfigNode& node,
     if (type == "tcp") {
         return TcpFlowParser::parse_tcp_flow(node, conn_id);
     }
-
-    std::stringstream ss;
-    ss << "Error while parsing node\n";
-    ss << node.get_stacktrace() << '\n';
-    ss << "Unexpected flow type: " << type;
-    throw ConfigNodeError(ss.str());
+    throw node.create_parsing_error("Unexpected flow type: " + type);
 }
 
 }  // namespace sim

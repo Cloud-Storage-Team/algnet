@@ -22,15 +22,11 @@ public:
         PresetStorage<TPreset> storage;
         for (auto it = presets_node.begin(); it != presets_node.end(); ++it) {
             ConfigNode preset_node = *it;
-            std::string preset_name = preset_node.get_name().value();
+            std::string preset_name = preset_node.get_name_or_throw();
 
             if (storage.contains(preset_name)) {
-                std::stringstream ss;
-                ss << "Error while parsing\n";
-                ss << preset_node.get_stacktrace()->to_string() << "\n";
-                ss << "Preset with name" << preset_name << "already exists";
-
-                throw ConfigNodeError(ss.str());
+                throw preset_node.create_parsing_error(fmt::format(
+                    "Preset with name {} already exists", preset_name));
             }
 
             storage.emplace(std::move(preset_name), preset_parser(preset_node));

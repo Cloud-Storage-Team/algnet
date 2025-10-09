@@ -18,10 +18,6 @@ std::unique_ptr<ITcpCC> TcpCCParser::parse_i_tcp_cc(const ConfigNode& node) {
         return SwiftCCParser::parse_swift_cc(node);
     }
 
-    std::stringstream ss;
-    ss << "Error while parsing node\n";
-    ss << node.get_stacktrace() << '\n';
-    ss << "Unexpected type of CC module: " << type;
-    throw ConfigNodeError(ss.str());
+    throw node.create_parsing_error("Unexpected type of CC module: " + type);
 }
 }  // namespace sim

@@ -14,7 +14,7 @@ std::shared_ptr<IConnection> ConnectionParser::parse_i_connection(
 
 std::shared_ptr<IConnection> ConnectionParser::parse_connection(
     const ConfigNode& node) {
-    Id conn_id = node.get_name().value();
+    Id conn_id = node.get_name_or_throw();
 
     Id sender_id =
         node["sender_id"].value_or_throw().as<std::string>().value_or_throw();
