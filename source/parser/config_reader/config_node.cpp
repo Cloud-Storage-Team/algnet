@@ -39,7 +39,12 @@ std::ostream& operator<<(std::ostream& out, const ConfigNode& node) {
     } else {
         out << "without name";
     }
-    return out << " at line " << mark.line + 1 << " column " << mark.column + 1;
+    if (mark.line >= 0 && mark.column >= 0) {
+        out << " at line " << mark.line + 1 << " column " << mark.column + 1;
+    } else {
+        out << " at unknown location";
+    }
+    return out;
 }
 
 YAML::NodeType::value ConfigNode::Type() const { return m_node.Type(); }
