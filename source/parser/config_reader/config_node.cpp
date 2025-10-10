@@ -127,6 +127,10 @@ utils::StrExpected<ConfigNode> ConfigNode::operator[](
         ss << "does not have key `" << key << '`';
         return std::unexpected(ss.str());
     }
+    if (child_node.IsNull()) {
+        // if node is null, its name should be empty
+        return ConfigNode(std::move(child_node), std::nullopt);
+    }
     return ConfigNode(std::move(child_node), std::string(key));
 };
 

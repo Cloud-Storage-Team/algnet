@@ -43,13 +43,13 @@ Simulator YamlParser::build_simulator_from_config(
                          return process_switches(node, packet_spraying_node);
                      });
 
-    parse_if_present(topology_config["links"], [this, &topology_presets_node](
-                                                   ConfigNode node) {
-        ConfigNode links_preset_node =
-            topology_presets_node.value_or(ConfigNode())["link"].value_or(
-                ConfigNode());
-        process_links(node, links_preset_node);
-    });
+    ConfigNode links_preset_node =
+        topology_presets_node.value_or(ConfigNode())["link"].value_or(
+            ConfigNode());
+    parse_if_present(topology_config["links"],
+                     [this, &links_preset_node](ConfigNode node) {
+                         process_links(node, links_preset_node);
+                     });
 
     parse_if_present(simulation_config["connections"],
                      [this](ConfigNode node) { process_connection(node); });
