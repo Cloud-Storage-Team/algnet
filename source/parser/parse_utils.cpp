@@ -114,7 +114,7 @@ utils::StrExpected<SizeByte> parse_size(const std::string &size) {
 
 SpeedGbps parse_speed(const ConfigNode &throughput_node) {
     std::string throughput = throughput_node.as_or_throw<std::string>();
-    utils::StrExpected<SpeedGbps> result = parse_speed(throughtput);
+    utils::StrExpected<SpeedGbps> result = parse_speed(throughput);
     if (!result) {
         throw throughput_node.create_parsing_error(result.error());
     }
