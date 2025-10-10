@@ -16,7 +16,7 @@ using ConfigNodeExpected = utils::StrExpected<ConfigNode>;
 
 class ConfigNode {
 public:
-    explicit ConfigNode(YAML::Node a_node = YAML::Node(),
+    explicit ConfigNode(YAML::Node a_node = YAML::Node(YAML::NodeType::Null),
                         std::optional<std::string> a_name = std::nullopt);
 
     // Some functional over yaml-cpp

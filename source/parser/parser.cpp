@@ -34,7 +34,7 @@ Simulator YamlParser::build_simulator_from_config(
     ConfigNodeExpected topology_presets_node = topology_config["presets"];
 
     const ConfigNode packet_spraying_node =
-        topology_config["packet-spraying"].value_or_throw<std::runtime_error>();
+        topology_config["packet-spraying"].value_or_throw();
     parse_if_present(topology_config["hosts"],
                      [this](ConfigNode node) { process_hosts(node); });
 
