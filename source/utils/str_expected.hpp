@@ -10,7 +10,7 @@ namespace utils {
 template <typename T>
 class StrExpected : public std::expected<T, std::string> {
 public:
-    // template for possible unexpected convections (like std::unexpected<const
+    // template for possible unexpected conversions (like std::unexpected<const
     // char*> to std::unexpected<std::string>)
     template <typename U>
     StrExpected(std::unexpected<U> a_unexpected)
