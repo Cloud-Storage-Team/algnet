@@ -21,31 +21,35 @@ public:
 
     // Some functional over yaml-cpp
 
-    const YAML::Node& get_node() const noexcept;
+    [[nodiscard]] const YAML::Node& get_node() const noexcept;
 
-    const std::optional<std::string>& get_name() const noexcept;
+    [[nodiscard]] const std::optional<std::string>& get_name() const noexcept;
 
-    const std::string& get_name_or_throw() const;
+    [[nodiscard]] const std::string& get_name_or_throw() const;
 
-    std::runtime_error create_parsing_error(std::string_view error) const;
+    [[nodiscard]] std::runtime_error create_parsing_error(
+        std::string_view error) const;
 
     friend std::ostream& operator<<(std::ostream& out, const ConfigNode& node);
 
     // yaml-cpp functional
 
-    YAML::NodeType::value Type() const;
-    bool IsNull() const noexcept;
-    bool IsScalar() const noexcept;
-    bool IsSequence() const noexcept;
-    bool IsMap() const noexcept;
+    [[nodiscard]] YAML::NodeType::value Type() const;
+    [[nodiscard]] bool IsNull() const noexcept;
+    [[nodiscard]] bool IsScalar() const noexcept;
+    [[nodiscard]] bool IsSequence() const noexcept;
+    [[nodiscard]] bool IsMap() const noexcept;
 
     // access
     template <typename T>
-    utils::StrExpected<T> as() const {
+    [[nodiscard]] utils::StrExpected<T> as() const noexcept {
         try {
             return m_node.as<T>();
-        } catch (const YAML::Exception& e) {
+        } catch (const std::exception& e) {
             return std::unexpected(e.what());
+        } catch (...) {
+            return std::unexpected(
+                "Undefined exception while calling `YAML::Node::as`");
         }
     }
 
@@ -54,11 +58,9 @@ public:
         return as<T>().value_or_throw();
     }
 
-    const std::string& Scalar() const;
+    [[nodiscard]] const std::string& Tag() const noexcept;
 
-    const std::string& Tag() const noexcept;
-
-    std::size_t size() const noexcept;
+    [[nodiscard]] std::size_t size() const noexcept;
 
     class Iterator {
     public:

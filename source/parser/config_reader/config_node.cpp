@@ -54,14 +54,6 @@ bool ConfigNode::IsScalar() const noexcept { return m_node.IsScalar(); }
 bool ConfigNode::IsSequence() const noexcept { return m_node.IsSequence(); }
 bool ConfigNode::IsMap() const noexcept { return m_node.IsMap(); }
 
-const std::string& ConfigNode::Scalar() const {
-    if (!m_node.IsScalar()) {
-        throw create_parsing_error(
-            "Can not return scalar representation: node is not scalar");
-    }
-    return m_node.Scalar();
-}
-
 const std::string& ConfigNode::Tag() const noexcept { return m_node.Tag(); }
 
 // size/iterator
