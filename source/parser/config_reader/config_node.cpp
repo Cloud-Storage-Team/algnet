@@ -81,18 +81,16 @@ bool ConfigNode::Iterator::operator!=(const Iterator& rhs) const {
 }
 
 ConfigNode ConfigNode::Iterator::operator*() const {
-    YAML::detail::iterator_value iterator_value = *m_iterator;
-    // Call method of Node to get which type of nodes iterator goes
-    // Explanation: iterator_value inherited from
+    // Explanation: iterator_value under *m_iterator inherited from
     // YAML::Node and std::pair<YAML::Node, YAML::Node>, but only one value of
-    // this pair is correct (please, them about std::variant...)
-    if (iterator_value) {
+    // this pair is correct (please, tell them about std::variant...)
+    if (m_iterator->IsDefined()) {
         // iterator goes over "named" nodes like
         // list:
         //  - value_0
         //  - value_1
         //  ...
-        YAML::Node node = iterator_value;
+        YAML::Node node = *m_iterator;
         return ConfigNode(node, std::nullopt);
     } else {
         // iterator goes over "named" nodes like
