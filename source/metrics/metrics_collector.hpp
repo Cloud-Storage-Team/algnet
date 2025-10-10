@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <regex>
 #include <unordered_map>
 
@@ -8,6 +9,12 @@
 #include "multi_id_metrics_storage.hpp"
 #include "packet_reordering/i_packet_reordering.hpp"
 namespace sim {
+
+struct StorageData {
+    MultiIdMetricsStorage storage;
+    PlotMetadata metadata;
+    std::function<std::string(const Id&)> id_to_curve_name;
+};
 
 class MetricsCollector {
 public:
@@ -30,25 +37,23 @@ public:
     static void set_metrics_filter(const std::string& filter);
 
 private:
+    static std::string m_metrics_filter;
+    static bool m_is_initialised;
+
     MetricsCollector();
     MetricsCollector(const MetricsCollector&) = delete;
     MetricsCollector& operator=(const MetricsCollector&) = delete;
 
-    void draw_cwnd_plot(std::filesystem::path path) const;
-    void draw_delivery_rate_plot(std::filesystem::path path) const;
-    void draw_RTT_plot(std::filesystem::path path) const;
-    void draw_packet_reordering_plot(std::filesystem::path path) const;
     void draw_queue_size_plots(std::filesystem::path dir_path) const;
 
-    static std::string m_metrics_filter;
-    static bool m_is_initialised;
+    MultiIdMetricsStorage& get_storage(const std::string& name);
 
-    // flow_ID --> vector of <time, ...> values
-    MultiIdMetricsStorage m_RTT_storage;
-    MultiIdMetricsStorage m_cwnd_storage;
-    MultiIdMetricsStorage m_rate_storage;
+    static constexpr std::string M_RTT_STORAGE_NAME = "rtt";
+    static constexpr std::string M_CWND_STORAGE_NAME = "cwnd";
+    static constexpr std::string M_RATE_STORAGE_NAME = "rate";
+    static constexpr std::string M_REORDERING_STORAGE_NAME = "reordering";
 
-    MultiIdMetricsStorage m_packet_reordering_storage;
+    std::unordered_map<std::string, StorageData> m_multi_id_storages;
 
     // link_ID --> vector of <time, queue size> values
     LinksQueueSizeStorage m_links_queue_size_storage;
