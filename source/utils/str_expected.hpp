@@ -44,7 +44,7 @@ public:
     }
 
     template <typename U>
-    U apply_or(std::function<U(const T&)> aplly_value,
+    U apply_or(std::function<U(const T&)> apply_value,
                std::function<U(const std::string&)> apply_error) {
         if (this->has_value()) {
             return apply_value(this->value());
@@ -54,10 +54,10 @@ public:
     }
 
     template <typename U>
-    U apply_or_default(std::function<U(const T&)> aplly_value,
+    U apply_or_default(std::function<U(const T&)> apply_value,
                        U default_value) {
         if (this->has_value()) {
-            return aplly_value(this->value());
+            return apply_value(this->value());
         } else {
             return default_value;
         }
