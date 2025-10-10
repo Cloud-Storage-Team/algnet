@@ -101,7 +101,7 @@ ConfigNode ConfigNode::Iterator::operator*() const {
         YAML::Node value_node = m_iterator->second;
         if (!key_node || !value_node) {
             throw std::runtime_error(
-                "Can not take value under config node iterator; all possile "
+                "Can not take value under config node iterator; all possible "
                 "nodes are invalid");
         }
         std::string key = key_node.as<std::string>();
