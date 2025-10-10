@@ -2,6 +2,7 @@
 
 #include <spdlog/fmt/fmt.h>
 
+#include <charconv>
 #include <stdexcept>
 
 namespace sim {
@@ -14,24 +15,26 @@ static utils::StrExpected<std::pair<uint32_t, std::string> > parse_value_unit(
     }
     std::string value_str = value_with_unit.substr(0, unit_pos);
     uint32_t value;
-    try {
-        const unsigned long value_long = std::stoul(value_str);
-        if (value_long > std::numeric_limits<uint32_t>::max()) {
-            return std::unexpected(
-                fmt::format("Value ({}), exceeds uint32_t limit", value_long));
-        }
-        value = value_long;
-    } catch (const std::invalid_argument &e) {  // might be thrown by std::stoul
-        return std::unexpected(
-            fmt::format("Can not convert {} to uint32_t : not valid number; "
-                        "original error: {}",
-                        value_str, e.what()));
-    } catch (const std::out_of_range &e) {  // might be thrown by std::stoul
-        return std::unexpected(fmt::format(
-            "Value {} is too big to be represented as number", value_str));
+    std::errc from_chars_err =
+        std::from_chars(value_str.data(), value_str.data() + value_str.size(),
+                        value)
+            .ec;
+    if (from_chars_err == std::errc()) {
+        // no error
+        const std::string unit = value_with_unit.substr(unit_pos);
+        return std::make_pair(value, unit);
     }
-    const std::string unit = value_with_unit.substr(unit_pos);
-    return std::make_pair(value, unit);
+    if (from_chars_err == std::errc::invalid_argument) {
+        return std::unexpected(
+            fmt::format("Can not convert {} to integer", std::move(value_str)));
+    }
+    if (from_chars_err == std::errc::result_out_of_range) {
+        return std::unexpected(
+            fmt::format("{} can not be represented as integer: out of range",
+                        std::move(value_str)));
+    }
+    return std::unexpected(
+        fmt::format("Unexpected error from std::from_chars"));
 }
 
 utils::StrExpected<SpeedGbps> parse_speed(const std::string &throughput) {
