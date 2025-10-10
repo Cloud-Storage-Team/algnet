@@ -25,7 +25,7 @@ public:
     template <typename TErr = std::runtime_error>
     T value_or_throw() const {
         static_assert(std::is_base_of_v<std::exception, TErr>,
-                      "TErr must inhetir std::exception");
+                      "TErr must inherit std::exception");
         static_assert(std::is_constructible_v<TErr, const std::string&>,
                       "TErr should be constructable from rvalue std::string");
         if (!this->has_value()) {
