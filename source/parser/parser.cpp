@@ -74,10 +74,10 @@ void YamlParser::process_hosts(const ConfigNode &hosts_node) {
         HostParser::parse_i_host, "Can not add host.");
 }
 
-void YamlParser::process_switches(const ConfigNode &swtiches_node,
+void YamlParser::process_switches(const ConfigNode &switches_node,
                                   const ConfigNode &packet_spraying_node) {
     process_identifiables<ISwitch>(
-        swtiches_node,
+        switches_node,
         [this](std::shared_ptr<ISwitch> swtch) {
             return m_simulator.add_switch(swtch);
         },
