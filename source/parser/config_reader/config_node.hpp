@@ -24,9 +24,9 @@ public:
 
     // Some functional over yaml-cpp
 
-    const YAML::Node& get_node() const;
+    const YAML::Node& get_node() const noexcept;
 
-    const std::optional<std::string>& get_name() const;
+    const std::optional<std::string>& get_name() const noexcept;
 
     const std::string& get_name_or_throw() const;
 
@@ -37,10 +37,10 @@ public:
     // yaml-cpp functional
 
     YAML::NodeType::value Type() const;
-    bool IsNull() const;
-    bool IsScalar() const;
-    bool IsSequence() const;
-    bool IsMap() const;
+    bool IsNull() const noexcept;
+    bool IsScalar() const noexcept;
+    bool IsSequence() const noexcept;
+    bool IsMap() const noexcept;
 
     // access
     template <typename T>
@@ -59,9 +59,9 @@ public:
 
     const std::string& Scalar() const;
 
-    const std::string& Tag() const;
+    const std::string& Tag() const noexcept;
 
-    std::size_t size() const;
+    std::size_t size() const noexcept;
 
     class Iterator {
     public:

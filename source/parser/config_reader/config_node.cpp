@@ -11,9 +11,9 @@ ConfigNode::ConfigNode(YAML::Node a_node, std::optional<std::string> a_name)
     }
 }
 
-const YAML::Node& ConfigNode::get_node() const { return m_node; }
+const YAML::Node& ConfigNode::get_node() const noexcept { return m_node; }
 
-const std::optional<std::string>& ConfigNode::get_name() const {
+const std::optional<std::string>& ConfigNode::get_name() const noexcept {
     return m_name;
 }
 
@@ -49,10 +49,10 @@ std::ostream& operator<<(std::ostream& out, const ConfigNode& node) {
 
 YAML::NodeType::value ConfigNode::Type() const { return m_node.Type(); }
 
-bool ConfigNode::IsNull() const { return m_node.IsNull(); }
-bool ConfigNode::IsScalar() const { return m_node.IsScalar(); }
-bool ConfigNode::IsSequence() const { return m_node.IsSequence(); }
-bool ConfigNode::IsMap() const { return m_node.IsMap(); }
+bool ConfigNode::IsNull() const noexcept { return m_node.IsNull(); }
+bool ConfigNode::IsScalar() const noexcept { return m_node.IsScalar(); }
+bool ConfigNode::IsSequence() const noexcept { return m_node.IsSequence(); }
+bool ConfigNode::IsMap() const noexcept { return m_node.IsMap(); }
 
 const std::string& ConfigNode::Scalar() const {
     if (!m_node.IsScalar()) {
@@ -62,10 +62,10 @@ const std::string& ConfigNode::Scalar() const {
     return m_node.Scalar();
 }
 
-const std::string& ConfigNode::Tag() const { return m_node.Tag(); }
+const std::string& ConfigNode::Tag() const noexcept { return m_node.Tag(); }
 
 // size/iterator
-std::size_t ConfigNode::size() const { return m_node.size(); }
+std::size_t ConfigNode::size() const noexcept { return m_node.size(); }
 
 ConfigNode::Iterator::Iterator(YAML::const_iterator a_it) : m_iterator(a_it) {}
 
