@@ -4,9 +4,9 @@
 
 namespace sim {
 
-Scenario ScenarioParser::parse(const YAML::Node& scenario_node) {
-    if (!scenario_node || !scenario_node.IsSequence()) {
-        throw std::runtime_error("`scenario` must be a sequence");
+Scenario ScenarioParser::parse(const ConfigNode& scenario_node) {
+    if (!scenario_node.IsSequence()) {
+        throw scenario_node.create_parsing_error("Node should be a sequence");
     }
 
     auto scenario = Scenario();
