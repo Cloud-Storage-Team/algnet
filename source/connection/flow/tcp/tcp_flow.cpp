@@ -247,7 +247,7 @@ void TcpFlow::update(Packet packet) {
 
         TimeNs rtt = current_time - packet.sent_time;
         m_rtt_statistics.add_record(rtt);
-        update_rto_on_ack(); // update and transition to STEADY
+        update_rto_on_ack();  // update and transition to STEADY
 
         MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
                                                  current_time, rtt);
@@ -323,8 +323,8 @@ void TcpFlow::send_packet_now(Packet packet) {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
 
     Scheduler::get_instance().add<Timeout>(current_time + m_current_rto,
-                                               this->shared_from_this(),
-                                               packet.packet_num);
+                                           this->shared_from_this(),
+                                           packet.packet_num);
 
     packet.sent_time = current_time;
     m_src.lock()->enqueue_packet(std::move(packet));

@@ -11,4 +11,4 @@ public:
     std::uint32_t get_hash(const Packet& packet) final;
 };
 
-}
+}  // namespace sim
