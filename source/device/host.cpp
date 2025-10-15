@@ -4,6 +4,7 @@
 
 #include "logger/logger.hpp"
 #include "utils/validation.hpp"
+#include "metrics/metrics_collector.hpp"
 
 namespace sim {
 
@@ -45,9 +46,11 @@ TimeNs Host::process() {
     // TODO: add some sender ID for easier packet path tracing
     LOG_INFO("Processing packet from link on host. Packet: " +
              packet.to_string());
+    packet.network_telemetry_data.push_back(DeviceVisitingTime(get_id(), Scheduler::get_instance().get_current_time()));
 
     if (packet.dest_id == get_id()) {
         packet.flow->update(packet);
+        MetricsCollector::get_instance().add_arrived_packet(get_id(), packet);
     } else {
         LOG_WARN(
             "Packet arrived to Host that is not its destination; use routing "
@@ -100,6 +103,7 @@ TimeNs Host::send_packet() {
 
     LOG_INFO(fmt::format("Sent new packet from host. Packet: {}", get_id(),
                          data_packet.to_string()));
+    data_packet.network_telemetry_data.push_back(DeviceVisitingTime(get_id(), Scheduler::get_instance().get_current_time()));
 
     next_link->schedule_arrival(data_packet);
     if (m_send_data_scheduler.notify_about_finish(

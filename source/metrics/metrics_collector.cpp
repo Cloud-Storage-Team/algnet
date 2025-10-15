@@ -18,7 +18,8 @@ MetricsCollector::MetricsCollector()
       m_cwnd_storage("cwnd", m_metrics_filter),
       m_rate_storage("rate", m_metrics_filter),
       m_packet_reordering_storage("packet_reordering", m_metrics_filter),
-      m_links_queue_size_storage(m_metrics_filter) {
+      m_links_queue_size_storage(m_metrics_filter),
+      m_arrived_packets("telemetry", m_metrics_filter) {
     m_is_initialised = true;
 }
 
@@ -45,6 +46,10 @@ void MetricsCollector::add_queue_size(Id link_id, TimeNs time, SizeByte value,
     m_links_queue_size_storage.add_record(link_id, type, time, value.value());
 }
 
+void MetricsCollector::add_arrived_packet(Id device_id, Packet packet) {
+    m_arrived_packets.add_record(device_id, packet);
+}
+
 void MetricsCollector::add_packet_reordering(Id flow_id, TimeNs time,
                                              PacketReordering reordering) {
     m_packet_reordering_storage.add_record(flow_id, time, reordering);
@@ -56,6 +61,7 @@ void MetricsCollector::export_metrics_to_files(
     m_RTT_storage.export_to_files(metrics_dir);
     m_rate_storage.export_to_files(metrics_dir);
     m_packet_reordering_storage.export_to_files(metrics_dir);
+    m_arrived_packets.export_to_files(metrics_dir);
     m_links_queue_size_storage.export_to_files(metrics_dir);
 }
 
