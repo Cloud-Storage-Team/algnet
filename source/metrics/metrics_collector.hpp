@@ -25,6 +25,7 @@ public:
     void add_delivery_rate(Id flow_id, TimeNs time, SpeedGbps value);
     void add_RTT(Id flow_id, TimeNs time, TimeNs value);
     void add_packet_reordering(Id flow_id, TimeNs time, PacketReordering value);
+    void add_packet_spacing(Id flow_id, TimeNs time, TimeNs value);
 
     // Link metrics
     void add_queue_size(Id link_id, TimeNs time, SizeByte value,
@@ -52,6 +53,7 @@ private:
     static constexpr std::string M_CWND_STORAGE_NAME = "cwnd";
     static constexpr std::string M_RATE_STORAGE_NAME = "rate";
     static constexpr std::string M_REORDERING_STORAGE_NAME = "reordering";
+    static constexpr std::string M_PACKET_SPACING_STORAGE_NAME = "packet spacing";
 
     std::unordered_map<std::string, StorageData> m_multi_id_storages;
 

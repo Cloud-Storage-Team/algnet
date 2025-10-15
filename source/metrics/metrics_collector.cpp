@@ -30,7 +30,7 @@ MetricsCollector::MetricsCollector()
                                                 metadata, id_to_curve_name})
                      .second) {
                 throw std::runtime_error(fmt::format(
-                    "Can not initialize MetricsCollector: {} add twice", name));
+                    "Can not initialize MetricsCollector: metric with name '{}' adds twice", name));
             }
         };
 
@@ -47,6 +47,11 @@ MetricsCollector::MetricsCollector()
     add_storage(M_REORDERING_STORAGE_NAME,
                 PlotMetadata{"Time, ns", "Reordering (inversions count)",
                              "Packet reordering"},
+                flow_id_to_curve_name);
+
+    add_storage(M_PACKET_SPACING_STORAGE_NAME,
+                PlotMetadata{"Time, ns", "Packet spacing, ns",
+                             "Packet spacing"},
                 flow_id_to_curve_name);
     m_is_initialised = true;
 }
@@ -85,6 +90,10 @@ void MetricsCollector::add_packet_reordering(Id flow_id, TimeNs time,
                                              PacketReordering reordering) {
     get_storage(M_REORDERING_STORAGE_NAME)
         .add_record(flow_id, time, reordering);
+}
+
+void MetricsCollector::add_packet_spacing(Id flow_id, TimeNs time, TimeNs value) {
+    get_storage(M_PACKET_SPACING_STORAGE_NAME).add_record(flow_id, time, value.value());
 }
 
 void MetricsCollector::add_queue_size(Id link_id, TimeNs time, SizeByte value,

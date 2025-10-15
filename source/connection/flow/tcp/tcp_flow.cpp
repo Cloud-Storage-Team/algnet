@@ -24,6 +24,7 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
       m_sending_started(false),
       m_init_time(0),
       m_last_ack_arrive_time(0),
+      m_last_time_data_send(std::nullopt),
       m_packet_size(a_packet_size),
       m_ecn_capable(a_ecn_capable),
       m_packets_in_flight(0),
@@ -306,6 +307,11 @@ TimeNs TcpFlow::get_max_timeout() const {
 
 void TcpFlow::send_packet_now(Packet packet) {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
+
+    if (m_last_time_data_send.has_value()) {
+        MetricsCollector::get_instance().add_packet_spacing(m_id, current_time, current_time - m_last_time_data_send.value());
+    }
+    m_last_time_data_send = current_time;
 
     TimeNs max_timeout = get_max_timeout();
     if (max_timeout != TimeNs(std::numeric_limits<double>::max())) {
