@@ -1,0 +1,2606 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" width="1200" height="1942" onload="init(evt)" viewBox="0 0 1200 1942" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- Flame graph stack visualization. See https://github.com/brendangregg/FlameGraph for latest version, and http://www.brendangregg.com/flamegraphs.html for examples. -->
+<!-- NOTES:  -->
+<defs>
+	<linearGradient id="background" y1="0" y2="1" x1="0" x2="0" >
+		<stop stop-color="#eeeeee" offset="5%" />
+		<stop stop-color="#eeeeb0" offset="95%" />
+	</linearGradient>
+</defs>
+<style type="text/css">
+	text { font-family:Verdana; font-size:12px; fill:rgb(0,0,0); }
+	#search, #ignorecase { opacity:0.1; cursor:pointer; }
+	#search:hover, #search.show, #ignorecase:hover, #ignorecase.show { opacity:1; }
+	#subtitle { text-anchor:middle; font-color:rgb(160,160,160); }
+	#title { text-anchor:middle; font-size:17px}
+	#unzoom { cursor:pointer; }
+	#frames > *:hover { stroke:black; stroke-width:0.5; cursor:pointer; }
+	.hide { display:none; }
+	.parent { opacity:0.5; }
+</style>
+<script type="text/ecmascript">
+<![CDATA[
+	"use strict";
+	var details, searchbtn, unzoombtn, matchedtxt, svg, searching, currentSearchTerm, ignorecase, ignorecaseBtn;
+	function init(evt) {
+		details = document.getElementById("details").firstChild;
+		searchbtn = document.getElementById("search");
+		ignorecaseBtn = document.getElementById("ignorecase");
+		unzoombtn = document.getElementById("unzoom");
+		matchedtxt = document.getElementById("matched");
+		svg = document.getElementsByTagName("svg")[0];
+		searching = 0;
+		currentSearchTerm = null;
+
+		// use GET parameters to restore a flamegraphs state.
+		var params = get_params();
+		if (params.x && params.y)
+			zoom(find_group(document.querySelector('[x="' + params.x + '"][y="' + params.y + '"]')));
+                if (params.s) search(params.s);
+	}
+
+	// event listeners
+	window.addEventListener("click", function(e) {
+		var target = find_group(e.target);
+		if (target) {
+			if (target.nodeName == "a") {
+				if (e.ctrlKey === false) return;
+				e.preventDefault();
+			}
+			if (target.classList.contains("parent")) unzoom(true);
+			zoom(target);
+			if (!document.querySelector('.parent')) {
+				// we have basically done a clearzoom so clear the url
+				var params = get_params();
+				if (params.x) delete params.x;
+				if (params.y) delete params.y;
+				history.replaceState(null, null, parse_params(params));
+				unzoombtn.classList.add("hide");
+				return;
+			}
+
+			// set parameters for zoom state
+			var el = target.querySelector("rect");
+			if (el && el.attributes && el.attributes.y && el.attributes._orig_x) {
+				var params = get_params()
+				params.x = el.attributes._orig_x.value;
+				params.y = el.attributes.y.value;
+				history.replaceState(null, null, parse_params(params));
+			}
+		}
+		else if (e.target.id == "unzoom") clearzoom();
+		else if (e.target.id == "search") search_prompt();
+		else if (e.target.id == "ignorecase") toggle_ignorecase();
+	}, false)
+
+	// mouse-over for info
+	// show
+	window.addEventListener("mouseover", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = "Function: " + g_to_text(target);
+	}, false)
+
+	// clear
+	window.addEventListener("mouseout", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = ' ';
+	}, false)
+
+	// ctrl-F for search
+	// ctrl-I to toggle case-sensitive search
+	window.addEventListener("keydown",function (e) {
+		if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
+			e.preventDefault();
+			search_prompt();
+		}
+		else if (e.ctrlKey && e.keyCode === 73) {
+			e.preventDefault();
+			toggle_ignorecase();
+		}
+	}, false)
+
+	// functions
+	function get_params() {
+		var params = {};
+		var paramsarr = window.location.search.substr(1).split('&');
+		for (var i = 0; i < paramsarr.length; ++i) {
+			var tmp = paramsarr[i].split("=");
+			if (!tmp[0] || !tmp[1]) continue;
+			params[tmp[0]]  = decodeURIComponent(tmp[1]);
+		}
+		return params;
+	}
+	function parse_params(params) {
+		var uri = "?";
+		for (var key in params) {
+			uri += key + '=' + encodeURIComponent(params[key]) + '&';
+		}
+		if (uri.slice(-1) == "&")
+			uri = uri.substring(0, uri.length - 1);
+		if (uri == '?')
+			uri = window.location.href.split('?')[0];
+		return uri;
+	}
+	function find_child(node, selector) {
+		var children = node.querySelectorAll(selector);
+		if (children.length) return children[0];
+	}
+	function find_group(node) {
+		var parent = node.parentElement;
+		if (!parent) return;
+		if (parent.id == "frames") return node;
+		return find_group(parent);
+	}
+	function orig_save(e, attr, val) {
+		if (e.attributes["_orig_" + attr] != undefined) return;
+		if (e.attributes[attr] == undefined) return;
+		if (val == undefined) val = e.attributes[attr].value;
+		e.setAttribute("_orig_" + attr, val);
+	}
+	function orig_load(e, attr) {
+		if (e.attributes["_orig_"+attr] == undefined) return;
+		e.attributes[attr].value = e.attributes["_orig_" + attr].value;
+		e.removeAttribute("_orig_"+attr);
+	}
+	function g_to_text(e) {
+		var text = find_child(e, "title").firstChild.nodeValue;
+		return (text)
+	}
+	function g_to_func(e) {
+		var func = g_to_text(e);
+		// if there's any manipulation we want to do to the function
+		// name before it's searched, do it here before returning.
+		return (func);
+	}
+	function update_text(e) {
+		var r = find_child(e, "rect");
+		var t = find_child(e, "text");
+		var w = parseFloat(r.attributes.width.value) -3;
+		var txt = find_child(e, "title").textContent.replace(/\([^(]*\)$/,"");
+		t.attributes.x.value = parseFloat(r.attributes.x.value) + 3;
+
+		// Smaller than this size won't fit anything
+		if (w < 2 * 12 * 0.59) {
+			t.textContent = "";
+			return;
+		}
+
+		t.textContent = txt;
+		var sl = t.getSubStringLength(0, txt.length);
+		// check if only whitespace or if we can fit the entire string into width w
+		if (/^ *$/.test(txt) || sl < w)
+			return;
+
+		// this isn't perfect, but gives a good starting point
+		// and avoids calling getSubStringLength too often
+		var start = Math.floor((w/sl) * txt.length);
+		for (var x = start; x > 0; x = x-2) {
+			if (t.getSubStringLength(0, x + 2) <= w) {
+				t.textContent = txt.substring(0, x) + "..";
+				return;
+			}
+		}
+		t.textContent = "";
+	}
+
+	// zoom
+	function zoom_reset(e) {
+		if (e.attributes != undefined) {
+			orig_load(e, "x");
+			orig_load(e, "width");
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_reset(c[i]);
+		}
+	}
+	function zoom_child(e, x, ratio) {
+		if (e.attributes != undefined) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = (parseFloat(e.attributes.x.value) - x - 10) * ratio + 10;
+				if (e.tagName == "text")
+					e.attributes.x.value = find_child(e.parentNode, "rect[x]").attributes.x.value + 3;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseFloat(e.attributes.width.value) * ratio;
+			}
+		}
+
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_child(c[i], x - 10, ratio);
+		}
+	}
+	function zoom_parent(e) {
+		if (e.attributes) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = 10;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseInt(svg.width.baseVal.value) - (10 * 2);
+			}
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_parent(c[i]);
+		}
+	}
+	function zoom(node) {
+		var attr = find_child(node, "rect").attributes;
+		var width = parseFloat(attr.width.value);
+		var xmin = parseFloat(attr.x.value);
+		var xmax = parseFloat(xmin + width);
+		var ymin = parseFloat(attr.y.value);
+		var ratio = (svg.width.baseVal.value - 2 * 10) / width;
+
+		// XXX: Workaround for JavaScript float issues (fix me)
+		var fudge = 0.0001;
+
+		unzoombtn.classList.remove("hide");
+
+		var el = document.getElementById("frames").children;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var a = find_child(e, "rect").attributes;
+			var ex = parseFloat(a.x.value);
+			var ew = parseFloat(a.width.value);
+			var upstack;
+			// Is it an ancestor
+			if (0 == 0) {
+				upstack = parseFloat(a.y.value) > ymin;
+			} else {
+				upstack = parseFloat(a.y.value) < ymin;
+			}
+			if (upstack) {
+				// Direct ancestor
+				if (ex <= xmin && (ex+ew+fudge) >= xmax) {
+					e.classList.add("parent");
+					zoom_parent(e);
+					update_text(e);
+				}
+				// not in current path
+				else
+					e.classList.add("hide");
+			}
+			// Children maybe
+			else {
+				// no common path
+				if (ex < xmin || ex + fudge >= xmax) {
+					e.classList.add("hide");
+				}
+				else {
+					zoom_child(e, xmin, ratio);
+					update_text(e);
+				}
+			}
+		}
+		search();
+	}
+	function unzoom(dont_update_text) {
+		unzoombtn.classList.add("hide");
+		var el = document.getElementById("frames").children;
+		for(var i = 0; i < el.length; i++) {
+			el[i].classList.remove("parent");
+			el[i].classList.remove("hide");
+			zoom_reset(el[i]);
+			if(!dont_update_text) update_text(el[i]);
+		}
+		search();
+	}
+	function clearzoom() {
+		unzoom();
+
+		// remove zoom state
+		var params = get_params();
+		if (params.x) delete params.x;
+		if (params.y) delete params.y;
+		history.replaceState(null, null, parse_params(params));
+	}
+
+	// search
+	function toggle_ignorecase() {
+		ignorecase = !ignorecase;
+		if (ignorecase) {
+			ignorecaseBtn.classList.add("show");
+		} else {
+			ignorecaseBtn.classList.remove("show");
+		}
+		reset_search();
+		search();
+	}
+	function reset_search() {
+		var el = document.querySelectorAll("#frames rect");
+		for (var i = 0; i < el.length; i++) {
+			orig_load(el[i], "fill")
+		}
+		var params = get_params();
+		delete params.s;
+		history.replaceState(null, null, parse_params(params));
+	}
+	function search_prompt() {
+		if (!searching) {
+			var term = prompt("Enter a search term (regexp " +
+			    "allowed, eg: ^ext4_)"
+			    + (ignorecase ? ", ignoring case" : "")
+			    + "\nPress Ctrl-i to toggle case sensitivity", "");
+			if (term != null) search(term);
+		} else {
+			reset_search();
+			searching = 0;
+			currentSearchTerm = null;
+			searchbtn.classList.remove("show");
+			searchbtn.firstChild.nodeValue = "Search"
+			matchedtxt.classList.add("hide");
+			matchedtxt.firstChild.nodeValue = ""
+		}
+	}
+	function search(term) {
+		if (term) currentSearchTerm = term;
+		if (currentSearchTerm === null) return;
+
+		var re = new RegExp(currentSearchTerm, ignorecase ? 'i' : '');
+		var el = document.getElementById("frames").children;
+		var matches = new Object();
+		var maxwidth = 0;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var func = g_to_func(e);
+			var rect = find_child(e, "rect");
+			if (func == null || rect == null)
+				continue;
+
+			// Save max width. Only works as we have a root frame
+			var w = parseFloat(rect.attributes.width.value);
+			if (w > maxwidth)
+				maxwidth = w;
+
+			if (func.match(re)) {
+				// highlight
+				var x = parseFloat(rect.attributes.x.value);
+				orig_save(rect, "fill");
+				rect.attributes.fill.value = "rgb(230,0,230)";
+
+				// remember matches
+				if (matches[x] == undefined) {
+					matches[x] = w;
+				} else {
+					if (w > matches[x]) {
+						// overwrite with parent
+						matches[x] = w;
+					}
+				}
+				searching = 1;
+			}
+		}
+		if (!searching)
+			return;
+		var params = get_params();
+		params.s = currentSearchTerm;
+		history.replaceState(null, null, parse_params(params));
+
+		searchbtn.classList.add("show");
+		searchbtn.firstChild.nodeValue = "Reset Search";
+
+		// calculate percent matched, excluding vertical overlap
+		var count = 0;
+		var lastx = -1;
+		var lastw = 0;
+		var keys = Array();
+		for (k in matches) {
+			if (matches.hasOwnProperty(k))
+				keys.push(k);
+		}
+		// sort the matched frames by their x location
+		// ascending, then width descending
+		keys.sort(function(a, b){
+			return a - b;
+		});
+		// Step through frames saving only the biggest bottom-up frames
+		// thanks to the sort order. This relies on the tree property
+		// where children are always smaller than their parents.
+		var fudge = 0.0001;	// JavaScript floating point
+		for (var k in keys) {
+			var x = parseFloat(keys[k]);
+			var w = matches[keys[k]];
+			if (x >= lastx + lastw - fudge) {
+				count += w;
+				lastx = x;
+				lastw = w;
+			}
+		}
+		// display matched percent
+		matchedtxt.classList.remove("hide");
+		var pct = 100 * count / maxwidth;
+		if (pct != 100) pct = pct.toFixed(1)
+		matchedtxt.firstChild.nodeValue = "Matched: " + pct + "%";
+	}
+]]>
+</script>
+<rect x="0.0" y="0" width="1200.0" height="1942.0" fill="url(#background)"  />
+<text id="title" x="600.00" y="24" >Flame Graph</text>
+<text id="details" x="10.00" y="1925" > </text>
+<text id="unzoom" x="10.00" y="24" class="hide">Reset Zoom</text>
+<text id="search" x="1090.00" y="24" >Search</text>
+<text id="ignorecase" x="1174.00" y="24" >ic</text>
+<text id="matched" x="1090.00" y="1925" > </text>
+<g id="frames">
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="792.9" y="1445" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="795.88" y="1455.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="165" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="175.5" ></text>
+</g>
+<g >
+<title>YAML::Parser::HandleNextDocument (676,767,670 samples, 32.21%)</title><rect x="804.2" y="1733" width="380.1" height="15.0" fill="rgb(222,81,19)" rx="2" ry="2" />
+<text  x="807.23" y="1743.5" >YAML::Parser::HandleNextDocument</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1509" width="11.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="149.15" y="1519.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="213" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="223.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="736.2" y="1653" width="5.6" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="739.15" y="1663.5" ></text>
+</g>
+<g >
+<title>sim::MetricsStorage::add_record (10,101,010 samples, 0.48%)</title><rect x="526.2" y="1669" width="5.7" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="529.25" y="1679.5" ></text>
+</g>
+<g >
+<title>std::ostreambuf_iterator&lt;char, std::char_traits&lt;char&gt; &gt; std::num_put&lt;char, std::ostreambuf_iterator&lt;char, std::char_traits&lt;char&gt; &gt; &gt;::_M_insert_float&lt;double&gt; (10,101,010 samples, 0.48%)</title><rect x="594.3" y="1685" width="5.7" height="15.0" fill="rgb(238,154,36)" rx="2" ry="2" />
+<text  x="597.33" y="1695.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="341" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="351.5" ></text>
+</g>
+<g >
+<title>YAML::ScanScalar[abi:cxx11] (101,010,100 samples, 4.81%)</title><rect x="1031.2" y="1477" width="56.7" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="1034.15" y="1487.5" >YAML::..</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="437" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="447.5" ></text>
+</g>
+<g >
+<title>malloc (40,404,040 samples, 1.92%)</title><rect x="843.9" y="1525" width="22.7" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="846.94" y="1535.5" >m..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="151.8" y="1381" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="154.83" y="1391.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_ptr&lt;YAML::detail::node_ref*,  (10,101,010 samples, 0.48%)</title><rect x="685.1" y="1685" width="5.7" height="15.0" fill="rgb(225,94,22)" rx="2" ry="2" />
+<text  x="688.10" y="1695.5" ></text>
+</g>
+<g >
+<title>sim::ECMPHasher::get_hash (10,101,010 samples, 0.48%)</title><rect x="548.9" y="1717" width="5.7" height="15.0" fill="rgb(207,11,2)" rx="2" ry="2" />
+<text  x="551.94" y="1727.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::ScanPlainScalar (40,404,040 samples, 1.92%)</title><rect x="974.4" y="1509" width="22.7" height="15.0" fill="rgb(213,38,9)" rx="2" ry="2" />
+<text  x="977.42" y="1519.5" >Y..</text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="1082.2" y="1381" width="5.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1085.21" y="1391.5" ></text>
+</g>
+<g >
+<title>YAML::Stream::operator bool (10,101,010 samples, 0.48%)</title><rect x="1087.9" y="1461" width="5.7" height="15.0" fill="rgb(246,189,45)" rx="2" ry="2" />
+<text  x="1090.88" y="1471.5" ></text>
+</g>
+<g >
+<title>sim::LinkQueue::pop (30,303,030 samples, 1.44%)</title><rect x="441.2" y="1733" width="17.0" height="15.0" fill="rgb(214,44,10)" rx="2" ry="2" />
+<text  x="444.15" y="1743.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="245" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="255.5" ></text>
+</g>
+<g >
+<title>sim::TcpFlow::Timeout::operator (10,101,010 samples, 0.48%)</title><rect x="617.0" y="1765" width="5.7" height="15.0" fill="rgb(240,162,38)" rx="2" ry="2" />
+<text  x="620.02" y="1775.5" ></text>
+</g>
+<g >
+<title>YAML::SingleDocParser::HandleNode (676,767,670 samples, 32.21%)</title><rect x="804.2" y="1669" width="380.1" height="15.0" fill="rgb(215,50,12)" rx="2" ry="2" />
+<text  x="807.23" y="1679.5" >YAML::SingleDocParser::HandleNode</text>
+</g>
+<g >
+<title>std::ostream&amp; std::ostream::_M_insert&lt;double&gt; (313,131,310 samples, 14.90%)</title><rect x="157.5" y="1749" width="175.9" height="15.0" fill="rgb(244,180,43)" rx="2" ry="2" />
+<text  x="160.50" y="1759.5" >std::ostream&amp; std::ost..</text>
+</g>
+<g >
+<title>sim::Link::schedule_arrival (50,505,050 samples, 2.40%)</title><rect x="503.6" y="1733" width="28.3" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="506.56" y="1743.5" >si..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="10.0" y="1845" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="1855.5" ></text>
+</g>
+<g >
+<title>sim::LinkQueue::pop (10,101,010 samples, 0.48%)</title><rect x="469.5" y="1717" width="5.7" height="15.0" fill="rgb(214,44,10)" rx="2" ry="2" />
+<text  x="472.52" y="1727.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="133" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="143.5" ></text>
+</g>
+<g >
+<title>sim::MetricsCollector::add_packet_spacing (10,101,010 samples, 0.48%)</title><rect x="480.9" y="1669" width="5.6" height="15.0" fill="rgb(237,151,36)" rx="2" ry="2" />
+<text  x="483.87" y="1679.5" ></text>
+</g>
+<g >
+<title>std::ostream&amp; std::ostream::_M_insert&lt;double&gt; (10,101,010 samples, 0.48%)</title><rect x="594.3" y="1701" width="5.7" height="15.0" fill="rgb(244,180,43)" rx="2" ry="2" />
+<text  x="597.33" y="1711.5" ></text>
+</g>
+<g >
+<title>sim::get_target_connections (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1685" width="11.4" height="15.0" fill="rgb(246,192,46)" rx="2" ry="2" />
+<text  x="727.81" y="1695.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (222,222,220 samples, 10.58%)</title><rect x="202.9" y="1685" width="124.8" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="205.88" y="1695.5" >[libc.so.6]</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="229" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="239.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1205" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="977.42" y="1215.5" ></text>
+</g>
+<g >
+<title>YAML::Stream::_ReadAheadTo (10,101,010 samples, 0.48%)</title><rect x="866.6" y="1525" width="5.7" height="15.0" fill="rgb(231,122,29)" rx="2" ry="2" />
+<text  x="869.63" y="1535.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="10.0" y="1861" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="1871.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (121,212,120 samples, 5.77%)</title><rect x="872.3" y="1509" width="68.1" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="875.31" y="1519.5" >int YAM..</text>
+</g>
+<g >
+<title>[libstdc++.so.6.0.33] (242,424,240 samples, 11.54%)</title><rect x="191.5" y="1717" width="136.2" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="194.54" y="1727.5" >[libstdc++.so.6.0..</text>
+</g>
+<g >
+<title>YAML::detail::node_data::begin (20,202,020 samples, 0.96%)</title><rect x="753.2" y="1669" width="11.3" height="15.0" fill="rgb(253,224,53)" rx="2" ry="2" />
+<text  x="756.17" y="1679.5" ></text>
+</g>
+<g >
+<title>YAML::SingleDocParser::HandleBlockMap (676,767,670 samples, 32.21%)</title><rect x="804.2" y="1685" width="380.1" height="15.0" fill="rgb(215,50,12)" rx="2" ry="2" />
+<text  x="807.23" y="1695.5" >YAML::SingleDocParser::HandleBlockMap</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="10.0" y="1797" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="1807.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="997.1" y="1413" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1000.12" y="1423.5" ></text>
+</g>
+<g >
+<title>cfree (60,606,060 samples, 2.88%)</title><rect x="690.8" y="1669" width="34.0" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="693.77" y="1679.5" >cf..</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="645" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="655.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::~Scanner (10,101,010 samples, 0.48%)</title><rect x="1184.3" y="1717" width="5.7" height="15.0" fill="rgb(243,174,41)" rx="2" ry="2" />
+<text  x="1187.33" y="1727.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="594.3" y="1605" width="5.7" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="597.33" y="1615.5" ></text>
+</g>
+<g >
+<title>__libc_start_main (2,090,909,070 samples, 99.52%)</title><rect x="15.7" y="1845" width="1174.3" height="15.0" fill="rgb(236,142,34)" rx="2" ry="2" />
+<text  x="18.67" y="1855.5" >__libc_start_main</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="10.0" y="1637" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="1647.5" ></text>
+</g>
+<g >
+<title>YAML::SingleDocParser::HandleBlockMap (414,141,410 samples, 19.71%)</title><rect x="951.7" y="1589" width="232.6" height="15.0" fill="rgb(215,50,12)" rx="2" ry="2" />
+<text  x="954.73" y="1599.5" >YAML::SingleDocParser::HandleB..</text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (30,303,030 samples, 1.44%)</title><rect x="980.1" y="1477" width="17.0" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="983.10" y="1487.5" ></text>
+</g>
+<g >
+<title>YAML::Load (686,868,680 samples, 32.69%)</title><rect x="804.2" y="1749" width="385.8" height="15.0" fill="rgb(250,208,49)" rx="2" ry="2" />
+<text  x="807.23" y="1759.5" >YAML::Load</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1493" width="11.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="149.15" y="1503.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="151.8" y="1365" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="154.83" y="1375.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="1025.5" y="1445" width="5.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1028.48" y="1455.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="792.9" y="1429" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="795.88" y="1439.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::empty (50,505,050 samples, 2.40%)</title><rect x="968.7" y="1541" width="28.4" height="15.0" fill="rgb(208,14,3)" rx="2" ry="2" />
+<text  x="971.75" y="1551.5" >YA..</text>
+</g>
+<g >
+<title>YAML::Scanner::EnsureTokensInQueue (60,606,060 samples, 2.88%)</title><rect x="809.9" y="1589" width="34.0" height="15.0" fill="rgb(246,191,45)" rx="2" ry="2" />
+<text  x="812.90" y="1599.5" >YA..</text>
+</g>
+<g >
+<title>sim::TcpFlow::update (30,303,030 samples, 1.44%)</title><rect x="475.2" y="1733" width="17.0" height="15.0" fill="rgb(244,181,43)" rx="2" ry="2" />
+<text  x="478.19" y="1743.5" ></text>
+</g>
+<g >
+<title>std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;&amp; std::__ostream_insert&lt;char, std::char_traits&lt;char&gt; &gt; (10,101,010 samples, 0.48%)</title><rect x="588.7" y="1701" width="5.6" height="15.0" fill="rgb(220,73,17)" rx="2" ry="2" />
+<text  x="591.65" y="1711.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1461" width="11.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="149.15" y="1471.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (20,202,020 samples, 0.96%)</title><rect x="361.7" y="1637" width="11.4" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="364.73" y="1647.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="885" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="895.5" ></text>
+</g>
+<g >
+<title>std::basic_filebuf&lt;char, std::char_traits&lt;char&gt; &gt;::xsputn (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1717" width="5.7" height="15.0" fill="rgb(218,64,15)" rx="2" ry="2" />
+<text  x="376.08" y="1727.5" ></text>
+</g>
+<g >
+<title>sim::ConnectionParser::parse_i_connection (111,111,110 samples, 5.29%)</title><rect x="741.8" y="1701" width="62.4" height="15.0" fill="rgb(247,193,46)" rx="2" ry="2" />
+<text  x="744.83" y="1711.5" >sim::C..</text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (80,808,080 samples, 3.85%)</title><rect x="895.0" y="1461" width="45.4" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="898.00" y="1471.5" >int ..</text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="1173.0" y="1429" width="5.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1175.98" y="1439.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1621" width="11.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="149.15" y="1631.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::ScanNextToken (10,101,010 samples, 0.48%)</title><rect x="809.9" y="1573" width="5.7" height="15.0" fill="rgb(211,30,7)" rx="2" ry="2" />
+<text  x="812.90" y="1583.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="764.5" y="1669" width="5.7" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="767.52" y="1679.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1605" width="11.4" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="727.81" y="1615.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1557" width="11.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="149.15" y="1567.5" ></text>
+</g>
+<g >
+<title>operator new (10,101,010 samples, 0.48%)</title><rect x="997.1" y="1477" width="5.7" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="1000.12" y="1487.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="837" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="847.5" ></text>
+</g>
+<g >
+<title>sim::IdentifierFactory::~IdentifierFactory (20,202,020 samples, 0.96%)</title><rect x="15.7" y="1781" width="11.3" height="15.0" fill="rgb(251,213,51)" rx="2" ry="2" />
+<text  x="18.67" y="1791.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="101" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="111.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="10.0" y="1829" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="1839.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1477" width="11.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="149.15" y="1487.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (121,212,120 samples, 5.77%)</title><rect x="872.3" y="1525" width="68.1" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="875.31" y="1535.5" >int YAM..</text>
+</g>
+<g >
+<title>std::ostream::put (10,101,010 samples, 0.48%)</title><rect x="333.4" y="1749" width="5.6" height="15.0" fill="rgb(219,64,15)" rx="2" ry="2" />
+<text  x="336.37" y="1759.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (30,303,030 samples, 1.44%)</title><rect x="1138.9" y="1381" width="17.1" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1141.94" y="1391.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1221" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="1231.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1541" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="376.08" y="1551.5" ></text>
+</g>
+<g >
+<title>sim::Link::get_packet (20,202,020 samples, 0.96%)</title><rect x="492.2" y="1733" width="11.4" height="15.0" fill="rgb(205,0,0)" rx="2" ry="2" />
+<text  x="495.21" y="1743.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="651.1" y="1733" width="5.6" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="654.06" y="1743.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1621" width="11.4" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="727.81" y="1631.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_ptr&lt;YAML::detail::memory*,  (111,111,110 samples, 5.29%)</title><rect x="662.4" y="1749" width="62.4" height="15.0" fill="rgb(217,56,13)" rx="2" ry="2" />
+<text  x="665.40" y="1759.5" >std::_..</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1253" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="1263.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="792.9" y="1509" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="795.88" y="1519.5" ></text>
+</g>
+<g >
+<title>YAML::Stream::StreamInUtf8 (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1445" width="5.7" height="15.0" fill="rgb(220,69,16)" rx="2" ry="2" />
+<text  x="977.42" y="1455.5" ></text>
+</g>
+<g >
+<title>sim::ConnectionParser::parse_connection (101,010,100 samples, 4.81%)</title><rect x="747.5" y="1685" width="56.7" height="15.0" fill="rgb(239,156,37)" rx="2" ry="2" />
+<text  x="750.50" y="1695.5" >sim::C..</text>
+</g>
+<g >
+<title>[libstdc++.so.6.0.33] (10,101,010 samples, 0.48%)</title><rect x="594.3" y="1669" width="5.7" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="597.33" y="1679.5" ></text>
+</g>
+<g >
+<title>YAML::NodeBuilder::OnScalar (40,404,040 samples, 1.92%)</title><rect x="843.9" y="1589" width="22.7" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="846.94" y="1599.5" >Y..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1621" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="376.08" y="1631.5" ></text>
+</g>
+<g >
+<title>std::_Function_handler&lt;bool  (10,101,010 samples, 0.48%)</title><rect x="736.2" y="1717" width="5.6" height="15.0" fill="rgb(234,135,32)" rx="2" ry="2" />
+<text  x="739.15" y="1727.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="10.0" y="1749" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="1759.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1589" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="376.08" y="1599.5" ></text>
+</g>
+<g >
+<title>vsnprintf (232,323,230 samples, 11.06%)</title><rect x="197.2" y="1701" width="130.5" height="15.0" fill="rgb(240,164,39)" rx="2" ry="2" />
+<text  x="200.21" y="1711.5" >vsnprintf</text>
+</g>
+<g >
+<title>sim::MetricsCollector::add_queue_size (30,303,030 samples, 1.44%)</title><rect x="441.2" y="1717" width="17.0" height="15.0" fill="rgb(249,202,48)" rx="2" ry="2" />
+<text  x="444.15" y="1727.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::ScanPlainScalar (50,505,050 samples, 2.40%)</title><rect x="815.6" y="1573" width="28.3" height="15.0" fill="rgb(213,38,9)" rx="2" ry="2" />
+<text  x="818.58" y="1583.5" >YA..</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1077" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="1087.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1269" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="977.42" y="1279.5" ></text>
+</g>
+<g >
+<title>sim::TcpCCParser::parse_i_tcp_cc (40,404,040 samples, 1.92%)</title><rect x="781.5" y="1637" width="22.7" height="15.0" fill="rgb(213,41,9)" rx="2" ry="2" />
+<text  x="784.54" y="1647.5" >s..</text>
+</g>
+<g >
+<title>YAML::Parser::~Parser (10,101,010 samples, 0.48%)</title><rect x="1184.3" y="1733" width="5.7" height="15.0" fill="rgb(244,181,43)" rx="2" ry="2" />
+<text  x="1187.33" y="1743.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1429" width="11.4" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="727.81" y="1439.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="805" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="815.5" ></text>
+</g>
+<g >
+<title>cfree (30,303,030 samples, 1.44%)</title><rect x="32.7" y="1765" width="17.0" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="35.69" y="1775.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="53" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="63.5" ></text>
+</g>
+<g >
+<title>YAML::NodeBuilder::OnScalar (10,101,010 samples, 0.48%)</title><rect x="1156.0" y="1493" width="5.6" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="1158.96" y="1503.5" ></text>
+</g>
+<g >
+<title>_IO_file_open (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1685" width="11.3" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="149.15" y="1695.5" ></text>
+</g>
+<g >
+<title>sim::LinksQueueSizeStorage::add_record (30,303,030 samples, 1.44%)</title><rect x="514.9" y="1685" width="17.0" height="15.0" fill="rgb(237,148,35)" rx="2" ry="2" />
+<text  x="517.90" y="1695.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1221" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="977.42" y="1231.5" ></text>
+</g>
+<g >
+<title>cfree (10,101,010 samples, 0.48%)</title><rect x="651.1" y="1765" width="5.6" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="654.06" y="1775.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="509.2" y="1685" width="5.7" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="512.23" y="1695.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="656.7" y="1589" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="659.73" y="1599.5" ></text>
+</g>
+<g >
+<title>sim::MetricsCollector::add_queue_size (10,101,010 samples, 0.48%)</title><rect x="469.5" y="1701" width="5.7" height="15.0" fill="rgb(249,202,48)" rx="2" ry="2" />
+<text  x="472.52" y="1711.5" ></text>
+</g>
+<g >
+<title>std::_Rb_tree&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, std::shared_ptr&lt;sim::Identifiable&gt; &gt;, std::_Select1st&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, std::shared_ptr&lt;sim::Identifiable&gt; &gt; &gt;, std::less&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, std::shared_ptr&lt;sim::Identifiable&gt; &gt; &gt; &gt;::_M_erase (10,101,010 samples, 0.48%)</title><rect x="21.3" y="1749" width="5.7" height="15.0" fill="rgb(211,29,7)" rx="2" ry="2" />
+<text  x="24.35" y="1759.5" ></text>
+</g>
+<g >
+<title>YAML::ScanScalar[abi:cxx11] (10,101,010 samples, 0.48%)</title><rect x="957.4" y="1509" width="5.7" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="960.40" y="1519.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1541" width="11.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="149.15" y="1551.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (60,606,060 samples, 2.88%)</title><rect x="690.8" y="1637" width="34.0" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="693.77" y="1647.5" >[l..</text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="185.9" y="1717" width="5.6" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="188.87" y="1727.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="949" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="959.5" ></text>
+</g>
+<g >
+<title>void std::deque&lt;sim::Packet, std::allocator&lt;sim::Packet&gt; &gt;::_M_push_back_aux&lt;sim::Packet const&amp;&gt; (10,101,010 samples, 0.48%)</title><rect x="475.2" y="1653" width="5.7" height="15.0" fill="rgb(214,44,10)" rx="2" ry="2" />
+<text  x="478.19" y="1663.5" ></text>
+</g>
+<g >
+<title>sim::ConnectionImpl::send_data (10,101,010 samples, 0.48%)</title><rect x="390.1" y="1749" width="5.7" height="15.0" fill="rgb(210,24,5)" rx="2" ry="2" />
+<text  x="393.10" y="1759.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="741" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="751.5" ></text>
+</g>
+<g >
+<title>std::_Rb_tree_insert_and_rebalance (10,101,010 samples, 0.48%)</title><rect x="486.5" y="1717" width="5.7" height="15.0" fill="rgb(225,94,22)" rx="2" ry="2" />
+<text  x="489.54" y="1727.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="357" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="367.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="517" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="527.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (2,090,909,070 samples, 99.52%)</title><rect x="15.7" y="1829" width="1174.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="18.67" y="1839.5" >[libc.so.6]</text>
+</g>
+<g >
+<title>std::ostream::sentry::sentry (10,101,010 samples, 0.48%)</title><rect x="588.7" y="1685" width="5.6" height="15.0" fill="rgb(251,214,51)" rx="2" ry="2" />
+<text  x="591.65" y="1695.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (20,202,020 samples, 0.96%)</title><rect x="15.7" y="1797" width="11.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="18.67" y="1807.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::ScanPlainScalar (20,202,020 samples, 0.96%)</title><rect x="1167.3" y="1461" width="11.4" height="15.0" fill="rgb(213,38,9)" rx="2" ry="2" />
+<text  x="1170.31" y="1471.5" ></text>
+</g>
+<g >
+<title>malloc (10,101,010 samples, 0.48%)</title><rect x="736.2" y="1669" width="5.6" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="739.15" y="1679.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1333" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="977.42" y="1343.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="725" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="735.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (20,202,020 samples, 0.96%)</title><rect x="985.8" y="1445" width="11.3" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="988.77" y="1455.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (70,707,070 samples, 3.37%)</title><rect x="1048.2" y="1445" width="39.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1051.17" y="1455.5" >int..</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1125" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="1135.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="709" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="719.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_ptr&lt;YAML::detail::node_ref*,  (60,606,060 samples, 2.88%)</title><rect x="690.8" y="1701" width="34.0" height="15.0" fill="rgb(225,94,22)" rx="2" ry="2" />
+<text  x="693.77" y="1711.5" >st..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1493" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="376.08" y="1503.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="1014.1" y="1413" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1017.13" y="1423.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1349" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="977.42" y="1359.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="656.7" y="1669" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="659.73" y="1679.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1205" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="1215.5" ></text>
+</g>
+<g >
+<title>nons (2,101,010,080 samples, 100.00%)</title><rect x="10.0" y="1877" width="1180.0" height="15.0" fill="rgb(232,126,30)" rx="2" ry="2" />
+<text  x="13.00" y="1887.5" >nons</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1237" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="1247.5" ></text>
+</g>
+<g >
+<title>sim::ConfigNode::~ConfigNode (111,111,110 samples, 5.29%)</title><rect x="662.4" y="1781" width="62.4" height="15.0" fill="rgb(210,26,6)" rx="2" ry="2" />
+<text  x="665.40" y="1791.5" >sim::C..</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="693" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="703.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (40,404,040 samples, 1.92%)</title><rect x="350.4" y="1685" width="22.7" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="353.38" y="1695.5" >[..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1477" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="376.08" y="1487.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::EnsureTokensInQueue (30,303,030 samples, 1.44%)</title><rect x="1161.6" y="1477" width="17.1" height="15.0" fill="rgb(246,191,45)" rx="2" ry="2" />
+<text  x="1164.63" y="1487.5" ></text>
+</g>
+<g >
+<title>sim::Summary::write_to_csv (10,101,010 samples, 0.48%)</title><rect x="656.7" y="1797" width="5.7" height="15.0" fill="rgb(220,73,17)" rx="2" ry="2" />
+<text  x="659.73" y="1807.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::empty (10,101,010 samples, 0.48%)</title><rect x="951.7" y="1573" width="5.7" height="15.0" fill="rgb(208,14,3)" rx="2" ry="2" />
+<text  x="954.73" y="1583.5" ></text>
+</g>
+<g >
+<title>sim::Link::Arrive::operator (60,606,060 samples, 2.88%)</title><rect x="395.8" y="1765" width="34.0" height="15.0" fill="rgb(224,89,21)" rx="2" ry="2" />
+<text  x="398.77" y="1775.5" >si..</text>
+</g>
+<g >
+<title>_IO_file_fopen (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1701" width="11.3" height="15.0" fill="rgb(240,164,39)" rx="2" ry="2" />
+<text  x="149.15" y="1711.5" ></text>
+</g>
+<g >
+<title>sim::YamlParser::build_simulator_from_config (141,414,140 samples, 6.73%)</title><rect x="724.8" y="1781" width="79.4" height="15.0" fill="rgb(228,107,25)" rx="2" ry="2" />
+<text  x="727.81" y="1791.5" >sim::Yaml..</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="469" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="479.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::empty (121,212,120 samples, 5.77%)</title><rect x="1019.8" y="1525" width="68.1" height="15.0" fill="rgb(208,14,3)" rx="2" ry="2" />
+<text  x="1022.81" y="1535.5" >YAML::S..</text>
+</g>
+<g >
+<title>YAML::NodeBuilder::Push (10,101,010 samples, 0.48%)</title><rect x="804.2" y="1605" width="5.7" height="15.0" fill="rgb(232,124,29)" rx="2" ry="2" />
+<text  x="807.23" y="1615.5" ></text>
+</g>
+<g >
+<title>main (2,070,707,050 samples, 98.56%)</title><rect x="27.0" y="1813" width="1163.0" height="15.0" fill="rgb(243,179,42)" rx="2" ry="2" />
+<text  x="30.02" y="1823.5" >main</text>
+</g>
+<g >
+<title>sim::LinksQueueSizeStorage::export_to_files (545,454,540 samples, 25.96%)</title><rect x="32.7" y="1781" width="306.3" height="15.0" fill="rgb(219,66,15)" rx="2" ry="2" />
+<text  x="35.69" y="1791.5" >sim::LinksQueueSizeStorage::export_to_files</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="789" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="799.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1653" width="11.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="149.15" y="1663.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::EnsureTokensInQueue (10,101,010 samples, 0.48%)</title><rect x="951.7" y="1557" width="5.7" height="15.0" fill="rgb(246,191,45)" rx="2" ry="2" />
+<text  x="954.73" y="1567.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1365" width="11.4" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="727.81" y="1375.5" ></text>
+</g>
+<g >
+<title>sim::RoutingModule::get_outlinks (10,101,010 samples, 0.48%)</title><rect x="628.4" y="1749" width="5.6" height="15.0" fill="rgb(243,176,42)" rx="2" ry="2" />
+<text  x="631.37" y="1759.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="792.9" y="1461" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="795.88" y="1471.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (20,202,020 samples, 0.96%)</title><rect x="1019.8" y="1477" width="11.4" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1022.81" y="1487.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="261" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="271.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="997.1" y="1445" width="5.7" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="1000.12" y="1455.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="792.9" y="1493" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="795.88" y="1503.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1061" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="1071.5" ></text>
+</g>
+<g >
+<title>std::_Rb_tree&lt;Time&lt;Nanosecond&gt;, std::pair&lt;Time&lt;Nanosecond&gt; const, std::vector&lt;double, std::allocator&lt;double&gt; &gt; &gt;, std::_Select1st&lt;std::pair&lt;Time&lt;Nanosecond&gt; const, std::vector&lt;double, std::allocator&lt;double&gt; &gt; &gt; &gt;, std::less&lt;Time&lt;Nanosecond&gt; &gt;, std::allocator&lt;std::pair&lt;Time&lt;Nanosecond&gt; const, std::vector&lt;double, std::allocator&lt;double&gt; &gt; &gt; &gt; &gt;::_M_erase (30,303,030 samples, 1.44%)</title><rect x="129.1" y="1749" width="17.1" height="15.0" fill="rgb(232,125,30)" rx="2" ry="2" />
+<text  x="132.13" y="1759.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (50,505,050 samples, 2.40%)</title><rect x="815.6" y="1541" width="28.3" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="818.58" y="1551.5" >in..</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1333" width="11.4" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="727.81" y="1343.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="10.0" y="1669" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="1679.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1589" width="11.4" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="727.81" y="1599.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Map_base&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, std::map&lt;std::weak_ptr&lt;sim::ILink&gt;, int, std::owner_less&lt;std::weak_ptr&lt;sim::ILink&gt; &gt;, std::allocator&lt;std::pair&lt;std::weak_ptr&lt;sim::ILink&gt; const, int&gt; &gt; &gt; &gt;, std::allocator&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, std::map&lt;std::weak_ptr&lt;sim::ILink&gt;, int, std::owner_less&lt;std::weak_ptr&lt;sim::ILink&gt; &gt;, std::allocator&lt;std::pair&lt;std::weak_ptr&lt;sim::ILink&gt; const, int&gt; &gt; &gt; &gt; &gt;, std::__detail::_Select1st, std::equal_to&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::hash&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits&lt;true, false, true&gt;, true&gt;::operator[] (10,101,010 samples, 0.48%)</title><rect x="645.4" y="1749" width="5.7" height="15.0" fill="rgb(240,165,39)" rx="2" ry="2" />
+<text  x="648.38" y="1759.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="656.7" y="1621" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="659.73" y="1631.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (60,606,060 samples, 2.88%)</title><rect x="293.7" y="1637" width="34.0" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="296.65" y="1647.5" >[l..</text>
+</g>
+<g >
+<title>writev (10,101,010 samples, 0.48%)</title><rect x="656.7" y="1749" width="5.7" height="15.0" fill="rgb(216,50,12)" rx="2" ry="2" />
+<text  x="659.73" y="1759.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1173" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="977.42" y="1183.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (30,303,030 samples, 1.44%)</title><rect x="32.7" y="1733" width="17.0" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="35.69" y="1743.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::EnsureTokensInQueue (151,515,150 samples, 7.21%)</title><rect x="866.6" y="1573" width="85.1" height="15.0" fill="rgb(246,191,45)" rx="2" ry="2" />
+<text  x="869.63" y="1583.5" >YAML::Scan..</text>
+</g>
+<g >
+<title>YAML::SingleDocParser::HandleBlockMap (161,616,160 samples, 7.69%)</title><rect x="1087.9" y="1525" width="90.8" height="15.0" fill="rgb(215,50,12)" rx="2" ry="2" />
+<text  x="1090.88" y="1535.5" >YAML::Sing..</text>
+</g>
+<g >
+<title>[libc.so.6] (60,606,060 samples, 2.88%)</title><rect x="690.8" y="1653" width="34.0" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="693.77" y="1663.5" >[l..</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1189" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="1199.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="934.7" y="1429" width="5.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="937.71" y="1439.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="583.0" y="1717" width="5.7" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="585.98" y="1727.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="1025.5" y="1413" width="5.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1028.48" y="1423.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1509" width="11.4" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="727.81" y="1519.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="656.7" y="1733" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="659.73" y="1743.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="10.0" y="1733" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="1743.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="1014.1" y="1429" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1017.13" y="1439.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (20,202,020 samples, 0.96%)</title><rect x="855.3" y="1509" width="11.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="858.29" y="1519.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="957.4" y="1493" width="5.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="960.40" y="1503.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="597" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="607.5" ></text>
+</g>
+<g >
+<title>malloc (20,202,020 samples, 0.96%)</title><rect x="117.8" y="1733" width="11.3" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="120.79" y="1743.5" ></text>
+</g>
+<g >
+<title>YAML::Stream::get (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1477" width="5.7" height="15.0" fill="rgb(209,20,4)" rx="2" ry="2" />
+<text  x="977.42" y="1487.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1237" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="977.42" y="1247.5" ></text>
+</g>
+<g >
+<title>YAML::SingleDocParser::HandleNode (606,060,600 samples, 28.85%)</title><rect x="843.9" y="1605" width="340.4" height="15.0" fill="rgb(215,50,12)" rx="2" ry="2" />
+<text  x="846.94" y="1615.5" >YAML::SingleDocParser::HandleNode</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="151.8" y="1349" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="154.83" y="1359.5" ></text>
+</g>
+<g >
+<title>cfree (10,101,010 samples, 0.48%)</title><rect x="787.2" y="1573" width="5.7" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="790.21" y="1583.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="901" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="911.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1285" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="1295.5" ></text>
+</g>
+<g >
+<title>YAML::detail::iterator_base&lt;YAML::detail::iterator_value const&gt;::operator* (10,101,010 samples, 0.48%)</title><rect x="770.2" y="1653" width="5.7" height="15.0" fill="rgb(246,189,45)" rx="2" ry="2" />
+<text  x="773.19" y="1663.5" ></text>
+</g>
+<g >
+<title>all (2,101,010,080 samples, 100%)</title><rect x="10.0" y="1893" width="1180.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="1903.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::ScanNextToken (20,202,020 samples, 0.96%)</title><rect x="1019.8" y="1493" width="11.4" height="15.0" fill="rgb(211,30,7)" rx="2" ry="2" />
+<text  x="1022.81" y="1503.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1605" width="11.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="149.15" y="1615.5" ></text>
+</g>
+<g >
+<title>YAML::Stream::GetNextByte (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1429" width="5.7" height="15.0" fill="rgb(225,94,22)" rx="2" ry="2" />
+<text  x="977.42" y="1439.5" ></text>
+</g>
+<g >
+<title>std::ostreambuf_iterator&lt;char, std::char_traits&lt;char&gt; &gt; std::num_put&lt;char, std::ostreambuf_iterator&lt;char, std::char_traits&lt;char&gt; &gt; &gt;::_M_insert_float&lt;double&gt; (272,727,270 samples, 12.98%)</title><rect x="180.2" y="1733" width="153.2" height="15.0" fill="rgb(238,154,36)" rx="2" ry="2" />
+<text  x="183.19" y="1743.5" >std::ostreambuf_ite..</text>
+</g>
+<g >
+<title>double sim::simple_parse_with_default&lt;double&gt; (30,303,030 samples, 1.44%)</title><rect x="787.2" y="1605" width="17.0" height="15.0" fill="rgb(213,37,9)" rx="2" ry="2" />
+<text  x="790.21" y="1615.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1637" width="11.4" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="727.81" y="1647.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="821" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="831.5" ></text>
+</g>
+<g >
+<title>std::basic_streambuf&lt;char, std::char_traits&lt;char&gt; &gt;::xsputn (10,101,010 samples, 0.48%)</title><rect x="168.8" y="1733" width="5.7" height="15.0" fill="rgb(244,181,43)" rx="2" ry="2" />
+<text  x="171.85" y="1743.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1413" width="11.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="149.15" y="1423.5" ></text>
+</g>
+<g >
+<title>sim::MetricsStorage::add_record (10,101,010 samples, 0.48%)</title><rect x="480.9" y="1653" width="5.6" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="483.87" y="1663.5" ></text>
+</g>
+<g >
+<title>YAML::Stream::StreamInUtf8 (20,202,020 samples, 0.96%)</title><rect x="1065.2" y="1413" width="11.3" height="15.0" fill="rgb(220,69,16)" rx="2" ry="2" />
+<text  x="1068.19" y="1423.5" ></text>
+</g>
+<g >
+<title>cfree (20,202,020 samples, 0.96%)</title><rect x="134.8" y="1733" width="11.4" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="137.81" y="1743.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (20,202,020 samples, 0.96%)</title><rect x="49.7" y="1733" width="11.4" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="52.71" y="1743.5" ></text>
+</g>
+<g >
+<title>[libstdc++.so.6.0.33] (40,404,040 samples, 1.92%)</title><rect x="350.4" y="1717" width="22.7" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="353.38" y="1727.5" >[..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1669" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="376.08" y="1679.5" ></text>
+</g>
+<g >
+<title>YAML::detail::memory::create_node (10,101,010 samples, 0.48%)</title><rect x="997.1" y="1493" width="5.7" height="15.0" fill="rgb(239,159,38)" rx="2" ry="2" />
+<text  x="1000.12" y="1503.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="21.3" y="1669" width="5.7" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="24.35" y="1679.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (40,404,040 samples, 1.92%)</title><rect x="821.2" y="1525" width="22.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="824.25" y="1535.5" >i..</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="85" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="95.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1605" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="376.08" y="1615.5" ></text>
+</g>
+<g >
+<title>std::ostream&amp; std::ostream::_M_insert&lt;double&gt; (70,707,070 samples, 3.37%)</title><rect x="339.0" y="1749" width="39.8" height="15.0" fill="rgb(244,180,43)" rx="2" ry="2" />
+<text  x="342.04" y="1759.5" >std..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="997.1" y="1397" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1000.12" y="1407.5" ></text>
+</g>
+<g >
+<title>sim::TcpFlow::send_packet_now (20,202,020 samples, 0.96%)</title><rect x="475.2" y="1685" width="11.3" height="15.0" fill="rgb(239,160,38)" rx="2" ry="2" />
+<text  x="478.19" y="1695.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1381" width="11.4" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="727.81" y="1391.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="1161.6" y="1445" width="5.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1164.63" y="1455.5" ></text>
+</g>
+<g >
+<title>YAML::NodeBuilder::Push (10,101,010 samples, 0.48%)</title><rect x="1156.0" y="1477" width="5.6" height="15.0" fill="rgb(232,124,29)" rx="2" ry="2" />
+<text  x="1158.96" y="1487.5" ></text>
+</g>
+<g >
+<title>sim::RoutingModule::get_link_to_destination (20,202,020 samples, 0.96%)</title><rect x="605.7" y="1733" width="11.3" height="15.0" fill="rgb(253,221,53)" rx="2" ry="2" />
+<text  x="608.67" y="1743.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::InsertPotentialSimpleKey (10,101,010 samples, 0.48%)</title><rect x="940.4" y="1541" width="5.7" height="15.0" fill="rgb(247,193,46)" rx="2" ry="2" />
+<text  x="943.38" y="1551.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="421" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="431.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (80,808,080 samples, 3.85%)</title><rect x="1042.5" y="1461" width="45.4" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1045.50" y="1471.5" >int ..</text>
+</g>
+<g >
+<title>sim::LinksQueueSizeStorage::add_record (10,101,010 samples, 0.48%)</title><rect x="469.5" y="1685" width="5.7" height="15.0" fill="rgb(237,148,35)" rx="2" ry="2" />
+<text  x="472.52" y="1695.5" ></text>
+</g>
+<g >
+<title>sim::Packet::Packet (10,101,010 samples, 0.48%)</title><rect x="600.0" y="1733" width="5.7" height="15.0" fill="rgb(237,150,35)" rx="2" ry="2" />
+<text  x="603.00" y="1743.5" ></text>
+</g>
+<g >
+<title>malloc (30,303,030 samples, 1.44%)</title><rect x="1002.8" y="1461" width="17.0" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="1005.79" y="1471.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1557" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="376.08" y="1567.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1301" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="1311.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1397" width="11.4" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="727.81" y="1407.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="656.7" y="1685" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="659.73" y="1695.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="325" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="335.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1029" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="1039.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="792.9" y="1413" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="795.88" y="1423.5" ></text>
+</g>
+<g >
+<title>std::_Rb_tree&lt;std::shared_ptr&lt;YAML::detail::node&gt;, std::shared_ptr&lt;YAML::detail::node&gt;, std::_Identity&lt;std::shared_ptr&lt;YAML::detail::node&gt; &gt;, std::less&lt;std::shared_ptr&lt;YAML::detail::node&gt; &gt;, std::allocator&lt;std::shared_ptr&lt;YAML::detail::node&gt; &gt; &gt;::_M_erase (20,202,020 samples, 0.96%)</title><rect x="679.4" y="1717" width="11.4" height="15.0" fill="rgb(242,170,40)" rx="2" ry="2" />
+<text  x="682.42" y="1727.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="957.4" y="1477" width="5.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="960.40" y="1487.5" ></text>
+</g>
+<g >
+<title>std::locale::id::_M_id (10,101,010 samples, 0.48%)</title><rect x="174.5" y="1733" width="5.7" height="15.0" fill="rgb(222,82,19)" rx="2" ry="2" />
+<text  x="177.52" y="1743.5" ></text>
+</g>
+<g >
+<title>YAML::Stream::_ReadAheadTo (30,303,030 samples, 1.44%)</title><rect x="1059.5" y="1429" width="17.0" height="15.0" fill="rgb(231,122,29)" rx="2" ry="2" />
+<text  x="1062.52" y="1439.5" ></text>
+</g>
+<g >
+<title>std::_Hash_bytes (10,101,010 samples, 0.48%)</title><rect x="634.0" y="1749" width="5.7" height="15.0" fill="rgb(232,127,30)" rx="2" ry="2" />
+<text  x="637.04" y="1759.5" ></text>
+</g>
+<g >
+<title>sim::ConnectionImpl::send_data (20,202,020 samples, 0.96%)</title><rect x="475.2" y="1717" width="11.3" height="15.0" fill="rgb(210,24,5)" rx="2" ry="2" />
+<text  x="478.19" y="1727.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="957.4" y="1429" width="5.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="960.40" y="1439.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (60,606,060 samples, 2.88%)</title><rect x="1121.9" y="1413" width="34.1" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1124.92" y="1423.5" >in..</text>
+</g>
+<g >
+<title>std::_Rb_tree&lt;std::shared_ptr&lt;YAML::detail::node&gt;, std::shared_ptr&lt;YAML::detail::node&gt;, std::_Identity&lt;std::shared_ptr&lt;YAML::detail::node&gt; &gt;, std::less&lt;std::shared_ptr&lt;YAML::detail::node&gt; &gt;, std::allocator&lt;std::shared_ptr&lt;YAML::detail::node&gt; &gt; &gt;::_M_erase (111,111,110 samples, 5.29%)</title><rect x="662.4" y="1733" width="62.4" height="15.0" fill="rgb(242,170,40)" rx="2" ry="2" />
+<text  x="665.40" y="1743.5" >std::_..</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1461" width="11.4" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="727.81" y="1471.5" ></text>
+</g>
+<g >
+<title>operator new (20,202,020 samples, 0.96%)</title><rect x="117.8" y="1749" width="11.3" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="120.79" y="1759.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::empty (20,202,020 samples, 0.96%)</title><rect x="957.4" y="1557" width="11.3" height="15.0" fill="rgb(208,14,3)" rx="2" ry="2" />
+<text  x="960.40" y="1567.5" ></text>
+</g>
+<g >
+<title>sim::RoundRobinMPLB::select_flow (10,101,010 samples, 0.48%)</title><rect x="390.1" y="1733" width="5.7" height="15.0" fill="rgb(239,160,38)" rx="2" ry="2" />
+<text  x="393.10" y="1743.5" ></text>
+</g>
+<g >
+<title>sim::Host::process (40,404,040 samples, 1.92%)</title><rect x="469.5" y="1749" width="22.7" height="15.0" fill="rgb(210,24,5)" rx="2" ry="2" />
+<text  x="472.52" y="1759.5" >s..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="656.7" y="1605" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="659.73" y="1615.5" ></text>
+</g>
+<g >
+<title>YAML::NodeBuilder::OnScalar (30,303,030 samples, 1.44%)</title><rect x="1002.8" y="1525" width="17.0" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="1005.79" y="1535.5" ></text>
+</g>
+<g >
+<title>sim::MetricsCollector::add_queue_size (30,303,030 samples, 1.44%)</title><rect x="412.8" y="1717" width="17.0" height="15.0" fill="rgb(249,202,48)" rx="2" ry="2" />
+<text  x="415.79" y="1727.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1493" width="11.4" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="727.81" y="1503.5" ></text>
+</g>
+<g >
+<title>sim::Process::~Process (10,101,010 samples, 0.48%)</title><rect x="577.3" y="1765" width="5.7" height="15.0" fill="rgb(229,113,27)" rx="2" ry="2" />
+<text  x="580.31" y="1775.5" ></text>
+</g>
+<g >
+<title>std::_Rb_tree_increment (30,303,030 samples, 1.44%)</title><rect x="560.3" y="1733" width="17.0" height="15.0" fill="rgb(247,196,46)" rx="2" ry="2" />
+<text  x="563.29" y="1743.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="1082.2" y="1397" width="5.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1085.21" y="1407.5" ></text>
+</g>
+<g >
+<title>sim::write_to_csv (494,949,490 samples, 23.56%)</title><rect x="61.1" y="1765" width="277.9" height="15.0" fill="rgb(215,46,11)" rx="2" ry="2" />
+<text  x="64.06" y="1775.5" >sim::write_to_csv</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="405" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="415.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="533" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="543.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (20,202,020 samples, 0.96%)</title><rect x="1019.8" y="1461" width="11.4" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1022.81" y="1471.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (20,202,020 samples, 0.96%)</title><rect x="1008.5" y="1445" width="11.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="1011.46" y="1455.5" ></text>
+</g>
+<g >
+<title>std::_Function_handler&lt;void  (141,414,140 samples, 6.73%)</title><rect x="724.8" y="1749" width="79.4" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="727.81" y="1759.5" >std::_Fun..</text>
+</g>
+<g >
+<title>[libc.so.6] (40,404,040 samples, 1.92%)</title><rect x="350.4" y="1653" width="22.7" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="353.38" y="1663.5" >[..</text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (40,404,040 samples, 1.92%)</title><rect x="1133.3" y="1397" width="22.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1136.27" y="1407.5" >i..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="792.9" y="1477" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="795.88" y="1487.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::PushIndentTo (10,101,010 samples, 0.48%)</title><rect x="963.1" y="1493" width="5.6" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="966.08" y="1503.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="965" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="975.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="581" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="591.5" ></text>
+</g>
+<g >
+<title>sim::Link::transmit (30,303,030 samples, 1.44%)</title><rect x="441.2" y="1749" width="17.0" height="15.0" fill="rgb(220,73,17)" rx="2" ry="2" />
+<text  x="444.15" y="1759.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="565" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="575.5" ></text>
+</g>
+<g >
+<title>sim::load_file (686,868,680 samples, 32.69%)</title><rect x="804.2" y="1781" width="385.8" height="15.0" fill="rgb(250,209,50)" rx="2" ry="2" />
+<text  x="807.23" y="1791.5" >sim::load_file</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="629" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="639.5" ></text>
+</g>
+<g >
+<title>sim::AddDataToConnection::operator (10,101,010 samples, 0.48%)</title><rect x="390.1" y="1765" width="5.7" height="15.0" fill="rgb(249,202,48)" rx="2" ry="2" />
+<text  x="393.10" y="1775.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1557" width="11.4" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="727.81" y="1567.5" ></text>
+</g>
+<g >
+<title>std::basic_filebuf&lt;char, std::char_traits&lt;char&gt; &gt;::open (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1749" width="11.3" height="15.0" fill="rgb(222,81,19)" rx="2" ry="2" />
+<text  x="149.15" y="1759.5" ></text>
+</g>
+<g >
+<title>sim::bfs[abi:cxx11] (50,505,050 samples, 2.40%)</title><rect x="622.7" y="1765" width="28.4" height="15.0" fill="rgb(229,114,27)" rx="2" ry="2" />
+<text  x="625.69" y="1775.5" >si..</text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="963.1" y="1445" width="5.6" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="966.08" y="1455.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="1025.5" y="1429" width="5.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1028.48" y="1439.5" ></text>
+</g>
+<g >
+<title>sim::Event::operator&gt; (10,101,010 samples, 0.48%)</title><rect x="407.1" y="1733" width="5.7" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
+<text  x="410.12" y="1743.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::EnsureTokensInQueue (121,212,120 samples, 5.77%)</title><rect x="1087.9" y="1493" width="68.1" height="15.0" fill="rgb(246,191,45)" rx="2" ry="2" />
+<text  x="1090.88" y="1503.5" >YAML::S..</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1045" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="1055.5" ></text>
+</g>
+<g >
+<title>YAML::SingleDocParser::HandleNode (323,232,320 samples, 15.38%)</title><rect x="997.1" y="1541" width="181.6" height="15.0" fill="rgb(215,50,12)" rx="2" ry="2" />
+<text  x="1000.12" y="1551.5" >YAML::SingleDocParser::..</text>
+</g>
+<g >
+<title>std::_Rb_tree_insert_and_rebalance (10,101,010 samples, 0.48%)</title><rect x="1156.0" y="1461" width="5.6" height="15.0" fill="rgb(225,94,22)" rx="2" ry="2" />
+<text  x="1158.96" y="1471.5" ></text>
+</g>
+<g >
+<title>YAML::SingleDocParser::HandleBlockMap (676,767,670 samples, 32.21%)</title><rect x="804.2" y="1653" width="380.1" height="15.0" fill="rgb(215,50,12)" rx="2" ry="2" />
+<text  x="807.23" y="1663.5" >YAML::SingleDocParser::HandleBlockMap</text>
+</g>
+<g >
+<title>memcpy@plt (10,101,010 samples, 0.48%)</title><rect x="327.7" y="1717" width="5.7" height="15.0" fill="rgb(224,88,21)" rx="2" ry="2" />
+<text  x="330.69" y="1727.5" ></text>
+</g>
+<g >
+<title>read (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1365" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="977.42" y="1375.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="389" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="399.5" ></text>
+</g>
+<g >
+<title>YAML::ScanScalar[abi:cxx11] (131,313,130 samples, 6.25%)</title><rect x="866.6" y="1541" width="73.8" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="869.63" y="1551.5" >YAML::Sc..</text>
+</g>
+<g >
+<title>YAML::SingleDocParser::HandleNode (676,767,670 samples, 32.21%)</title><rect x="804.2" y="1701" width="380.1" height="15.0" fill="rgb(215,50,12)" rx="2" ry="2" />
+<text  x="807.23" y="1711.5" >YAML::SingleDocParser::HandleNode</text>
+</g>
+<g >
+<title>YAML::detail::memory::create_node (40,404,040 samples, 1.92%)</title><rect x="843.9" y="1557" width="22.7" height="15.0" fill="rgb(239,159,38)" rx="2" ry="2" />
+<text  x="846.94" y="1567.5" >Y..</text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (30,303,030 samples, 1.44%)</title><rect x="980.1" y="1461" width="17.0" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="983.10" y="1471.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1141" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="1151.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1685" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="376.08" y="1695.5" ></text>
+</g>
+<g >
+<title>sim::SendDataAction::~SendDataAction (10,101,010 samples, 0.48%)</title><rect x="651.1" y="1781" width="5.6" height="15.0" fill="rgb(222,78,18)" rx="2" ry="2" />
+<text  x="654.06" y="1791.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1573" width="11.4" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="727.81" y="1583.5" ></text>
+</g>
+<g >
+<title>sim::Switch::process (151,515,150 samples, 7.21%)</title><rect x="492.2" y="1749" width="85.1" height="15.0" fill="rgb(240,165,39)" rx="2" ry="2" />
+<text  x="495.21" y="1759.5" >sim::Switc..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1461" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="376.08" y="1471.5" ></text>
+</g>
+<g >
+<title>malloc (10,101,010 samples, 0.48%)</title><rect x="997.1" y="1461" width="5.7" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="1000.12" y="1471.5" ></text>
+</g>
+<g >
+<title>sim::Event::operator&gt; (10,101,010 samples, 0.48%)</title><rect x="378.8" y="1781" width="5.6" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
+<text  x="381.75" y="1791.5" ></text>
+</g>
+<g >
+<title>YAML::NodeBuilder::Push (10,101,010 samples, 0.48%)</title><rect x="997.1" y="1509" width="5.7" height="15.0" fill="rgb(232,124,29)" rx="2" ry="2" />
+<text  x="1000.12" y="1519.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="21.3" y="1685" width="5.7" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="24.35" y="1695.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="997.1" y="1381" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1000.12" y="1391.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="10.0" y="1701" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="1711.5" ></text>
+</g>
+<g >
+<title>sim::YamlParser::process_connection (121,212,120 samples, 5.77%)</title><rect x="736.2" y="1733" width="68.0" height="15.0" fill="rgb(231,120,28)" rx="2" ry="2" />
+<text  x="739.15" y="1743.5" >sim::Ya..</text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="741.8" y="1685" width="5.7" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="744.83" y="1695.5" ></text>
+</g>
+<g >
+<title>sim::TahoeCCParser::parse_tahoe_cc (40,404,040 samples, 1.92%)</title><rect x="781.5" y="1621" width="22.7" height="15.0" fill="rgb(246,189,45)" rx="2" ry="2" />
+<text  x="784.54" y="1631.5" >s..</text>
+</g>
+<g >
+<title>void fmt::v11::detail::parse_format_string&lt;char, fmt::v11::detail::format_handler&lt;char&gt; &gt; (10,101,010 samples, 0.48%)</title><rect x="548.9" y="1701" width="5.7" height="15.0" fill="rgb(236,142,34)" rx="2" ry="2" />
+<text  x="551.94" y="1711.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="549" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="559.5" ></text>
+</g>
+<g >
+<title>sim::FlowParser::parse_i_flow (50,505,050 samples, 2.40%)</title><rect x="775.9" y="1669" width="28.3" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<text  x="778.87" y="1679.5" >si..</text>
+</g>
+<g >
+<title>YAML::NodeBuilder::OnMapStart (10,101,010 samples, 0.48%)</title><rect x="997.1" y="1525" width="5.7" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<text  x="1000.12" y="1535.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="293" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="303.5" ></text>
+</g>
+<g >
+<title>open64 (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1669" width="11.3" height="15.0" fill="rgb(225,92,22)" rx="2" ry="2" />
+<text  x="149.15" y="1679.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (50,505,050 samples, 2.40%)</title><rect x="912.0" y="1445" width="28.4" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="915.02" y="1455.5" >in..</text>
+</g>
+<g >
+<title>fmt::v11::basic_appender&lt;char&gt; fmt::v11::detail::copy_noinline&lt;char, char const*, fmt::v11::basic_appender&lt;char&gt; &gt; (10,101,010 samples, 0.48%)</title><rect x="548.9" y="1685" width="5.7" height="15.0" fill="rgb(207,13,3)" rx="2" ry="2" />
+<text  x="551.94" y="1695.5" ></text>
+</g>
+<g >
+<title>operator new (30,303,030 samples, 1.44%)</title><rect x="1002.8" y="1477" width="17.0" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="1005.79" y="1487.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="656.7" y="1637" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="659.73" y="1647.5" ></text>
+</g>
+<g >
+<title>operator new (10,101,010 samples, 0.48%)</title><rect x="736.2" y="1685" width="5.6" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="739.15" y="1695.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="656.7" y="1653" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="659.73" y="1663.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1301" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="977.42" y="1311.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="27.0" y="1797" width="5.7" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="30.02" y="1807.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="997.1" y="1429" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1000.12" y="1439.5" ></text>
+</g>
+<g >
+<title>sim::YamlParser::build_simulator_from_config (939,393,930 samples, 44.71%)</title><rect x="662.4" y="1797" width="527.6" height="15.0" fill="rgb(228,107,25)" rx="2" ry="2" />
+<text  x="665.40" y="1807.5" >sim::YamlParser::build_simulator_from_config</text>
+</g>
+<g >
+<title>YAML::ScanScalar[abi:cxx11] (111,111,110 samples, 5.29%)</title><rect x="1093.6" y="1461" width="62.4" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="1096.56" y="1471.5" >YAML::..</text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (20,202,020 samples, 0.96%)</title><rect x="1076.5" y="1429" width="11.4" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1079.54" y="1439.5" ></text>
+</g>
+<g >
+<title>sim::Link::Transmit::operator (50,505,050 samples, 2.40%)</title><rect x="429.8" y="1765" width="28.4" height="15.0" fill="rgb(219,66,15)" rx="2" ry="2" />
+<text  x="432.81" y="1775.5" >si..</text>
+</g>
+<g >
+<title>sim::Link::get_packet (10,101,010 samples, 0.48%)</title><rect x="469.5" y="1733" width="5.7" height="15.0" fill="rgb(205,0,0)" rx="2" ry="2" />
+<text  x="472.52" y="1743.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="277" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="287.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1397" width="11.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="149.15" y="1407.5" ></text>
+</g>
+<g >
+<title>sim::Simulator::~Simulator (10,101,010 samples, 0.48%)</title><rect x="651.1" y="1797" width="5.6" height="15.0" fill="rgb(222,81,19)" rx="2" ry="2" />
+<text  x="654.06" y="1807.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1525" width="11.4" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="727.81" y="1535.5" ></text>
+</g>
+<g >
+<title>cfree (30,303,030 samples, 1.44%)</title><rect x="662.4" y="1717" width="17.0" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="665.40" y="1727.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1445" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="376.08" y="1455.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::empty (151,515,150 samples, 7.21%)</title><rect x="866.6" y="1589" width="85.1" height="15.0" fill="rgb(208,14,3)" rx="2" ry="2" />
+<text  x="869.63" y="1599.5" >YAML::Scan..</text>
+</g>
+<g >
+<title>sim::Simulator::recalculate_paths (50,505,050 samples, 2.40%)</title><rect x="622.7" y="1781" width="28.4" height="15.0" fill="rgb(236,143,34)" rx="2" ry="2" />
+<text  x="625.69" y="1791.5" >si..</text>
+</g>
+<g >
+<title>std::_Sp_counted_ptr&lt;YAML::detail::node_data*,  (60,606,060 samples, 2.88%)</title><rect x="690.8" y="1685" width="34.0" height="15.0" fill="rgb(224,91,21)" rx="2" ry="2" />
+<text  x="693.77" y="1695.5" >st..</text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (101,010,100 samples, 4.81%)</title><rect x="1099.2" y="1445" width="56.8" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1102.23" y="1455.5" >int YA..</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="373" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="383.5" ></text>
+</g>
+<g >
+<title>sim::MultiIdMetricsStorage::export_to_files (70,707,070 samples, 3.37%)</title><rect x="339.0" y="1781" width="39.8" height="15.0" fill="rgb(235,141,33)" rx="2" ry="2" />
+<text  x="342.04" y="1791.5" >sim..</text>
+</g>
+<g >
+<title>std::_Rb_tree&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, std::shared_ptr&lt;sim::Identifiable&gt; &gt;, std::_Select1st&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, std::shared_ptr&lt;sim::Identifiable&gt; &gt; &gt;, std::less&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, std::shared_ptr&lt;sim::Identifiable&gt; &gt; &gt; &gt;::_M_erase (20,202,020 samples, 0.96%)</title><rect x="15.7" y="1765" width="11.3" height="15.0" fill="rgb(211,29,7)" rx="2" ry="2" />
+<text  x="18.67" y="1775.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1525" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="376.08" y="1535.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="838.3" y="1493" width="5.6" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="841.27" y="1503.5" ></text>
+</g>
+<g >
+<title>fopen (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1717" width="11.3" height="15.0" fill="rgb(251,211,50)" rx="2" ry="2" />
+<text  x="149.15" y="1727.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="933" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="943.5" ></text>
+</g>
+<g >
+<title>sim::MetricsCollector::add_queue_size (10,101,010 samples, 0.48%)</title><rect x="497.9" y="1717" width="5.7" height="15.0" fill="rgb(249,202,48)" rx="2" ry="2" />
+<text  x="500.88" y="1727.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (30,303,030 samples, 1.44%)</title><rect x="32.7" y="1749" width="17.0" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="35.69" y="1759.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1637" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="376.08" y="1647.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="853" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="863.5" ></text>
+</g>
+<g >
+<title>writev (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1701" width="5.7" height="15.0" fill="rgb(216,50,12)" rx="2" ry="2" />
+<text  x="376.08" y="1711.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="809.9" y="1557" width="5.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="812.90" y="1567.5" ></text>
+</g>
+<g >
+<title>malloc (10,101,010 samples, 0.48%)</title><rect x="792.9" y="1557" width="5.7" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="795.88" y="1567.5" ></text>
+</g>
+<g >
+<title>YAML::Stream::peek (10,101,010 samples, 0.48%)</title><rect x="1093.6" y="1445" width="5.6" height="15.0" fill="rgb(206,8,2)" rx="2" ry="2" />
+<text  x="1096.56" y="1455.5" ></text>
+</g>
+<g >
+<title>cfree (10,101,010 samples, 0.48%)</title><rect x="21.3" y="1701" width="5.7" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="24.35" y="1711.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="10.0" y="1781" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="1791.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::ScanNextToken (10,101,010 samples, 0.48%)</title><rect x="1087.9" y="1477" width="5.7" height="15.0" fill="rgb(211,30,7)" rx="2" ry="2" />
+<text  x="1090.88" y="1487.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="809.9" y="1541" width="5.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="812.90" y="1551.5" ></text>
+</g>
+<g >
+<title>operator new (40,404,040 samples, 1.92%)</title><rect x="843.9" y="1541" width="22.7" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="846.94" y="1551.5" >o..</text>
+</g>
+<g >
+<title>sim::Host::send_packet (60,606,060 samples, 2.88%)</title><rect x="583.0" y="1749" width="34.0" height="15.0" fill="rgb(216,54,13)" rx="2" ry="2" />
+<text  x="585.98" y="1759.5" >si..</text>
+</g>
+<g >
+<title>YAML::Stream::eat (10,101,010 samples, 0.48%)</title><rect x="1167.3" y="1429" width="5.7" height="15.0" fill="rgb(248,198,47)" rx="2" ry="2" />
+<text  x="1170.31" y="1439.5" ></text>
+</g>
+<g >
+<title>YAML::NodeBuilder::Push (40,404,040 samples, 1.92%)</title><rect x="843.9" y="1573" width="22.7" height="15.0" fill="rgb(232,124,29)" rx="2" ry="2" />
+<text  x="846.94" y="1583.5" >Y..</text>
+</g>
+<g >
+<title>sim::MetricsCollector::export_metrics_to_files (616,161,610 samples, 29.33%)</title><rect x="32.7" y="1797" width="346.1" height="15.0" fill="rgb(208,16,3)" rx="2" ry="2" />
+<text  x="35.69" y="1807.5" >sim::MetricsCollector::export_metrics_to_files</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="69" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="79.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1429" width="11.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="149.15" y="1439.5" ></text>
+</g>
+<g >
+<title>sim::Simulator::add_connection (10,101,010 samples, 0.48%)</title><rect x="736.2" y="1701" width="5.6" height="15.0" fill="rgb(230,118,28)" rx="2" ry="2" />
+<text  x="739.15" y="1711.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1285" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="977.42" y="1295.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (20,202,020 samples, 0.96%)</title><rect x="713.5" y="1621" width="11.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="716.46" y="1631.5" ></text>
+</g>
+<g >
+<title>YAML::SingleDocParser::HandleNode (40,404,040 samples, 1.92%)</title><rect x="1156.0" y="1509" width="22.7" height="15.0" fill="rgb(215,50,12)" rx="2" ry="2" />
+<text  x="1158.96" y="1519.5" >Y..</text>
+</g>
+<g >
+<title>YAML::Stream::AdvanceCurrent (10,101,010 samples, 0.48%)</title><rect x="1167.3" y="1397" width="5.7" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="1170.31" y="1407.5" ></text>
+</g>
+<g >
+<title>operator new (10,101,010 samples, 0.48%)</title><rect x="792.9" y="1573" width="5.7" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="795.88" y="1583.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::ScanPlainScalar (101,010,100 samples, 4.81%)</title><rect x="1031.2" y="1493" width="56.7" height="15.0" fill="rgb(213,38,9)" rx="2" ry="2" />
+<text  x="1034.15" y="1503.5" >YAML::..</text>
+</g>
+<g >
+<title>YAML::ScanScalar[abi:cxx11] (50,505,050 samples, 2.40%)</title><rect x="815.6" y="1557" width="28.3" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="818.58" y="1567.5" >YA..</text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="651.1" y="1749" width="5.6" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="654.06" y="1759.5" ></text>
+</g>
+<g >
+<title>std::basic_streambuf&lt;char, std::char_traits&lt;char&gt; &gt;::xsgetn (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1397" width="5.7" height="15.0" fill="rgb(205,4,0)" rx="2" ry="2" />
+<text  x="977.42" y="1407.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="957.4" y="1445" width="5.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="960.40" y="1455.5" ></text>
+</g>
+<g >
+<title>YAML::Stream::peek (10,101,010 samples, 0.48%)</title><rect x="1036.8" y="1461" width="5.7" height="15.0" fill="rgb(206,8,2)" rx="2" ry="2" />
+<text  x="1039.83" y="1471.5" ></text>
+</g>
+<g >
+<title>sim::MetricsCollector::add_queue_size (40,404,040 samples, 1.92%)</title><rect x="509.2" y="1701" width="22.7" height="15.0" fill="rgb(249,202,48)" rx="2" ry="2" />
+<text  x="512.23" y="1711.5" >s..</text>
+</g>
+<g >
+<title>malloc (10,101,010 samples, 0.48%)</title><rect x="963.1" y="1461" width="5.6" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="966.08" y="1471.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="501" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="511.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (40,404,040 samples, 1.92%)</title><rect x="350.4" y="1669" width="22.7" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="353.38" y="1679.5" >[..</text>
+</g>
+<g >
+<title>YAML::Scanner::ScanPlainScalar (20,202,020 samples, 0.96%)</title><rect x="957.4" y="1525" width="11.3" height="15.0" fill="rgb(213,38,9)" rx="2" ry="2" />
+<text  x="960.40" y="1535.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="997.1" y="1365" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1000.12" y="1375.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1637" width="11.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="149.15" y="1647.5" ></text>
+</g>
+<g >
+<title>std::_Function_handler&lt;std::shared_ptr&lt;sim::IConnection&gt;  (111,111,110 samples, 5.29%)</title><rect x="741.8" y="1717" width="62.4" height="15.0" fill="rgb(210,23,5)" rx="2" ry="2" />
+<text  x="744.83" y="1727.5" >std::_..</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="997" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="1007.5" ></text>
+</g>
+<g >
+<title>YAML::NodeBuilder::Push (30,303,030 samples, 1.44%)</title><rect x="1002.8" y="1509" width="17.0" height="15.0" fill="rgb(232,124,29)" rx="2" ry="2" />
+<text  x="1005.79" y="1519.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="613" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="623.5" ></text>
+</g>
+<g >
+<title>std::_Function_handler&lt;bool  (10,101,010 samples, 0.48%)</title><rect x="730.5" y="37" width="5.7" height="15.0" fill="rgb(234,135,32)" rx="2" ry="2" />
+<text  x="733.48" y="47.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (30,303,030 samples, 1.44%)</title><rect x="1138.9" y="1365" width="17.1" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1141.94" y="1375.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="197" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="207.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1173" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="1183.5" ></text>
+</g>
+<g >
+<title>YAML::SingleDocParser::HandleBlockMap (666,666,660 samples, 31.73%)</title><rect x="809.9" y="1621" width="374.4" height="15.0" fill="rgb(215,50,12)" rx="2" ry="2" />
+<text  x="812.90" y="1631.5" >YAML::SingleDocParser::HandleBlockMap</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="757" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="767.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::ScanNextToken (10,101,010 samples, 0.48%)</title><rect x="968.7" y="1509" width="5.7" height="15.0" fill="rgb(211,30,7)" rx="2" ry="2" />
+<text  x="971.75" y="1519.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1509" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="376.08" y="1519.5" ></text>
+</g>
+<g >
+<title>sim::Host::~Host (10,101,010 samples, 0.48%)</title><rect x="21.3" y="1717" width="5.7" height="15.0" fill="rgb(226,100,23)" rx="2" ry="2" />
+<text  x="24.35" y="1727.5" ></text>
+</g>
+<g >
+<title>sim::Event::operator&gt; (20,202,020 samples, 0.96%)</title><rect x="429.8" y="1749" width="11.4" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
+<text  x="432.81" y="1759.5" ></text>
+</g>
+<g >
+<title>sim::Process::operator (212,121,210 samples, 10.10%)</title><rect x="458.2" y="1765" width="119.1" height="15.0" fill="rgb(232,127,30)" rx="2" ry="2" />
+<text  x="461.17" y="1775.5" >sim::Process::..</text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (10,101,010 samples, 0.48%)</title><rect x="21.3" y="1733" width="5.7" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="24.35" y="1743.5" ></text>
+</g>
+<g >
+<title>YAML::ScanScalar[abi:cxx11] (40,404,040 samples, 1.92%)</title><rect x="974.4" y="1493" width="22.7" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="977.42" y="1503.5" >Y..</text>
+</g>
+<g >
+<title>[libc.so.6] (20,202,020 samples, 0.96%)</title><rect x="117.8" y="1717" width="11.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="120.79" y="1727.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="792.9" y="1525" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="795.88" y="1535.5" ></text>
+</g>
+<g >
+<title>sim::Simulator::start (484,848,480 samples, 23.08%)</title><rect x="378.8" y="1797" width="272.3" height="15.0" fill="rgb(233,130,31)" rx="2" ry="2" />
+<text  x="381.75" y="1807.5" >sim::Simulator::start</text>
+</g>
+<g >
+<title>_start (2,090,909,070 samples, 99.52%)</title><rect x="15.7" y="1861" width="1174.3" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="18.67" y="1871.5" >_start</text>
+</g>
+<g >
+<title>sim::LinksQueueSizeStorage::add_record (30,303,030 samples, 1.44%)</title><rect x="412.8" y="1701" width="17.0" height="15.0" fill="rgb(237,148,35)" rx="2" ry="2" />
+<text  x="415.79" y="1711.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1653" width="11.4" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="727.81" y="1663.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1477" width="11.4" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="727.81" y="1487.5" ></text>
+</g>
+<g >
+<title>sim::ConfigNode::Iterator::operator* (10,101,010 samples, 0.48%)</title><rect x="770.2" y="1669" width="5.7" height="15.0" fill="rgb(238,153,36)" rx="2" ry="2" />
+<text  x="773.19" y="1679.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="10.0" y="1685" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="1695.5" ></text>
+</g>
+<g >
+<title>sim::Link::arrive (60,606,060 samples, 2.88%)</title><rect x="395.8" y="1749" width="34.0" height="15.0" fill="rgb(226,96,23)" rx="2" ry="2" />
+<text  x="398.77" y="1759.5" >si..</text>
+</g>
+<g >
+<title>YAML::LoadFile (686,868,680 samples, 32.69%)</title><rect x="804.2" y="1765" width="385.8" height="15.0" fill="rgb(219,68,16)" rx="2" ry="2" />
+<text  x="807.23" y="1775.5" >YAML::LoadFile</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="10.0" y="1653" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="1663.5" ></text>
+</g>
+<g >
+<title>std::locale::locale (10,101,010 samples, 0.48%)</title><rect x="798.6" y="1573" width="5.6" height="15.0" fill="rgb(214,44,10)" rx="2" ry="2" />
+<text  x="801.56" y="1583.5" ></text>
+</g>
+<g >
+<title>sim::Scheduler::tick (424,242,420 samples, 20.19%)</title><rect x="384.4" y="1781" width="238.3" height="15.0" fill="rgb(242,174,41)" rx="2" ry="2" />
+<text  x="387.42" y="1791.5" >sim::Scheduler::tick</text>
+</g>
+<g >
+<title>[libc.so.6] (30,303,030 samples, 1.44%)</title><rect x="441.2" y="1701" width="17.0" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="444.15" y="1711.5" ></text>
+</g>
+<g >
+<title>std::__basic_file&lt;char&gt;::open (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1733" width="11.3" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="149.15" y="1743.5" ></text>
+</g>
+<g >
+<title>sim::Event::operator&gt; (10,101,010 samples, 0.48%)</title><rect x="458.2" y="1749" width="5.6" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
+<text  x="461.17" y="1759.5" ></text>
+</g>
+<g >
+<title>sim::EventComparator::operator (10,101,010 samples, 0.48%)</title><rect x="463.8" y="1749" width="5.7" height="15.0" fill="rgb(240,162,38)" rx="2" ry="2" />
+<text  x="466.85" y="1759.5" ></text>
+</g>
+<g >
+<title>YAML::Stream::peek (10,101,010 samples, 0.48%)</title><rect x="946.1" y="1557" width="5.6" height="15.0" fill="rgb(206,8,2)" rx="2" ry="2" />
+<text  x="949.06" y="1567.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="117" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="127.5" ></text>
+</g>
+<g >
+<title>YAML::Stream::_ReadAheadTo (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1461" width="5.7" height="15.0" fill="rgb(231,122,29)" rx="2" ry="2" />
+<text  x="977.42" y="1471.5" ></text>
+</g>
+<g >
+<title>YAML::Stream::eat (10,101,010 samples, 0.48%)</title><rect x="1031.2" y="1461" width="5.6" height="15.0" fill="rgb(248,198,47)" rx="2" ry="2" />
+<text  x="1034.15" y="1471.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_ptr&lt;YAML::detail::node*,  (10,101,010 samples, 0.48%)</title><rect x="685.1" y="1701" width="5.7" height="15.0" fill="rgb(237,147,35)" rx="2" ry="2" />
+<text  x="688.10" y="1711.5" ></text>
+</g>
+<g >
+<title>malloc (20,202,020 samples, 0.96%)</title><rect x="49.7" y="1749" width="11.4" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="52.71" y="1759.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (111,111,110 samples, 5.29%)</title><rect x="878.0" y="1493" width="62.4" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="880.98" y="1503.5" >int YA..</text>
+</g>
+<g >
+<title>std::_Function_handler&lt;void  (141,414,140 samples, 6.73%)</title><rect x="724.8" y="1765" width="79.4" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="727.81" y="1775.5" >std::_Fun..</text>
+</g>
+<g >
+<title>std::_Hash_bytes (10,101,010 samples, 0.48%)</title><rect x="554.6" y="1717" width="5.7" height="15.0" fill="rgb(232,127,30)" rx="2" ry="2" />
+<text  x="557.62" y="1727.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (181,818,180 samples, 8.65%)</title><rect x="225.6" y="1653" width="102.1" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="228.58" y="1663.5" >[libc.so.6]</text>
+</g>
+<g >
+<title>sim::ScenarioParser::parse (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1733" width="11.4" height="15.0" fill="rgb(248,202,48)" rx="2" ry="2" />
+<text  x="727.81" y="1743.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="485" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="495.5" ></text>
+</g>
+<g >
+<title>sim::MetricsCollector::add_queue_size (10,101,010 samples, 0.48%)</title><rect x="492.2" y="1701" width="5.7" height="15.0" fill="rgb(249,202,48)" rx="2" ry="2" />
+<text  x="495.21" y="1711.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="1082.2" y="1413" width="5.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1085.21" y="1423.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::EnsureTokensInQueue (50,505,050 samples, 2.40%)</title><rect x="968.7" y="1525" width="28.4" height="15.0" fill="rgb(246,191,45)" rx="2" ry="2" />
+<text  x="971.75" y="1535.5" >YA..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1653" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="376.08" y="1663.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1541" width="11.4" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="727.81" y="1551.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_ptr&lt;YAML::detail::memory_holder*,  (111,111,110 samples, 5.29%)</title><rect x="662.4" y="1765" width="62.4" height="15.0" fill="rgb(232,125,29)" rx="2" ry="2" />
+<text  x="665.40" y="1775.5" >std::_..</text>
+</g>
+<g >
+<title>operator new (10,101,010 samples, 0.48%)</title><rect x="963.1" y="1477" width="5.6" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="966.08" y="1487.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::ScanPlainScalar (111,111,110 samples, 5.29%)</title><rect x="1093.6" y="1477" width="62.4" height="15.0" fill="rgb(213,38,9)" rx="2" ry="2" />
+<text  x="1096.56" y="1487.5" >YAML::..</text>
+</g>
+<g >
+<title>YAML::SingleDocParser::HandleNode (404,040,400 samples, 19.23%)</title><rect x="957.4" y="1573" width="226.9" height="15.0" fill="rgb(215,50,12)" rx="2" ry="2" />
+<text  x="960.40" y="1583.5" >YAML::SingleDocParser::HandleN..</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="149" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="159.5" ></text>
+</g>
+<g >
+<title>YAML::Stream::get (10,101,010 samples, 0.48%)</title><rect x="1167.3" y="1413" width="5.7" height="15.0" fill="rgb(209,20,4)" rx="2" ry="2" />
+<text  x="1170.31" y="1423.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::empty (121,212,120 samples, 5.77%)</title><rect x="1087.9" y="1509" width="68.1" height="15.0" fill="rgb(208,14,3)" rx="2" ry="2" />
+<text  x="1090.88" y="1519.5" >YAML::S..</text>
+</g>
+<g >
+<title>operator new (20,202,020 samples, 0.96%)</title><rect x="49.7" y="1765" width="11.4" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="52.71" y="1775.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="594.3" y="1637" width="5.7" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="597.33" y="1647.5" ></text>
+</g>
+<g >
+<title>YAML::ScanScalar[abi:cxx11] (20,202,020 samples, 0.96%)</title><rect x="1167.3" y="1445" width="11.4" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="1170.31" y="1455.5" ></text>
+</g>
+<g >
+<title>sim::MetricsStorage::export_to_file (70,707,070 samples, 3.37%)</title><rect x="339.0" y="1765" width="39.8" height="15.0" fill="rgb(224,90,21)" rx="2" ry="2" />
+<text  x="342.04" y="1775.5" >sim..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1413" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="376.08" y="1423.5" ></text>
+</g>
+<g >
+<title>sim::LinkQueue::pop (10,101,010 samples, 0.48%)</title><rect x="492.2" y="1717" width="5.7" height="15.0" fill="rgb(214,44,10)" rx="2" ry="2" />
+<text  x="495.21" y="1727.5" ></text>
+</g>
+<g >
+<title>sim::ActionParser::parse_send_data (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1701" width="11.4" height="15.0" fill="rgb(253,223,53)" rx="2" ry="2" />
+<text  x="727.81" y="1711.5" ></text>
+</g>
+<g >
+<title>sim::Packet::to_string[abi:cxx11] (20,202,020 samples, 0.96%)</title><rect x="588.7" y="1717" width="11.3" height="15.0" fill="rgb(226,98,23)" rx="2" ry="2" />
+<text  x="591.65" y="1727.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1189" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="977.42" y="1199.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1573" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="376.08" y="1583.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="373.1" y="1429" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="376.08" y="1439.5" ></text>
+</g>
+<g >
+<title>YAML::NodeBuilder::OnMapStart (10,101,010 samples, 0.48%)</title><rect x="804.2" y="1621" width="5.7" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<text  x="807.23" y="1631.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1589" width="11.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="149.15" y="1599.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::EnsureTokensInQueue (20,202,020 samples, 0.96%)</title><rect x="957.4" y="1541" width="11.3" height="15.0" fill="rgb(246,191,45)" rx="2" ry="2" />
+<text  x="960.40" y="1551.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_ptr&lt;YAML::detail::node*,  (60,606,060 samples, 2.88%)</title><rect x="690.8" y="1717" width="34.0" height="15.0" fill="rgb(237,147,35)" rx="2" ry="2" />
+<text  x="693.77" y="1727.5" >st..</text>
+</g>
+<g >
+<title>YAML::SingleDocParser::HandleBlockMap (383,838,380 samples, 18.27%)</title><rect x="968.7" y="1557" width="215.6" height="15.0" fill="rgb(215,50,12)" rx="2" ry="2" />
+<text  x="971.75" y="1567.5" >YAML::SingleDocParser::Handl..</text>
+</g>
+<g >
+<title>sim::TcpFlowParser::parse_tcp_flow (50,505,050 samples, 2.40%)</title><rect x="775.9" y="1653" width="28.3" height="15.0" fill="rgb(222,81,19)" rx="2" ry="2" />
+<text  x="778.87" y="1663.5" >si..</text>
+</g>
+<g >
+<title>std::basic_filebuf&lt;char, std::char_traits&lt;char&gt; &gt;::xsgetn (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1413" width="5.7" height="15.0" fill="rgb(230,116,27)" rx="2" ry="2" />
+<text  x="977.42" y="1423.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1445" width="11.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="149.15" y="1455.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="957.4" y="1461" width="5.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="960.40" y="1471.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="10.0" y="1813" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="1823.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1669" width="11.4" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="727.81" y="1679.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="838.3" y="1477" width="5.6" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="841.27" y="1487.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1525" width="11.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="149.15" y="1535.5" ></text>
+</g>
+<g >
+<title>std::_Rb_tree_insert_and_rebalance (10,101,010 samples, 0.48%)</title><rect x="804.2" y="1589" width="5.7" height="15.0" fill="rgb(225,94,22)" rx="2" ry="2" />
+<text  x="807.23" y="1599.5" ></text>
+</g>
+<g >
+<title>std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;&amp; std::__ostream_insert&lt;char, std::char_traits&lt;char&gt; &gt; (10,101,010 samples, 0.48%)</title><rect x="656.7" y="1781" width="5.7" height="15.0" fill="rgb(220,73,17)" rx="2" ry="2" />
+<text  x="659.73" y="1791.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="661" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="671.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="309" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="319.5" ></text>
+</g>
+<g >
+<title>sim::Link::schedule_arrival (30,303,030 samples, 1.44%)</title><rect x="583.0" y="1733" width="17.0" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="585.98" y="1743.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="55.4" y="1717" width="5.7" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="58.38" y="1727.5" ></text>
+</g>
+<g >
+<title>sim::Link::start_head_packet_sending (10,101,010 samples, 0.48%)</title><rect x="531.9" y="1733" width="5.7" height="15.0" fill="rgb(237,147,35)" rx="2" ry="2" />
+<text  x="534.92" y="1743.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::ScanPlainScalar (141,414,140 samples, 6.73%)</title><rect x="866.6" y="1557" width="79.5" height="15.0" fill="rgb(213,38,9)" rx="2" ry="2" />
+<text  x="869.63" y="1567.5" >YAML::Sca..</text>
+</g>
+<g >
+<title>sim::LinkQueue::push (50,505,050 samples, 2.40%)</title><rect x="503.6" y="1717" width="28.3" height="15.0" fill="rgb(234,136,32)" rx="2" ry="2" />
+<text  x="506.56" y="1727.5" >si..</text>
+</g>
+<g >
+<title>YAML::Scanner::empty (30,303,030 samples, 1.44%)</title><rect x="1161.6" y="1493" width="17.1" height="15.0" fill="rgb(208,14,3)" rx="2" ry="2" />
+<text  x="1164.63" y="1503.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="792.9" y="1541" width="5.7" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="795.88" y="1551.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="968.7" y="1493" width="5.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="971.75" y="1503.5" ></text>
+</g>
+<g >
+<title>sim::Host::enqueue_packet (10,101,010 samples, 0.48%)</title><rect x="475.2" y="1669" width="5.7" height="15.0" fill="rgb(209,19,4)" rx="2" ry="2" />
+<text  x="478.19" y="1679.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="869" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="879.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1013" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="1023.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1413" width="11.4" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="727.81" y="1423.5" ></text>
+</g>
+<g >
+<title>sim::TcpFlow::send_data (20,202,020 samples, 0.96%)</title><rect x="475.2" y="1701" width="11.3" height="15.0" fill="rgb(234,133,32)" rx="2" ry="2" />
+<text  x="478.19" y="1711.5" ></text>
+</g>
+<g >
+<title>std::set&lt;std::weak_ptr&lt;sim::ILink&gt;, std::owner_less&lt;std::weak_ptr&lt;sim::ILink&gt; &gt;, std::allocator&lt;std::weak_ptr&lt;sim::ILink&gt; &gt; &gt;::size_type std::__detail::__erase_nodes_if&lt;std::set&lt;std::weak_ptr&lt;sim::ILink&gt;, std::owner_less&lt;std::weak_ptr&lt;sim::ILink&gt; &gt;, std::allocator&lt;std::weak_ptr&lt;sim::ILink&gt; &gt; &gt;, std::set&lt;std::weak_ptr&lt;sim::ILink&gt;, std::owner_less&lt;std::weak_ptr&lt;sim::ILink&gt; &gt;, std::allocator&lt;std::weak_ptr&lt;sim::ILink&gt; &gt; &gt;, sim::RoutingModule::correctify_outlinks (10,101,010 samples, 0.48%)</title><rect x="628.4" y="1733" width="5.6" height="15.0" fill="rgb(233,129,30)" rx="2" ry="2" />
+<text  x="631.37" y="1743.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (80,808,080 samples, 3.85%)</title><rect x="895.0" y="1477" width="45.4" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="898.00" y="1487.5" >int ..</text>
+</g>
+<g >
+<title>std::basic_filebuf&lt;char, std::char_traits&lt;char&gt; &gt;::underflow (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1381" width="5.7" height="15.0" fill="rgb(232,127,30)" rx="2" ry="2" />
+<text  x="977.42" y="1391.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="917" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="927.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1109" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="1119.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1157" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="1167.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="1173.0" y="1413" width="5.7" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1175.98" y="1423.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="181" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="191.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="677" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="687.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::InsertPotentialSimpleKey (10,101,010 samples, 0.48%)</title><rect x="963.1" y="1509" width="5.6" height="15.0" fill="rgb(247,193,46)" rx="2" ry="2" />
+<text  x="966.08" y="1519.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="981" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="991.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::empty (60,606,060 samples, 2.88%)</title><rect x="809.9" y="1605" width="34.0" height="15.0" fill="rgb(208,14,3)" rx="2" ry="2" />
+<text  x="812.90" y="1615.5" >YA..</text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="453" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="463.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="594.3" y="1621" width="5.7" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="597.33" y="1631.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1093" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="1103.5" ></text>
+</g>
+<g >
+<title>vsnprintf (10,101,010 samples, 0.48%)</title><rect x="594.3" y="1653" width="5.7" height="15.0" fill="rgb(240,164,39)" rx="2" ry="2" />
+<text  x="597.33" y="1663.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1445" width="11.4" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="727.81" y="1455.5" ></text>
+</g>
+<g >
+<title>std::_Rb_tree&lt;std::shared_ptr&lt;sim::IRoutingDevice&gt;, std::shared_ptr&lt;sim::IRoutingDevice&gt;, std::_Identity&lt;std::shared_ptr&lt;sim::IRoutingDevice&gt; &gt;, std::less&lt;std::shared_ptr&lt;sim::IRoutingDevice&gt; &gt;, std::allocator&lt;std::shared_ptr&lt;sim::IRoutingDevice&gt; &gt; &gt;::_M_erase (10,101,010 samples, 0.48%)</title><rect x="639.7" y="1749" width="5.7" height="15.0" fill="rgb(250,208,49)" rx="2" ry="2" />
+<text  x="642.71" y="1759.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="656.7" y="1701" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="659.73" y="1711.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1317" width="11.4" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="727.81" y="1327.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="10.0" y="1717" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="1727.5" ></text>
+</g>
+<g >
+<title>YAML::SingleDocParser::HandleNode (676,767,670 samples, 32.21%)</title><rect x="804.2" y="1637" width="380.1" height="15.0" fill="rgb(215,50,12)" rx="2" ry="2" />
+<text  x="807.23" y="1647.5" >YAML::SingleDocParser::HandleNode</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="10.0" y="1765" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="1775.5" ></text>
+</g>
+<g >
+<title>sim::LinkQueue::push (30,303,030 samples, 1.44%)</title><rect x="412.8" y="1733" width="17.0" height="15.0" fill="rgb(234,136,32)" rx="2" ry="2" />
+<text  x="415.79" y="1743.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="656.7" y="1717" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="659.73" y="1727.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1317" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="977.42" y="1327.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="1014.1" y="1397" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1017.13" y="1407.5" ></text>
+</g>
+<g >
+<title>std::basic_filebuf&lt;char, std::char_traits&lt;char&gt; &gt;::xsputn (10,101,010 samples, 0.48%)</title><rect x="656.7" y="1765" width="5.7" height="15.0" fill="rgb(218,64,15)" rx="2" ry="2" />
+<text  x="659.73" y="1775.5" ></text>
+</g>
+<g >
+<title>sim::SendData::operator (60,606,060 samples, 2.88%)</title><rect x="583.0" y="1765" width="34.0" height="15.0" fill="rgb(243,177,42)" rx="2" ry="2" />
+<text  x="585.98" y="1775.5" >si..</text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (101,010,100 samples, 4.81%)</title><rect x="1099.2" y="1429" width="56.8" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="1102.23" y="1439.5" >int YA..</text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.48%)</title><rect x="492.2" y="1685" width="5.7" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="495.21" y="1695.5" ></text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (30,303,030 samples, 1.44%)</title><rect x="826.9" y="1509" width="17.0" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="829.92" y="1519.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::EnsureTokensInQueue (121,212,120 samples, 5.77%)</title><rect x="1019.8" y="1509" width="68.1" height="15.0" fill="rgb(246,191,45)" rx="2" ry="2" />
+<text  x="1022.81" y="1519.5" >YAML::S..</text>
+</g>
+<g >
+<title>sim::RoutingModule::get_link_to_destination (40,404,040 samples, 1.92%)</title><rect x="537.6" y="1733" width="22.7" height="15.0" fill="rgb(253,221,53)" rx="2" ry="2" />
+<text  x="540.60" y="1743.5" >s..</text>
+</g>
+<g >
+<title>[libc.so.6] (20,202,020 samples, 0.96%)</title><rect x="15.7" y="1813" width="11.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="18.67" y="1823.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (191,919,190 samples, 9.13%)</title><rect x="219.9" y="1669" width="107.8" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="222.90" y="1679.5" >[libc.so.6]</text>
+</g>
+<g >
+<title>int YAML::RegEx::MatchUnchecked&lt;YAML::StreamCharSource&gt; (10,101,010 samples, 0.48%)</title><rect x="838.3" y="1461" width="5.6" height="15.0" fill="rgb(250,207,49)" rx="2" ry="2" />
+<text  x="841.27" y="1471.5" ></text>
+</g>
+<g >
+<title>std::ostreambuf_iterator&lt;char, std::char_traits&lt;char&gt; &gt; std::num_put&lt;char, std::ostreambuf_iterator&lt;char, std::char_traits&lt;char&gt; &gt; &gt;::_M_insert_float&lt;double&gt; (60,606,060 samples, 2.88%)</title><rect x="344.7" y="1733" width="34.1" height="15.0" fill="rgb(238,154,36)" rx="2" ry="2" />
+<text  x="347.71" y="1743.5" >st..</text>
+</g>
+<g >
+<title>YAML::SingleDocParser::HandleDocument (676,767,670 samples, 32.21%)</title><rect x="804.2" y="1717" width="380.1" height="15.0" fill="rgb(217,55,13)" rx="2" ry="2" />
+<text  x="807.23" y="1727.5" >YAML::SingleDocParser::HandleDocument</text>
+</g>
+<g >
+<title>vsnprintf (40,404,040 samples, 1.92%)</title><rect x="350.4" y="1701" width="22.7" height="15.0" fill="rgb(240,164,39)" rx="2" ry="2" />
+<text  x="353.38" y="1711.5" >v..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.96%)</title><rect x="146.2" y="1573" width="11.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="149.15" y="1583.5" ></text>
+</g>
+<g >
+<title>sim::ActionParser::parse (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1717" width="11.4" height="15.0" fill="rgb(231,121,29)" rx="2" ry="2" />
+<text  x="727.81" y="1727.5" ></text>
+</g>
+<g >
+<title>cfree (10,101,010 samples, 0.48%)</title><rect x="1184.3" y="1701" width="5.7" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="1187.33" y="1711.5" ></text>
+</g>
+<g >
+<title>YAML::detail::memory::create_node (30,303,030 samples, 1.44%)</title><rect x="1002.8" y="1493" width="17.0" height="15.0" fill="rgb(239,159,38)" rx="2" ry="2" />
+<text  x="1005.79" y="1503.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.48%)</title><rect x="974.4" y="1253" width="5.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="977.42" y="1263.5" ></text>
+</g>
+<g >
+<title>sim::ConfigNode::operator[] (30,303,030 samples, 1.44%)</title><rect x="787.2" y="1589" width="17.0" height="15.0" fill="rgb(209,21,5)" rx="2" ry="2" />
+<text  x="790.21" y="1599.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (10,101,010 samples, 0.48%)</title><rect x="730.5" y="773" width="5.7" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="733.48" y="783.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_dfs (10,101,010 samples, 0.48%)</title><rect x="730.5" y="1269" width="5.7" height="15.0" fill="rgb(252,216,51)" rx="2" ry="2" />
+<text  x="733.48" y="1279.5" ></text>
+</g>
+<g >
+<title>YAML::Scanner::ScanNextToken (10,101,010 samples, 0.48%)</title><rect x="1161.6" y="1461" width="5.7" height="15.0" fill="rgb(211,30,7)" rx="2" ry="2" />
+<text  x="1164.63" y="1471.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Executor&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::allocator&lt;std::__cxx11::sub_match&lt;__gnu_cxx::__normal_iterator&lt;char const*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;, std::__cxx11::regex_traits&lt;char&gt;, true&gt;::_M_rep_once_more (20,202,020 samples, 0.96%)</title><rect x="724.8" y="1349" width="11.4" height="15.0" fill="rgb(230,117,28)" rx="2" ry="2" />
+<text  x="727.81" y="1359.5" ></text>
+</g>
+<g >
+<title>YAML::SingleDocParser::ParseProperties (10,101,010 samples, 0.48%)</title><rect x="1178.7" y="1541" width="5.6" height="15.0" fill="rgb(252,220,52)" rx="2" ry="2" />
+<text  x="1181.65" y="1551.5" ></text>
+</g>
+</g>
+</svg>
