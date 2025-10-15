@@ -1,0 +1,42 @@
+#pragma once
+#include "i_tcp_cc.hpp"
+#include "metrics/packet_reordering/simple_packet_reordering.hpp"
+#include "tcp_common.hpp"
+
+namespace sim {
+class TcpSender {
+public:
+    TcpSender(TcpCommonPtr a_common, std::shared_ptr<IHost> a_sender,
+              std::unique_ptr<ITcpCC> a_cc, SizeByte a_packet_size);
+
+public:
+    TcpCommonPtr m_common;
+    std::weak_ptr<IHost> m_sender;
+
+    // Congestion control module
+    std::unique_ptr<ITcpCC> m_cc;
+    SizeByte m_packet_size;
+
+    std::optional<TimeNs> m_first_send_time;
+    std::optional<TimeNs> m_last_send_time;
+
+    // is send_packet called at least once
+    TimeNs m_last_ack_arrive_time;
+
+    TimeNs m_current_rto;
+    TimeNs m_max_rto;
+    // is in STEADY state (after first ACK with valid RTT)
+    bool m_rto_steady;
+
+    std::uint32_t m_packets_in_flight;
+    SizeByte m_delivered_data_size;
+    PacketNum m_next_packet_num;
+
+    // Contains numbers of all delivered acks
+    std::set<PacketNum> m_acked;
+
+    SimplePacketReordering m_packet_reordering;
+    utils::Statistics<TimeNs> m_rtt_statistics;
+};
+
+}  // namespace sim

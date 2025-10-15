@@ -1,0 +1,33 @@
+#include "tcp_common.hpp"
+
+#include "utils/avg_rtt_packet_flag.hpp"
+
+namespace sim {
+FlagManager<std::string, PacketFlagsBase> TcpCommon::flag_manager;
+bool TcpCommon::is_flag_manager_initialized = false;
+
+void TcpCommon::initialize_flag_manager() {
+    if (!is_flag_manager_initialized) {
+        if (!flag_manager.register_flag_by_amount(packet_type_label,
+                                                  PacketType::ENUM_SIZE)) {
+            throw std::runtime_error("Can not registrate packet type label");
+        }
+        if (!flag_manager.register_flag_by_amount(ack_ttl_label, MAX_TTL + 1)) {
+            throw std::runtime_error("Can not registrate ack ttl label");
+        }
+        if (!register_packet_avg_rtt_flag(flag_manager)) {
+            throw std::runtime_error("Can not registrate packet avg rtt label");
+        }
+        is_flag_manager_initialized = true;
+    }
+}
+
+TcpCommon::TcpCommon(Id a_id, std::shared_ptr<IConnection> a_connection,
+                     bool a_ecn_capable)
+    : id(std::move(a_id)),
+      connection(a_connection),
+      ecn_capable(a_ecn_capable) {
+    initialize_flag_manager();
+}
+
+}  // namespace sim
