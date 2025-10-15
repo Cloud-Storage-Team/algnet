@@ -55,8 +55,8 @@ private:
     void set_avg_rtt_if_present(Packet& packet);
     Packet create_ack(Packet data);
     Packet generate_packet();
-
-    TimeNs get_max_timeout() const;
+    void update_rto_on_timeout();
+    void update_rto_on_ack();
     void send_packet_now(Packet packet);
     void retransmit_packet(PacketNum packet_num);
 
@@ -79,6 +79,11 @@ private:
 
     SizeByte m_packet_size;
     bool m_ecn_capable;
+
+    TimeNs m_current_rto;
+    TimeNs m_max_rto;
+    // is in STEADY state (after first ACK with valid RTT)
+    bool m_rto_steady;
 
     std::uint32_t m_packets_in_flight;
     SizeByte m_delivered_data_size;

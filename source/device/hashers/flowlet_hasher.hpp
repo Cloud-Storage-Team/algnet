@@ -22,4 +22,4 @@ private:
     ECMPHasher m_ecmp_hasher;
 };
 
-}
+}  // namespace sim

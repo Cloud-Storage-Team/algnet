@@ -102,8 +102,7 @@ void test_set_and_get_flag() {
     int first_flag_length = random_in_range(rnd, 1, max_two_flags_sum - 1);
     int second_flag_length =
         random_in_range(rnd, 1, max_two_flags_sum - first_flag_length);
-    int third_flag_length =
-        total_bits - first_flag_length - second_flag_length;
+    int third_flag_length = total_bits - first_flag_length - second_flag_length;
 
     auto process_flag = [&rnd, &flag_manager, &flags](int flag_length) {
         static int flag_num = 0;

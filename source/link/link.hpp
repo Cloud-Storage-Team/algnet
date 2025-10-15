@@ -13,10 +13,8 @@ struct LinkInitArgs {
     utils::StrExpected<Id> id = std::unexpected("Missing id");
     utils::StrExpected<Id> from_id = std::unexpected("Missing from id");
     utils::StrExpected<Id> to_id = std::unexpected("Missing to id");
-    utils::StrExpected<SpeedGbps> speed =
-        std::unexpected("Missing speed");
-    utils::StrExpected<TimeNs> delay =
-        std::unexpected("Missing delay");
+    utils::StrExpected<SpeedGbps> speed = std::unexpected("Missing speed");
+    utils::StrExpected<TimeNs> delay = std::unexpected("Missing delay");
     utils::StrExpected<SizeByte> max_from_egress_buffer_size =
         std::unexpected("Missing max from egress buffer size");
     utils::StrExpected<SizeByte> max_to_ingress_buffer_size =
