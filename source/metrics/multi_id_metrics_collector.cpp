@@ -46,6 +46,13 @@ void MultiIdMetricsStorage::draw_on_plot(
     draw_on_same_plot(path, std::move(data), std::move(metadata));
 }
 
+void MultiIdMetricsStorage::draw_on_different_plots(
+    std::filesystem::path path, PlotMetadata metadata) const {
+    for (auto [id, storage] : data()) {
+        storage.draw_plot(path / (id + ".svg"), metadata);
+    }
+}
+
 std::unordered_map<Id, MetricsStorage> MultiIdMetricsStorage::data() const {
     std::unordered_map<Id, MetricsStorage> result;
     result.reserve(m_storage.size());

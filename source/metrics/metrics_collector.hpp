@@ -12,6 +12,7 @@ namespace sim {
 
 struct StorageData {
     MultiIdMetricsStorage storage;
+    bool draw_on_same_plot;
     PlotMetadata metadata;
     std::function<std::string(const Id&)> id_to_curve_name;
 };

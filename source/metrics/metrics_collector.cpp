@@ -23,10 +23,10 @@ MetricsCollector::MetricsCollector()
     : m_links_queue_size_storage(m_metrics_filter) {
     auto add_storage =
         [this](std::string name, PlotMetadata metadata,
-               std::function<std::string(const Id&)> id_to_curve_name) {
+               std::function<std::string(const Id&)> id_to_curve_name, bool draw_on_same_plot = true) {
             if (!m_multi_id_storages
                      .emplace(name, StorageData{MultiIdMetricsStorage(
-                                                    name, m_metrics_filter),
+                                                    name, m_metrics_filter), draw_on_same_plot,
                                                 metadata, id_to_curve_name})
                      .second) {
                 throw std::runtime_error(fmt::format(
@@ -52,7 +52,7 @@ MetricsCollector::MetricsCollector()
     add_storage(M_PACKET_SPACING_STORAGE_NAME,
                 PlotMetadata{"Time, ns", "Packet spacing, ns",
                              "Packet spacing"},
-                flow_id_to_curve_name);
+                flow_id_to_curve_name, false);
     m_is_initialised = true;
 }
 
@@ -117,9 +117,13 @@ void MetricsCollector::draw_queue_size_plots(
 void MetricsCollector::draw_metric_plots(
     std::filesystem::path metrics_dir) const {
     for (auto [name, storage] : m_multi_id_storages) {
-        storage.storage.draw_on_plot(metrics_dir / (name + ".svg"),
-                                     storage.metadata,
-                                     storage.id_to_curve_name);
+        if (storage.draw_on_same_plot) {
+            storage.storage.draw_on_plot(metrics_dir / (name + ".svg"),
+                                        storage.metadata,
+                                        storage.id_to_curve_name);
+        } else {
+            storage.storage.draw_on_different_plots(metrics_dir / name, storage.metadata);
+        }
     };
     draw_queue_size_plots(metrics_dir / "queue_size");
 }
