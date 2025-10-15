@@ -8,28 +8,18 @@
 namespace sim {
 
 std::shared_ptr<IConnection> ConnectionParser::parse_i_connection(
-    const YAML::Node& key_node, const YAML::Node& value_node) {
-    return parse_connection(key_node, value_node);
+    const ConfigNode& node) {
+    return parse_connection(node);
 }
 
 std::shared_ptr<IConnection> ConnectionParser::parse_connection(
-    const YAML::Node& key_node, const YAML::Node& value_node) {
-    Id conn_id = key_node.as<Id>();
-    if (conn_id.empty()) {
-        throw std::runtime_error("Connection ID is not specified");
-    }
+    const ConfigNode& node) {
+    Id conn_id = node.get_name_or_throw();
 
-    Id sender_id = value_node["sender_id"].as<Id>();
-    if (sender_id.empty()) {
-        throw std::runtime_error("Sender ID is not specified for connection " +
-                                 conn_id);
-    }
+    Id sender_id =
+        node["sender_id"].value_or_throw().as_or_throw<std::string>();
 
-    Id receiver_id = value_node["receiver_id"].as<Id>();
-    if (receiver_id.empty()) {
-        throw std::runtime_error(
-            "Receiver ID is not specified for connection " + conn_id);
-    }
+    Id receiver_id = node["receiver_id"].value_or_throw().as_or_throw<Id>();
 
     std::shared_ptr<IHost> sender_ptr =
         IdentifierFactory::get_instance().get_object<IHost>(sender_id);
@@ -37,11 +27,9 @@ std::shared_ptr<IConnection> ConnectionParser::parse_connection(
     std::shared_ptr<IHost> receiver_ptr =
         IdentifierFactory::get_instance().get_object<IHost>(receiver_id);
 
-    std::string mplb_name = value_node["mplb"].as<std::string>();
-    if (mplb_name.empty()) {
-        throw std::runtime_error(
-            "MPLB algorithm is not specified for connection " + conn_id);
-    }
+    std::string mplb_name =
+        node["mplb"].value_or_throw().as_or_throw<std::string>();
+
     auto mplb = make_mplb(mplb_name);
 
     auto conn = std::make_shared<ConnectionImpl>(conn_id, sender_ptr,
@@ -50,18 +38,13 @@ std::shared_ptr<IConnection> ConnectionParser::parse_connection(
     auto& idf = IdentifierFactory::get_instance();
     idf.add_object(conn);
 
-    YAML::Node flows = value_node["flows"];
-    if (!flows) {
-        throw std::runtime_error("No flows specified for connection " +
-                                 conn_id);
-    }
+    ConfigNode flows_node = node["flows"].value_or_throw();
 
-    for (auto it = flows.begin(); it != flows.end(); ++it) {
-        const YAML::Node& flow_key = it->first;
-        const YAML::Node& flow_value = it->second;
+    for (auto it = flows_node.begin(); it != flows_node.end(); ++it) {
+        ConfigNode flow_node = *it;
 
         std::shared_ptr<IFlow> flow(
-            FlowParser::parse_i_flow(flow_key, flow_value, conn_id));
+            FlowParser::parse_i_flow(flow_node, conn_id));
 
         idf.add_object(flow);
         conn->add_flow(flow);

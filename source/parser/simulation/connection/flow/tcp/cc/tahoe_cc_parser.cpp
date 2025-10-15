@@ -4,7 +4,7 @@
 
 namespace sim {
 std::unique_ptr<TcpTahoeCC> TahoeCCParser::parse_tahoe_cc(
-    const YAML::Node& node) {
+    const ConfigNode& node) {
     double start_cwnd = simple_parse_with_default(
         node, "start_cwnd", TcpTahoeCC::DEFAULT_START_CWND);
     double sstresh =

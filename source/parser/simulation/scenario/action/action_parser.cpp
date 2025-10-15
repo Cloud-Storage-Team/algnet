@@ -8,17 +8,13 @@
 
 namespace sim {
 
-std::unique_ptr<IAction> ActionParser::parse(const YAML::Node& node) {
-    auto action_node = node["action"];
-    if (!action_node) {
-        throw std::runtime_error("Scenario item must contain `action`");
-    }
-    const std::string action = action_node.as<std::string>();
+std::unique_ptr<IAction> ActionParser::parse(const ConfigNode& node) {
+    const std::string action =
+        node["action"].value_or_throw().as_or_throw<std::string>();
     if (action == "send_data") {
         return parse_send_data(node);
-    } else {
-        throw std::runtime_error("Unknown scenario action: " + action);
     }
+    throw node.create_parsing_error("Unknown scenario action: " + action);
 }
 
 }  // namespace sim

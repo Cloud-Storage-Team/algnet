@@ -11,35 +11,36 @@
 namespace sim {
 
 std::shared_ptr<ISwitch> SwitchParser::parse_i_switch(
-    const YAML::Node& key_node, const YAML::Node& value_node,
-    const YAML::Node& packet_spraying_node) {
-    return parse_default_switch(key_node, value_node, packet_spraying_node);
+    const ConfigNode& switch_node, const ConfigNode& packet_spraying_node) {
+    return parse_default_switch(switch_node, packet_spraying_node);
 }
 
 std::shared_ptr<Switch> SwitchParser::parse_default_switch(
-    const YAML::Node& key_node, const YAML::Node& value_node,
-    const YAML::Node& packet_spraying_node) {
-    Id id = key_node.as<Id>();
-    const YAML::Node& ecn_node = value_node["ecn"];
+    const ConfigNode& switch_node, const ConfigNode& packet_spraying_node) {
+    Id id = switch_node.get_name_or_throw();
+    ConfigNodeExpected ecn_node = switch_node["ecn"];
     ECN ecn(1.0, 1.0, 0.0);
     if (ecn_node) {
-        ecn = parse_ecn(ecn_node);
+        ecn = parse_ecn(ecn_node.value());
     }
     return std::make_shared<Switch>(id, std::move(ecn),
                                     parse_hasher(packet_spraying_node, id));
 }
 
-ECN SwitchParser::parse_ecn(const YAML::Node& node) {
-    float min = node["min"].as<float>();
-    float max = node["max"].as<float>();
-    float probability = node["probability"].as<float>();
+ECN SwitchParser::parse_ecn(const ConfigNode& node) {
+    float min = node["min"].value_or_throw().as_or_throw<float>();
+    float max = node["max"].value_or_throw().as_or_throw<float>();
+    float probability =
+        node["probability"].value_or_throw().as_or_throw<float>();
     return ECN(min, max, probability);
 }
 
 std::unique_ptr<IPacketHasher> SwitchParser::parse_hasher(
-    const YAML::Node& packet_spraying_node, Id switch_id) {
-    auto type_node = packet_spraying_node["type"];
-    std::string type = type_node.as<std::string>();
+    const ConfigNode& packet_spraying_node, Id switch_id) {
+    std::string type = packet_spraying_node["type"]
+                           .value_or_throw()
+                           .as<std::string>()
+                           .value_or_throw();
     if (type == "random") {
         return std::make_unique<RandomHasher>();
     }
@@ -48,13 +49,13 @@ std::unique_ptr<IPacketHasher> SwitchParser::parse_hasher(
     }
     if (type == "flowlet") {
         TimeNs threshold =
-            parse_time(packet_spraying_node["threshold"].as<std::string>());
+            parse_time(packet_spraying_node["threshold"].value_or_throw());
         return std::make_unique<FLowletHasher>(threshold);
     }
     if (type == "adaptive_flowlet") {
         auto factor_node = packet_spraying_node["factor"];
         if (factor_node) {
-            double factor = factor_node.as<double>();
+            double factor = factor_node.value().as_or_throw<double>();
             return std::make_unique<AdaptiveFlowletHasher>(factor);
         } else {
             return std::make_unique<AdaptiveFlowletHasher>();
@@ -63,7 +64,7 @@ std::unique_ptr<IPacketHasher> SwitchParser::parse_hasher(
     if (type == "salt") {
         return std::make_unique<SaltECMPHasher>(std::move(switch_id));
     }
-    throw std::runtime_error(
+    throw packet_spraying_node.create_parsing_error(
         fmt::format("Unexpected packet sprayng type: {}", type));
 }
 

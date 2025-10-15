@@ -10,14 +10,16 @@
 namespace sim {
 
 struct LinkInitArgs {
-    utils::str_expected<Id> id = std::unexpected("Missing id");
-    utils::str_expected<Id> from_id = std::unexpected("Missing from id");
-    utils::str_expected<Id> to_id = std::unexpected("Missing to id");
-    utils::str_expected<SpeedGbps> speed = std::unexpected("Missing speed");
-    utils::str_expected<TimeNs> delay = std::unexpected("Missing delay");
-    utils::str_expected<SizeByte> max_from_egress_buffer_size =
+    utils::StrExpected<Id> id = std::unexpected("Missing id");
+    utils::StrExpected<Id> from_id = std::unexpected("Missing from id");
+    utils::StrExpected<Id> to_id = std::unexpected("Missing to id");
+    utils::StrExpected<SpeedGbps> speed =
+        std::unexpected("Missing speed");
+    utils::StrExpected<TimeNs> delay =
+        std::unexpected("Missing delay");
+    utils::StrExpected<SizeByte> max_from_egress_buffer_size =
         std::unexpected("Missing max from egress buffer size");
-    utils::str_expected<SizeByte> max_to_ingress_buffer_size =
+    utils::StrExpected<SizeByte> max_to_ingress_buffer_size =
         std::unexpected("Missing max to ingress buffer size");
     ;
 };

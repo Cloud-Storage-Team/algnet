@@ -7,12 +7,8 @@
 #include "tahoe_cc_parser.hpp"
 
 namespace sim {
-std::unique_ptr<ITcpCC> TcpCCParser::parse_i_tcp_cc(const YAML::Node& node) {
-    if (!node["type"]) {
-        throw std::runtime_error("Missing 'cc.type' field");
-    }
-
-    std::string type = node["type"].as<std::string>();
+std::unique_ptr<ITcpCC> TcpCCParser::parse_i_tcp_cc(const ConfigNode& node) {
+    std::string type = node["type"].value_or_throw().as_or_throw<std::string>();
     if (type == "basic") {
         return std::make_unique<BasicCC>();
     } else if (type == "tahoe") {
@@ -20,7 +16,7 @@ std::unique_ptr<ITcpCC> TcpCCParser::parse_i_tcp_cc(const YAML::Node& node) {
     } else if (type == "swift") {
         return SwiftCCParser::parse_swift_cc(node);
     }
-    throw std::runtime_error(
-        fmt::format("Unexpected type of CC module: {}", type));
+
+    throw node.create_parsing_error("Unexpected type of CC module: " + type);
 }
 }  // namespace sim

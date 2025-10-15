@@ -60,4 +60,4 @@ scenario:
   - action: send_data
     when: 0ns
     size: 1000000B
-    connections: ^conn.*
+    connections: conn.*
