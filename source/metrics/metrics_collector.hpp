@@ -12,9 +12,9 @@ namespace sim {
 
 struct StorageData {
     MultiIdMetricsStorage storage;
-    bool draw_on_same_plot;
     PlotMetadata metadata;
     std::function<std::string(const Id&)> id_to_curve_name;
+    bool draw_on_same_plot;
 };
 
 class MetricsCollector {
@@ -48,7 +48,7 @@ private:
 
     void draw_queue_size_plots(std::filesystem::path dir_path) const;
 
-    MultiIdMetricsStorage& get_storage(const std::string& name);
+    MultiIdMetricsStorage& get_storage_named(const std::string& name);
 
     static constexpr std::string M_RTT_STORAGE_NAME = "rtt";
     static constexpr std::string M_CWND_STORAGE_NAME = "cwnd";
