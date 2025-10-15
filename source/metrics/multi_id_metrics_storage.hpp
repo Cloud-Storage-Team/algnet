@@ -17,8 +17,8 @@ public:
         std::filesystem::path path, PlotMetadata metadata,
         std::function<std::string(const Id&)> id_to_curve_name) const;
 
-    void draw_on_different_plots(
-        std::filesystem::path dir_path, PlotMetadata metadata) const;
+    void draw_on_different_plots(std::filesystem::path dir_path,
+                                 PlotMetadata metadata) const;
 
     std::unordered_map<Id, MetricsStorage> data() const;
 

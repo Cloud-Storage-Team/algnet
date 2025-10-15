@@ -29,6 +29,8 @@ public:
 
     void add_data_to_send(SizeByte data) override;
 
+    SizeByte get_total_data_added() const override;
+
     void update(const std::shared_ptr<IFlow>& flow) override;
 
     std::set<std::shared_ptr<IFlow>> get_flows() const override;
@@ -49,6 +51,7 @@ private:
     std::weak_ptr<IHost> m_dest;
     std::shared_ptr<IMPLB> m_mplb;
     SizeByte m_data_to_send;
+    SizeByte m_total_data_added;
     std::set<std::shared_ptr<IFlow>> m_flows;
 };
 

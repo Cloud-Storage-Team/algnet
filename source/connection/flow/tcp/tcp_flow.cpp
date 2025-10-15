@@ -30,8 +30,10 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
       m_current_rto(TimeNs(2000)),
       m_max_rto(Time<Second>(1)),
       m_rto_steady(false),
+      m_retransmit_count(0),
       m_packets_in_flight(0),
       m_delivered_data_size(0),
+      m_sent_data_size(0),
       m_next_packet_num(0) {
     if (m_src.lock() == nullptr) {
         throw std::invalid_argument("Sender for TcpFlow is nullptr");
@@ -45,6 +47,10 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
 SizeByte TcpFlow::get_delivered_data_size() const {
     return m_delivered_data_size;
 }
+
+SizeByte TcpFlow::get_sent_data_size() const { return m_sent_data_size; }
+
+uint32_t TcpFlow::retransmit_count() const { return m_retransmit_count; }
 
 TimeNs TcpFlow::get_fct() const {
     if (!m_sending_started) {
@@ -329,6 +335,7 @@ void TcpFlow::send_packet_now(Packet packet) {
     Scheduler::get_instance().add<Timeout>(current_time + m_current_rto,
                                            this->shared_from_this(),
                                            packet.packet_num);
+    m_sent_data_size += packet.size;
 
     packet.sent_time = current_time;
     m_src.lock()->enqueue_packet(std::move(packet));
@@ -337,6 +344,7 @@ void TcpFlow::send_packet_now(Packet packet) {
 void TcpFlow::retransmit_packet(PacketNum packet_num) {
     Packet packet = generate_data_packet(packet_num);
     send_packet_now(std::move(packet));
+    m_retransmit_count++;
 }
 
 }  // namespace sim

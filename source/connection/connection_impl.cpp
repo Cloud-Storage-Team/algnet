@@ -13,7 +13,8 @@ ConnectionImpl::ConnectionImpl(Id a_id, std::shared_ptr<IHost> a_src,
       m_src(a_src),
       m_dest(a_dest),
       m_mplb(std::move(a_mplb)),
-      m_data_to_send(0) {}
+      m_data_to_send(0),
+      m_total_data_added(0) {}
 
 Id ConnectionImpl::get_id() const { return m_id; }
 
@@ -29,7 +30,12 @@ void ConnectionImpl::delete_flow(std::shared_ptr<IFlow> flow) {
 
 void ConnectionImpl::add_data_to_send(SizeByte data) {
     m_data_to_send += data;
+    m_total_data_added += data;
     send_data();
+}
+
+SizeByte ConnectionImpl::get_total_data_added() const {
+    return m_total_data_added;
 }
 
 void ConnectionImpl::update(const std::shared_ptr<IFlow>& flow) {
