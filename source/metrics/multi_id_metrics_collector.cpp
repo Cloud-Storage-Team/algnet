@@ -49,7 +49,9 @@ void MultiIdMetricsStorage::draw_on_plot(
 void MultiIdMetricsStorage::draw_on_different_plots(
     std::filesystem::path path, PlotMetadata metadata) const {
     for (auto [id, storage] : data()) {
-        storage.draw_plot(path / (id + ".svg"), metadata);
+        PlotMetadata storage_metadata = metadata;
+        storage_metadata.title += " for " + id;
+        storage.draw_plot(path / (id + ".svg"), storage_metadata);
     }
 }
 

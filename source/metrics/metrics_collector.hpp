@@ -54,7 +54,7 @@ private:
     static constexpr std::string M_CWND_STORAGE_NAME = "cwnd";
     static constexpr std::string M_RATE_STORAGE_NAME = "rate";
     static constexpr std::string M_REORDERING_STORAGE_NAME = "reordering";
-    static constexpr std::string M_PACKET_SPACING_STORAGE_NAME = "packet spacing";
+    static constexpr std::string M_PACKET_SPACING_STORAGE_NAME = "packet_spacing";
 
     std::unordered_map<std::string, StorageData> m_multi_id_storages;
 
