@@ -26,7 +26,7 @@ public:
     static constexpr double DEFAULT_AI = 0.5;
     static constexpr double DEFAULT_MD = 0.5;
     static constexpr double DEFAULT_MAX_MDF = 0.3;
-    static constexpr double DEFAULT_FS_RANGE = 0.3;
+    static constexpr double DEFAULT_FS_RANGE = 1.5;
     static constexpr double DEFAULT_FS_MIN_CWND = 0.1;   // taken from the paper
     static constexpr double DEFAULT_FS_MAX_CWND = 100.;  // taken from the paper
     /**

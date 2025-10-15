@@ -3,13 +3,12 @@ import os
 from common import *
 from generators.topology.common import *
 
-def _receiver_names(cfg: dict) -> list[str]:
-    n = int(cfg.get("receivers", 1))
-    if n < 1:
+def generate_receiver_names(receivers_count: int) -> list[str]:
+    if receivers_count < 1:
         raise ValueError("Config 'receivers' must be >= 1")
-    if n == 1:
+    if receivers_count == 1:
         return ["receiver"]
-    return [f"receiver-{i}" for i in range(1, n + 1)]
+    return [f"receiver-{i}" for i in range(1, receivers_count + 1)]
 
 def generate_topology(config : dict):
     try:
@@ -17,11 +16,12 @@ def generate_topology(config : dict):
         num_switches_per_device = int(config["num_switches_per_device"])
         packet_spraying = config["packet-spraying"]
         depth = int(config["depth"])
+        receivers_count = int(config["receivers_count"])
     except KeyError as e:
         raise KeyError(f"Config missing value {e}")
     
     sender_name = "sender"
-    receiver_names = _receiver_names(config)
+    receiver_names = generate_receiver_names(receivers_count)
 
     topology = {
         "presets" : presets,

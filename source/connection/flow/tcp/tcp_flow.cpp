@@ -304,18 +304,16 @@ std::string TcpFlow::to_string() const {
 // Before the first ACK: exponential growth by timeout
 void TcpFlow::update_rto_on_timeout() {
     if (!m_rto_steady) {
-        TimeNs doubled_rto = m_current_rto * 2;
-        m_current_rto = (doubled_rto > m_max_rto) ? m_max_rto : doubled_rto;
+        m_current_rto = std::min(m_current_rto * 2, m_max_rto);
     }
     // in STEADY, don't touch RTO by timeout
 }
 
 // After ACK with a valid RTT: formula + transition to STEADY (once)
 void TcpFlow::update_rto_on_ack() {
-    auto mean = m_rtt_statistics.get_mean();
+    auto mean = m_rtt_statistics.get_mean().value();
     TimeNs std = m_rtt_statistics.get_std().value();
-    TimeNs rto = mean.value() * 2 + std * 4;
-    m_current_rto = (rto < m_max_rto) ? rto : m_max_rto;
+    m_current_rto = std::min(mean * 2 + std * 4, m_max_rto);
     m_rto_steady = true;
 }
 
