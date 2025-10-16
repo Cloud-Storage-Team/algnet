@@ -45,7 +45,7 @@ private:
     void retransmit_packet(PacketNum packet_num);
 
     TcpCommonPtr m_common;
-    TcpSender m_sender;
+    TcpSenderPtr m_sender;
     TcpReceiver m_receiver;
 };
 

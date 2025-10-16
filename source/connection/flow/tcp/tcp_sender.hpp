@@ -4,11 +4,19 @@
 #include "tcp_common.hpp"
 
 namespace sim {
-class TcpSender {
+
+class TcpSender;
+using TcpSenderPtr = std::shared_ptr<TcpSender>;
+
+class TcpSender : public std::enable_shared_from_this<TcpSender> {
 public:
+    static TcpSenderPtr create(TcpCommonPtr a_common,
+                               std::unique_ptr<ITcpCC> a_cc,
+                               SizeByte a_packet_size);
+
+private:
     TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
               SizeByte a_packet_size);
-
     // TODO: make it private
 public:
     void set_avg_rtt_if_present(Packet& packet);

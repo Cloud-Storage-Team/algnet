@@ -14,19 +14,19 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
     : m_common(std::make_shared<TcpCommon>(
           std::move(a_id), a_conn, a_conn->get_sender(), a_conn->get_receiver(),
           a_ecn_capable)),
-      m_sender(m_common, std::move(a_cc), a_packet_size),
+      m_sender(TcpSender::create(m_common, std::move(a_cc), a_packet_size)),
       m_receiver(m_common) {}
 
 SizeByte TcpFlow::get_delivered_data_size() const {
-    return m_sender.m_delivered_data_size;
+    return m_sender->m_delivered_data_size;
 }
 
 TimeNs TcpFlow::get_fct() const {
-    if (!m_sender.m_first_send_time) {
+    if (!m_sender->m_first_send_time) {
         return TimeNs(0);
     }
-    return m_sender.m_last_send_time.value() -
-           m_sender.m_first_send_time.value();
+    return m_sender->m_last_send_time.value() -
+           m_sender->m_first_send_time.value();
 }
 
 const BaseFlagManager& TcpFlow::get_flag_manager() const {
@@ -44,32 +44,32 @@ std::shared_ptr<IHost> TcpFlow::get_receiver() const {
 Id TcpFlow::get_id() const { return m_common->id; }
 
 SizeByte TcpFlow::get_delivered_bytes() const {
-    return m_sender.m_delivered_data_size;
+    return m_sender->m_delivered_data_size;
 }
 
 SizeByte TcpFlow::get_sending_quota() const {
-    const double cwnd = m_sender.m_cc->get_cwnd();
+    const double cwnd = m_sender->m_cc->get_cwnd();
 
     // Effective window: the whole part of cwnd; if cwnd < 1 and inflight == 0,
     // allow 1 packet
     std::uint32_t effective_cwnd = static_cast<std::uint32_t>(std::floor(cwnd));
-    if (m_sender.m_packets_in_flight == 0 && cwnd < 1.0) {
+    if (m_sender->m_packets_in_flight == 0 && cwnd < 1.0) {
         effective_cwnd = 1;
     }
     const std::uint32_t quota_pkts =
-        (effective_cwnd > m_sender.m_packets_in_flight)
-            ? (effective_cwnd - m_sender.m_packets_in_flight)
+        (effective_cwnd > m_sender->m_packets_in_flight)
+            ? (effective_cwnd - m_sender->m_packets_in_flight)
             : 0;
 
     // Quota in bytes, multiple of the packet size
-    return quota_pkts * m_sender.m_packet_size;
+    return quota_pkts * m_sender->m_packet_size;
 }
 
 void TcpFlow::send_data(SizeByte data) {
     TimeNs now = Scheduler::get_instance().get_current_time();
 
-    if (!m_sender.m_first_send_time) {
-        m_sender.m_first_send_time = now;
+    if (!m_sender->m_first_send_time) {
+        m_sender->m_first_send_time = now;
     }
 
     SizeByte quota = get_sending_quota();
@@ -81,8 +81,8 @@ void TcpFlow::send_data(SizeByte data) {
 
     while (data != SizeByte(0)) {
         Packet packet =
-            m_sender.generate_data_packet(m_sender.m_next_packet_num++);
-        TimeNs pacing_delay = m_sender.m_cc->get_pacing_delay();
+            m_sender->generate_data_packet(m_sender->m_next_packet_num++);
+        TimeNs pacing_delay = m_sender->m_cc->get_pacing_delay();
         if (pacing_delay == TimeNs(0)) {
             send_packet_now(std::move(packet));
         } else {
@@ -90,8 +90,8 @@ void TcpFlow::send_data(SizeByte data) {
                                                       this->shared_from_this(),
                                                       std::move(packet));
         }
-        data -= std::min(data, m_sender.m_packet_size);
-        m_sender.m_packets_in_flight++;
+        data -= std::min(data, m_sender->m_packet_size);
+        m_sender->m_packets_in_flight++;
     }
 }
 
@@ -159,15 +159,15 @@ public:
         }
         auto flow = m_flow.lock();
 
-        if (flow->m_sender.m_acked.contains(m_packet_num)) {
+        if (flow->m_sender->m_acked.contains(m_packet_num)) {
             return;
         }
         LOG_WARN(
             fmt::format("Timeout for packet number {} expired; looks "
                         "like packet loss",
                         m_packet_num));
-        flow->m_sender.update_rto_on_timeout();
-        flow->m_sender.m_cc->on_timeout();
+        flow->m_sender->update_rto_on_timeout();
+        flow->m_sender->m_cc->on_timeout();
         flow->retransmit_packet(m_packet_num);
     }
 
@@ -189,39 +189,39 @@ void TcpFlow::update(Packet packet) {
             return;
         }
 
-        m_sender.m_last_ack_arrive_time = current_time;
+        m_sender->m_last_ack_arrive_time = current_time;
 
-        if (m_sender.m_acked.contains(packet.packet_num)) {
+        if (m_sender->m_acked.contains(packet.packet_num)) {
             LOG_WARN(fmt::format("Got duplicate ack number {}; ignored",
                                  packet.packet_num));
             return;
         }
 
         TimeNs rtt = current_time - packet.sent_time;
-        m_sender.m_rtt_statistics.add_record(rtt);
+        m_sender->m_rtt_statistics.add_record(rtt);
         update_rto_on_ack();  // update and transition to STEADY
 
         MetricsCollector::get_instance().add_RTT(m_common->id, current_time,
                                                  rtt);
-        m_sender.m_acked.insert(packet.packet_num);
+        m_sender->m_acked.insert(packet.packet_num);
 
-        if (m_sender.m_packets_in_flight > 0) {
-            m_sender.m_packets_in_flight--;
+        if (m_sender->m_packets_in_flight > 0) {
+            m_sender->m_packets_in_flight--;
         }
 
-        m_sender.m_cc->on_ack(rtt, m_sender.m_rtt_statistics.get_mean().value(),
+        m_sender->m_cc->on_ack(rtt, m_sender->m_rtt_statistics.get_mean().value(),
                               packet.congestion_experienced);
 
-        m_sender.m_delivered_data_size += m_sender.m_packet_size;
+        m_sender->m_delivered_data_size += m_sender->m_packet_size;
 
-        SpeedGbps delivery_rate = (m_sender.m_delivered_data_size -
+        SpeedGbps delivery_rate = (m_sender->m_delivered_data_size -
                                    packet.delivered_data_size_at_origin) /
                                   (current_time - packet.generated_time);
         MetricsCollector::get_instance().add_delivery_rate(
             m_common->id, current_time, delivery_rate);
 
         MetricsCollector::get_instance().add_cwnd(m_common->id, current_time,
-                                                  m_sender.m_cc->get_cwnd());
+                                                  m_sender->m_cc->get_cwnd());
         if (m_common->connection.expired()) {
             LOG_ERROR(fmt::format(
                 "Can not update coinnection from flow '{}': connection expired",
@@ -231,9 +231,9 @@ void TcpFlow::update(Packet packet) {
         }
     } else if (packet.dest_id == m_common->receiver.lock()->get_id() &&
                type == TcpCommon::PacketType::DATA) {
-        m_sender.m_packet_reordering.add_record(packet.packet_num);
+        m_sender->m_packet_reordering.add_record(packet.packet_num);
         MetricsCollector::get_instance().add_packet_reordering(
-            m_common->id, current_time, m_sender.m_packet_reordering.value());
+            m_common->id, current_time, m_sender->m_packet_reordering.value());
 
         Packet ack = create_ack(std::move(packet));
 
@@ -242,7 +242,7 @@ void TcpFlow::update(Packet packet) {
 }
 
 std::optional<TimeNs> TcpFlow::get_last_rtt() const {
-    return m_sender.m_rtt_statistics.get_last();
+    return m_sender->m_rtt_statistics.get_last();
 }
 
 std::string TcpFlow::to_string() const {
@@ -251,33 +251,33 @@ std::string TcpFlow::to_string() const {
     oss << "Id:" << m_common->id;
     oss << ", src id: " << m_common->sender.lock()->get_id();
     oss << ", dest id: " << m_common->receiver.lock()->get_id();
-    oss << ", CC module: " << m_sender.m_cc->to_string();
-    oss << ", packet size: " << m_sender.m_packet_size;
-    oss << ", packets in flight: " << m_sender.m_packets_in_flight;
-    oss << ", acked packets: " << m_sender.m_delivered_data_size;
+    oss << ", CC module: " << m_sender->m_cc->to_string();
+    oss << ", packet size: " << m_sender->m_packet_size;
+    oss << ", packets in flight: " << m_sender->m_packets_in_flight;
+    oss << ", acked packets: " << m_sender->m_delivered_data_size;
     oss << "]";
     return oss.str();
 }
 
 // After ACK with a valid RTT: formula + transition to STEADY (once)
 void TcpFlow::update_rto_on_ack() {
-    auto mean = m_sender.m_rtt_statistics.get_mean().value();
-    TimeNs std = m_sender.m_rtt_statistics.get_std().value();
-    m_sender.m_current_rto = std::min(mean * 2 + std * 4, m_sender.m_max_rto);
-    m_sender.m_rto_steady = true;
+    auto mean = m_sender->m_rtt_statistics.get_mean().value();
+    TimeNs std = m_sender->m_rtt_statistics.get_std().value();
+    m_sender->m_current_rto = std::min(mean * 2 + std * 4, m_sender->m_max_rto);
+    m_sender->m_rto_steady = true;
 }
 
 void TcpFlow::send_packet_now(Packet packet) {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
 
-    if (m_sender.m_last_send_time.has_value()) {
+    if (m_sender->m_last_send_time.has_value()) {
         MetricsCollector::get_instance().add_packet_spacing(
             m_common->id, current_time,
-            current_time - m_sender.m_last_send_time.value());
+            current_time - m_sender->m_last_send_time.value());
     }
-    m_sender.m_last_send_time = current_time;
+    m_sender->m_last_send_time = current_time;
     Scheduler::get_instance().add<Timeout>(
-        current_time + m_sender.m_current_rto, this->shared_from_this(),
+        current_time + m_sender->m_current_rto, this->shared_from_this(),
         packet.packet_num);
 
     packet.sent_time = current_time;
@@ -285,7 +285,7 @@ void TcpFlow::send_packet_now(Packet packet) {
 }
 
 void TcpFlow::retransmit_packet(PacketNum packet_num) {
-    Packet packet = m_sender.generate_data_packet(packet_num);
+    Packet packet = m_sender->generate_data_packet(packet_num);
     send_packet_now(std::move(packet));
 }
 

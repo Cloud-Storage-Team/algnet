@@ -4,6 +4,14 @@
 #include "utils/avg_rtt_packet_flag.hpp"
 
 namespace sim {
+
+TcpSenderPtr TcpSender::create(TcpCommonPtr a_common,
+                               std::unique_ptr<ITcpCC> a_cc,
+                               SizeByte a_packet_size) {
+    return std::shared_ptr<TcpSender>(
+        new TcpSender(a_common, std::move(a_cc), a_packet_size));
+}
+
 TcpSender::TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
                      SizeByte a_packet_size)
     : m_common(a_common),
