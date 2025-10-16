@@ -19,7 +19,7 @@ TcpFlowPtr TcpFlow::create(Id a_id, std::shared_ptr<IConnection> a_conn,
 TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
                  std::unique_ptr<ITcpCC> a_cc, SizeByte a_packet_size,
                  bool a_ecn_capable)
-    : m_common(std::make_shared<TcpCommon>(
+    : m_common(std::make_shared<TcpFlowCommon>(
           std::move(a_id), a_conn, a_conn->get_sender(), a_conn->get_receiver(),
           a_ecn_capable)),
       m_sender(TcpSender::create(m_common, std::move(a_cc), a_packet_size)),
@@ -56,10 +56,10 @@ SizeByte TcpFlow::get_sending_quota() const {
 void TcpFlow::send_data(SizeByte data) { return m_sender->send_data(data); }
 
 void TcpFlow::update(Packet packet) {
-    TcpCommon::PacketType type =
-        static_cast<TcpCommon::PacketType>(m_common->flag_manager.get_flag(
-            packet.flags, TcpCommon::packet_type_label));
-    if (type == TcpCommon::PacketType::ACK) {
+    TcpFlowCommon::PacketType type =
+        static_cast<TcpFlowCommon::PacketType>(m_common->flag_manager.get_flag(
+            packet.flags, TcpFlowCommon::packet_type_label));
+    if (type == TcpFlowCommon::PacketType::ACK) {
         std::weak_ptr<IHost> sender = m_common->sender;
         if (sender.expired()) {
             LOG_ERROR(
@@ -84,7 +84,7 @@ void TcpFlow::update(Packet packet) {
         } else {
             m_common->connection.lock()->update(shared_from_this());
         }
-    } else if (type == TcpCommon::PacketType::DATA) {
+    } else if (type == TcpFlowCommon::PacketType::DATA) {
         std::weak_ptr<IHost> receiver = m_common->receiver;
         if (receiver.expired()) {
             LOG_ERROR(

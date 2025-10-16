@@ -10,7 +10,7 @@ TcpReceiver::TcpReceiver(TcpCommonPtr a_common) : m_common(a_common) {}
 void TcpReceiver::update(Packet packet) {
     if (m_common->flag_manager.get_flag(packet.flags,
                                         m_common->packet_type_label) !=
-        TcpCommon::PacketType::DATA) {
+        TcpFlowCommon::PacketType::DATA) {
         LOG_ERROR(fmt::format(
             "Called TcpReceiver::update with packet {}, but its type differs "
             "from data; ignored",
@@ -37,13 +37,13 @@ Packet TcpReceiver::create_ack(Packet data) {
     ack.generated_time = data.generated_time;
     ack.sent_time = data.sent_time;
     ack.delivered_data_size_at_origin = data.delivered_data_size_at_origin;
-    ack.ttl = TcpCommon::MAX_TTL;
+    ack.ttl = TcpFlowCommon::MAX_TTL;
     ack.ecn_capable_transport = data.ecn_capable_transport;
     ack.congestion_experienced = data.congestion_experienced;
 
-    m_common->flag_manager.set_flag(ack.flags, TcpCommon::packet_type_label,
-                                    TcpCommon::PacketType::ACK);
-    m_common->flag_manager.set_flag(ack.flags, TcpCommon::ack_ttl_label,
+    m_common->flag_manager.set_flag(ack.flags, TcpFlowCommon::packet_type_label,
+                                    TcpFlowCommon::PacketType::ACK);
+    m_common->flag_manager.set_flag(ack.flags, TcpFlowCommon::ack_ttl_label,
                                     data.ttl);
 
     try {

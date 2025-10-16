@@ -6,10 +6,10 @@
 #include "utils/flag_manager.hpp"
 
 namespace sim {
-struct TcpCommon {
-    TcpCommon(Id a_id, std::shared_ptr<IConnection> a_connection,
-              std::shared_ptr<IHost> a_sender,
-              std::shared_ptr<IHost> a_receiver, bool a_ecn_capable);
+struct TcpFlowCommon {
+    TcpFlowCommon(Id a_id, std::shared_ptr<IConnection> a_connection,
+                  std::shared_ptr<IHost> a_sender,
+                  std::shared_ptr<IHost> a_receiver, bool a_ecn_capable);
 
     static void initialize_flag_manager();
 
@@ -30,6 +30,6 @@ struct TcpCommon {
     bool ecn_capable;
 };
 
-using TcpCommonPtr = std::shared_ptr<const TcpCommon>;
+using TcpCommonPtr = std::shared_ptr<const TcpFlowCommon>;
 
 }  // namespace sim

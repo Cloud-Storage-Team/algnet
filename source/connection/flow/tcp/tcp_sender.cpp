@@ -31,7 +31,7 @@ TcpSender::TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
 void TcpSender::on_ack(Packet ack) {
     if (m_common->flag_manager.get_flag(ack.flags,
                                         m_common->packet_type_label) !=
-        TcpCommon::PacketType::ACK) {
+        TcpFlowCommon::PacketType::ACK) {
         LOG_ERROR(fmt::format(
             "Called TcpSender '{}' on_ack with packet {}, but its type differs "
             "from ack; ignored",
@@ -218,8 +218,9 @@ void TcpSender::update_rto_on_timeout() {
 
 Packet TcpSender::generate_data_packet(PacketNum packet_num) {
     Packet packet;
-    m_common->flag_manager.set_flag(packet.flags, TcpCommon::packet_type_label,
-                                    TcpCommon::PacketType::DATA);
+    m_common->flag_manager.set_flag(packet.flags,
+                                    TcpFlowCommon::packet_type_label,
+                                    TcpFlowCommon::PacketType::DATA);
     set_avg_rtt_if_present(packet);
     packet.size = m_packet_size;
     packet.flow_id = m_common->id;
@@ -250,7 +251,7 @@ Packet TcpSender::generate_data_packet(PacketNum packet_num) {
     packet.packet_num = packet_num;
     packet.delivered_data_size_at_origin = m_delivered_data_size;
     packet.generated_time = Scheduler::get_instance().get_current_time();
-    packet.ttl = TcpCommon::MAX_TTL;
+    packet.ttl = TcpFlowCommon::MAX_TTL;
     packet.ecn_capable_transport = m_common->ecn_capable;
     return packet;
 }

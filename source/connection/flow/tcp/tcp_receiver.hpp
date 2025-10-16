@@ -2,7 +2,7 @@
 #include <memory>
 
 #include "metrics/packet_reordering/simple_packet_reordering.hpp"
-#include "tcp_common.hpp"
+#include "tcp_flow_common.hpp"
 
 namespace sim {
 class TcpReceiver {

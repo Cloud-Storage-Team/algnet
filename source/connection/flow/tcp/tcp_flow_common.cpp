@@ -1,12 +1,12 @@
-#include "tcp_common.hpp"
+#include "tcp_flow_common.hpp"
 
 #include "utils/avg_rtt_packet_flag.hpp"
 
 namespace sim {
-FlagManager<std::string, PacketFlagsBase> TcpCommon::flag_manager;
-bool TcpCommon::is_flag_manager_initialized = false;
+FlagManager<std::string, PacketFlagsBase> TcpFlowCommon::flag_manager;
+bool TcpFlowCommon::is_flag_manager_initialized = false;
 
-void TcpCommon::initialize_flag_manager() {
+void TcpFlowCommon::initialize_flag_manager() {
     if (!is_flag_manager_initialized) {
         if (!flag_manager.register_flag_by_amount(packet_type_label,
                                                   PacketType::ENUM_SIZE)) {
@@ -22,9 +22,10 @@ void TcpCommon::initialize_flag_manager() {
     }
 }
 
-TcpCommon::TcpCommon(Id a_id, std::shared_ptr<IConnection> a_connection,
-                     std::shared_ptr<IHost> a_sender,
-                     std::shared_ptr<IHost> a_receiver, bool a_ecn_capable)
+TcpFlowCommon::TcpFlowCommon(Id a_id, std::shared_ptr<IConnection> a_connection,
+                             std::shared_ptr<IHost> a_sender,
+                             std::shared_ptr<IHost> a_receiver,
+                             bool a_ecn_capable)
     : id(std::move(a_id)),
       sender(a_sender),
       receiver(a_receiver),
