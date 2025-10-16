@@ -1,4 +1,6 @@
 #pragma once
+#include <optional>
+
 #include "event/event.hpp"
 #include "i_tcp_cc.hpp"
 #include "tcp_common.hpp"
@@ -14,9 +16,11 @@ public:
                                std::unique_ptr<ITcpCC> a_cc,
                                SizeByte a_packet_size);
 
-    SizeByte get_sending_quota() const;
-    void send_data(SizeByte data);
     void update(Packet packet);
+    void send_data(SizeByte data);
+
+    SizeByte get_sending_quota() const;
+    std::optional<TimeNs> get_fct() const;
 
 private:
     TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,

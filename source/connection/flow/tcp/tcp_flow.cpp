@@ -21,13 +21,7 @@ SizeByte TcpFlow::get_delivered_data_size() const {
     return m_sender->m_delivered_data_size;
 }
 
-std::optional<TimeNs> TcpFlow::get_fct() const {
-    if (!m_sender->m_first_send_time) {
-        return std::nullopt;
-    }
-    return m_sender->m_last_send_time.value() -
-           m_sender->m_first_send_time.value();
-}
+std::optional<TimeNs> TcpFlow::get_fct() const { return m_sender->get_fct(); }
 
 const BaseFlagManager& TcpFlow::get_flag_manager() const {
     return m_common->flag_manager;

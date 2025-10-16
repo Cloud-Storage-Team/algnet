@@ -28,6 +28,103 @@ TcpSender::TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
       m_delivered_data_size(0),
       m_next_packet_num(0) {}
 
+void TcpSender::update(Packet packet) {
+    TimeNs current_time = Scheduler::get_instance().get_current_time();
+    if (current_time < packet.sent_time) {
+        LOG_ERROR("Packet " + packet.to_string() +
+                  " current time less that sending time; ignored");
+        return;
+    }
+
+    m_last_ack_arrive_time = current_time;
+
+    if (m_acked.contains(packet.packet_num)) {
+        LOG_WARN(fmt::format("Got duplicate ack number {}; ignored",
+                             packet.packet_num));
+        return;
+    }
+
+    TimeNs rtt = current_time - packet.sent_time;
+    m_rtt_statistics.add_record(rtt);
+    update_rto_on_ack();  // update and transition to STEADY
+
+    MetricsCollector::get_instance().add_RTT(m_common->id, current_time, rtt);
+    m_acked.insert(packet.packet_num);
+
+    if (m_packets_in_flight > 0) {
+        m_packets_in_flight--;
+    }
+
+    m_cc->on_ack(rtt, m_rtt_statistics.get_mean().value(),
+                 packet.congestion_experienced);
+
+    m_delivered_data_size += m_packet_size;
+
+    SpeedGbps delivery_rate =
+        (m_delivered_data_size - packet.delivered_data_size_at_origin) /
+        (current_time - packet.generated_time);
+    MetricsCollector::get_instance().add_delivery_rate(
+        m_common->id, current_time, delivery_rate);
+
+    MetricsCollector::get_instance().add_cwnd(m_common->id, current_time,
+                                              m_cc->get_cwnd());
+}
+
+void TcpSender::send_data(SizeByte data) {
+    TimeNs now = Scheduler::get_instance().get_current_time();
+
+    if (!m_first_send_time) {
+        m_first_send_time = now;
+    }
+
+    SizeByte quota = get_sending_quota();
+    if (data > quota) {
+        throw std::runtime_error(fmt::format(
+            "Trying to send {} bytes on flow {} with quota {} bytes",
+            data.value(), m_common->id, quota.value()));
+    }
+
+    while (data != SizeByte(0)) {
+        Packet packet = generate_data_packet(m_next_packet_num++);
+        TimeNs pacing_delay = m_cc->get_pacing_delay();
+        if (pacing_delay == TimeNs(0)) {
+            send_packet_now(std::move(packet));
+        } else {
+            Scheduler::get_instance().add<SendAtTime>(now + pacing_delay,
+                                                      this->shared_from_this(),
+                                                      std::move(packet));
+        }
+        data -= std::min(data, m_packet_size);
+        m_packets_in_flight++;
+    }
+}
+
+SizeByte TcpSender::get_sending_quota() const {
+    const double cwnd = m_cc->get_cwnd();
+
+    // Effective window: the whole part of cwnd; if cwnd < 1 and inflight == 0,
+    // allow 1 packet
+    std::uint32_t effective_cwnd = static_cast<std::uint32_t>(std::floor(cwnd));
+    if (m_packets_in_flight == 0 && cwnd < 1.0) {
+        effective_cwnd = 1;
+    }
+    const std::uint32_t quota_pkts =
+        (effective_cwnd > m_packets_in_flight)
+            ? (effective_cwnd - m_packets_in_flight)
+            : 0;
+
+    // Quota in bytes, multiple of the packet size
+    return quota_pkts * m_packet_size;
+}
+
+std::optional<TimeNs> TcpSender::get_fct() const {
+    if (!m_first_send_time) {
+        return std::nullopt;
+    }
+    return m_last_send_time.value() -
+           m_first_send_time.value();
+}
+
 void TcpSender::set_avg_rtt_if_present(Packet& packet) {
     std::optional<TimeNs> avg_rtt = m_rtt_statistics.get_mean();
     if (avg_rtt.has_value()) {
@@ -160,95 +257,6 @@ void TcpSender::send_packet_now(Packet packet) {
 void TcpSender::retransmit_packet(PacketNum packet_num) {
     Packet packet = generate_data_packet(packet_num);
     send_packet_now(std::move(packet));
-}
-
-SizeByte TcpSender::get_sending_quota() const {
-    const double cwnd = m_cc->get_cwnd();
-
-    // Effective window: the whole part of cwnd; if cwnd < 1 and inflight == 0,
-    // allow 1 packet
-    std::uint32_t effective_cwnd = static_cast<std::uint32_t>(std::floor(cwnd));
-    if (m_packets_in_flight == 0 && cwnd < 1.0) {
-        effective_cwnd = 1;
-    }
-    const std::uint32_t quota_pkts =
-        (effective_cwnd > m_packets_in_flight)
-            ? (effective_cwnd - m_packets_in_flight)
-            : 0;
-
-    // Quota in bytes, multiple of the packet size
-    return quota_pkts * m_packet_size;
-}
-
-void TcpSender::send_data(SizeByte data) {
-    TimeNs now = Scheduler::get_instance().get_current_time();
-
-    if (!m_first_send_time) {
-        m_first_send_time = now;
-    }
-
-    SizeByte quota = get_sending_quota();
-    if (data > quota) {
-        throw std::runtime_error(fmt::format(
-            "Trying to send {} bytes on flow {} with quota {} bytes",
-            data.value(), m_common->id, quota.value()));
-    }
-
-    while (data != SizeByte(0)) {
-        Packet packet = generate_data_packet(m_next_packet_num++);
-        TimeNs pacing_delay = m_cc->get_pacing_delay();
-        if (pacing_delay == TimeNs(0)) {
-            send_packet_now(std::move(packet));
-        } else {
-            Scheduler::get_instance().add<SendAtTime>(now + pacing_delay,
-                                                      this->shared_from_this(),
-                                                      std::move(packet));
-        }
-        data -= std::min(data, m_packet_size);
-        m_packets_in_flight++;
-    }
-}
-
-void TcpSender::update(Packet packet) {
-    TimeNs current_time = Scheduler::get_instance().get_current_time();
-    if (current_time < packet.sent_time) {
-        LOG_ERROR("Packet " + packet.to_string() +
-                  " current time less that sending time; ignored");
-        return;
-    }
-
-    m_last_ack_arrive_time = current_time;
-
-    if (m_acked.contains(packet.packet_num)) {
-        LOG_WARN(fmt::format("Got duplicate ack number {}; ignored",
-                             packet.packet_num));
-        return;
-    }
-
-    TimeNs rtt = current_time - packet.sent_time;
-    m_rtt_statistics.add_record(rtt);
-    update_rto_on_ack();  // update and transition to STEADY
-
-    MetricsCollector::get_instance().add_RTT(m_common->id, current_time, rtt);
-    m_acked.insert(packet.packet_num);
-
-    if (m_packets_in_flight > 0) {
-        m_packets_in_flight--;
-    }
-
-    m_cc->on_ack(rtt, m_rtt_statistics.get_mean().value(),
-                 packet.congestion_experienced);
-
-    m_delivered_data_size += m_packet_size;
-
-    SpeedGbps delivery_rate =
-        (m_delivered_data_size - packet.delivered_data_size_at_origin) /
-        (current_time - packet.generated_time);
-    MetricsCollector::get_instance().add_delivery_rate(
-        m_common->id, current_time, delivery_rate);
-
-    MetricsCollector::get_instance().add_cwnd(m_common->id, current_time,
-                                              m_cc->get_cwnd());
 }
 
 }  // namespace sim
