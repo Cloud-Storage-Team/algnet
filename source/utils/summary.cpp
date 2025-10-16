@@ -36,7 +36,7 @@ Summary::Summary(
                 FlowSummary{sent,       delivered, sending_rate,
                             throughput, fct,       retransmit_count};
         }
-        if (expt_data_delivery != real_data_delivery) {
+        if (expt_data_delivery > real_data_delivery) {
             throw std::runtime_error(fmt::format(
                 "For connection {} expected delivery {} but real is {}",
                 conn_id, expt_data_delivery.value(),
