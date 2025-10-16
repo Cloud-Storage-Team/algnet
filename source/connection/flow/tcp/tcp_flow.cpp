@@ -77,7 +77,7 @@ Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
                                     TcpCommon::PacketType::DATA);
     set_avg_rtt_if_present(packet);
     packet.size = m_sender.m_packet_size;
-    packet.flow = this;
+    packet.flow_id = m_common->id;
     packet.source_id = get_sender()->get_id();
     packet.dest_id = get_receiver()->get_id();
     packet.packet_num = packet_num;
@@ -123,7 +123,7 @@ Packet TcpFlow::create_ack(Packet data) {
     ack.source_id = m_receiver.m_receiver.lock()->get_id();
     ack.dest_id = m_sender.m_sender.lock()->get_id();
     ack.size = SizeByte(1);
-    ack.flow = this;
+    ack.flow_id = m_common->id;
     ack.generated_time = data.generated_time;
     ack.sent_time = data.sent_time;
     ack.delivered_data_size_at_origin = data.delivered_data_size_at_origin;
@@ -217,8 +217,8 @@ void TcpFlow::update(Packet packet) {
         m_sender.m_rtt_statistics.add_record(rtt);
         update_rto_on_ack();  // update and transition to STEADY
 
-        MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
-                                                 current_time, rtt);
+        MetricsCollector::get_instance().add_RTT(m_common->id, current_time,
+                                                 rtt);
         m_sender.m_acked.insert(packet.packet_num);
 
         if (m_sender.m_packets_in_flight > 0) {
@@ -234,7 +234,7 @@ void TcpFlow::update(Packet packet) {
                                    packet.delivered_data_size_at_origin) /
                                   (current_time - packet.generated_time);
         MetricsCollector::get_instance().add_delivery_rate(
-            packet.flow->get_id(), current_time, delivery_rate);
+            m_common->id, current_time, delivery_rate);
 
         MetricsCollector::get_instance().add_cwnd(m_common->id, current_time,
                                                   m_sender.m_cc->get_cwnd());

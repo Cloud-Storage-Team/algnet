@@ -32,10 +32,6 @@ TimeNs Switch::process() {
         return total_processing_time;
     }
     Packet packet = optional_packet.value();
-    if (packet.flow == nullptr) {
-        LOG_WARN("No flow in packet");
-        return total_processing_time;
-    }
 
     std::shared_ptr<ILink> next_link = get_link_to_destination(packet);
 

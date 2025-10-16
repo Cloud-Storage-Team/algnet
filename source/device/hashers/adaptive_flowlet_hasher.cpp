@@ -11,17 +11,18 @@ AdaptiveFlowletHasher::AdaptiveFlowletHasher(double a_factor)
 std::uint32_t AdaptiveFlowletHasher::get_hash(const Packet& packet) {
     std::uint32_t ecmp_hash = m_ecmp_hasher.get_hash(packet);
 
-    IFlow* flow = packet.flow;
+    Id flow_id = packet.flow_id;
+
+    std::shared_ptr<IFlow> flow =
+        IdentifierFactory::get_instance().get_object<IFlow>(flow_id);
 
     if (!flow) {
-        LOG_ERROR(
-            fmt::format("Try to use AdaptiveFlowletHasher on packet {}; "
-                        "flow does not set!",
-                        packet.to_string()));
+        LOG_ERROR(fmt::format(
+            "Try to use AdaptiveFlowletHasher on packet {}; "
+            "flow with id {} can not be found in EdentifierFactory!",
+            packet.to_string(), flow_id));
         return ecmp_hash;
     }
-
-    Id flow_id = flow->get_id();
 
     TimeNs curr_time = Scheduler::get_instance().get_current_time();
     auto it = m_flow_table.find(flow_id);

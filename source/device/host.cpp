@@ -37,7 +37,9 @@ TimeNs Host::process() {
     }
 
     Packet packet = opt_packet.value();
-    if (packet.flow == nullptr) {
+    std::shared_ptr<IFlow> flow =
+        IdentifierFactory::get_instance().get_object<IFlow>(packet.flow_id);
+    if (flow == nullptr) {
         LOG_ERROR("Packet flow does not exist");
         return total_processing_time;
     }
@@ -47,7 +49,7 @@ TimeNs Host::process() {
              packet.to_string());
 
     if (packet.dest_id == get_id()) {
-        packet.flow->update(packet);
+        flow->update(packet);
     } else {
         LOG_WARN(
             "Packet arrived to Host that is not its destination; use routing "

@@ -1,11 +1,9 @@
 #include "ecmp_hasher.hpp"
 
-#include "get_flow_id.hpp"
-
 namespace sim {
 
 std::uint32_t ECMPHasher::get_hash(const Packet& packet) {
-    std::string flow_id = get_flow_id(packet.flow);
+    std::string flow_id = packet.flow_id;
 
     std::hash<std::string> hasher;
     std::string header_str =
