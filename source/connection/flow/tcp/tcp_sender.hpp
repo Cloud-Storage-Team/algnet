@@ -1,4 +1,5 @@
 #pragma once
+#include "event/event.hpp"
 #include "i_tcp_cc.hpp"
 #include "metrics/packet_reordering/simple_packet_reordering.hpp"
 #include "tcp_common.hpp"
@@ -14,9 +15,27 @@ public:
                                std::unique_ptr<ITcpCC> a_cc,
                                SizeByte a_packet_size);
 
+    class SendAtTime : public Event {
+    public:
+        SendAtTime(TimeNs a_time, std::weak_ptr<TcpSender> a_sender,
+                   Packet a_packet);
+
+        void operator()() final;
+
+    private:
+        std::weak_ptr<TcpSender> m_sender;
+        Packet m_packet;
+    };
+    class Timeout;
+
+    void update_rto_on_ack();
+    void send_packet_now(Packet packet);
+    void retransmit_packet(PacketNum packet_num);
+
 private:
     TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
               SizeByte a_packet_size);
+
     // TODO: make it private
 public:
     void set_avg_rtt_if_present(Packet& packet);

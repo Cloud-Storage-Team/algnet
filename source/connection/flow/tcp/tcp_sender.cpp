@@ -1,5 +1,6 @@
 #include "tcp_sender.hpp"
 
+#include "metrics/metrics_collector.hpp"
 #include "scheduler.hpp"
 #include "utils/avg_rtt_packet_flag.hpp"
 
@@ -79,6 +80,80 @@ void TcpSender::update_rto_on_timeout() {
         m_current_rto = std::min(m_current_rto * 2, m_max_rto);
     }
     // in STEADY, don't touch RTO by timeout
+}
+
+TcpSender::SendAtTime::SendAtTime(TimeNs a_time,
+                                  std::weak_ptr<TcpSender> a_sender,
+                                  Packet a_packet)
+    : Event(a_time), m_sender(a_sender), m_packet(std::move(a_packet)) {}
+
+void TcpSender::SendAtTime::operator()() {
+    if (m_sender.expired()) {
+        LOG_ERROR("Pointer to flow expired");
+        return;
+    }
+    auto sender = m_sender.lock();
+    sender->send_packet_now(std::move(m_packet));
+}
+
+class TcpSender::Timeout : public Event {
+public:
+    Timeout(TimeNs a_time, std::weak_ptr<TcpSender> a_flow,
+            PacketNum a_packet_num)
+        : Event(a_time), m_sender(a_flow), m_packet_num(a_packet_num) {}
+
+    void operator()() {
+        if (m_sender.expired()) {
+            LOG_ERROR("Pointer to flow expired");
+            return;
+        }
+        auto sender = m_sender.lock();
+
+        if (sender->m_acked.contains(m_packet_num)) {
+            return;
+        }
+        LOG_WARN(
+            fmt::format("Timeout for packet number {} expired; looks "
+                        "like packet loss",
+                        m_packet_num));
+        sender->update_rto_on_timeout();
+        sender->m_cc->on_timeout();
+        sender->retransmit_packet(m_packet_num);
+    }
+
+private:
+    std::weak_ptr<TcpSender> m_sender;
+    PacketNum m_packet_num;
+};
+
+// After ACK with a valid RTT: formula + transition to STEADY (once)
+void TcpSender::update_rto_on_ack() {
+    auto mean = m_rtt_statistics.get_mean().value();
+    TimeNs std = m_rtt_statistics.get_std().value();
+    m_current_rto = std::min(mean * 2 + std * 4, m_max_rto);
+    m_rto_steady = true;
+}
+
+void TcpSender::send_packet_now(Packet packet) {
+    TimeNs current_time = Scheduler::get_instance().get_current_time();
+
+    if (m_last_send_time.has_value()) {
+        MetricsCollector::get_instance().add_packet_spacing(
+            m_common->id, current_time,
+            current_time - m_last_send_time.value());
+    }
+    m_last_send_time = current_time;
+    Scheduler::get_instance().add<Timeout>(current_time + m_current_rto,
+                                           this->shared_from_this(),
+                                           packet.packet_num);
+
+    packet.sent_time = current_time;
+    m_common->sender.lock()->enqueue_packet(std::move(packet));
+}
+
+void TcpSender::retransmit_packet(PacketNum packet_num) {
+    Packet packet = generate_data_packet(packet_num);
+    send_packet_now(std::move(packet));
 }
 
 }  // namespace sim
