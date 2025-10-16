@@ -8,7 +8,8 @@
 namespace sim {
 struct TcpCommon {
     TcpCommon(Id a_id, std::shared_ptr<IConnection> a_connection,
-              bool a_ecn_capable);
+              std::shared_ptr<IHost> a_sender,
+              std::shared_ptr<IHost> a_receiver, bool a_ecn_capable);
 
     static void initialize_flag_manager();
 
@@ -23,6 +24,8 @@ struct TcpCommon {
     const static inline TTL MAX_TTL = 31;
 
     Id id;
+    std::weak_ptr<IHost> sender;
+    std::weak_ptr<IHost> receiver;
     std::weak_ptr<IConnection> connection;
     bool ecn_capable;
 };

@@ -11,10 +11,11 @@ namespace sim {
 TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
                  std::unique_ptr<ITcpCC> a_cc, SizeByte a_packet_size,
                  bool a_ecn_capable)
-    : m_common(
-          std::make_shared<TcpCommon>(std::move(a_id), a_conn, a_ecn_capable)),
-      m_sender(m_common, a_conn->get_sender(), std::move(a_cc), a_packet_size),
-      m_receiver(m_common, a_conn->get_receiver()) {}
+    : m_common(std::make_shared<TcpCommon>(
+          std::move(a_id), a_conn, a_conn->get_sender(), a_conn->get_receiver(),
+          a_ecn_capable)),
+      m_sender(m_common, std::move(a_cc), a_packet_size),
+      m_receiver(m_common) {}
 
 SizeByte TcpFlow::get_delivered_data_size() const {
     return m_sender.m_delivered_data_size;
@@ -33,11 +34,11 @@ const BaseFlagManager& TcpFlow::get_flag_manager() const {
 }
 
 std::shared_ptr<IHost> TcpFlow::get_sender() const {
-    return m_sender.m_sender.lock();
+    return m_common->sender.lock();
 }
 
 std::shared_ptr<IHost> TcpFlow::get_receiver() const {
-    return m_receiver.m_receiver.lock();
+    return m_common->receiver.lock();
 }
 
 Id TcpFlow::get_id() const { return m_common->id; }
@@ -120,8 +121,8 @@ void TcpFlow::send_data(SizeByte data) {
 Packet TcpFlow::create_ack(Packet data) {
     Packet ack;
     ack.packet_num = data.packet_num;
-    ack.source_id = m_receiver.m_receiver.lock()->get_id();
-    ack.dest_id = m_sender.m_sender.lock()->get_id();
+    ack.source_id = m_common->receiver.lock()->get_id();
+    ack.dest_id = m_common->sender.lock()->get_id();
     ack.size = SizeByte(1);
     ack.flow_id = m_common->id;
     ack.generated_time = data.generated_time;
@@ -197,7 +198,7 @@ void TcpFlow::update(Packet packet) {
         static_cast<TcpCommon::PacketType>(m_common->flag_manager.get_flag(
             packet.flags, TcpCommon::packet_type_label));
     TimeNs current_time = Scheduler::get_instance().get_current_time();
-    if (packet.dest_id == m_sender.m_sender.lock()->get_id() &&
+    if (packet.dest_id == m_common->sender.lock()->get_id() &&
         type == TcpCommon::PacketType::ACK) {
         if (current_time < packet.sent_time) {
             LOG_ERROR("Packet " + packet.to_string() +
@@ -245,7 +246,7 @@ void TcpFlow::update(Packet packet) {
         } else {
             m_common->connection.lock()->update(shared_from_this());
         }
-    } else if (packet.dest_id == m_receiver.m_receiver.lock()->get_id() &&
+    } else if (packet.dest_id == m_common->receiver.lock()->get_id() &&
                type == TcpCommon::PacketType::DATA) {
         m_sender.m_packet_reordering.add_record(packet.packet_num);
         MetricsCollector::get_instance().add_packet_reordering(
@@ -253,7 +254,7 @@ void TcpFlow::update(Packet packet) {
 
         Packet ack = create_ack(std::move(packet));
 
-        m_receiver.m_receiver.lock()->enqueue_packet(ack);
+        m_common->receiver.lock()->enqueue_packet(ack);
     }
 }
 
@@ -265,8 +266,8 @@ std::string TcpFlow::to_string() const {
     std::ostringstream oss;
     oss << "[TcpFlow; ";
     oss << "Id:" << m_common->id;
-    oss << ", src id: " << m_sender.m_sender.lock()->get_id();
-    oss << ", dest id: " << m_receiver.m_receiver.lock()->get_id();
+    oss << ", src id: " << m_common->sender.lock()->get_id();
+    oss << ", dest id: " << m_common->receiver.lock()->get_id();
     oss << ", CC module: " << m_sender.m_cc->to_string();
     oss << ", packet size: " << m_sender.m_packet_size;
     oss << ", packets in flight: " << m_sender.m_packets_in_flight;
@@ -306,7 +307,7 @@ void TcpFlow::send_packet_now(Packet packet) {
         packet.packet_num);
 
     packet.sent_time = current_time;
-    m_sender.m_sender.lock()->enqueue_packet(std::move(packet));
+    m_common->sender.lock()->enqueue_packet(std::move(packet));
 }
 
 void TcpFlow::retransmit_packet(PacketNum packet_num) {

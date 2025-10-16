@@ -23,11 +23,20 @@ void TcpCommon::initialize_flag_manager() {
 }
 
 TcpCommon::TcpCommon(Id a_id, std::shared_ptr<IConnection> a_connection,
-                     bool a_ecn_capable)
+                     std::shared_ptr<IHost> a_sender,
+                     std::shared_ptr<IHost> a_receiver, bool a_ecn_capable)
     : id(std::move(a_id)),
+      sender(a_sender),
+      receiver(a_receiver),
       connection(a_connection),
       ecn_capable(a_ecn_capable) {
     initialize_flag_manager();
+    if (sender.lock() == nullptr) {
+        throw std::invalid_argument("Sender for TcpFlow is nullptr");
+    }
+    if (receiver.lock() == nullptr) {
+        throw std::invalid_argument("Receiver for TcpFlow is nullptr");
+    }
 }
 
 }  // namespace sim

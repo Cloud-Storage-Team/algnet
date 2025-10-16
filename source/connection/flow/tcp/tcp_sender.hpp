@@ -6,12 +6,11 @@
 namespace sim {
 class TcpSender {
 public:
-    TcpSender(TcpCommonPtr a_common, std::shared_ptr<IHost> a_sender,
-              std::unique_ptr<ITcpCC> a_cc, SizeByte a_packet_size);
+    TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
+              SizeByte a_packet_size);
 
 public:
     TcpCommonPtr m_common;
-    std::weak_ptr<IHost> m_sender;
 
     // Congestion control module
     std::unique_ptr<ITcpCC> m_cc;
