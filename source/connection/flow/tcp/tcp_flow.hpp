@@ -40,7 +40,6 @@ private:
     class Timeout;
 
     Packet create_ack(Packet data);
-    Packet generate_packet();
     void update_rto_on_timeout();
     void update_rto_on_ack();
     void send_packet_now(Packet packet);

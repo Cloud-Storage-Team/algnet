@@ -127,10 +127,6 @@ Packet TcpFlow::create_ack(Packet data) {
     return ack;
 }
 
-Packet TcpFlow::generate_packet() {
-    return m_sender.generate_data_packet(m_sender.m_next_packet_num++);
-}
-
 class TcpFlow::SendAtTime : public Event {
 public:
     SendAtTime(TimeNs a_time, std::weak_ptr<TcpFlow> a_flow, Packet a_packet)
