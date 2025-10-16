@@ -1,5 +1,7 @@
 #include "tcp_sender.hpp"
 
+#include "utils/avg_rtt_packet_flag.hpp"
+
 namespace sim {
 TcpSender::TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
                      SizeByte a_packet_size)
@@ -15,4 +17,12 @@ TcpSender::TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
       m_packets_in_flight(0),
       m_delivered_data_size(0),
       m_next_packet_num(0) {}
+
+void TcpSender::set_avg_rtt_if_present(Packet& packet) {
+    std::optional<TimeNs> avg_rtt = m_rtt_statistics.get_mean();
+    if (avg_rtt.has_value()) {
+        set_avg_rtt_flag(m_common->flag_manager, packet.flags, avg_rtt.value());
+    }
+}
+
 }  // namespace sim

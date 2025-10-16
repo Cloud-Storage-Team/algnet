@@ -65,18 +65,11 @@ SizeByte TcpFlow::get_sending_quota() const {
     return quota_pkts * m_sender.m_packet_size;
 }
 
-void TcpFlow::set_avg_rtt_if_present(Packet& packet) {
-    std::optional<TimeNs> avg_rtt = m_sender.m_rtt_statistics.get_mean();
-    if (avg_rtt.has_value()) {
-        set_avg_rtt_flag(m_common->flag_manager, packet.flags, avg_rtt.value());
-    }
-}
-
 Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     Packet packet;
     m_common->flag_manager.set_flag(packet.flags, TcpCommon::packet_type_label,
                                     TcpCommon::PacketType::DATA);
-    set_avg_rtt_if_present(packet);
+    m_sender.set_avg_rtt_if_present(packet);
     packet.size = m_sender.m_packet_size;
     packet.flow_id = m_common->id;
     packet.source_id = get_sender()->get_id();
@@ -136,7 +129,17 @@ Packet TcpFlow::create_ack(Packet data) {
                                     TcpCommon::PacketType::ACK);
     m_common->flag_manager.set_flag(ack.flags, TcpCommon::ack_ttl_label,
                                     data.ttl);
-    set_avg_rtt_if_present(ack);
+
+    try {
+        TimeNs rtt = get_avg_rtt_label(m_common->flag_manager, data.flags);
+        set_avg_rtt_flag(m_common->flag_manager, ack.flags, rtt);
+    } catch (const FlagNotSetException& e) {
+        LOG_INFO(
+            fmt::format("avg rtt flag does not set in data packet {} so it "
+                        "will not be set in "
+                        "ack {}",
+                        data.to_string(), ack.to_string()));
+    }
     return ack;
 }
 
