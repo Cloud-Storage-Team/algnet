@@ -19,9 +19,9 @@ std::shared_ptr<sim::TcpFlow> add_connection_with_single_flow(
     auto connection = std::make_shared<sim::ConnectionImpl>(
         conn_id, sender, receiver, std::make_shared<sim::RoundRobinMPLB>());
 
-    auto flow = std::make_shared<sim::TcpFlow>(conn_id + "_flow1", connection,
-                                               std::make_unique<sim::BasicCC>(),
-                                               packet_size);
+    auto flow =
+        sim::TcpFlow::create(conn_id + "_flow1", connection,
+                             std::make_unique<sim::BasicCC>(), packet_size);
 
     connection->add_flow(flow);
 

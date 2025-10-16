@@ -18,7 +18,7 @@ std::shared_ptr<TcpFlow> TcpFlowParser::parse_tcp_flow(const ConfigNode& node,
     std::shared_ptr<IConnection> conn =
         IdentifierFactory::get_instance().get_object<IConnection>(conn_id);
 
-    return std::make_shared<TcpFlow>(flow_id, conn, std::move(cc), packet_size);
+    return TcpFlow::create(flow_id, conn, std::move(cc), packet_size);
 }
 
 }  // namespace sim

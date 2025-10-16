@@ -12,11 +12,22 @@
 
 namespace sim {
 
+class TcpFlow;
+
+using TcpFlowPtr = std::shared_ptr<TcpFlow>;
+
 class TcpFlow : public IFlow, public std::enable_shared_from_this<TcpFlow> {
 public:
+    static TcpFlowPtr create(Id a_id, std::shared_ptr<IConnection> a_conn,
+                             std::unique_ptr<ITcpCC> a_cc,
+                             SizeByte a_packet_size, bool a_ecn_capable = true);
+
+private:
     TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
             std::unique_ptr<ITcpCC> a_cc, SizeByte a_packet_size,
             bool a_ecn_capable = true);
+
+public:
     void update(Packet packet) final;
     void send_data(SizeByte data) final;
 

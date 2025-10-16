@@ -8,6 +8,14 @@
 
 namespace sim {
 
+TcpFlowPtr TcpFlow::create(Id a_id, std::shared_ptr<IConnection> a_conn,
+                           std::unique_ptr<ITcpCC> a_cc, SizeByte a_packet_size,
+                           bool a_ecn_capable) {
+    return std::shared_ptr<TcpFlow>(new TcpFlow(std::move(a_id), a_conn,
+                                                std::move(a_cc), a_packet_size,
+                                                a_ecn_capable));
+}
+
 TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
                  std::unique_ptr<ITcpCC> a_cc, SizeByte a_packet_size,
                  bool a_ecn_capable)
