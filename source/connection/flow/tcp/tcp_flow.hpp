@@ -26,7 +26,7 @@ public:
     const BaseFlagManager& get_flag_manager() const final;
     // Returns time elapced from flow start (firsrt call of send_packet)
     // to last update call
-    TimeNs get_fct() const final;
+    std::optional<TimeNs> get_fct() const final;
 
     std::shared_ptr<IHost> get_sender() const final;
     std::shared_ptr<IHost> get_receiver() const final;

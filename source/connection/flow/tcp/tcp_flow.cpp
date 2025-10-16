@@ -21,9 +21,9 @@ SizeByte TcpFlow::get_delivered_data_size() const {
     return m_sender->m_delivered_data_size;
 }
 
-TimeNs TcpFlow::get_fct() const {
+std::optional<TimeNs> TcpFlow::get_fct() const {
     if (!m_sender->m_first_send_time) {
-        return TimeNs(0);
+        return std::nullopt;
     }
     return m_sender->m_last_send_time.value() -
            m_sender->m_first_send_time.value();

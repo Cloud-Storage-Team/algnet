@@ -13,8 +13,13 @@ Summary::Summary(
         Id conn_id = conn->get_id();
         auto flows = conn->get_flows();
         for (const auto& flow : flows) {
+            std::optional<TimeNs> fct = flow->get_fct();
+            if (!fct) {
+                throw std::runtime_error(
+                    fmt::format("Flow {} does not have fct", flow->get_id()));
+            }
             SpeedGbps throughput =
-                flow->get_delivered_data_size() / flow->get_fct();
+                flow->get_delivered_data_size() / fct.value();
             m_values[conn_id].insert(
                 std::make_pair(flow->get_id(), throughput));
         }

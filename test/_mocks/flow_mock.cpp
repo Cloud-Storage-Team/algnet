@@ -20,7 +20,7 @@ void FlowMock::send_data(SizeByte data) {
     m_sending_quota -= data;
 }
 SizeByte FlowMock::get_delivered_data_size() const { return SizeByte(0); }
-TimeNs FlowMock::get_fct() const { return TimeNs(0); }
+std::optional<TimeNs> FlowMock::get_fct() const { return std::nullopt; }
 
 const sim::BaseFlagManager& FlowMock::get_flag_manager() const {
     return m_flag_manager;
