@@ -22,6 +22,7 @@ public:
     SizeByte get_delivered_bytes() const;
     SizeByte get_sending_quota() const;
     std::optional<TimeNs> get_fct() const;
+    std::optional<TimeNs> get_last_rtt() const;
 
 private:
     TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,

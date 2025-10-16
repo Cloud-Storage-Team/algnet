@@ -108,7 +108,7 @@ void TcpFlow::update(Packet packet) {
 }
 
 std::optional<TimeNs> TcpFlow::get_last_rtt() const {
-    return m_sender->m_rtt_statistics.get_last();
+    return m_sender->get_last_rtt();
 }
 
 std::string TcpFlow::to_string() const {

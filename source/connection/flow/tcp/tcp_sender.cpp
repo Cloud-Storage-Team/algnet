@@ -128,6 +128,10 @@ std::optional<TimeNs> TcpSender::get_fct() const {
     return m_last_send_time.value() - m_first_send_time.value();
 }
 
+std::optional<TimeNs> TcpSender::get_last_rtt() const {
+    return m_rtt_statistics.get_last();
+}
+
 void TcpSender::set_avg_rtt_if_present(Packet& packet) {
     std::optional<TimeNs> avg_rtt = m_rtt_statistics.get_mean();
     if (avg_rtt.has_value()) {
