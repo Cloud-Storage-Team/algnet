@@ -19,12 +19,6 @@ Packet::Packet(SizeByte a_size, Id a_flow_id, Id a_source_id, Id a_dest_id,
       ecn_capable_transport(a_ecn_capable_transport),
       congestion_experienced(a_congestion_experienced) {}
 
-bool Packet::operator==(const Packet& packet) const {
-    return flow_id == packet.flow_id && source_id == packet.source_id &&
-           dest_id == packet.dest_id && size == packet.size &&
-           flags == packet.flags;
-}
-
 // TODO: think about some ID for packet (currently its impossible to distinguish
 // packets)
 std::string Packet::to_string() const {

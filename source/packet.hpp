@@ -15,7 +15,8 @@ struct Packet {
            bool a_ecn_capable_transport = true,
            bool a_congestion_experienced = false);
 
-    bool operator==(const Packet& packet) const;
+    auto operator<=>(const Packet& packet) const = default;
+
     std::string to_string() const;
 
     PacketNum packet_num = 0;

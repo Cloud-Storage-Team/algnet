@@ -103,9 +103,7 @@ public:
         return oss.str();
     };
 
-    friend bool operator==(const BitSet& fst, const BitSet& snd) {
-        return fst.m_data == snd.m_data;
-    };
+    auto operator<=>(const BitSet& fst) const = default;
 
     void reset() { m_data = 0; };
 

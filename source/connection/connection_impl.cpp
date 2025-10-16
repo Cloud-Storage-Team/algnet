@@ -18,11 +18,20 @@ ConnectionImpl::ConnectionImpl(Id a_id, std::shared_ptr<IHost> a_src,
 Id ConnectionImpl::get_id() const { return m_id; }
 
 void ConnectionImpl::add_flow(std::shared_ptr<IFlow> flow) {
+    if (!IdentifierFactory::get_instance().add_object(flow)) {
+        throw std::runtime_error(fmt::format(
+            "Can not registrate flow; object with such id ({}) already exists",
+            flow->get_id()));
+    }
     m_flows.insert(flow);
     m_mplb->add_flow(flow);
 }
 
 void ConnectionImpl::delete_flow(std::shared_ptr<IFlow> flow) {
+    if (!IdentifierFactory::get_instance().delete_object(flow)) {
+        LOG_ERROR(fmt::format("Can not delete flow with id {}; already deleted",
+                              flow->get_id()));
+    }
     m_flows.erase(flow);
     m_mplb->remove_flow(flow);
 }
@@ -49,6 +58,13 @@ std::set<std::shared_ptr<IFlow>> ConnectionImpl::get_flows() const {
 }
 
 void ConnectionImpl::clear_flows() {
+    for (const auto& flow : m_flows) {
+        if (!IdentifierFactory::get_instance().delete_object(flow)) {
+            LOG_ERROR(
+                fmt::format("Can not delete flow with id {}; already deleted",
+                            flow->get_id()));
+        }
+    }
     m_flows.clear();
     m_mplb->clear_flows();
 }

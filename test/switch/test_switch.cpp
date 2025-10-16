@@ -80,7 +80,7 @@ TEST_F(TestSwitch, test_no_destination_route) {
     auto switch_device = std::make_shared<sim::Switch>("");
     auto receiver = std::make_shared<HostMock>();
     FlowMock flow(receiver);
-    sim::Packet packet(SizeByte(0), &flow);
+    sim::Packet packet(SizeByte(0), flow.get_id());
 
     std::shared_ptr<sim::IDevice> null_device(nullptr);
     std::shared_ptr<LinkMock> switch_inlink =
@@ -99,10 +99,6 @@ TEST_F(TestSwitch, test_no_destination_route) {
               std::vector<sim::Packet>());
 }
 
-static bool compare_packets(const sim::Packet& p1, const sim::Packet& p2) {
-    return p1.flow < p2.flow;
-}
-
 void test_senders(size_t senders_count) {
     // create devices
     auto switch_device = std::make_shared<sim::Switch>("");
@@ -117,7 +113,7 @@ void test_senders(size_t senders_count) {
     // create packets
     std::vector<sim::Packet> packets(senders_count);
     for (size_t i = 0; i < senders_count; i++) {
-        packets[i] = sim::Packet(SizeByte(i), &flows[i], "",
+        packets[i] = sim::Packet(SizeByte(i), flows[i].get_id(), "",
                                  flows[i].get_receiver()->get_id());
         packets[i].ttl = 2;
     }
@@ -151,12 +147,23 @@ void test_senders(size_t senders_count) {
     std::vector<sim::Packet> arrived_packets =
         switch_reciever_link->get_arrived_packets();
 
-    for (auto packet : packets) {
-        packet.ttl -= 2;
+    for (auto& packet : packets) {
+        packet.ttl -= 1;
     }
 
-    std::sort(packets.begin(), packets.end(), compare_packets);
-    std::sort(arrived_packets.begin(), arrived_packets.end(), compare_packets);
+    std::sort(packets.begin(), packets.end());
+
+    std::cout << "packets:" << std::endl;
+    for (const auto& el : packets) {
+        std::cout << el.to_string() << std::endl;
+    }
+
+    std::sort(arrived_packets.begin(), arrived_packets.end());
+
+    std::cout << "arrived packets:" << std::endl;
+    for (const auto& el : arrived_packets) {
+        std::cout << el.to_string() << std::endl;
+    }
     ASSERT_EQ(arrived_packets, packets);
 }
 
