@@ -17,6 +17,7 @@ public:
 
     SizeByte get_sending_quota() const;
     void send_data(SizeByte data);
+    void update(Packet packet);
 
     void update_rto_on_ack();
     void send_packet_now(Packet packet);

@@ -92,46 +92,8 @@ void TcpFlow::update(Packet packet) {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
     if (packet.dest_id == m_common->sender.lock()->get_id() &&
         type == TcpCommon::PacketType::ACK) {
-        if (current_time < packet.sent_time) {
-            LOG_ERROR("Packet " + packet.to_string() +
-                      " current time less that sending time; ignored");
-            return;
-        }
+        m_sender->update(std::move(packet));
 
-        m_sender->m_last_ack_arrive_time = current_time;
-
-        if (m_sender->m_acked.contains(packet.packet_num)) {
-            LOG_WARN(fmt::format("Got duplicate ack number {}; ignored",
-                                 packet.packet_num));
-            return;
-        }
-
-        TimeNs rtt = current_time - packet.sent_time;
-        m_sender->m_rtt_statistics.add_record(rtt);
-        m_sender->update_rto_on_ack();  // update and transition to STEADY
-
-        MetricsCollector::get_instance().add_RTT(m_common->id, current_time,
-                                                 rtt);
-        m_sender->m_acked.insert(packet.packet_num);
-
-        if (m_sender->m_packets_in_flight > 0) {
-            m_sender->m_packets_in_flight--;
-        }
-
-        m_sender->m_cc->on_ack(rtt,
-                               m_sender->m_rtt_statistics.get_mean().value(),
-                               packet.congestion_experienced);
-
-        m_sender->m_delivered_data_size += m_sender->m_packet_size;
-
-        SpeedGbps delivery_rate = (m_sender->m_delivered_data_size -
-                                   packet.delivered_data_size_at_origin) /
-                                  (current_time - packet.generated_time);
-        MetricsCollector::get_instance().add_delivery_rate(
-            m_common->id, current_time, delivery_rate);
-
-        MetricsCollector::get_instance().add_cwnd(m_common->id, current_time,
-                                                  m_sender->m_cc->get_cwnd());
         if (m_common->connection.expired()) {
             LOG_ERROR(fmt::format(
                 "Can not update coinnection from flow '{}': connection expired",
