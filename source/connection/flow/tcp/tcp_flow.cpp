@@ -18,7 +18,7 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
       m_receiver(m_common) {}
 
 SizeByte TcpFlow::get_delivered_data_size() const {
-    return m_sender->m_delivered_data_size;
+    return m_sender->get_delivered_data_size();
 }
 
 std::optional<TimeNs> TcpFlow::get_fct() const { return m_sender->get_fct(); }
@@ -38,7 +38,7 @@ std::shared_ptr<IHost> TcpFlow::get_receiver() const {
 Id TcpFlow::get_id() const { return m_common->id; }
 
 SizeByte TcpFlow::get_delivered_bytes() const {
-    return m_sender->get_delivered_bytes();
+    return m_sender->get_delivered_data_size();
 }
 
 SizeByte TcpFlow::get_sending_quota() const {
@@ -113,15 +113,10 @@ std::optional<TimeNs> TcpFlow::get_last_rtt() const {
 
 std::string TcpFlow::to_string() const {
     std::ostringstream oss;
-    oss << "[TcpFlow; ";
     oss << "Id:" << m_common->id;
     oss << ", src id: " << m_common->sender.lock()->get_id();
     oss << ", dest id: " << m_common->receiver.lock()->get_id();
-    oss << ", CC module: " << m_sender->m_cc->to_string();
-    oss << ", packet size: " << m_sender->m_packet_size;
-    oss << ", packets in flight: " << m_sender->m_packets_in_flight;
-    oss << ", acked packets: " << m_sender->m_delivered_data_size;
-    oss << "]";
+    oss << "sender: [" << m_sender->to_string() << ']';
     return oss.str();
 }
 

@@ -20,7 +20,7 @@ TcpSender::TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
       m_packet_size(a_packet_size),
       m_first_send_time(std::nullopt),
       m_last_send_time(std::nullopt),
-      m_last_ack_arrive_time(0),
+      m_last_ack_arrive_time(std::nullopt),
       m_current_rto(2000),
       m_max_rto(Time<Second>(1)),
       m_rto_steady(false),
@@ -99,7 +99,7 @@ void TcpSender::send_data(SizeByte data) {
     }
 }
 
-SizeByte TcpSender::get_delivered_bytes() const {
+SizeByte TcpSender::get_delivered_data_size() const {
     return m_delivered_data_size;
 }
 
@@ -122,14 +122,23 @@ SizeByte TcpSender::get_sending_quota() const {
 }
 
 std::optional<TimeNs> TcpSender::get_fct() const {
-    if (!m_first_send_time) {
+    if (!m_first_send_time || !m_last_ack_arrive_time) {
         return std::nullopt;
     }
-    return m_last_send_time.value() - m_first_send_time.value();
+    return m_last_ack_arrive_time.value() - m_first_send_time.value();
 }
 
 std::optional<TimeNs> TcpSender::get_last_rtt() const {
     return m_rtt_statistics.get_last();
+}
+
+std::string TcpSender::to_string() const {
+    std::stringstream oss;
+    oss << ", CC module: " << m_cc->to_string();
+    oss << ", packet size: " << m_packet_size;
+    oss << ", packets in flight: " << m_packets_in_flight;
+    oss << ", acked packets: " << m_delivered_data_size;
+    return oss.str();
 }
 
 void TcpSender::set_avg_rtt_if_present(Packet& packet) {
