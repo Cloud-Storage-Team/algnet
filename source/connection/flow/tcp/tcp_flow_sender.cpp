@@ -29,7 +29,7 @@ TcpFlowSender::TcpFlowSender(TcpCommonPtr a_common,
       m_delivered_data_size(0),
       m_next_packet_num(0) {}
 
-void TcpFlowSender::on_ack(Packet ack) {
+void TcpFlowSender::process_ack_packet(Packet ack) {
     if (m_common->flag_manager.get_flag(ack.flags,
                                         m_common->packet_type_label) !=
         TcpFlowCommon::PacketType::ACK) {

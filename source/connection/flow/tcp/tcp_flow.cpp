@@ -76,7 +76,7 @@ void TcpFlow::update(Packet packet) {
             return;
         }
 
-        m_sender->on_ack(std::move(packet));
+        m_sender->process_ack_packet(std::move(packet));
         if (m_common->connection.expired()) {
             LOG_ERROR(fmt::format(
                 "Can not update coinnection from flow '{}': connection expired",
@@ -101,7 +101,7 @@ void TcpFlow::update(Packet packet) {
             return;
         }
 
-        m_receiver.update(std::move(packet));
+        m_receiver.process_data_packet(std::move(packet));
     } else {
         LOG_ERROR(
             fmt::format("Packet {} called update on flow {}; unexpected packet "

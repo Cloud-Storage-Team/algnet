@@ -9,7 +9,7 @@ class TcpFlowReceiver {
 public:
     explicit TcpFlowReceiver(TcpCommonPtr a_common);
 
-    void update(Packet packet);
+    void process_data_packet(Packet packet);
 
 private:
     Packet create_ack(Packet data);

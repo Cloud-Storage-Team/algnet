@@ -22,7 +22,7 @@ private:
                   SizeByte a_packet_size);
 
 public:
-    void on_ack(Packet ack);
+    void process_ack_packet(Packet ack);
     void send_data(SizeByte data);
 
     SizeByte get_delivered_data_size() const;

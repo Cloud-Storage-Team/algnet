@@ -7,7 +7,7 @@
 namespace sim {
 TcpFlowReceiver::TcpFlowReceiver(TcpCommonPtr a_common) : m_common(a_common) {}
 
-void TcpFlowReceiver::update(Packet packet) {
+void TcpFlowReceiver::process_data_packet(Packet packet) {
     if (m_common->flag_manager.get_flag(packet.flags,
                                         m_common->packet_type_label) !=
         TcpFlowCommon::PacketType::DATA) {
