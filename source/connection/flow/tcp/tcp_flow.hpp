@@ -25,7 +25,7 @@ public:
     SizeByte get_delivered_data_size() const final;
     const BaseFlagManager& get_flag_manager() const final;
     // Returns time elapced from flow start (firsrt call of send_packet)
-    // to last update call
+    // to last ack arrive
     std::optional<TimeNs> get_fct() const final;
 
     std::shared_ptr<IHost> get_sender() const final;
@@ -36,8 +36,6 @@ public:
     std::string to_string() const;
 
 private:
-    Packet create_ack(Packet data);
-
     TcpCommonPtr m_common;
     TcpSenderPtr m_sender;
     TcpReceiver m_receiver;

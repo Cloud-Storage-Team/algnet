@@ -47,38 +47,6 @@ SizeByte TcpFlow::get_sending_quota() const {
 
 void TcpFlow::send_data(SizeByte data) { return m_sender->send_data(data); }
 
-Packet TcpFlow::create_ack(Packet data) {
-    Packet ack;
-    ack.packet_num = data.packet_num;
-    ack.source_id = m_common->receiver.lock()->get_id();
-    ack.dest_id = m_common->sender.lock()->get_id();
-    ack.size = SizeByte(1);
-    ack.flow_id = m_common->id;
-    ack.generated_time = data.generated_time;
-    ack.sent_time = data.sent_time;
-    ack.delivered_data_size_at_origin = data.delivered_data_size_at_origin;
-    ack.ttl = TcpCommon::MAX_TTL;
-    ack.ecn_capable_transport = data.ecn_capable_transport;
-    ack.congestion_experienced = data.congestion_experienced;
-
-    m_common->flag_manager.set_flag(ack.flags, TcpCommon::packet_type_label,
-                                    TcpCommon::PacketType::ACK);
-    m_common->flag_manager.set_flag(ack.flags, TcpCommon::ack_ttl_label,
-                                    data.ttl);
-
-    try {
-        TimeNs rtt = get_avg_rtt_label(m_common->flag_manager, data.flags);
-        set_avg_rtt_flag(m_common->flag_manager, ack.flags, rtt);
-    } catch (const FlagNotSetException& e) {
-        LOG_INFO(
-            fmt::format("avg rtt flag does not set in data packet {} so it "
-                        "will not be set in "
-                        "ack {}",
-                        data.to_string(), ack.to_string()));
-    }
-    return ack;
-}
-
 void TcpFlow::update(Packet packet) {
     TcpCommon::PacketType type =
         static_cast<TcpCommon::PacketType>(m_common->flag_manager.get_flag(
@@ -101,7 +69,7 @@ void TcpFlow::update(Packet packet) {
         MetricsCollector::get_instance().add_packet_reordering(
             m_common->id, current_time, m_receiver.m_packet_reordering.value());
 
-        Packet ack = create_ack(std::move(packet));
+        Packet ack = m_receiver.create_ack(std::move(packet));
 
         m_common->receiver.lock()->enqueue_packet(ack);
     }

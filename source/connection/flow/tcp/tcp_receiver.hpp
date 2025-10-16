@@ -9,7 +9,11 @@ class TcpReceiver {
 public:
     explicit TcpReceiver(TcpCommonPtr a_common);
 
+    void update(Packet packet);
+
 public:
+    Packet create_ack(Packet data);
+
     TcpCommonPtr m_common;
     SimplePacketReordering m_packet_reordering;
 };
