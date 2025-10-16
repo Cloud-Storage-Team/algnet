@@ -17,6 +17,8 @@ public:
     void send_data(SizeByte data) final;
 
     virtual SizeByte get_delivered_data_size() const final;
+    virtual SizeByte get_sent_data_size() const final;
+    virtual uint32_t retransmit_count() const final;
     virtual TimeNs get_fct() const final;
     virtual std::optional<TimeNs> get_last_rtt() const;
     const sim::BaseFlagManager& get_flag_manager() const final;

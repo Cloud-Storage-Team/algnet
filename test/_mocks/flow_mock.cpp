@@ -20,6 +20,8 @@ void FlowMock::send_data(SizeByte data) {
     m_sending_quota -= data;
 }
 SizeByte FlowMock::get_delivered_data_size() const { return SizeByte(0); }
+SizeByte FlowMock::get_sent_data_size() const { return SizeByte(0); }
+uint32_t FlowMock::retransmit_count() const { return 0; }
 TimeNs FlowMock::get_fct() const { return TimeNs(0); }
 
 const sim::BaseFlagManager& FlowMock::get_flag_manager() const {
