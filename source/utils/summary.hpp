@@ -31,6 +31,7 @@ public:
         const std::unordered_set<std::shared_ptr<IConnection>>& connections);
 
     void write_to_csv(std::filesystem::path& output_path) const;
+    void check() const;
 
 private:
     std::map<Id, std::map<Id, FlowSummary>> m_values;

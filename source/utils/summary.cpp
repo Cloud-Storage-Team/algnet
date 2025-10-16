@@ -28,7 +28,7 @@ Summary::Summary(
                     "{} bytes",
                     flow->get_id(), conn_id, sent.value(), delivered.value()));
             }
-            double overhead = (sent.value()/delivered.value() - 1) * 100;
+            double overhead = (sent.value() / delivered.value() - 1) * 100;
 
             const TimeNs fct = flow->get_fct();
             SizeByte packet_size = flow->get_packet_size();
@@ -40,9 +40,9 @@ Summary::Summary(
             SizeByte retransmit_size = retransmit_count * packet_size;
 
             m_values[conn_id][flow->get_id()] =
-                FlowSummary{sent,       delivered, packet_size,
-                            overhead,   retransmit_size, retransmit_count,
-                            sending_rate, throughput, fct};
+                FlowSummary{sent,         delivered,       packet_size,
+                            overhead,     retransmit_size, retransmit_count,
+                            sending_rate, throughput,      fct};
         }
         if (expt_data_delivery > real_data_delivery) {
             m_errors.emplace_back(fmt::format(
@@ -74,9 +74,11 @@ void Summary::write_to_csv(std::filesystem::path& output_path) const {
         }
     }
     out.close();
+}
+
+void Summary::check() const {
     if (!m_errors.empty()) {
         throw std::runtime_error(fmt::format("{}", fmt::join(m_errors, "\n")));
     }
 }
-
 }  // namespace sim
