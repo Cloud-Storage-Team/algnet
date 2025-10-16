@@ -33,16 +33,30 @@ Packet TcpSender::generate_data_packet(PacketNum packet_num) {
     set_avg_rtt_if_present(packet);
     packet.size = m_packet_size;
     packet.flow_id = m_common->id;
-    std::weak_ptr<IHost> sender = m_common->sender;
-    if (!sender.expired()) {
-        packet.source_id = m_common->sender.lock()->get_id();
-    } else {
-        LOG_ERROR(
-            fmt::format("Sender expider for flow {}; sender_id does not set to "
-                        "data packet {}",
-                        m_common->id, packet.to_string()));
+    {
+        // set source id
+        std::weak_ptr<IHost> sender = m_common->sender;
+        if (!sender.expired()) {
+            packet.source_id = sender.lock()->get_id();
+        } else {
+            LOG_ERROR(fmt::format(
+                "Sender expired for flow {}; sender_id does not set to "
+                "data packet {}",
+                m_common->id, packet.to_string()));
+        }
     }
-    packet.dest_id = m_common->receiver.lock()->get_id();
+    {
+        // set dest id
+        std::weak_ptr<IHost> receiver = m_common->receiver;
+        if (!receiver.expired()) {
+            packet.dest_id = receiver.lock()->get_id();
+        } else {
+            LOG_ERROR(fmt::format(
+                "Receiver expider for flow {}; receiver_id does not set to "
+                "data packet {}",
+                m_common->id, packet.to_string()));
+        }
+    }
     packet.packet_num = packet_num;
     packet.delivered_data_size_at_origin = m_delivered_data_size;
     packet.generated_time = Scheduler::get_instance().get_current_time();
