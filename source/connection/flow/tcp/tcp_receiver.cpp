@@ -1,11 +1,22 @@
 #include "tcp_receiver.hpp"
 
+#include "metrics/metrics_collector.hpp"
+#include "scheduler.hpp"
 #include "utils/avg_rtt_packet_flag.hpp"
 
 namespace sim {
 TcpReceiver::TcpReceiver(TcpCommonPtr a_common) : m_common(a_common) {}
 
-// void TcpReceiver::update(Packet packet) {}
+void TcpReceiver::update(Packet packet) {
+    TimeNs current_time = Scheduler::get_instance().get_current_time();
+    m_packet_reordering.add_record(packet.packet_num);
+    MetricsCollector::get_instance().add_packet_reordering(
+        m_common->id, current_time, m_packet_reordering.value());
+
+    Packet ack = create_ack(std::move(packet));
+
+    m_common->receiver.lock()->enqueue_packet(ack);
+}
 
 Packet TcpReceiver::create_ack(Packet data) {
     Packet ack;

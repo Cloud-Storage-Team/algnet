@@ -51,7 +51,6 @@ void TcpFlow::update(Packet packet) {
     TcpCommon::PacketType type =
         static_cast<TcpCommon::PacketType>(m_common->flag_manager.get_flag(
             packet.flags, TcpCommon::packet_type_label));
-    TimeNs current_time = Scheduler::get_instance().get_current_time();
     if (packet.dest_id == m_common->sender.lock()->get_id() &&
         type == TcpCommon::PacketType::ACK) {
         m_sender->update(std::move(packet));
@@ -65,13 +64,7 @@ void TcpFlow::update(Packet packet) {
         }
     } else if (packet.dest_id == m_common->receiver.lock()->get_id() &&
                type == TcpCommon::PacketType::DATA) {
-        m_receiver.m_packet_reordering.add_record(packet.packet_num);
-        MetricsCollector::get_instance().add_packet_reordering(
-            m_common->id, current_time, m_receiver.m_packet_reordering.value());
-
-        Packet ack = m_receiver.create_ack(std::move(packet));
-
-        m_common->receiver.lock()->enqueue_packet(ack);
+        m_receiver.update(packet);
     }
 }
 
