@@ -11,7 +11,7 @@ public:
 
     void update(Packet packet);
 
-public:
+private:
     Packet create_ack(Packet data);
 
     TcpCommonPtr m_common;

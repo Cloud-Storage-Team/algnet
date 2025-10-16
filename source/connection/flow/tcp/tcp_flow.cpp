@@ -51,10 +51,24 @@ void TcpFlow::update(Packet packet) {
     TcpCommon::PacketType type =
         static_cast<TcpCommon::PacketType>(m_common->flag_manager.get_flag(
             packet.flags, TcpCommon::packet_type_label));
-    if (packet.dest_id == m_common->sender.lock()->get_id() &&
-        type == TcpCommon::PacketType::ACK) {
-        m_sender->update(std::move(packet));
+    if (type == TcpCommon::PacketType::ACK) {
+        std::weak_ptr<IHost> sender = m_common->sender;
+        if (sender.expired()) {
+            LOG_ERROR(
+                fmt::format("Ack packet {} called update on flow {}, but "
+                            "sender pointer expired; ignored",
+                            packet.to_string(), to_string()));
+            return;
+        }
+        if (packet.dest_id != sender.lock()->get_id()) {
+            LOG_ERROR(fmt::format(
+                "Ack packet {} called update on flow {}, but "
+                "its destination device is not equal to flow sender; ignored",
+                packet.to_string(), to_string()));
+            return;
+        }
 
+        m_sender->update(std::move(packet));
         if (m_common->connection.expired()) {
             LOG_ERROR(fmt::format(
                 "Can not update coinnection from flow '{}': connection expired",
@@ -62,9 +76,29 @@ void TcpFlow::update(Packet packet) {
         } else {
             m_common->connection.lock()->update(shared_from_this());
         }
-    } else if (packet.dest_id == m_common->receiver.lock()->get_id() &&
-               type == TcpCommon::PacketType::DATA) {
-        m_receiver.update(packet);
+    } else if (type == TcpCommon::PacketType::DATA) {
+        std::weak_ptr<IHost> receiver = m_common->receiver;
+        if (receiver.expired()) {
+            LOG_ERROR(
+                fmt::format("Data packet {} called update on flow {}, but "
+                            "receiver pointer expired; ignored",
+                            packet.to_string(), to_string()));
+            return;
+        }
+        if (packet.dest_id != receiver.lock()->get_id()) {
+            LOG_ERROR(fmt::format(
+                "Data packet {} called update on flow {}, but "
+                "its destination device is not equal to flow receiver; ignored",
+                packet.to_string(), to_string()));
+            return;
+        }
+
+        m_receiver.update(std::move(packet));
+    } else {
+        LOG_ERROR(
+            fmt::format("Packet {} called update on flow {}; unexpected packet "
+                        "type; ignored",
+                        packet.to_string(), to_string()));
     }
 }
 
