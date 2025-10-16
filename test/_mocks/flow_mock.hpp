@@ -13,6 +13,7 @@ public:
              TimeNs a_last_rtt = TimeNs(0));
 
     void update(sim::Packet packet) final;
+    SizeByte get_packet_size() const final;
     SizeByte get_sending_quota() const final;
     void send_data(SizeByte data) final;
 
@@ -29,7 +30,6 @@ public:
     Id get_id() const final;
     void set_sending_quota(SizeByte quota);
     void set_last_rtt(std::optional<TimeNs> rtt);
-    SizeByte get_packet_size() const;
 
 private:
     std::weak_ptr<sim::IHost> m_receiver;

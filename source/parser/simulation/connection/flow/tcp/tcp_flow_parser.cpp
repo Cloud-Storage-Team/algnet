@@ -8,7 +8,7 @@ namespace sim {
 
 std::shared_ptr<TcpFlow> TcpFlowParser::parse_tcp_flow(const ConfigNode& node,
                                                        Id conn_id) {
-    Id flow_id = node.get_name_or_throw() + "_" + conn_id;
+    Id flow_id = conn_id + "_" + node.get_name_or_throw();
     std::unique_ptr<ITcpCC> cc =
         TcpCCParser::parse_i_tcp_cc(node["cc"].value_or_throw());
 

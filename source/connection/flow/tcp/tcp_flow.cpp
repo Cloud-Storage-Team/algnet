@@ -71,6 +71,8 @@ Id TcpFlow::get_id() const { return m_id; }
 
 SizeByte TcpFlow::get_delivered_bytes() const { return m_delivered_data_size; }
 
+SizeByte TcpFlow::get_packet_size() const { return m_packet_size; }
+
 SizeByte TcpFlow::get_sending_quota() const {
     const double cwnd = m_cc->get_cwnd();
 

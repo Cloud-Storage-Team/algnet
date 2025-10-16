@@ -21,7 +21,8 @@ public:
     void update(Packet packet) final;
     void send_data(SizeByte data) final;
 
-    SizeByte get_sending_quota() const;
+    SizeByte get_packet_size() const final;
+    SizeByte get_sending_quota() const final;
     std::optional<TimeNs> get_last_rtt() const final;
     SizeByte get_delivered_data_size() const final;
     SizeByte get_sent_data_size() const final;

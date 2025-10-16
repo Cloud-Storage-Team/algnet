@@ -16,6 +16,7 @@ public:
     virtual void update(Packet packet) = 0;
     virtual void send_data(SizeByte data) = 0;
 
+    virtual SizeByte get_packet_size() const = 0;
     virtual SizeByte get_sending_quota() const = 0;
     virtual std::optional<TimeNs> get_last_rtt() const = 0;
     virtual SizeByte get_delivered_data_size() const = 0;
