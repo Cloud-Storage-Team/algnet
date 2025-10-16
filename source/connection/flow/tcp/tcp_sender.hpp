@@ -16,19 +16,7 @@ public:
                                SizeByte a_packet_size);
 
     SizeByte get_sending_quota() const;
-
-    class SendAtTime : public Event {
-    public:
-        SendAtTime(TimeNs a_time, std::weak_ptr<TcpSender> a_sender,
-                   Packet a_packet);
-
-        void operator()() final;
-
-    private:
-        std::weak_ptr<TcpSender> m_sender;
-        Packet m_packet;
-    };
-    class Timeout;
+    void send_data(SizeByte data);
 
     void update_rto_on_ack();
     void send_packet_now(Packet packet);
@@ -37,6 +25,9 @@ public:
 private:
     TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
               SizeByte a_packet_size);
+
+    class SendAtTime;
+    class Timeout;
 
     // TODO: make it private
 public:

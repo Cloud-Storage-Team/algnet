@@ -82,19 +82,25 @@ void TcpSender::update_rto_on_timeout() {
     // in STEADY, don't touch RTO by timeout
 }
 
-TcpSender::SendAtTime::SendAtTime(TimeNs a_time,
-                                  std::weak_ptr<TcpSender> a_sender,
-                                  Packet a_packet)
-    : Event(a_time), m_sender(a_sender), m_packet(std::move(a_packet)) {}
+class TcpSender::SendAtTime : public Event {
+public:
+    SendAtTime(TimeNs a_time, std::weak_ptr<TcpSender> a_sender,
+               Packet a_packet)
+        : Event(a_time), m_sender(a_sender), m_packet(std::move(a_packet)) {}
 
-void TcpSender::SendAtTime::operator()() {
-    if (m_sender.expired()) {
-        LOG_ERROR("Pointer to flow expired");
-        return;
+    void operator()() final {
+        if (m_sender.expired()) {
+            LOG_ERROR("Pointer to flow expired");
+            return;
+        }
+        auto sender = m_sender.lock();
+        sender->send_packet_now(std::move(m_packet));
     }
-    auto sender = m_sender.lock();
-    sender->send_packet_now(std::move(m_packet));
-}
+
+private:
+    std::weak_ptr<TcpSender> m_sender;
+    Packet m_packet;
+};
 
 class TcpSender::Timeout : public Event {
 public:
@@ -172,6 +178,35 @@ SizeByte TcpSender::get_sending_quota() const {
 
     // Quota in bytes, multiple of the packet size
     return quota_pkts * m_packet_size;
+}
+
+void TcpSender::send_data(SizeByte data) {
+    TimeNs now = Scheduler::get_instance().get_current_time();
+
+    if (!m_first_send_time) {
+        m_first_send_time = now;
+    }
+
+    SizeByte quota = get_sending_quota();
+    if (data > quota) {
+        throw std::runtime_error(fmt::format(
+            "Trying to send {} bytes on flow {} with quota {} bytes",
+            data.value(), m_common->id, quota.value()));
+    }
+
+    while (data != SizeByte(0)) {
+        Packet packet = generate_data_packet(m_next_packet_num++);
+        TimeNs pacing_delay = m_cc->get_pacing_delay();
+        if (pacing_delay == TimeNs(0)) {
+            send_packet_now(std::move(packet));
+        } else {
+            Scheduler::get_instance().add<SendAtTime>(now + pacing_delay,
+                                                      this->shared_from_this(),
+                                                      std::move(packet));
+        }
+        data -= std::min(data, m_packet_size);
+        m_packets_in_flight++;
+    }
 }
 
 }  // namespace sim

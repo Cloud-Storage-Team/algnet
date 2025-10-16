@@ -51,34 +51,7 @@ SizeByte TcpFlow::get_sending_quota() const {
     return m_sender->get_sending_quota();
 }
 
-void TcpFlow::send_data(SizeByte data) {
-    TimeNs now = Scheduler::get_instance().get_current_time();
-
-    if (!m_sender->m_first_send_time) {
-        m_sender->m_first_send_time = now;
-    }
-
-    SizeByte quota = get_sending_quota();
-    if (data > quota) {
-        throw std::runtime_error(fmt::format(
-            "Trying to send {} bytes on flow {} with quota {} bytes",
-            data.value(), m_common->id, quota.value()));
-    }
-
-    while (data != SizeByte(0)) {
-        Packet packet =
-            m_sender->generate_data_packet(m_sender->m_next_packet_num++);
-        TimeNs pacing_delay = m_sender->m_cc->get_pacing_delay();
-        if (pacing_delay == TimeNs(0)) {
-            m_sender->send_packet_now(std::move(packet));
-        } else {
-            Scheduler::get_instance().add<TcpSender::SendAtTime>(
-                now + pacing_delay, m_sender, std::move(packet));
-        }
-        data -= std::min(data, m_sender->m_packet_size);
-        m_sender->m_packets_in_flight++;
-    }
-}
+void TcpFlow::send_data(SizeByte data) { return m_sender->send_data(data); }
 
 Packet TcpFlow::create_ack(Packet data) {
     Packet ack;
