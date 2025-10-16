@@ -16,7 +16,13 @@ public:
                                std::unique_ptr<ITcpCC> a_cc,
                                SizeByte a_packet_size);
 
-    void update(Packet packet);
+private:
+    // because of inheritance from std::enable_shared_from_this
+    TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
+              SizeByte a_packet_size);
+
+public:
+    void on_ack(Packet ack);
     void send_data(SizeByte data);
 
     SizeByte get_delivered_data_size() const;
@@ -24,11 +30,6 @@ public:
     std::optional<TimeNs> get_fct() const;
     std::optional<TimeNs> get_last_rtt() const;
     std::string to_string() const;
-
-private:
-    // because of inheritance from std::enable_shared_from_this
-    TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
-              SizeByte a_packet_size);
 
 private:
     class SendAtTime;

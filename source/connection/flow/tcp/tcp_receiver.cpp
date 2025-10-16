@@ -8,6 +8,15 @@ namespace sim {
 TcpReceiver::TcpReceiver(TcpCommonPtr a_common) : m_common(a_common) {}
 
 void TcpReceiver::update(Packet packet) {
+    if (m_common->flag_manager.get_flag(packet.flags,
+                                        m_common->packet_type_label) !=
+        TcpCommon::PacketType::DATA) {
+        LOG_ERROR(fmt::format(
+            "Called TcpReceiver::update with packet {}, but its type differs "
+            "from data; ignored",
+            packet.to_string()));
+        return;
+    }
     TimeNs current_time = Scheduler::get_instance().get_current_time();
     m_packet_reordering.add_record(packet.packet_num);
     MetricsCollector::get_instance().add_packet_reordering(

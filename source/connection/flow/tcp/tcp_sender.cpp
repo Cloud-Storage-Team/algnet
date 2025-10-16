@@ -28,41 +28,50 @@ TcpSender::TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
       m_delivered_data_size(0),
       m_next_packet_num(0) {}
 
-void TcpSender::update(Packet packet) {
+void TcpSender::on_ack(Packet ack) {
+    if (m_common->flag_manager.get_flag(ack.flags,
+                                        m_common->packet_type_label) !=
+        TcpCommon::PacketType::ACK) {
+        LOG_ERROR(fmt::format(
+            "Called TcpSender '{}' on_ack with packet {}, but its type differs "
+            "from ack; ignored",
+            to_string(), ack.to_string()));
+        return;
+    }
     TimeNs current_time = Scheduler::get_instance().get_current_time();
-    if (current_time < packet.sent_time) {
-        LOG_ERROR("Packet " + packet.to_string() +
+    if (current_time < ack.sent_time) {
+        LOG_ERROR("Packet " + ack.to_string() +
                   " current time less that sending time; ignored");
         return;
     }
 
     m_last_ack_arrive_time = current_time;
 
-    if (m_acked.contains(packet.packet_num)) {
+    if (m_acked.contains(ack.packet_num)) {
         LOG_WARN(fmt::format("Got duplicate ack number {}; ignored",
-                             packet.packet_num));
+                             ack.packet_num));
         return;
     }
 
-    TimeNs rtt = current_time - packet.sent_time;
+    TimeNs rtt = current_time - ack.sent_time;
     m_rtt_statistics.add_record(rtt);
     update_rto_on_ack();  // update and transition to STEADY
 
     MetricsCollector::get_instance().add_RTT(m_common->id, current_time, rtt);
-    m_acked.insert(packet.packet_num);
+    m_acked.insert(ack.packet_num);
 
     if (m_packets_in_flight > 0) {
         m_packets_in_flight--;
     }
 
     m_cc->on_ack(rtt, m_rtt_statistics.get_mean().value(),
-                 packet.congestion_experienced);
+                 ack.congestion_experienced);
 
     m_delivered_data_size += m_packet_size;
 
     SpeedGbps delivery_rate =
-        (m_delivered_data_size - packet.delivered_data_size_at_origin) /
-        (current_time - packet.generated_time);
+        (m_delivered_data_size - ack.delivered_data_size_at_origin) /
+        (current_time - ack.generated_time);
     MetricsCollector::get_instance().add_delivery_rate(
         m_common->id, current_time, delivery_rate);
 
@@ -141,60 +150,6 @@ std::string TcpSender::to_string() const {
     return oss.str();
 }
 
-void TcpSender::set_avg_rtt_if_present(Packet& packet) {
-    std::optional<TimeNs> avg_rtt = m_rtt_statistics.get_mean();
-    if (avg_rtt.has_value()) {
-        set_avg_rtt_flag(m_common->flag_manager, packet.flags, avg_rtt.value());
-    }
-}
-
-Packet TcpSender::generate_data_packet(PacketNum packet_num) {
-    Packet packet;
-    m_common->flag_manager.set_flag(packet.flags, TcpCommon::packet_type_label,
-                                    TcpCommon::PacketType::DATA);
-    set_avg_rtt_if_present(packet);
-    packet.size = m_packet_size;
-    packet.flow_id = m_common->id;
-    {
-        // set source id
-        std::weak_ptr<IHost> sender = m_common->sender;
-        if (!sender.expired()) {
-            packet.source_id = sender.lock()->get_id();
-        } else {
-            LOG_ERROR(fmt::format(
-                "Sender expired for flow {}; sender_id does not set to "
-                "data packet {}",
-                m_common->id, packet.to_string()));
-        }
-    }
-    {
-        // set dest id
-        std::weak_ptr<IHost> receiver = m_common->receiver;
-        if (!receiver.expired()) {
-            packet.dest_id = receiver.lock()->get_id();
-        } else {
-            LOG_ERROR(fmt::format(
-                "Receiver expider for flow {}; receiver_id does not set to "
-                "data packet {}",
-                m_common->id, packet.to_string()));
-        }
-    }
-    packet.packet_num = packet_num;
-    packet.delivered_data_size_at_origin = m_delivered_data_size;
-    packet.generated_time = Scheduler::get_instance().get_current_time();
-    packet.ttl = TcpCommon::MAX_TTL;
-    packet.ecn_capable_transport = m_common->ecn_capable;
-    return packet;
-}
-
-// Before the first ACK: exponential growth by timeout
-void TcpSender::update_rto_on_timeout() {
-    if (!m_rto_steady) {
-        m_current_rto = std::min(m_current_rto * 2, m_max_rto);
-    }
-    // in STEADY, don't touch RTO by timeout
-}
-
 class TcpSender::SendAtTime : public Event {
 public:
     SendAtTime(TimeNs a_time, std::weak_ptr<TcpSender> a_sender,
@@ -253,6 +208,53 @@ void TcpSender::update_rto_on_ack() {
     m_rto_steady = true;
 }
 
+// Before the first ACK: exponential growth by timeout
+void TcpSender::update_rto_on_timeout() {
+    if (!m_rto_steady) {
+        m_current_rto = std::min(m_current_rto * 2, m_max_rto);
+    }
+    // in STEADY, don't touch RTO by timeout
+}
+
+Packet TcpSender::generate_data_packet(PacketNum packet_num) {
+    Packet packet;
+    m_common->flag_manager.set_flag(packet.flags, TcpCommon::packet_type_label,
+                                    TcpCommon::PacketType::DATA);
+    set_avg_rtt_if_present(packet);
+    packet.size = m_packet_size;
+    packet.flow_id = m_common->id;
+    {
+        // set source id
+        std::weak_ptr<IHost> sender = m_common->sender;
+        if (!sender.expired()) {
+            packet.source_id = sender.lock()->get_id();
+        } else {
+            LOG_ERROR(fmt::format(
+                "Sender expired for flow {}; sender_id does not set to "
+                "data packet {}",
+                m_common->id, packet.to_string()));
+        }
+    }
+    {
+        // set dest id
+        std::weak_ptr<IHost> receiver = m_common->receiver;
+        if (!receiver.expired()) {
+            packet.dest_id = receiver.lock()->get_id();
+        } else {
+            LOG_ERROR(fmt::format(
+                "Receiver expider for flow {}; receiver_id does not set to "
+                "data packet {}",
+                m_common->id, packet.to_string()));
+        }
+    }
+    packet.packet_num = packet_num;
+    packet.delivered_data_size_at_origin = m_delivered_data_size;
+    packet.generated_time = Scheduler::get_instance().get_current_time();
+    packet.ttl = TcpCommon::MAX_TTL;
+    packet.ecn_capable_transport = m_common->ecn_capable;
+    return packet;
+}
+
 void TcpSender::send_packet_now(Packet packet) {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
 
@@ -273,6 +275,13 @@ void TcpSender::send_packet_now(Packet packet) {
 void TcpSender::retransmit_packet(PacketNum packet_num) {
     Packet packet = generate_data_packet(packet_num);
     send_packet_now(std::move(packet));
+}
+
+void TcpSender::set_avg_rtt_if_present(Packet& packet) {
+    std::optional<TimeNs> avg_rtt = m_rtt_statistics.get_mean();
+    if (avg_rtt.has_value()) {
+        set_avg_rtt_flag(m_common->flag_manager, packet.flags, avg_rtt.value());
+    }
 }
 
 }  // namespace sim
