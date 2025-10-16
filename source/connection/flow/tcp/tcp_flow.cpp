@@ -38,7 +38,7 @@ std::shared_ptr<IHost> TcpFlow::get_receiver() const {
 Id TcpFlow::get_id() const { return m_common->id; }
 
 SizeByte TcpFlow::get_delivered_bytes() const {
-    return m_sender->m_delivered_data_size;
+    return m_sender->get_delivered_bytes();
 }
 
 SizeByte TcpFlow::get_sending_quota() const {

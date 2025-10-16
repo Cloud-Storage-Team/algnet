@@ -99,6 +99,10 @@ void TcpSender::send_data(SizeByte data) {
     }
 }
 
+SizeByte TcpSender::get_delivered_bytes() const {
+    return m_delivered_data_size;
+}
+
 SizeByte TcpSender::get_sending_quota() const {
     const double cwnd = m_cc->get_cwnd();
 
@@ -121,8 +125,7 @@ std::optional<TimeNs> TcpSender::get_fct() const {
     if (!m_first_send_time) {
         return std::nullopt;
     }
-    return m_last_send_time.value() -
-           m_first_send_time.value();
+    return m_last_send_time.value() - m_first_send_time.value();
 }
 
 void TcpSender::set_avg_rtt_if_present(Packet& packet) {

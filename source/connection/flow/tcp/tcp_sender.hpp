@@ -19,6 +19,7 @@ public:
     void update(Packet packet);
     void send_data(SizeByte data);
 
+    SizeByte get_delivered_bytes() const;
     SizeByte get_sending_quota() const;
     std::optional<TimeNs> get_fct() const;
 
