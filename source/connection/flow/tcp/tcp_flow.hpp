@@ -40,7 +40,6 @@ private:
     class Timeout;
 
     Packet create_ack(Packet data);
-    void update_rto_on_timeout();
     void update_rto_on_ack();
     void send_packet_now(Packet packet);
     void retransmit_packet(PacketNum packet_num);

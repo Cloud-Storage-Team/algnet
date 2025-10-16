@@ -166,7 +166,7 @@ public:
             fmt::format("Timeout for packet number {} expired; looks "
                         "like packet loss",
                         m_packet_num));
-        flow->update_rto_on_timeout();
+        flow->m_sender.update_rto_on_timeout();
         flow->m_sender.m_cc->on_timeout();
         flow->retransmit_packet(m_packet_num);
     }
@@ -257,15 +257,6 @@ std::string TcpFlow::to_string() const {
     oss << ", acked packets: " << m_sender.m_delivered_data_size;
     oss << "]";
     return oss.str();
-}
-
-// Before the first ACK: exponential growth by timeout
-void TcpFlow::update_rto_on_timeout() {
-    if (!m_sender.m_rto_steady) {
-        m_sender.m_current_rto =
-            std::min(m_sender.m_current_rto * 2, m_sender.m_max_rto);
-    }
-    // in STEADY, don't touch RTO by timeout
 }
 
 // After ACK with a valid RTT: formula + transition to STEADY (once)

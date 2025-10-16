@@ -65,4 +65,12 @@ Packet TcpSender::generate_data_packet(PacketNum packet_num) {
     return packet;
 }
 
+// Before the first ACK: exponential growth by timeout
+void TcpSender::update_rto_on_timeout() {
+    if (!m_rto_steady) {
+        m_current_rto = std::min(m_current_rto * 2, m_max_rto);
+    }
+    // in STEADY, don't touch RTO by timeout
+}
+
 }  // namespace sim
