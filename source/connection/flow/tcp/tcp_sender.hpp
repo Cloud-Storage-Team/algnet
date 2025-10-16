@@ -26,6 +26,7 @@ public:
     std::string to_string() const;
 
 private:
+    // because of inheritance from std::enable_shared_from_this
     TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
               SizeByte a_packet_size);
 
