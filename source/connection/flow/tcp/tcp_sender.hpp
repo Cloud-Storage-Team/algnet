@@ -1,7 +1,6 @@
 #pragma once
 #include "event/event.hpp"
 #include "i_tcp_cc.hpp"
-#include "metrics/packet_reordering/simple_packet_reordering.hpp"
 #include "tcp_common.hpp"
 
 namespace sim {
@@ -63,7 +62,6 @@ public:
     // Contains numbers of all delivered acks
     std::set<PacketNum> m_acked;
 
-    SimplePacketReordering m_packet_reordering;
     utils::Statistics<TimeNs> m_rtt_statistics;
 };
 

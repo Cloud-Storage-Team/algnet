@@ -103,9 +103,9 @@ void TcpFlow::update(Packet packet) {
         }
     } else if (packet.dest_id == m_common->receiver.lock()->get_id() &&
                type == TcpCommon::PacketType::DATA) {
-        m_sender->m_packet_reordering.add_record(packet.packet_num);
+        m_receiver.m_packet_reordering.add_record(packet.packet_num);
         MetricsCollector::get_instance().add_packet_reordering(
-            m_common->id, current_time, m_sender->m_packet_reordering.value());
+            m_common->id, current_time, m_receiver.m_packet_reordering.value());
 
         Packet ack = create_ack(std::move(packet));
 
