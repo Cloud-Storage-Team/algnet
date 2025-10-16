@@ -7,10 +7,10 @@
 
 namespace sim {
 
-class TcpSender;
-using TcpSenderPtr = std::shared_ptr<TcpSender>;
+class TcpFlowSender;
+using TcpSenderPtr = std::shared_ptr<TcpFlowSender>;
 
-class TcpSender : public std::enable_shared_from_this<TcpSender> {
+class TcpFlowSender : public std::enable_shared_from_this<TcpFlowSender> {
 public:
     static TcpSenderPtr create(TcpCommonPtr a_common,
                                std::unique_ptr<ITcpCC> a_cc,
@@ -18,8 +18,8 @@ public:
 
 private:
     // because of inheritance from std::enable_shared_from_this
-    TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
-              SizeByte a_packet_size);
+    TcpFlowSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
+                  SizeByte a_packet_size);
 
 public:
     void on_ack(Packet ack);

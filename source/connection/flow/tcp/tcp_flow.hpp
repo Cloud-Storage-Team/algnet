@@ -7,7 +7,7 @@
 #include "packet.hpp"
 #include "tcp_flow_common.hpp"
 #include "tcp_flow_receiver.hpp"
-#include "tcp_sender.hpp"
+#include "tcp_flow_sender.hpp"
 #include "utils/str_expected.hpp"
 
 namespace sim {

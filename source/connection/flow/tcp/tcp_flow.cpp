@@ -22,7 +22,7 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
     : m_common(std::make_shared<TcpFlowCommon>(
           std::move(a_id), a_conn, a_conn->get_sender(), a_conn->get_receiver(),
           a_ecn_capable)),
-      m_sender(TcpSender::create(m_common, std::move(a_cc), a_packet_size)),
+      m_sender(TcpFlowSender::create(m_common, std::move(a_cc), a_packet_size)),
       m_receiver(m_common) {}
 
 SizeByte TcpFlow::get_delivered_data_size() const {

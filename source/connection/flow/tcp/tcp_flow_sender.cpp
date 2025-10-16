@@ -1,4 +1,4 @@
-#include "tcp_sender.hpp"
+#include "tcp_flow_sender.hpp"
 
 #include "metrics/metrics_collector.hpp"
 #include "scheduler.hpp"
@@ -6,15 +6,16 @@
 
 namespace sim {
 
-TcpSenderPtr TcpSender::create(TcpCommonPtr a_common,
-                               std::unique_ptr<ITcpCC> a_cc,
-                               SizeByte a_packet_size) {
-    return std::shared_ptr<TcpSender>(
-        new TcpSender(a_common, std::move(a_cc), a_packet_size));
+TcpSenderPtr TcpFlowSender::create(TcpCommonPtr a_common,
+                                   std::unique_ptr<ITcpCC> a_cc,
+                                   SizeByte a_packet_size) {
+    return std::shared_ptr<TcpFlowSender>(
+        new TcpFlowSender(a_common, std::move(a_cc), a_packet_size));
 }
 
-TcpSender::TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
-                     SizeByte a_packet_size)
+TcpFlowSender::TcpFlowSender(TcpCommonPtr a_common,
+                             std::unique_ptr<ITcpCC> a_cc,
+                             SizeByte a_packet_size)
     : m_common(a_common),
       m_cc(std::move(a_cc)),
       m_packet_size(a_packet_size),
@@ -28,14 +29,15 @@ TcpSender::TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
       m_delivered_data_size(0),
       m_next_packet_num(0) {}
 
-void TcpSender::on_ack(Packet ack) {
+void TcpFlowSender::on_ack(Packet ack) {
     if (m_common->flag_manager.get_flag(ack.flags,
                                         m_common->packet_type_label) !=
         TcpFlowCommon::PacketType::ACK) {
-        LOG_ERROR(fmt::format(
-            "Called TcpSender '{}' on_ack with packet {}, but its type differs "
-            "from ack; ignored",
-            to_string(), ack.to_string()));
+        LOG_ERROR(
+            fmt::format("Called TcpFlowSender '{}' on_ack with packet {}, but "
+                        "its type differs "
+                        "from ack; ignored",
+                        to_string(), ack.to_string()));
         return;
     }
     TimeNs current_time = Scheduler::get_instance().get_current_time();
@@ -79,7 +81,7 @@ void TcpSender::on_ack(Packet ack) {
                                               m_cc->get_cwnd());
 }
 
-void TcpSender::send_data(SizeByte data) {
+void TcpFlowSender::send_data(SizeByte data) {
     TimeNs now = Scheduler::get_instance().get_current_time();
 
     if (!m_first_send_time) {
@@ -108,11 +110,11 @@ void TcpSender::send_data(SizeByte data) {
     }
 }
 
-SizeByte TcpSender::get_delivered_data_size() const {
+SizeByte TcpFlowSender::get_delivered_data_size() const {
     return m_delivered_data_size;
 }
 
-SizeByte TcpSender::get_sending_quota() const {
+SizeByte TcpFlowSender::get_sending_quota() const {
     const double cwnd = m_cc->get_cwnd();
 
     // Effective window: the whole part of cwnd; if cwnd < 1 and inflight == 0,
@@ -130,18 +132,18 @@ SizeByte TcpSender::get_sending_quota() const {
     return quota_pkts * m_packet_size;
 }
 
-std::optional<TimeNs> TcpSender::get_fct() const {
+std::optional<TimeNs> TcpFlowSender::get_fct() const {
     if (!m_first_send_time || !m_last_ack_arrive_time) {
         return std::nullopt;
     }
     return m_last_ack_arrive_time.value() - m_first_send_time.value();
 }
 
-std::optional<TimeNs> TcpSender::get_last_rtt() const {
+std::optional<TimeNs> TcpFlowSender::get_last_rtt() const {
     return m_rtt_statistics.get_last();
 }
 
-std::string TcpSender::to_string() const {
+std::string TcpFlowSender::to_string() const {
     std::stringstream oss;
     oss << ", CC module: " << m_cc->to_string();
     oss << ", packet size: " << m_packet_size;
@@ -150,9 +152,9 @@ std::string TcpSender::to_string() const {
     return oss.str();
 }
 
-class TcpSender::SendAtTime : public Event {
+class TcpFlowSender::SendAtTime : public Event {
 public:
-    SendAtTime(TimeNs a_time, std::weak_ptr<TcpSender> a_sender,
+    SendAtTime(TimeNs a_time, std::weak_ptr<TcpFlowSender> a_sender,
                Packet a_packet)
         : Event(a_time), m_sender(a_sender), m_packet(std::move(a_packet)) {}
 
@@ -166,13 +168,13 @@ public:
     }
 
 private:
-    std::weak_ptr<TcpSender> m_sender;
+    std::weak_ptr<TcpFlowSender> m_sender;
     Packet m_packet;
 };
 
-class TcpSender::Timeout : public Event {
+class TcpFlowSender::Timeout : public Event {
 public:
-    Timeout(TimeNs a_time, std::weak_ptr<TcpSender> a_flow,
+    Timeout(TimeNs a_time, std::weak_ptr<TcpFlowSender> a_flow,
             PacketNum a_packet_num)
         : Event(a_time), m_sender(a_flow), m_packet_num(a_packet_num) {}
 
@@ -196,12 +198,12 @@ public:
     }
 
 private:
-    std::weak_ptr<TcpSender> m_sender;
+    std::weak_ptr<TcpFlowSender> m_sender;
     PacketNum m_packet_num;
 };
 
 // After ACK with a valid RTT: formula + transition to STEADY (once)
-void TcpSender::update_rto_on_ack() {
+void TcpFlowSender::update_rto_on_ack() {
     auto mean = m_rtt_statistics.get_mean().value();
     TimeNs std = m_rtt_statistics.get_std().value();
     m_current_rto = std::min(mean * 2 + std * 4, m_max_rto);
@@ -209,14 +211,14 @@ void TcpSender::update_rto_on_ack() {
 }
 
 // Before the first ACK: exponential growth by timeout
-void TcpSender::update_rto_on_timeout() {
+void TcpFlowSender::update_rto_on_timeout() {
     if (!m_rto_steady) {
         m_current_rto = std::min(m_current_rto * 2, m_max_rto);
     }
     // in STEADY, don't touch RTO by timeout
 }
 
-Packet TcpSender::generate_data_packet(PacketNum packet_num) {
+Packet TcpFlowSender::generate_data_packet(PacketNum packet_num) {
     Packet packet;
     m_common->flag_manager.set_flag(packet.flags,
                                     TcpFlowCommon::packet_type_label,
@@ -256,7 +258,7 @@ Packet TcpSender::generate_data_packet(PacketNum packet_num) {
     return packet;
 }
 
-void TcpSender::send_packet_now(Packet packet) {
+void TcpFlowSender::send_packet_now(Packet packet) {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
 
     if (m_last_send_time.has_value()) {
@@ -273,12 +275,12 @@ void TcpSender::send_packet_now(Packet packet) {
     m_common->sender.lock()->enqueue_packet(std::move(packet));
 }
 
-void TcpSender::retransmit_packet(PacketNum packet_num) {
+void TcpFlowSender::retransmit_packet(PacketNum packet_num) {
     Packet packet = generate_data_packet(packet_num);
     send_packet_now(std::move(packet));
 }
 
-void TcpSender::set_avg_rtt_if_present(Packet& packet) {
+void TcpFlowSender::set_avg_rtt_if_present(Packet& packet) {
     std::optional<TimeNs> avg_rtt = m_rtt_statistics.get_mean();
     if (avg_rtt.has_value()) {
         set_avg_rtt_flag(m_common->flag_manager, packet.flags, avg_rtt.value());
