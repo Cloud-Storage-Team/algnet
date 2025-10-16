@@ -39,7 +39,6 @@ private:
     class SendAtTime;
     class Timeout;
 
-    Packet generate_data_packet(PacketNum packet_num);
     Packet create_ack(Packet data);
     Packet generate_packet();
     void update_rto_on_timeout();

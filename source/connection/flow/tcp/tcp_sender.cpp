@@ -1,5 +1,6 @@
 #include "tcp_sender.hpp"
 
+#include "scheduler.hpp"
 #include "utils/avg_rtt_packet_flag.hpp"
 
 namespace sim {
@@ -23,6 +24,31 @@ void TcpSender::set_avg_rtt_if_present(Packet& packet) {
     if (avg_rtt.has_value()) {
         set_avg_rtt_flag(m_common->flag_manager, packet.flags, avg_rtt.value());
     }
+}
+
+Packet TcpSender::generate_data_packet(PacketNum packet_num) {
+    Packet packet;
+    m_common->flag_manager.set_flag(packet.flags, TcpCommon::packet_type_label,
+                                    TcpCommon::PacketType::DATA);
+    set_avg_rtt_if_present(packet);
+    packet.size = m_packet_size;
+    packet.flow_id = m_common->id;
+    std::weak_ptr<IHost> sender = m_common->sender;
+    if (!sender.expired()) {
+        packet.source_id = m_common->sender.lock()->get_id();
+    } else {
+        LOG_ERROR(
+            fmt::format("Sender expider for flow {}; sender_id does not set to "
+                        "data packet {}",
+                        m_common->id, packet.to_string()));
+    }
+    packet.dest_id = m_common->receiver.lock()->get_id();
+    packet.packet_num = packet_num;
+    packet.delivered_data_size_at_origin = m_delivered_data_size;
+    packet.generated_time = Scheduler::get_instance().get_current_time();
+    packet.ttl = TcpCommon::MAX_TTL;
+    packet.ecn_capable_transport = m_common->ecn_capable;
+    return packet;
 }
 
 }  // namespace sim

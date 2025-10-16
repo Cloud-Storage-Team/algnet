@@ -9,11 +9,12 @@ public:
     TcpSender(TcpCommonPtr a_common, std::unique_ptr<ITcpCC> a_cc,
               SizeByte a_packet_size);
 
-// TODO: make it private
+    // TODO: make it private
 public:
     void set_avg_rtt_if_present(Packet& packet);
+    Packet generate_data_packet(PacketNum packet_num);
 
-// TODO: make it private
+    // TODO: make it private
 public:
     TcpCommonPtr m_common;
 
