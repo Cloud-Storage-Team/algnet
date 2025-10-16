@@ -15,6 +15,8 @@ public:
                                std::unique_ptr<ITcpCC> a_cc,
                                SizeByte a_packet_size);
 
+    SizeByte get_sending_quota() const;
+
     class SendAtTime : public Event {
     public:
         SendAtTime(TimeNs a_time, std::weak_ptr<TcpSender> a_sender,

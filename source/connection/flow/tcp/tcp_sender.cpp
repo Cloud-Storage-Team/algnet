@@ -156,4 +156,22 @@ void TcpSender::retransmit_packet(PacketNum packet_num) {
     send_packet_now(std::move(packet));
 }
 
+SizeByte TcpSender::get_sending_quota() const {
+    const double cwnd = m_cc->get_cwnd();
+
+    // Effective window: the whole part of cwnd; if cwnd < 1 and inflight == 0,
+    // allow 1 packet
+    std::uint32_t effective_cwnd = static_cast<std::uint32_t>(std::floor(cwnd));
+    if (m_packets_in_flight == 0 && cwnd < 1.0) {
+        effective_cwnd = 1;
+    }
+    const std::uint32_t quota_pkts =
+        (effective_cwnd > m_packets_in_flight)
+            ? (effective_cwnd - m_packets_in_flight)
+            : 0;
+
+    // Quota in bytes, multiple of the packet size
+    return quota_pkts * m_packet_size;
+}
+
 }  // namespace sim
