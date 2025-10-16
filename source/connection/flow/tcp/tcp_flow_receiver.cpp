@@ -1,20 +1,21 @@
-#include "tcp_receiver.hpp"
+#include "tcp_flow_receiver.hpp"
 
 #include "metrics/metrics_collector.hpp"
 #include "scheduler.hpp"
 #include "utils/avg_rtt_packet_flag.hpp"
 
 namespace sim {
-TcpReceiver::TcpReceiver(TcpCommonPtr a_common) : m_common(a_common) {}
+TcpFlowReceiver::TcpFlowReceiver(TcpCommonPtr a_common) : m_common(a_common) {}
 
-void TcpReceiver::update(Packet packet) {
+void TcpFlowReceiver::update(Packet packet) {
     if (m_common->flag_manager.get_flag(packet.flags,
                                         m_common->packet_type_label) !=
         TcpFlowCommon::PacketType::DATA) {
-        LOG_ERROR(fmt::format(
-            "Called TcpReceiver::update with packet {}, but its type differs "
-            "from data; ignored",
-            packet.to_string()));
+        LOG_ERROR(
+            fmt::format("Called TcpFlowReceiver::update with packet {}, but "
+                        "its type differs "
+                        "from data; ignored",
+                        packet.to_string()));
         return;
     }
     TimeNs current_time = Scheduler::get_instance().get_current_time();
@@ -27,7 +28,7 @@ void TcpReceiver::update(Packet packet) {
     m_common->receiver.lock()->enqueue_packet(ack);
 }
 
-Packet TcpReceiver::create_ack(Packet data) {
+Packet TcpFlowReceiver::create_ack(Packet data) {
     Packet ack;
     ack.packet_num = data.packet_num;
     ack.source_id = m_common->receiver.lock()->get_id();

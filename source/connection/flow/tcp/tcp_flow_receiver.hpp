@@ -5,9 +5,9 @@
 #include "tcp_flow_common.hpp"
 
 namespace sim {
-class TcpReceiver {
+class TcpFlowReceiver {
 public:
-    explicit TcpReceiver(TcpCommonPtr a_common);
+    explicit TcpFlowReceiver(TcpCommonPtr a_common);
 
     void update(Packet packet);
 

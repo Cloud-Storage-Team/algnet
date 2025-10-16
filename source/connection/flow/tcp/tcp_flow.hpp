@@ -6,7 +6,7 @@
 #include "device/interfaces/i_host.hpp"
 #include "packet.hpp"
 #include "tcp_flow_common.hpp"
-#include "tcp_receiver.hpp"
+#include "tcp_flow_receiver.hpp"
 #include "tcp_sender.hpp"
 #include "utils/str_expected.hpp"
 
@@ -49,7 +49,7 @@ public:
 private:
     TcpCommonPtr m_common;
     TcpSenderPtr m_sender;
-    TcpReceiver m_receiver;
+    TcpFlowReceiver m_receiver;
 };
 
 }  // namespace sim
