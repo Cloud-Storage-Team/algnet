@@ -16,7 +16,7 @@ void TcpFlowCommon::initialize_flag_manager() {
             throw std::runtime_error("Cannot register ack ttl label");
         }
         if (!register_packet_avg_rtt_flag(flag_manager)) {
-            throw std::runtime_error("Can not registrate packet avg rtt label");
+            throw std::runtime_error("Cannot register packet avg rtt label");
         }
         is_flag_manager_initialized = true;
     }
