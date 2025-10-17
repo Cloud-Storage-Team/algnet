@@ -13,7 +13,7 @@ void TcpFlowCommon::initialize_flag_manager() {
             throw std::runtime_error("Can not registrate packet type label");
         }
         if (!flag_manager.register_flag_by_amount(ack_ttl_label, MAX_TTL + 1)) {
-            throw std::runtime_error("Can not registrate ack ttl label");
+            throw std::runtime_error("Cannot register ack ttl label");
         }
         if (!register_packet_avg_rtt_flag(flag_manager)) {
             throw std::runtime_error("Can not registrate packet avg rtt label");
