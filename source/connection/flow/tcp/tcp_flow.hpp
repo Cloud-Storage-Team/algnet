@@ -9,6 +9,7 @@
 #include "metrics/packet_reordering/simple_packet_reordering.hpp"
 #include "packet.hpp"
 #include "utils/flag_manager.hpp"
+#include "utils/packet_num_monitor.hpp"
 #include "utils/str_expected.hpp"
 
 namespace sim {
@@ -36,10 +37,10 @@ public:
     std::shared_ptr<IHost> get_receiver() const final;
 
     Id get_id() const final;
-    SizeByte get_delivered_bytes() const;
     std::string to_string() const;
 
 private:
+    // common part
     static void initialize_flag_manager();
 
     static std::string m_packet_type_label;
@@ -51,24 +52,24 @@ private:
     static FlagManager<std::string, PacketFlagsBase> m_flag_manager;
     const static inline TTL M_MAX_TTL = 31;
 
+    Id m_id;
+    std::shared_ptr<IConnection> m_connection;
+
+    std::weak_ptr<IHost> m_src;
+    std::weak_ptr<IHost> m_dest;
+    bool m_ecn_capable;
+
+private:
+    // sender part
     class SendAtTime;
     class Timeout;
 
     Packet generate_data_packet(PacketNum packet_num);
     void set_avg_rtt_if_present(Packet& packet);
-    Packet create_ack(Packet data);
-    Packet generate_packet();
     void update_rto_on_timeout();
     void update_rto_on_ack();
     void send_packet_now(Packet packet);
     void retransmit_packet(PacketNum packet_num);
-
-    Id m_id;
-
-    std::shared_ptr<IConnection> m_connection;
-
-    std::weak_ptr<IHost> m_src;
-    std::weak_ptr<IHost> m_dest;
 
     // Congestion control module
     std::unique_ptr<ITcpCC> m_cc;
@@ -81,7 +82,6 @@ private:
     std::optional<TimeNs> m_last_send_time;
 
     SizeByte m_packet_size;
-    bool m_ecn_capable;
 
     TimeNs m_current_rto;
     TimeNs m_max_rto;
@@ -95,10 +95,14 @@ private:
     PacketNum m_next_packet_num;
 
     // Contains numbers of all delivered acks
-    std::set<PacketNum> m_acked;
+    PacketNumMonitor m_acked;
 
     SimplePacketReordering m_packet_reordering;
     utils::Statistics<TimeNs> m_rtt_statistics;
+
+private:
+    // receiver part
+    Packet create_ack(Packet data);
 };
 
 }  // namespace sim

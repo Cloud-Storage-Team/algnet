@@ -68,7 +68,7 @@ TEST_F(Start, TrivialTopology) {
 
     sim.start();
 
-    ASSERT_EQ(flow->get_delivered_bytes(), data_to_send);
+    ASSERT_EQ(flow->get_delivered_data_size(), data_to_send);
 }
 
 TEST_F(Start, ThreeToOneTopology) {
@@ -122,7 +122,7 @@ TEST_F(Start, ThreeToOneTopology) {
     for (int i = 0; i < 3; ++i) {
         const auto conn_id = "conn" + std::to_string(i + 1);
         const auto expected = data_to_send_map.at(conn_id);
-        const auto actual = flows[i]->get_delivered_bytes();
+        const auto actual = flows[i]->get_delivered_data_size();
         ASSERT_EQ(actual, expected) << conn_id << " mismatch";
     }
 }

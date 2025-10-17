@@ -20,13 +20,13 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
       m_connection(std::move(a_conn)),
       m_src(m_connection->get_sender()),
       m_dest(m_connection->get_receiver()),
+      m_ecn_capable(a_ecn_capable),
       m_cc(std::move(a_cc)),
       m_sending_started(false),
       m_init_time(0),
       m_last_ack_arrive_time(0),
       m_last_send_time(std::nullopt),
       m_packet_size(a_packet_size),
-      m_ecn_capable(a_ecn_capable),
       m_current_rto(TimeNs(2000)),
       m_max_rto(Time<Second>(1)),
       m_rto_steady(false),
@@ -68,8 +68,6 @@ std::shared_ptr<IHost> TcpFlow::get_sender() const { return m_src.lock(); }
 std::shared_ptr<IHost> TcpFlow::get_receiver() const { return m_dest.lock(); }
 
 Id TcpFlow::get_id() const { return m_id; }
-
-SizeByte TcpFlow::get_delivered_bytes() const { return m_delivered_data_size; }
 
 SizeByte TcpFlow::get_packet_size() const { return m_packet_size; }
 
@@ -161,12 +159,17 @@ Packet TcpFlow::create_ack(Packet data) {
 
     m_flag_manager.set_flag(ack.flags, m_packet_type_label, PacketType::ACK);
     m_flag_manager.set_flag(ack.flags, m_ack_ttl_label, data.ttl);
-    set_avg_rtt_if_present(ack);
+    try {
+        TimeNs rtt = get_avg_rtt_label(m_flag_manager, data.flags);
+        set_avg_rtt_flag(m_flag_manager, ack.flags, rtt);
+    } catch (const FlagNotSetException& e) {
+        LOG_INFO(
+            fmt::format("avg rtt flag does not set in data packet {} so it "
+                        "will not be set in "
+                        "ack {}",
+                        data.to_string(), ack.to_string()));
+    }
     return ack;
-}
-
-Packet TcpFlow::generate_packet() {
-    return generate_data_packet(m_next_packet_num++);
 }
 
 void TcpFlow::initialize_flag_manager() {
@@ -218,7 +221,7 @@ public:
         }
         auto flow = m_flow.lock();
 
-        if (flow->m_acked.contains(m_packet_num)) {
+        if (flow->m_acked.is_confirmed(m_packet_num)) {
             return;
         }
         LOG_WARN(
@@ -248,7 +251,7 @@ void TcpFlow::update(Packet packet) {
 
         m_last_ack_arrive_time = current_time;
 
-        if (m_acked.contains(packet.packet_num)) {
+        if (m_acked.is_confirmed(packet.packet_num)) {
             LOG_WARN(fmt::format("Got duplicate ack number {}; ignored",
                                  packet.packet_num));
             return;
@@ -260,7 +263,7 @@ void TcpFlow::update(Packet packet) {
 
         MetricsCollector::get_instance().add_RTT(packet.flow->get_id(),
                                                  current_time, rtt);
-        m_acked.insert(packet.packet_num);
+        m_acked.confirm_one(packet.packet_num);
 
         if (m_packets_in_flight > 0) {
             m_packets_in_flight--;
