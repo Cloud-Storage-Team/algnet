@@ -12,12 +12,12 @@ connections:
         cc:
           type: swift
           base_target: 4000ns
-      # flow2:
-      #   type: tcp
-      #   packet_size: 256B
-      #   cc:
-      #     type: swift
-      #     base_target: 4000ns
+      flow2:
+        type: tcp
+        packet_size: 256B
+        cc:
+          type: swift
+          base_target: 4000ns
 
 scenario:
   - action: send_data
