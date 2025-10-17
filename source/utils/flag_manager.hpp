@@ -116,7 +116,7 @@ private:
     std::unordered_map<FlagId, FlagInfo> m_flag_manager;
 };
 
-using BaseFlagType = std::string;
+using BaseFlagType = std::string_view;
 using BaseFlagManager = FlagManager<BaseFlagType, PacketFlagsBase>;
 
 }  // namespace sim

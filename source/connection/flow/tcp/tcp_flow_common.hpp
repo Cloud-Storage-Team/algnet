@@ -1,0 +1,35 @@
+#pragma once
+#include <memory>
+
+#include "connection/i_connection.hpp"
+#include "types.hpp"
+#include "utils/flag_manager.hpp"
+
+namespace sim {
+struct TcpFlowCommon {
+    TcpFlowCommon(Id a_id, std::shared_ptr<IConnection> a_connection,
+                  std::shared_ptr<IHost> a_sender,
+                  std::shared_ptr<IHost> a_receiver, bool a_ecn_capable);
+
+    static void initialize_flag_manager();
+
+    static inline constexpr std::string_view packet_type_label = "type";
+    enum PacketType { ACK, DATA, ENUM_SIZE };
+
+    static constexpr std::string_view ack_ttl_label = "ack_ttl";
+
+    static bool is_flag_manager_initialized;
+    static BaseFlagManager flag_manager;
+
+    const static inline TTL MAX_TTL = 31;
+
+    Id id;
+    std::weak_ptr<IHost> sender;
+    std::weak_ptr<IHost> receiver;
+    std::weak_ptr<IConnection> connection;
+    bool ecn_capable;
+};
+
+using TcpCommonPtr = std::shared_ptr<const TcpFlowCommon>;
+
+}  // namespace sim

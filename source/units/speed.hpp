@@ -55,21 +55,7 @@ public:
 
     constexpr void operator/=(double mult) { m_value_bit_per_ns /= mult; }
 
-    bool constexpr operator<(ThisSpeed speed) const {
-        return m_value_bit_per_ns < speed.m_value_bit_per_ns;
-    }
-
-    bool constexpr operator>(ThisSpeed speed) const {
-        return m_value_bit_per_ns > speed.m_value_bit_per_ns;
-    }
-
-    constexpr bool operator==(ThisSpeed speed) const {
-        return equal(m_value_bit_per_ns, speed.value_bit_per_ns());
-    }
-
-    constexpr bool operator!=(ThisSpeed speed) const {
-        return !(*this == speed);
-    }
+    auto operator<=>(const ThisSpeed& speed) const = default;
 
 private:
     double m_value_bit_per_ns;  // value in bit per nanosecond

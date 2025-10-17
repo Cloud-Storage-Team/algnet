@@ -20,7 +20,9 @@ public:
         return instance;
     }
 
-    bool add_object(std::shared_ptr<Identifiable> object);
+    [[nodiscard]] bool add_object(std::shared_ptr<Identifiable> object);
+
+    [[nodiscard]] bool delete_object(std::shared_ptr<Identifiable> object);
 
     template <typename TObject>
     std::shared_ptr<TObject> get_object(Id id) {

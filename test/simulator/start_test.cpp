@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "connection/connection_impl.hpp"
-#include "connection/flow/tcp/basic/basic_cc.hpp"
+#include "connection/flow/tcp/cc/basic/basic_cc.hpp"
 #include "connection/mplb/round_robin_mplb.hpp"
 #include "scenario/action/send_data_action.hpp"
 #include "scenario/scenario.hpp"
@@ -19,9 +19,9 @@ std::shared_ptr<sim::TcpFlow> add_connection_with_single_flow(
     auto connection = std::make_shared<sim::ConnectionImpl>(
         conn_id, sender, receiver, std::make_shared<sim::RoundRobinMPLB>());
 
-    auto flow = std::make_shared<sim::TcpFlow>(conn_id + "_flow1", connection,
-                                               std::make_unique<sim::BasicCC>(),
-                                               packet_size);
+    auto flow =
+        sim::TcpFlow::create(conn_id + "_flow1", connection,
+                             std::make_unique<sim::BasicCC>(), packet_size);
 
     connection->add_flow(flow);
 
@@ -32,7 +32,7 @@ std::shared_ptr<sim::TcpFlow> add_connection_with_single_flow(
 
 class Start : public testing::Test {
 public:
-    void TearDown() override {}
+    void TearDown() override { sim::IdentifierFactory::get_instance().clear(); }
     void SetUp() override {};
 };
 
@@ -68,7 +68,7 @@ TEST_F(Start, TrivialTopology) {
 
     sim.start();
 
-    ASSERT_EQ(flow->get_delivered_bytes(), data_to_send);
+    ASSERT_EQ(flow->get_delivered_data_size(), data_to_send);
 }
 
 TEST_F(Start, ThreeToOneTopology) {
@@ -122,7 +122,7 @@ TEST_F(Start, ThreeToOneTopology) {
     for (int i = 0; i < 3; ++i) {
         const auto conn_id = "conn" + std::to_string(i + 1);
         const auto expected = data_to_send_map.at(conn_id);
-        const auto actual = flows[i]->get_delivered_bytes();
+        const auto actual = flows[i]->get_delivered_data_size();
         ASSERT_EQ(actual, expected) << conn_id << " mismatch";
     }
 }

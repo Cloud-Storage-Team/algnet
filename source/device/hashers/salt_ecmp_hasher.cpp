@@ -1,14 +1,12 @@
 #include "salt_ecmp_hasher.hpp"
 
-#include "get_flow_id.hpp"
-
 namespace sim {
 
 SaltECMPHasher::SaltECMPHasher(Id a_device_id)
     : m_device_id(std::move(a_device_id)) {}
 
 std::uint32_t SaltECMPHasher::get_hash(const Packet& packet) {
-    std::string flow_id = get_flow_id(packet.flow);
+    std::string flow_id = packet.flow_id;
 
     std::hash<std::string> hasher;
     std::string header_str = fmt::format(

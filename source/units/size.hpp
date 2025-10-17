@@ -93,29 +93,7 @@ public:
         m_value_bits = (m_value_bits + mult - 1) / mult;
     }
 
-    bool constexpr operator<(ThisSize size) const {
-        return m_value_bits < size.m_value_bits;
-    }
-
-    bool constexpr operator>(ThisSize size) const {
-        return m_value_bits > size.m_value_bits;
-    }
-
-    bool constexpr operator<=(ThisSize size) const {
-        return m_value_bits <= size.m_value_bits;
-    }
-
-    bool constexpr operator>=(ThisSize size) const {
-        return m_value_bits >= size.m_value_bits;
-    }
-
-    bool constexpr operator==(ThisSize size) const {
-        return m_value_bits == size.m_value_bits;
-    }
-
-    bool constexpr operator!=(ThisSize size) const {
-        return m_value_bits != size.m_value_bits;
-    }
+    auto operator<=>(const ThisSize& size) const = default;
 
 private:
     uint64_t m_value_bits;  // Size in bits

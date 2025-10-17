@@ -36,7 +36,12 @@ std::shared_ptr<IConnection> ConnectionParser::parse_connection(
                                                  receiver_ptr, std::move(mplb));
 
     auto& idf = IdentifierFactory::get_instance();
-    idf.add_object(conn);
+    if (!idf.add_object(conn)) {
+        throw std::runtime_error(
+            fmt::format("Can not registrage connection; object with such id "
+                        "({}) alredy exists",
+                        conn->get_id()));
+    }
 
     ConfigNode flows_node = node["flows"].value_or_throw();
 
@@ -46,7 +51,6 @@ std::shared_ptr<IConnection> ConnectionParser::parse_connection(
         std::shared_ptr<IFlow> flow(
             FlowParser::parse_i_flow(flow_node, conn_id));
 
-        idf.add_object(flow);
         conn->add_flow(flow);
     }
 

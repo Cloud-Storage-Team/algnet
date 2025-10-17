@@ -84,19 +84,7 @@ public:
 
     constexpr void operator/=(double mult) { m_value_ns /= mult; }
 
-    bool constexpr operator<(ThisTime time) const {
-        return m_value_ns < time.m_value_ns;
-    }
-
-    bool constexpr operator>(ThisTime time) const {
-        return m_value_ns > time.m_value_ns;
-    }
-
-    bool constexpr operator==(ThisTime time) const {
-        return equal(m_value_ns, time.value_nanoseconds());
-    }
-
-    bool constexpr operator!=(ThisTime time) const { return !operator==(time); }
+    auto operator<=>(const ThisTime& time) const = default;
 
 private:
     double m_value_ns;  // Time in nanoseconds
