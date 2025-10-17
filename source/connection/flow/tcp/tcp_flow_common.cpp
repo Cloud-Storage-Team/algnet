@@ -3,7 +3,7 @@
 #include "utils/avg_rtt_packet_flag.hpp"
 
 namespace sim {
-FlagManager<std::string, PacketFlagsBase> TcpFlowCommon::flag_manager;
+BaseFlagManager TcpFlowCommon::flag_manager;
 bool TcpFlowCommon::is_flag_manager_initialized = false;
 
 void TcpFlowCommon::initialize_flag_manager() {

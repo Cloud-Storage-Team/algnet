@@ -13,13 +13,13 @@ struct TcpFlowCommon {
 
     static void initialize_flag_manager();
 
-    static constexpr std::string packet_type_label = "type";
+    static inline constexpr std::string_view packet_type_label = "type";
     enum PacketType { ACK, DATA, ENUM_SIZE };
 
-    static constexpr std::string ack_ttl_label = "ack_ttl";
+    static constexpr std::string_view ack_ttl_label = "ack_ttl";
 
     static bool is_flag_manager_initialized;
-    static FlagManager<std::string, PacketFlagsBase> flag_manager;
+    static BaseFlagManager flag_manager;
 
     const static inline TTL MAX_TTL = 31;
 
