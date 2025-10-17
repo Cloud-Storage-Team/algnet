@@ -78,7 +78,8 @@ void Summary::write_to_csv(std::filesystem::path& output_path) const {
 
 void Summary::check() const {
     if (!m_errors.empty()) {
-        throw std::runtime_error(fmt::format("{}", fmt::join(m_errors, "\n")));
+        throw std::runtime_error(
+            fmt::format("Summary errors: {}", fmt::join(m_errors, "\n")));
     }
 }
 }  // namespace sim
