@@ -159,7 +159,7 @@ std::string TcpFlowSender::to_string() const {
     oss << ", CC module: " << m_cc->to_string();
     oss << ", packet size: " << m_packet_size;
     oss << ", packets in flight: " << m_packets_in_flight;
-    oss << ", acked packets: " << m_delivered_data_size;
+    oss << ", Deliverred data size: " << m_delivered_data_size;
     return oss.str();
 }
 
