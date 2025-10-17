@@ -67,7 +67,10 @@ private:
     class SendAtTime;
     class Timeout;
 
-    void process_ack(Packet ack);
+    void process_single_ack(Packet ack);
+    void process_collective_ack(Packet ack);
+    void process_ack(Packet ack, std::size_t confirm_count);
+
     Packet generate_data_packet(PacketNum packet_num);
     void set_avg_rtt_if_present(Packet& packet);
     void update_rto_on_timeout();

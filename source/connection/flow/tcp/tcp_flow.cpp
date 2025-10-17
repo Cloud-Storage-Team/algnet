@@ -48,7 +48,7 @@ void TcpFlow::update(Packet packet) {
     PacketType type = static_cast<PacketType>(
         m_flag_manager.get_flag(packet.flags, m_packet_type_label));
     if (packet.dest_id == m_src.lock()->get_id() && type == PacketType::ACK) {
-        process_ack(std::move(packet));
+        process_single_ack(std::move(packet));
     } else if (packet.dest_id == m_dest.lock()->get_id() &&
                type == PacketType::DATA) {
         process_data_packet(std::move(packet));
@@ -214,7 +214,16 @@ private:
     PacketNum m_packet_num;
 };
 
-void TcpFlow::process_ack(Packet ack) {
+void TcpFlow::process_single_ack(Packet ack) {
+    bool confirmed = m_acked.confirm_one(ack.packet_num);
+    process_ack(std::move(ack), confirmed);
+}
+void TcpFlow::process_collective_ack(Packet ack) {
+    std::size_t confirmed = m_acked.confirm_to(ack.packet_num);
+    process_ack(std::move(ack), confirmed);
+}
+
+void TcpFlow::process_ack(Packet ack, std::size_t confirm_count) {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
     if (current_time < ack.sent_time) {
         LOG_ERROR("Packet " + ack.to_string() +
@@ -224,8 +233,8 @@ void TcpFlow::process_ack(Packet ack) {
 
     m_last_ack_arrive_time = current_time;
 
-    if (m_acked.is_confirmed(ack.packet_num)) {
-        LOG_WARN(fmt::format("Got duplicate ack number {}; ignored",
+    if (confirm_count == 0) {
+        LOG_WARN(fmt::format("Got ack number {} that confirm nothing; ignored",
                              ack.packet_num));
         return;
     }
@@ -236,16 +245,17 @@ void TcpFlow::process_ack(Packet ack) {
 
     MetricsCollector::get_instance().add_RTT(ack.flow->get_id(), current_time,
                                              rtt);
-    m_acked.confirm_one(ack.packet_num);
 
-    if (m_packets_in_flight > 0) {
-        m_packets_in_flight--;
+    if (m_packets_in_flight > confirm_count) {
+        m_packets_in_flight -= confirm_count;
+    } else {
+        m_packets_in_flight = 0;
     }
 
     m_cc->on_ack(rtt, m_rtt_statistics.get_mean().value(),
                  ack.congestion_experienced);
 
-    m_delivered_data_size += m_packet_size;
+    m_delivered_data_size += m_packet_size * confirm_count;
 
     SpeedGbps delivery_rate =
         (m_delivered_data_size - ack.delivered_data_size_at_origin) /
