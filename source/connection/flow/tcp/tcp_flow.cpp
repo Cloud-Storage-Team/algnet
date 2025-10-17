@@ -47,11 +47,50 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
 void TcpFlow::update(Packet packet) {
     PacketType type = static_cast<PacketType>(
         m_flag_manager.get_flag(packet.flags, m_packet_type_label));
-    if (packet.dest_id == m_src.lock()->get_id() && type == PacketType::ACK) {
-        process_single_ack(std::move(packet));
-    } else if (packet.dest_id == m_dest.lock()->get_id() &&
-               type == PacketType::DATA) {
-        process_data_packet(std::move(packet));
+    if (m_src.expired()) {
+        LOG_ERROR(fmt::format("Sender exprired for flow {}; ignore packet {}",
+                              to_string(), packet.to_string()));
+        return;
+    }
+    if (m_dest.expired()) {
+        LOG_ERROR(fmt::format("Receiver exprired for flow {}; ignore packet {}",
+                              to_string(), packet.to_string()));
+        return;
+    }
+    if (packet.dest_id == m_src.lock()->get_id()) {
+        switch (type) {
+            case PacketType::ACK: {
+                process_single_ack(std::move(packet));
+                break;
+            }
+            case PacketType::COLLECTIVE_ACK: {
+                process_collective_ack(std::move(packet));
+                break;
+            }
+            default: {
+                LOG_ERROR(fmt::format(
+                    "Unexpected type of packet {} arrived to sender",
+                    packet.to_string()));
+                break;
+            }
+        }
+    } else if (packet.dest_id == m_dest.lock()->get_id()) {
+        switch (type) {
+            case PacketType::DATA: {
+                process_data_packet(std::move(packet));
+                break;
+            }
+            default: {
+                LOG_ERROR(fmt::format(
+                    "Unexpected type of packet {} arrived to receiver",
+                    packet.to_string()));
+                break;
+            }
+        }
+    } else {
+        LOG_ERROR(
+            fmt::format("Packet {} arrived to unexoected device (see dest_id)",
+                        packet.to_string()));
     }
 }
 
