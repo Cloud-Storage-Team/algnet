@@ -256,7 +256,7 @@ Packet TcpFlowSender::generate_data_packet(PacketNum packet_num) {
             packet.dest_id = receiver.lock()->get_id();
         } else {
             LOG_ERROR(fmt::format(
-                "Receiver expider for flow {}; receiver_id does not set to "
+                "Receiver expired for flow {}; receiver_id does not set to "
                 "data packet {}",
                 m_common->id, packet.to_string()));
         }
