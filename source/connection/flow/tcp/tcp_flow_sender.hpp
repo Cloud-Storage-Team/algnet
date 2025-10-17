@@ -25,7 +25,11 @@ public:
     void process_ack_packet(Packet ack);
     void send_data(SizeByte data);
 
+    SizeByte get_packet_size() const;
+    SizeByte get_sent_data_size() const;
     SizeByte get_delivered_data_size() const;
+    uint32_t get_retransmit_count() const;
+
     SizeByte get_sending_quota() const;
     std::optional<TimeNs> get_fct() const;
     std::optional<TimeNs> get_last_rtt() const;
@@ -59,8 +63,10 @@ private:
     TimeNs m_max_rto;
     // is in STEADY state (after first ACK with valid RTT)
     bool m_rto_steady;
+    std::uint32_t m_retransmit_count;
 
     std::uint32_t m_packets_in_flight;
+    SizeByte m_sent_data_size;
     SizeByte m_delivered_data_size;
     PacketNum m_next_packet_num;
 

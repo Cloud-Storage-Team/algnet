@@ -26,6 +26,7 @@ TcpFlowSender::TcpFlowSender(TcpCommonPtr a_common,
       m_max_rto(Time<Second>(1)),
       m_rto_steady(false),
       m_packets_in_flight(0),
+      m_sent_data_size(0),
       m_delivered_data_size(0),
       m_next_packet_num(0) {}
 
@@ -108,6 +109,14 @@ void TcpFlowSender::send_data(SizeByte data) {
         data -= std::min(data, m_packet_size);
         m_packets_in_flight++;
     }
+}
+
+SizeByte TcpFlowSender::get_packet_size() const { return m_packet_size; }
+
+SizeByte TcpFlowSender::get_sent_data_size() const { return m_sent_data_size; }
+
+uint32_t TcpFlowSender::get_retransmit_count() const {
+    return m_retransmit_count;
 }
 
 SizeByte TcpFlowSender::get_delivered_data_size() const {
@@ -270,13 +279,14 @@ void TcpFlowSender::send_packet_now(Packet packet) {
     Scheduler::get_instance().add<Timeout>(current_time + m_current_rto,
                                            this->shared_from_this(),
                                            packet.packet_num);
-
+    m_sent_data_size += packet.size;
     packet.sent_time = current_time;
     m_common->sender.lock()->enqueue_packet(std::move(packet));
 }
 
 void TcpFlowSender::retransmit_packet(PacketNum packet_num) {
     Packet packet = generate_data_packet(packet_num);
+    m_retransmit_count++;
     send_packet_now(std::move(packet));
 }
 

@@ -13,10 +13,13 @@ public:
              TimeNs a_last_rtt = TimeNs(0));
 
     void update(sim::Packet packet) final;
+    SizeByte get_packet_size() const final;
     SizeByte get_sending_quota() const final;
     void send_data(SizeByte data) final;
 
     virtual SizeByte get_delivered_data_size() const final;
+    virtual SizeByte get_sent_data_size() const final;
+    virtual uint32_t retransmit_count() const final;
     virtual std::optional<TimeNs> get_fct() const final;
     virtual std::optional<TimeNs> get_last_rtt() const;
     const sim::BaseFlagManager& get_flag_manager() const final;
@@ -27,7 +30,6 @@ public:
     Id get_id() const final;
     void set_sending_quota(SizeByte quota);
     void set_last_rtt(std::optional<TimeNs> rtt);
-    SizeByte get_packet_size() const;
 
 private:
     std::weak_ptr<sim::IHost> m_receiver;

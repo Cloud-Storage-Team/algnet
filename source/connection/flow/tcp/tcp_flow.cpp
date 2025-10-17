@@ -25,36 +25,6 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
       m_sender(TcpFlowSender::create(m_common, std::move(a_cc), a_packet_size)),
       m_receiver(m_common) {}
 
-SizeByte TcpFlow::get_delivered_data_size() const {
-    return m_sender->get_delivered_data_size();
-}
-
-std::optional<TimeNs> TcpFlow::get_fct() const { return m_sender->get_fct(); }
-
-const BaseFlagManager& TcpFlow::get_flag_manager() const {
-    return m_common->flag_manager;
-}
-
-std::shared_ptr<IHost> TcpFlow::get_sender() const {
-    return m_common->sender.lock();
-}
-
-std::shared_ptr<IHost> TcpFlow::get_receiver() const {
-    return m_common->receiver.lock();
-}
-
-Id TcpFlow::get_id() const { return m_common->id; }
-
-SizeByte TcpFlow::get_delivered_bytes() const {
-    return m_sender->get_delivered_data_size();
-}
-
-SizeByte TcpFlow::get_sending_quota() const {
-    return m_sender->get_sending_quota();
-}
-
-void TcpFlow::send_data(SizeByte data) { return m_sender->send_data(data); }
-
 void TcpFlow::update(Packet packet) {
     TcpFlowCommon::PacketType type =
         static_cast<TcpFlowCommon::PacketType>(m_common->flag_manager.get_flag(
@@ -110,9 +80,47 @@ void TcpFlow::update(Packet packet) {
     }
 }
 
+void TcpFlow::send_data(SizeByte data) { return m_sender->send_data(data); }
+
+SizeByte TcpFlow::get_sending_quota() const {
+    return m_sender->get_sending_quota();
+}
+
+SizeByte TcpFlow::get_packet_size() const {
+    return m_sender->get_packet_size();
+}
+
+SizeByte TcpFlow::get_sent_data_size() const {
+    return m_sender->get_sent_data_size();
+}
+
+SizeByte TcpFlow::get_delivered_data_size() const {
+    return m_sender->get_delivered_data_size();
+}
+
+uint32_t TcpFlow::retransmit_count() const {
+    return m_sender->get_retransmit_count();
+};
+
 std::optional<TimeNs> TcpFlow::get_last_rtt() const {
     return m_sender->get_last_rtt();
 }
+
+std::optional<TimeNs> TcpFlow::get_fct() const { return m_sender->get_fct(); }
+
+const BaseFlagManager& TcpFlow::get_flag_manager() const {
+    return m_common->flag_manager;
+}
+
+std::shared_ptr<IHost> TcpFlow::get_sender() const {
+    return m_common->sender.lock();
+}
+
+std::shared_ptr<IHost> TcpFlow::get_receiver() const {
+    return m_common->receiver.lock();
+}
+
+Id TcpFlow::get_id() const { return m_common->id; }
 
 std::string TcpFlow::to_string() const {
     std::ostringstream oss;

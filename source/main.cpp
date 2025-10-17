@@ -54,6 +54,7 @@ int main(const int argc, char **argv) {
     sim::Summary summary = sim::Summary(simulator.get_connections());
 
     summary.write_to_csv(summary_path);
+    summary.check();
 
     return 0;
 }

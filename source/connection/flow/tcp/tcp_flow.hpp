@@ -32,18 +32,23 @@ public:
     void send_data(SizeByte data) final;
 
     SizeByte get_sending_quota() const final;
-    std::optional<TimeNs> get_last_rtt() const final;
+
+    SizeByte get_packet_size() const final;
+    SizeByte get_sent_data_size() const final;
     SizeByte get_delivered_data_size() const final;
-    const BaseFlagManager& get_flag_manager() const final;
+    uint32_t retransmit_count() const final;
+
+    std::optional<TimeNs> get_last_rtt() const final;
     // Returns time elapced from flow start (firsrt call of send_packet)
     // to last ack arrive
     std::optional<TimeNs> get_fct() const final;
+
+    const BaseFlagManager& get_flag_manager() const final;
 
     std::shared_ptr<IHost> get_sender() const final;
     std::shared_ptr<IHost> get_receiver() const final;
 
     Id get_id() const final;
-    SizeByte get_delivered_bytes() const;
     std::string to_string() const;
 
 private:
