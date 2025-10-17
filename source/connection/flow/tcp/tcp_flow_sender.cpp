@@ -44,7 +44,7 @@ void TcpFlowSender::process_ack_packet(Packet ack) {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
     if (current_time < ack.sent_time) {
         LOG_ERROR("Packet " + ack.to_string() +
-                  " current time less that sending time; ignored");
+                  " current time less than sending time; ignored");
         return;
     }
 
