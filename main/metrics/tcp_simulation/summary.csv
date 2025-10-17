@@ -1,3 +1,5 @@
-Conn id, Flow id, Throughput (Gbps)
-conn1, flow1_conn1, 0.995856
-conn2, flow1_conn2, 0.997922
+Flow id, Packet size (bytes), Sent (bytes), Delivered (bytes), Overhead (%), Retransmit size (bytes), Retransmit count, Sending rate (Gbps), Throughput (Gbps), FCT (ns)
+
+conn1_flow1, 256, 129792, 128000, 0, 1792, 7, 1.0098, 0.995856, 957642
+
+conn2_flow1, 256, 259328, 256000, 0, 3328, 13, 1.01089, 0.997922, 1.91132e+06
