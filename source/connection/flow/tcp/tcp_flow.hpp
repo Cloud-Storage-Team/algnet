@@ -23,15 +23,18 @@ public:
     void send_data(SizeByte data) final;
 
     SizeByte get_packet_size() const final;
-    SizeByte get_sending_quota() const final;
-    std::optional<TimeNs> get_last_rtt() const final;
-    SizeByte get_delivered_data_size() const final;
     SizeByte get_sent_data_size() const final;
+    SizeByte get_delivered_data_size() const final;
     uint32_t retransmit_count() const final;
-    const BaseFlagManager& get_flag_manager() const final;
+
+    SizeByte get_sending_quota() const final;
+
+    std::optional<TimeNs> get_last_rtt() const final;
     // Returns time elapced from flow start (firsrt call of send_packet)
     // to last update call
     TimeNs get_fct() const final;
+
+    const BaseFlagManager& get_flag_manager() const final;
 
     std::shared_ptr<IHost> get_sender() const final;
     std::shared_ptr<IHost> get_receiver() const final;
@@ -44,7 +47,7 @@ private:
     static void initialize_flag_manager();
 
     static std::string m_packet_type_label;
-    enum PacketType { ACK, DATA, ENUM_SIZE };
+    enum PacketType { ACK, COLLECTIVE_ACK, DATA, ENUM_SIZE };
 
     static std::string m_ack_ttl_label;
 
@@ -64,6 +67,7 @@ private:
     class SendAtTime;
     class Timeout;
 
+    void process_ack(Packet ack);
     Packet generate_data_packet(PacketNum packet_num);
     void set_avg_rtt_if_present(Packet& packet);
     void update_rto_on_timeout();
@@ -102,6 +106,7 @@ private:
 
 private:
     // receiver part
+    void process_data_packet(Packet data_packet);
     Packet create_ack(Packet data);
 };
 
