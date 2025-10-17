@@ -108,7 +108,7 @@ private:
     utils::Statistics<TimeNs> m_rtt_statistics;
 
 private:
-    static constexpr bool M_COLLECTIVE_ACK_SUPPORT = false;
+    static constexpr bool M_COLLECTIVE_ACK_SUPPORT = true;
     PacketNumMonitor m_data_packets_monitor;
     // receiver part
     void process_data_packet(Packet data_packet);
