@@ -10,7 +10,7 @@ void TcpFlowCommon::initialize_flag_manager() {
     if (!is_flag_manager_initialized) {
         if (!flag_manager.register_flag_by_amount(packet_type_label,
                                                   PacketType::ENUM_SIZE)) {
-            throw std::runtime_error("Can not registrate packet type label");
+            throw std::runtime_error("Cannot register packet type label");
         }
         if (!flag_manager.register_flag_by_amount(ack_ttl_label, MAX_TTL + 1)) {
             throw std::runtime_error("Cannot register ack ttl label");
