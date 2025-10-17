@@ -1,8 +1,8 @@
 #pragma once
 #include <optional>
 
+#include "cc/i_tcp_cc.hpp"
 #include "event/event.hpp"
-#include "i_tcp_cc.hpp"
 #include "tcp_flow_common.hpp"
 
 namespace sim {
@@ -70,8 +70,8 @@ private:
     SizeByte m_delivered_data_size;
     PacketNum m_next_packet_num;
 
-    // Contains numbers of all delivered acks
-    std::set<PacketNum> m_acked;
+    // Contains numbers of all confirmed packets
+    std::set<PacketNum> m_confirmed;
 
     utils::Statistics<TimeNs> m_rtt_statistics;
 };

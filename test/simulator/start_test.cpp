@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "connection/connection_impl.hpp"
-#include "connection/flow/tcp/basic/basic_cc.hpp"
+#include "connection/flow/tcp/cc/basic/basic_cc.hpp"
 #include "connection/mplb/round_robin_mplb.hpp"
 #include "scenario/action/send_data_action.hpp"
 #include "scenario/scenario.hpp"

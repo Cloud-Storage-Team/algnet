@@ -50,7 +50,7 @@ void TcpFlowSender::process_ack_packet(Packet ack) {
 
     m_last_ack_arrive_time = current_time;
 
-    if (m_acked.contains(ack.packet_num)) {
+    if (m_confirmed.contains(ack.packet_num)) {
         LOG_WARN(fmt::format("Got duplicate ack number {}; ignored",
                              ack.packet_num));
         return;
@@ -61,7 +61,7 @@ void TcpFlowSender::process_ack_packet(Packet ack) {
     update_rto_on_ack();  // update and transition to STEADY
 
     MetricsCollector::get_instance().add_RTT(m_common->id, current_time, rtt);
-    m_acked.insert(ack.packet_num);
+    m_confirmed.insert(ack.packet_num);
 
     if (m_packets_in_flight > 0) {
         m_packets_in_flight--;
@@ -194,7 +194,7 @@ public:
         }
         auto sender = m_sender.lock();
 
-        if (sender->m_acked.contains(m_packet_num)) {
+        if (sender->m_confirmed.contains(m_packet_num)) {
             return;
         }
         LOG_WARN(
