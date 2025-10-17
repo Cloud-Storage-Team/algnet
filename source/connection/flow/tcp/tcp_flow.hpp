@@ -5,9 +5,9 @@
 #include "connection/flow/i_flow.hpp"
 #include "device/interfaces/i_host.hpp"
 #include "packet.hpp"
-#include "sender/tcp_flow_sender.hpp"
 #include "tcp_flow_common.hpp"
 #include "tcp_flow_receiver.hpp"
+#include "tcp_flow_sender.hpp"
 #include "utils/str_expected.hpp"
 
 namespace sim {

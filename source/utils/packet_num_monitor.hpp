@@ -3,9 +3,9 @@
 
 #include "types.hpp"
 namespace sim {
-class AckMonitor {
+class PacketNumMonitor {
 public:
-    AckMonitor();
+    PacketNumMonitor();
 
     void confirm_one(PacketNum packet_num);
     void confirm_to(PacketNum packet_num);

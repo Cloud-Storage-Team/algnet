@@ -51,7 +51,7 @@ void TcpFlowSender::process_ack_packet(Packet ack) {
     m_last_ack_arrive_time = current_time;
 
     if (m_ack_monitor.is_confirmed(ack.packet_num)) {
-        LOG_WARN(fmt::format("Got duplicate ack number {}; ignored",
+        LOG_WARN(fmt::format("Got already confirmed ack number {}; ignored",
                              ack.packet_num));
         return;
     }

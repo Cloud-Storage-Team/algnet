@@ -1,9 +1,9 @@
-#include "ack_monitor.hpp"
+#include "packet_num_monitor.hpp"
 
 namespace sim {
-AckMonitor::AckMonitor() : m_confirmed(), m_confirmed_mex(0) {}
+PacketNumMonitor::PacketNumMonitor() : m_confirmed(), m_confirmed_mex(0) {}
 
-void AckMonitor::confirm_one(PacketNum packet_num) {
+void PacketNumMonitor::confirm_one(PacketNum packet_num) {
     if (packet_num < m_confirmed_mex) {
         // already confirmed
         return;
@@ -14,7 +14,7 @@ void AckMonitor::confirm_one(PacketNum packet_num) {
     }
 }
 
-void AckMonitor::confirm_to(PacketNum packet_num) {
+void PacketNumMonitor::confirm_to(PacketNum packet_num) {
     if (packet_num < m_confirmed_mex) {
         // already confirmed
         return;
@@ -24,14 +24,14 @@ void AckMonitor::confirm_to(PacketNum packet_num) {
     correctify_state();
 }
 
-bool AckMonitor::is_confirmed(PacketNum packet_num) const {
+bool PacketNumMonitor::is_confirmed(PacketNum packet_num) const {
     if (m_confirmed_mex > packet_num) {
         return true;
     }
     return m_confirmed.contains(packet_num);
 }
 
-void AckMonitor::correctify_state() {
+void PacketNumMonitor::correctify_state() {
     // correctify m_confirmed_mex
     auto it = m_confirmed.lower_bound(m_confirmed_mex);
     while (it != m_confirmed.end() && *it == m_confirmed_mex) {

@@ -1,10 +1,10 @@
 #pragma once
 #include <optional>
 
-#include "../cc/i_tcp_cc.hpp"
-#include "../tcp_flow_common.hpp"
-#include "ack_monitor.hpp"
+#include "cc/i_tcp_cc.hpp"
 #include "event/event.hpp"
+#include "tcp_flow_common.hpp"
+#include "utils/packet_num_monitor.hpp"
 
 namespace sim {
 
@@ -72,7 +72,7 @@ private:
     PacketNum m_next_packet_num;
 
     // Contains numbers of all confirmed packets
-    AckMonitor m_ack_monitor;
+    PacketNumMonitor m_ack_monitor;
 
     utils::Statistics<TimeNs> m_rtt_statistics;
 };
