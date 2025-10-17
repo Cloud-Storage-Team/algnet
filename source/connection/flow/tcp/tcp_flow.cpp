@@ -177,8 +177,10 @@ std::string TcpFlow::to_string() const {
     std::ostringstream oss;
     oss << "[TcpFlow; ";
     oss << "Id:" << m_id;
-    oss << ", src id: " << m_src.lock()->get_id();
-    oss << ", dest id: " << m_dest.lock()->get_id();
+    oss << ", src id: "
+        << (m_src.expired() ? "expired" : m_src.lock()->get_id());
+    oss << ", dest id: "
+        << (m_dest.expired() ? "expired" : m_dest.lock()->get_id());
     oss << ", CC module: " << m_cc->to_string();
     oss << ", packet size: " << m_packet_size;
     oss << ", packets in flight: " << m_packets_in_flight;
@@ -236,7 +238,7 @@ public:
         }
         auto flow = m_flow.lock();
 
-        if (flow->m_acked.is_confirmed(m_packet_num)) {
+        if (flow->m_ack_monitor.is_confirmed(m_packet_num)) {
             return;
         }
         LOG_WARN(
@@ -254,11 +256,11 @@ private:
 };
 
 void TcpFlow::process_single_ack(Packet ack) {
-    bool confirmed = m_acked.confirm_one(ack.packet_num);
+    bool confirmed = m_ack_monitor.confirm_one(ack.packet_num);
     process_ack(std::move(ack), confirmed);
 }
 void TcpFlow::process_collective_ack(Packet ack) {
-    std::size_t confirmed = m_acked.confirm_to(ack.packet_num);
+    std::size_t confirmed = m_ack_monitor.confirm_to(ack.packet_num);
     process_ack(std::move(ack), confirmed);
 }
 
@@ -375,7 +377,9 @@ void TcpFlow::process_data_packet(Packet packet) {
     m_packet_reordering.add_record(packet.packet_num);
     MetricsCollector::get_instance().add_packet_reordering(
         m_id, current_time, m_packet_reordering.value());
-
+    if (M_COLLECTIVE_ACK_SUPPORT) {
+        m_data_packets_monitor.confirm_one(packet.packet_num);
+    }
     Packet ack = create_ack(std::move(packet));
 
     m_dest.lock()->enqueue_packet(ack);
@@ -383,7 +387,9 @@ void TcpFlow::process_data_packet(Packet packet) {
 
 Packet TcpFlow::create_ack(Packet data) {
     Packet ack;
-    ack.packet_num = data.packet_num;
+    ack.packet_num = (M_COLLECTIVE_ACK_SUPPORT
+                          ? m_data_packets_monitor.get_last_confirmed().value()
+                          : data.packet_num);
     ack.source_id = m_dest.lock()->get_id();
     ack.dest_id = m_src.lock()->get_id();
     ack.size = SizeByte(1);
@@ -395,7 +401,10 @@ Packet TcpFlow::create_ack(Packet data) {
     ack.ecn_capable_transport = data.ecn_capable_transport;
     ack.congestion_experienced = data.congestion_experienced;
 
-    m_flag_manager.set_flag(ack.flags, m_packet_type_label, PacketType::ACK);
+    m_flag_manager.set_flag(
+        ack.flags, m_packet_type_label,
+        (M_COLLECTIVE_ACK_SUPPORT ? PacketType::COLLECTIVE_ACK
+                                  : PacketType::ACK));
     m_flag_manager.set_flag(ack.flags, m_ack_ttl_label, data.ttl);
     try {
         TimeNs rtt = get_avg_rtt_label(m_flag_manager, data.flags);

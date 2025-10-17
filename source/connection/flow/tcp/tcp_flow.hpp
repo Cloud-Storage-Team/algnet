@@ -102,12 +102,14 @@ private:
     PacketNum m_next_packet_num;
 
     // Contains numbers of all delivered acks
-    PacketNumMonitor m_acked;
+    PacketNumMonitor m_ack_monitor;
 
     SimplePacketReordering m_packet_reordering;
     utils::Statistics<TimeNs> m_rtt_statistics;
 
 private:
+    static constexpr bool M_COLLECTIVE_ACK_SUPPORT = false;
+    PacketNumMonitor m_data_packets_monitor;
     // receiver part
     void process_data_packet(Packet data_packet);
     Packet create_ack(Packet data);
