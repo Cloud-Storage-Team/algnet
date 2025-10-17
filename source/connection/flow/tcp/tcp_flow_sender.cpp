@@ -50,8 +50,9 @@ void TcpFlowSender::process_ack_packet(Packet ack) {
 
     m_last_ack_arrive_time = current_time;
 
-    if (m_ack_monitor.is_confirmed(ack.packet_num)) {
-        LOG_WARN(fmt::format("Got already confirmed ack number {}; ignored",
+    std::size_t confirmed_count = m_ack_monitor.confirm_to(ack.packet_num);
+    if (confirmed_count == 0) {
+        LOG_WARN(fmt::format("Got ack number {} that confirms nothig; ignored",
                              ack.packet_num));
         return;
     }
@@ -61,25 +62,26 @@ void TcpFlowSender::process_ack_packet(Packet ack) {
     update_rto_on_ack();  // update and transition to STEADY
 
     MetricsCollector::get_instance().add_RTT(m_common->id, current_time, rtt);
-    m_ack_monitor.confirm_one(ack.packet_num);
 
-    if (m_packets_in_flight > 0) {
-        m_packets_in_flight--;
+    if (m_packets_in_flight <= confirmed_count) {
+        m_packets_in_flight -= confirmed_count;
+    } else {
+        m_packets_in_flight = 0;
     }
 
     m_cc->on_ack(rtt, m_rtt_statistics.get_mean().value(),
                  ack.congestion_experienced);
 
-    m_delivered_data_size += m_packet_size;
+    MetricsCollector::get_instance().add_cwnd(m_common->id, current_time,
+                                              m_cc->get_cwnd());
+
+    m_delivered_data_size += confirmed_count * m_packet_size;
 
     SpeedGbps delivery_rate =
         (m_delivered_data_size - ack.delivered_data_size_at_origin) /
         (current_time - ack.generated_time);
     MetricsCollector::get_instance().add_delivery_rate(
         m_common->id, current_time, delivery_rate);
-
-    MetricsCollector::get_instance().add_cwnd(m_common->id, current_time,
-                                              m_cc->get_cwnd());
 }
 
 void TcpFlowSender::send_data(SizeByte data) {

@@ -1,4 +1,5 @@
 #pragma once
+#include <optional>
 #include <set>
 
 #include "types.hpp"
@@ -7,17 +8,24 @@ class PacketNumMonitor {
 public:
     PacketNumMonitor();
 
-    void confirm_one(PacketNum packet_num);
-    void confirm_to(PacketNum packet_num);
+    bool confirm_one(PacketNum packet_num);
+    // Returns number of packets that packet_num confirms
+    std::size_t confirm_to(PacketNum packet_num);
     bool is_confirmed(PacketNum packet_num) const;
 
+    std::optional<PacketNum> get_last_confirmed() const;
+    PacketNum get_first_unconfirmed() const;
+
 private:
+    // returns count of unconfirmed packets with numbers <= max_packet_num
+    // carefully: work slowly!
+    std::size_t get_unconfirmed_count(PacketNum max_packet_num) const;
+
     void correctify_state();
 
-    // State: at any moment m_confirmed_mex contaits mex of all confirmed (got
-    // by confirm_one and confirm_to) packets, m_confirmed containts ONLY packet
-    // numbers > m_confirmed_mex
+    // State: at any moment m_confirmed containts ONLY packet numbers >
+    // m_first_unconfirmed
     std::set<PacketNum> m_confirmed;
-    PacketNum m_confirmed_mex;
+    PacketNum m_first_unconfirmed;
 };
 }  // namespace sim

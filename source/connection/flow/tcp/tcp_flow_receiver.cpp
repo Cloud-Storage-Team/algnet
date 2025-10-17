@@ -18,6 +18,7 @@ void TcpFlowReceiver::process_data_packet(Packet packet) {
                         packet.to_string()));
         return;
     }
+    m_data_packets_monitor.confirm_one(packet.packet_num);
     TimeNs current_time = Scheduler::get_instance().get_current_time();
     m_packet_reordering.add_record(packet.packet_num);
     MetricsCollector::get_instance().add_packet_reordering(
@@ -30,7 +31,16 @@ void TcpFlowReceiver::process_data_packet(Packet packet) {
 
 Packet TcpFlowReceiver::create_ack(Packet data) {
     Packet ack;
-    ack.packet_num = data.packet_num;
+    std::optional<PacketNum> maybe_last_confirmed =
+        m_data_packets_monitor.get_last_confirmed();
+    if (!maybe_last_confirmed) {
+        LOG_ERROR(
+            "Can not correcly calculate ACK numer: there are no packets "
+            "confirmed; ack number set to 0");
+        ack.packet_num = 0;
+    } else {
+        ack.packet_num = maybe_last_confirmed.value();
+    }
     ack.source_id = m_common->receiver.lock()->get_id();
     ack.dest_id = m_common->sender.lock()->get_id();
     ack.size = SizeByte(1);
