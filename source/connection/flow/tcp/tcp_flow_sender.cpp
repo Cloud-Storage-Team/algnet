@@ -289,7 +289,6 @@ void TcpFlowSender::send_packet_now(Packet packet) {
 void TcpFlowSender::retransmit_packet(PacketNum packet_num) {
     Packet packet = generate_data_packet(packet_num);
     m_retransmit_count++;
-    m_packets_in_flight++;
     send_packet_now(std::move(packet));
 }
 
