@@ -35,14 +35,14 @@ bool PacketNumMonitor::is_confirmed(PacketNum packet_num) const {
 }
 
 std::size_t PacketNumMonitor::get_unconfirmed_count(
-    PacketNum max_paket_num) const {
-    if (max_paket_num < m_first_unconfirmed) {
+    PacketNum max_packet_num) const {
+    if (max_packet_num < m_first_unconfirmed) {
         return 0;
     }
-    std::size_t ans = max_paket_num - m_first_unconfirmed + 1;
+    std::size_t ans = max_packet_num - m_first_unconfirmed + 1;
 
     auto it = m_confirmed.begin();
-    while (it != m_confirmed.end() && *it <= max_paket_num) {
+    while (it != m_confirmed.end() && *it <= max_packet_num) {
         it++;
         ans--;
     }
