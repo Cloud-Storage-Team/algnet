@@ -64,9 +64,9 @@ void TcpFlowSender::process_ack_packet(Packet ack) {
     MetricsCollector::get_instance().add_RTT(m_common->id, current_time, rtt);
 
     if (m_packets_in_flight <= confirmed_count) {
-        m_packets_in_flight -= confirmed_count;
-    } else {
         m_packets_in_flight = 0;
+    } else {
+        m_packets_in_flight -= confirmed_count;
     }
 
     m_cc->on_ack(rtt, m_rtt_statistics.get_mean().value(),
@@ -98,16 +98,16 @@ void TcpFlowSender::send_data(SizeByte data) {
             data.value(), m_common->id, quota.value()));
     }
 
+    TimeNs packet_processing_time(1);
+    TimeNs shift(0);
+
     while (data != SizeByte(0)) {
         Packet packet = generate_data_packet(m_next_packet_num++);
         TimeNs pacing_delay = m_cc->get_pacing_delay();
-        if (pacing_delay == TimeNs(0)) {
-            send_packet_now(std::move(packet));
-        } else {
-            Scheduler::get_instance().add<SendAtTime>(now + pacing_delay,
-                                                      this->shared_from_this(),
-                                                      std::move(packet));
-        }
+        Scheduler::get_instance().add<SendAtTime>(now + pacing_delay + shift,
+                                                  this->shared_from_this(),
+                                                  std::move(packet));
+        shift += packet_processing_time;
         data -= std::min(data, m_packet_size);
         m_packets_in_flight++;
     }
