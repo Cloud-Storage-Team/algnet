@@ -3,6 +3,7 @@
 
 #include "../cc/i_tcp_cc.hpp"
 #include "../tcp_flow_common.hpp"
+#include "ack_monitor.hpp"
 #include "event/event.hpp"
 
 namespace sim {
@@ -71,7 +72,7 @@ private:
     PacketNum m_next_packet_num;
 
     // Contains numbers of all confirmed packets
-    std::set<PacketNum> m_confirmed;
+    AckMonitor m_ack_monitor;
 
     utils::Statistics<TimeNs> m_rtt_statistics;
 };
