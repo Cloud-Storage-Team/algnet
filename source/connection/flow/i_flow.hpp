@@ -27,7 +27,7 @@ public:
     virtual std::optional<TimeNs> get_fct() const = 0;
 
     virtual const BaseFlagManager& get_flag_manager() const = 0;
-    
+
     virtual std::shared_ptr<IHost> get_sender() const = 0;
     virtual std::shared_ptr<IHost> get_receiver() const = 0;
 
