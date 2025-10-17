@@ -29,16 +29,15 @@ Summary::Summary(
                     flow->get_id(), conn_id, sent.value(), delivered.value()));
             }
             double overhead = (sent.value() / delivered.value() - 1) * 100;
-            std::optional<TimeNs> maybe_fct = flow->get_fct();
-            if (!maybe_fct) {
+            std::optional<TimeNs> fct = flow->get_fct();
+            if (!fct) {
                 throw std::runtime_error(
                     fmt::format("Flow {} does not have fct", flow->get_id()));
             }
-            const TimeNs fct = maybe_fct.value();
             SizeByte packet_size = flow->get_packet_size();
 
-            SpeedGbps sending_rate = sent / fct;
-            SpeedGbps throughput = delivered / fct;
+            SpeedGbps sending_rate = sent / fct.value();
+            SpeedGbps throughput = delivered / fct.value();
 
             uint32_t retransmit_count = flow->retransmit_count();
             SizeByte retransmit_size = retransmit_count * packet_size;
@@ -46,7 +45,7 @@ Summary::Summary(
             m_values[conn_id][flow->get_id()] =
                 FlowSummary{sent,         delivered,       packet_size,
                             overhead,     retransmit_size, retransmit_count,
-                            sending_rate, throughput,      fct};
+                            sending_rate, throughput,      fct.value()};
         }
         if (expt_data_delivery > real_data_delivery) {
             m_errors.emplace_back(fmt::format(
