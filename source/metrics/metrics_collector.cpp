@@ -74,31 +74,40 @@ MultiIdMetricsStorage& MetricsCollector::get_storage_named(
 }
 
 void MetricsCollector::add_cwnd(Id flow_id, TimeNs time, double cwnd) {
-    get_storage_named(M_CWND_STORAGE_NAME)
-        .add_record(std::move(flow_id), time, cwnd);
+    static MultiIdMetricsStorage& cwnd_storage =
+        get_storage_named(M_CWND_STORAGE_NAME);
+
+    cwnd_storage.add_record(std::move(flow_id), time, cwnd);
 }
 
 void MetricsCollector::add_delivery_rate(Id flow_id, TimeNs time,
                                          SpeedGbps value) {
-    get_storage_named(M_RATE_STORAGE_NAME)
-        .add_record(std::move(flow_id), time, value.value());
+    static MultiIdMetricsStorage& rate_storage =
+        get_storage_named(M_RATE_STORAGE_NAME);
+    rate_storage.add_record(std::move(flow_id), time, value.value());
 }
 
 void MetricsCollector::add_RTT(Id flow_id, TimeNs time, TimeNs value) {
-    get_storage_named(M_RTT_STORAGE_NAME)
-        .add_record(std::move(flow_id), time, value.value());
+    static MultiIdMetricsStorage& rtt_storage =
+        get_storage_named(M_RTT_STORAGE_NAME);
+
+    rtt_storage.add_record(std::move(flow_id), time, value.value());
 }
 
 void MetricsCollector::add_packet_reordering(Id flow_id, TimeNs time,
                                              PacketReordering reordering) {
-    get_storage_named(M_REORDERING_STORAGE_NAME)
-        .add_record(std::move(flow_id), time, reordering);
+    static MultiIdMetricsStorage& reordering_storage =
+        get_storage_named(M_REORDERING_STORAGE_NAME);
+
+    reordering_storage.add_record(std::move(flow_id), time, reordering);
 }
 
 void MetricsCollector::add_packet_spacing(Id flow_id, TimeNs time,
                                           TimeNs value) {
-    get_storage_named(M_PACKET_SPACING_STORAGE_NAME)
-        .add_record(std::move(flow_id), time, value.value());
+    static MultiIdMetricsStorage& packet_spacing_storage =
+        get_storage_named(M_PACKET_SPACING_STORAGE_NAME);
+
+    packet_spacing_storage.add_record(std::move(flow_id), time, value.value());
 }
 
 void MetricsCollector::add_queue_size(Id link_id, TimeNs time, SizeByte value,
