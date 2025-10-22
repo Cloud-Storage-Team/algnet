@@ -89,7 +89,7 @@ void TcpFlow::update(Packet packet) {
         }
     } else {
         LOG_ERROR(
-            fmt::format("Packet {} arrived to unexoected device (see dest_id)",
+            fmt::format("Packet {} arrived to unexpected device (see dest_id)",
                         packet.to_string()));
     }
 }
