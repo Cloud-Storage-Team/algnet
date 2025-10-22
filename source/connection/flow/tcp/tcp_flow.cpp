@@ -114,13 +114,9 @@ void TcpFlow::send_data(SizeByte data) {
     while (data != SizeByte(0)) {
         Packet packet = generate_data_packet(m_next_packet_num++);
         TimeNs pacing_delay = m_cc->get_pacing_delay();
-        // if (pacing_delay == TimeNs(0)) {
-        //     send_packet_now(std::move(packet));
-        // } else {
         Scheduler::get_instance().add<SendAtTime>(now + pacing_delay + shift,
                                                   this->shared_from_this(),
                                                   std::move(packet));
-        // }
         shift += packet_processing_time;
         data -= std::min(data, m_packet_size);
         m_packets_in_flight++;
@@ -381,6 +377,8 @@ void TcpFlow::process_data_packet(Packet packet) {
     MetricsCollector::get_instance().add_packet_reordering(
         m_id, current_time, m_packet_reordering.value());
     if (M_COLLECTIVE_ACK_SUPPORT) {
+        // we do not need to use m_data_packets_monitor if collective ACKs are
+        // not used
         m_data_packets_monitor.confirm_one(packet.packet_num);
     }
     Packet ack = create_ack(std::move(packet));

@@ -44,6 +44,7 @@ public:
 
 private:
     // common part
+    static constexpr bool M_COLLECTIVE_ACK_SUPPORT = false;
     static void initialize_flag_manager();
 
     static std::string m_packet_type_label;
@@ -108,9 +109,8 @@ private:
     utils::Statistics<TimeNs> m_rtt_statistics;
 
 private:
-    static constexpr bool M_COLLECTIVE_ACK_SUPPORT = true;
-    PacketNumMonitor m_data_packets_monitor;
     // receiver part
+    PacketNumMonitor m_data_packets_monitor;
     void process_data_packet(Packet data_packet);
     Packet create_ack(Packet data);
 };
