@@ -8,19 +8,8 @@ on:
 
 env:
   BUILD_DIR: build
-  EXECUTABLE_PATH: ${{env.BUILD_DIR}}/nons
   GENERATORS_DIR: scripts/generators 
-  
-  FAT_TREE_GENERATOR: ${{env.GENERATORS_DIR}}/topology/fat_tree/fat_tree.py
-  ALL_TO_ALL_GENERATOR: ${{env.GENERATORS_DIR}}/ti_simulation/all-to-all/all-to-all.py
-
-  FAT_TREE_CONFIGS_DIR: ${{env.GENERATORS_DIR}}/topology/fat_tree
-  FAT_TREE_SMALL_CONFIG: ${{env.FAT_TREE_CONFIGS_DIR}}/small_fat_tree_config.yml
-  FAT_TREE_LARGE_CONFIG: ${{env.FAT_TREE_CONFIGS_DIR}}/large_fat_tree_config.yml
-  
   FLAMEGRAPH_ARTIFACT_DIR: flamegraph
-  FLAMEGRAPH_OUTPUT_DIR: ${{env.FLAMEGRAPH_ARTIFACT_DIR}}/flamegraph
-
   FLAMEGRAPH_TOPOLOGY_NAME: fat_tree_topology.yml
   FLAMEGRAPH_SIMULATION_NAME: fat_tree_simulation.yml
 
@@ -34,19 +23,29 @@ jobs:
     - name: Update submodules
       run: git submodule update --init --recursive
 
+    - name: Derive env vars
+      run: |
+        echo "EXECUTABLE_PATH=$BUILD_DIR/nons" >> $GITHUB_ENV
+        echo "FAT_TREE_GENERATOR=$GENERATORS_DIR/topology/fat_tree/fat_tree.py" >> $GITHUB_ENV
+        echo "ALL_TO_ALL_GENERATOR=$GENERATORS_DIR/ti_simulation/all-to-all/all-to-all.py" >> $GITHUB_ENV
+        echo "FAT_TREE_CONFIGS_DIR=$GENERATORS_DIR/topology/fat_tree" >> $GITHUB_ENV
+        echo "FAT_TREE_SMALL_CONFIG=$GENERATORS_DIR/topology/fat_tree/small_fat_tree_config.yml" >> $GITHUB_ENV
+        echo "FAT_TREE_LARGE_CONFIG=$GENERATORS_DIR/topology/fat_tree/large_fat_tree_config.yml" >> $GITHUB_ENV
+        echo "FLAMEGRAPH_OUTPUT_DIR=$FLAMEGRAPH_ARTIFACT_DIR/flamegraph" >> $GITHUB_ENV
+
     - name: Configure CMake for building project
-      run: cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF -DLOG_LEVEL=LOG_LEVEL_ERROR
+      run: cmake -B $BUILD_DIR -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF -DLOG_LEVEL=LOG_LEVEL_ERROR
 
     - name: Build project
-      run: cmake --build ${{env.BUILD_DIR}} -j $(nproc)
+      run: cmake --build $BUILD_DIR -j $(nproc)
 
     - name: Update PYTHONPATH
       run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
     - name: Run simulations
       run: | 
-        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_SMALL_CONFIG}}
-        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_LARGE_CONFIG}}
+        python3 scripts/generate_configs_and_run.py -e $EXECUTABLE_PATH -t $FAT_TREE_GENERATOR -tc $FAT_TREE_SMALL_CONFIG
+        python3 scripts/generate_configs_and_run.py -e $EXECUTABLE_PATH -t $FAT_TREE_GENERATOR -tc $FAT_TREE_LARGE_CONFIG
       
 
   profiling_load_testing:
@@ -57,24 +56,34 @@ jobs:
     - name: Update submodules
       run: git submodule update --init --recursive
 
+    - name: Derive env vars
+      run: |
+        echo "EXECUTABLE_PATH=$BUILD_DIR/nons" >> $GITHUB_ENV
+        echo "FAT_TREE_GENERATOR=$GENERATORS_DIR/topology/fat_tree/fat_tree.py" >> $GITHUB_ENV
+        echo "ALL_TO_ALL_GENERATOR=$GENERATORS_DIR/ti_simulation/all-to-all/all-to-all.py" >> $GITHUB_ENV
+        echo "FAT_TREE_CONFIGS_DIR=$GENERATORS_DIR/topology/fat_tree" >> $GITHUB_ENV
+        echo "FAT_TREE_SMALL_CONFIG=$GENERATORS_DIR/topology/fat_tree/small_fat_tree_config.yml" >> $GITHUB_ENV
+        echo "FAT_TREE_LARGE_CONFIG=$GENERATORS_DIR/topology/fat_tree/large_fat_tree_config.yml" >> $GITHUB_ENV
+        echo "FLAMEGRAPH_OUTPUT_DIR=$FLAMEGRAPH_ARTIFACT_DIR/flamegraph" >> $GITHUB_ENV
+
     - name: Configure CMake for profiling
-      run: cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF -DPROFILING=ON -DLOG_LEVEL=LOG_LEVEL_ERROR
+      run: cmake -B $BUILD_DIR -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF -DPROFILING=ON -DLOG_LEVEL=LOG_LEVEL_ERROR
 
     - name: Build project with profiling
-      run: cmake --build ${{env.BUILD_DIR}} -j $(nproc)
+      run: cmake --build $BUILD_DIR -j $(nproc)
 
     - name: Update PYTHONPATH
       run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
     - name: Run simulations with profiling
       run: | 
-        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_SMALL_CONFIG}}
-        gprof ${{env.EXECUTABLE_PATH}} > profile.txt
-        head profile.txt
+        python3 scripts/generate_configs_and_run.py -e $EXECUTABLE_PATH -t $FAT_TREE_GENERATOR -tc $FAT_TREE_SMALL_CONFIG
+        gprof $EXECUTABLE_PATH > profile.txt || true
+        head profile.txt || true
         
-        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_LARGE_CONFIG}}
-        gprof ${{env.EXECUTABLE_PATH}} > profile.txt
-        head profile.txt
+        python3 scripts/generate_configs_and_run.py -e $EXECUTABLE_PATH -t $FAT_TREE_GENERATOR -tc $FAT_TREE_LARGE_CONFIG
+        gprof $EXECUTABLE_PATH > profile.txt || true
+        head profile.txt || true
 
   flamegraph:
     runs-on: ubuntu-latest
@@ -87,41 +96,50 @@ jobs:
     - name: Update submodules
       run: git submodule update --init --recursive
 
+    - name: Derive env vars
+      run: |
+        echo "EXECUTABLE_PATH=$BUILD_DIR/nons" >> $GITHUB_ENV
+        echo "FAT_TREE_GENERATOR=$GENERATORS_DIR/topology/fat_tree/fat_tree.py" >> $GITHUB_ENV
+        echo "ALL_TO_ALL_GENERATOR=$GENERATORS_DIR/ti_simulation/all-to-all/all-to-all.py" >> $GITHUB_ENV
+        echo "FAT_TREE_CONFIGS_DIR=$GENERATORS_DIR/topology/fat_tree" >> $GITHUB_ENV
+        echo "FAT_TREE_LARGE_CONFIG=$GENERATORS_DIR/topology/fat_tree/large_fat_tree_config.yml" >> $GITHUB_ENV
+        echo "FLAMEGRAPH_OUTPUT_DIR=$FLAMEGRAPH_ARTIFACT_DIR/flamegraph" >> $GITHUB_ENV
+
     - name: Get dependencies  
       run: git clone https://github.com/brendangregg/FlameGraph.git
 
     - name: Configure CMake for perf
-      run: cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF -DLOG_LEVEL=LOG_LEVEL_ERROR -DCMAKE_CXX_FLAGS="-g -fno-omit-frame-pointer"
+      run: cmake -B $BUILD_DIR -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF -DLOG_LEVEL=LOG_LEVEL_ERROR -DCMAKE_CXX_FLAGS="-g -fno-omit-frame-pointer"
 
     - name: Build project with profiling
-      run: cmake --build ${{env.BUILD_DIR}} -j $(nproc)
+      run: cmake --build $BUILD_DIR -j $(nproc)
 
     - name: Update PYTHONPATH
       run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
     - name: Generate topology config  
-      run: python3 ${{env.FAT_TREE_GENERATOR}} -c ${{env.FAT_TREE_LARGE_CONFIG}} -o ${{env.FLAMEGRAPH_TOPOLOGY_NAME}}
+      run: python3 $FAT_TREE_GENERATOR -c $FAT_TREE_LARGE_CONFIG -o $FLAMEGRAPH_TOPOLOGY_NAME
     
     - name: Generate simulation config
-      run: python3 ${{env.ALL_TO_ALL_GENERATOR}} -t ${{env.FLAMEGRAPH_TOPOLOGY_NAME}} -o ${{env.FLAMEGRAPH_SIMULATION_NAME}}
+      run: python3 $ALL_TO_ALL_GENERATOR -t $FLAMEGRAPH_TOPOLOGY_NAME -o $FLAMEGRAPH_SIMULATION_NAME
 
     - name: Run perf
       run: |
-        sudo perf record -F 99 -g -- ./${{env.EXECUTABLE_PATH}} -c ${{env.FLAMEGRAPH_SIMULATION_NAME}} --no-logs --no-plots > perf.data
+        sudo perf record -F 99 -g -- ./$EXECUTABLE_PATH -c $FLAMEGRAPH_SIMULATION_NAME --no-logs --no-plots > perf.data
         perf report -i perf.data --header-only
         perf script -i perf.data -v > out.perf 2>&1 || true
 
     - name: Prepare FlameGraph
       run: |
-        mkdir -p ${{ env.FLAMEGRAPH_OUTPUT_DIR }}
+        mkdir -p $FLAMEGRAPH_OUTPUT_DIR
 
     - name: Generate flamegraph
       run: |
         ./FlameGraph/stackcollapse-perf.pl out.perf > out.folded
-        ./FlameGraph/flamegraph.pl out.folded > ${{ env.FLAMEGRAPH_OUTPUT_DIR }}/flamegraph.svg
+        ./FlameGraph/flamegraph.pl out.folded > $FLAMEGRAPH_OUTPUT_DIR/flamegraph.svg
 
     - name: Create HTML    
-      run: python3 scripts/generate-html.py ./${{ env.FLAMEGRAPH_ARTIFACT_DIR }}
+      run: python3 scripts/generate-html.py ./$FLAMEGRAPH_ARTIFACT_DIR
 
     - name: Put github context to json file
       run: echo '${{ toJson(github) }}' > github_context.json    
