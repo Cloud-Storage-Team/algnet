@@ -65,6 +65,7 @@ TimeNs Switch::process() {
         return total_processing_time;
     }
     packet.ttl--;
+    packet.path_hash ^= std::hash<Id>{}(get_id());
 
     // TODO: increase total_processing_time correctly
     next_link->schedule_arrival(packet);
