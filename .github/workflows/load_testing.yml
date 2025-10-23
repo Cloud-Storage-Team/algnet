@@ -8,19 +8,18 @@ on:
 
 env:
   BUILD_DIR: build
-  EXECUTABLE_PATH: $BUILD_DIR/nons
-  
+  EXECUTABLE_PATH: ${{env.BUILD_DIR}}/nons
   GENERATORS_DIR: scripts/generators 
   
-  FAT_TREE_GENERATOR: $GENERATORS_DIR/topology/fat_tree/fat_tree.py
-  ALL_TO_ALL_GENERATOR: $GENERATORS_DIR/ti_simulation/all-to-all/all-to-all.py
+  FAT_TREE_GENERATOR: ${{env.GENERATORS_DIR}}/topology/fat_tree/fat_tree.py
+  ALL_TO_ALL_GENERATOR: ${{env.GENERATORS_DIR}}/ti_simulation/all-to-all/all-to-all.py
 
-  FAT_TREE_CONFIGS_DIR: $GENERATORS_DIR/topology/fat_tree
-  FAT_TREE_SMALL_CONFIG: $FAT_TREE_CONFIGS_DIR/small_fat_tree_config.yml
-  FAT_TREE_LARGE_CONFIG: $FAT_TREE_CONFIGS_DIR/large_fat_tree_config.yml
+  FAT_TREE_CONFIGS_DIR: ${{env.GENERATORS_DIR}}/topology/fat_tree
+  FAT_TREE_SMALL_CONFIG: ${{env.FAT_TREE_CONFIGS_DIR}}/small_fat_tree_config.yml
+  FAT_TREE_LARGE_CONFIG: ${{env.FAT_TREE_CONFIGS_DIR}}/large_fat_tree_config.yml
   
   FLAMEGRAPH_ARTIFACT_DIR: flamegraph
-  FLAMEGRAPH_OUTPUT_DIR: $FLAMEGRAPH_ARTIFACT_DIR/flamegraph
+  FLAMEGRAPH_OUTPUT_DIR: ${{env.FLAMEGRAPH_ARTIFACT_DIR}}/flamegraph
 
   FLAMEGRAPH_TOPOLOGY_NAME: fat_tree_topology.yml
   FLAMEGRAPH_SIMULATION_NAME: fat_tree_simulation.yml
@@ -41,7 +40,7 @@ jobs:
     - name: Build project
       run: cmake --build ${{env.BUILD_DIR}} -j $(nproc)
 
-    - name: Update PYTHONPOATH
+    - name: Update PYTHONPATH
       run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
     - name: Run simulations
@@ -64,7 +63,7 @@ jobs:
     - name: Build project with profiling
       run: cmake --build ${{env.BUILD_DIR}} -j $(nproc)
 
-    - name: Update PYTHONPOATH
+    - name: Update PYTHONPATH
       run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
     - name: Run simulations with profiling
@@ -97,7 +96,7 @@ jobs:
     - name: Build project with profiling
       run: cmake --build ${{env.BUILD_DIR}} -j $(nproc)
 
-    - name: Update PYTHONPOATH
+    - name: Update PYTHONPATH
       run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
     - name: Generate topology config  
