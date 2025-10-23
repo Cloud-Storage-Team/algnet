@@ -87,7 +87,7 @@ def generate_fat_tree_config(config_params):
 
 if __name__ == "__main__":
     args = parse_topology_generator_args(
-        os.path.join(os.path.dirname(__file__), "default_config.yml"),
+        os.path.join(os.path.dirname(__file__), "small_fat_tree_config.yml"),
         'Generate Fat-Tree network configuration.'\
         'You may see more about it here: '\
         'https://packetpushers.net/blog/demystifying-dcn-topologies-clos-fat-trees-part2/'

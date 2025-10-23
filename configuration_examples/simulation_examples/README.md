@@ -67,9 +67,10 @@ cc:
 - `swift`: [swift](https://2022-cs244.github.io/papers/L5-swift.pdf) congestion control (especially see pseudocode on page 516); specific fields:
   
   Required:
-    + `target_delay`: value from paper above in [time format](../README.md)
+    + `base_target`: value from paper above in [time format](../README.md)
 
   Optional (all are real numbers):
+    + `start_cwnd`: initial congestion window size; default: `1`.
     + `ai`: Additive‑increase constant; default: `0.5`.
     + `md`: Multiplicative decrease constant; default: `0.5`.
     + `max_mdf`: Upper bound on MD factor per RTT; default: `0.3`.

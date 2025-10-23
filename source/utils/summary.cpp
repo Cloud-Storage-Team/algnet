@@ -14,6 +14,10 @@ Summary::Summary(
     for (const auto& conn : connections) {
         Id conn_id = conn->get_id();
         SizeByte expt_data_delivery = conn->get_total_data_added();
+        if (expt_data_delivery == SizeByte(0)) {
+            m_warnings.emplace_back(
+                fmt::format("Connection {} has 0 expected data delivery", conn_id));
+        }
         SizeByte real_data_delivery(0);
         auto flows = conn->get_flows();
 
@@ -28,7 +32,8 @@ Summary::Summary(
                     "{} bytes",
                     flow->get_id(), conn_id, sent.value(), delivered.value()));
             }
-            double overhead = (sent.value() / delivered.value() - 1) * 100;
+
+            double overhead = delivered != SizeByte(0) ? (sent / delivered - 1) * 100 : std::nan("");
 
             const TimeNs fct = flow->get_fct();
             SizeByte packet_size = flow->get_packet_size();
@@ -49,6 +54,11 @@ Summary::Summary(
                 "For connection {} expected delivery {} but real is {}",
                 conn_id, expt_data_delivery.value(),
                 real_data_delivery.value()));
+        }
+        if (expt_data_delivery == SizeByte(0) && real_data_delivery > SizeByte(0)) {
+            m_errors.emplace_back(fmt::format(
+                "For connection {} expected delivery 0 but real is {}",
+                conn_id, real_data_delivery.value()));
         }
     }
 }
@@ -77,6 +87,9 @@ void Summary::write_to_csv(std::filesystem::path& output_path) const {
 }
 
 void Summary::check() const {
+    if (!m_warnings.empty()) {
+        LOG_WARN(fmt::format("Summary warnings: {}", fmt::join(m_warnings, "\n")));
+    }
     if (!m_errors.empty()) {
         throw std::runtime_error(
             fmt::format("Summary errors: {}", fmt::join(m_errors, "\n")));

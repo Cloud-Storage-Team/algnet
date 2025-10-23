@@ -1,22 +1,22 @@
-switch_ports_count: 8
+switch_ports_count: 4
 
 presets:
   link:
     edge-host:
-      latency: 0ns
+      latency: 1000ns
       throughput: 1Gbps
-      ingress_buffer_size: 4096B
-      egress_buffer_size: 4096B
+      ingress_buffer_size: 4096KB
+      egress_buffer_size: 4096KB
     aggr-edge:
-      latency: 0ns
+      latency: 1000ns
       throughput: 10Gbps
-      ingress_buffer_size: 4096B
-      egress_buffer_size: 4096B
+      ingress_buffer_size: 4096KB
+      egress_buffer_size: 4096KB
     aggr-core:
-      latency: 0ns
+      latency: 1000ns
       throughput: 100Gbps
-      ingress_buffer_size: 4096B
-      egress_buffer_size: 4096B
+      ingress_buffer_size: 4096KB
+      egress_buffer_size: 4096KB
   switch:
     edge:
       ecn:

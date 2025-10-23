@@ -33,6 +33,9 @@ std::unique_ptr<IAction> ActionParser::parse_send_data(const ConfigNode& node) {
     const TimeNs repeat_interval =
         (repeat_interval_node ? parse_time(repeat_interval_node.value())
                               : TimeNs(0));
+    auto jitter_node = node["jitter"];
+    const TimeNs jitter =
+        (jitter_node ? parse_time(jitter_node.value()) : TimeNs(0));
     auto conns = get_target_connections(connections);
 
     if (conns.empty()) {
@@ -41,7 +44,7 @@ std::unique_ptr<IAction> ActionParser::parse_send_data(const ConfigNode& node) {
     }
 
     return std::make_unique<SendDataAction>(when, size, conns, repeat_count,
-                                            repeat_interval);
+                                            repeat_interval, jitter);
 }
 
 }  // namespace sim

@@ -9,6 +9,7 @@
 namespace sim {
 
 using ErrorMessage = std::string;
+using WarningMessage = std::string;
 
 struct FlowSummary {
     SizeByte sent{0};
@@ -36,6 +37,7 @@ public:
 private:
     std::map<Id, std::map<Id, FlowSummary>> m_values;
     std::vector<ErrorMessage> m_errors;
+    std::vector<WarningMessage> m_warnings;
 };
 
 }  // namespace sim
