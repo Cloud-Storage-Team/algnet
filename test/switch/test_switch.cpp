@@ -177,18 +177,20 @@ TEST_F(TestSwitch, test_path_hash) {
     auto receiver = std::make_shared<sim::Host>("receiver");
 
     auto link_sender_to_switch_1 = std::make_shared<LinkMock>(sender, switch_1);
-    switch_1->add_inlink(link_sender_switch_1);
+    switch_1->add_inlink(link_sender_to_switch_1);
 
     auto link_sender_to_switch_2 = std::make_shared<LinkMock>(sender, switch_2);
-    switch_2->add_inlink(link_sender_switch_2);
+    switch_2->add_inlink(link_sender_to_switch_2);
 
     auto link_switch_1_to_receiver =
         std::make_shared<LinkMock>(switch_1, receiver);
-    switch_1->update_routing_table(receiver->get_id(), link_switch_1_receiver);
+    switch_1->update_routing_table(receiver->get_id(),
+                                   link_switch_1_to_receiver);
 
     auto link_switch_2_to_receiver =
         std::make_shared<LinkMock>(switch_2, receiver);
-    switch_2->update_routing_table(receiver->get_id(), link_switch_2_receiver);
+    switch_2->update_routing_table(receiver->get_id(),
+                                   link_switch_2_to_receiver);
 
     sim::Packet packet_template(SizeByte(1), nullptr, sender->get_id(),
                                 receiver->get_id());
@@ -196,21 +198,21 @@ TEST_F(TestSwitch, test_path_hash) {
     sim::Packet second_packet_route_1(packet_template);
     sim::Packet packet_route_2(packet_template);
 
-    link_sender_switch_1->set_ingress_packet(first_packet_route_1);
+    link_sender_to_switch_1->set_ingress_packet(first_packet_route_1);
     switch_1->process();
-    link_sender_switch_1->set_ingress_packet(second_packet_route_1);
+    link_sender_to_switch_1->set_ingress_packet(second_packet_route_1);
     switch_1->process();
     auto arrived_packets_route_1 =
-        link_switch_1_receiver->get_arrived_packets();
+        link_switch_1_to_receiver->get_arrived_packets();
     ASSERT_EQ(arrived_packets_route_1.size(), 2);
 
     ASSERT_EQ(arrived_packets_route_1[0].path_hash,
               arrived_packets_route_1[1].path_hash);
 
-    link_sender_switch_2->set_ingress_packet(packet_route_2);
+    link_sender_to_switch_2->set_ingress_packet(packet_route_2);
     switch_2->process();
     auto arrived_packets_route_2 =
-        link_switch_2_receiver->get_arrived_packets();
+        link_switch_2_to_receiver->get_arrived_packets();
     ASSERT_EQ(arrived_packets_route_2.size(), 1);
     ASSERT_NE(arrived_packets_route_2[0].path_hash,
               arrived_packets_route_1[0].path_hash);
