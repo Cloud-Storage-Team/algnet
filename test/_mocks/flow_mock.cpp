@@ -19,6 +19,9 @@ void FlowMock::send_data(SizeByte data) {
     }
     m_sending_quota -= data;
 }
+SizeByte FlowMock::get_total_data_size_added_from_conn() const {
+    return SizeByte(0);
+}
 SizeByte FlowMock::get_delivered_data_size() const { return SizeByte(0); }
 SizeByte FlowMock::get_sent_data_size() const { return SizeByte(0); }
 uint32_t FlowMock::retransmit_count() const { return 0; }

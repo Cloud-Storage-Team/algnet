@@ -12,6 +12,7 @@ using ErrorMessage = std::string;
 using WarningMessage = std::string;
 
 struct FlowSummary {
+    SizeByte added_from_conn{0};
     SizeByte sent{0};
     SizeByte delivered{0};
     SizeByte packet_size{0};

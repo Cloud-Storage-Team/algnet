@@ -23,6 +23,7 @@ public:
     void send_data(SizeByte data) final;
 
     SizeByte get_packet_size() const final;
+    SizeByte get_total_data_size_added_from_conn() const final;
     SizeByte get_sent_data_size() const final;
     SizeByte get_delivered_data_size() const final;
     uint32_t retransmit_count() const final;
@@ -98,6 +99,7 @@ private:
     std::uint32_t m_retransmit_count;
 
     std::uint32_t m_packets_in_flight;
+    SizeByte m_total_data_from_conn;
     SizeByte m_delivered_data_size;
     SizeByte m_sent_data_size;
     PacketNum m_next_packet_num;

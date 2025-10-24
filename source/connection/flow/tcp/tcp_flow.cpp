@@ -32,6 +32,7 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
       m_rto_steady(false),
       m_retransmit_count(0),
       m_packets_in_flight(0),
+      m_total_data_from_conn(0),
       m_delivered_data_size(0),
       m_sent_data_size(0),
       m_next_packet_num(0) {
@@ -95,6 +96,7 @@ void TcpFlow::update(Packet packet) {
 }
 
 void TcpFlow::send_data(SizeByte data) {
+    m_total_data_from_conn += data;
     TimeNs now = Scheduler::get_instance().get_current_time();
 
     if (!m_sending_started) {
@@ -124,6 +126,10 @@ void TcpFlow::send_data(SizeByte data) {
 }
 
 SizeByte TcpFlow::get_packet_size() const { return m_packet_size; }
+
+SizeByte TcpFlow::get_total_data_size_added_from_conn() const {
+    return m_total_data_from_conn;
+}
 
 SizeByte TcpFlow::get_sent_data_size() const { return m_sent_data_size; }
 

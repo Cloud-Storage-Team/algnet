@@ -1,5 +1,6 @@
 #pragma once
 #include <random>
+
 #include "connection/i_connection.hpp"
 #include "i_action.hpp"
 #include "scheduler.hpp"
@@ -11,7 +12,8 @@ class SendDataAction : public IAction {
 public:
     SendDataAction(TimeNs a_when, SizeByte a_size,
                    std::vector<std::weak_ptr<IConnection>> a_conns,
-                   int a_repeat_count, TimeNs a_repeat_interval, TimeNs a_jitter);
+                   int a_repeat_count, TimeNs a_repeat_interval,
+                   TimeNs a_jitter);
 
     void schedule() final;
 
