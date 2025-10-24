@@ -186,7 +186,7 @@ TEST_F(TestSwitch, test_path_hash) {
         std::make_shared<LinkMock>(switch_1, receiver);
     switch_1->update_routing_table(receiver->get_id(), link_switch_1_receiver);
 
-    auto link_switch_2_receiver =
+    auto link_switch_2_to_receiver =
         std::make_shared<LinkMock>(switch_2, receiver);
     switch_2->update_routing_table(receiver->get_id(), link_switch_2_receiver);
 
