@@ -1,0 +1,33 @@
+topology_config_path: ../topology_examples/bus_topology.yml
+
+connections:
+  conn1:
+    sender_id: sender1
+    receiver_id: receiver1
+    mplb: round_robin
+    flows:
+      flow1:
+        type: tcp
+        packet_size: 64B
+        cc:
+          type: basic
+  conn2:
+    sender_id: sender2
+    receiver_id: receiver2
+    mplb: round_robin
+    flows:
+      flow1:
+        type: tcp
+        packet_size: 128B
+        cc:
+          type: basic
+
+scenario:
+  - action: send_data
+    when: 0ns
+    size: 6400B
+    connections: conn1
+  - action: send_data
+    when: 0ns
+    size: 12800B
+    connections: conn2
