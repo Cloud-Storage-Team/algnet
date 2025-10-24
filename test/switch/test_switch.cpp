@@ -179,7 +179,7 @@ TEST_F(TestSwitch, test_path_hash) {
     auto link_sender_to_switch_1 = std::make_shared<LinkMock>(sender, switch_1);
     switch_1->add_inlink(link_sender_switch_1);
 
-    auto link_sender_switch_2 = std::make_shared<LinkMock>(sender, switch_2);
+    auto link_sender_to_switch_2 = std::make_shared<LinkMock>(sender, switch_2);
     switch_2->add_inlink(link_sender_switch_2);
 
     auto link_switch_1_receiver =
