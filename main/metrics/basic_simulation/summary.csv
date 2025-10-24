@@ -1,5 +1,5 @@
-Flow id, Packet size (bytes), Sent (bytes), Delivered (bytes), Overhead (%), Retransmit size (bytes), Retransmit count, Sending rate (Gbps), Throughput (Gbps), FCT (ns)
+Flow id, Packet size (bytes), Data from conn (bytes), Sent (bytes), Delivered (bytes), Overhead (%), Retransmit size (bytes), Retransmit count, Sending rate (Gbps), Throughput (Gbps), FCT (ns)
 
-conn1_flow1, 64, 23040, 6400, 200, 16640, 260, 2.06535, 0.573708, 83114.9
+conn1_flow1, 64, 6400, 23040, 6400, 260, 16640, 260, 2.06535, 0.573708, 83114.9
 
-conn2_flow1, 128, 61440, 12800, 300, 48640, 380, 2.07594, 0.432488, 220509
+conn2_flow1, 128, 12800, 61440, 12800, 380, 48640, 380, 2.07594, 0.432488, 220509
