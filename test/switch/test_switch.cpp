@@ -165,6 +165,8 @@ TEST_F(TestSwitch, test_one_sender) { test_senders(1); }
 
 TEST_F(TestSwitch, test_multiple_senders) { test_senders(5); }
 
+// this test checks that packets passed throw same path have equal path hash
+// and packets passed throw different pathes have different path hashes
 TEST_F(TestSwitch, test_path_hash) {
     // topology:
     // sender  --- switch_1
