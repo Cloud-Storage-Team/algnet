@@ -7,6 +7,8 @@
 
 namespace sim {
 
+using PathHash = std::uint32_t;
+
 struct Packet {
     Packet(SizeByte a_size = SizeByte(0), IFlow* a_flow = nullptr,
            Id a_source_id = "", Id a_dest_id = "",
@@ -30,6 +32,7 @@ struct Packet {
     SizeByte delivered_data_size_at_origin;  // For ACK this is inherited from
                                              // data packet
     TTL ttl = std::numeric_limits<TTL>::max();
+    PathHash path_hash = 0;
     bool ecn_capable_transport;
     bool congestion_experienced;
 };

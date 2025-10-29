@@ -30,11 +30,16 @@ def run_subprocess(subprocess_args : list[str], log_commands : bool = True, chec
     Runs subprocess with given args. If command fails, prints its stderr to stderr
     Returns result of subprocess.
     """
-    print(f"Run command: `", *subprocess_args, "`", sep='')
+    command_str = ' '.join(subprocess_args)
+    if log_commands:
+        print(f"Run command: `{command_str}`")
+
     result = subprocess.run(subprocess_args, capture_output=True, text=True)
+
     if result.returncode != 0 and check_fails:
-        print(f"Command `", *subprocess_args, "` failed; stderr:", sep='', file=sys.stderr)
+        print(f"Command `{command_str}` failed; stderr:", file=sys.stderr)
         print(result.stderr, file=sys.stderr)
+
     return result
 
 def run_nons(

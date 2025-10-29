@@ -8,22 +8,17 @@ on:
 
 env:
   BUILD_DIR: build
-  EXECUTABLE_PATH: $BUILD_DIR/nons
-  
-  GENERATORS_DIR: scripts/generators
-  FAT_TREE_GENERATOR: $GENERATORS_DIR/topology/fat_tree/fat_tree.py
-  ALL_TO_ALL_GENERATOR: $GENERATORS_DIR/ti_simulation/all-to-all/all-to-all.py
+  EXECUTABLE_PATH: build/nons
 
-  FAT_TREE_CONFIGS_DIR: .github/workflows/load_testing_configs
-  FAT_TREE_SMALL_CONFIG: $FAT_TREE_CONFIGS_DIR/small_fat_tree_config.yml
-  FAT_TREE_MEDIUM_CONFIG: $FAT_TREE_CONFIGS_DIR/medium_fat_tree_config.yml
-  FAT_TREE_LARGE_CONFIG: $FAT_TREE_CONFIGS_DIR/large_fat_tree_config.yml
-  
-  FLAMEGRAPH_ARTIFACT_DIR: flamegraph
-  FLAMEGRAPH_OUTPUT_DIR: $FLAMEGRAPH_ARTIFACT_DIR/flamegraph
+  GENERATORS_DIR: scripts/generators
+  FAT_TREE_GENERATOR: scripts/generators/topology/fat_tree/fat_tree.py
+  FAT_TREE_SMALL_CONFIG: scripts/generators/topology/fat_tree/small_fat_tree_config.yml
+  FAT_TREE_LARGE_CONFIG: scripts/generators/topology/fat_tree/large_fat_tree_config.yml
+  ALL_TO_ALL_GENERATOR: scripts/generators/ti_simulation/all-to-all/all-to-all.py
 
   FLAMEGRAPH_TOPOLOGY_NAME: fat_tree_topology.yml
   FLAMEGRAPH_SIMULATION_NAME: fat_tree_simulation.yml
+  FLAMEGRAPH_OUTPUT_DIR: flamegraph/flamegraph
 
 jobs:
   load_testing:
@@ -41,13 +36,12 @@ jobs:
     - name: Build project
       run: cmake --build ${{env.BUILD_DIR}} -j $(nproc)
 
-    - name: Update PYTHONPOATH
+    - name: Update PYTHONPATH
       run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
     - name: Run simulations
       run: | 
         python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_SMALL_CONFIG}}
-        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_MEDIUM_CONFIG}}
         python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_LARGE_CONFIG}}
       
 
@@ -65,16 +59,12 @@ jobs:
     - name: Build project with profiling
       run: cmake --build ${{env.BUILD_DIR}} -j $(nproc)
 
-    - name: Update PYTHONPOATH
+    - name: Update PYTHONPATH
       run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
     - name: Run simulations with profiling
       run: | 
         python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_SMALL_CONFIG}}
-        gprof ${{env.EXECUTABLE_PATH}} > profile.txt
-        head profile.txt
-        
-        python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_MEDIUM_CONFIG}}
         gprof ${{env.EXECUTABLE_PATH}} > profile.txt
         head profile.txt
         
@@ -102,11 +92,11 @@ jobs:
     - name: Build project with profiling
       run: cmake --build ${{env.BUILD_DIR}} -j $(nproc)
 
-    - name: Update PYTHONPOATH
+    - name: Update PYTHONPATH
       run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
     - name: Generate topology config  
-      run: python3 ${{env.FAT_TREE_GENERATOR}} -c ${{env.FAT_TREE_MEDIUM_CONFIG}} -o ${{env.FLAMEGRAPH_TOPOLOGY_NAME}}
+      run: python3 ${{env.FAT_TREE_GENERATOR}} -c ${{env.FAT_TREE_LARGE_CONFIG}} -o ${{env.FLAMEGRAPH_TOPOLOGY_NAME}}
     
     - name: Generate simulation config
       run: python3 ${{env.ALL_TO_ALL_GENERATOR}} -t ${{env.FLAMEGRAPH_TOPOLOGY_NAME}} -o ${{env.FLAMEGRAPH_SIMULATION_NAME}}
@@ -115,7 +105,7 @@ jobs:
       run: |
         sudo perf record -F 99 -g -- ./${{env.EXECUTABLE_PATH}} -c ${{env.FLAMEGRAPH_SIMULATION_NAME}} --no-logs --no-plots > perf.data
         perf report -i perf.data --header-only
-        perf script -i perf.data -v > out.perf 2>&1 || true
+        perf script -i perf.data -v > out.perf 2>&1
 
     - name: Prepare FlameGraph
       run: |

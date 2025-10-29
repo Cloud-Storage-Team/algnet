@@ -17,6 +17,7 @@ public:
     SizeByte get_sending_quota() const final;
     void send_data(SizeByte data) final;
 
+    virtual SizeByte get_total_data_size_added_from_conn() const final;
     virtual SizeByte get_delivered_data_size() const final;
     virtual SizeByte get_sent_data_size() const final;
     virtual uint32_t retransmit_count() const final;
