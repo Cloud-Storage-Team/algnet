@@ -3,7 +3,7 @@
 #include <string>
 
 #include "connection/flow/i_flow.hpp"
-#include "utils/bitset.hpp"
+#include "utils/flag_manager.hpp"
 
 namespace sim {
 
@@ -21,7 +21,7 @@ struct Packet {
     std::string to_string() const;
 
     PacketNum packet_num = 0;
-    BitSet<PacketFlagsBase> flags;
+    BaseFlagManager flags;
     Id source_id;
     Id dest_id;
     SizeByte size;

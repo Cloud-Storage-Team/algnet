@@ -6,6 +6,7 @@
 
 #include "bitset.hpp"
 #include "logger/logger.hpp"
+#include "utils/str_expected.hpp"
 
 namespace sim {
 
@@ -28,7 +29,7 @@ public:
 template <typename FlagId, BitStorageType BitStorage>
 class FlagManager {
 public:
-    FlagManager() : m_next_pos(0) {}
+    FlagManager() : m_next_pos(0), m_bits(0) {}
 
     [[nodiscard]] bool register_flag_by_amount(FlagId id,
                                                BitStorage different_values) {
@@ -62,27 +63,32 @@ public:
         return true;
     }
 
-    void set_flag(BitSet<BitStorage>& bitset, FlagId id, BitStorage value) {
+    [[nodiscard]] std::expected<void, std::string> set_flag(FlagId id, BitStorage value) {
         auto it = m_flag_manager.find(id);
         if (it == m_flag_manager.end()) {
-            throw FlagNotRegistratedException(id);
+            return std::unexpected(fmt::format("Flag with id '{}' was not registred.", id));
         }
 
         FlagInfo& info = it->second;
-        bitset.set_range(info.start, info.start + info.length - 1, value);
+        m_bits.set_range(info.start, info.start + info.length - 1, value);
         info.is_set = true;
+        return {};
     }
 
-    BitStorage get_flag(const BitSet<BitStorage>& bitset, FlagId id) const {
+    [[nodiscard]] utils::StrExpected<BitStorage> get_flag(FlagId id) const {
         auto it = m_flag_manager.find(id);
         if (it == m_flag_manager.end()) {
-            throw FlagNotRegistratedException(id);
+            return std::unexpected(fmt::format("Flag with id '{}' was not registred.", id));
         }
         const FlagInfo& info = it->second;
         if (!info.is_set) {
-            throw FlagNotSetException(id);
+            return std::unexpected(fmt::format("Flag with id '{}' was not set.", id));
         }
-        return bitset.get_range(info.start, info.start + info.length - 1);
+        return m_bits.get_range(info.start, info.start + info.length - 1);
+    }
+
+    BitSet<BitStorage> get_bits() const {
+        return m_bits;
     }
 
     void reset() {
@@ -113,6 +119,7 @@ private:
     }
 
     BitStorage m_next_pos = 0;
+    BitSet<BitStorage> m_bits;
     std::unordered_map<FlagId, FlagInfo> m_flag_manager;
 };
 

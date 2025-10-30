@@ -46,8 +46,12 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
 }
 
 void TcpFlow::update(Packet packet) {
-    PacketType type = static_cast<PacketType>(
-        m_flag_manager.get_flag(packet.flags, m_packet_type_label));
+    auto result = packet.flags.get_flag(m_packet_type_label);
+    if (!result.has_value()) {
+        LOG_ERROR(std::move(result.error()));
+    }
+
+    PacketType type = static_cast<PacketType>(result.value());
     if (m_src.expired()) {
         LOG_ERROR(fmt::format("Sender exprired for flow {}; ignore packet {}",
                               to_string(), packet.to_string()));
@@ -316,8 +320,14 @@ void TcpFlow::process_ack(Packet ack, std::size_t confirm_count) {
 
 Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     Packet packet;
-    m_flag_manager.set_flag(packet.flags, m_packet_type_label,
+    packet.flags = get_flag_manager();
+    auto result = packet.flags.set_flag(m_packet_type_label,
                             PacketType::DATA);
+    if (!result.has_value()) {
+        LOG_ERROR(std::move(result.error()));
+    }
+
+
     set_avg_rtt_if_present(packet);
     packet.size = m_packet_size;
     packet.flow = this;
@@ -334,7 +344,7 @@ Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
 void TcpFlow::set_avg_rtt_if_present(Packet& packet) {
     std::optional<TimeNs> avg_rtt = m_rtt_statistics.get_mean();
     if (avg_rtt.has_value()) {
-        set_avg_rtt_flag(m_flag_manager, packet.flags, avg_rtt.value());
+        set_avg_rtt_flag(packet.flags, avg_rtt.value());
     }
 }
 
@@ -408,14 +418,21 @@ Packet TcpFlow::create_ack(Packet data) {
     ack.ecn_capable_transport = data.ecn_capable_transport;
     ack.congestion_experienced = data.congestion_experienced;
 
-    m_flag_manager.set_flag(
-        ack.flags, m_packet_type_label,
+    ack.flags = get_flag_manager();
+    auto result = ack.flags.set_flag(m_packet_type_label,
         (M_COLLECTIVE_ACK_SUPPORT ? PacketType::COLLECTIVE_ACK
                                   : PacketType::ACK));
-    m_flag_manager.set_flag(ack.flags, m_ack_ttl_label, data.ttl);
+    if (!result.has_value()) {
+        LOG_ERROR(std::move(result.error()));
+    }
+    
+    result = ack.flags.set_flag(m_ack_ttl_label, data.ttl);
+    if (!result.has_value()) {
+        LOG_ERROR(std::move(result.error()));
+    }
     try {
-        TimeNs rtt = get_avg_rtt_label(m_flag_manager, data.flags);
-        set_avg_rtt_flag(m_flag_manager, ack.flags, rtt);
+        TimeNs rtt = get_avg_rtt_label(data.flags);
+        set_avg_rtt_flag(ack.flags, rtt);
     } catch (const FlagNotSetException& e) {
         LOG_INFO(
             fmt::format("avg rtt flag does not set in data packet {} so it "

@@ -93,7 +93,6 @@ template <sim::BitStorageType TBitStirageType>
 void test_set_and_get_flag() {
     std::mt19937_64 rnd(RANDOM_SEED);
     sim::FlagManager<int, TBitStirageType> flag_manager;
-    sim::BitSet<TBitStirageType> flags;
 
     int total_bits = sizeof_bits(TBitStirageType);
 
@@ -104,13 +103,14 @@ void test_set_and_get_flag() {
         random_in_range(rnd, 1, max_two_flags_sum - first_flag_length);
     int third_flag_length = total_bits - first_flag_length - second_flag_length;
 
-    auto process_flag = [&rnd, &flag_manager, &flags](int flag_length) {
+    auto process_flag = [&rnd, &flag_manager](int flag_length) {
         static int flag_num = 0;
         EXPECT_TRUE(
             flag_manager.register_flag_by_length(flag_num, flag_length));
         TBitStirageType value = random_unsigned_value(rnd, flag_length);
-        flag_manager.set_flag(flags, flag_num, value);
-        EXPECT_EQ(flag_manager.get_flag(flags, flag_num), value);
+        auto result = flag_manager.set_flag(flag_num, value);
+        EXPECT_TRUE(result.has_value());
+        EXPECT_EQ(flag_manager.get_flag(flag_num), value);
         flag_num++;
     };
 
@@ -129,11 +129,8 @@ TEST_F(FlagManagerTest, SetAndGetFlag) {
 template <sim::BitStorageType TBitsStorageType>
 void test_set_and_get_unregistred_flag() {
     sim::FlagManager<int, TBitsStorageType> flag_manager;
-    sim::BitSet<TBitsStorageType> flags;
-    EXPECT_THROW(flag_manager.set_flag(flags, TestFlagId::FlagA, 0),
-                 sim::FlagNotRegistratedException);
-    EXPECT_THROW(flag_manager.get_flag(flags, TestFlagId::FlagA),
-                 sim::FlagNotRegistratedException);
+    EXPECT_FALSE(flag_manager.set_flag(TestFlagId::FlagA, 0).has_value());
+    EXPECT_FALSE(flag_manager.get_flag(TestFlagId::FlagA).has_value());
 }
 
 TEST_F(FlagManagerTest, SetGetFlag_UnregisteredFlag) {
@@ -146,10 +143,8 @@ TEST_F(FlagManagerTest, SetGetFlag_UnregisteredFlag) {
 template <sim::BitStorageType TBitsStorageType>
 void test_get_not_set_flag() {
     sim::FlagManager<int, TBitsStorageType> flag_manager;
-    sim::BitSet<TBitsStorageType> flags;
     EXPECT_TRUE(flag_manager.register_flag_by_length(TestFlagId::FlagA, 1));
-    EXPECT_THROW(flag_manager.get_flag(flags, TestFlagId::FlagA),
-                 sim::FlagNotSetException);
+    EXPECT_FALSE(flag_manager.get_flag(TestFlagId::FlagA).has_value());
 }
 
 TEST_F(FlagManagerTest, GetFlag_NotSetFlag) {
@@ -162,28 +157,25 @@ TEST_F(FlagManagerTest, GetFlag_NotSetFlag) {
 template <sim::BitStorageType TBitStorageType>
 void test_clear_flags() {
     sim::FlagManager<int, TBitStorageType> flag_manager;
-    sim::BitSet<TBitStorageType> flags;
     std::mt19937_64 rnd(RANDOM_SEED);
 
     int flag_size = random_in_range(rnd, 1, sizeof_bits(TBitStorageType));
     TBitStorageType value = random_unsigned_value(rnd, flag_size);
     EXPECT_TRUE(
         flag_manager.register_flag_by_length(TestFlagId::FlagA, flag_size));
-    flag_manager.set_flag(flags, TestFlagId::FlagA, value);
-    EXPECT_EQ(flag_manager.get_flag(flags, TestFlagId::FlagA), value);
+    auto result = flag_manager.set_flag(TestFlagId::FlagA, value);
+    EXPECT_EQ(flag_manager.get_flag(TestFlagId::FlagA).value(), value);
 
     flag_manager.reset();
 
-    EXPECT_THROW(flag_manager.set_flag(flags, TestFlagId::FlagA, value),
-                 sim::FlagNotRegistratedException);
-    EXPECT_THROW(flag_manager.get_flag(flags, TestFlagId::FlagA),
-                 sim::FlagNotRegistratedException);
+    EXPECT_FALSE(flag_manager.set_flag(TestFlagId::FlagA, value).has_value());
+    EXPECT_FALSE(flag_manager.get_flag(TestFlagId::FlagA).has_value());
 
     EXPECT_TRUE(
         flag_manager.register_flag_by_length(TestFlagId::FlagA, flag_size));
 
-    flag_manager.set_flag(flags, TestFlagId::FlagA, value);
-    EXPECT_EQ(flag_manager.get_flag(flags, TestFlagId::FlagA), value);
+    result = flag_manager.set_flag(TestFlagId::FlagA, value);
+    EXPECT_EQ(flag_manager.get_flag(TestFlagId::FlagA), value);
 }
 
 TEST_F(FlagManagerTest, Reset_ClearsFlags) {
