@@ -46,8 +46,8 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
 }
 
 void TcpFlow::update(Packet packet) {
-    auto result = packet.flags.get_flag(m_packet_type_label);
-    if (!result.has_value()) {
+    utils::StrExpected<BitStorage> packet_type_label_flag = packet.flags.get_flag(m_packet_type_label);
+    if (!packet_type_label_flag.has_value()) {
         LOG_ERROR(std::move(result.error()));
     }
 
@@ -434,7 +434,7 @@ Packet TcpFlow::create_ack(Packet data) {
         LOG_ERROR(std::move(result.error()));
     }
         
-    auto exp_avg_rtt = get_avg_rtt_label(data.flags);
+    utils::StrExpected<TimeNs> exp_avg_rtt = get_avg_rtt_label(data.flags);
     if (!exp_avg_rtt.has_value()) {
         LOG_INFO(
             fmt::format("avg rtt flag does not set in data packet {} so it "
