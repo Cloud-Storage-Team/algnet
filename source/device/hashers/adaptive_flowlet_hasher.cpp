@@ -33,15 +33,15 @@ std::uint32_t AdaptiveFlowletHasher::get_hash(const Packet& packet) {
     auto& [last_seen, shift] = it->second;
     TimeNs elapsed_from_last_seen = curr_time - last_seen;
 
-    auto exp_rtt = get_avg_rtt_label(packet.flags);
-    if (!exp_rtt.has_value()) {
+    auto exp_avg_rtt = get_avg_rtt_label(packet.flags);
+    if (!exp_avg_rtt.has_value()) {
         LOG_ERROR(fmt::format("Adaptive flowlet hasher could not find avg rtt ({});"
                               "returned previous hash",
-                              exp_rtt.error()));
+                              exp_avg_rtt.error()));
         return ecmp_hash + shift;
     }
     TimeNs flowlet_threshold =
-        exp_rtt.value() * m_factor;
+        exp_avg_rtt.value() * m_factor;
 
     if (elapsed_from_last_seen > flowlet_threshold) {
         shift++;

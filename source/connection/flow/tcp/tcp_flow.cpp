@@ -434,8 +434,8 @@ Packet TcpFlow::create_ack(Packet data) {
         LOG_ERROR(std::move(result.error()));
     }
         
-    auto exp_rtt = get_avg_rtt_label(data.flags);
-    if (!exp_rtt.has_value()) {
+    auto exp_avg_rtt = get_avg_rtt_label(data.flags);
+    if (!exp_avg_rtt.has_value()) {
         LOG_INFO(
             fmt::format("avg rtt flag does not set in data packet {} so it "
                         "will not be set in "
@@ -444,7 +444,7 @@ Packet TcpFlow::create_ack(Packet data) {
         return ack;
     } 
         
-    result = set_avg_rtt_flag(ack.flags, exp_rtt.value());
+    result = set_avg_rtt_flag(ack.flags, exp_avg_rtt.value());
     if (!result.has_value()) {
         // TODO: handle
     }
