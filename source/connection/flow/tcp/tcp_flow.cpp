@@ -46,7 +46,7 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
 }
 
 void TcpFlow::update(Packet packet) {
-    auto result = packet.flags.get_flag(m_packet_type_label);
+    utils::StrExpected<BitStorage> type_label_flag = packet.flags.get_flag(m_packet_type_label);
     if (!result.has_value()) {
         LOG_ERROR(std::move(result.error()));
     }
