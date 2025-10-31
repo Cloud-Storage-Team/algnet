@@ -434,7 +434,7 @@ Packet TcpFlow::create_ack(Packet data) {
         LOG_ERROR(std::move(result.error()));
     }
         
-    auto exp_rtt = get_avg_rtt_label(data.flags);
+    utils::StrExpected<TimeNs> avg_rtt = get_avg_rtt_label(data.flags);
     if (!exp_rtt.has_value()) {
         LOG_INFO(
             fmt::format("avg rtt flag does not set in data packet {} so it "
