@@ -49,4 +49,6 @@ std::uint32_t AdaptiveFlowletHasher::get_hash(const Packet& packet) {
     last_seen = curr_time;
 
     return ecmp_hash + shift;
+}
+
 }  // namespace sim

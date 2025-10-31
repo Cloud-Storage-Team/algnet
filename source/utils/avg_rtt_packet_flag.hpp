@@ -25,12 +25,12 @@ inline bool register_packet_avg_rtt_flag(BaseFlagManager& flag_manager) {
     return flag_manager.set_flag(packet_avg_rtt_label, casted_value);
 }
 
-[[nodiscard]]  StrExpected<TimeNs> get_avg_rtt_label(const BaseFlagManager& flag_manager) {
+[[nodiscard]] inline utils::StrExpected<TimeNs> get_avg_rtt_label(const BaseFlagManager& flag_manager) {
     auto exp_flag = flag_manager.get_flag(packet_avg_rtt_label);
-    if (!result.has_value()) {
+    if (!exp_flag.has_value()) {
         return std::unexpected(exp_flag.error());
     }
-    AvgRttFlagType casted_value = result.exp_flag();
+    AvgRttFlagType casted_value = exp_flag.value();
     AvgRttCastType value = std::bit_cast<AvgRttCastType>(casted_value);
     return TimeNs(value);
 }

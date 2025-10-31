@@ -344,7 +344,10 @@ Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
 void TcpFlow::set_avg_rtt_if_present(Packet& packet) {
     std::optional<TimeNs> avg_rtt = m_rtt_statistics.get_mean();
     if (avg_rtt.has_value()) {
-        set_avg_rtt_flag(packet.flags, avg_rtt.value());
+        auto result = set_avg_rtt_flag(packet.flags, avg_rtt.value());
+        if (!result.has_value()) {
+            LOG_WARN(fmt::format("Failed to set rtt; {}", result.error()));
+        }
     }
 }
 
@@ -441,7 +444,7 @@ Packet TcpFlow::create_ack(Packet data) {
         return ack;
     } 
         
-    auto result = set_avg_rtt_flag(ack.flags, exp_rtt.value());
+    result = set_avg_rtt_flag(ack.flags, exp_rtt.value());
     if (!result.has_value()) {
         // TODO: handle
     }
