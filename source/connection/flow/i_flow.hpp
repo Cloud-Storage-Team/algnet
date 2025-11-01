@@ -31,9 +31,6 @@ public:
 
     virtual std::shared_ptr<IHost> get_sender() const = 0;
     virtual std::shared_ptr<IHost> get_receiver() const = 0;
-
-private:
-    BaseFlagManager m_man;
 };
 
 }  // namespace sim
