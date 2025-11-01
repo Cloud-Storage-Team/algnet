@@ -63,10 +63,12 @@ public:
         return true;
     }
 
-    [[nodiscard]] std::expected<void, std::string> set_flag(FlagId id, BitStorage value) {
+    [[nodiscard]] std::expected<void, std::string> set_flag(FlagId id,
+                                                            BitStorage value) {
         auto it = m_flag_manager.find(id);
         if (it == m_flag_manager.end()) {
-            return std::unexpected(fmt::format("Flag with id '{}' was not registred.", id));
+            return std::unexpected(
+                fmt::format("Flag with id '{}' was not registred.", id));
         }
 
         FlagInfo& info = it->second;
@@ -78,18 +80,18 @@ public:
     [[nodiscard]] utils::StrExpected<BitStorage> get_flag(FlagId id) const {
         auto it = m_flag_manager.find(id);
         if (it == m_flag_manager.end()) {
-            return std::unexpected(fmt::format("Flag with id '{}' was not registred.", id));
+            return std::unexpected(
+                fmt::format("Flag with id '{}' was not registred.", id));
         }
         const FlagInfo& info = it->second;
         if (!info.is_set) {
-            return std::unexpected(fmt::format("Flag with id '{}' was not set.", id));
+            return std::unexpected(
+                fmt::format("Flag with id '{}' was not set.", id));
         }
         return m_bits.get_range(info.start, info.start + info.length - 1);
     }
 
-    BitSet<BitStorage> get_bit_storage() const {
-        return m_bits;
-    }
+    BitSet<BitStorage> get_bit_storage() const { return m_bits; }
 
     void reset() {
         m_next_pos = 0;

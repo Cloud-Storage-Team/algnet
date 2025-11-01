@@ -46,12 +46,14 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
 }
 
 void TcpFlow::update(Packet packet) {
-    utils::StrExpected<PacketFlagsBase> exp_packet_type_label_flag = packet.flags.get_flag(m_packet_type_label);
+    utils::StrExpected<PacketFlagsBase> exp_packet_type_label_flag =
+        packet.flags.get_flag(m_packet_type_label);
     if (!exp_packet_type_label_flag.has_value()) {
         LOG_ERROR(std::move(exp_packet_type_label_flag.error()));
     }
 
-    PacketType type = static_cast<PacketType>(exp_packet_type_label_flag.value());
+    PacketType type =
+        static_cast<PacketType>(exp_packet_type_label_flag.value());
     if (m_src.expired()) {
         LOG_ERROR(fmt::format("Sender exprired for flow {}; ignore packet {}",
                               to_string(), packet.to_string()));
@@ -321,12 +323,10 @@ void TcpFlow::process_ack(Packet ack, std::size_t confirm_count) {
 Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     Packet packet;
     packet.flags = get_flag_manager();
-    auto result = packet.flags.set_flag(m_packet_type_label,
-                            PacketType::DATA);
+    auto result = packet.flags.set_flag(m_packet_type_label, PacketType::DATA);
     if (!result.has_value()) {
         LOG_ERROR(std::move(result.error()));
     }
-
 
     set_avg_rtt_if_present(packet);
     packet.size = m_packet_size;
@@ -422,28 +422,29 @@ Packet TcpFlow::create_ack(Packet data) {
     ack.congestion_experienced = data.congestion_experienced;
 
     ack.flags = get_flag_manager();
-    auto result = ack.flags.set_flag(m_packet_type_label,
+    auto result = ack.flags.set_flag(
+        m_packet_type_label,
         (M_COLLECTIVE_ACK_SUPPORT ? PacketType::COLLECTIVE_ACK
                                   : PacketType::ACK));
     if (!result.has_value()) {
         LOG_ERROR(std::move(result.error()));
     }
-    
+
     result = ack.flags.set_flag(m_ack_ttl_label, data.ttl);
     if (!result.has_value()) {
         LOG_ERROR(std::move(result.error()));
     }
-        
+
     utils::StrExpected<TimeNs> exp_avg_rtt = get_avg_rtt_label(data.flags);
     if (!exp_avg_rtt.has_value()) {
         LOG_INFO(
             fmt::format("avg rtt flag does not set in data packet {} so it "
                         "will not be set in "
                         "ack {}",
-                         data.to_string(), ack.to_string()));
+                        data.to_string(), ack.to_string()));
         return ack;
-    } 
-        
+    }
+
     result = set_avg_rtt_flag(ack.flags, exp_avg_rtt.value());
     if (!result.has_value()) {
         // TODO: handle
