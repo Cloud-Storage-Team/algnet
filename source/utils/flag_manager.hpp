@@ -87,7 +87,7 @@ public:
         return m_bits.get_range(info.start, info.start + info.length - 1);
     }
 
-    BitSet<BitStorage> get_bits() const {
+    BitSet<BitStorage> get_bit_storage() const {
         return m_bits;
     }
 

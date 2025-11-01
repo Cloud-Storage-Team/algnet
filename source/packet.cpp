@@ -22,7 +22,7 @@ Packet::Packet(SizeByte a_size, IFlow* a_flow, Id a_source_id, Id a_dest_id,
 bool Packet::operator==(const Packet& packet) const {
     return flow == packet.flow && source_id == packet.source_id &&
            dest_id == packet.dest_id && size == packet.size &&
-           flags.get_bits() == packet.flags.get_bits();
+           flags.get_bit_storage() == packet.flags.get_bit_storage();
 }
 
 // TODO: think about some ID for packet (currently its impossible to distinguish
@@ -37,7 +37,7 @@ std::string Packet::to_string() const {
     oss << ", generated time: " << generated_time;
     oss << ", sent time: " << sent_time;
     oss << ", TTL: " << ttl;
-    oss << ", flags: " << flags.get_bits().get_bits();
+    oss << ", flags: " << flags.get_bit_storage().get_base_storage();
     oss << "]";
 
     return oss.str();
