@@ -132,7 +132,7 @@ jobs:
       uses: peaceiris/actions-gh-pages@v3
       with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ flamegraph }}
+          publish_dir: ${{ env.FLAMEGRAPH_ARTIFACT_DIR }}
           destination_dir: ${{ env.DEPLOY_DIR }}
 
     - name: Wait for artifacts to be available
