@@ -8,8 +8,8 @@
 namespace sim {
 
 struct ConnectionContext {
-    SizeByte total_data_added = SizeByte(0);
-    SizeByte total_data_confirmed = SizeByte(0);
+    SizeByte total_data_added;
+    SizeByte total_data_confirmed;
     std::shared_ptr<INewMPLB> mplb;
 };
 

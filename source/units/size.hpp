@@ -53,7 +53,7 @@ public:
         : m_value_bits(a_size.value_bits()) {}
 
     // Attention: a_value given in TSizeBase units!
-    explicit constexpr Size(uint64_t a_value)
+    explicit constexpr Size(uint64_t a_value = 0)
         : m_value_bits(a_value * TSizeBase::to_bit_multiplier) {}
 
     constexpr uint64_t value() const {

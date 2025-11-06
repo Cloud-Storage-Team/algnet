@@ -9,8 +9,8 @@ namespace sim {
 
 struct MPLBContext {
     std::set<std::shared_ptr<INewFlow> > flows;
-    SizeByte sent_data_size = SizeByte(0);
-    SizeByte delivered_data_size = SizeByte(0);
+    SizeByte sent_data_size;
+    SizeByte delivered_data_size;
 };
 
 // Multipath module - transport layer interface of reliable data delivery along

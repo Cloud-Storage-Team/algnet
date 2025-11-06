@@ -7,9 +7,9 @@
 namespace sim {
 
 struct FlowContext {
-    SizeByte sent_size = SizeByte(0);
-    SizeByte delivered_size = SizeByte(0);
-    SizeByte retransmit_size = SizeByte(0);
+    SizeByte sent_size;
+    SizeByte delivered_size;
+    SizeByte retransmit_size;
 
     std::optional<TimeNs> start_time;
     std::optional<TimeNs> last_ack_receive_time;
