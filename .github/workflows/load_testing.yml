@@ -80,9 +80,6 @@ jobs:
     steps:  
     - uses: actions/checkout@v4
 
-    - name: Clear cache
-      run: git submodule update --init --recursive
-
     - name: Update submodules
       run: git submodule update --init --recursive
 
