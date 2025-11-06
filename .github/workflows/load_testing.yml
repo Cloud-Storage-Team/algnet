@@ -105,7 +105,7 @@ jobs:
       run: |
         sudo perf record -F 99 -g -- ./${{env.EXECUTABLE_PATH}} -c ${{env.FLAMEGRAPH_SIMULATION_NAME}} --no-logs --no-plots > perf.data
         perf report -i perf.data --header-only
-        perf script -i perf.data -v > out.perf 2>&1 || true
+        perf script -i perf.data -v > out.perf 2>&1
 
     - name: Prepare FlameGraph
       run: |
