@@ -117,7 +117,7 @@ jobs:
         ./FlameGraph/flamegraph.pl out.folded > ${{ env.FLAMEGRAPH_OUTPUT_DIR }}/flamegraph.svg
 
     - name: Create HTML    
-      run: python3 scripts/generate-html.py ./${{ flamegraph }}
+      run: python3 scripts/generate-html.py ./${{ env.FLAMEGRAPH_ARTIFACT_DIR }}
 
     - name: Put github context to json file
       run: echo '${{ toJson(github) }}' > github_context.json    
