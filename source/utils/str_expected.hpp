@@ -6,6 +6,8 @@
 #include <type_traits>
 #include <variant>
 
+#include "logger.hpp"
+
 namespace utils {
 
 template <typename T>
