@@ -1,0 +1,49 @@
+presets:
+  link:
+    default:
+      latency: 1ns
+      throughput: 1Gbps
+      ingress_buffer_size: 4096B
+      egress_buffer_size: 4096B
+
+hosts:
+  sender1:
+  sender2:
+  receiver1:
+  receiver2:
+
+packet-spraying:
+  type: ecmp
+
+switches:
+  bus:
+    ecn:  
+      min: 0.2
+      max: 0.3
+      probability: 1.0
+
+links:
+  link1:
+    from: sender1
+    to: bus
+  link2:
+    from: bus
+    to: sender1
+  link3:
+    from: sender2
+    to: bus
+  link4:
+    from: bus
+    to: sender2
+  link5:
+    from: receiver1
+    to: bus
+  link6:
+    from: bus
+    to: receiver1  
+  link7:
+    from: receiver2
+    to: bus    
+  link8:
+    from: bus
+    to: receiver2

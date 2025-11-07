@@ -1,0 +1,30 @@
+topology_config_path: ../topology_examples/two_layers_fractal.yml
+
+connections:
+  conn1:
+    sender_id: sender
+    receiver_id: receiver
+    mplb: round_robin
+    flows:
+      flow1:
+        type: tcp
+        packet_size: 4096B
+        cc:
+          type: tahoe
+
+  conn2:
+    sender_id: sender
+    receiver_id: receiver
+    mplb: round_robin
+    flows:
+      flow1:
+        type: tcp
+        packet_size: 2048B
+        cc:
+          type: tahoe
+
+scenario:
+  - action: send_data
+    when: 0ns
+    size: 819200B
+    connections: ^conn.*

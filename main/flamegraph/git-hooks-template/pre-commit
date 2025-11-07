@@ -1,0 +1,11 @@
+#!/bin/sh
+
+cpp_diff=$(git diff --cached --name-status | grep -E '^[AM]' | awk '{print $2}' | grep -E "\.(cpp|hpp)")
+
+if [ -n "${cpp_diff}" ]; then
+    echo "Formated followong files:"
+    echo "$cpp_diff"
+    clang-format -i $cpp_diff
+    echo
+    git add $cpp_diff
+fi

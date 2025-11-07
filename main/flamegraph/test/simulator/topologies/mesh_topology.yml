@@ -1,0 +1,76 @@
+topology_config_path: mesh_topology.yml # it's genious i think
+
+presets:
+  link:
+    default:
+      latency: 1ns
+      throughput: 1Gbps
+      ingress_buffer_size: 4096B
+      egress_buffer_size: 4096B
+packet-spraying:
+  type: ecmp
+
+hosts:
+  sender1:
+  sender2:
+  sender3:
+  receiver1:
+  receiver2:
+  receiver3:
+
+switches:
+  switch1:
+  switch2:
+
+links:
+  link1:
+    from: sender1
+    to: switch1
+  link2:
+    from: switch1
+    to: sender1
+  link3:
+    from: sender2
+    to: switch1
+  link4:
+    from: switch1
+    to: sender2
+  link5:
+    from: sender3
+    to: switch2
+  link6:
+    from: switch2
+    to: sender3
+  link7:
+    from: switch1
+    to: switch2
+  link8:
+    from: switch2
+    to: switch1
+  link9:
+    from: switch1
+    to: receiver1
+  link10:
+    from: receiver1
+    to: switch1
+  link11:
+    from: switch1
+    to: receiver2
+  link12:
+    from: receiver2
+    to: switch1
+  link13:
+    from: switch2
+    to: receiver2
+  link14:
+    from: receiver2
+    to: switch2
+  link15:
+    from: switch2
+    to: receiver3
+  link16:
+    from: receiver3
+    to: switch2
+
+
+
