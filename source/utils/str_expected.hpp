@@ -106,7 +106,7 @@ public:
     }
 
     void log_err_if_not_present(std::string msg = "error occurred") {
-        auto log_func = [](std::string&& err) { LOG_ERROR(err); };
+        auto log_func = [](std::string err) { LOG_ERROR(std::move(err)); };
 
         if (!this->has_value()) {
             log_func("Message: " + msg + "; Error: " + this->error());
