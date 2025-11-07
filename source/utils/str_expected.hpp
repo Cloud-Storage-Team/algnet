@@ -24,8 +24,8 @@ public:
     }
 
     template <typename U = T, std::enable_if_t<!std::is_void_v<U>, int> = 0>
-    StrExpected(T a_value)
-        : std::expected<T, std::string>(std::move(a_value)) {}
+    StrExpected(U a_value)
+        : std::expected<U, std::string>(std::move(a_value)) {}
 
     template <typename U = T, std::enable_if_t<std::is_void_v<U>, int> = 0>
     StrExpected(std::nullptr_t = nullptr)
