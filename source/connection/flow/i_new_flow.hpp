@@ -19,7 +19,7 @@ struct FlowContext {
     std::weak_ptr<IHost> receiver;
 };
 
-// Transport layer interface of reliable data delivery along single physycal
+// Transport layer interface for reliable data delivery along single physical
 // path
 class INewFlow : public virtual Identifiable {
 public:
