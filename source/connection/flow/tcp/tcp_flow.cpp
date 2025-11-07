@@ -317,10 +317,7 @@ void TcpFlow::process_ack(Packet ack, std::size_t confirm_count) {
 Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     Packet packet;
     packet.flags = get_flag_manager();
-    auto result = packet.flags.set_flag(m_packet_type_label, PacketType::DATA);
-    if (!result.has_value()) {
-        LOG_ERROR(std::move(result.error()));
-    }
+    packet.flags.set_flag(m_packet_type_label, PacketType::DATA).log_if_not_present("Did not manage to set packet type (DATA)");
 
     set_avg_rtt_if_present(packet);
     packet.size = m_packet_size;
@@ -416,18 +413,11 @@ Packet TcpFlow::create_ack(Packet data) {
     ack.congestion_experienced = data.congestion_experienced;
 
     ack.flags = get_flag_manager();
-    auto result = ack.flags.set_flag(
+    ack.flags.set_flag(
         m_packet_type_label,
         (M_COLLECTIVE_ACK_SUPPORT ? PacketType::COLLECTIVE_ACK
-                                  : PacketType::ACK));
-    if (!result.has_value()) {
-        LOG_ERROR(std::move(result.error()));
-    }
-
-    result = ack.flags.set_flag(m_ack_ttl_label, data.ttl);
-    if (!result.has_value()) {
-        LOG_ERROR(std::move(result.error()));
-    }
+                                  : PacketType::ACK)).log_if_not_present("Did not manage to set ACK flag");
+    ack.flags.set_flag(m_ack_ttl_label, data.ttl).log_if_not_present("Did not manage to set TTL flag");
 
     utils::StrExpected<TimeNs> exp_avg_rtt = get_avg_rtt_label(data.flags);
     if (!exp_avg_rtt.has_value()) {

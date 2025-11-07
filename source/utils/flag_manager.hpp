@@ -63,7 +63,7 @@ public:
         return true;
     }
 
-    [[nodiscard]] std::expected<void, std::string> set_flag(FlagId id,
+    [[nodiscard]] utils::StrExpected<void> set_flag(FlagId id,
                                                             BitStorage value) {
         auto it = m_flag_manager.find(id);
         if (it == m_flag_manager.end()) {

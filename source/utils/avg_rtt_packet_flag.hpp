@@ -19,7 +19,7 @@ inline bool register_packet_avg_rtt_flag(BaseFlagManager& flag_manager) {
                                                 sizeof_bits(AvgRttCastType));
 }
 
-[[nodiscard]] inline std::expected<void, std::string> set_avg_rtt_flag(
+[[nodiscard]] inline utils::StrExpected<void> set_avg_rtt_flag(
     BaseFlagManager& flag_manager, TimeNs rtt) {
     AvgRttCastType value = rtt.value_nanoseconds();
     AvgRttFlagType casted_value = std::bit_cast<AvgRttFlagType>(value);

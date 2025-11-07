@@ -10,6 +10,9 @@ namespace utils {
 template <typename T>
 class StrExpected : public std::expected<T, std::string> {
 public:
+    // TODO: think about this approach
+    // static std::function<void(const T&)> log_func = [](const std::string& err) { LOG_ERROR(err); };
+
     // template for possible unexpected conversions (like std::unexpected<const
     // char*> to std::unexpected<std::string>)
     template <typename U>
@@ -22,8 +25,13 @@ public:
     StrExpected(T a_value)
         : std::expected<T, std::string>(std::move(a_value)) {}
 
+    // Special constructor for void type
+    template <typename U = T>
+    StrExpected(std::enable_if_t<std::is_void_v<U>, std::nullptr_t> = nullptr)
+        : std::expected<T, std::string>(std::in_place) {}
+
     template <typename TErr = std::runtime_error>
-    T value_or_throw() const {
+    auto value_or_throw() const {
         static_assert(std::is_base_of_v<std::exception, TErr>,
                       "TErr must inherit std::exception");
         static_assert(std::is_constructible_v<TErr, const std::string&>,
@@ -31,41 +39,76 @@ public:
         if (!this->has_value()) {
             throw TErr(this->error());
         }
-        return this->value();
+        
+        if constexpr (!std::is_void_v<T>) {
+            return this->value();
+        }
     }
 
-    void apply_or(std::function<void(const T&)> apply_value,
+    template <typename U = T>
+    auto apply_or(std::function<void(std::conditional_t<std::is_void_v<U>, std::monostate, const T&>)> apply_value,
                   std::function<void(const std::string&)> apply_error) {
         if (this->has_value()) {
-            apply_value(this->value());
+            if constexpr (std::is_void_v<U>) {
+                apply_value(std::monostate{});
+            } else {
+                apply_value(this->value());
+            }
         } else {
             apply_error(this->error());
         }
     }
 
-    template <typename U>
-    U apply_or(std::function<U(const T&)> apply_value,
-               std::function<U(const std::string&)> apply_error) {
+    template <typename Ret, typename U = T>
+    Ret apply_or(std::function<Ret(std::conditional_t<std::is_void_v<U>, std::monostate, const T&>)> apply_value,
+                 std::function<Ret(const std::string&)> apply_error) {
         if (this->has_value()) {
-            return apply_value(this->value());
+            if constexpr (std::is_void_v<U>) {
+                return apply_value(std::monostate{});
+            } else {
+                return apply_value(this->value());
+            }
         } else {
             return apply_error(this->error());
         }
     }
 
-    template <typename U>
-    U apply_or_default(std::function<U(const T&)> apply_value,
-                       U default_value) {
+    template <typename Ret, typename U = T>
+    Ret apply_or_default(std::function<Ret(std::conditional_t<std::is_void_v<U>, std::monostate, const T&>)> apply_value,
+                         Ret default_value) {
         if (this->has_value()) {
-            return apply_value(this->value());
+            if constexpr (std::is_void_v<U>) {
+                return apply_value(std::monostate{});
+            } else {
+                return apply_value(this->value());
+            }
         } else {
             return default_value;
         }
     }
 
-    void apply_if_present(std::function<void(const T&)> apply_func) {
+    template <typename U = T>
+    void apply_if_present(std::function<void(std::conditional_t<std::is_void_v<U>, std::monostate, const T&>)> apply_func) {
         if (this->has_value()) {
-            apply_func(this->value());
+            if constexpr (std::is_void_v<U>) {
+                apply_func(std::monostate{});
+            } else {
+                apply_func(this->value());
+            }
+        }
+    }
+
+    void apply_if_not_present(std::function<void(const std::string&)> apply_func) {
+        if (!this->has_value()) {
+            apply_func(this->error());
+        }
+    }
+
+    void log_if_not_present(const std::string& msg = "error occurred") {
+        auto log_func = [](const std::string& err) { LOG_ERROR(err); };
+
+        if (!this->has_value()) {
+            log_func("Message: " + msg + "; Error: " + this->error());
         }
     }
 };
