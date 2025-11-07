@@ -108,7 +108,7 @@ void test_set_and_get_flag() {
         EXPECT_TRUE(
             flag_manager.register_flag_by_length(flag_num, flag_length));
         TBitStirageType value = random_unsigned_value(rnd, flag_length);
-        flag_manager.set_flag(flag_num, value).log_if_not_present();
+        flag_manager.set_flag(flag_num, value).log_err_if_not_present();
         EXPECT_TRUE(result.has_value());
         EXPECT_EQ(flag_manager.get_flag(flag_num), value);
         flag_num++;
