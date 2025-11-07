@@ -29,7 +29,7 @@ public:
     // Callback that should be triggered when ack packet arrives to sender
     virtual void on_ack(const Packet& ack) = 0;
 
-    virtual void send_packets(std::vector<Packet> packets) = 0;
+    virtual void send(std::vector<Packet> packets) = 0;
 
     virtual const FlowContext& get_context() = 0;
 };
