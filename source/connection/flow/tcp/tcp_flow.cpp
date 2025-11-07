@@ -46,14 +46,8 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
 }
 
 void TcpFlow::update(Packet packet) {
-    utils::StrExpected<PacketFlagsBase> exp_packet_type_label_flag =
-        packet.flags.get_flag(m_packet_type_label);
-    if (!exp_packet_type_label_flag.has_value()) {
-        LOG_ERROR(std::move(exp_packet_type_label_flag.error()));
-    }
-
     PacketType type =
-        static_cast<PacketType>(exp_packet_type_label_flag.value());
+        static_cast<PacketType>(exp_packet_type_label_flag.value_or_throw());
     if (m_src.expired()) {
         LOG_ERROR(fmt::format("Sender exprired for flow {}; ignore packet {}",
                               to_string(), packet.to_string()));
