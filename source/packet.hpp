@@ -21,6 +21,7 @@ struct Packet {
     std::string to_string() const;
 
     PacketNum packet_num = 0;
+    DataId data_id = 0;  // Identificator of data transaction
     BitSet<PacketFlagsBase> flags;
     Id source_id;
     Id dest_id;

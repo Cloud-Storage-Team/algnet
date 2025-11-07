@@ -5,6 +5,7 @@
 
 #include "units/time.hpp"
 #include "units/units.hpp"
+#include "data.hpp"
 
 using TimeNs = Time<Nanosecond>;
 using SizeByte = Size<Byte>;

@@ -16,11 +16,10 @@ struct ConnectionContext {
 // Logical path in network. Corresponds to application layer in TCP\IP stack
 class INewConnection : public virtual Identifiable {
 public:
-    // Adds data_size bytes to send
-    virtual void add_data_to_send(SizeByte data_size) = 0;
+    virtual void add_data_to_send(Data data) = 0;
 
-    // Confirm data_size delivery
-    virtual void confirm(SizeByte data_size) = 0;
+    // Confirm data_size bytes delivery for data with given id
+    virtual void confirm(DataId id, SizeByte data_size) = 0;
 };
 
 }  // namespace sim

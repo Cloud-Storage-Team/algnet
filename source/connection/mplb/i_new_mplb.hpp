@@ -19,12 +19,12 @@ struct MPLBContext {
 class INewMPLB {
 public:
     // Callback that triggers when ack receives to sender of given flow
-    virtual void on_ack(const std::shared_ptr<INewFlow>& flow,
-                        const Packet& ack) = 0;
+    virtual void on_ack(std::shared_ptr<const INewFlow> flow, const Packet& ack,
+                        std::vector<PacketNum> confinfed_packet_nums) = 0;
 
-    // By given maximal_size returns real size of data that was forwarded to
-    // transport layer now
-    virtual SizeByte send_data(SizeByte maximal_size) = 0;
+    // Forward to as much of data to transport layer
+    // Returns size of transfered data
+    virtual SizeByte send_data(Data data) = 0;
 };
 
 }  // namespace sim
