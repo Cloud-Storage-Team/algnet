@@ -48,11 +48,11 @@ public:
         }
     }
 
-    template <typename U = T>
-    auto apply_or(std::function<void(std::conditional_t<std::is_void_v<U>, std::monostate, const U&>)> apply_value,
+    // template <typename U = T>
+    auto apply_or(std::function<void(std::conditional_t<std::is_void_v<T>, std::monostate, const T&>)> apply_value,
                   std::function<void(const std::string&)> apply_error) {
         if (this->has_value()) {
-            if constexpr (std::is_void_v<U>) {
+            if constexpr (std::is_void_v<T>) {
                 apply_value(std::monostate{});
             } else {
                 apply_value(this->value());
