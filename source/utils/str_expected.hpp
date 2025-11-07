@@ -105,8 +105,8 @@ public:
         }
     }
 
-    void log_if_not_present(const std::string& msg = "error occurred") {
-        auto log_func = [](const std::string& err) { LOG_ERROR(err); };
+    void log_err_if_not_present(std::string msg = "error occurred") {
+        auto log_func = [](std::string err) { LOG_ERROR(err); };
 
         if (!this->has_value()) {
             log_func("Message: " + msg + "; Error: " + this->error());
