@@ -94,7 +94,7 @@ public:
         return (m_data >> low) & max_range_value(length);
     };
 
-    BitStorage get_base_storage() const { return m_data; };
+    BitStorage get_bits() const { return m_data; };
 
     std::string to_string() const {
         std::bitset<sizeof_bits(BitStorage)> bits(m_data);

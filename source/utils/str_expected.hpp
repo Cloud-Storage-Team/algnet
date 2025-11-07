@@ -29,6 +29,7 @@ public:
     StrExpected(U a_value)
         : std::expected<U, std::string>(std::move(a_value)) {}
 
+    // Special constructor for void type
     template <typename U = T, std::enable_if_t<std::is_void_v<U>, int> = 0>
     StrExpected(std::nullptr_t = nullptr)
         : std::expected<T, std::string>(std::in_place) {}
@@ -48,11 +49,11 @@ public:
         }
     }
 
-    // template <typename U = T>
-    auto apply_or(std::function<void(std::conditional_t<std::is_void_v<T>, std::monostate, const T&>)> apply_value,
+    template <typename U = T>
+    auto apply_or(std::function<void(std::conditional_t<std::is_void_v<U>, std::monostate, const U&>)> apply_value,
                   std::function<void(const std::string&)> apply_error) {
         if (this->has_value()) {
-            if constexpr (std::is_void_v<T>) {
+            if constexpr (std::is_void_v<U>) {
                 apply_value(std::monostate{});
             } else {
                 apply_value(this->value());
