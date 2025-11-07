@@ -23,12 +23,12 @@ public:
                                               std::unexpected<U> >);
     }
 
+    template <typename U = T, std::enable_if_t<!std::is_void_v<U>, int> = 0>
     StrExpected(T a_value)
         : std::expected<T, std::string>(std::move(a_value)) {}
 
-    // Special constructor for void type
-    template <typename U = T>
-    StrExpected(std::enable_if_t<std::is_void_v<U>, std::nullptr_t> = nullptr)
+    template <typename U = T, std::enable_if_t<std::is_void_v<U>, int> = 0>
+    StrExpected(std::nullptr_t = nullptr)
         : std::expected<T, std::string>(std::in_place) {}
 
     template <typename TErr = std::runtime_error>
