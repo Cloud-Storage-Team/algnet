@@ -4,6 +4,7 @@
 #include <utility>
 
 #include "connection/flow/i_new_flow.hpp"
+#include "data.hpp"
 
 namespace sim {
 
