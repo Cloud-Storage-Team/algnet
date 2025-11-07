@@ -47,7 +47,7 @@ public:
     }
 
     template <typename U = T>
-    auto apply_or(std::function<void(std::conditional_t<std::is_void_v<U>, std::monostate, const T&>)> apply_value,
+    auto apply_or(std::function<void(std::conditional_t<std::is_void_v<U>, std::monostate, const U&>)> apply_value,
                   std::function<void(const std::string&)> apply_error) {
         if (this->has_value()) {
             if constexpr (std::is_void_v<U>) {
@@ -61,7 +61,7 @@ public:
     }
 
     template <typename Ret, typename U = T>
-    Ret apply_or(std::function<Ret(std::conditional_t<std::is_void_v<U>, std::monostate, const T&>)> apply_value,
+    Ret apply_or(std::function<Ret(std::conditional_t<std::is_void_v<U>, std::monostate, const U&>)> apply_value,
                  std::function<Ret(const std::string&)> apply_error) {
         if (this->has_value()) {
             if constexpr (std::is_void_v<U>) {
@@ -75,7 +75,7 @@ public:
     }
 
     template <typename Ret, typename U = T>
-    Ret apply_or_default(std::function<Ret(std::conditional_t<std::is_void_v<U>, std::monostate, const T&>)> apply_value,
+    Ret apply_or_default(std::function<Ret(std::conditional_t<std::is_void_v<U>, std::monostate, const U&>)> apply_value,
                          Ret default_value) {
         if (this->has_value()) {
             if constexpr (std::is_void_v<U>) {
@@ -89,7 +89,7 @@ public:
     }
 
     template <typename U = T>
-    void apply_if_present(std::function<void(std::conditional_t<std::is_void_v<U>, std::monostate, const T&>)> apply_func) {
+    void apply_if_present(std::function<void(std::conditional_t<std::is_void_v<U>, std::monostate, const U&>)> apply_func) {
         if (this->has_value()) {
             if constexpr (std::is_void_v<U>) {
                 apply_func(std::monostate{});
