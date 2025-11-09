@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [ "main" ]
-  workflow_call: 
+  workflow_call:
 
 env:
   BUILD_DIR: build
@@ -18,12 +18,13 @@ env:
 
   FLAMEGRAPH_TOPOLOGY_NAME: fat_tree_topology.yml
   FLAMEGRAPH_SIMULATION_NAME: fat_tree_simulation.yml
+  FLAMEGRAPH_ARTIFACT_DIR: flamegraph
   FLAMEGRAPH_OUTPUT_DIR: flamegraph/flamegraph
 
 jobs:
   load_testing:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
 
@@ -40,10 +41,10 @@ jobs:
       run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
     - name: Run simulations
-      run: | 
+      run: |
         python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_SMALL_CONFIG}}
         python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_LARGE_CONFIG}}
-      
+
 
   profiling_load_testing:
     runs-on: ubuntu-latest
@@ -63,11 +64,11 @@ jobs:
       run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
     - name: Run simulations with profiling
-      run: | 
+      run: |
         python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_SMALL_CONFIG}}
         gprof ${{env.EXECUTABLE_PATH}} > profile.txt
         head profile.txt
-        
+
         python3 scripts/generate_configs_and_run.py -e ${{env.EXECUTABLE_PATH}} -t ${{env.FAT_TREE_GENERATOR}} -tc ${{env.FAT_TREE_LARGE_CONFIG}}
         gprof ${{env.EXECUTABLE_PATH}} > profile.txt
         head profile.txt
@@ -77,13 +78,13 @@ jobs:
     permissions:
       contents: write
 
-    steps:  
+    steps:
     - uses: actions/checkout@v4
 
     - name: Update submodules
       run: git submodule update --init --recursive
 
-    - name: Get dependencies  
+    - name: Get dependencies
       run: git clone https://github.com/brendangregg/FlameGraph.git
 
     - name: Configure CMake for perf
@@ -95,9 +96,9 @@ jobs:
     - name: Update PYTHONPATH
       run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
-    - name: Generate topology config  
+    - name: Generate topology config
       run: python3 ${{env.FAT_TREE_GENERATOR}} -c ${{env.FAT_TREE_LARGE_CONFIG}} -o ${{env.FLAMEGRAPH_TOPOLOGY_NAME}}
-    
+
     - name: Generate simulation config
       run: python3 ${{env.ALL_TO_ALL_GENERATOR}} -t ${{env.FLAMEGRAPH_TOPOLOGY_NAME}} -o ${{env.FLAMEGRAPH_SIMULATION_NAME}}
 
@@ -116,18 +117,18 @@ jobs:
         ./FlameGraph/stackcollapse-perf.pl out.perf > out.folded
         ./FlameGraph/flamegraph.pl out.folded > ${{ env.FLAMEGRAPH_OUTPUT_DIR }}/flamegraph.svg
 
-    - name: Create HTML    
+    - name: Create HTML
       run: python3 scripts/generate-html.py ./${{ env.FLAMEGRAPH_ARTIFACT_DIR }}
 
     - name: Put github context to json file
-      run: echo '${{ toJson(github) }}' > github_context.json    
+      run: echo '${{ toJson(github) }}' > github_context.json
 
     - name: Calculate deploy destination dir
       run: |
         DEPLOY_DIR=$(python3 scripts/calculate_deploy_dir.py -c github_context.json);
         echo "DEPLOY_DIR=${DEPLOY_DIR}/flamegraph" >> $GITHUB_ENV;
 
-    - name: Deploy to GitHub Pages 
+    - name: Deploy to GitHub Pages
       if: ${{ env.DEPLOY_DIR }} != ''
       uses: peaceiris/actions-gh-pages@v3
       with:
