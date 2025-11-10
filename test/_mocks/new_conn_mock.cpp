@@ -1,0 +1,21 @@
+#include "new_conn_mock.hpp"
+
+namespace test {
+
+NewConnectionMock::NewConnectionMock(
+    [[maybe_unused]] Id a_id,
+    [[maybe_unused]] std::shared_ptr<sim::IHost> a_src,
+    [[maybe_unused]] std::shared_ptr<sim::IHost> a_dest,
+    std::shared_ptr<sim::INewMPLB> a_mplb) {
+    m_context.mplb = std::move(a_mplb);
+}
+
+void NewConnectionMock::add_data_to_send(sim::Data data) {
+    // Mock implementation
+}
+
+void NewConnectionMock::confirm(sim::DataId id, SizeByte data_size) {
+    // Mock implementation
+}
+
+}  // namespace test
