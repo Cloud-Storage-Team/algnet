@@ -4,6 +4,7 @@
 
 #include "connection/flow/i_flow.hpp"
 #include "utils/flag_manager.hpp"
+#include "data.hpp"
 
 namespace sim {
 
@@ -22,6 +23,7 @@ struct Packet {
 
     PacketNum packet_num = 0;
     BaseFlagManager flags;
+    DataId data_id = 0;  // Identifier of data transaction
     Id source_id;
     Id dest_id;
     SizeByte size;
