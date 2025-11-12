@@ -12,8 +12,7 @@ public:
                 std::shared_ptr<sim::IHost> a_receiver,
                 std::shared_ptr<sim::INewMPLB> a_mplb);
 
-    void on_packet_to_receiver(const sim::Packet& data) final;
-    void on_packet_to_sender(const sim::Packet& ack) final;
+    void on_packet(const sim::Packet& packet) final;
     void send(std::vector<sim::Packet> packets) final;
     const sim::FlowContext& get_context() final;
 

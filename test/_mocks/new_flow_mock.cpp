@@ -10,12 +10,8 @@ NewFlowMock::NewFlowMock(
     m_context.receiver = a_receiver;
 }
 
-void NewFlowMock::on_packet_to_receiver(
-    [[maybe_unused]] const sim::Packet& data) {
-    // Mock implementation
-}
-
-void NewFlowMock::on_packet_to_sender([[maybe_unused]] const sim::Packet& ack) {
+void NewFlowMock::on_packet(
+    [[maybe_unused]] const sim::Packet& packet) {
     // Mock implementation
 }
 

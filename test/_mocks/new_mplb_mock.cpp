@@ -2,6 +2,10 @@
 
 namespace test {
 
+NewMPLBMock::NewMPLBMock(std::shared_ptr<sim::INewFlowFactory> flow_factory) {
+    m_flow_factory = std::move(flow_factory);
+}
+
 void NewMPLBMock::on_ack(
     std::shared_ptr<const sim::INewFlow> flow,
     [[maybe_unused]] const sim::Packet& ack,
