@@ -3,7 +3,7 @@
 #include "new_flow_mock.hpp"
 
 namespace test {
-FlowFactoryMock::FlowFactoryMock([[maybe_unused]] YAML::Node flow_node,
+FlowFactoryMock::FlowFactoryMock([[maybe_unused]] const YAML::Node& flow_node,
                                  [[maybe_unused]] Id conn_id,
                                  const std::shared_ptr<sim::INewMPLB>& mplb,
                                  const std::shared_ptr<sim::IHost>& sender,

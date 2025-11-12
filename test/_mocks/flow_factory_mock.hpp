@@ -8,7 +8,7 @@ namespace test {
 class FlowFactoryMock : public sim::INewFlowFactory {
 public:
     ~FlowFactoryMock() = default;
-    FlowFactoryMock(YAML::Node flow_node, Id conn_id,
+    FlowFactoryMock(const YAML::Node& flow_node, Id conn_id,
                     const std::shared_ptr<sim::INewMPLB>& mplb,
                     const std::shared_ptr<sim::IHost> &sender,
                     const std::shared_ptr<sim::IHost> &receiver);

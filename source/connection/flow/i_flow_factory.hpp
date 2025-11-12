@@ -3,6 +3,7 @@
 namespace sim {
 
 class INewFlowFactory {
+public:
     virtual std::shared_ptr<INewFlow> create_flow() = 0;
 };
 
