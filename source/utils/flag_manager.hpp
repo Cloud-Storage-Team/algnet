@@ -10,22 +10,6 @@
 
 namespace sim {
 
-class FlagNotRegistredException : public std::invalid_argument {
-public:
-    template <typename TFlagId>
-    explicit FlagNotRegistredException(TFlagId id)
-        : std::invalid_argument(
-              fmt::format("Flag {} not registered", std::move(id))){};
-};
-
-class FlagNotSetException : public std::invalid_argument {
-public:
-    template <typename TFlagId>
-    explicit FlagNotSetException(TFlagId id)
-        : std::invalid_argument(
-              fmt::format("Flag {} is not set", std::move(id))){};
-};
-
 template <typename FlagId, BitStorageType BitStorage>
 class FlagManager {
 public:
