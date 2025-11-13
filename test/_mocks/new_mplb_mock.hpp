@@ -8,7 +8,9 @@ namespace test {
 class NewMPLBMock : public sim::INewMPLB {
 public:
     ~NewMPLBMock() = default;
-    NewMPLBMock(std::unique_ptr<sim::INewFlowFactory> flow_factory,
+    NewMPLBMock(std::shared_ptr<sim::IHost> a_src,
+                std::shared_ptr<sim::IHost> a_dest,
+                std::unique_ptr<sim::INewFlowFactory> flow_factory,
                 std::unique_ptr<sim::ITcpCCFactory> cc_factory);
     void on_ack(std::shared_ptr<const sim::INewFlow> flow,
                 const sim::Packet& ack,

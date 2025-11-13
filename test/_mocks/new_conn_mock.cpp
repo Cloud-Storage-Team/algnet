@@ -3,10 +3,10 @@
 namespace test {
 
 NewConnectionMock::NewConnectionMock(
-    [[maybe_unused]] Id a_id,
+    Id a_id,
     [[maybe_unused]] std::shared_ptr<sim::IHost> a_src,
     [[maybe_unused]] std::shared_ptr<sim::IHost> a_dest,
-    std::shared_ptr<sim::INewMPLB> a_mplb) {
+    std::shared_ptr<sim::INewMPLB> a_mplb) : m_id(std::move(a_id)) {
     m_context.mplb = std::move(a_mplb);
 }
 

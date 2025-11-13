@@ -3,12 +3,15 @@
 namespace test {
 
 NewFlowMock::NewFlowMock(
-    [[maybe_unused]] Id a_id, std::shared_ptr<sim::IHost> a_sender,
-    std::shared_ptr<sim::IHost> a_receiver,
-    [[maybe_unused]] std::shared_ptr<sim::INewMPLB> a_mplb) {
+    Id a_id, [[maybe_unused]] std::shared_ptr<sim::IHost> a_sender,
+    [[maybe_unused]] std::shared_ptr<sim::IHost> a_receiver,
+    [[maybe_unused]] std::shared_ptr<sim::INewMPLB> a_mplb)
+    : m_id(std::move(a_id)) {
     m_context.sender = a_sender;
     m_context.receiver = a_receiver;
 }
+
+Id NewFlowMock::get_id() const { return m_id; }
 
 void NewFlowMock::on_packet([[maybe_unused]] const sim::Packet& packet) {
     // Mock implementation

@@ -13,6 +13,7 @@ public:
     void confirm(sim::DataId id, SizeByte data_size) final;
 
 private:
+    Id m_id;
     sim::ConnectionContext m_context;
 };
 
