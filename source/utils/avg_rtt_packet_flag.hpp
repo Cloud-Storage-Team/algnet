@@ -19,17 +19,20 @@ inline bool register_packet_avg_rtt_flag(BaseFlagManager& flag_manager) {
                                                 sizeof_bits(AvgRttCastType));
 }
 
-inline void set_avg_rtt_flag(BaseFlagManager& flag_manager, BaseBitset& bitset,
-                             TimeNs rtt) {
+[[nodiscard]] inline utils::StrExpected<void> set_avg_rtt_flag(
+    BaseFlagManager& flag_manager, TimeNs rtt) {
     AvgRttCastType value = rtt.value_nanoseconds();
     AvgRttFlagType casted_value = std::bit_cast<AvgRttFlagType>(value);
-    flag_manager.set_flag(bitset, packet_avg_rtt_label, casted_value);
+    return flag_manager.set_flag(packet_avg_rtt_label, casted_value);
 }
 
-inline TimeNs get_avg_rtt_label(const BaseFlagManager& flag_manager,
-                                const BaseBitset& bitset) {
-    AvgRttFlagType casted_value =
-        flag_manager.get_flag(bitset, packet_avg_rtt_label);
+[[nodiscard]] inline utils::StrExpected<TimeNs> get_avg_rtt_label(
+    const BaseFlagManager& flag_manager) {
+    auto exp_flag = flag_manager.get_flag(packet_avg_rtt_label);
+    if (!exp_flag.has_value()) {
+        return std::unexpected(exp_flag.error());
+    }
+    AvgRttFlagType casted_value = exp_flag.value();
     AvgRttCastType value = std::bit_cast<AvgRttCastType>(casted_value);
     return TimeNs(value);
 }
