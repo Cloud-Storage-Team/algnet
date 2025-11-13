@@ -112,27 +112,15 @@ public:
         return result;
     }
 
-    bool log_info_if_not_present(std::string msg = "error occurred") {
-        return log_if_not_present(msg, m_info_log_func);
-    }
-
-    bool log_err_if_not_present(std::string msg = "") {
-        return log_if_not_present(msg, m_err_log_func);
-    }
-
-private:
-    std::function<void(const std::string&)> m_info_log_func = [](std::string msg) { LOG_INFO(std::move(msg)); };
-    std::function<void(const std::string&)> m_err_log_func = [](std::string msg) { LOG_ERROR(std::move(msg)); };
-
-    bool log_if_not_present(std::string msg, std::function<void(const std::string&)> log_func) {
+    bool log_err_if_not_present(std::string msg = "error occured") {
         bool result = !this->has_value();
+        std::function<void(const std::string&)> err_log_func = [](std::string msg) { LOG_ERROR(std::move(msg)); };
 
         if (result) {
-            log_func("Message: " + msg + "; Issue: " + this->error());
+            err_log_func("Message: " + msg + "; Issue: " + this->error());
         }
         return result;
     }
-
 
 };
 

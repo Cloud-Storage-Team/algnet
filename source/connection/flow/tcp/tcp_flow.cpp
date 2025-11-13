@@ -417,7 +417,8 @@ Packet TcpFlow::create_ack(Packet data) {
     ack.flags.set_flag(m_ack_ttl_label, data.ttl).log_err_if_not_present("Failed to set TTL flag");
 
     utils::StrExpected<TimeNs> exp_avg_rtt = get_avg_rtt_label(data.flags);
-    bool is_not_present = exp_avg_rtt.log_info_if_not_present(fmt::format("avg rtt flag does not set in data packet {} so it "
+    // TODO: use LOG_INFO for this part
+    bool is_not_present = exp_avg_rtt.log_err_if_not_present(fmt::format("avg rtt flag does not set in data packet {} so it "
                         "will not be set in ack {}", data.to_string(), ack.to_string()));
     if (is_not_present) {
         return ack;
