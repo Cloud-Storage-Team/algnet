@@ -2,13 +2,11 @@
 
 namespace test {
 
-ITcpCCFactoryMock::ITcpCCFactoryMock(
-    [[maybe_unused]] sim::CCScope scope,
-    [[maybe_unused]] const YAML::Node& cc_node) {
+TcpCCFactoryMock::TcpCCFactoryMock([[maybe_unused]] const YAML::Node& cc_node) {
     // Mock implementation
 }
 
-std::unique_ptr<sim::ITcpCC> ITcpCCFactoryMock::create_cc() {
+std::unique_ptr<sim::ITcpCC> TcpCCFactoryMock::create_cc() {
     return std::make_unique<sim::BasicCC>();
 }
 

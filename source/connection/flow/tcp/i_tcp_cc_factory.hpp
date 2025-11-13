@@ -2,11 +2,6 @@
 
 namespace sim {
 
-enum CCScope {
-    CCPerFlow,
-    CCShared
-};
-
 class ITcpCCFactory {
 public:
     virtual std::unique_ptr<ITcpCC> create_cc() = 0;

@@ -10,11 +10,12 @@ NewConnectionMock::NewConnectionMock(
     m_context.mplb = std::move(a_mplb);
 }
 
-void NewConnectionMock::add_data_to_send(sim::Data data) {
+void NewConnectionMock::add_data_to_send([[maybe_unused]] sim::Data data) {
     // Mock implementation
 }
 
-void NewConnectionMock::confirm(sim::DataId id, SizeByte data_size) {
+void NewConnectionMock::confirm([[maybe_unused]] sim::DataId id,
+                                [[maybe_unused]] SizeByte data_size) {
     // Mock implementation
 }
 

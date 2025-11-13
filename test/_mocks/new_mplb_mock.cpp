@@ -2,8 +2,8 @@
 
 namespace test {
 
-NewMPLBMock::NewMPLBMock(std::shared_ptr<sim::INewFlowFactory> flow_factory,
-                         std::shared_ptr<sim::ITcpCCFactory> cc_factory) {
+NewMPLBMock::NewMPLBMock(std::unique_ptr<sim::INewFlowFactory> flow_factory,
+                         std::unique_ptr<sim::ITcpCCFactory> cc_factory) {
     m_flow_factory = std::move(flow_factory);
     m_cc_factory = std::move(cc_factory);
 }
