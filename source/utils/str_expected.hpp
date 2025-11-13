@@ -92,29 +92,48 @@ public:
     }
 
     template <typename U = T>
-    void apply_if_present(std::function<void(std::conditional_t<std::is_void_v<U>, std::monostate, const U&>)> apply_func) {
-        if (this->has_value()) {
+    bool apply_if_present(std::function<void(std::conditional_t<std::is_void_v<U>, std::monostate, const U&>)> apply_func) {
+        bool result = this->has_value();
+        if (result) {
             if constexpr (std::is_void_v<U>) {
                 apply_func(std::monostate{});
             } else {
                 apply_func(this->value());
             }
         }
+        return result;
     }
 
-    void apply_if_not_present(std::function<void(const std::string&)> apply_func) {
-        if (!this->has_value()) {
+    bool apply_if_not_present(std::function<void(const std::string&)> apply_func) {
+        bool result = !this->has_value();
+        if (result) {
             apply_func(this->error());
         }
+        return result;
     }
 
-    void log_err_if_not_present(std::string msg = "error occurred") {
-        auto log_func = [](std::string err) { LOG_ERROR(std::move(err)); };
+    bool log_info_if_not_present(std::string msg = "error occurred") {
+        return log_if_not_present(msg, m_info_log_func);
+    }
 
-        if (!this->has_value()) {
+    bool log_err_if_not_present(std::string msg = "error occurred") {
+        return log_if_not_present(msg, m_err_log_func);
+    }
+
+private:
+    std::function<void(const std::string&)> m_info_log_func = [](std::string msg) { LOG_INFO(std::move(msg)); };
+    std::function<void(const std::string&)> m_err_log_func = [](std::string msg) { LOG_ERROR(std::move(msg)); };
+
+    bool log_if_not_present(std::string msg, std::function<void(const std::string&)> log_func) {
+        bool result = !this->has_value();
+
+        if (result) {
             log_func("Message: " + msg + "; Error: " + this->error());
         }
+        return result;
     }
+
+
 };
 
 }  // namespace utils
