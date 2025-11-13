@@ -28,13 +28,11 @@ inline bool register_packet_avg_rtt_flag(BaseFlagManager& flag_manager) {
 
 [[nodiscard]] inline utils::StrExpected<TimeNs> get_avg_rtt_label(
     const BaseFlagManager& flag_manager) {
-    auto exp_flag = flag_manager.get_flag(packet_avg_rtt_label);
-    if (!exp_flag.has_value()) {
-        return std::unexpected(exp_flag.error());
-    }
-    AvgRttFlagType casted_value = exp_flag.value();
-    AvgRttCastType value = std::bit_cast<AvgRttCastType>(casted_value);
-    return TimeNs(value);
+    return flag_manager.get_flag(packet_avg_rtt_label).and_than(
+        [] (const AvgRttFlagType& casted_value) {
+            return TimeNs(td::bit_cast<AvgRttCastType>(casted_value));
+        }
+    );
 }
 
 }  // namespace sim
