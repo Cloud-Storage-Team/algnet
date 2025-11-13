@@ -23,11 +23,8 @@ struct FlowContext {
 // path
 class INewFlow : public virtual Identifiable {
 public:
-    // Callback that should be triggered when data packet arrives to receiver
-    virtual void on_recv(const Packet& data) = 0;
-
-    // Callback that should be triggered when ack packet arrives to sender
-    virtual void on_ack(const Packet& ack) = 0;
+    // Callback that should be triggered when packet arrives to endpoint
+    virtual void on_packet(const Packet& packet) = 0;
 
     virtual void send(std::vector<Packet> packets) = 0;
 
