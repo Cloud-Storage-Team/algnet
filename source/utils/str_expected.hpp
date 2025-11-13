@@ -116,7 +116,7 @@ public:
         return log_if_not_present(msg, m_info_log_func);
     }
 
-    bool log_err_if_not_present(std::string msg = "error occurred") {
+    bool log_err_if_not_present(std::string msg = "") {
         return log_if_not_present(msg, m_err_log_func);
     }
 
@@ -128,7 +128,7 @@ private:
         bool result = !this->has_value();
 
         if (result) {
-            log_func("Message: " + msg + "; Error: " + this->error());
+            log_func("Message: " + msg + "; Issue: " + this->error());
         }
         return result;
     }
