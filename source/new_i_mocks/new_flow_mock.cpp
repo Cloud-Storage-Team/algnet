@@ -5,8 +5,8 @@ namespace test {
 NewFlowMock::NewFlowMock(
     Id a_id, [[maybe_unused]] std::shared_ptr<sim::IHost> a_sender,
     [[maybe_unused]] std::shared_ptr<sim::IHost> a_receiver,
-    [[maybe_unused]] std::shared_ptr<sim::INewMPLB> a_mplb)
-    : m_id(std::move(a_id)) {
+    [[maybe_unused]] sim::INewMPLB& a_mplb)
+    : m_id(std::move(a_id)), m_mplb(a_mplb) {
     m_context.sender = a_sender;
     m_context.receiver = a_receiver;
 }

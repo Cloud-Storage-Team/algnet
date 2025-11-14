@@ -10,7 +10,7 @@ public:
     ~NewFlowMock() = default;
     NewFlowMock(Id a_id, std::shared_ptr<sim::IHost> a_sender,
                 std::shared_ptr<sim::IHost> a_receiver,
-                std::shared_ptr<sim::INewMPLB> a_mplb);
+                sim::INewMPLB& a_mplb);
     Id get_id() const final;
     void on_packet(const sim::Packet& packet) final;
     void send(std::vector<sim::Packet> packets) final;
@@ -19,6 +19,7 @@ public:
 private:
     Id m_id;
     sim::FlowContext m_context;
+    sim::INewMPLB& m_mplb;
 };
 
 }  // namespace test
