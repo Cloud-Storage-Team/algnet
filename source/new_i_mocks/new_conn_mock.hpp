@@ -1,5 +1,6 @@
 #pragma once
 #include "connection/i_new_connection.hpp"
+#include "device/interfaces/i_host.hpp"
 
 namespace test {
 

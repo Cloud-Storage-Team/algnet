@@ -23,10 +23,14 @@ struct FlowContext {
 // path
 class INewFlow : public virtual Identifiable {
 public:
+    using MPLBAckCallback =
+    std::function<void(std::shared_ptr<const INewFlow>, const Packet&,
+                       std::vector<PacketNum>)>;
+
     // Callback that should be triggered when packet arrives to endpoint
     virtual void on_packet(const Packet& packet) = 0;
 
-    virtual void send(std::vector<Packet> packets) = 0;
+    virtual void send(std::vector<Packet> packets, MPLBAckCallback cb) = 0;
 
     virtual const FlowContext& get_context() = 0;
 };

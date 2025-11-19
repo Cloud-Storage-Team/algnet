@@ -12,6 +12,10 @@ public:
     static std::shared_ptr<INewMPLB> parse_i_mplb(
         const ConfigNode& node, std::shared_ptr<IHost> sender,
         std::shared_ptr<IHost> receiver);
+private:
+    static std::shared_ptr<INewMPLB> parse_mplb(
+        const ConfigNode& node, std::shared_ptr<IHost> sender,
+        std::shared_ptr<IHost> receiver);
 };
 
 }  // namespace sim

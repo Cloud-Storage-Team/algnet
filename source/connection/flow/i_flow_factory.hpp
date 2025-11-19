@@ -7,7 +7,8 @@ namespace sim {
 
 class INewFlowFactory {
 public:
-    virtual std::shared_ptr<INewFlow> create_flow(INewMPLB& mplb) = 0;
+    virtual std::shared_ptr<INewFlow> create_flow() = 0;
+    virtual void set_mplb_ack_cb(INewMPLB::MPLBAckCallback cb) = 0;
 };
 
 }  // namespace sim
