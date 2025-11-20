@@ -16,7 +16,7 @@ std::shared_ptr<Host> HostParser::parse_default_host(
     if (exp_ecn_node.has_value()) {
         ecn = EcnParser::parse_ecn(exp_ecn_node.value());
     }
-    return std::make_shared<Host>(host_node.get_name_or_throw(), ecn);
+    return std::make_shared<Host>(id, ecn);
 }
 
 }  // namespace sim
