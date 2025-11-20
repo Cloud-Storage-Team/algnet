@@ -7,6 +7,7 @@
 #include "device/hashers/salt_ecmp_hasher.hpp"
 #include "device/hashers/symmetric_hasher.hpp"
 #include "parser/parse_utils.hpp"
+#include "parser/topology/ecn/ecn_parser.hpp"
 
 namespace sim {
 
@@ -21,18 +22,10 @@ std::shared_ptr<Switch> SwitchParser::parse_default_switch(
     ConfigNodeExpected ecn_node = switch_node["ecn"];
     ECN ecn(1.0, 1.0, 0.0);
     if (ecn_node) {
-        ecn = parse_ecn(ecn_node.value());
+        ecn = EcnParser::parse_ecn(ecn_node.value());
     }
     return std::make_shared<Switch>(id, std::move(ecn),
                                     parse_hasher(packet_spraying_node, id));
-}
-
-ECN SwitchParser::parse_ecn(const ConfigNode& node) {
-    float min = node["min"].value_or_throw().as_or_throw<float>();
-    float max = node["max"].value_or_throw().as_or_throw<float>();
-    float probability =
-        node["probability"].value_or_throw().as_or_throw<float>();
-    return ECN(min, max, probability);
 }
 
 std::unique_ptr<IPacketHasher> SwitchParser::parse_hasher(

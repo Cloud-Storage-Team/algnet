@@ -7,7 +7,7 @@
 
 namespace sim {
 
-Host::Host(Id a_id) : RoutingModule(a_id) {}
+Host::Host(Id a_id, ECN a_ecn) : RoutingModule(a_id), m_ecn(a_ecn) {}
 
 bool Host::notify_about_arrival(TimeNs arrival_time) {
     return m_process_scheduler.notify_about_arriving(arrival_time,
@@ -100,6 +100,15 @@ TimeNs Host::send_packet() {
 
     LOG_INFO(fmt::format("Sent new packet from host. Packet: {}", get_id(),
                          data_packet.to_string()));
+
+    if (data_packet.ecn_capable_transport) {
+        float egress_queue_filling =
+            (next_link->get_from_egress_queue_size() + data_packet.size) /
+            next_link->get_max_from_egress_buffer_size();
+        if (m_ecn.get_congestion_mark(egress_queue_filling)) {
+            data_packet.congestion_experienced = true;
+        }
+    }
 
     next_link->schedule_arrival(data_packet);
     if (m_send_data_scheduler.notify_about_finish(
