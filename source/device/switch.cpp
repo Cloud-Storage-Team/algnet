@@ -47,7 +47,7 @@ TimeNs Switch::process() {
     // ECN mark for data packets
     if (packet.ecn_capable_transport) {
         float egress_queue_filling =
-            next_link->get_from_egress_queue_size() /
+            (next_link->get_from_egress_queue_size() + packet.size) /
             next_link->get_max_from_egress_buffer_size();
         if (m_ecn.get_congestion_mark(ingress_queue_filling) ||
             m_ecn.get_congestion_mark(egress_queue_filling)) {
