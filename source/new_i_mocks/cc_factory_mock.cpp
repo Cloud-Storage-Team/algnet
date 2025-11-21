@@ -2,7 +2,7 @@
 
 namespace test {
 
-TcpCCFactoryMock::TcpCCFactoryMock([[maybe_unused]] const YAML::Node& cc_node) {
+TcpCCFactoryMock::TcpCCFactoryMock() {
     // Mock implementation
 }
 
