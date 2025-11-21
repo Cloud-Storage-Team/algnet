@@ -3,13 +3,15 @@
 
 namespace sim {
 
-using DataId = std::uint32_t;
+using DataId = std::string;
 
 struct Data {
-    DataId id = 0;
+    DataId id;
     SizeByte size;
 
-    inline Data(DataId a_id, SizeByte a_size) : id(a_id), size(a_size) {}
+    Data(DataId a_id, SizeByte a_size);
+
+    std::string to_string() const;
 };
 
 }  // namespace sim

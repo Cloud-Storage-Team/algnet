@@ -8,11 +8,16 @@ AddDataToConnection::AddDataToConnection(TimeNs a_when,
     : Event(a_when), m_connection(a_conn), m_size(a_size) {}
 
 void AddDataToConnection::operator()() {
+    // TODO: eliminate counter
+    static int counter = 0;
+    counter++;
     if (m_connection.expired()) {
         LOG_ERROR("Connection expired; can't add data to it");
         return;
     }
-    m_connection.lock()->add_data_to_send(m_size);
+
+    m_connection.lock()->add_data_to_send(
+        Data(fmt::format("send_data_{}", counter), m_size));
 }
 
 }  // namespace sim

@@ -1,11 +1,13 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <memory>
 
 #include "connection/flow/i_flow.hpp"
+#include "data.hpp"
 #include "mplb/i_mplb.hpp"
-#include "types.hpp"
+#include "utils/str_expected.hpp"
 
 namespace sim {
 
@@ -21,8 +23,13 @@ public:
     virtual void add_flow(std::shared_ptr<IFlow> flow) = 0;
     // Delete a flow from the connection
     virtual void delete_flow(std::shared_ptr<IFlow> flow) = 0;
-    // Adds more packets to the total amount to be sent
-    virtual void add_data_to_send(SizeByte data_size) = 0;
+
+    using OnDeliveryCallback = std::function<void()>;
+
+    // Adds new portion of data that should be sent
+    // Callback hould be triggered when given data succesefully delivered
+    virtual utils::StrExpected<void> add_data_to_send(
+        Data data, OnDeliveryCallback callback = []() {}) = 0;
     // Returns the total amount of data added to the connection
     virtual SizeByte get_total_data_added() const = 0;
     // Called by a flow when an ACK is received to update connection state

@@ -13,7 +13,6 @@ ConnectionImpl::ConnectionImpl(Id a_id, std::shared_ptr<IHost> a_src,
       m_src(a_src),
       m_dest(a_dest),
       m_mplb(std::move(a_mplb)),
-      m_data_to_send(0),
       m_total_data_added(0) {}
 
 Id ConnectionImpl::get_id() const { return m_id; }
@@ -28,10 +27,21 @@ void ConnectionImpl::delete_flow(std::shared_ptr<IFlow> flow) {
     m_mplb->remove_flow(flow);
 }
 
-void ConnectionImpl::add_data_to_send(SizeByte data) {
-    m_data_to_send += data;
-    m_total_data_added += data;
+utils::StrExpected<void> ConnectionImpl::add_data_to_send(
+    Data data, OnDeliveryCallback callback) {
+    DataId data_id = data.id;
+    if (m_data_context_table.contains(data_id)) {
+        return std::unexpected(
+            fmt::format("Connection {}: could not add data {}: data with given "
+                        "id already sent",
+                        m_id, data.to_string()));
+    }
+    m_sending_queue.emplace(data_id);
+    m_data_context_table[data.id] =
+        DataContext{data.size, SizeByte(0), SizeByte(0), callback};
+    m_total_data_added += data.size;
     send_data();
+    return {};
 }
 
 SizeByte ConnectionImpl::get_total_data_added() const {
@@ -60,7 +70,7 @@ void ConnectionImpl::clear_flows() {
 }
 
 void ConnectionImpl::send_data() {
-    while (m_data_to_send > SizeByte(0)) {
+    while (!m_sending_queue.empty()) {
         auto flow = m_mplb->select_flow();
         if (!flow) {
             LOG_INFO(fmt::format(
@@ -74,10 +84,55 @@ void ConnectionImpl::send_data() {
                 "MPLB returned flow {} with zero quota in connection {}",
                 flow->get_id(), m_id));
         }
-        SizeByte data = std::min(quota, m_data_to_send);
+        DataId data_id = m_sending_queue.front();
+        auto it = m_data_context_table.find(data_id);
+        if (it == m_data_context_table.end()) {
+            LOG_ERROR(
+                fmt::format("Connection {}: could not find context for "
+                            "data id {}; ignored",
+                            m_id, data_id));
+            return;
+        }
+        DataContext& context = it->second;
+        SizeByte send_size = std::min(quota, context.total_size - context.sent);
 
-        flow->send_data(data);
-        m_data_to_send -= data;
+        std::weak_ptr<ConnectionImpl> connection_weak = shared_from_this();
+        std::function<void(DataId id, SizeByte size)> callback =
+            [connection_weak](DataId data_id, SizeByte size) {
+                if (connection_weak.expired()) {
+                    LOG_ERROR(fmt::format("Could not "));
+                }
+                std::shared_ptr<ConnectionImpl> connection =
+                    connection_weak.lock();
+                Id id = connection->m_id;
+
+                auto it = connection->m_data_context_table.find(data_id);
+                if (it == connection->m_data_context_table.end()) {
+                    LOG_ERROR(
+                        fmt::format("Connection {}: could not find context for "
+                                    "data id {}; ignored",
+                                    id, data_id));
+                    return;
+                }
+                DataContext& context = it->second;
+
+                context.delivered += size;
+                if (context.delivered == context.total_size) {
+                    LOG_INFO(
+                        fmt::format("Connection {} successefully deliveder "
+                                    "data with id {} & size {}",
+                                    connection->m_id, context.total_size));
+                    context.callback();
+                }
+            };
+
+        // TODO: pass callback to flow->send_data instead calling it here
+        flow->send_data(send_size);
+        context.sent += send_size;
+        if (context.sent == context.total_size) {
+            m_sending_queue.pop();
+        }
+        callback(data_id, send_size);
     }
 }
 
