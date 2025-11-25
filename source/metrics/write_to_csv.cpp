@@ -6,28 +6,28 @@
 namespace sim {
 
 void write_to_csv(
-    const std::vector<std::pair<MetricsStorage, std::string> >& storages,
-    std::filesystem::path output_path) {
-    size_t count_storages = storages.size();
-    // values[time][i] is a value of metric for i-th storage at time time;
-    // If there were no measurement at time, values[time][i] =
-    // std::numeric_limits<double>::quiet_NaN()
-    std::map<TimeNs, std::vector<double> > values;
-    double nan = std::numeric_limits<double>::quiet_NaN();
-    std::vector<double> default_values(count_storages, nan);
-    for (size_t i = 0; i < count_storages; i++) {
+    const std::vector<std::pair<MetricsStorage, std::string>>& storages,
+    std::filesystem::path output_path)
+{
+    const size_t count_storages = storages.size();
+
+    std::map<TimeNs, std::vector<double>> values;
+    const double nan = std::numeric_limits<double>::quiet_NaN();
+    const std::vector<double> default_values(count_storages, nan);
+
+    for (size_t i = 0; i < count_storages; ++i) {
         for (const auto& [time, value] : storages[i].first.get_records()) {
-            if (values.find(time) == values.end()) {
-                values[time] = default_values;
+            auto it = values.find(time);
+            if (it == values.end()) {
+                it = values.emplace(time, default_values).first;
             }
-            values[time][i] = value;
+            it->second[i] = value;
         }
     }
 
     std::vector<double> previous_time_row = default_values;
-    // push values by time using increasing order of keys (time) in std::map
     for (auto& [time, time_values] : values) {
-        for (size_t i = 0; i < count_storages; i++) {
+        for (size_t i = 0; i < count_storages; ++i) {
             if (std::isnan(time_values[i])) {
                 time_values[i] = previous_time_row[i];
             } else {
@@ -37,19 +37,31 @@ void write_to_csv(
     }
 
     utils::create_all_directories(output_path);
-    std::ofstream out(output_path);
-    out << "Time";
-    for (size_t i = 0; i < count_storages; i++) {
-        out << ',' << storages[i].second;
+    std::ofstream out(output_path, std::ios::binary);
+    if (!out) {
+        throw std::runtime_error("Failed to open output file: " +
+                                 output_path.string());
     }
-    out << '\n';
+
+    fmt::memory_buffer buffer;
+    auto it = std::back_inserter(buffer);
+
+    fmt::format_to(it, "Time");
+    for (const auto& p : storages) {
+        fmt::format_to(it, ",{}", p.second);
+    }
+    fmt::format_to(it, "\n");
+
     for (const auto& [time, time_values] : values) {
-        out << time;
-        for (auto value : time_values) {
-            out << ',' << value;
+        fmt::format_to(it, "{}", time.value()); 
+        for (double v : time_values) {
+            fmt::format_to(it, ",{}", v);
         }
-        out << '\n';
+        fmt::format_to(it, "\n");
     }
+
+    out.write(buffer.data(),
+              static_cast<std::streamsize>(buffer.size()));
 }
 
 }  // namespace sim
