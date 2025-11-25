@@ -7,34 +7,29 @@ namespace sim {
 
 void write_to_csv(
     const std::vector<std::pair<MetricsStorage, std::string>>& storages,
-    std::filesystem::path output_path)
+    const std::filesystem::path output_path)
 {
     const size_t count_storages = storages.size();
+    if (count_storages == 0) {
+        return;
+    }
 
-    std::map<TimeNs, std::vector<double>> values;
+    // References to the underlying data vectors
+    std::vector<const std::vector<std::pair<TimeNs, double>>*> series;
+    series.reserve(count_storages);
+
+    for (const auto& [storage, name] : storages) {
+        const auto& recs = storage.get_records();
+        // Under DEBUG, it may be validated that `recs` is sorted by timestamp
+        series.push_back(&recs);
+    }
+
+    // Indices of the current element for each storage
+    std::vector<size_t> idx(count_storages, 0);
+
     const double nan = std::numeric_limits<double>::quiet_NaN();
-    const std::vector<double> default_values(count_storages, nan);
-
-    for (size_t i = 0; i < count_storages; ++i) {
-        for (const auto& [time, value] : storages[i].first.get_records()) {
-            auto it = values.find(time);
-            if (it == values.end()) {
-                it = values.emplace(time, default_values).first;
-            }
-            it->second[i] = value;
-        }
-    }
-
-    std::vector<double> previous_time_row = default_values;
-    for (auto& [time, time_values] : values) {
-        for (size_t i = 0; i < count_storages; ++i) {
-            if (std::isnan(time_values[i])) {
-                time_values[i] = previous_time_row[i];
-            } else {
-                previous_time_row[i] = time_values[i];
-            }
-        }
-    }
+    // Most recent known values (forward-fill state)
+    std::vector<double> values(count_storages, nan);
 
     utils::create_all_directories(output_path);
     std::ofstream out(output_path, std::ios::binary);
@@ -46,22 +41,65 @@ void write_to_csv(
     fmt::memory_buffer buffer;
     auto it = std::back_inserter(buffer);
 
+    // Header row
     fmt::format_to(it, "Time");
     for (const auto& p : storages) {
         fmt::format_to(it, ",{}", p.second);
     }
     fmt::format_to(it, "\n");
 
-    for (const auto& [time, time_values] : values) {
-        fmt::format_to(it, "{}", time.value()); 
-        for (double v : time_values) {
-            fmt::format_to(it, ",{}", v);
+    // Main time-merge loop (k-way merge)
+    while (true) {
+        bool have_next_time = false;
+        TimeNs next_time{};  // Smallest next timestamp among all storages
+
+        // 1) Find the minimum unprocessed timestamp
+        for (size_t i = 0; i < count_storages; ++i) {
+            const auto& recs = *series[i];
+            if (idx[i] >= recs.size()) {
+                continue;
+            }
+            TimeNs t = recs[idx[i]].first;
+            if (!have_next_time || t < next_time) {
+                next_time = t;
+                have_next_time = true;
+            }
+        }
+
+        if (!have_next_time) {
+            break; // All series are exhausted
+        }
+
+        // 2) Update forward-filled values for this timestamp
+        for (size_t i = 0; i < count_storages; ++i) {
+            const auto& recs = *series[i];
+            if (idx[i] < recs.size() && recs[idx[i]].first == next_time) {
+                values[i] = recs[idx[i]].second;
+                ++idx[i];
+            }
+        }
+
+        // 3) Append the row to the buffer
+        fmt::format_to(it, "{}", next_time.value());
+        for (size_t i = 0; i < count_storages; ++i) {
+            fmt::format_to(it, ",{}", values[i]);
         }
         fmt::format_to(it, "\n");
+
+        // 4) Optionally flush the buffer periodically to avoid memory growth
+        //    (e.g., every 1–8 MB)
+        if (buffer.size() > 1 << 20) { // 1 MB
+            out.write(buffer.data(),
+                      static_cast<std::streamsize>(buffer.size()));
+            buffer.clear();
+        }
     }
 
-    out.write(buffer.data(),
-              static_cast<std::streamsize>(buffer.size()));
+    // Final flush
+    if (!buffer.size()) {
+        out.write(buffer.data(),
+                  static_cast<std::streamsize>(buffer.size()));
+    }
 }
 
 }  // namespace sim
