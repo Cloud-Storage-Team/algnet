@@ -124,10 +124,10 @@ void ConnectionImpl::send_data() {
 
                 context.delivered += size;
                 if (context.delivered == context.total_size) {
-                    LOG_INFO(
-                        fmt::format("Connection {} successefully deliveder "
-                                    "data with id {} & size {}",
-                                    connection->m_id, context.total_size));
+                    LOG_INFO(fmt::format(
+                        "Connection {} successefully deliveder "
+                        "data with id {} & size {}",
+                        connection->m_id, data_id, context.total_size));
                     context.callback();
                 }
             };
