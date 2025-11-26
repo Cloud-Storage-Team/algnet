@@ -15,6 +15,7 @@ struct SendDataActionsSummaryRow {
 
 using SendDataActionsSummary = std::vector<SendDataActionsSummaryRow>;
 
-void write_to_csv(std::ofstream& out, const SendDataActionsSummary& summary);
+void write_to_csv(const std::string& output_path,
+                  const SendDataActionsSummary& summary);
 
 }  // namespace sim

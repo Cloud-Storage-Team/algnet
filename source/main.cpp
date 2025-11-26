@@ -56,5 +56,11 @@ int main(const int argc, char **argv) {
     summary.write_to_csv(summary_path);
     summary.check();
 
+    std::shared_ptr<sim::SendDataActionsSummary> send_data_summary =
+        simulator.get_scenario().get_summary();
+    std::filesystem::path actions_summary_path(
+        std::filesystem::path(output_dir) / "actions_summary.csv");
+    sim::write_to_csv(actions_summary_path, *send_data_summary.get());
+
     return 0;
 }

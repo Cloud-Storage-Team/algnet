@@ -1,7 +1,15 @@
 #include "actions_summary.hpp"
 
+#include "utils/filesystem.hpp"
+
 namespace sim {
-void write_to_csv(std::ofstream& out, const SendDataActionsSummary& summary) {
+void write_to_csv(const std::string& output_path,
+                  const SendDataActionsSummary& summary) {
+    utils::create_all_directories(output_path);
+    std::ofstream out(output_path);
+    if (!out) {
+        throw std::runtime_error("Failed to create file for summary");
+    }
     out << "Data Id";
     out << ", " << "Data Size (bytes)";
     out << ", " << "Time Spent (ns)";

@@ -43,8 +43,20 @@ std::unique_ptr<IAction> ActionParser::parse_send_data(const ConfigNode& node) {
             "No connections specified for send data action");
     }
 
+    std::shared_ptr<SendDataActionsSummary> summary = m_summary;
+    SizeByte total_size = size * repeat_count * conns.size();
+    TimeNs start_time = when;
+    // TODO: fill id correcrly
+    DataId data_id = "dataid_changeme";
+
+    OnDeliveryCallback callback = [data_id, total_size, start_time, summary] {
+        TimeNs finish_time = Scheduler::get_instance().get_current_time();
+        summary->emplace_back(SendDataActionsSummaryRow{
+            std::move(data_id), total_size, start_time, finish_time});
+    };
+
     return std::make_unique<SendDataAction>(when, size, conns, repeat_count,
-                                            repeat_interval, jitter, []() {});
+                                            repeat_interval, jitter, callback);
 }
 
 }  // namespace sim
