@@ -16,7 +16,7 @@ SendDataAction::SendDataAction(TimeNs a_when, SizeByte a_size,
       m_jitter(a_jitter),
       m_delivered_count(0),
       m_callback_observer(std::make_shared<CallbackObserver>(
-          m_repeat_count, std::move(a_callback))) {}
+          m_conns.size() * m_repeat_count, std::move(a_callback))) {}
 
 void SendDataAction::schedule() {
     const bool use_jitter = m_jitter > TimeNs(0);

@@ -281,13 +281,13 @@ void TcpFlow::process_ack(Packet ack, std::size_t confirm_count) {
         return;
     }
 
-    m_last_ack_arrive_time = current_time;
-
     if (confirm_count == 0) {
         LOG_WARN(fmt::format("Got ack number {} that confirm nothing; ignored",
                              ack.packet_num));
         return;
     }
+
+    m_last_ack_arrive_time = current_time;
 
     TimeNs rtt = current_time - ack.sent_time;
     m_rtt_statistics.add_record(rtt);
