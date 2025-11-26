@@ -3,8 +3,8 @@
 #include <string>
 
 #include "connection/flow/i_flow.hpp"
-#include "utils/flag_manager.hpp"
 #include "data.hpp"
+#include "utils/flag_manager.hpp"
 
 namespace sim {
 

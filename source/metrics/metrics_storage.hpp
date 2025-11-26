@@ -20,7 +20,7 @@ public:
                       std::string_view name = "") const;
 
 private:
-    std::vector<std::pair<TimeNs, double> > m_records;
+    std::vector<std::pair<TimeNs, double>> m_records;
 };
 
 }  // namespace sim

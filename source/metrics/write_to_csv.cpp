@@ -7,21 +7,22 @@ namespace sim {
 
 void write_to_csv(
     const std::vector<std::pair<MetricsStorage, std::string>>& storages,
-    const std::filesystem::path output_path)
-{
+    const std::filesystem::path output_path) {
     const size_t count_storages = storages.size();
     if (count_storages == 0) {
         return;
     }
 
+    using Sample = std::pair<TimeNs, double>;
+    using SeriesSpan = std::span<const Sample>;
+
     // References to the underlying data vectors
-    std::vector<const std::vector<std::pair<TimeNs, double>>*> series;
+    std::vector<SeriesSpan> series;
     series.reserve(count_storages);
 
     for (const auto& [storage, name] : storages) {
-        const auto& recs = storage.get_records();
-        // Under DEBUG, it may be validated that `recs` is sorted by timestamp
-        series.push_back(&recs);
+        const std::vector<Sample>& recs = storage.get_records();
+        series.emplace_back(recs.data(), recs.size());
     }
 
     // Indices of the current element for each storage
@@ -48,47 +49,43 @@ void write_to_csv(
     }
     fmt::format_to(it, "\n");
 
+    auto get_next_time = [&]() -> std::optional<TimeNs> {
+        std::optional<TimeNs> result;
+        for (size_t i = 0; i < count_storages; ++i) {
+            const auto& recs = series[i];
+            if (idx[i] < recs.size()) {
+                TimeNs t = recs[idx[i]].first;
+                if (!result || t < *result) {
+                    result = t;
+                }
+            }
+        }
+        return result;
+    };
+
     // Main time-merge loop (k-way merge)
-    while (true) {
-        bool have_next_time = false;
-        TimeNs next_time{};  // Smallest next timestamp among all storages
-
-        // 1) Find the minimum unprocessed timestamp
+    for (auto next_time_opt = get_next_time(); next_time_opt.has_value();
+         next_time_opt = get_next_time()) {
+        TimeNs next_time = next_time_opt.value();
+        // 1) Update forward-filled values for all storages that have a record
+        // at next_time
         for (size_t i = 0; i < count_storages; ++i) {
-            const auto& recs = *series[i];
-            if (idx[i] >= recs.size()) {
-                continue;
-            }
-            TimeNs t = recs[idx[i]].first;
-            if (!have_next_time || t < next_time) {
-                next_time = t;
-                have_next_time = true;
-            }
-        }
-
-        if (!have_next_time) {
-            break; // All series are exhausted
-        }
-
-        // 2) Update forward-filled values for this timestamp
-        for (size_t i = 0; i < count_storages; ++i) {
-            const auto& recs = *series[i];
+            const auto& recs = series[i];
             if (idx[i] < recs.size() && recs[idx[i]].first == next_time) {
                 values[i] = recs[idx[i]].second;
                 ++idx[i];
             }
         }
-
-        // 3) Append the row to the buffer
+        // 2) Append the row to the buffer
         fmt::format_to(it, "{}", next_time.value());
-        for (size_t i = 0; i < count_storages; ++i) {
-            fmt::format_to(it, ",{}", values[i]);
+        for (double v : values) {
+            fmt::format_to(it, ",{}", v);
         }
         fmt::format_to(it, "\n");
 
-        // 4) Optionally flush the buffer periodically to avoid memory growth
-        //    (e.g., every 1–8 MB)
-        if (buffer.size() > 1 << 20) { // 1 MB
+        // 3) Optionally flush the buffer periodically to avoid memory growth
+        // (e.g., every 1–8 MB)
+        if (buffer.size() > (1 << 20)) {  // 1 MB
             out.write(buffer.data(),
                       static_cast<std::streamsize>(buffer.size()));
             buffer.clear();
@@ -96,9 +93,8 @@ void write_to_csv(
     }
 
     // Final flush
-    if (!buffer.size()) {
-        out.write(buffer.data(),
-                  static_cast<std::streamsize>(buffer.size()));
+    if (buffer.size()) {
+        out.write(buffer.data(), static_cast<std::streamsize>(buffer.size()));
     }
 }
 
