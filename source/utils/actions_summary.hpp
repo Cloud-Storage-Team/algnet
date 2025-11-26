@@ -8,6 +8,7 @@ namespace sim {
 
 struct SendDataActionsSummaryRow {
     DataId data_id;
+    std::vector<Id> connection_ids;
     SizeByte data_size;
     TimeNs start_time;
     TimeNs finish_time;
