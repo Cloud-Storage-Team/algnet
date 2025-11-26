@@ -43,11 +43,16 @@ std::unique_ptr<IAction> ActionParser::parse_send_data(const ConfigNode& node) {
             "No connections specified for send data action");
     }
 
+    DataId data_id = node["id"].value_or_throw().as_or_throw<DataId>();
+    if (m_data_ids.contains(data_id)) {
+        throw node.create_parsing_error(
+            fmt::format("Action with id '{}' already exists", data_id));
+    }
+    m_data_ids.insert(data_id);
+
     std::shared_ptr<SendDataActionsSummary> summary = m_summary;
     SizeByte total_size = size * repeat_count * conns.size();
     TimeNs start_time = when;
-    // TODO: fill id correcrly
-    DataId data_id = "dataid_changeme";
 
     OnDeliveryCallback callback = [data_id, total_size, start_time, summary] {
         TimeNs finish_time = Scheduler::get_instance().get_current_time();
