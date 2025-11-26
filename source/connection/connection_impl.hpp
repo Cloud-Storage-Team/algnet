@@ -34,7 +34,7 @@ public:
 
     SizeByte get_total_data_added() const final;
 
-    void update(const std::shared_ptr<IFlow>& flow) final;
+    void update(const std::shared_ptr<IFlow>& flow, DataId data_id) final;
 
     std::set<std::shared_ptr<IFlow>> get_flows() const final;
 

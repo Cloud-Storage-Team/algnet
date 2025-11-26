@@ -48,7 +48,8 @@ SizeByte ConnectionImpl::get_total_data_added() const {
     return m_total_data_added;
 }
 
-void ConnectionImpl::update(const std::shared_ptr<IFlow>& flow) {
+void ConnectionImpl::update(const std::shared_ptr<IFlow>& flow,
+                            DataId data_id) {
     if (!flow) {
         LOG_ERROR(fmt::format("Null flow in ConnectionImpl {} update; ignored",
                               m_id));
@@ -56,6 +57,11 @@ void ConnectionImpl::update(const std::shared_ptr<IFlow>& flow) {
     }
     // Notify MPLB about received packet for metric updates
     m_mplb->notify_packet_confirmed(flow);
+    DataContext& context = m_data_context_table[data_id];
+    context.delivered += flow->get_packet_size();
+    if (context.delivered >= context.total_size) {
+        context.callback();
+    }
     // Trigger next possible sending attempt
     send_data();
 }
@@ -132,7 +138,7 @@ void ConnectionImpl::send_data() {
         if (context.sent == context.total_size) {
             m_sending_queue.pop();
         }
-        callback(data_id, send_size);
+        // callback(data_id, send_size);
     }
 }
 

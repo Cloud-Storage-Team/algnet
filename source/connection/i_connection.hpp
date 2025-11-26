@@ -31,7 +31,7 @@ public:
     // Returns the total amount of data added to the connection
     virtual SizeByte get_total_data_added() const = 0;
     // Called by a flow when an ACK is received to update connection state
-    virtual void update(const std::shared_ptr<IFlow>& flow) = 0;
+    virtual void update(const std::shared_ptr<IFlow>& flow, DataId data_id) = 0;
     virtual std::set<std::shared_ptr<IFlow>> get_flows() const = 0;
     virtual void clear_flows() = 0;
     virtual std::shared_ptr<IHost> get_sender() const = 0;
