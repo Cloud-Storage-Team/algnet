@@ -15,6 +15,8 @@ public:
 
 private:
     static std::unique_ptr<IAction> parse_send_data(const ConfigNode& node);
+
+    static std::unique_ptr<IAction> parse_stop_time(const ConfigNode& node);
 };
 
 }  // namespace sim

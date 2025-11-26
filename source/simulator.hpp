@@ -44,8 +44,6 @@ public:
     // Calls BFS for each device to build the routing table
     void recalculate_paths();
 
-    void set_stop_time(TimeNs stop_time);
-
     // Start simulation
     void start();
 

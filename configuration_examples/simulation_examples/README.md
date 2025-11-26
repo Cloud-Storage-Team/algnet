@@ -109,3 +109,8 @@ Specifies how much data should be sent to the connection level at a given time.
 **optional fields:**
 - `repeat_count`: Sets the number of times to perform an action (1 by default)
 - `repeat_interval` : Sets the time interval after which actions will be performed in [time format](../README.md)
+
+`stop_time` action:
+Specifies the time to stop the simulation.
+**mandatory field:**
+- `time`: the time of stop.
