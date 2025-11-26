@@ -24,8 +24,6 @@ public:
     // Delete a flow from the connection
     virtual void delete_flow(std::shared_ptr<IFlow> flow) = 0;
 
-    using OnDeliveryCallback = std::function<void()>;
-
     // Adds new portion of data that should be sent
     // Callback hould be triggered when given data succesefully delivered
     virtual utils::StrExpected<void> add_data_to_send(

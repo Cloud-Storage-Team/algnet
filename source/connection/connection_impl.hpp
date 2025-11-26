@@ -30,7 +30,7 @@ public:
     void delete_flow(std::shared_ptr<IFlow> flow) final;
 
     utils::StrExpected<void> add_data_to_send(
-        Data data, std::function<void()> callback) final;
+        Data data, OnDeliveryCallback callback) final;
 
     SizeByte get_total_data_added() const final;
 

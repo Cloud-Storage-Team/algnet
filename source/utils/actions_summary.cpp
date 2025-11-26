@@ -1,7 +1,7 @@
 #include "actions_summary.hpp"
 
 namespace sim {
-void write_to_csv(std::ofstream& out, const ActionsSummary& summary) {
+void write_to_csv(std::ofstream& out, const SendDataActionsSummary& summary) {
     out << "Data Id";
     out << ", " << "Data Size (bytes)";
     out << ", " << "Time Spent (ns)";
@@ -9,7 +9,7 @@ void write_to_csv(std::ofstream& out, const ActionsSummary& summary) {
     out << ", " << "Start time (ns)";
     out << ", " << "Finish time (ns)";
     out << '\n';
-    for (const ActionsSummaryRow& row : summary) {
+    for (const SendDataActionsSummaryRow& row : summary) {
         TimeNs spent = row.finish_time - row.start_time;
         SpeedGbps throughput = row.data_size / spent;
         out << row.data_id;

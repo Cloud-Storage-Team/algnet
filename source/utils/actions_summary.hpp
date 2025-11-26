@@ -6,15 +6,15 @@
 
 namespace sim {
 
-struct ActionsSummaryRow {
+struct SendDataActionsSummaryRow {
     DataId data_id;
     SizeByte data_size;
     TimeNs start_time;
     TimeNs finish_time;
 };
 
-using ActionsSummary = std::vector<ActionsSummaryRow>;
+using SendDataActionsSummary = std::vector<SendDataActionsSummaryRow>;
 
-void write_to_csv(std::ofstream& out, const ActionsSummary& summary);
+void write_to_csv(std::ofstream& out, const SendDataActionsSummary& summary);
 
 }  // namespace sim

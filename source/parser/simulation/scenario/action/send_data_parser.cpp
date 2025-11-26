@@ -44,7 +44,7 @@ std::unique_ptr<IAction> ActionParser::parse_send_data(const ConfigNode& node) {
     }
 
     return std::make_unique<SendDataAction>(when, size, conns, repeat_count,
-                                            repeat_interval, jitter);
+                                            repeat_interval, jitter, []() {});
 }
 
 }  // namespace sim

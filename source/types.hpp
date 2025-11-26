@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
@@ -10,6 +11,7 @@ using TimeNs = Time<Nanosecond>;
 using SizeByte = Size<Byte>;
 using SpeedGbps = Speed<GBit, Second>;
 using Id = std::string;
+using OnDeliveryCallback = std::function<void()>;
 
 using PacketNum = std::uint32_t;
 using TTL = std::uint32_t;
