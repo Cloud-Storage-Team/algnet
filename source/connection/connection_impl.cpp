@@ -127,7 +127,7 @@ void ConnectionImpl::send_data() {
             };
 
         // TODO: pass callback to flow->send_data instead calling it here
-        flow->send_data(send_size);
+        flow->send_data(send_size, data_id);
         context.sent += send_size;
         if (context.sent == context.total_size) {
             m_sending_queue.pop();

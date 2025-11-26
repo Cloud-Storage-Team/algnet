@@ -15,7 +15,7 @@ public:
     void update(sim::Packet packet) final;
     SizeByte get_packet_size() const final;
     SizeByte get_sending_quota() const final;
-    void send_data(SizeByte data) final;
+    void send_data(SizeByte data, sim::DataId data_id) final;
 
     virtual SizeByte get_total_data_size_added_from_conn() const final;
     virtual SizeByte get_delivered_data_size() const final;

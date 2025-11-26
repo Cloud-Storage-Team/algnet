@@ -46,8 +46,8 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
 }
 
 void TcpFlow::update(Packet packet) {
-    PacketType type =
-        static_cast<PacketType>(packet.flags.get_flag(m_packet_type_label).value_or_throw());
+    PacketType type = static_cast<PacketType>(
+        packet.flags.get_flag(m_packet_type_label).value_or_throw());
     if (m_src.expired()) {
         LOG_ERROR(fmt::format("Sender exprired for flow {}; ignore packet {}",
                               to_string(), packet.to_string()));
@@ -95,7 +95,7 @@ void TcpFlow::update(Packet packet) {
     }
 }
 
-void TcpFlow::send_data(SizeByte data) {
+void TcpFlow::send_data(SizeByte data, DataId id) {
     m_total_data_from_conn += data;
     TimeNs now = Scheduler::get_instance().get_current_time();
 
@@ -114,7 +114,7 @@ void TcpFlow::send_data(SizeByte data) {
     TimeNs packet_processing_time(1);
     TimeNs shift(0);
     while (data != SizeByte(0)) {
-        Packet packet = generate_data_packet(m_next_packet_num++);
+        Packet packet = generate_data_packet(m_next_packet_num++, id);
         TimeNs pacing_delay = m_cc->get_pacing_delay();
         Scheduler::get_instance().add<SendAtTime>(now + pacing_delay + shift,
                                                   this->shared_from_this(),
@@ -233,8 +233,11 @@ private:
 class TcpFlow::Timeout : public Event {
 public:
     Timeout(TimeNs a_time, std::weak_ptr<TcpFlow> a_flow,
-            PacketNum a_packet_num)
-        : Event(a_time), m_flow(a_flow), m_packet_num(a_packet_num) {}
+            PacketNum a_packet_num, DataId a_data_id)
+        : Event(a_time),
+          m_flow(a_flow),
+          m_packet_num(a_packet_num),
+          m_data_id(std::move(a_data_id)) {}
 
     void operator()() {
         if (m_flow.expired()) {
@@ -252,12 +255,13 @@ public:
                         m_packet_num));
         flow->update_rto_on_timeout();
         flow->m_cc->on_timeout();
-        flow->retransmit_packet(m_packet_num);
+        flow->retransmit_packet(m_packet_num, m_data_id);
     }
 
 private:
     std::weak_ptr<TcpFlow> m_flow;
     PacketNum m_packet_num;
+    DataId m_data_id;
 };
 
 void TcpFlow::process_single_ack(Packet ack) {
@@ -314,12 +318,14 @@ void TcpFlow::process_ack(Packet ack, std::size_t confirm_count) {
     m_connection->update(shared_from_this());
 }
 
-Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
+Packet TcpFlow::generate_data_packet(PacketNum packet_num, DataId id) {
     Packet packet;
     packet.flags = get_flag_manager();
-    packet.flags.set_flag(m_packet_type_label, PacketType::DATA).log_err_if_not_present("Failed to set packet type (DATA)");
+    packet.flags.set_flag(m_packet_type_label, PacketType::DATA)
+        .log_err_if_not_present("Failed to set packet type (DATA)");
 
     set_avg_rtt_if_present(packet);
+    packet.data_id = std::move(id);
     packet.size = m_packet_size;
     packet.flow = this;
     packet.source_id = get_sender()->get_id();
@@ -335,7 +341,8 @@ Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
 void TcpFlow::set_avg_rtt_if_present(Packet& packet) {
     std::optional<TimeNs> avg_rtt = m_rtt_statistics.get_mean();
     if (avg_rtt.has_value()) {
-        set_avg_rtt_flag(packet.flags, avg_rtt.value()).log_err_if_not_present("Failed to set average RTT");
+        set_avg_rtt_flag(packet.flags, avg_rtt.value())
+            .log_err_if_not_present("Failed to set average RTT");
     }
 }
 
@@ -365,15 +372,15 @@ void TcpFlow::send_packet_now(Packet packet) {
     m_last_send_time = current_time;
     Scheduler::get_instance().add<Timeout>(current_time + m_current_rto,
                                            this->shared_from_this(),
-                                           packet.packet_num);
+                                           packet.packet_num, packet.data_id);
     m_sent_data_size += packet.size;
 
     packet.sent_time = current_time;
     m_src.lock()->enqueue_packet(std::move(packet));
 }
 
-void TcpFlow::retransmit_packet(PacketNum packet_num) {
-    Packet packet = generate_data_packet(packet_num);
+void TcpFlow::retransmit_packet(PacketNum packet_num, DataId data_id) {
+    Packet packet = generate_data_packet(packet_num, data_id);
     send_packet_now(std::move(packet));
     m_retransmit_count++;
 }
@@ -410,21 +417,26 @@ Packet TcpFlow::create_ack(Packet data) {
     ack.congestion_experienced = data.congestion_experienced;
 
     ack.flags = get_flag_manager();
-    ack.flags.set_flag(
-        m_packet_type_label,
-        (M_COLLECTIVE_ACK_SUPPORT ? PacketType::COLLECTIVE_ACK
-                                  : PacketType::ACK)).log_err_if_not_present("Failed to set ACK flag");
-    ack.flags.set_flag(m_ack_ttl_label, data.ttl).log_err_if_not_present("Failed to set TTL flag");
+    ack.flags
+        .set_flag(m_packet_type_label,
+                  (M_COLLECTIVE_ACK_SUPPORT ? PacketType::COLLECTIVE_ACK
+                                            : PacketType::ACK))
+        .log_err_if_not_present("Failed to set ACK flag");
+    ack.flags.set_flag(m_ack_ttl_label, data.ttl)
+        .log_err_if_not_present("Failed to set TTL flag");
 
     utils::StrExpected<TimeNs> exp_avg_rtt = get_avg_rtt_label(data.flags);
     // TODO: use LOG_INFO for this part
-    bool is_not_present = exp_avg_rtt.log_err_if_not_present(fmt::format("avg rtt flag does not set in data packet {} so it "
-                        "will not be set in ack {}", data.to_string(), ack.to_string()));
+    bool is_not_present = exp_avg_rtt.log_err_if_not_present(
+        fmt::format("avg rtt flag does not set in data packet {} so it "
+                    "will not be set in ack {}",
+                    data.to_string(), ack.to_string()));
     if (is_not_present) {
         return ack;
     }
 
-    set_avg_rtt_flag(ack.flags, exp_avg_rtt.value()).log_err_if_not_present("Failed to set average RTT");
+    set_avg_rtt_flag(ack.flags, exp_avg_rtt.value())
+        .log_err_if_not_present("Failed to set average RTT");
     return ack;
 }
 
