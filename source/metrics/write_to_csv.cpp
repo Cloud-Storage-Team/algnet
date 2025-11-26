@@ -55,7 +55,7 @@ void write_to_csv(
             const auto& recs = series[i];
             if (idx[i] < recs.size()) {
                 TimeNs t = recs[idx[i]].first;
-                if (!result || t < *result) {
+                if (!result || t < result.value()) {
                     result = t;
                 }
             }
