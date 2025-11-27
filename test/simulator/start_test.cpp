@@ -62,8 +62,8 @@ TEST_F(Start, TrivialTopology) {
     }
 
     scenario.add_action(std::make_unique<sim::SendDataAction>(
-        TimeNs(0), sim::Data{"", data_to_send}, conns, 1, TimeNs(0), TimeNs(0),
-        []() {}));
+        TimeNs(0), data_to_send, "", conns, 1, TimeNs(0), TimeNs(0),
+        scenario.get_summary()));
 
     sim.set_scenario(std::move(scenario));
 
@@ -114,8 +114,8 @@ TEST_F(Start, ThreeToOneTopology) {
         conns.emplace_back(connection);
 
         scenario.add_action(std::make_unique<sim::SendDataAction>(
-            TimeNs(0), sim::Data{"", size}, conns, 1, TimeNs(0), TimeNs(0),
-            []() {}));
+            TimeNs(0), size, "", conns, 1, TimeNs(0), TimeNs(0),
+            scenario.get_summary()));
     }
     sim.set_scenario(std::move(scenario));
 

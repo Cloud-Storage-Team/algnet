@@ -43,7 +43,7 @@ std::unique_ptr<IAction> ActionParser::parse_send_data(const ConfigNode& node) {
             "No connections specified for send data action");
     }
 
-    DataId data_id = node["id"].value_or_throw().as_or_throw<DataId>();
+    RawDataId data_id = node["id"].value_or_throw().as_or_throw<RawDataId>();
     if (m_data_ids.contains(data_id)) {
         throw node.create_parsing_error(
             fmt::format("Action with id '{}' already exists", data_id));
@@ -51,25 +51,14 @@ std::unique_ptr<IAction> ActionParser::parse_send_data(const ConfigNode& node) {
     m_data_ids.insert(data_id);
 
     std::shared_ptr<SendDataActionsSummary> summary = m_summary;
-    SizeByte total_size = size * repeat_count * conns.size();
-    TimeNs start_time = when;
     std::vector<Id> connection_ids(conns.size());
     for (size_t i = 0; i < connection_ids.size(); i++) {
         connection_ids[i] = conns[i].lock()->get_id();
     }
 
-    OnDeliveryCallback callback = [data_id, connection_ids, total_size,
-                                   start_time, summary] {
-        TimeNs finish_time = Scheduler::get_instance().get_current_time();
-        summary->emplace_back(SendDataActionsSummaryRow{
-            std::move(data_id), std::move(connection_ids), total_size,
-            start_time, finish_time});
-    };
-
-    Data data(data_id, size);
-
-    return std::make_unique<SendDataAction>(when, data, conns, repeat_count,
-                                            repeat_interval, jitter, callback);
+    return std::make_unique<SendDataAction>(when, size, data_id, conns,
+                                            repeat_count, repeat_interval,
+                                            jitter, m_summary);
 }
 
 }  // namespace sim

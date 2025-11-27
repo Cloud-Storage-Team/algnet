@@ -96,7 +96,7 @@ void ConnectionImpl::send_data() {
             LOG_ERROR(
                 fmt::format("Connection {}: could not find context for "
                             "data id {}; ignored",
-                            m_id, data_id));
+                            m_id, data_id.to_string()));
             return;
         }
         DataContext& context = it->second;
@@ -117,7 +117,7 @@ void ConnectionImpl::send_data() {
                     LOG_ERROR(
                         fmt::format("Connection {}: could not find context for "
                                     "data id {}; ignored",
-                                    id, data_id));
+                                    id, data_id.to_string()));
                     return;
                 }
                 DataContext& context = it->second;
@@ -127,7 +127,7 @@ void ConnectionImpl::send_data() {
                     LOG_INFO(fmt::format(
                         "Connection {} successefully deliveder "
                         "data with id {} & size {}b",
-                        connection->m_id, data_id, context.total_size.value()));
+                        connection->m_id, data_id.to_string(), context.total_size.value()));
                     context.callback();
                 }
             };

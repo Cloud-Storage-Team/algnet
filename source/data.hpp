@@ -9,16 +9,14 @@ namespace sim {
 using RepeatNum = std::size_t;
 using RawDataId = std::string;
 
-struct NewDataId {
-    RawDataId raw_id = {};
-    std::optional<RepeatNum> repeat_num = std::nullopt;
+struct DataId {
+    RawDataId raw_id;
+    std::optional<RepeatNum> repeat_num;
 
-    auto operator<=>(const NewDataId&) const = default;
+    auto operator<=>(const DataId&) const = default;
 
     std::string to_string() const;
 };
-
-using DataId = std::string;
 
 struct Data {
     DataId id;

@@ -4,43 +4,68 @@
 
 namespace sim {
 
-SendDataAction::SendDataAction(TimeNs a_when, Data a_data,
-                               std::vector<std::weak_ptr<IConnection>> a_conns,
-                               int a_repeat_count, TimeNs a_repeat_interval,
-                               TimeNs a_jitter, OnDeliveryCallback a_callback)
+SendDataAction::SendDataAction(
+    TimeNs a_when, SizeByte a_size, RawDataId a_raw_data_id,
+    std::vector<std::weak_ptr<IConnection>> a_conns, int a_repeat_count,
+    TimeNs a_repeat_interval, TimeNs a_jitter,
+    std::shared_ptr<SendDataActionsSummary> a_summary)
     : m_when(a_when),
-      m_data(a_data),
+      m_size(a_size),
+      m_raw_data_id(std::move(a_raw_data_id)),
       m_conns(std::move(a_conns)),
       m_repeat_count(a_repeat_count),
       m_repeat_interval(a_repeat_interval),
       m_jitter(a_jitter),
-      m_delivered_count(0),
-      m_callback_observer(std::make_shared<CallbackObserver>(
-          m_conns.size() * m_repeat_count, std::move(a_callback))) {}
+      m_summary(a_summary) {}
 
 void SendDataAction::schedule() {
     const bool use_jitter = m_jitter > TimeNs(0);
 
-    std::shared_ptr<CallbackObserver> observer = m_callback_observer;
-
-    OnDeliveryCallback single_data_callback = [observer]() {
-        observer->on_single_callback();
-    };
-
-    for (auto& weak : m_conns) {
-        auto conn = weak.lock();
+    std::size_t connections_count = m_conns.size();
+    std::vector<Id> connection_ids;
+    connection_ids.reserve(connections_count);
+    for (const auto& weak_conn : m_conns) {
+        auto conn = weak_conn.lock();
         if (!conn) throw std::runtime_error("Expired connection in action");
+        connection_ids.emplace_back(conn->get_id());
+    }
 
-        std::uint64_t seed = std::hash<std::string>{}(conn->get_id());
-        std::mt19937_64 rng(seed);
-        std::uniform_int_distribution<uint64_t> dist(
-            0, m_jitter.value_nanoseconds());
+    std::uint64_t seed = std::hash<std::string>{}(m_raw_data_id);
+    std::mt19937_64 rng(seed);
+    for (size_t i = 0; i < m_repeat_count; ++i) {
+        std::shared_ptr<SendDataActionsSummary> summary = m_summary;
 
-        for (size_t i = 0; i < m_repeat_count; ++i) {
+        std::optional<RepeatNum> repeat_num =
+            (m_repeat_count == 1 ? std::nullopt : std::make_optional(i));
+        DataId data_id{m_raw_data_id, repeat_num};
+        SizeByte total_size = m_size * connections_count;
+        Data data(data_id, total_size);
+
+        TimeNs start_time = m_when + i * m_repeat_interval;
+
+        OnDeliveryCallback callback = [data, connection_ids, start_time,
+                                       summary]() {
+            TimeNs finish_time = Scheduler::get_instance().get_current_time();
+            summary->emplace_back(data, connection_ids, start_time,
+                                  finish_time);
+        };
+
+        std::shared_ptr<CallbackObserver> observer =
+            std::make_shared<CallbackObserver>(connections_count, callback);
+
+        OnDeliveryCallback single_connection_callback = [observer]() {
+            observer->on_single_callback();
+        };
+
+        for (auto& weak : m_conns) {
+            auto conn = weak.lock();
+            std::uniform_int_distribution<uint64_t> dist(
+                0, m_jitter.value_nanoseconds());
+
             TimeNs jitter_gap = use_jitter ? TimeNs(dist(rng)) : TimeNs(0);
             Scheduler::get_instance().add<AddDataToConnection>(
-                m_when + i * m_repeat_interval + jitter_gap, conn, m_data,
-                single_data_callback);
+                start_time + jitter_gap, conn, data,
+                single_connection_callback);
         }
     }
 }

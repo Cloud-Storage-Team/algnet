@@ -62,7 +62,7 @@ private:
     };
 
     // stores delivered size & callback for every data id
-    std::unordered_map<DataId, DataContext> m_data_context_table;
+    std::map<DataId, DataContext> m_data_context_table;
     std::queue<DataId> m_sending_queue;
     SizeByte m_total_data_added;
     std::set<std::shared_ptr<IFlow>> m_flows;

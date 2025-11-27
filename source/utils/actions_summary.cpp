@@ -22,8 +22,18 @@ void write_to_csv(const std::string& output_path,
     if (!out) {
         throw std::runtime_error("Failed to create file for summary");
     }
+    bool any_repeat_num_present = false;
+    for (auto el : summary) {
+        if (el.data.id.repeat_num.has_value()) {
+            any_repeat_num_present = true;
+        }
+    }
+
     std::string joined_connection_ids;
     out << "Data Id";
+    if (any_repeat_num_present) {
+        out << ", " << "Repeant number";
+    }
     out << ", " << "Connection Ids";
     out << ", " << "Data Size (bytes)";
     out << ", " << "Time Spent (ns)";
@@ -33,10 +43,13 @@ void write_to_csv(const std::string& output_path,
     out << '\n';
     for (const SendDataActionsSummaryRow& row : summary) {
         TimeNs spent = row.finish_time - row.start_time;
-        SpeedGbps throughput = row.data_size / spent;
-        out << row.data_id;
+        SpeedGbps throughput = row.data.size / spent;
+        out << row.data.id.raw_id;
+        if (any_repeat_num_present && row.data.id.repeat_num.has_value()) {
+            out << ", " << row.data.id.repeat_num.value();
+        }
         out << ", " << join_ids(row.connection_ids);
-        out << ", " << row.data_size;
+        out << ", " << row.data.size;
         out << ", " << spent.value();
         out << ", " << throughput.value();
         out << ", " << row.start_time.value();

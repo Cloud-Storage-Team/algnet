@@ -19,7 +19,7 @@ private:
     std::unique_ptr<IAction> parse_send_data(const ConfigNode& node);
 
     std::shared_ptr<SendDataActionsSummary> m_summary;
-    std::set<DataId> m_data_ids;
+    std::set<RawDataId> m_data_ids;
 };
 
 }  // namespace sim

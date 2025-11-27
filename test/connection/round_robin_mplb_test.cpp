@@ -43,7 +43,7 @@ protected:
             auto flow =
                 std::dynamic_pointer_cast<test::FlowMock>(mplb.select_flow());
             if (!flow) break;
-            flow.get()->send_data(flow.get()->get_packet_size(), "");
+            flow.get()->send_data(flow.get()->get_packet_size(), sim::DataId());
             flows.emplace_back(flow);
         }
         return flows;
