@@ -48,7 +48,12 @@ void write_to_csv(const std::string& output_path,
         if (any_repeat_num_present && row.data.id.repeat_num.has_value()) {
             out << ", " << row.data.id.repeat_num.value();
         }
-        out << ", " << join_ids(row.connection_ids);
+        if (row.connection_ids.size() < 5) {
+            out << ", " << join_ids(row.connection_ids);
+        } else {
+            out << ", " << row.connection_ids.size()
+                << " different connections";
+        }
         out << ", " << row.data.size;
         out << ", " << spent.value();
         out << ", " << throughput.value();
