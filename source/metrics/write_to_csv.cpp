@@ -2,6 +2,9 @@
 
 #include <cmath>
 #include <limits>
+#include <span>
+
+static constexpr std::size_t FLUSH_THRESHOLD = (1 << 20);  // 1 MB
 
 namespace sim {
 
@@ -9,9 +12,6 @@ void write_to_csv(
     const std::vector<std::pair<MetricsStorage, std::string>>& storages,
     const std::filesystem::path output_path) {
     const size_t count_storages = storages.size();
-    if (count_storages == 0) {
-        return;
-    }
 
     using Sample = std::pair<TimeNs, double>;
     using SeriesSpan = std::span<const Sample>;
@@ -63,6 +63,10 @@ void write_to_csv(
         return result;
     };
 
+    auto flush_buffer = [&]() {
+        out.write(buffer.data(), static_cast<std::streamsize>(buffer.size()));
+    };
+
     // Main time-merge loop (k-way merge)
     for (auto next_time_opt = get_next_time(); next_time_opt.has_value();
          next_time_opt = get_next_time()) {
@@ -85,16 +89,15 @@ void write_to_csv(
 
         // 3) Optionally flush the buffer periodically to avoid memory growth
         // (e.g., every 1–8 MB)
-        if (buffer.size() > (1 << 20)) {  // 1 MB
-            out.write(buffer.data(),
-                      static_cast<std::streamsize>(buffer.size()));
+        if (buffer.size() > FLUSH_THRESHOLD) {  // 1 MB
+            flush_buffer();
             buffer.clear();
         }
     }
 
     // Final flush
     if (buffer.size()) {
-        out.write(buffer.data(), static_cast<std::streamsize>(buffer.size()));
+        flush_buffer();
     }
 }
 
