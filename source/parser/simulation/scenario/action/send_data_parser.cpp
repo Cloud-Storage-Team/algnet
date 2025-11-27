@@ -66,7 +66,9 @@ std::unique_ptr<IAction> ActionParser::parse_send_data(const ConfigNode& node) {
             start_time, finish_time});
     };
 
-    return std::make_unique<SendDataAction>(when, size, conns, repeat_count,
+    Data data(data_id, size);
+
+    return std::make_unique<SendDataAction>(when, data, conns, repeat_count,
                                             repeat_interval, jitter, callback);
 }
 

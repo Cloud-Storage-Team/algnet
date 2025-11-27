@@ -4,12 +4,12 @@
 
 namespace sim {
 
-SendDataAction::SendDataAction(TimeNs a_when, SizeByte a_size,
+SendDataAction::SendDataAction(TimeNs a_when, Data a_data,
                                std::vector<std::weak_ptr<IConnection>> a_conns,
                                int a_repeat_count, TimeNs a_repeat_interval,
                                TimeNs a_jitter, OnDeliveryCallback a_callback)
     : m_when(a_when),
-      m_size(a_size),
+      m_data(a_data),
       m_conns(std::move(a_conns)),
       m_repeat_count(a_repeat_count),
       m_repeat_interval(a_repeat_interval),
@@ -39,7 +39,7 @@ void SendDataAction::schedule() {
         for (size_t i = 0; i < m_repeat_count; ++i) {
             TimeNs jitter_gap = use_jitter ? TimeNs(dist(rng)) : TimeNs(0);
             Scheduler::get_instance().add<AddDataToConnection>(
-                m_when + i * m_repeat_interval + jitter_gap, conn, m_size,
+                m_when + i * m_repeat_interval + jitter_gap, conn, m_data,
                 single_data_callback);
         }
     }

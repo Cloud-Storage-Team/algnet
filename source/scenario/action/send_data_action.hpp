@@ -10,7 +10,7 @@ namespace sim {
 
 class SendDataAction : public IAction {
 public:
-    SendDataAction(TimeNs a_when, SizeByte a_size,
+    SendDataAction(TimeNs a_when, Data a_data,
                    std::vector<std::weak_ptr<IConnection>> a_conns,
                    int a_repeat_count, TimeNs a_repeat_interval,
                    TimeNs a_jitter, OnDeliveryCallback a_callback);
@@ -31,7 +31,7 @@ private:
     };
 
     TimeNs m_when;
-    SizeByte m_size;
+    Data m_data;
     std::vector<std::weak_ptr<IConnection>> m_conns;
     size_t m_repeat_count;
     TimeNs m_repeat_interval;

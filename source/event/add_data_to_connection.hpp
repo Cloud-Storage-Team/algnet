@@ -10,13 +10,13 @@ namespace sim {
 class AddDataToConnection : public Event {
 public:
     AddDataToConnection(TimeNs when, std::shared_ptr<IConnection> conn,
-                        SizeByte size, OnDeliveryCallback a_callback);
+                        Data a_data, OnDeliveryCallback a_callback);
     ~AddDataToConnection() = default;
     void operator()() final;
 
 private:
     std::weak_ptr<IConnection> m_connection;
-    SizeByte m_size;
+    Data m_data;
     OnDeliveryCallback m_callback;
 };
 
