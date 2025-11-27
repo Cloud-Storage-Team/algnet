@@ -2,8 +2,6 @@
 
 #include "i_action.hpp"
 #include "types.hpp"
-#include "scheduler.hpp"
-#include "event/stop.hpp"
 
 namespace sim{
 
