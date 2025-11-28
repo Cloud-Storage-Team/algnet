@@ -46,8 +46,8 @@ TcpFlow::TcpFlow(Id a_id, std::shared_ptr<IConnection> a_conn,
 }
 
 void TcpFlow::update(Packet packet) {
-    PacketType type =
-        static_cast<PacketType>(packet.flags.get_flag(m_packet_type_label).value_or_throw());
+    PacketType type = static_cast<PacketType>(
+        packet.flags.get_flag(m_packet_type_label).value_or_throw());
     if (m_src.expired()) {
         LOG_ERROR(fmt::format("Sender exprired for flow {}; ignore packet {}",
                               to_string(), packet.to_string()));
@@ -317,7 +317,8 @@ void TcpFlow::process_ack(Packet ack, std::size_t confirm_count) {
 Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
     Packet packet;
     packet.flags = get_flag_manager();
-    packet.flags.set_flag(m_packet_type_label, PacketType::DATA).log_err_if_not_present("Failed to set packet type (DATA)");
+    packet.flags.set_flag(m_packet_type_label, PacketType::DATA)
+        .log_err_if_not_present("Failed to set packet type (DATA)");
 
     set_avg_rtt_if_present(packet);
     packet.size = m_packet_size;
@@ -335,7 +336,8 @@ Packet TcpFlow::generate_data_packet(PacketNum packet_num) {
 void TcpFlow::set_avg_rtt_if_present(Packet& packet) {
     std::optional<TimeNs> avg_rtt = m_rtt_statistics.get_mean();
     if (avg_rtt.has_value()) {
-        set_avg_rtt_flag(packet.flags, avg_rtt.value()).log_err_if_not_present("Failed to set average RTT");
+        set_avg_rtt_flag(packet.flags, avg_rtt.value())
+            .log_err_if_not_present("Failed to set average RTT");
     }
 }
 
@@ -410,21 +412,26 @@ Packet TcpFlow::create_ack(Packet data) {
     ack.congestion_experienced = data.congestion_experienced;
 
     ack.flags = get_flag_manager();
-    ack.flags.set_flag(
-        m_packet_type_label,
-        (M_COLLECTIVE_ACK_SUPPORT ? PacketType::COLLECTIVE_ACK
-                                  : PacketType::ACK)).log_err_if_not_present("Failed to set ACK flag");
-    ack.flags.set_flag(m_ack_ttl_label, data.ttl).log_err_if_not_present("Failed to set TTL flag");
+    ack.flags
+        .set_flag(m_packet_type_label,
+                  (M_COLLECTIVE_ACK_SUPPORT ? PacketType::COLLECTIVE_ACK
+                                            : PacketType::ACK))
+        .log_err_if_not_present("Failed to set ACK flag");
+    ack.flags.set_flag(m_ack_ttl_label, data.ttl)
+        .log_err_if_not_present("Failed to set TTL flag");
 
     utils::StrExpected<TimeNs> exp_avg_rtt = get_avg_rtt_label(data.flags);
     // TODO: use LOG_INFO for this part
-    bool is_not_present = exp_avg_rtt.log_err_if_not_present(fmt::format("avg rtt flag does not set in data packet {} so it "
-                        "will not be set in ack {}", data.to_string(), ack.to_string()));
+    bool is_not_present = exp_avg_rtt.log_err_if_not_present(
+        fmt::format("avg rtt flag does not set in data packet {} so it "
+                    "will not be set in ack {}",
+                    data.to_string(), ack.to_string()));
     if (is_not_present) {
         return ack;
     }
 
-    set_avg_rtt_flag(ack.flags, exp_avg_rtt.value()).log_err_if_not_present("Failed to set average RTT");
+    set_avg_rtt_flag(ack.flags, exp_avg_rtt.value())
+        .log_err_if_not_present("Failed to set average RTT");
     return ack;
 }
 

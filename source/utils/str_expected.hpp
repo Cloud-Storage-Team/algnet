@@ -17,7 +17,7 @@ public:
     StrExpected(std::unexpected<U> a_unexpected)
         : std::expected<T, std::string>(a_unexpected) {
         static_assert(std::is_constructible_v<std::expected<T, std::string>,
-                                              std::unexpected<U> >);
+                                              std::unexpected<U>>);
     }
 
     StrExpected(T a_value)
@@ -72,7 +72,8 @@ public:
         return result;
     }
 
-    bool apply_if_not_present(std::function<void(const std::string&)> apply_func) {
+    bool apply_if_not_present(
+        std::function<void(const std::string&)> apply_func) {
         bool result = !this->has_value();
         if (result) {
             apply_func(this->error());
@@ -102,8 +103,7 @@ public:
                                               std::unexpected<U>>);
     }
 
-    StrExpected()
-        : std::expected<void, std::string>(std::in_place) {}
+    StrExpected() : std::expected<void, std::string>(std::in_place) {}
 
     template <typename TErr = std::runtime_error>
     void value_or_throw() const {
@@ -154,7 +154,8 @@ public:
         return result;
     }
 
-    bool apply_if_not_present(std::function<void(const std::string&)> apply_func) {
+    bool apply_if_not_present(
+        std::function<void(const std::string&)> apply_func) {
         bool result = !this->has_value();
         if (result) {
             apply_func(this->error());
