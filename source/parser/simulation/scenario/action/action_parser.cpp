@@ -8,6 +8,9 @@
 
 namespace sim {
 
+ActionParser::ActionParser(std::shared_ptr<SendDataActionsSummary> a_summary)
+    : m_summary(a_summary) {}
+
 std::unique_ptr<IAction> ActionParser::parse(const ConfigNode& node) {
     const std::string action =
         node["action"].value_or_throw().as_or_throw<std::string>();

@@ -13,7 +13,7 @@ void FlowMock::update([[maybe_unused]] sim::Packet packet) {};
 
 SizeByte FlowMock::get_sending_quota() const { return m_sending_quota; }
 std::optional<TimeNs> FlowMock::get_last_rtt() const { return m_last_rtt; }
-void FlowMock::send_data(SizeByte data) {
+void FlowMock::send_data(SizeByte data, [[maybe_unused]] sim::DataId data_id) {
     if (data > m_sending_quota) {
         throw std::runtime_error("FlowMock::send_data: data > sending_quota");
     }

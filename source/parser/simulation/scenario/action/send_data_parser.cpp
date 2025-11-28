@@ -43,8 +43,22 @@ std::unique_ptr<IAction> ActionParser::parse_send_data(const ConfigNode& node) {
             "No connections specified for send data action");
     }
 
-    return std::make_unique<SendDataAction>(when, size, conns, repeat_count,
-                                            repeat_interval, jitter);
+    RawDataId data_id = node["id"].value_or_throw().as_or_throw<RawDataId>();
+    if (m_data_ids.contains(data_id)) {
+        throw node.create_parsing_error(
+            fmt::format("Action with id '{}' already exists", data_id));
+    }
+    m_data_ids.insert(data_id);
+
+    std::shared_ptr<SendDataActionsSummary> summary = m_summary;
+    std::vector<Id> connection_ids(conns.size());
+    for (size_t i = 0; i < connection_ids.size(); i++) {
+        connection_ids[i] = conns[i].lock()->get_id();
+    }
+
+    return std::make_unique<SendDataAction>(when, size, data_id, conns,
+                                            repeat_count, repeat_interval,
+                                            jitter, m_summary);
 }
 
 }  // namespace sim

@@ -20,6 +20,7 @@ presets:
 
 scenario:
   - action: send_data
+    id: send
     connections: .*
     when: 0ns
     size: 1500KB

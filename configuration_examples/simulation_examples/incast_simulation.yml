@@ -58,6 +58,7 @@ connections:
 
 scenario:
   - action: send_data
+    id: send-1
     when: 0ns
     size: 1000000B
     connections: conn.*

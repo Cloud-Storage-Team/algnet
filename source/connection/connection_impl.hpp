@@ -2,7 +2,9 @@
 
 #include <cstdint>
 #include <memory>
+#include <queue>
 #include <set>
+#include <utility>
 
 #include "connection/flow/i_flow.hpp"
 #include "connection/i_connection.hpp"
@@ -19,27 +21,28 @@ public:
                    std::shared_ptr<IHost> a_dest,
                    std::shared_ptr<IMPLB> a_mplb);
 
-    ~ConnectionImpl() override = default;
+    ~ConnectionImpl() final = default;
 
-    Id get_id() const override;
+    Id get_id() const final;
 
-    void add_flow(std::shared_ptr<IFlow> flow) override;
+    void add_flow(std::shared_ptr<IFlow> flow) final;
 
-    void delete_flow(std::shared_ptr<IFlow> flow) override;
+    void delete_flow(std::shared_ptr<IFlow> flow) final;
 
-    void add_data_to_send(SizeByte data) override;
+    [[nodiscard]] utils::StrExpected<void> add_data_to_send(
+        Data data, OnDeliveryCallback callback) final;
 
-    SizeByte get_total_data_added() const override;
+    SizeByte get_total_data_added() const final;
 
-    void update(const std::shared_ptr<IFlow>& flow) override;
+    void update(const std::shared_ptr<IFlow>& flow, DataId data_id) final;
 
-    std::set<std::shared_ptr<IFlow>> get_flows() const override;
+    std::set<std::shared_ptr<IFlow>> get_flows() const final;
 
-    void clear_flows() override;
+    void clear_flows() final;
 
-    std::shared_ptr<IHost> get_sender() const override;
+    std::shared_ptr<IHost> get_sender() const final;
 
-    std::shared_ptr<IHost> get_receiver() const override;
+    std::shared_ptr<IHost> get_receiver() const final;
 
 private:
     // Tries to send data using the MPLB-selected flow(s), as long as
@@ -50,7 +53,17 @@ private:
     std::weak_ptr<IHost> m_src;
     std::weak_ptr<IHost> m_dest;
     std::shared_ptr<IMPLB> m_mplb;
-    SizeByte m_data_to_send;
+
+    struct DataContext {
+        SizeByte total_size;
+        SizeByte sent;
+        SizeByte delivered;
+        OnDeliveryCallback callback;
+    };
+
+    // stores delivered size & callback for every data id
+    std::map<DataId, DataContext> m_data_context_table;
+    std::queue<DataId> m_sending_queue;
     SizeByte m_total_data_added;
     std::set<std::shared_ptr<IFlow>> m_flows;
 };
