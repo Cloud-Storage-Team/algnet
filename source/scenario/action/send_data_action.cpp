@@ -39,14 +39,14 @@ void SendDataAction::schedule() {
             (m_repeat_count == 1 ? std::nullopt : std::make_optional(i));
         DataId data_id{m_raw_data_id, repeat_num};
         SizeByte total_size = m_size * connections_count;
-        Data data(data_id, total_size);
+        Data total_data(data_id, total_size);
 
         TimeNs start_time = m_when + i * m_repeat_interval;
 
-        OnDeliveryCallback callback = [data, connection_ids, start_time,
+        OnDeliveryCallback callback = [total_data, connection_ids, start_time,
                                        summary]() {
             TimeNs finish_time = Scheduler::get_instance().get_current_time();
-            summary->emplace_back(data, connection_ids, start_time,
+            summary->emplace_back(total_data, connection_ids, start_time,
                                   finish_time);
         };
 
@@ -57,6 +57,7 @@ void SendDataAction::schedule() {
             observer->on_single_callback();
         };
 
+        Data data{data_id, m_size};
         for (auto& weak : m_conns) {
             auto conn = weak.lock();
             std::uniform_int_distribution<uint64_t> dist(

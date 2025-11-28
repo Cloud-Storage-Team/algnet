@@ -17,7 +17,10 @@ void AddDataToConnection::operator()() {
         return;
     }
 
-    m_connection.lock()->add_data_to_send(m_data, m_callback);
+    auto res = m_connection.lock()->add_data_to_send(m_data, m_callback);
+    if (!res.has_value()) {
+        LOG_ERROR(std::move(res.error()));
+    }
 }
 
 }  // namespace sim

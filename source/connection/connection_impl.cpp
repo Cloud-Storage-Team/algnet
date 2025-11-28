@@ -103,42 +103,12 @@ void ConnectionImpl::send_data() {
         SizeByte send_size = std::min(quota, context.total_size - context.sent);
 
         std::weak_ptr<ConnectionImpl> connection_weak = shared_from_this();
-        std::function<void(DataId id, SizeByte size)> callback =
-            [connection_weak](DataId data_id, SizeByte size) {
-                if (connection_weak.expired()) {
-                    LOG_ERROR(fmt::format("Could not "));
-                }
-                std::shared_ptr<ConnectionImpl> connection =
-                    connection_weak.lock();
-                Id id = connection->m_id;
 
-                auto it = connection->m_data_context_table.find(data_id);
-                if (it == connection->m_data_context_table.end()) {
-                    LOG_ERROR(
-                        fmt::format("Connection {}: could not find context for "
-                                    "data id {}; ignored",
-                                    id, data_id.to_string()));
-                    return;
-                }
-                DataContext& context = it->second;
-
-                context.delivered += size;
-                if (context.delivered == context.total_size) {
-                    LOG_INFO(fmt::format(
-                        "Connection {} successefully deliveder "
-                        "data with id {} & size {}b",
-                        connection->m_id, data_id.to_string(), context.total_size.value()));
-                    context.callback();
-                }
-            };
-
-        // TODO: pass callback to flow->send_data instead calling it here
         flow->send_data(send_size, data_id);
         context.sent += send_size;
-        if (context.sent == context.total_size) {
+        if (context.sent >= context.total_size) {
             m_sending_queue.pop();
         }
-        // callback(data_id, send_size);
     }
 }
 

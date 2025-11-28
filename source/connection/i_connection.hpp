@@ -26,7 +26,7 @@ public:
 
     // Adds new portion of data that should be sent
     // Callback hould be triggered when given data succesefully delivered
-    virtual utils::StrExpected<void> add_data_to_send(
+    [[nodiscard]] virtual utils::StrExpected<void> add_data_to_send(
         Data data, OnDeliveryCallback callback = []() {}) = 0;
     // Returns the total amount of data added to the connection
     virtual SizeByte get_total_data_added() const = 0;
