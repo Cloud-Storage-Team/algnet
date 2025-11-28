@@ -97,7 +97,7 @@ scenario:
 
 `action` — the type of action. This field is **mandatory**.
 - Other fields depend on the chosen `action` type.  
-- At the moment, only `send_data` and `stop_time` is supported. Additional actions will be introduced in the future.
+- At the moment, only `send_data` and `stop_time`  are supported. Additional actions will be introduced in the future.
 
 `send_data` action:  
 Specifies how much data should be sent to the connection level at a given time.  
