@@ -5,7 +5,6 @@
 
 namespace sim {
 
-// TODO: use NewDataId instead of DataId
 using RepeatNum = std::size_t;
 using RawDataId = std::string;
 
