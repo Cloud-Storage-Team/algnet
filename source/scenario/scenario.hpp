@@ -29,7 +29,7 @@ public:
 private:
     std::vector<std::shared_ptr<IAction>> m_actions;
     // TODO: move this to some other place (this class collect all type of
-    // events, not only send_data, so it looks strange to store summary by onbly
+    // events, not only send_data, so it looks strange to store summary by only
     // one type of events here)
     std::shared_ptr<SendDataActionsSummary> m_send_data_actions_summary;
 };
