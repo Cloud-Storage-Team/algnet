@@ -103,7 +103,7 @@ scenario:
 `send_data` action:  
 Specifies how much data should be sent to the connection level at a given time.  
 **mandatory fields:**
-- `id`: identifier of action. Different `send_data` actiuons should have different ids 
+- `id`: identifier of action. Different `send_data` actions should have different ids 
 - `when`: The time at which the data will start being sent in [time format](../README.md) 
 - `size`: The amount of data to send in [size format](../README.md)
 - `connections`: Specifies which connections to use for sending data. Supports regular expression
