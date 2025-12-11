@@ -3,8 +3,7 @@
 #include <memory>
 
 #include "parser/config_reader/config_node.hpp"
-#include "parser/parse_utils.hpp"
-#include "scenario/action/i_action.hpp"
+#include "send_data_action_parser.hpp"
 #include "utils/actions_summary.hpp"
 
 namespace sim {
@@ -16,10 +15,7 @@ public:
     std::unique_ptr<IAction> parse(const ConfigNode& node);
 
 private:
-    std::unique_ptr<IAction> parse_send_data(const ConfigNode& node);
-
-    std::shared_ptr<SendDataActionsSummary> m_summary;
-    std::set<RawDataId> m_data_ids;
+    SendDataActionParser m_send_data_parser;
 };
 
 }  // namespace sim

@@ -1,8 +1,9 @@
+#include "send_data_action_parser.hpp"
+
 #include <ranges>
 #include <regex>
 
-#include "action_parser.hpp"
-#include "scenario/action/send_data_action.hpp"
+#include "parser/parse_utils.hpp"
 
 namespace sim {
 
@@ -20,7 +21,11 @@ static std::vector<std::weak_ptr<IConnection>> get_target_connections(
     return conns;
 }
 
-std::unique_ptr<IAction> ActionParser::parse_send_data(const ConfigNode& node) {
+SendDataActionParser::SendDataActionParser(
+    std::shared_ptr<SendDataActionsSummary> a_summary)
+    : m_summary(a_summary) {}
+
+std::unique_ptr<IAction> SendDataActionParser::parse(const ConfigNode& node) {
     const TimeNs when = parse_time(node["when"].value_or_throw());
     const SizeByte size = parse_size(node["size"].value_or_throw());
     const std::regex connections =
@@ -58,7 +63,7 @@ std::unique_ptr<IAction> ActionParser::parse_send_data(const ConfigNode& node) {
 
     return std::make_unique<SendDataAction>(when, size, data_id, conns,
                                             repeat_count, repeat_interval,
-                                            jitter, m_summary);
+                                            jitter, summary);
 }
 
 }  // namespace sim

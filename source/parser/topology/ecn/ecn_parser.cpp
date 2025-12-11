@@ -10,4 +10,4 @@ ECN EcnParser::parse_ecn(const ConfigNode& node) {
     return ECN(min, max, probability);
 }
 
-}
+}  // namespace sim

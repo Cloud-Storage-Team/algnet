@@ -34,8 +34,9 @@ std::uint32_t AdaptiveFlowletHasher::get_hash(const Packet& packet) {
     TimeNs elapsed_from_last_seen = curr_time - last_seen;
 
     utils::StrExpected<TimeNs> exp_avg_rtt = get_avg_rtt_label(packet.flags);
-    bool is_not_present = exp_avg_rtt.log_err_if_not_present("Adaptive flowlet hasher could not find avg rtt;"
-                        "returned previous hash");
+    bool is_not_present = exp_avg_rtt.log_err_if_not_present(
+        "Adaptive flowlet hasher could not find avg rtt;"
+        "returned previous hash");
     if (is_not_present) {
         return ecmp_hash + shift;
     }

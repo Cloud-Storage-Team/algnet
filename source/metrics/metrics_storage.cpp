@@ -10,7 +10,8 @@ void MetricsStorage::add_record(TimeNs time, double value) {
     m_records.emplace_back(time, value);
 }
 
-std::vector<std::pair<TimeNs, double> > MetricsStorage::get_records() const {
+const std::vector<std::pair<TimeNs, double>>& MetricsStorage::get_records()
+    const {
     return m_records;
 }
 

@@ -74,8 +74,6 @@ void Simulator::recalculate_paths() {
     }
 }
 
-void Simulator::set_stop_time(TimeNs stop_time) { m_stop_time = stop_time; }
-
 void Simulator::start() {
     recalculate_paths();
 
