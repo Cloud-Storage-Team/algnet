@@ -23,7 +23,7 @@ struct Packet {
 
     PacketNum packet_num = 0;
     BaseFlagManager flags;
-    DataId data_id = 0;  // Identifier of data transaction
+    DataId data_id;  // Identifier of data transaction
     Id source_id;
     Id dest_id;
     SizeByte size;

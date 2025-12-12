@@ -25,10 +25,12 @@ connections:
 
 scenario:
   - action: send_data
+    id: send-1
     when: 0ns
     size: 128000B
     connections: conn1
   - action: send_data
+    id: send-2
     when: 0ns
     size: 256000B
     connections: conn2

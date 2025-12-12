@@ -4,13 +4,13 @@
 #include <vector>
 
 #include "action/i_action.hpp"
+#include "utils/actions_summary.hpp"
 
 namespace sim {
 
 class Scenario {
 public:
-    Scenario() = default;
-    ~Scenario() = default;
+    Scenario();
 
     Scenario(const Scenario&) = delete;
     Scenario& operator=(const Scenario&) = delete;
@@ -19,13 +19,19 @@ public:
     Scenario& operator=(Scenario&&) noexcept = default;
 
     // Add a new action to the scenario
-    void add_action(std::unique_ptr<IAction> action);
+    void add_action(std::shared_ptr<IAction> action);
 
     // Run all actions (schedule them in the simulator)
     void start();
 
+    std::shared_ptr<SendDataActionsSummary> get_summary() const;
+
 private:
-    std::vector<std::unique_ptr<IAction>> m_actions;
+    std::vector<std::shared_ptr<IAction>> m_actions;
+    // TODO: move this to some other place (this class collect all type of
+    // events, not only send_data, so it looks strange to store summary by only
+    // one type of events here)
+    std::shared_ptr<SendDataActionsSummary> m_send_data_actions_summary;
 };
 
 }  // namespace sim

@@ -37,7 +37,9 @@ public:
 
     bool add_link(std::shared_ptr<ILink> link);
 
-    void set_scenario(Scenario&& scenario);
+    void set_scenario(Scenario scenario);
+
+    const Scenario& get_scenario() const;
 
     std::vector<std::shared_ptr<IDevice>> get_devices() const;
 

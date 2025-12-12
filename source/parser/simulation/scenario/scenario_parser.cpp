@@ -11,8 +11,10 @@ Scenario ScenarioParser::parse(const ConfigNode& scenario_node) {
 
     auto scenario = Scenario();
 
+    ActionParser action_parser(scenario.get_summary());
+
     for (const auto& node : scenario_node) {
-        scenario.add_action(ActionParser::parse(node));
+        scenario.add_action(action_parser.parse(node));
     }
     return scenario;
 }

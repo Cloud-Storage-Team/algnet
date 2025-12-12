@@ -20,7 +20,7 @@ public:
             std::unique_ptr<ITcpCC> a_cc, SizeByte a_packet_size,
             bool a_ecn_capable = true);
     void update(Packet packet) final;
-    void send_data(SizeByte data) final;
+    void send_data(SizeByte data, DataId id) final;
 
     SizeByte get_packet_size() const final;
     SizeByte get_total_data_size_added_from_conn() const final;
@@ -73,12 +73,12 @@ private:
     void process_collective_ack(Packet ack);
     void process_ack(Packet ack, std::size_t confirm_count);
 
-    Packet generate_data_packet(PacketNum packet_num);
+    Packet generate_data_packet(PacketNum packet_num, DataId id);
     void set_avg_rtt_if_present(Packet& packet);
     void update_rto_on_timeout();
     void update_rto_on_ack();
     void send_packet_now(Packet packet);
-    void retransmit_packet(PacketNum packet_num);
+    void retransmit_packet(PacketNum packet_num, DataId data_id);
 
     // Congestion control module
     std::unique_ptr<ITcpCC> m_cc;

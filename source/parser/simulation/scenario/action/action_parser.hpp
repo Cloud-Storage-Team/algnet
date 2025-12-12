@@ -3,20 +3,19 @@
 #include <memory>
 
 #include "parser/config_reader/config_node.hpp"
-#include "parser/parse_utils.hpp"
-#include "scenario/action/i_action.hpp"
+#include "send_data_action_parser.hpp"
+#include "utils/actions_summary.hpp"
 
 namespace sim {
 
 class ActionParser {
 public:
+    ActionParser(std::shared_ptr<SendDataActionsSummary> a_summary);
     // Parse one YAML node into an IAction
-    static std::unique_ptr<IAction> parse(const ConfigNode& node);
+    std::unique_ptr<IAction> parse(const ConfigNode& node);
 
 private:
-    static std::unique_ptr<IAction> parse_send_data(const ConfigNode& node);
-
-    static std::unique_ptr<IAction> parse_stop_time(const ConfigNode& node);
+    SendDataActionParser m_send_data_parser;
 };
 
 }  // namespace sim

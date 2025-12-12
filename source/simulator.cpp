@@ -40,9 +40,11 @@ bool Simulator::add_link(std::shared_ptr<ILink> link) {
     return true;
 }
 
-void Simulator::set_scenario(Scenario&& scenario) {
+void Simulator::set_scenario(Scenario scenario) {
     m_scenario = std::move(scenario);
 }
+
+const Scenario& Simulator::get_scenario() const { return m_scenario; }
 
 std::vector<std::shared_ptr<IDevice>> Simulator::get_devices() const {
     std::vector<std::shared_ptr<IDevice>> devices;

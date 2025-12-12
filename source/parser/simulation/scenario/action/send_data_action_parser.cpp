@@ -1,10 +1,11 @@
+#include "send_data_action_parser.hpp"
+
 #include <ranges>
 #include <regex>
 
 #include "parser/parse_utils.hpp"
-#include "send_data_action_parser.hpp"
 
-namespace sim{
+namespace sim {
 
 // Get target connections from the YAML node
 static std::vector<std::weak_ptr<IConnection>> get_target_connections(
@@ -20,7 +21,11 @@ static std::vector<std::weak_ptr<IConnection>> get_target_connections(
     return conns;
 }
 
-std::unique_ptr<IAction> SendDataActionParser::parse(const ConfigNode& node){
+SendDataActionParser::SendDataActionParser(
+    std::shared_ptr<SendDataActionsSummary> a_summary)
+    : m_summary(a_summary) {}
+
+std::unique_ptr<IAction> SendDataActionParser::parse(const ConfigNode& node) {
     const TimeNs when = parse_time(node["when"].value_or_throw());
     const SizeByte size = parse_size(node["size"].value_or_throw());
     const std::regex connections =
@@ -43,8 +48,22 @@ std::unique_ptr<IAction> SendDataActionParser::parse(const ConfigNode& node){
             "No connections specified for send data action");
     }
 
-    return std::make_unique<SendDataAction>(when, size, conns, repeat_count,
-                                            repeat_interval, jitter);
+    RawDataId data_id = node["id"].value_or_throw().as_or_throw<RawDataId>();
+    if (m_data_ids.contains(data_id)) {
+        throw node.create_parsing_error(
+            fmt::format("Action with id '{}' already exists", data_id));
+    }
+    m_data_ids.insert(data_id);
+
+    std::shared_ptr<SendDataActionsSummary> summary = m_summary;
+    std::vector<Id> connection_ids(conns.size());
+    for (size_t i = 0; i < connection_ids.size(); i++) {
+        connection_ids[i] = conns[i].lock()->get_id();
+    }
+
+    return std::make_unique<SendDataAction>(when, size, data_id, conns,
+                                            repeat_count, repeat_interval,
+                                            jitter, summary);
 }
 
-} // namespace sim
+}  // namespace sim
