@@ -17,9 +17,9 @@ struct ConnectionContext {
 // Logical path in network. Corresponds to application layer in TCP\IP stack
 class INewConnection : public virtual Identifiable {
 public:
-    virtual void send_data(Data data, OnDeliveryCallback callback) = 0;
+    [[nodiscard]] virtual utils::StrExpected<void> send_data(
+        Data data, OnDeliveryCallback callback) = 0;
 
-    // Confirm data_size bytes delivery for data with given id
     virtual const ConnectionContext& get_context() const = 0;
 };
 
