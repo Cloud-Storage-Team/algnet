@@ -20,13 +20,13 @@ struct MPLBContext {
 // Owns multiple flows; balances the load between them
 class INewMPLB {
 public:
-    // Callback that is triggered when ack is received by sender of a given flow
-    virtual void on_ack(std::shared_ptr<const INewFlow> flow, const Packet& ack,
-                        std::vector<PacketNum> confinfed_packet_nums) = 0;
+    // Forward data to transport layer
+    // Returns error given data might not be sent (e.g. its size greater than
+    // quota)
+    virtual utils::StrExpected<void> send_data(Data data,
+                                               OnDeliveryCallback callback) = 0;
 
-    // Forward data to transport layer as much as possible
-    // Returns size of transfered data
-    virtual SizeByte send_data(Data data) = 0;
+    virtual const MPLBContext& get_context() const = 0;
 };
 
 }  // namespace sim
