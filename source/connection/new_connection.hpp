@@ -7,7 +7,7 @@
 namespace sim {
 
 class NewConnection : public INewConnection,
-                      std::enable_shared_from_this<NewConnection> {
+                      public std::enable_shared_from_this<NewConnection> {
 public:
     static std::shared_ptr<NewConnection> create(
         Id a_id, std::shared_ptr<INewMPLB> mplb);

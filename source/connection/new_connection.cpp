@@ -64,7 +64,7 @@ void NewConnection::send_new_portion(DataId id) {
 
     std::weak_ptr<NewConnection> connection_weak = shared_from_this();
 
-    OnDeliveryCallback callback = [=]() {
+    OnDeliveryCallback callback = [connection_weak, id, delivery_size]() {
         if (connection_weak.expired()) {
             LOG_ERROR(fmt::format(
                 "Pointer to connection expired; could not call its callback on "
@@ -74,10 +74,19 @@ void NewConnection::send_new_portion(DataId id) {
         }
         auto connection = connection_weak.lock();
         connection->m_context.total_data_confirmed += delivery_size;
-        connection->send_new_portion(std::move(id));
+        auto it = connection->m_data_context_table.find(id);
+        if (it != connection->m_data_context_table.end()) {
+            DataContext& context = it->second;
+            context.delivered += delivery_size;
+        } else {
+            LOG_ERROR(fmt::format(
+                "Connection {}: could not find context for data with id {}",
+                connection->m_id, id.to_string()));
+        }
+        connection->send_new_portion(id);
     };
 
-    m_context.mplb->send_data(Data(id, delivery_size), std::move(callback))
+    m_context.mplb->send_data(Data(id, delivery_size), callback)
         .log_err_if_not_present(
             fmt::format("Error on sending data in connection {}", m_id));
 }
