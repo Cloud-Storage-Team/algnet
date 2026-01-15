@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <queue>
 
 #include "i_new_connection.hpp"
 
@@ -23,7 +24,7 @@ private:
     // to avoid creating on stack
     NewConnection(Id a_id, std::shared_ptr<INewMPLB> mplb);
 
-    void send_new_portion(DataId id);
+    void send_new_portion();
 
     struct DataContext {
         SizeByte total_size;
@@ -35,5 +36,6 @@ private:
     Id m_id;
     ConnectionContext m_context;
     std::map<DataId, DataContext> m_data_context_table;
+    std::queue<DataId> m_sending_queue;
 };
 }  // namespace sim

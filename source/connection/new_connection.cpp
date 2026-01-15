@@ -23,8 +23,9 @@ utils::StrExpected<void> NewConnection::send_data(Data data,
     m_data_context_table[data.id] =
         DataContext{data.size, SizeByte(0), SizeByte(0), callback};
     m_context.total_data_added += data.size;
+    m_sending_queue.push(data_id);
 
-    send_new_portion(data_id);
+    send_new_portion();
     return {};
 }
 
@@ -34,61 +35,73 @@ const ConnectionContext& NewConnection::get_context() const {
 
 Id NewConnection::get_id() const { return m_id; }
 
-void NewConnection::send_new_portion(DataId id) {
-    auto it = m_data_context_table.find(id);
-    if (it == m_data_context_table.end()) {
-        LOG_ERROR(
-            fmt::format("Could not send new portion of data with id {}: no "
-                        "context associated with it",
-                        id.to_string()));
-        return;
-    }
-    DataContext& context = it->second;
-    if (context.delivered >= context.total_size) {
-        LOG_INFO(fmt::format("All data with id {} delivered; call callback",
-                             id.to_string()));
-        context.callback();
-        return;
-    }
+void NewConnection::send_new_portion() {
+    while (!m_sending_queue.empty()) {
+        DataId id = m_sending_queue.front();
 
-    SizeByte quota = m_context.mplb->get_context().sending_quota;
-    if (quota == SizeByte(0)) {
-        LOG_ERROR(
-            fmt::format("Sending quota is qero; could not send data with id {}",
-                        id.to_string()));
-        return;
-    }
+        auto it = m_data_context_table.find(id);
+        if (it == m_data_context_table.end()) {
+            LOG_ERROR(
+                fmt::format("Could not send new portion of data with id {}: no "
+                            "context associated with it",
+                            id.to_string()));
+            m_sending_queue.pop();
+            continue;
+        }
 
-    SizeByte delivery_size =
-        std::min(context.total_size - context.delivered, quota);
+        DataContext& context = it->second;
+        if (context.sent >= context.total_size) {
+            m_sending_queue.pop();
+            continue;
+        }
 
-    std::weak_ptr<NewConnection> connection_weak = shared_from_this();
-
-    OnDeliveryCallback callback = [connection_weak, id, delivery_size]() {
-        if (connection_weak.expired()) {
+        SizeByte quota = m_context.mplb->get_context().sending_quota;
+        if (quota == SizeByte(0)) {
             LOG_ERROR(fmt::format(
-                "Pointer to connection expired; could not call its callback on "
-                "delivery portion of data with id {}",
+                "Sending quota is qero; could not send data with id {}",
                 id.to_string()));
-            return;
+            break;
         }
-        auto connection = connection_weak.lock();
-        connection->m_context.total_data_confirmed += delivery_size;
-        auto it = connection->m_data_context_table.find(id);
-        if (it != connection->m_data_context_table.end()) {
-            DataContext& context = it->second;
-            context.delivered += delivery_size;
-        } else {
-            LOG_ERROR(fmt::format(
-                "Connection {}: could not find context for data with id {}",
-                connection->m_id, id.to_string()));
-        }
-        connection->send_new_portion(id);
-    };
 
-    m_context.mplb->send_data(Data(id, delivery_size), callback)
-        .log_err_if_not_present(
-            fmt::format("Error on sending data in connection {}", m_id));
+        SizeByte delivery_size =
+            std::min(context.total_size - context.sent, quota);
+
+        std::weak_ptr<NewConnection> connection_weak = shared_from_this();
+
+        OnDeliveryCallback callback = [connection_weak, id, delivery_size]() {
+            if (connection_weak.expired()) {
+                LOG_ERROR(
+                    fmt::format("Pointer to connection expired; could not call "
+                                "its callback on "
+                                "delivery portion of data with id {}",
+                                id.to_string()));
+                return;
+            }
+            auto connection = connection_weak.lock();
+            connection->m_context.total_data_confirmed += delivery_size;
+
+            auto it = connection->m_data_context_table.find(id);
+            if (it != connection->m_data_context_table.end()) {
+                DataContext& context = it->second;
+                context.delivered += delivery_size;
+                if (context.delivered >= context.total_size) {
+                    LOG_INFO(fmt::format(
+                        "All data with id {} delivered; call callback", id));
+                    context.callback();
+                }
+            } else {
+                LOG_ERROR(fmt::format(
+                    "Connection {}: could not find context for data with id {}",
+                    connection->m_id, id.to_string()));
+            }
+            connection->send_new_portion();
+        };
+
+        context.sent += delivery_size;
+        m_context.mplb->send_data(Data(id, delivery_size), callback)
+            .log_err_if_not_present(
+                fmt::format("Error on sending data in connection {}", m_id));
+    }
 }
 
 }  // namespace sim
