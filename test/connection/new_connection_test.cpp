@@ -81,4 +81,20 @@ TEST_F(NewConnectionSendTest, SendRepeatingDataIds) {
     }
 }
 
+TEST_F(NewConnectionSendTest, SendManyIds) {
+    auto mplb = std::make_shared<MplbMock>(SizeByte(100));
+    auto connection = sim::NewConnection::create("", mplb);
+
+    for (int num = 0; num < 3; num++) {
+        sim::DataId id(fmt::format("id_{}", num));
+        bool delivered = false;
+
+        auto res = connection->send_data(sim::Data(id, SizeByte(100)),
+                                         [&]() { delivered = true; });
+        ASSERT_TRUE(res.has_value()) << res.error();
+        ASSERT_TRUE(delivered) << fmt::format(
+            "Data {} should be delivered, but it was not", id.to_string());
+    }
+}
+
 }  // namespace test
