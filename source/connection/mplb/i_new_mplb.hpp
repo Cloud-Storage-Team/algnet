@@ -9,7 +9,7 @@
 namespace sim {
 
 struct MPLBContext {
-    std::set<std::shared_ptr<INewFlow> > flows;
+    const std::set<std::shared_ptr<INewFlow> >& flows;
     SizeByte sent_data_size;
     SizeByte delivered_data_size;
     SizeByte sending_quota;  // maximal size of data that might be sent now
