@@ -26,7 +26,7 @@ public:
     virtual utils::StrExpected<void> send_data(Data data,
                                                OnDeliveryCallback callback) = 0;
 
-    virtual const MPLBContext& get_context() const = 0;
+    virtual MPLBContext get_context() const = 0;
 };
 
 }  // namespace sim
