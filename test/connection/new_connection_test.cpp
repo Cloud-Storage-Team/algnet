@@ -82,18 +82,29 @@ TEST_F(NewConnectionSendTest, SendRepeatingDataIds) {
 }
 
 TEST_F(NewConnectionSendTest, SendManyIds) {
-    auto mplb = std::make_shared<MplbMock>(SizeByte(100));
+    auto mplb = std::make_shared<MplbMock>(SizeByte(100), false);
     auto connection = sim::NewConnection::create("", mplb);
 
-    for (int num = 0; num < 3; num++) {
-        sim::DataId id(fmt::format("id_{}", num));
-        bool delivered = false;
+    const size_t IDS_COUNT = 3;
 
-        auto res = connection->send_data(sim::Data(id, SizeByte(100)),
-                                         [&]() { delivered = true; });
+    std::vector<bool> delivered(IDS_COUNT, false);
+    std::vector<sim::DataId> ids(IDS_COUNT);
+    for (size_t i = 0; i < IDS_COUNT; i++) {
+        ids[i] = fmt::format("id_{}", i);
+
+        auto res =
+            connection->send_data(sim::Data(ids[i], SizeByte(100)),
+                                  [&delivered, i]() { delivered[i] = true; });
         ASSERT_TRUE(res.has_value()) << res.error();
-        ASSERT_TRUE(delivered) << fmt::format(
-            "Data {} should be delivered, but it was not", id.to_string());
+        ASSERT_FALSE(delivered[i]) << fmt::format(
+            "Data {} should not be delivered now", ids[i].to_string());
+    }
+
+    mplb->send_all_data();
+
+    for (size_t i = 0; i < IDS_COUNT; i++) {
+        ASSERT_TRUE(delivered[i]) << fmt::format(
+            "Data {} should be delivered, but it was not", ids[i].to_string());
     }
 }
 
