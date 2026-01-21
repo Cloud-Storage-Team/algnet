@@ -86,7 +86,7 @@ void NewConnection::send_new_portion() {
                 context.delivered += delivery_size;
                 if (context.delivered >= context.total_size) {
                     LOG_INFO(fmt::format(
-                        "All data with id {} delivered; call callback", id));
+                        "All data with id {} delivered; call callback", id.to_string()));
                     context.callback();
                 }
             } else {
