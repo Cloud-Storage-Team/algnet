@@ -29,9 +29,7 @@ utils::StrExpected<void> NewConnection::send_data(Data data,
     return {};
 }
 
-const ConnectionContext& NewConnection::get_context() const {
-    return m_context;
-}
+ConnectionContext NewConnection::get_context() const { return m_context; }
 
 Id NewConnection::get_id() const { return m_id; }
 
@@ -86,7 +84,8 @@ void NewConnection::send_new_portion() {
                 context.delivered += delivery_size;
                 if (context.delivered >= context.total_size) {
                     LOG_INFO(fmt::format(
-                        "All data with id {} delivered; call callback", id.to_string()));
+                        "All data with id {} delivered; call callback",
+                        id.to_string()));
                     context.callback();
                 }
             } else {

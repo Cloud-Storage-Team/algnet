@@ -7,8 +7,7 @@ namespace test {
 class MplbMock : public sim::INewMPLB {
 public:
     MplbMock(SizeByte quota, bool a_send_immideatly = true)
-        : m_context{{}, SizeByte(0), SizeByte(0), quota},
-          m_send_immediatly(a_send_immideatly) {}
+        : m_quota(quota), m_send_immediatly(a_send_immideatly) {}
 
     utils::StrExpected<void> send_data([[maybe_unused]] sim::Data data,
                                        OnDeliveryCallback callback) final {
@@ -20,7 +19,9 @@ public:
         return {};
     }
 
-    const sim::MPLBContext& get_context() const final { return m_context; }
+    sim::MPLBContext get_context() const final {
+        return sim::MPLBContext{m_flows, SizeByte(0), SizeByte(0), m_quota};
+    }
 
     void send_all_data() {
         for (auto callback : m_callbacks) {
@@ -30,7 +31,8 @@ public:
     }
 
 private:
-    sim::MPLBContext m_context;
+    std::set<std::shared_ptr<sim::INewFlow> > m_flows;
+    SizeByte m_quota;
     std::vector<OnDeliveryCallback> m_callbacks;
     bool m_send_immediatly;
 };

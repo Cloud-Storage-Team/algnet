@@ -16,7 +16,7 @@ public:
     [[nodiscard]] utils::StrExpected<void> send_data(
         Data data, OnDeliveryCallback callback) final;
 
-    const ConnectionContext& get_context() const final;
+    ConnectionContext get_context() const final;
 
     Id get_id() const final;
 
