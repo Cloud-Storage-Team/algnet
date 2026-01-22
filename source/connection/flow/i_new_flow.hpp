@@ -2,6 +2,7 @@
 
 #include "device/interfaces/i_host.hpp"
 #include "packet.hpp"
+#include "packet_ack_info.hpp"
 #include "utils/statistics.hpp"
 
 namespace sim {
@@ -17,12 +18,6 @@ struct FlowContext {
 
     std::weak_ptr<IHost> sender;
     std::weak_ptr<IHost> receiver;
-};
-
-struct PacketAckInfo {
-    TimeNs rtt;
-    TimeNs avg_rtt;
-    bool ecn_flag;
 };
 
 using PacketCallback = std::function<void(PacketAckInfo)>;

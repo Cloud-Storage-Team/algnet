@@ -46,6 +46,8 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
     TimeNs now = Scheduler::get_instance().get_current_time();
 
     for (size_t packet_num = 0; packet_num < packets_count; packet_num++) {
+        // TODO: think about pasing delay & sending data to many flows (is it
+        // really needed in such case?)
         std::shared_ptr<INewFlow> flow = m_path_chooser->choose_flow();
         shift += pacing_delay;
         std::shared_ptr<SingleCCMplb> this_mplb = shared_from_this();
