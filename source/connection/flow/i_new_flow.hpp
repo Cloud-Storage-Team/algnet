@@ -19,10 +19,18 @@ struct FlowContext {
     std::weak_ptr<IHost> receiver;
 };
 
+struct PacketAckInfo {
+    TimeNs rtt;
+    TimeNs avg_rtt;
+    bool ecn_flag;
+};
+
+using PacketCallback = std::function<void(PacketAckInfo)>;
+
 struct PacketInfo {
     DataId id;
     SizeByte packet_size;
-    OnDeliveryCallback callback;
+    PacketCallback callback;
     TimeNs generated_time;
 };
 

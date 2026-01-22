@@ -9,6 +9,13 @@
 
 namespace sim {
 
+std::shared_ptr<SingleCCMplb> SingleCCMplb::create_shared(
+    std::unique_ptr<ITcpCC> a_cc, std::unique_ptr<IPathChooser> a_path_chooser,
+    SizeByte a_packet_size) {
+    return std::shared_ptr<SingleCCMplb>(new SingleCCMplb(
+        std::move(a_cc), std::move(a_path_chooser), a_packet_size));
+}
+
 SingleCCMplb::SingleCCMplb(std::unique_ptr<ITcpCC> a_cc,
                            std::unique_ptr<IPathChooser> a_path_chooser,
                            SizeByte a_packet_size)
@@ -41,8 +48,13 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
     for (size_t packet_num = 0; packet_num < packets_count; packet_num++) {
         std::shared_ptr<INewFlow> flow = m_path_chooser->choose_flow();
         shift += pacing_delay;
-        PacketInfo info{data.id, m_packet_size,
-                        [observer] { observer->on_single_callback(); }, now};
+        std::shared_ptr<SingleCCMplb> this_mplb = shared_from_this();
+        PacketCallback packet_callback = [observer, this_mplb,
+                                          flow](PacketAckInfo info) {
+            observer->on_single_callback();
+            this_mplb->m_cc->on_ack(info.rtt, info.avg_rtt, info.ecn_flag);
+        };
+        PacketInfo info{data.id, m_packet_size, packet_callback, now};
         Scheduler::get_instance().add<CallAtTime>(
             now + shift, [flow, packet_info = std::move(info)]() {
                 flow->send(std::vector<PacketInfo>(1, std::move(packet_info)));

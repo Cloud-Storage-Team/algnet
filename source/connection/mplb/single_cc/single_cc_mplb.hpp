@@ -5,11 +5,13 @@
 
 namespace sim {
 
-class SingleCCMplb : public INewMPLB {
+class SingleCCMplb : public INewMPLB,
+                     public std::enable_shared_from_this<SingleCCMplb> {
 public:
-    SingleCCMplb(std::unique_ptr<ITcpCC> a_cc,
-                 std::unique_ptr<IPathChooser> a_path_chooser,
-                 SizeByte a_packet_size = SizeByte(1500));
+    std::shared_ptr<SingleCCMplb> create_shared(
+        std::unique_ptr<ITcpCC> a_cc,
+        std::unique_ptr<IPathChooser> a_path_chooser,
+        SizeByte a_packet_size = SizeByte(1500));
 
     [[nodiscard]] virtual utils::StrExpected<void> send_data(
         Data data, OnDeliveryCallback callback) final;
@@ -17,6 +19,9 @@ public:
     virtual MPLBContext get_context() const final;
 
 private:
+    SingleCCMplb(std::unique_ptr<ITcpCC> a_cc,
+                 std::unique_ptr<IPathChooser> a_path_chooser,
+                 SizeByte a_packet_size);
     SizeByte get_quota() const;
 
     std::unique_ptr<ITcpCC> m_cc;
