@@ -8,7 +8,7 @@ namespace sim {
 class SingleCCMplb : public INewMPLB,
                      public std::enable_shared_from_this<SingleCCMplb> {
 public:
-    std::shared_ptr<SingleCCMplb> create_shared(
+    static std::shared_ptr<SingleCCMplb> create_shared(
         std::unique_ptr<ITcpCC> a_cc,
         std::unique_ptr<IPathChooser> a_path_chooser,
         SizeByte a_packet_size = SizeByte(1500));
