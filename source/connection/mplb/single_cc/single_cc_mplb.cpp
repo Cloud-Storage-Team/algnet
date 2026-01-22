@@ -51,11 +51,13 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
         std::shared_ptr<INewFlow> flow = m_path_chooser->choose_flow();
         shift += pacing_delay;
         std::shared_ptr<SingleCCMplb> this_mplb = shared_from_this();
-        PacketCallback packet_callback = [observer, this_mplb,
-                                          flow](PacketAckInfo info) {
-            observer->on_single_callback();
-            this_mplb->m_cc->on_ack(info.rtt, info.avg_rtt, info.ecn_flag);
-        };
+        PacketCallback packet_callback =
+            [observer, this_mplb, flow,
+             delivered = m_packet_size](PacketAckInfo info) {
+                observer->on_single_callback();
+                this_mplb->m_cc->on_ack(info.rtt, info.avg_rtt, info.ecn_flag);
+                this_mplb->m_delivered_data_size += delivered;
+            };
         PacketInfo info{data.id, m_packet_size, packet_callback, now};
         Scheduler::get_instance().add<CallAtTime>(
             now + shift, [flow, packet_info = std::move(info)]() {
