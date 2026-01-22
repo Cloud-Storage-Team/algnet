@@ -21,8 +21,8 @@ TEST_F(SingleCCMplbTest, SimpleSend) {
 
     SizeByte packet_size(1500);
 
-    auto mplb = sim::SingleCCMplb::create_shared(std::move(cc),
-                                                 std::move(path_chooser));
+    auto mplb = sim::SingleCCMplb::create_shared(
+        std::move(cc), std::move(path_chooser), packet_size);
     bool delivered = false;
     OnDeliveryCallback callback = [&delivered]() { delivered = true; };
     auto res = mplb->send_data(
@@ -33,6 +33,33 @@ TEST_F(SingleCCMplbTest, SimpleSend) {
     }
 
     EXPECT_TRUE(delivered);
+}
+
+TEST_F(SingleCCMplbTest, IncorrectSend) {
+    std::set<std::shared_ptr<sim::INewFlow> > pathes = {
+        std::make_shared<NewFlowMock>()};
+
+    std::unique_ptr<sim::IPathChooser> path_chooser =
+        std::make_unique<PathChooserMock>(pathes);
+
+    std::unique_ptr<sim::ITcpCC> cc = std::make_unique<CCMock>(1, TimeNs(0));
+
+    SizeByte small_packet_size(1500);
+    SizeByte big_packet_size(3000);
+
+    auto mplb = sim::SingleCCMplb::create_shared(
+        std::move(cc), std::move(path_chooser), small_packet_size);
+    bool delivered = false;
+    OnDeliveryCallback callback = [&delivered]() { delivered = true; };
+    auto res = mplb->send_data(
+        sim::Data(sim::DataId{"", std::nullopt}, big_packet_size), callback);
+    EXPECT_FALSE(res.has_value()) << "Data should not be delivered, but it was";
+
+    while (sim::Scheduler::get_instance().tick()) {
+    }
+
+    EXPECT_FALSE(delivered)
+        << "On delivery callback should not be triggered, but it was";
 }
 
 }  // namespace test
