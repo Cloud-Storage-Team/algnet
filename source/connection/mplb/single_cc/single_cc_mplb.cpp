@@ -35,7 +35,6 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
                         data.size.value(), quota.value()));
     }
 
-    m_sent_data_size += data.size;
     TimeNs pacing_delay = m_cc->get_pacing_delay();
     TimeNs shift(0);
 
@@ -48,20 +47,38 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
     for (size_t packet_num = 0; packet_num < packets_count; packet_num++) {
         // TODO: think about pasing delay & sending data to many flows (is it
         // really needed in such case?)
-        std::shared_ptr<INewFlow> flow = m_path_chooser->choose_flow();
+        std::weak_ptr<INewFlow> flow_weak = m_path_chooser->choose_flow();
         shift += pacing_delay;
-        std::shared_ptr<SingleCCMplb> this_mplb = shared_from_this();
-        PacketCallback packet_callback =
-            [observer, this_mplb, flow,
-             delivered = m_packet_size](PacketAckInfo info) {
-                observer->on_single_callback();
-                this_mplb->m_cc->on_ack(info.rtt, info.avg_rtt, info.ecn_flag);
-                this_mplb->m_delivered_data_size += delivered;
-            };
+        std::weak_ptr<SingleCCMplb> mplb_weak = shared_from_this();
+        PacketCallback packet_callback = [observer, mplb_weak,
+                                          flow_weak](PacketAckInfo info) {
+            observer->on_single_callback();
+            if (mplb_weak.expired()) {
+                LOG_ERROR("MPLB pointer expired, could not call callback");
+                return;
+            }
+            auto mplb = mplb_weak.lock();
+            mplb->m_cc->on_ack(info.rtt, info.avg_rtt, info.ecn_flag);
+            mplb->m_delivered_data_size += mplb->m_packet_size;
+        };
         PacketInfo info{data.id, m_packet_size, packet_callback, now};
         Scheduler::get_instance().add<CallAtTime>(
-            now + shift, [flow, packet_info = std::move(info)]() {
-                flow->send(std::vector<PacketInfo>(1, std::move(packet_info)));
+            now + shift,
+            [mplb_weak, flow_weak, packet_info = std::move(info)]() {
+                if (flow_weak.expired()) {
+                    LOG_ERROR("Flow pointer expired; could not send data");
+                    return;
+                }
+                if (mplb_weak.expired()) {
+                    LOG_ERROR(
+                        "MPLB pointer expired; could not increase sent data "
+                        "size");
+                } else {
+                    mplb_weak.lock()->m_sent_data_size +=
+                        packet_info.packet_size;
+                }
+                flow_weak.lock()->send(
+                    std::vector<PacketInfo>(1, std::move(packet_info)));
             });
         m_packets_in_flight++;
     }
