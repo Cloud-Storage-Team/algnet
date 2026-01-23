@@ -20,7 +20,7 @@ utils::StrExpected<void> NewConnection::send_data(Data data,
                         "id already sent",
                         m_id, data.to_string()));
     }
-    m_data_context_table[data.id] =
+    m_data_context_table[data_id] =
         DataContext{data.size, SizeByte(0), SizeByte(0), callback};
     m_context.total_data_added += data.size;
     m_sending_queue.push(data_id);
