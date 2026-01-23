@@ -55,7 +55,7 @@ void NewConnection::send_new_portion() {
 
         SizeByte quota = m_context.mplb->get_context().sending_quota;
         if (quota == SizeByte(0)) {
-            LOG_ERROR(fmt::format(
+            LOG_INFO(fmt::format(
                 "Sending quota is zero; could not send data with id {}",
                 id.to_string()));
             break;
