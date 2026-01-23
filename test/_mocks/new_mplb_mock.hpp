@@ -1,7 +1,7 @@
 #pragma once
-#include <vector>
 #include <memory>
 #include <set>
+#include <vector>
 
 #include "connection/mplb/i_new_mplb.hpp"
 
@@ -13,7 +13,7 @@ public:
 
     utils::StrExpected<void> send_data([[maybe_unused]] sim::Data data,
                                        OnDeliveryCallback callback) final {
-        if (m_send_immediatly) {
+        if (m_send_immediately) {
             callback();
         } else {
             m_callbacks.emplace_back(callback);
@@ -36,6 +36,6 @@ private:
     std::set<std::shared_ptr<sim::INewFlow> > m_flows;
     SizeByte m_quota;
     std::vector<OnDeliveryCallback> m_callbacks;
-    bool m_send_immediatly;
+    bool m_send_immediately;
 };
 }  // namespace test
