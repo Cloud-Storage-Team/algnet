@@ -2,6 +2,7 @@
 
 #include <map>
 #include <queue>
+#include <memory>
 
 #include "i_new_connection.hpp"
 
