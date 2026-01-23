@@ -26,8 +26,8 @@ public:
     }
 
     void send_all_data() {
-        for (auto callback : m_callbacks) {
-            callback();
+        for (size_t i = 0; i < m_callbacks.size(); i++) {
+            m_callbacks[i]();
         }
         m_callbacks.clear();
     }
