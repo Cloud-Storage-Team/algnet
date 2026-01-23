@@ -1,5 +1,7 @@
 #pragma once
 #include <vector>
+#include <memory>
+#include <set>
 
 #include "connection/mplb/i_new_mplb.hpp"
 
