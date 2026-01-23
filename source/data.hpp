@@ -12,6 +12,8 @@ struct DataId {
     RawDataId raw_id;
     std::optional<RepeatNum> repeat_num;
 
+    DataId(RawDataId a_raw_id = "", std::optional<RepeatNum> = std::nullopt);
+
     auto operator<=>(const DataId&) const = default;
 
     std::string to_string() const;
