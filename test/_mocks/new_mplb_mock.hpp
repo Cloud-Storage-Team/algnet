@@ -7,7 +7,7 @@ namespace test {
 class MplbMock : public sim::INewMPLB {
 public:
     MplbMock(SizeByte quota, bool a_send_immediately = true)
-        : m_quota(quota), m_send_immediatly(a_send_immideatly) {}
+        : m_quota(quota), m_send_immediately(a_send_immediately) {}
 
     utils::StrExpected<void> send_data([[maybe_unused]] sim::Data data,
                                        OnDeliveryCallback callback) final {
