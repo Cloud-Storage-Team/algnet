@@ -12,7 +12,7 @@ class NewConnection : public INewConnection,
                       public std::enable_shared_from_this<NewConnection> {
 public:
     static std::shared_ptr<NewConnection> create(
-        Id a_id, std::shared_ptr<INewMPLB> mplb);
+        Id a_id, std::shared_ptr<INewMPLB> a_mplb);
 
     [[nodiscard]] utils::StrExpected<void> send_data(
         Data data, OnDeliveryCallback callback) final;
