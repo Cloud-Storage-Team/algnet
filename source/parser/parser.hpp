@@ -7,6 +7,7 @@
 
 #include "parser/config_reader/config_node.hpp"
 #include "simulator.hpp"
+#include "parser/config_reader/config_node_with_preset.hpp"
 
 namespace sim {
 

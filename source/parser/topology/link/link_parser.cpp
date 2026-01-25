@@ -1,52 +1,28 @@
-#include "link_parser.hpp"
+#include "./link_parser.hpp"
 
 namespace sim {
 
-std::shared_ptr<ILink> LinkParser::parse_i_link(const ConfigNode& link_node,
-                                                const LinkPresets& presets) {
-    return parse_default_link(link_node, presets);
+std::shared_ptr<ILink> LinkParser::parse_i_link(const ConfigNodeWithPreset& link_node) {
+    return parse_link(link_node);
 }
 
-void LinkParser::parse_to_args(const ConfigNode& node, LinkInitArgs& args) {
-    node["from"].apply_if_present([&args](const ConfigNode& from) {
-        args.from_id.emplace(from.as_or_throw<Id>());
-    });
-
-    node["to"].apply_if_present([&args](const ConfigNode& to) {
-        args.to_id.emplace(to.as_or_throw<Id>());
-    });
-
-    node["latency"].apply_if_present([&args](const ConfigNode& latency) {
-        args.delay.emplace(parse_time(latency));
-    });
-
-    node["throughput"].apply_if_present([&args](const ConfigNode& speed) {
-        args.speed.emplace(parse_speed(speed));
-    });
-
-    node["egress_buffer_size"].apply_if_present(
-        [&args](const ConfigNode& max_from_egress_buffer_size) {
-            args.max_from_egress_buffer_size.emplace(
-                parse_size(max_from_egress_buffer_size));
-        });
-
-    node["ingress_buffer_size"].apply_if_present(
-        [&args](const ConfigNode& max_to_ingress_buffer_size) {
-            args.max_to_ingress_buffer_size.emplace(
-                parse_size(max_to_ingress_buffer_size));
-        });
+std::shared_ptr<Link> LinkParser::parse_to_args(const ConfigNodeWithPreset& node) {
+    Id m_id = node.get_node().get_name_or_throw();
+    std::weak_ptr<IDevice> m_from = IdentifierFactory::get_instance().get_object<IDevice>(node["from"].value_or_throw().get_node().as_or_throw<Id>());
+    std::weak_ptr<IDevice> m_to = IdentifierFactory::get_instance().get_object<IDevice>(node["to"].value_or_throw().get_node().as_or_throw<Id>());
+    SpeedGbps m_speed = parse_speed(node["throughput"].value_or_throw().get_node());
+    TimeNs m_delay = parse_time(node["latency"].value_or_throw().get_node());
+    SizeByte m_egress_buffer_size = parse_size(node["egress_buffer_size"].value_or_throw().get_node());
+    SizeByte m_ingress_buffer_size = parse_size(node["ingress_buffer_size"].value_or_throw().get_node());
+    return std::make_shared<Link>(std::move(Link(m_id, m_from, m_to, m_speed, m_delay, m_egress_buffer_size, m_ingress_buffer_size)));
 }
 
-std::shared_ptr<Link> LinkParser::parse_default_link(
-    const ConfigNode& link_node, const LinkPresets& presets) {
-    Id link_id = link_node.get_name_or_throw();
-    LinkInitArgs link_args = presets.get_preset(link_node);
-    parse_to_args(link_node, link_args);
-    link_args.id = link_id;
+std::shared_ptr<Link> LinkParser::parse_link(
+    const ConfigNodeWithPreset& link_node) {
     try {
-        return std::make_shared<Link>(std::move(link_args));
+        return parse_to_args(link_node);
     } catch (const std::exception& e) {
-        throw link_node.create_parsing_error(e.what());
+        throw link_node.get_node().create_parsing_error(e.what());
     }
 }
 

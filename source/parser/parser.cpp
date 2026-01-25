@@ -85,20 +85,13 @@ void YamlParser::process_switches(const ConfigNode &switches_node,
 
 void YamlParser::process_links(const ConfigNode &links_node,
                                const ConfigNode &link_presets_node) {
-    // Maps preset name to preset body
-    LinkPresets presets = LinkPresets::parse_presets(
-        link_presets_node, [](const ConfigNode &preset_node) {
-            LinkInitArgs args;
-            LinkParser::parse_to_args(preset_node, args);
-            return args;
-        });
     process_identifiables<ILink>(
         links_node,
         [this](std::shared_ptr<ILink> link) {
             return m_simulator.add_link(link);
         },
-        [&presets](const ConfigNode &link_node) {
-            return LinkParser::parse_i_link(link_node, presets);
+        [&link_presets_node](const ConfigNode &link_node) {
+            return LinkParser::parse_i_link(ConfigNodeWithPreset(link_node, link_presets_node));
         },
         "Can not add link.");
 }

@@ -27,36 +27,48 @@ links:
   link0:
     from: sender0
     to: switch
+    preset-name: default
   link1:
     from: switch
     to: sender0
+    preset-name: default
   link2:
     from: sender1
     to: switch
+    preset-name: default
   link3:
     from: switch
     to: sender1
+    preset-name: default
   link4:
     from: sender2
     to: switch
+    preset-name: default
   link5:
     from: switch
     to: sender2
+    preset-name: default
   link6:
     from: sender3
     to: switch
+    preset-name: default
   link7:
     from: switch
     to: sender3
+    preset-name: default
   link8:
     from: sender4
     to: switch
+    preset-name: default
   link9:
     from: switch
     to: sender4
+    preset-name: default
   link10:
     from: switch
     to: receiver0
+    preset-name: default
   link11:
     from: receiver0
     to: switch
+    preset-name: default
