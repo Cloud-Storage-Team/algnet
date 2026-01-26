@@ -10,17 +10,15 @@ using ConfigNodeWithPresetExpected = utils::StrExpected<ConfigNodeWithPreset>;
 
 class ConfigNodeWithPreset{
 public:
-    ConfigNodeWithPreset(ConfigNode a_node, ConfigNode a_presets_node);
+    ConfigNodeWithPreset(ConfigNode a_node);
 
-    ConfigNodeWithPreset(ConfigNode a_node, std::optional<ConfigNode> a_preset, ConfigNode a_presets_node);
+    ConfigNodeWithPreset(ConfigNode a_node, std::optional<ConfigNode> a_presets_node);
+
+    ConfigNodeWithPreset(ConfigNode a_node, std::optional<ConfigNode> a_preset, std::optional<ConfigNode> a_presets_node);
 
     ConfigNodeWithPresetExpected operator[](std::string_view key) const;
 
     const ConfigNode& get_node() const noexcept;
-
-    std::optional<ConfigNode>& get_preset() const noexcept;
-
-    const ConfigNode& get_presets_node() const noexcept;
 
     template <typename T>
     [[nodiscard]] utils::StrExpected<T> as() const noexcept {
@@ -41,7 +39,7 @@ private:
     // m_presets_node - set of presets
     const ConfigNode m_node;
     mutable std::optional<ConfigNode> m_preset;
-    const ConfigNode m_presets_node;
+    const std::optional<ConfigNode> m_presets_node;
 };
 
 } // namespace sim 

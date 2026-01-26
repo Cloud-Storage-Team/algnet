@@ -4,21 +4,21 @@
 #include <memory>
 
 #include "device/switch.hpp"
-#include "parser/config_reader/config_node.hpp"
+#include "parser/config_reader/config_node_with_preset.hpp"
 
 namespace sim {
 
 class SwitchParser {
 public:
     static std::shared_ptr<ISwitch> parse_i_switch(
-        const ConfigNode& switch_node, const ConfigNode& packet_spraying_node);
+        const ConfigNodeWithPreset& switch_node, const ConfigNodeWithPreset& packet_spraying_node);
 
 private:
     static std::shared_ptr<Switch> parse_default_switch(
-        const ConfigNode& switch_node, const ConfigNode& packet_spraying_node);
+        const ConfigNodeWithPreset& switch_node, const ConfigNodeWithPreset& packet_spraying_node);
 
     static std::unique_ptr<IPacketHasher> parse_hasher(
-        const ConfigNode& packet_spraying_node, Id switch_id);
+        const ConfigNodeWithPreset& packet_spraying_node, Id switch_id);
 };
 
 }  // namespace sim
