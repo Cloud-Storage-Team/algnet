@@ -10,36 +10,30 @@ using ConfigNodeWithPresetExpected = utils::StrExpected<ConfigNodeWithPreset>;
 
 class ConfigNodeWithPreset{
 public:
-    ConfigNodeWithPreset(ConfigNode a_node);
 
-    ConfigNodeWithPreset(ConfigNode a_node, std::optional<ConfigNode> a_presets_node);
-
-    ConfigNodeWithPreset(ConfigNode a_node, std::optional<ConfigNode> a_preset, std::optional<ConfigNode> a_presets_node);
+    explicit ConfigNodeWithPreset(
+        ConfigNode a_node,
+        std::optional<ConfigNode> a_presets_node = std::nullopt,
+        std::optional<ConfigNode> a_preset = std::nullopt
+    );
 
     ConfigNodeWithPresetExpected operator[](std::string_view key) const;
 
     const ConfigNode& get_node() const noexcept;
 
     template <typename T>
-    [[nodiscard]] utils::StrExpected<T> as() const noexcept {
-        try {
-            return m_node.as<T>();
-        } catch (const std::exception& e) {
-            return std::unexpected(e.what());
-        } catch (...) {
-            return std::unexpected(
-                "Undefined exception while calling `YAML::Node::as`");
-        }
+    ConfigNodeWithPreset as() const noexcept {
+        return ConfigNodeWithPreset(m_node.as<T>());
     }
 
 private:
 
-    // m_node - contains information about config node and preset name
-    // m_preset - preset node which is used in m_node
-    // m_presets_node - set of presets
+    // m_node contains information about config node and probably preset name
+    // m_preset - preset node which that is used to supplement fields of m_node
+    // m_presets_node - node it which preset node should be searched (id it needs)
     const ConfigNode m_node;
-    mutable std::optional<ConfigNode> m_preset;
     const std::optional<ConfigNode> m_presets_node;
+    mutable std::optional<ConfigNode> m_preset;
 };
 
 } // namespace sim 

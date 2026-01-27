@@ -58,10 +58,7 @@ class LinkGenerator:
             "from" : source_id,
             "to" : dest_id
         }
-        if preset_name != "default":
-            self.topology["links"][link_name]["preset-name"] = preset_name
-        else:
-            self.topology["links"][link_name]["preset-name"] = "default"
+        self.topology["links"][link_name]["preset-name"] = preset_name
         self.next_link_num += 1
 
     def add_bidirectional_link(self,

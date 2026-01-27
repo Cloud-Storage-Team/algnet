@@ -7,7 +7,6 @@
 
 #include "parser/config_reader/config_node.hpp"
 #include "simulator.hpp"
-#include "parser/config_reader/config_node_with_preset.hpp"
 
 namespace sim {
 
@@ -58,9 +57,10 @@ private:
         }
     }
 
-    void process_hosts(const ConfigNode& hosts_node);
+    void process_hosts(const ConfigNode& hosts_node, const ConfigNode &hosts_presets_node);
     void process_switches(const ConfigNode& switches_node,
-                          const ConfigNode& packet_spraying_node);
+                        const ConfigNode &switches_presets_node,
+                        const ConfigNode& packet_spraying_node);
 
     void process_connection(const ConfigNode& connections_node);
     void process_links(const ConfigNode& links_node,
