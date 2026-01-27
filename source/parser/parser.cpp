@@ -91,8 +91,7 @@ void YamlParser::process_switches(const ConfigNode &switches_node,
             return m_simulator.add_switch(swtch);
         },
         [&packet_spraying_node, &switches_presets_node](const ConfigNode &switch_node) {
-            return SwitchParser::parse_i_switch(ConfigNodeWithPreset(switch_node, switches_presets_node),
-                                                ConfigNodeWithPreset(packet_spraying_node));
+            return SwitchParser::parse_i_switch(ConfigNodeWithPreset(switch_node, switches_presets_node), packet_spraying_node);
         },
         "Can not add switch.");
 }
