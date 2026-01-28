@@ -4,6 +4,9 @@
 
 namespace sim {
 
+DataId::DataId(RawDataId a_raw_id, std::optional<RepeatNum> a_repeat_num)
+    : raw_id(a_raw_id), repeat_num(a_repeat_num) {}
+
 std::string DataId::to_string() const {
     return fmt::format(
         "(raw id: {}, repeat num: {})", raw_id,
