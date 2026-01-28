@@ -8,6 +8,7 @@ class ConfigNodeWithPreset;
 
 using ConfigNodeWithPresetExpected = utils::StrExpected<ConfigNodeWithPreset>;
 
+// Config node that supports preset inheritance.
 class ConfigNodeWithPreset{
 public:
 
@@ -19,11 +20,13 @@ public:
 
     ConfigNodeWithPresetExpected operator[](std::string_view key) const;
 
+    // Returns the base config node.
     const ConfigNode& get_node() const noexcept;
 
+    // Converts m_node to type T. Probably this method will return message about error
     template <typename T>
-    ConfigNodeWithPreset as() const noexcept {
-        return ConfigNodeWithPreset(m_node.as<T>());
+    [[nodiscard]] utils::StrExpected<T> as() const noexcept {
+        return m_node.as<T>();
     }
 
 private:
