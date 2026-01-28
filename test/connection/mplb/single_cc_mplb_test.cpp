@@ -40,7 +40,7 @@ TEST_F(SingleCCMplbTest, SimpleSend) {
     }
 
     EXPECT_TRUE(delivered)
-        << "Callback on data delivery should be triggered but in was not";
+        << "Callback on data delivery should be triggered but it was not";
     {
         sim::MPLBContext ctx = mplb->get_context();
         EXPECT_EQ(ctx.sent_data_size, packet_size);

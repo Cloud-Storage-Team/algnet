@@ -19,7 +19,7 @@ public:
     Id get_id() const final { return ""; }
 
     void send(std::vector<sim::PacketInfo> packets_info) final {
-        for (sim::PacketInfo info : packets_info) {
+        for (auto& info : packets_info) {
             if (m_send_immediately) {
                 info.callback(sim::PacketAckInfo{TimeNs(0), TimeNs(0), false});
             } else {

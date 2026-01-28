@@ -31,21 +31,21 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
     SizeByte quota = get_quota();
     if (data.size > quota) {
         return std::unexpected(
-            fmt::format("Data size {}b is bigger that quota size: {}b",
+            fmt::format("Data size {}b is bigger than quota size: {}b",
                         data.size.value(), quota.value()));
     }
 
     TimeNs pacing_delay = m_cc->get_pacing_delay();
     TimeNs shift(0);
 
-    std::size_t packets_count = std::ceil(data.size / m_packet_size);
+    auto packets_count = (data.size + m_packet_size - SizeByte(1)) / m_packet_size;
 
     std::shared_ptr<utils::CallbackObserver> observer =
         std::make_shared<utils::CallbackObserver>(packets_count, callback);
     TimeNs now = Scheduler::get_instance().get_current_time();
 
     for (size_t packet_num = 0; packet_num < packets_count; packet_num++) {
-        // TODO: think about pasing delay & sending data to many flows (is it
+        // TODO: think about pacing delay & sending data to many flows (is it
         // really needed in such case?)
         std::weak_ptr<INewFlow> flow_weak = m_path_chooser->choose_flow();
         shift += pacing_delay;
@@ -59,6 +59,7 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
             }
             auto mplb = mplb_weak.lock();
             mplb->m_cc->on_ack(info.rtt, info.avg_rtt, info.ecn_flag);
+            mplb->m_packets_in_flight--;
             mplb->m_delivered_data_size += mplb->m_packet_size;
         };
         PacketInfo info{data.id, m_packet_size, packet_callback, now};
