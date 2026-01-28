@@ -12,16 +12,16 @@
 namespace sim {
 
 std::shared_ptr<ISwitch> SwitchParser::parse_i_switch(
-    const ConfigNode& switch_node, const ConfigNode& packet_spraying_node) {
+    const ConfigNodeWithPreset& switch_node, const ConfigNode& packet_spraying_node) {
     return parse_default_switch(switch_node, packet_spraying_node);
 }
 
 std::shared_ptr<Switch> SwitchParser::parse_default_switch(
-    const ConfigNode& switch_node, const ConfigNode& packet_spraying_node) {
-    Id id = switch_node.get_name_or_throw();
-    ConfigNodeExpected ecn_node = switch_node["ecn"];
+    const ConfigNodeWithPreset& switch_node, const ConfigNode& packet_spraying_node) {
+    Id id = switch_node.get_node().get_name_or_throw();
+    ConfigNodeWithPresetExpected ecn_node = switch_node["ecn"];
     ECN ecn(1.0, 1.0, 0.0);
-    if (ecn_node) {
+    if (ecn_node.has_value()) {
         ecn = EcnParser::parse_ecn(ecn_node.value());
     }
     return std::make_shared<Switch>(id, std::move(ecn),
@@ -46,8 +46,8 @@ std::unique_ptr<IPacketHasher> SwitchParser::parse_hasher(
         return std::make_unique<FLowletHasher>(threshold);
     }
     if (type == "adaptive_flowlet") {
-        auto factor_node = packet_spraying_node["factor"];
-        if (factor_node) {
+        ConfigNodeExpected factor_node = packet_spraying_node["factor"];
+        if (factor_node.has_value()) {
             double factor = factor_node.value().as_or_throw<double>();
             return std::make_unique<AdaptiveFlowletHasher>(factor);
         } else {

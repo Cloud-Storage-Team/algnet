@@ -26,24 +26,32 @@ links:
   link1:
     from: sender1
     to: bus
+    preset-name: default
   link2:
     from: bus
     to: sender1
+    preset-name: default
   link3:
     from: sender2
     to: bus
+    preset-name: default
   link4:
     from: bus
     to: sender2
+    preset-name: default
   link5:
     from: receiver1
     to: bus
+    preset-name: default
   link6:
     from: bus
     to: receiver1  
+    preset-name: default
   link7:
     from: receiver2
     to: bus    
+    preset-name: default
   link8:
     from: bus
     to: receiver2
+    preset-name: default

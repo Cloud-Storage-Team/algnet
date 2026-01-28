@@ -33,14 +33,24 @@ Simulator YamlParser::build_simulator_from_config(
 
     ConfigNodeExpected topology_presets_node = topology_config["presets"];
 
+    ConfigNode hosts_presets_node = 
+        topology_presets_node.value_or(ConfigNode())["hosts"].value_or(
+            ConfigNode());
+    
+    parse_if_present(topology_config["hosts"],
+                     [this, &hosts_presets_node](ConfigNode node) {
+                        process_hosts(node, hosts_presets_node);
+                    });
+
     const ConfigNode packet_spraying_node =
         topology_config["packet-spraying"].value_or_throw();
-    parse_if_present(topology_config["hosts"],
-                     [this](ConfigNode node) { process_hosts(node); });
+    ConfigNode switches_presets_node = 
+        topology_presets_node.value_or(ConfigNode())["switches"].value_or(
+            ConfigNode());
 
     parse_if_present(topology_config["switches"],
-                     [this, &packet_spraying_node](ConfigNode node) {
-                         return process_switches(node, packet_spraying_node);
+                     [this, &switches_presets_node, &packet_spraying_node](ConfigNode node) {
+                         process_switches(node, switches_presets_node, packet_spraying_node);
                      });
 
     ConfigNode links_preset_node =
@@ -60,45 +70,41 @@ Simulator YamlParser::build_simulator_from_config(
     return std::move(m_simulator);
 }
 
-void YamlParser::process_hosts(const ConfigNode &hosts_node) {
+void YamlParser::process_hosts(const ConfigNode &hosts_node, const ConfigNode &hosts_presets_node) {
     process_identifiables<IHost>(
         hosts_node,
         [this](std::shared_ptr<IHost> host) {
             return m_simulator.add_host(host);
         },
-        HostParser::parse_i_host, "Can not add host.");
+        [&hosts_presets_node](const ConfigNode& hosts_node){
+            return HostParser::parse_i_host(ConfigNodeWithPreset(hosts_node, hosts_presets_node));
+        },
+        "Can not add host.");
 }
 
 void YamlParser::process_switches(const ConfigNode &switches_node,
-                                  const ConfigNode &packet_spraying_node) {
+                                const ConfigNode &switches_presets_node,
+                                const ConfigNode &packet_spraying_node) {
     process_identifiables<ISwitch>(
         switches_node,
         [this](std::shared_ptr<ISwitch> swtch) {
             return m_simulator.add_switch(swtch);
         },
-        [&packet_spraying_node](const ConfigNode &switch_node) {
-            return SwitchParser::parse_i_switch(switch_node,
-                                                packet_spraying_node);
+        [&packet_spraying_node, &switches_presets_node](const ConfigNode &switch_node) {
+            return SwitchParser::parse_i_switch(ConfigNodeWithPreset(switch_node, switches_presets_node), packet_spraying_node);
         },
         "Can not add switch.");
 }
 
 void YamlParser::process_links(const ConfigNode &links_node,
                                const ConfigNode &link_presets_node) {
-    // Maps preset name to preset body
-    LinkPresets presets = LinkPresets::parse_presets(
-        link_presets_node, [](const ConfigNode &preset_node) {
-            LinkInitArgs args;
-            LinkParser::parse_to_args(preset_node, args);
-            return args;
-        });
     process_identifiables<ILink>(
         links_node,
         [this](std::shared_ptr<ILink> link) {
             return m_simulator.add_link(link);
         },
-        [&presets](const ConfigNode &link_node) {
-            return LinkParser::parse_i_link(link_node, presets);
+        [&link_presets_node](const ConfigNode &link_node) {
+            return LinkParser::parse_i_link(ConfigNodeWithPreset(link_node, link_presets_node));
         },
         "Can not add link.");
 }
