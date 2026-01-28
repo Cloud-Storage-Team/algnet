@@ -28,6 +28,7 @@ struct Packet {
     Id dest_id;
     SizeByte size;
     IFlow* flow;
+    OnDeliveryCallback callback = []() {};
     TimeNs generated_time;  // Note: ACK's generated time is the data packet
                             // generated time
     TimeNs sent_time;  // Note: ACK's sent time is the data packet sent time
