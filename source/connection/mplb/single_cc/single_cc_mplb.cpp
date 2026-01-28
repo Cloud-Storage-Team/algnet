@@ -38,7 +38,8 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
     TimeNs pacing_delay = m_cc->get_pacing_delay();
     TimeNs shift(0);
 
-    auto packets_count = (data.size + m_packet_size - SizeByte(1)) / m_packet_size;
+    std::size_t packets_count =
+        (data.size + m_packet_size - SizeByte(1)) / m_packet_size;
 
     std::shared_ptr<utils::CallbackObserver> observer =
         std::make_shared<utils::CallbackObserver>(packets_count, callback);
@@ -52,15 +53,15 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
         std::weak_ptr<SingleCCMplb> mplb_weak = shared_from_this();
         PacketCallback packet_callback = [observer, mplb_weak,
                                           flow_weak](PacketAckInfo info) {
-            observer->on_single_callback();
-            if (mplb_weak.expired()) {
+            if (!mplb_weak.expired()) {
+                auto mplb = mplb_weak.lock();
+                mplb->m_cc->on_ack(info.rtt, info.avg_rtt, info.ecn_flag);
+                mplb->m_packets_in_flight--;
+                mplb->m_delivered_data_size += mplb->m_packet_size;
+            } else {
                 LOG_ERROR("MPLB pointer expired, could not call callback");
-                return;
             }
-            auto mplb = mplb_weak.lock();
-            mplb->m_cc->on_ack(info.rtt, info.avg_rtt, info.ecn_flag);
-            mplb->m_packets_in_flight--;
-            mplb->m_delivered_data_size += mplb->m_packet_size;
+            observer->on_single_callback();
         };
         PacketInfo info{data.id, m_packet_size, packet_callback, now};
         Scheduler::get_instance().add<CallAtTime>(
@@ -79,7 +80,7 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
                         packet_info.packet_size;
                 }
                 flow_weak.lock()->send(
-                    std::vector<PacketInfo>(1, std::move(packet_info)));
+                    std::vector<PacketInfo>({std::move(packet_info)}));
             });
         m_packets_in_flight++;
     }

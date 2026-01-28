@@ -45,7 +45,7 @@ TEST_F(SingleCCMplbTest, SimpleSend) {
         sim::MPLBContext ctx = mplb->get_context();
         EXPECT_EQ(ctx.sent_data_size, packet_size);
         EXPECT_EQ(ctx.delivered_data_size, packet_size);
-        EXPECT_EQ(ctx.sending_quota, SizeByte(0));
+        EXPECT_EQ(ctx.sending_quota, packet_size);
     }
 }
 

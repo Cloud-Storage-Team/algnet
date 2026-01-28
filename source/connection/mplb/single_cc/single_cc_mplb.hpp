@@ -8,6 +8,8 @@ namespace sim {
 class SingleCCMplb : public INewMPLB,
                      public std::enable_shared_from_this<SingleCCMplb> {
 public:
+    virtual ~SingleCCMplb() = default;
+
     static std::shared_ptr<SingleCCMplb> create_shared(
         std::unique_ptr<ITcpCC> a_cc,
         std::unique_ptr<IPathChooser> a_path_chooser,
