@@ -23,11 +23,17 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](std::string_view k
                 return std::unexpected(ss.str());
             }
             ConfigNode presets_node = m_presets_node.value();
-            std::string preset_name = node_preset_name.value().as_or_throw<std::string>();
-            ConfigNodeExpected preset_node = presets_node[preset_name];
+            utils::StrExpected<std::string> preset_name = node_preset_name.value().as<std::string>();
+            if (!preset_name.has_value()){ // field 'preset-name' couldn't be converted to string. Returns message about it
+                std::stringstream ss;
+                ss << "Error: field 'preset-name' in node " << m_node << '\n';
+                ss << "couldn't be converted to string";
+                return std::unexpected(ss.str());
+            }
+            ConfigNodeExpected preset_node = presets_node[preset_name.value()];
             if (!preset_node.has_value()){ // m_presets_node hasn't preset with the specified name in config. Retruns message about it
                 std::stringstream ss;
-                ss << "Error: preset named" << preset_name << "of node" << m_node << '\n';
+                ss << "Error: preset named '" << preset_name.value() << "' of node " << m_node << '\n';
                 ss << "can not be found in presets node:" << presets_node << ":\n";
                 return std::unexpected(ss.str());
             }
@@ -36,7 +42,7 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](std::string_view k
         ConfigNodeExpected key_node = m_preset.value()[key];
         if (!key_node.has_value()){ // m_preset hasn't key. Returns message about it
             std::stringstream ss;
-            ss << "Key error: preset " << m_preset.value().get_name().value() << " ";
+            ss << "Key error: preset '" << m_preset.value().get_name().value() << "' ";
             ss << "does not have key: " << key;
             return std::unexpected(ss.str());
         }

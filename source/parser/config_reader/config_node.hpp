@@ -19,7 +19,7 @@ public:
     explicit ConfigNode(YAML::Node a_node = YAML::Node(YAML::NodeType::Null),
                         std::optional<std::string> a_name = std::nullopt);
 
-    // Some functional over yaml-cpp 
+    // Some functional over yaml-cpp
 
     [[nodiscard]] const YAML::Node& get_node() const noexcept;
 

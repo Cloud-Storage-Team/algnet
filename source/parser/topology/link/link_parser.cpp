@@ -14,7 +14,7 @@ std::shared_ptr<Link> LinkParser::parse_to_args(const ConfigNodeWithPreset& node
     TimeNs m_delay = parse_time(node["latency"].value_or_throw().get_node());
     SizeByte m_egress_buffer_size = parse_size(node["egress_buffer_size"].value_or_throw().get_node());
     SizeByte m_ingress_buffer_size = parse_size(node["ingress_buffer_size"].value_or_throw().get_node());
-    return std::make_shared<Link>(std::move(Link(m_id, m_from, m_to, m_speed, m_delay, m_egress_buffer_size, m_ingress_buffer_size)));
+    return std::make_shared<Link>(m_id, m_from, m_to, m_speed, m_delay, m_egress_buffer_size, m_ingress_buffer_size);
 }
 
 std::shared_ptr<Link> LinkParser::parse_link(
