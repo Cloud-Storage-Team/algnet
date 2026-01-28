@@ -2,6 +2,7 @@
 
 #include "device/interfaces/i_host.hpp"
 #include "packet.hpp"
+#include "packet_ack_info.hpp"
 #include "utils/statistics.hpp"
 
 namespace sim {
@@ -19,11 +20,20 @@ struct FlowContext {
     std::weak_ptr<IHost> receiver;
 };
 
+using PacketCallback = std::function<void(PacketAckInfo)>;
+
+struct PacketInfo {
+    DataId id;
+    SizeByte packet_size;
+    PacketCallback callback;
+    TimeNs generated_time;
+};
+
 // Transport layer interface for reliable data delivery along single physical
 // path
 class INewFlow : public virtual Identifiable {
 public:
-    virtual void send(std::vector<Packet> packets) = 0;
+    virtual void send(std::vector<PacketInfo> packets) = 0;
 
     virtual const FlowContext& get_context() = 0;
 };
