@@ -7,9 +7,9 @@ std::shared_ptr<ILink> LinkParser::parse_i_link(const ConfigNodeWithPreset& link
 }
 
 std::shared_ptr<Link> LinkParser::parse_to_args(const ConfigNodeWithPreset& node) {
-    Id m_id = node.get_node().get_name_or_throw();
-    std::weak_ptr<IDevice> m_from = IdentifierFactory::get_instance().get_object<IDevice>(node["from"].value_or_throw().get_node().as_or_throw<Id>());
-    std::weak_ptr<IDevice> m_to = IdentifierFactory::get_instance().get_object<IDevice>(node["to"].value_or_throw().get_node().as_or_throw<Id>());
+    Id m_id = node.get_name_or_throw().value();
+    std::weak_ptr<IDevice> m_from = IdentifierFactory::get_instance().get_object<IDevice>(node["from"].value_or_throw().as_or_throw<Id>());
+    std::weak_ptr<IDevice> m_to = IdentifierFactory::get_instance().get_object<IDevice>(node["to"].value_or_throw().as_or_throw<Id>());
     SpeedGbps m_speed = parse_speed(node["throughput"].value_or_throw().get_node());
     TimeNs m_delay = parse_time(node["latency"].value_or_throw().get_node());
     SizeByte m_egress_buffer_size = parse_size(node["egress_buffer_size"].value_or_throw().get_node());

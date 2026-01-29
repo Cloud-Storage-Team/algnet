@@ -33,32 +33,44 @@ Simulator YamlParser::build_simulator_from_config(
 
     ConfigNodeExpected topology_presets_node = topology_config["presets"];
 
-    ConfigNode hosts_presets_node = 
-        topology_presets_node.value_or(ConfigNode())["hosts"].value_or(
-            ConfigNode());
-    
+    std::optional<ConfigNode> hosts_presets_node = ConfigNode();
+    if (topology_presets_node.has_value()) {
+        ConfigNodeExpected hosts = topology_presets_node.value()["hosts"];
+        if (hosts.has_value()) {
+            hosts_presets_node.emplace(hosts.value());
+        }
+    }
+
     parse_if_present(topology_config["hosts"],
                      [this, &hosts_presets_node](ConfigNode node) {
-                        process_hosts(node, hosts_presets_node);
+                        process_hosts(node, hosts_presets_node.value());
                     });
 
     const ConfigNode packet_spraying_node =
         topology_config["packet-spraying"].value_or_throw();
-    ConfigNode switches_presets_node = 
-        topology_presets_node.value_or(ConfigNode())["switches"].value_or(
-            ConfigNode());
+    std::optional<ConfigNode> switches_presets_node = ConfigNode();
+    if (topology_presets_node.has_value()) {
+        ConfigNodeExpected switches = topology_presets_node.value()["switches"];
+        if (switches.has_value()) {
+            switches_presets_node.emplace(switches.value());
+        }
+    }
 
     parse_if_present(topology_config["switches"],
                      [this, &switches_presets_node, &packet_spraying_node](ConfigNode node) {
                          process_switches(node, switches_presets_node, packet_spraying_node);
                      });
 
-    ConfigNode links_preset_node =
-        topology_presets_node.value_or(ConfigNode())["link"].value_or(
-            ConfigNode());
+    std::optional<ConfigNode> links_presets_node = ConfigNode();
+    if (topology_presets_node.has_value()) {
+        ConfigNodeExpected links = topology_presets_node.value()["link"];
+        if (links.has_value()) {
+            links_presets_node.emplace(links.value());
+        }
+    }
     parse_if_present(topology_config["links"],
-                     [this, &links_preset_node](ConfigNode node) {
-                         process_links(node, links_preset_node);
+                     [this, &links_presets_node](ConfigNode node) {
+                         process_links(node, links_presets_node);
                      });
 
     parse_if_present(simulation_config["connections"],
@@ -70,7 +82,7 @@ Simulator YamlParser::build_simulator_from_config(
     return std::move(m_simulator);
 }
 
-void YamlParser::process_hosts(const ConfigNode &hosts_node, const ConfigNode &hosts_presets_node) {
+void YamlParser::process_hosts(const ConfigNode &hosts_node, const std::optional<ConfigNode> &hosts_presets_node) {
     process_identifiables<IHost>(
         hosts_node,
         [this](std::shared_ptr<IHost> host) {
@@ -83,7 +95,7 @@ void YamlParser::process_hosts(const ConfigNode &hosts_node, const ConfigNode &h
 }
 
 void YamlParser::process_switches(const ConfigNode &switches_node,
-                                const ConfigNode &switches_presets_node,
+                                const std::optional<ConfigNode> &switches_presets_node,
                                 const ConfigNode &packet_spraying_node) {
     process_identifiables<ISwitch>(
         switches_node,
@@ -97,7 +109,7 @@ void YamlParser::process_switches(const ConfigNode &switches_node,
 }
 
 void YamlParser::process_links(const ConfigNode &links_node,
-                               const ConfigNode &link_presets_node) {
+                               const std::optional<ConfigNode> &link_presets_node) {
     process_identifiables<ILink>(
         links_node,
         [this](std::shared_ptr<ILink> link) {

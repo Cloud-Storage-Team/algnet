@@ -29,6 +29,13 @@ public:
         return m_node.as<T>();
     }
 
+    template <typename T>
+    T as_or_throw() const {
+        return as<T>().value_or_throw();
+    }
+
+    [[nodiscard]] utils::StrExpected<std::string> get_name_or_throw() const;
+
 private:
 
     // m_node contains information about config node and probably preset name

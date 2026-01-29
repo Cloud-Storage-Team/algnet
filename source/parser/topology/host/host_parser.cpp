@@ -10,7 +10,7 @@ std::shared_ptr<IHost> HostParser::parse_i_host(const ConfigNodeWithPreset& host
 
 std::shared_ptr<Host> HostParser::parse_default_host(
     const ConfigNodeWithPreset& host_node) {
-    const Id id = host_node.get_node().get_name_or_throw();
+    const Id id = host_node.get_name_or_throw().value();
     ConfigNodeWithPresetExpected exp_ecn_node = host_node["ecn"];
     ECN ecn(1.0, 1.0, 1.0);
     if (exp_ecn_node.has_value()) {

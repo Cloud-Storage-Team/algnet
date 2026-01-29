@@ -18,7 +18,7 @@ std::shared_ptr<ISwitch> SwitchParser::parse_i_switch(
 
 std::shared_ptr<Switch> SwitchParser::parse_default_switch(
     const ConfigNodeWithPreset& switch_node, const ConfigNode& packet_spraying_node) {
-    Id id = switch_node.get_node().get_name_or_throw();
+    Id id = switch_node.get_name_or_throw().value();
     ConfigNodeWithPresetExpected ecn_node = switch_node["ecn"];
     ECN ecn(1.0, 1.0, 0.0);
     if (ecn_node.has_value()) {
