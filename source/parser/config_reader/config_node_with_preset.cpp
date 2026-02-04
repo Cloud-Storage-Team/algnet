@@ -8,9 +8,9 @@ ConfigNodeWithPreset::ConfigNodeWithPreset(ConfigNode a_node, std::optional<Conf
 ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](std::string_view key) const{
     const ConfigNodeExpected child_node = m_node[key];
     if (!child_node.has_value()){
-    // m_node hasn't key. Tries to find key in m_preset
+        // m_node hasn't key. Tries to find key in m_preset
         if (!m_preset.has_value()){
-        // m_preset doesn't exist. Tries to find preset for this node
+            // m_preset doesn't exist. Tries to find preset for this node
             if (!m_presets_node.has_value()){
                 // m_presets_node doesn't exist. Returns message about it
                 std::stringstream ss;
@@ -18,7 +18,7 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](std::string_view k
                 ss << "does not have key " << key;
                 return std::unexpected(ss.str());
             }
-            // m_presets_node exist. Tries to find field 'preset-name' from m_node
+            // m_presets_node exist. Tries to find field 'preset-name' in m_node
             ConfigNodeExpected node_preset_name = m_node["preset-name"];
             if (!node_preset_name.has_value()){
                 // config hasn't field 'preset-name'. Returns message about it
@@ -27,7 +27,7 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](std::string_view k
                 ss << "does not have key `preset-name`";
                 return std::unexpected(ss.str());
             }
-            // field 'preset-name' was found. triesto convert 'preset-name' to string
+            // field 'preset-name' was found. Tries to convert it to string
             ConfigNode presets_node = m_presets_node.value();
             utils::StrExpected<std::string> preset_name = node_preset_name.value().as<std::string>();
             if (!preset_name.has_value()){
@@ -65,7 +65,7 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](std::string_view k
     return ConfigNodeWithPreset(child_node.value(), m_presets_node, m_preset);
 }
 
-utils::StrExpected<std::string> ConfigNodeWithPreset::get_name_or_throw() const{
+const std::string& ConfigNodeWithPreset::get_name_or_throw() const{
     return m_node.get_name_or_throw();
 }
 

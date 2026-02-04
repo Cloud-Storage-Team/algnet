@@ -33,7 +33,7 @@ Simulator YamlParser::build_simulator_from_config(
 
     ConfigNodeExpected topology_presets_node = topology_config["presets"];
 
-    std::optional<ConfigNode> hosts_presets_node = ConfigNode();
+    std::optional<ConfigNode> hosts_presets_node = std::nullopt;
     if (topology_presets_node.has_value()) {
         ConfigNodeExpected hosts = topology_presets_node.value()["hosts"];
         if (hosts.has_value()) {
@@ -43,12 +43,12 @@ Simulator YamlParser::build_simulator_from_config(
 
     parse_if_present(topology_config["hosts"],
                      [this, &hosts_presets_node](ConfigNode node) {
-                        process_hosts(node, hosts_presets_node.value());
+                        process_hosts(node, hosts_presets_node);
                     });
 
     const ConfigNode packet_spraying_node =
         topology_config["packet-spraying"].value_or_throw();
-    std::optional<ConfigNode> switches_presets_node = ConfigNode();
+    std::optional<ConfigNode> switches_presets_node = std::nullopt;
     if (topology_presets_node.has_value()) {
         ConfigNodeExpected switches = topology_presets_node.value()["switches"];
         if (switches.has_value()) {
@@ -61,7 +61,7 @@ Simulator YamlParser::build_simulator_from_config(
                          process_switches(node, switches_presets_node, packet_spraying_node);
                      });
 
-    std::optional<ConfigNode> links_presets_node = ConfigNode();
+    std::optional<ConfigNode> links_presets_node = std::nullopt;
     if (topology_presets_node.has_value()) {
         ConfigNodeExpected links = topology_presets_node.value()["link"];
         if (links.has_value()) {

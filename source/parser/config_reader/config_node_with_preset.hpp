@@ -34,7 +34,7 @@ public:
         return as<T>().value_or_throw();
     }
 
-    [[nodiscard]] utils::StrExpected<std::string> get_name_or_throw() const;
+    [[nodiscard]] const std::string& get_name_or_throw() const;
 
 private:
 

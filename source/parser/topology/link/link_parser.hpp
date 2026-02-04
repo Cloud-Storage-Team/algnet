@@ -11,8 +11,6 @@ class LinkParser {
 public:
     static std::shared_ptr<ILink> parse_i_link(const ConfigNodeWithPreset& link_node);
 
-    static std::shared_ptr<Link> parse_to_args(const ConfigNodeWithPreset& node);
-
 private:
     static std::shared_ptr<Link> parse_link(const ConfigNodeWithPreset& link_node);
 };
