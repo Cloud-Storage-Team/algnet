@@ -71,6 +71,14 @@ public:
         return !(*this == speed);
     }
 
+    // Outputs the Speed with the specified precision and with suffix.
+    // For example: 3.35 Mb/ms
+    std::string constexpr to_string(int precision = 2) const{
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(precision) << value() << ' ' << TSizeBase::suffix << '/' << TTimeBase::suffix;
+        return ss.str();
+    }
+
 private:
     double m_value_bit_per_ns;  // value in bit per nanosecond
 };

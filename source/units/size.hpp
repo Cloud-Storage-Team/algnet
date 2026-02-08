@@ -1,4 +1,5 @@
 #pragma once
+#include <iomanip>
 #include <concepts>
 #include <cstdint>
 #include <iostream>
@@ -7,40 +8,49 @@
 
 struct Bit {
     static constexpr uint64_t to_bit_multiplier = 1;
+    static constexpr std::string_view suffix = "b";
 };
 
 struct Byte {
     static constexpr uint64_t to_bit_multiplier = (1ull << 3);
+    static constexpr std::string_view suffix = "B";
 };
 
 struct KBit {
     static constexpr uint64_t to_bit_multiplier = (1ull << 10);
+    static constexpr std::string_view suffix = "Kb";
 };
 
 struct KByte {
     static constexpr uint64_t to_bit_multiplier = (1ull << 13);
+    static constexpr std::string_view suffix = "KB";
 };
 
 struct MBit {
     static constexpr uint64_t to_bit_multiplier = (1ull << 20);
+    static constexpr std::string_view suffix = "Mb";
 };
 
 struct MByte {
     static constexpr uint64_t to_bit_multiplier = (1ull << 23);
+    static constexpr std::string_view suffix = "MB";
 };
 
 struct GBit {
     static constexpr uint64_t to_bit_multiplier = (1ull << 30);
+    static constexpr std::string_view suffix = "Gb";
 };
 
 struct GByte {
     static constexpr uint64_t to_bit_multiplier = (1ull << 33);
+    static constexpr std::string_view suffix = "GB";
 };
 
 // Concept for all types that might be the base for Size
 template <typename T>
 concept IsSizeBase = requires {
     { T::to_bit_multiplier } -> std::convertible_to<uint64_t>;
+    { T::suffix } -> std::convertible_to<std::string_view>;
 };
 
 template <IsSizeBase TSizeBase>
@@ -115,6 +125,14 @@ public:
 
     bool constexpr operator!=(ThisSize size) const {
         return m_value_bits != size.m_value_bits;
+    }
+
+    // Outputs the Size with the specified precision and with suffix.
+    // For example: 1.53 Kb
+    std::string constexpr to_string(int precision = 2) const{
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(precision) << value() << ' ' << TSizeBase::suffix;
+        return ss.str();
     }
 
 private:
