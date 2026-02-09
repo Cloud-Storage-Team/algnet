@@ -1,6 +1,7 @@
 #pragma once
+
 #include "size.hpp"
-#include "speed.hpp"
+#include "time.hpp"
 
 template <IsSizeBase TSizeBase, IsTimeBase TTimeBase>
 class Speed {
@@ -75,7 +76,7 @@ public:
     // For example: 3.35 Mb/ms
     std::string constexpr to_string(int precision = 2) const{
         std::stringstream ss;
-        ss << std::fixed << std::setprecision(precision) << value() << ' ' << TSizeBase::suffix << '/' << TTimeBase::suffix;
+        ss << std::fixed << std::setprecision(precision) << value() << TSizeBase::suffix << '/' << TTimeBase::suffix;
         return ss.str();
     }
 

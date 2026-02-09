@@ -131,7 +131,7 @@ public:
     // For example: 1.53 Kb
     std::string constexpr to_string(int precision = 2) const{
         std::stringstream ss;
-        ss << std::fixed << std::setprecision(precision) << value() << ' ' << TSizeBase::suffix;
+        ss << std::fixed << std::setprecision(precision) << value() << TSizeBase::suffix;
         return ss.str();
     }
 

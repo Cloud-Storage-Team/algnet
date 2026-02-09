@@ -108,7 +108,7 @@ public:
     // For example: 2.37 Ns
     std::string constexpr to_string(int precision = 2) const{
         std::stringstream ss;
-        ss << std::fixed << std::setprecision(precision) << value() << ' ' << TTimeBase::suffix;
+        ss << std::fixed << std::setprecision(precision) << value() << TTimeBase::suffix;
         return ss.str();
     }
 
