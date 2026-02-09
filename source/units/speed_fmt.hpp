@@ -47,8 +47,8 @@ class fmt::formatter<Speed<TSizeBase, TTimeBase>>{
     }
 
     template<typename FormatContext>
-    auto format(const Speed<TSizeBase, TTimeBase>, FormatContext& context) const{
-        return fmt::format(context.out(), Speed<TSizeBase, TTimeBase>.to_string(precision));
+    auto format(const Speed<TSizeBase, TTimeBase> speed, FormatContext& context) const{
+        return fmt::format(context.out(), speed.to_string(precision));
     }
 
     private:
