@@ -71,16 +71,18 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
                     LOG_ERROR("Flow pointer expired; could not send data");
                     return;
                 }
+                auto flow = flow_weak.lock();
+
                 if (mplb_weak.expired()) {
                     LOG_ERROR(
                         "MPLB pointer expired; could not increase sent data "
                         "size");
-                } else {
-                    mplb_weak.lock()->m_sent_data_size +=
-                        packet_info.packet_size;
+                    return;
                 }
-                flow_weak.lock()->send(
-                    std::vector<PacketInfo>({std::move(packet_info)}));
+                auto mplb = mplb_weak.lock();
+
+                mplb->m_sent_data_size += packet_info.packet_size;
+                flow->send(std::vector<PacketInfo>({std::move(packet_info)}));
             });
         m_packets_in_flight++;
     }
@@ -96,8 +98,8 @@ MPLBContext SingleCCMplb::get_context() const {
 SizeByte SingleCCMplb::get_quota() const {
     const double cwnd = m_cc->get_cwnd();
 
-    // Effective window: the whole part of cwnd; if cwnd < 1 and inflight == 0,
-    // allow 1 packet
+    // Effective window: the whole part of cwnd; if cwnd < 1 and inflight ==
+    // 0, allow 1 packet
     std::uint32_t effective_cwnd = static_cast<std::uint32_t>(std::floor(cwnd));
     if (m_packets_in_flight == 0 && cwnd < 1.0) {
         effective_cwnd = 1;
