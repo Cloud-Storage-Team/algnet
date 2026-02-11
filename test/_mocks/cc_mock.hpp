@@ -12,16 +12,16 @@ public:
                         [[maybe_unused]] bool ecn_flag) {}
 
     // Callback that triggers when ACK not delivered on timeout
-    virtual void on_timeout() {};
+    virtual void on_timeout() override {};
 
     // Inter‑packet pacing gap when cwnd < 1; zero otherwise
-    virtual TimeNs get_pacing_delay() const { return m_pacing_delay; }
+    virtual TimeNs get_pacing_delay() const override { return m_pacing_delay; }
 
     // Current congestion window (in packets)
-    virtual double get_cwnd() const { return m_cwnd; }
+    virtual double get_cwnd() const override { return m_cwnd; }
 
     // For logs
-    virtual std::string to_string() const { return ""; }
+    virtual std::string to_string() const override { return ""; }
 
     double& get_mutable_cwnd() { return m_cwnd; }
 
