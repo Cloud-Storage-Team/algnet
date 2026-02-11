@@ -1,6 +1,7 @@
 #include "send_data_action.hpp"
 
 #include "event/add_data_to_connection.hpp"
+#include "utils/callback_observer.hpp"
 
 namespace sim {
 
@@ -50,8 +51,8 @@ void SendDataAction::schedule() {
                                   finish_time);
         };
 
-        std::shared_ptr<CallbackObserver> observer =
-            std::make_shared<CallbackObserver>(connections_count, callback);
+        std::shared_ptr<utils::CallbackObserver> observer =
+            std::make_shared<utils::CallbackObserver>(connections_count, callback);
 
         OnDeliveryCallback single_connection_callback = [observer]() {
             observer->on_single_callback();
@@ -68,16 +69,6 @@ void SendDataAction::schedule() {
                 start_time + jitter_gap, conn, data,
                 single_connection_callback);
         }
-    }
-}
-
-SendDataAction::CallbackObserver::CallbackObserver(
-    std::size_t a_count, OnDeliveryCallback a_callback)
-    : m_count(a_count), m_callbacks_triggered(0), m_callback(a_callback) {}
-
-void SendDataAction::CallbackObserver::on_single_callback() {
-    if (++m_callbacks_triggered == m_count) {
-        m_callback();
     }
 }
 
