@@ -10,6 +10,10 @@ namespace sim {
 
 using PathHash = std::uint32_t;
 
+struct Packet;
+
+using OnPacketDeliveryCallback = std::function<void(const Packet&)>;
+
 struct Packet {
     Packet(SizeByte a_size = SizeByte(0), IFlow* a_flow = nullptr,
            Id a_source_id = "", Id a_dest_id = "",
@@ -28,7 +32,11 @@ struct Packet {
     Id dest_id;
     SizeByte size;
     IFlow* flow;
-    OnDeliveryCallback callback = []() {};
+
+    // Note: callback takes packet itself because it might be changed while
+    // travelling along the net
+    OnPacketDeliveryCallback callback =
+        []([[maybe_unused]] const Packet& packet) {};
     TimeNs generated_time;  // Note: ACK's generated time is the data packet
                             // generated time
     TimeNs sent_time;  // Note: ACK's sent time is the data packet sent time
