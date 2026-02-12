@@ -7,7 +7,6 @@
 namespace sim {
 
 std::string NewTcpFlow::m_packet_type_label = "type";
-std::string NewTcpFlow::m_ack_ttl_label = "ack_ttl";
 
 std::shared_ptr<NewTcpFlow> NewTcpFlow::create_shared(
     Id a_id, std::shared_ptr<IHost> a_sender, std::shared_ptr<IHost> a_receiver,
@@ -54,10 +53,6 @@ NewTcpFlow::NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
                                                 PacketType::ENUM_SIZE)) {
         throw std::runtime_error("Can not registrate packet type label");
     }
-    if (!m_flag_manager.register_flag_by_amount(m_ack_ttl_label,
-                                                M_MAX_TTL + 1)) {
-        throw std::runtime_error("Can not registrate ack ttl label");
-    }
     if (!register_packet_avg_rtt_flag(m_flag_manager)) {
         throw std::runtime_error("Can not registrate packet avg rtt label");
     }
@@ -65,11 +60,11 @@ NewTcpFlow::NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
 
 utils::StrExpected<NewTcpFlow::Endpoints> NewTcpFlow::get_endpoints() const {
     if (m_context.sender.expired()) {
-        return std::unexpected(fmt::format("sender pointer expired", m_id));
+        return std::unexpected("sender pointer expired");
     }
 
     if (m_context.receiver.expired()) {
-        return std::unexpected(fmt::format("receiver pointer expired", m_id));
+        return std::unexpected("receiver pointer expired");
     }
     return Endpoints{m_context.sender.lock(), m_context.receiver.lock()};
 }
@@ -125,6 +120,14 @@ void NewTcpFlow::set_avg_rtt_if_present(Packet& packet) {
 }
 
 void NewTcpFlow::send_data_packet(Packet data) {
+    if (m_context.sender.expired()) {
+        LOG_ERROR(fmt::format(
+            "Flow {}: sender pointer expired; could not send data packet {}",
+            m_id, data.to_string()));
+        return;
+    }
+    auto sender = m_context.sender.lock();
+
     TimeNs now = Scheduler::get_instance().get_current_time();
 
     Scheduler::get_instance().add<Timeout>(now + m_rto.current,
@@ -132,7 +135,7 @@ void NewTcpFlow::send_data_packet(Packet data) {
     m_context.sent_size += data.size;
 
     data.sent_time = now;
-    m_context.sender.lock()->enqueue_packet(std::move(data));
+    sender->enqueue_packet(std::move(data));
 }
 
 void NewTcpFlow::process_data_packet(const Packet& data,
@@ -151,6 +154,10 @@ void NewTcpFlow::process_data_packet(const Packet& data,
     ack.dest_id = sender->get_id();
     ack.size = SizeByte(1);
     ack.ttl = M_MAX_TTL;
+    ack.flags.set_flag(m_packet_type_label, PacketType::ACK)
+        .log_err_if_not_present(
+            fmt::format("Flow {}: could not set type label to ack packet {}",
+                        m_id, ack.to_string()));
     SizeByte data_packet_size = data.size;
 
     std::weak_ptr<NewTcpFlow> flow_weak = shared_from_this();
@@ -172,6 +179,9 @@ void NewTcpFlow::process_data_packet(const Packet& data,
 void NewTcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
                              PacketCallback callback) {
     TimeNs now = Scheduler::get_instance().get_current_time();
+
+    // here ack.sent_time is the time when corresponding DATA packet was sent
+    // (see process_data_packet)
     TimeNs rtt = now - ack.sent_time;
     m_context.rtt_statistics.add_record(rtt);
 
@@ -210,7 +220,7 @@ void NewTcpFlow::on_timeout(Packet data) {
         return;
     }
     update_rto_on_timeout();
-    reatransmit_packet(std::move(data));
+    retransmit_packet(std::move(data));
 }
 
 // Before the first ACK: exponential growth by timeout
@@ -221,7 +231,7 @@ void NewTcpFlow::update_rto_on_timeout() {
     // in STEADY, don't touch RTO by timeout
 }
 
-void NewTcpFlow::reatransmit_packet(Packet data) {
+void NewTcpFlow::retransmit_packet(Packet data) {
     m_context.retransmit_size += data.size;
     send_data_packet(std::move(data));
 }

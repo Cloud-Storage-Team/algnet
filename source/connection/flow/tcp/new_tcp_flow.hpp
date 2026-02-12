@@ -48,7 +48,7 @@ private:
 
     void on_timeout(Packet data);
     void update_rto_on_timeout();
-    void reatransmit_packet(Packet data);
+    void retransmit_packet(Packet data);
 
 private:
     // timeout event
@@ -57,7 +57,6 @@ private:
     // flag labels
     enum PacketType { ACK, DATA, ENUM_SIZE };
     static std::string m_packet_type_label;
-    static std::string m_ack_ttl_label;
     const static inline TTL M_MAX_TTL = 31;
 
     constexpr static inline RTO DEFAULT_START_RTO =
