@@ -49,12 +49,12 @@ if(BUILD_TESTS)
     add_subdirectory(external/googletest)
     set(TEST_NAME "test_nons")
     add_executable(${TEST_NAME} ${src} ${tests})
-    
+
     target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/external/yaml-cpp/include)
     target_include_directories(${TEST_NAME} PUBLIC "source")
 
     target_compile_options(${TEST_NAME} PRIVATE -Wall -Wextra)
-    target_link_libraries(${TEST_NAME} gtest gtest_main yaml-cpp matplot)
+    target_link_libraries(${TEST_NAME} gtest gmock gtest_main yaml-cpp matplot)
 
     if (DEFINED LOG_LEVEL)
         target_compile_definitions(${TEST_NAME} PRIVATE LOG_LEVEL=${LOG_LEVEL})
