@@ -30,7 +30,7 @@ public:
 
     sim::FlowContext& get_mutable_context() { return m_context; }
 
-    const sim::FlowContext& get_context() final { return m_context; }
+    const sim::FlowContext& get_context() const final { return m_context; }
 
 private:
     bool m_send_immediately;
