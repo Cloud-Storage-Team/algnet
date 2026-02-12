@@ -8,11 +8,10 @@ namespace sim {
 class NewTcpFlow : public INewFlow,
                    public std::enable_shared_from_this<NewTcpFlow> {
 public:
-    std::shared_ptr<NewTcpFlow> create_shared(Id a_id,
-                                              std::shared_ptr<IHost> a_sender,
-                                              std::shared_ptr<IHost> a_receiver,
-                                              bool a_ecn_capable = true,
-                                              RTO a_rto = DEFAULT_START_RTO);
+    static std::shared_ptr<NewTcpFlow> create_shared(
+        Id a_id, std::shared_ptr<IHost> a_sender,
+        std::shared_ptr<IHost> a_receiver, bool a_ecn_capable = true,
+        RTO a_rto = DEFAULT_START_RTO);
 
     virtual void send(std::vector<PacketInfo> packets_info) final;
 
