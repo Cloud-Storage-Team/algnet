@@ -55,10 +55,9 @@ TEST_F(ComplexConnectionTest, SendOnePortion) {
 
     auto callback = [&]() { count_callback_called++; };
 
-    ASSERT_TRUE(connection
-                    ->send_data(sim::Data(sim::DataId("data_1"), portion_size),
-                                callback)
-                    .has_value());
+    auto res = connection->send_data(
+        sim::Data(sim::DataId("data_1"), portion_size), callback);
+    ASSERT_TRUE(res.has_value()) << res.error();
 
     while (sim::Scheduler::get_instance().tick()) {
     }
