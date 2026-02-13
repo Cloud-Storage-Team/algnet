@@ -15,6 +15,7 @@ class ComplexConnectionTest : public testing::Test {
 public:
     void TearDown() override { sim::Scheduler::get_instance().clear(); };
     void SetUp() override {
+    sim::Scheduler::get_instance().clear();
         sender->add_outlink(fwd_link);
         sender->update_routing_table(receiver->get_id(), fwd_link, 1);
         receiver->add_inlink(fwd_link);
@@ -26,7 +27,7 @@ public:
 
     // hosts
     std::shared_ptr<sim::Host> sender = std::make_shared<sim::Host>("sender");
-    std::shared_ptr<sim::Host> receiver = std::make_shared<sim::Host>("sender");
+    std::shared_ptr<sim::Host> receiver = std::make_shared<sim::Host>("receiver");
 
     // links
     std::shared_ptr<sim::Link> fwd_link =
@@ -70,7 +71,7 @@ TEST_F(ComplexConnectionTest, SendOnePortion) {
     ASSERT_GE(flow_ctx.delivered_size, mplb_ctx.delivered_data_size);
     ASSERT_EQ(mplb_ctx.delivered_data_size, mplb_ctx.sent_data_size);
 
-    // because posrtion size might not divide packet size
+    // because portion size might not divide packet size
     ASSERT_GE(mplb_ctx.delivered_data_size, portion_size);
 
     ASSERT_EQ(connection_ctx.total_data_confirmed, portion_size);
