@@ -12,10 +12,7 @@ public:
         return *m_flows.begin();
     }
 
-    virtual const std::set<std::shared_ptr<sim::INewFlow>> get_flows()
-        const final {
-        return m_flows; 
-    }
+    virtual const FlowsSet& get_flows() const final { return m_flows; }
 
 private:
     std::set<std::shared_ptr<sim::INewFlow> > m_flows;
