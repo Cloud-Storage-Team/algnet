@@ -184,12 +184,15 @@ void NewTcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
     // (see process_data_packet)
     TimeNs rtt = now - ack.sent_time;
     m_context.rtt_statistics.add_record(rtt);
+    MetricsCollector::get_instance().add_RTT(m_id, now, rtt);
 
     update_rto_on_ack();
 
-    m_ack_monitor.confirm_one(ack.packet_num);
-
-    MetricsCollector::get_instance().add_RTT(m_id, now, rtt);
+    if (!m_ack_monitor.confirm_one(ack.packet_num)) {
+        LOG_WARN(fmt::format("Flow {} got ack {} that confirms nothing; ignored", m_id,
+                 ack.to_string()));
+        return;
+    }
 
     m_context.delivered_size += data_packet_size;
 

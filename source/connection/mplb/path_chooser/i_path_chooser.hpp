@@ -8,7 +8,9 @@ class IPathChooser {
 public:
     virtual std::shared_ptr<INewFlow> choose_flow() = 0;
 
-    virtual const std::set<std::shared_ptr<INewFlow> > get_flows() const = 0;
+    using FlowsSet = std::set<std::shared_ptr<INewFlow> >;
+
+    virtual const FlowsSet& get_flows() const = 0;
 };
 
 }  // namespace sim

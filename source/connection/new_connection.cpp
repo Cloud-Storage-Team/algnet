@@ -2,7 +2,7 @@
 
 namespace sim {
 
-std::shared_ptr<NewConnection> NewConnection::create(
+std::shared_ptr<NewConnection> NewConnection::create_shared(
     Id a_id, std::shared_ptr<INewMPLB> a_mplb) {
     return std::shared_ptr<NewConnection>(
         new NewConnection(std::move(a_id), a_mplb));

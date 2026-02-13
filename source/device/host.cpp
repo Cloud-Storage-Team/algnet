@@ -37,17 +37,19 @@ TimeNs Host::process() {
     }
 
     Packet packet = opt_packet.value();
-    if (packet.flow == nullptr) {
-        LOG_ERROR("Packet flow does not exist");
-        return total_processing_time;
-    }
 
     // TODO: add some sender ID for easier packet path tracing
     LOG_INFO("Processing packet from link on host. Packet: " +
              packet.to_string());
 
     if (packet.dest_id == get_id()) {
-        packet.flow->update(packet);
+        if (packet.flow != nullptr) {
+            packet.flow->update(packet);
+        } else {
+            LOG_ERROR("Packet flow does not exist");
+        }
+
+        packet.callback(packet);
     } else {
         LOG_WARN(
             "Packet arrived to Host that is not its destination; use routing "
