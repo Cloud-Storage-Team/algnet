@@ -62,16 +62,16 @@ utils::StrExpected<TimeNs> parse_time(const std::string &time) {
     }
 
     auto [value, unit] = maybe_value_unit.value();
-    if (unit == "ns") {
+    if (unit == Nanosecond::suffix) {
         return TimeNs(value);
     }
-    if (unit == "us") {
+    if (unit == Microsecond::suffix) {
         return TimeNs(Time<Microsecond>(value));
     }
-    if (unit == "ms") {
+    if (unit == Millisecond::suffix) {
         return TimeNs(Time<Millisecond>(value));
     }
-    if (unit == "s") {
+    if (unit == Second::suffix) {
         return TimeNs(Time<Second>(value));
     }
     return std::unexpected("Unsupported time unit: " + unit);
@@ -85,28 +85,28 @@ utils::StrExpected<SizeByte> parse_size(const std::string &size) {
     }
 
     auto [value, unit] = maybe_value_unit.value();
-    if (unit == "b") {
+    if (unit == Bit::suffix) {
         return SizeByte(Size<Bit>(value));
     }
-    if (unit == "B") {
+    if (unit == Byte::suffix) {
         return SizeByte(value);
     }
-    if (unit == "Kb") {
+    if (unit == KBit::suffix) {
         return SizeByte(Size<KBit>(value));
     }
-    if (unit == "KB") {
+    if (unit == KByte::suffix) {
         return SizeByte(Size<KByte>(value));
     }
-    if (unit == "Mb") {
+    if (unit == MBit::suffix) {
         return SizeByte(Size<MBit>(value));
     }
-    if (unit == "MB") {
+    if (unit == MByte::suffix) {
         return SizeByte(Size<MByte>(value));
     }
-    if (unit == "Gb") {
+    if (unit == GBit::suffix) {
         return SizeByte(Size<GBit>(value));
     }
-    if (unit == "GB") {
+    if (unit == GByte::suffix) {
         return SizeByte(Size<GByte>(value));
     }
     return std::unexpected("Unsupported size unit: " + unit);

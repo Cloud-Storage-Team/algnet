@@ -3,6 +3,9 @@
 #include "size.hpp"
 #include "speed.hpp"
 #include "time.hpp"
+#include "size_fmt.hpp"
+#include "speed_fmt.hpp"
+#include "time_fmt.hpp"
 
 template <IsSizeBase TSizeBase, IsTimeBase TTimeBase>
 constexpr Speed<TSizeBase, TTimeBase> operator/(Size<TSizeBase> size,
