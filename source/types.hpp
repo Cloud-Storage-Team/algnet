@@ -4,7 +4,6 @@
 #include <memory>
 #include <string>
 
-#include "units/time.hpp"
 #include "units/units.hpp"
 
 using TimeNs = Time<Nanosecond>;

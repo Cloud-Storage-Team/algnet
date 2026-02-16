@@ -20,7 +20,8 @@ struct fmt::formatter<Speed<TSizeBase, TTimeBase>, Char> : CommonFormatter<Char>
         for (auto c : TSizeBase::suffix) {
             *out++ = static_cast<Char>(c);
         }
-        *out++ = static_cast<Char>('/');
+        auto sep = Speed<TSizeBase, TTimeBase>::m_separator;
+        out = std::copy(sep.begin(), sep.end(), out);
         for (auto c: TTimeBase::suffix){
             *out++ = static_cast<Char>(c);
         }

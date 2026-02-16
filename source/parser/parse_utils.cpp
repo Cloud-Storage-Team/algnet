@@ -45,10 +45,14 @@ utils::StrExpected<SpeedGbps> parse_speed(const std::string &throughput) {
     }
 
     auto [value, unit] = maybe_value_unit.value();
-    if (unit == "Mbps") {
+    std::string_view separator_mbit_second = Speed<MBit, Second>::m_separator;
+    std::string_view separator_gbit_second = Speed<GBit, Second>::m_separator;
+    std::string check_suffix_mbps = std::string(MBit::suffix) + std::string(separator_mbit_second) + std::string(Second::suffix);
+    std::string check_suffix_gbps = std::string(GBit::suffix) + std::string(separator_gbit_second) + std::string(Second::suffix);
+    if (unit == check_suffix_mbps) {
         return SpeedGbps(Speed<MBit, Second>(value));
     }
-    if (unit == "Gbps") {
+    if (unit == check_suffix_gbps) {
         return SpeedGbps(value);
     }
     return std::unexpected("Unsupported throughput unit: " + unit);

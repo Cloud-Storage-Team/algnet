@@ -10,7 +10,7 @@
 
 struct Nanosecond {
     static constexpr uint64_t to_nanoseconds_multiplier = 1;
-    static constexpr std::string_view suffix = "ns";
+    static constexpr std::string suffix = "ns";
 };
 
 struct Microsecond {

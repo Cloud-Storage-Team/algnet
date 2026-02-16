@@ -8,7 +8,7 @@
 
 #include "logger/logger.hpp"
 #include "parser/config_reader/config_node.hpp"
-#include "types.hpp"
+#include "../types.hpp"
 #include "utils/str_expected.hpp"
 
 namespace sim {

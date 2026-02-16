@@ -80,6 +80,8 @@ public:
         return ss.str();
     }
 
+    static constexpr std::string_view m_separator = "p";
+
 private:
     double m_value_bit_per_ns;  // value in bit per nanosecond
 };
