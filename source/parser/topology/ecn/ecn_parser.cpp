@@ -2,7 +2,7 @@
 
 namespace sim {
 
-ECN EcnParser::parse_ecn(const ConfigNode& node) {
+ECN EcnParser::parse_ecn(const ConfigNodeWithPreset& node) {
     float min = node["min"].value_or_throw().as_or_throw<float>();
     float max = node["max"].value_or_throw().as_or_throw<float>();
     float probability =

@@ -21,21 +21,27 @@ links:
   link1:
     from: sender1
     to: switch1
+    preset-name: default
   link2:
     from: sender2
     to: switch1
+    preset-name: default
 
   # bottleneck link
   link3_bottleneck:
     from: switch1
     to: receiver1
     throughput: 5Gbps
+    preset-name: default
   link4:
     from: receiver1
     to: switch1
+    preset-name: default
   link5:
     from: switch1
     to: sender1
+    preset-name: default
   link6:
     from: switch1
     to: sender2
+    preset-name: default

@@ -23,8 +23,8 @@ public:
     // Forward data to transport layer
     // Returns error given data might not be sent (e.g. its size greater than
     // quota)
-    virtual utils::StrExpected<void> send_data(Data data,
-                                               OnDeliveryCallback callback) = 0;
+    [[nodiscard]] virtual utils::StrExpected<void> send_data(
+        Data data, OnDeliveryCallback callback) = 0;
 
     virtual MPLBContext get_context() const = 0;
 };

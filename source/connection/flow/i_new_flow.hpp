@@ -2,6 +2,8 @@
 
 #include "device/interfaces/i_host.hpp"
 #include "packet.hpp"
+#include "packet_ack_info.hpp"
+#include "packet_info.hpp"
 #include "utils/statistics.hpp"
 
 namespace sim {
@@ -21,11 +23,11 @@ struct FlowContext {
 
 // Transport layer interface for reliable data delivery along single physical
 // path
-class INewFlow : public virtual Identifiable {
-public:
-    virtual void send(std::vector<Packet> packets) = 0;
+    class INewFlow : public virtual Identifiable {
+    public:
+        virtual void send(std::vector<PacketInfo> packets) = 0;
 
-    virtual const FlowContext& get_context() = 0;
-};
+        virtual const FlowContext& get_context() const = 0;
+    };
 
 }  // namespace sim

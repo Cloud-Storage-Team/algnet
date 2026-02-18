@@ -20,12 +20,16 @@ links:
   link1:
     from: sender
     to: switch
+    preset-name: default
   link2:
     from: switch
     to: sender
+    preset-name: default
   link3:
     from: switch
     to: receiver
+    preset-name: default
   link4:
     from: receiver
     to: switch
+    preset-name: default
