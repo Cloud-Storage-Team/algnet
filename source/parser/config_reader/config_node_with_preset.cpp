@@ -69,11 +69,13 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](
             ss << "does not have key: " << key;
             return std::unexpected(ss.str());
         }
-        // key was found in preset
-        return ConfigNodeWithPreset(key_node.value(), m_presets_node, m_preset);
+        // key was found in preset; use key_node as main node; DROP PRESET NODE
+        return ConfigNodeWithPreset(key_node.value(), m_presets_node,
+                                    std::nullopt);
     }
-    // key was found in m_node
-    return ConfigNodeWithPreset(child_node.value(), m_presets_node, m_preset);
+    // key was found in m_node: go to child value; DROP PRESET NODE
+    return ConfigNodeWithPreset(child_node.value(), m_presets_node,
+                                std::nullopt);
 }
 
 const std::string& ConfigNodeWithPreset::get_name_or_throw() const {
@@ -87,6 +89,11 @@ std::runtime_error ConfigNodeWithPreset::create_parsing_error(
 
 const ConfigNode& ConfigNodeWithPreset::get_node() const noexcept {
     return m_node;
+}
+
+const std::optional<ConfigNode> ConfigNodeWithPreset::get_presets_node()
+    const noexcept {
+    return m_presets_node;
 }
 
 }  // namespace sim
