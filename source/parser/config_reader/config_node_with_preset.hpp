@@ -36,6 +36,9 @@ public:
 
     [[nodiscard]] const std::string& get_name_or_throw() const;
 
+    [[nodiscard]] std::runtime_error create_parsing_error(
+        std::string_view error) const;
+
 private:
 
     // m_node contains information about config node and probably preset name
@@ -46,4 +49,4 @@ private:
     mutable std::optional<ConfigNode> m_preset;
 };
 
-} // namespace sim 
+} // namespace sim

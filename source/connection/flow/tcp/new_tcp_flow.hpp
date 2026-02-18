@@ -24,13 +24,6 @@ private:
                std::shared_ptr<IHost> a_receiver, bool a_ecn_capable,
                RTO a_rto);
 
-    struct Endpoints {
-        std::shared_ptr<IHost> sender;
-        std::shared_ptr<IHost> receiver;
-    };
-
-    utils::StrExpected<Endpoints> get_endpoints() const;
-
     Packet create_data_packet(PacketInfo info, std::shared_ptr<IHost> sender,
                               std::shared_ptr<IHost> receiver);
 
