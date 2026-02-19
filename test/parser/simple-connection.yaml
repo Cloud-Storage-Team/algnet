@@ -1,0 +1,18 @@
+connection-presets:
+  default:
+    type: mplb-connection
+    mplb:
+      type: single-cc
+      packet-size: 1500B
+      cc:
+        type: tahoe
+      path-chooser:
+        type: round-robin
+        flows:
+          flow:
+            type: tcp
+
+test-connection:
+  preset-name: default
+  sender_id: sender0
+  receiver_id: receiver0
