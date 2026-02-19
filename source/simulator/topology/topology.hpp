@@ -12,11 +12,12 @@ struct TopologyContext {
     utils::IdTable<ILink> links_table;
 };
 
+// Network topology: hosts, switches & links
 class Topology {
 public:
     explicit Topology(TopologyContext a_ctx);
 
-    const TopologyContext& get_ctx() const;
+    const TopologyContext& get_context() const;
 
     // Calls BFS for each device to build the routing tables
     void recalculate_paths() const;

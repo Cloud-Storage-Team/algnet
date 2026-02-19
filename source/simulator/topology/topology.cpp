@@ -5,7 +5,7 @@
 namespace sim {
 Topology::Topology(TopologyContext a_ctx) : m_ctx(std::move(a_ctx)) {}
 
-const TopologyContext& Topology::get_ctx() const { return m_ctx; }
+const TopologyContext& Topology::get_context() const { return m_ctx; }
 
 void Topology::recalculate_paths() const {
     auto process_device = [](std::shared_ptr<IRoutingDevice> src_device) {
