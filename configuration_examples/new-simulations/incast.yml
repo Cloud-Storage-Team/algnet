@@ -3,6 +3,7 @@ topology_config_path: ../topology_examples/incast_topology.yml
 presets:
   connection:
     default:
+      type: mplb-connection
       mplb:
         type: single-cc
         packet-size: 1500B
