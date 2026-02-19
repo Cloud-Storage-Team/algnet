@@ -1,4 +1,7 @@
 #pragma once
+#include <stdexcept>
+#include <type_traits>
+
 #include "identifier_factory.hpp"
 
 namespace utils {
@@ -20,10 +23,14 @@ public:
         return std::optional<TPtr>(it->second);
     }
 
-    TPtr get_or_throw(const Id& id, const std::exception& err) const {
+    template <typename E>
+    TPtr get_or_throw(const Id& id, E&& err) const
+    requires std::derived_from<std::remove_cvref_t<E>, std::exception> &&
+             std::constructible_from<std::remove_cvref_t<E>, E>
+    {
         auto it = this->find(id);
         if (it == this->end()) {
-            throw err;
+            throw std::forward<E>(err);
         }
         return it->second;
     }
