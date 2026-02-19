@@ -23,7 +23,6 @@ std::unique_ptr<RoundRobinPathChooser> parse_round_robin_path_chooser(
     ConfigNodeWithPreset flows_node = node["flows"].value_or_throw();
     IPathChooser::FlowsSet flows;
 
-    // TODO: iterate over flows_node (after its itarator implementation)
     for (ConfigNode node : flows_node.get_node()) {
         ConfigNodeWithPreset flow_node(node, flows_node.get_presets_node());
 
