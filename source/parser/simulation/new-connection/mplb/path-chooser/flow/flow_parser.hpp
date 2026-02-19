@@ -5,6 +5,6 @@
 namespace sim {
 
 std::shared_ptr<INewFlow> parse_i_flow(const ConfigNodeWithPreset& flow_node,
-                                       Endpoints enpoints);
+                                       Endpoints endpoints);
 
 }  // namespace sim

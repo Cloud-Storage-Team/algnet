@@ -15,7 +15,7 @@ std::unique_ptr<IPathChooser> parse_i_path_chooser(
         return parse_round_robin_path_chooser(node, std::move(endpoints));
     }
     throw node.create_parsing_error(
-        fmt::format("Unsupported path chooser type: ", type));
+        fmt::format("Unsupported path chooser type: {}", type));
 }
 
 std::unique_ptr<RoundRobinPathChooser> parse_round_robin_path_chooser(

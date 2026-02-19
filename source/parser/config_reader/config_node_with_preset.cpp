@@ -48,7 +48,7 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](
             ConfigNodeExpected preset_node = presets_node[preset_name.value()];
             if (!preset_node.has_value()) {
                 // m_presets_node hasn't preset with the specified name in
-                // config. Retruns message about it
+                // config. Returns message about it
                 std::stringstream ss;
                 ss << "Error: preset named '" << preset_name.value()
                    << "' of node " << m_node << '\n';
@@ -84,7 +84,7 @@ const std::string& ConfigNodeWithPreset::get_name_or_throw() const {
 
 std::runtime_error ConfigNodeWithPreset::create_parsing_error(
     std::string_view error) const {
-    return m_node.create_parsing_error(std::move(error));
+    return m_node.create_parsing_error(error);
 }
 
 const ConfigNode& ConfigNodeWithPreset::get_node() const noexcept {

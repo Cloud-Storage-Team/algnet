@@ -4,8 +4,8 @@
 #include "parser/parse_utils.hpp"
 
 namespace sim {
-std::shared_ptr<sim::NewTcpFlow> parse_tcp_flow(
-    const ConfigNodeWithPreset& flow_node, Endpoints enpoints);
+std::shared_ptr<NewTcpFlow> parse_tcp_flow(
+    const ConfigNodeWithPreset& flow_node, Endpoints endpoints);
 
 std::shared_ptr<INewFlow> parse_i_flow(const ConfigNodeWithPreset& flow_node,
                                        Endpoints endpoints) {
@@ -18,7 +18,7 @@ std::shared_ptr<INewFlow> parse_i_flow(const ConfigNodeWithPreset& flow_node,
         fmt::format("Unsupported flow type: {}", type));
 }
 
-std::shared_ptr<sim::NewTcpFlow> parse_tcp_flow(
+std::shared_ptr<NewTcpFlow> parse_tcp_flow(
     const ConfigNodeWithPreset& flow_node, Endpoints endpoints) {
     // TODO: add RTO & ecn_capable parsing (I am too lazy, sorry)
     return NewTcpFlow::create_shared(flow_node.get_name_or_throw(),
