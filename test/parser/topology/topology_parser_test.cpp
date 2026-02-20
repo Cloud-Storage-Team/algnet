@@ -7,7 +7,7 @@
 namespace sim {
 namespace test2 {
 
-TEST(TopologyParsing, bus_topology) {
+TEST(TopologyParsing, BusTopology) {
     std::filesystem::path bus_topology_path =
         std::filesystem::path(__FILE__).parent_path() / "bus_topology.yml";
 
