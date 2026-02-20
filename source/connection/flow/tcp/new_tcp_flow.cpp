@@ -20,13 +20,8 @@ void NewTcpFlow::send(std::vector<PacketInfo> packets_info) {
     if (packets_info.empty()) {
         return;
     }
-    auto exp_endpoints = get_endpoints();
-    if (!exp_endpoints.has_value()) {
-        LOG_ERROR(fmt::format("Flow {}; error while sending packets: {}", m_id,
-                              exp_endpoints.error()));
-        return;
-    }
-    auto [sender, receiver] = exp_endpoints.value();
+    auto sender = m_context.sender;
+    auto receiver = m_context.receiver;
     for (auto info : packets_info) {
         Packet data = create_data_packet(std::move(info), sender, receiver);
 
@@ -42,31 +37,19 @@ NewTcpFlow::NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
                        std::shared_ptr<IHost> a_receiver, bool a_ecn_capable,
                        RTO a_rto)
     : m_id(std::move(a_id)),
-      m_context({SizeByte(0), SizeByte(0), SizeByte(0),
+      m_context({Endpoints{a_sender, a_receiver}, SizeByte(0), SizeByte(0),
+                 SizeByte(0),
 
-                 std::nullopt, std::nullopt, utils::Statistics<TimeNs>(),
-
-                 a_sender, a_receiver}),
+                 std::nullopt, std::nullopt, utils::Statistics<TimeNs>()}),
       m_ecn_capable(a_ecn_capable),
       m_rto(std::move(a_rto)) {
     if (!m_flag_manager.register_flag_by_amount(m_packet_type_label,
                                                 PacketType::ENUM_SIZE)) {
-        throw std::runtime_error("Can not registrate packet type label");
+        throw std::runtime_error("Can not register packet type label");
     }
     if (!register_packet_avg_rtt_flag(m_flag_manager)) {
-        throw std::runtime_error("Can not registrate packet avg rtt label");
+        throw std::runtime_error("Can not register packet avg rtt label");
     }
-}
-
-utils::StrExpected<NewTcpFlow::Endpoints> NewTcpFlow::get_endpoints() const {
-    if (m_context.sender.expired()) {
-        return std::unexpected("sender pointer expired");
-    }
-
-    if (m_context.receiver.expired()) {
-        return std::unexpected("receiver pointer expired");
-    }
-    return Endpoints{m_context.sender.lock(), m_context.receiver.lock()};
 }
 
 Packet NewTcpFlow::create_data_packet(PacketInfo info,
@@ -120,14 +103,6 @@ void NewTcpFlow::set_avg_rtt_if_present(Packet& packet) {
 }
 
 void NewTcpFlow::send_data_packet(Packet data) {
-    if (m_context.sender.expired()) {
-        LOG_ERROR(fmt::format(
-            "Flow {}: sender pointer expired; could not send data packet {}",
-            m_id, data.to_string()));
-        return;
-    }
-    auto sender = m_context.sender.lock();
-
     TimeNs now = Scheduler::get_instance().get_current_time();
 
     Scheduler::get_instance().add<Timeout>(now + m_rto.current,
@@ -135,23 +110,14 @@ void NewTcpFlow::send_data_packet(Packet data) {
     m_context.sent_size += data.size;
 
     data.sent_time = now;
-    sender->enqueue_packet(std::move(data));
+    m_context.sender->enqueue_packet(std::move(data));
 }
 
 void NewTcpFlow::process_data_packet(const Packet& data,
                                      PacketCallback callback) {
-    auto exp_endpoints = get_endpoints();
-    if (!exp_endpoints.has_value()) {
-        LOG_ERROR(
-            fmt::format("Flow {}: error while processing data packet {}: {}",
-                        m_id, data.to_string(), exp_endpoints.error()));
-        return;
-    }
-    auto [sender, receiver] = exp_endpoints.value();
-
     Packet ack = data;
-    ack.source_id = receiver->get_id();
-    ack.dest_id = sender->get_id();
+    ack.source_id = m_context.receiver->get_id();
+    ack.dest_id = m_context.sender->get_id();
     ack.size = SizeByte(1);
     ack.ttl = M_MAX_TTL;
     ack.flags.set_flag(m_packet_type_label, PacketType::ACK)
@@ -173,7 +139,7 @@ void NewTcpFlow::process_data_packet(const Packet& data,
                                       callback);
     };
 
-    receiver->enqueue_packet(ack);
+    m_context.receiver->enqueue_packet(ack);
 }
 
 void NewTcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
@@ -189,8 +155,9 @@ void NewTcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
     update_rto_on_ack();
 
     if (!m_ack_monitor.confirm_one(ack.packet_num)) {
-        LOG_WARN(fmt::format("Flow {} got ack {} that confirms nothing; ignored", m_id,
-                 ack.to_string()));
+        LOG_WARN(
+            fmt::format("Flow {} got ack {} that confirms nothing; ignored",
+                        m_id, ack.to_string()));
         return;
     }
 
@@ -217,7 +184,7 @@ void NewTcpFlow::update_rto_on_ack() {
 void NewTcpFlow::on_timeout(Packet data) {
     if (m_ack_monitor.is_confirmed(data.packet_num)) {
         LOG_INFO(fmt::format(
-            "Flow {}: packet {} is confirmed when timeout reashed; no "
+            "Flow {}: packet {} is confirmed when timeout reached; no "
             "retransmit",
             m_id, data.packet_num));
         return;
@@ -247,7 +214,7 @@ public:
     void operator()() {
         if (m_flow.expired()) {
             LOG_ERROR(
-                "Could not run TCP flow timout event: flow pointer expired");
+                "Could not run TCP flow timeout event: flow pointer expired");
             return;
         }
         m_flow.lock()->on_timeout(std::move(m_packet));

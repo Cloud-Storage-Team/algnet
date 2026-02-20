@@ -8,7 +8,12 @@
 
 namespace sim {
 
-struct FlowContext {
+struct Endpoints {
+    std::shared_ptr<IHost> sender;
+    std::shared_ptr<IHost> receiver;
+};
+
+struct FlowContext : public Endpoints {
     SizeByte sent_size;
     SizeByte delivered_size;
     SizeByte retransmit_size;
@@ -16,18 +21,15 @@ struct FlowContext {
     std::optional<TimeNs> start_time;
     std::optional<TimeNs> last_ack_receive_time;
     utils::Statistics<TimeNs> rtt_statistics;
-
-    std::weak_ptr<IHost> sender;
-    std::weak_ptr<IHost> receiver;
 };
 
 // Transport layer interface for reliable data delivery along single physical
 // path
-    class INewFlow : public virtual Identifiable {
-    public:
-        virtual void send(std::vector<PacketInfo> packets) = 0;
+class INewFlow : public virtual Identifiable {
+public:
+    virtual void send(std::vector<PacketInfo> packets) = 0;
 
-        virtual const FlowContext& get_context() const = 0;
-    };
+    virtual const FlowContext& get_context() const = 0;
+};
 
 }  // namespace sim
