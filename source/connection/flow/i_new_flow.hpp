@@ -27,7 +27,6 @@ struct FlowContext : public Endpoints {
         MetricsStorage rtt;
         MetricsStorage delivery_rate;
         MetricsStorage packet_reordering;
-        MetricsStorage packet_spacing;
     } metrics;
 };
 

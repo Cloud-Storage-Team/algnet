@@ -1,5 +1,6 @@
 #pragma once
 #include "../i_new_flow.hpp"
+#include "metrics/packet_reordering/simple_packet_reordering.hpp"
 #include "rto.hpp"
 #include "utils/packet_num_monitor.hpp"
 
@@ -60,6 +61,7 @@ private:
 
     Id m_id;
     FlowContext m_context;
+    SimplePacketReordering m_packet_reordering;
     bool m_ecn_capable;
 
     size_t m_next_packet_num = 0;
