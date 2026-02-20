@@ -90,6 +90,13 @@ public:
         }
         return result;
     }
+
+    std::optional<T> to_optional() const {
+        if (this->has_value()) {
+            return std::optional<T>(this->value());
+        }
+        return std::nullopt;
+    }
 };
 
 template <>
