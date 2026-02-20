@@ -2,14 +2,14 @@
 
 namespace sim{
 
-ConfigNodeWithPresetExpected::ConfigNodeWithPresetExpected(ConfigNodeWithPreset a_node): utils::StrExpected<ConfigNode>(std::move(a_node)){}
+ConfigNodeWithPresetExpected::ConfigNodeWithPresetExpected(ConfigNodeWithPreset a_node): utils::StrExpected<ConfigNodeWithPreset>(std::move(a_node)){}
 
 [[nodiscard]] utils::StrExpected<std::string> ConfigNodeWithPresetExpected::get_name() const{
     if (!this->has_value()){
         return std::unexpected(this->error());
     }
     try{
-        return utils::StrExpected<std::string>(this->value().template get_name_or_throw());
+        return utils::StrExpected<std::string>(this->value().get_name_or_throw());
     } catch (const std::exception& e){
         return std::unexpected(std::string(e.what()));
     }
@@ -21,5 +21,6 @@ ConfigNodeWithPresetExpected ConfigNodeWithPresetExpected::operator[] (std::stri
     }
     return this->value()[key];
 }
+
 
 } // namespace sim

@@ -2,22 +2,24 @@
 
 #include "utils/str_expected.hpp"
 
-namespace sim{
+namespace sim {
 
 class ConfigNode;
 
-struct ConfigNodeExpected: utils::StrExpected<ConfigNode>{
-    
+struct ConfigNodeExpected : utils::StrExpected<ConfigNode> {
+
+    using utils::StrExpected<ConfigNode>::StrExpected;
+
     ConfigNodeExpected(utils::StrExpected<ConfigNode> a_node);
 
-    template<typename T>
-    [[nodiscard]] utils::StrExpected<T> as<T>() const noexcept{
-        if (!this->has_value()){
+    template <typename T>
+    [[nodiscard]] utils::StrExpected<T> as() const noexcept {
+        if (!this->has_value()) {
             return std::unexpected(this->error());
         }
-        try{
+        try {
             return utils::StrExpected<T>(this->value().template as<T>());
-        } catch (const std::exception& e){
+        } catch (const std::exception& e) {
             return std::unexpected(std::string(e.what()));
         }
     }
@@ -27,4 +29,4 @@ struct ConfigNodeExpected: utils::StrExpected<ConfigNode>{
     ConfigNodeExpected operator[](std::string_view key) const;
 };
 
-} // namespace sim
+}  // namespace sim

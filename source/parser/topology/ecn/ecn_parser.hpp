@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "device/ecn.hpp"
-#include "parser/config_reader/config_node_with_preset.hpp"
+#include "parser/config_reader/common_config_node_with_preset.hpp"
 
 namespace sim {
 

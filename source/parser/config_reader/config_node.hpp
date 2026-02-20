@@ -6,9 +6,11 @@
 #include <optional>
 #include <type_traits>
 
-#include "config_node_expected.hpp"
+#include "utils/str_expected.hpp"
 
 namespace sim {
+
+class ConfigNodeExpected;
 
 class ConfigNode {
 public:

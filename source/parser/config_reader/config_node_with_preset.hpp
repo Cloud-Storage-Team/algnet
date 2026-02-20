@@ -1,9 +1,10 @@
 #pragma once
 
 #include "./config_node.hpp"
-#include "config_node_with_preset_expected.hpp"
 
 namespace sim{
+
+class ConfigNodeWithPresetExpected;
 
 // Config node that supports preset inheritance.
 class ConfigNodeWithPreset{

@@ -9,7 +9,7 @@ ConfigNodeExpected::ConfigNodeExpected(utils::StrExpected<ConfigNode> a_node): u
         return std::unexpected(this->error());
     }
     try{
-        return utils::StrExpected<std::string>(this->value().template get_name_or_throw());
+        return utils::StrExpected<std::string>(this->value().get_name_or_throw());
     } catch (const std::exception& e){
         return std::unexpected(std::string(e.what()));
     }
@@ -21,6 +21,5 @@ ConfigNodeExpected ConfigNodeExpected::operator[] (std::string_view key) const{
     }
     return this->value()[key];
 }
-
 
 } // namespace sim
