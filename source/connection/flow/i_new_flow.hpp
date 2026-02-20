@@ -1,6 +1,7 @@
 #pragma once
 
 #include "device/interfaces/i_host.hpp"
+#include "metrics/metrics_storage.hpp"
 #include "packet.hpp"
 #include "packet_ack_info.hpp"
 #include "packet_info.hpp"
@@ -21,6 +22,13 @@ struct FlowContext : public Endpoints {
     std::optional<TimeNs> start_time;
     std::optional<TimeNs> last_ack_receive_time;
     utils::Statistics<TimeNs> rtt_statistics;
+
+    struct Metrics {
+        MetricsStorage rtt;
+        MetricsStorage delivery_rate;
+        MetricsStorage packet_reordering;
+        MetricsStorage packet_spacing;
+    } metrics;
 };
 
 // Transport layer interface for reliable data delivery along single physical

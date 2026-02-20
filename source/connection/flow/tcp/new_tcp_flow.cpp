@@ -40,7 +40,8 @@ NewTcpFlow::NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
       m_context({Endpoints{a_sender, a_receiver}, SizeByte(0), SizeByte(0),
                  SizeByte(0),
 
-                 std::nullopt, std::nullopt, utils::Statistics<TimeNs>()}),
+                 std::nullopt, std::nullopt, utils::Statistics<TimeNs>(),
+                 FlowContext::Metrics()}),
       m_ecn_capable(a_ecn_capable),
       m_rto(std::move(a_rto)) {
     if (!m_flag_manager.register_flag_by_amount(m_packet_type_label,
