@@ -1,13 +1,11 @@
 #pragma once
 
+#include "config_node.hpp"
 #include "utils/str_expected.hpp"
 
 namespace sim {
 
-class ConfigNode;
-
 struct ConfigNodeExpected : utils::StrExpected<ConfigNode> {
-
     using utils::StrExpected<ConfigNode>::StrExpected;
 
     ConfigNodeExpected(utils::StrExpected<ConfigNode> a_node);
