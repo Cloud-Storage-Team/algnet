@@ -1,20 +1,8 @@
-#include "config_node_with_preset_expected.hpp"
+#include "common_config_node_with_preset.hpp"
 
 namespace sim{
 
 ConfigNodeWithPresetExpected::ConfigNodeWithPresetExpected(ConfigNodeWithPreset a_node): utils::StrExpected<ConfigNode>(std::move(a_node)){}
-
-template<typename T>
-[[nodiscard]] utils::StrExpected<T> ConfigNodeWithPresetExpected::as<T>() const noexcept{
-    if (!this->has_value()){
-        return std::unexpected(this->error());
-    }
-    try{
-        return utils:StrExpected<T>(this->value().template as<T>());
-    } catch (const std::exception& e){
-        return std::unexpected(std::string(e.what()));
-    }
-}
 
 [[nodiscard]] utils::StrExpected<std::string> ConfigNodeWithPresetExpected::get_name() const{
     if (!this->has_value()){

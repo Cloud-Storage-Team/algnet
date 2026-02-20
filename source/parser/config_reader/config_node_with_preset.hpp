@@ -5,8 +5,6 @@
 
 namespace sim{
 
-using ConfigNodeWithPresetExpected = utils::StrExpected<ConfigNodeWithPreset>;
-
 // Config node that supports preset inheritance.
 class ConfigNodeWithPreset{
 public:

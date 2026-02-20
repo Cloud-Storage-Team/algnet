@@ -1,7 +1,6 @@
 #pragma once
 
 #include "utils/str_expected.hpp"
-#include "./config_node_with_preset.hpp"
 
 namespace sim{
 
@@ -12,7 +11,16 @@ struct ConfigNodeWithPresetExpected: utils::StrExpected<ConfigNodeWithPreset>{
     CondigNodeWithPresetExpected(ConfigNodeWithPreset a_node);
 
     template<typename T>
-    [[nodiscard]] utils::StrExpected<T> as() const noexcept;
+    [[nodiscard]] utils::StrExpected<T> as<T>() const noexcept{
+        if (!this->has_value()){
+            return std::unexpected(this->error());
+        }
+        try{
+            return utils:StrExpected<T>(this->value().template as<T>());
+        } catch (const std::exception& e){
+            return std::unexpected(std::string(e.what()));
+        }
+    }
 
     [[nodiscard]] utils::StrExpected<std::string> get_name() const;
 

@@ -1,16 +1,26 @@
 #pragma once
 
 #include "utils/str_expected.hpp"
-#include "./config_node.hpp"
 
 namespace sim{
 
+class ConfigNode;
+
 struct ConfigNodeExpected: utils::StrExpected<ConfigNode>{
     
-    ConfigNodeExpected(ConfigNode a_node);
+    ConfigNodeExpected(utils::StrExpected<ConfigNode> a_node);
 
     template<typename T>
-    [[nodiscard]] utils::StrExpected<T> as() const noexcept;
+    [[nodiscard]] utils::StrExpected<T> as<T>() const noexcept{
+        if (!this->has_value()){
+            return std::unexpected(this->error());
+        }
+        try{
+            return utils::StrExpected<T>(this->value().template as<T>());
+        } catch (const std::exception& e){
+            return std::unexpected(std::string(e.what()));
+        }
+    }
 
     [[nodiscard]] utils::StrExpected<std::string> get_name() const;
 

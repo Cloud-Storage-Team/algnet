@@ -10,8 +10,6 @@
 
 namespace sim {
 
-class ConfigNode;
-
 class ConfigNode {
 public:
     explicit ConfigNode(YAML::Node a_node = YAML::Node(YAML::NodeType::Null),
