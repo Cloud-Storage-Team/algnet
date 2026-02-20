@@ -21,6 +21,8 @@ public:
     // Returns the base config node.
     const ConfigNode& get_node() const noexcept;
 
+    const std::optional<ConfigNode> get_presets_node() const noexcept;
+
     // Converts m_node to type T. Probably this method will return message about
     // error
     template <typename T>
@@ -35,7 +37,8 @@ public:
 
     [[nodiscard]] const std::string& get_name_or_throw() const;
 
-    std::runtime_error create_parsing_error(std::string_view error) const;
+    [[nodiscard]] std::runtime_error create_parsing_error(
+        std::string_view error) const;
 
 private:
     // m_node contains information about config node and probably preset name

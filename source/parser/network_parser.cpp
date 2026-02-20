@@ -1,14 +1,39 @@
 #include "network_parser.hpp"
 
+#include "parser/simulation/new-connection/connection_parser.hpp"
+#include "parser/topology/topology_parser.hpp"
+#include "relative_path_parser.hpp"
+
 namespace sim {
 
-Network parse_network(const ConfigNode& node) {
-    std::string topology_config_path = node["topology_config_path"]
-                                           .value_or_throw()
-                                           .as_or_throw<std::string>();
+Network parse_network(const std::filesystem::path& path) {
+    ConfigNode node = load_file(path);
+
+    std::string topology_config_path =
+        parse_relative_path(node, "topology_config_path", path.parent_path());
+
+    const ConfigNode topology_config = load_file(topology_config_path);
+
+    Topology topology = parse_topology(topology_config);
 
     const ConfigNode& connections_node = node["connections"].value_or_throw();
-    
+
+    NetworkContext ctx(std::move(topology), {});
+
+    std::optional<ConfigNode> presets_node = node["presets"].to_optional();
+    std::optional<ConfigNode> connection_presets_node =
+        presets_node ? presets_node.value()["connection"].to_optional()
+                     : std::nullopt;
+
+    for (const auto& connection_node : connections_node) {
+        ConfigNodeWithPreset conn_node_with_preset(connection_node,
+                                                   connection_presets_node);
+        ctx.connections_table[conn_node_with_preset.get_name_or_throw()] =
+            parse_i_connection(conn_node_with_preset,
+                               ctx.topology.get_context().hosts_table);
+    }
+
+    return Network{std::move(ctx)};
 }
 
 }  // namespace sim

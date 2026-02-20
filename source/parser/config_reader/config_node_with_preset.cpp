@@ -48,7 +48,7 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](
             ConfigNodeExpected preset_node = presets_node[preset_name.value()];
             if (!preset_node.has_value()) {
                 // m_presets_node hasn't preset with the specified name in
-                // config. Retruns message about it
+                // config. Returns message about it
                 std::stringstream ss;
                 ss << "Error: preset named '" << preset_name.value()
                    << "' of node " << m_node << '\n';
@@ -69,24 +69,31 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](
             ss << "does not have key: " << key;
             return std::unexpected(ss.str());
         }
-        // key was found in preset
-        return ConfigNodeWithPreset(key_node.value(), m_presets_node, m_preset);
+        // key was found in preset; use key_node as main node; DROP PRESET NODE
+        return ConfigNodeWithPreset(key_node.value(), m_presets_node,
+                                    std::nullopt);
     }
-    // key was found in m_node
-    return ConfigNodeWithPreset(child_node.value(), m_presets_node, m_preset);
+    // key was found in m_node: go to child value; DROP PRESET NODE
+    return ConfigNodeWithPreset(child_node.value(), m_presets_node,
+                                std::nullopt);
 }
 
 const std::string& ConfigNodeWithPreset::get_name_or_throw() const {
     return m_node.get_name_or_throw();
 }
 
+std::runtime_error ConfigNodeWithPreset::create_parsing_error(
+    std::string_view error) const {
+    return m_node.create_parsing_error(error);
+}
+
 const ConfigNode& ConfigNodeWithPreset::get_node() const noexcept {
     return m_node;
 }
 
-std::runtime_error ConfigNodeWithPreset::create_parsing_error(
-    std::string_view error) const {
-    return m_node.create_parsing_error(std::move(error));
+const std::optional<ConfigNode> ConfigNodeWithPreset::get_presets_node()
+    const noexcept {
+    return m_presets_node;
 }
 
 }  // namespace sim

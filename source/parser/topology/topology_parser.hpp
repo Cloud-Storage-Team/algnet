@@ -1,6 +1,6 @@
 #pragma once
 #include "parser/config_reader/config_node_with_preset.hpp"
-#include "simulator/topology/topology.hpp"
+#include "simulator/network/topology/topology.hpp"
 
 namespace sim {
 

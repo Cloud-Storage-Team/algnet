@@ -1,9 +1,10 @@
 #pragma once
-#include "config_reader/config_node.hpp"
+#include <filesystem>
+
 #include "simulator/network/network.hpp"
 
 namespace sim {
 
-Network parse_network(const ConfigNode& node);
+Network parse_network(const std::filesystem::path &path);
 
 }

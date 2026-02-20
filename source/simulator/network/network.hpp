@@ -5,18 +5,18 @@
 #include "utils/id_table.hpp"
 
 namespace sim {
-struct SimulationContext {
+struct NetworkContext {
     Topology topology;
     utils::IdTable<INewConnection> connections_table;
 };
 
 class Network {
 public:
-    explicit Network(SimulationContext a_ctx);
+    explicit Network(NetworkContext a_ctx);
 
-    const SimulationContext& get_context() const;
+    const NetworkContext& get_context() const;
 
 private:
-    SimulationContext m_ctx;
+    NetworkContext m_ctx;
 };
 }  // namespace sim
