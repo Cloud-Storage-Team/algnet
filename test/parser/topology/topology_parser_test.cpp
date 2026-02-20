@@ -7,18 +7,19 @@
 namespace sim {
 namespace test2 {
 
-static std::filesystem::path project_root = PROJECT_ROOT_DIR;
-
-static std::filesystem::path topologies_folder_path =
-    project_root / "configuration_examples" / "topology_examples";
-
 TEST(TopologyParsing, bus_topology) {
     std::filesystem::path bus_topology_path =
-        topologies_folder_path / "bus_topology.yml";
+        std::filesystem::path(__FILE__).parent_path() / "bus_topology.yml";
 
     const ConfigNode config = load_file(bus_topology_path);
 
     Topology top = parse_topology(config);
+
+    const TopologyContext& ctx = top.get_context();
+
+    ASSERT_EQ(ctx.hosts_table.size(), 4);
+    ASSERT_EQ(ctx.switches_table.size(), 1);
+    ASSERT_EQ(ctx.links_table.size(), 8);
 }
 
 }  // namespace test2
