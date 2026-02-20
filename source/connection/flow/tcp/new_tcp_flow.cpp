@@ -45,10 +45,10 @@ NewTcpFlow::NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
       m_rto(std::move(a_rto)) {
     if (!m_flag_manager.register_flag_by_amount(m_packet_type_label,
                                                 PacketType::ENUM_SIZE)) {
-        throw std::runtime_error("Can not registrate packet type label");
+        throw std::runtime_error("Can not register packet type label");
     }
     if (!register_packet_avg_rtt_flag(m_flag_manager)) {
-        throw std::runtime_error("Can not registrate packet avg rtt label");
+        throw std::runtime_error("Can not register packet avg rtt label");
     }
 }
 
@@ -184,7 +184,7 @@ void NewTcpFlow::update_rto_on_ack() {
 void NewTcpFlow::on_timeout(Packet data) {
     if (m_ack_monitor.is_confirmed(data.packet_num)) {
         LOG_INFO(fmt::format(
-            "Flow {}: packet {} is confirmed when timeout reashed; no "
+            "Flow {}: packet {} is confirmed when timeout reached; no "
             "retransmit",
             m_id, data.packet_num));
         return;
@@ -214,7 +214,7 @@ public:
     void operator()() {
         if (m_flow.expired()) {
             LOG_ERROR(
-                "Could not run TCP flow timout event: flow pointer expired");
+                "Could not run TCP flow timeout event: flow pointer expired");
             return;
         }
         m_flow.lock()->on_timeout(std::move(m_packet));
