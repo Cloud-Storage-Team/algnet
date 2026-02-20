@@ -6,13 +6,11 @@
 #include <optional>
 #include <type_traits>
 
-#include "utils/str_expected.hpp"
+#include "config_node_expected.hpp"
 
 namespace sim {
 
 class ConfigNode;
-
-using ConfigNodeExpected = utils::StrExpected<ConfigNode>;
 
 class ConfigNode {
 public:

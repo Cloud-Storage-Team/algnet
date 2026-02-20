@@ -1,10 +1,9 @@
 #pragma once
 
 #include "./config_node.hpp"
+#include "config_node_with_preset_expected.hpp"
 
 namespace sim{
-
-class ConfigNodeWithPreset;
 
 using ConfigNodeWithPresetExpected = utils::StrExpected<ConfigNodeWithPreset>;
 
