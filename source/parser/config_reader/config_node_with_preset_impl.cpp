@@ -1,4 +1,4 @@
-#include "common_config_node_with_preset.hpp"
+#include "config_node_with_preset.hpp"
 
 namespace sim {
 
@@ -89,6 +89,10 @@ std::runtime_error ConfigNodeWithPreset::create_parsing_error(
 
 const ConfigNode& ConfigNodeWithPreset::get_node() const noexcept {
     return m_node;
+}
+
+[[nodiscard]] const std::optional<std::string>& ConfigNodeWithPreset::get_name() const{
+    return m_node.get_name();
 }
 
 const std::optional<ConfigNode> ConfigNodeWithPreset::get_presets_node()

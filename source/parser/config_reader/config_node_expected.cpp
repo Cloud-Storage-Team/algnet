@@ -1,4 +1,4 @@
-#include "common_config_node.hpp"
+#include "config_node.hpp"
 
 namespace sim{
 
@@ -8,16 +8,19 @@ ConfigNodeExpected::ConfigNodeExpected(utils::StrExpected<ConfigNode> a_node): u
     if (!this->has_value()){
         return std::unexpected(this->error());
     }
-    try{
-        return utils::StrExpected<std::string>(this->value().get_name_or_throw());
-    } catch (const std::exception& e){
-        return std::unexpected(std::string(e.what()));
+    std::optional<std::string> opt_name = this->value().get_name();
+    if (opt_name){
+        return utils::StrExpected<std::string>(opt_name.value());
+    } else{
+        std::stringstream ss;
+        ss << "The node doesn't have hame because " << this->error();
+        return std::unexpected(ss.str());
     }
 }
 
-ConfigNodeExpected ConfigNodeExpected::operator[] (std::string_view key) const{
+[[nodiscard]] ConfigNodeExpected ConfigNodeExpected::operator[] (std::string_view key) const{
     if (!this->has_value()){
-        return std::unexpected("The operator [] was called on an empty object.");
+        return *this;
     }
     return this->value()[key];
 }

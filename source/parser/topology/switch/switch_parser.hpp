@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "device/switch.hpp"
-#include "parser/config_reader/common_config_node_with_preset.hpp"
+#include "parser/config_reader/config_node_with_preset.hpp"
 
 namespace sim {
 

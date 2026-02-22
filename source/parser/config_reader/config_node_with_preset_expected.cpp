@@ -1,26 +1,31 @@
-#include "common_config_node_with_preset.hpp"
+#include "config_node_with_preset.hpp"
 
-namespace sim{
+namespace sim {
 
-ConfigNodeWithPresetExpected::ConfigNodeWithPresetExpected(ConfigNodeWithPreset a_node): utils::StrExpected<ConfigNodeWithPreset>(std::move(a_node)){}
+ConfigNodeWithPresetExpected::ConfigNodeWithPresetExpected(
+    ConfigNodeWithPreset a_node)
+    : utils::StrExpected<ConfigNodeWithPreset>(std::move(a_node)) {}
 
-[[nodiscard]] utils::StrExpected<std::string> ConfigNodeWithPresetExpected::get_name() const{
-    if (!this->has_value()){
+[[nodiscard]] utils::StrExpected<std::string>
+ConfigNodeWithPresetExpected::get_name() const {
+    if (!this->has_value()) {
         return std::unexpected(this->error());
     }
-    try{
-        return utils::StrExpected<std::string>(this->value().get_name_or_throw());
-    } catch (const std::exception& e){
-        return std::unexpected(std::string(e.what()));
+    std::optional<std::string> opt_name = this->value().get_name();
+    if (opt_name) {
+        return utils::StrExpected<std::string>(opt_name.value());
+    } else {
+        std::stringstream ss;
+        ss << "The node doesn't have hame because " << this->error();
+        return std::unexpected(ss.str());
     }
 }
 
-ConfigNodeWithPresetExpected ConfigNodeWithPresetExpected::operator[] (std::string_view key) const{
-    if (!this->has_value()){
-        return std::unexpected("The operator [] was called on an empty object.");
+[[nodiscard]] ConfigNodeWithPresetExpected ConfigNodeWithPresetExpected::operator[](std::string_view key) const {
+    if (!this->has_value()) {
+        return *this;
     }
     return this->value()[key];
 }
 
-
-} // namespace sim
+}  // namespace sim

@@ -1,13 +1,15 @@
 #pragma once
 
+#include <optional>
+
 #include "utils/str_expected.hpp"
 
 namespace sim{
 
 class ConfigNodeWithPreset;
 
-struct ConfigNodeWithPresetExpected: utils::StrExpected<ConfigNodeWithPreset>{
-
+class ConfigNodeWithPresetExpected: public utils::StrExpected<ConfigNodeWithPreset>{
+public:
     using utils::StrExpected<ConfigNodeWithPreset>::StrExpected;
     
     ConfigNodeWithPresetExpected(ConfigNodeWithPreset a_node);
@@ -17,18 +19,12 @@ struct ConfigNodeWithPresetExpected: utils::StrExpected<ConfigNodeWithPreset>{
         if (!this->has_value()){
             return std::unexpected(this->error());
         }
-        try{
-            return utils::StrExpected<T>(this->value().template as<T>());
-        } catch (const std::exception& e){
-            return std::unexpected(std::string(e.what()));
-        }
+        return utils::StrExpected<T>(this->value().template as<T>());
     }
 
     [[nodiscard]] utils::StrExpected<std::string> get_name() const;
 
-    ConfigNodeWithPresetExpected operator[](std::string_view key) const;
-
-
+    [[nodiscard]] ConfigNodeWithPresetExpected operator[](std::string_view key) const;
 };
 
 } // namespace sim

@@ -6,8 +6,8 @@ namespace sim {
 
 class ConfigNode;
 
-struct ConfigNodeExpected : utils::StrExpected<ConfigNode> {
-
+class ConfigNodeExpected : public utils::StrExpected<ConfigNode> {
+public:
     using utils::StrExpected<ConfigNode>::StrExpected;
 
     ConfigNodeExpected(utils::StrExpected<ConfigNode> a_node);
@@ -17,16 +17,12 @@ struct ConfigNodeExpected : utils::StrExpected<ConfigNode> {
         if (!this->has_value()) {
             return std::unexpected(this->error());
         }
-        try {
-            return utils::StrExpected<T>(this->value().template as<T>());
-        } catch (const std::exception& e) {
-            return std::unexpected(std::string(e.what()));
-        }
+        return utils::StrExpected<T>(this->value().template as<T>());
     }
 
     [[nodiscard]] utils::StrExpected<std::string> get_name() const;
 
-    ConfigNodeExpected operator[](std::string_view key) const;
+    [[nodiscard]] ConfigNodeExpected operator[](std::string_view key) const;
 };
 
 }  // namespace sim

@@ -1,6 +1,6 @@
 #pragma once
 #include "connection/flow/tcp/i_tcp_cc.hpp"
-#include "parser/config_reader/common_config_node.hpp"
+#include "parser/config_reader/config_node.hpp"
 
 namespace sim {
 
