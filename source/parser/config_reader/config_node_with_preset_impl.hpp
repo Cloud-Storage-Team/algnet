@@ -36,6 +36,10 @@ public:
 
     [[nodiscard]] const std::string& get_name_or_throw() const;
 
+    const std::optional<ConfigNode> get_presets_node() const noexcept;
+
+    std::runtime_error create_parsing_error(std::string_view error) const;
+
 private:
 
     // m_node contains information about config node and probably preset name
