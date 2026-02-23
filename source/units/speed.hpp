@@ -76,8 +76,14 @@ public:
     // For example: 3.35 Mb/ms
     std::string constexpr to_string(int precision = 2) const{
         std::stringstream ss;
-        ss << std::fixed << std::setprecision(precision) << value() << TSizeBase::suffix << '/' << TTimeBase::suffix;
+        ss << std::fixed << std::setprecision(precision) << value() << TSizeBase::suffix << m_separator << TTimeBase::suffix;
         return ss.str();
+    }
+
+    static constexpr std::string get_suffix() {
+        std::string_view separator = m_separator;
+        std::string result_suffix = std::string(TSizeBase::suffix) + std::string(separator) + std::string(TTimeBase::suffix);
+        return result_suffix;
     }
 
     static constexpr std::string_view m_separator = "p";

@@ -4,25 +4,19 @@
 
 #include "units/speed_fmt.hpp"
 
-class SpeedFormatTest : public testing::Test {
-public:
-    void TearDown() override {};
-    void SetUp() override {};
-};
-
-TEST_F(SpeedFormatTest, DefaultPrecision) {
+TEST(SpeedFormatTest, DefaultPrecision) {
     // default precision
     Speed<Byte, Second> byte(1.23456);
     EXPECT_EQ(fmt::format("{}", byte), "1.2Bps");
 }
 
-TEST_F(SpeedFormatTest, LargeValue) {
+TEST(SpeedFormatTest, LargeValue) {
     // use large value
     Speed<GBit, Millisecond> t(1000000);
     EXPECT_EQ(fmt::format("{}", t), "1000000.0Gbpms");
 }
 
-TEST_F(SpeedFormatTest, CustomPrecision) {
+TEST(SpeedFormatTest, CustomPrecision) {
     // specify precision
     Speed<MByte, Nanosecond> t(1.23456);
     EXPECT_EQ(fmt::format("{:.1f}", t), "1.2MBpns");

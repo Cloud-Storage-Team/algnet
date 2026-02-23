@@ -4,16 +4,16 @@
 #include <cstdlib>
 
 #include "time.hpp"
-#include "common_formatter.hpp"
+#include "default_formatter.hpp"
 
 template <IsTimeBase TTimeBase, typename Char>
-struct fmt::formatter<Time<TTimeBase>, Char> : CommonFormatter<Char> {
+struct fmt::formatter<Time<TTimeBase>, Char> : DefaultFormatter<double, Char> {
 
     template <typename FormatContext>
     auto format(const Time<TTimeBase>& t, FormatContext& ctx) const {
         auto out = ctx.out();
-        if (this->use_default_precision) {
-            out = fmt::format_to(out, this->default_precision_format_str, t.value());
+        if (this->is_empty_format) {
+            out = fmt::format_to(out, default_precision_format_str, t.value());
         } else {
             out = fmt::formatter<double, Char>::format(t.value(), ctx);
         }
@@ -23,5 +23,5 @@ struct fmt::formatter<Time<TTimeBase>, Char> : CommonFormatter<Char> {
         return out;
     }
 private:
-    static constexpr const char* default_precision_format_str = "{:.1f}";
+    static constexpr std::string_view default_precision_format_str = "{:.1f}";
 };

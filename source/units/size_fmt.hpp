@@ -4,18 +4,18 @@
 #include <cstdlib>
 
 #include "size.hpp"
-#include "common_formatter.hpp"
+#include "default_formatter.hpp"
 
 template <IsSizeBase TSizeBase, typename Char>
-struct fmt::formatter<Size<TSizeBase>, Char> : CommonFormatter<Char> {
+struct fmt::formatter<Size<TSizeBase>, Char> : DefaultFormatter<uint64_t, Char> {
 
     template <typename FormatContext>
     auto format(const Size<TSizeBase>& t, FormatContext& ctx) const {
         auto out = ctx.out();
-        if (this->use_default_precision) {
-            out = fmt::format_to(out, this->default_precision_format_str, t.value());
+        if (this->is_empty_format) {
+            out = fmt::format_to(out, default_precision_format_str, t.value());
         } else {
-            out = fmt::formatter<double, Char>::format(t.value(), ctx);
+            out = fmt::formatter<uint64_t, Char>::format(t.value(), ctx);
         }
         for (auto c : TSizeBase::suffix) {
             *out++ = static_cast<Char>(c);
@@ -24,5 +24,5 @@ struct fmt::formatter<Size<TSizeBase>, Char> : CommonFormatter<Char> {
     }
 
 private:
-    static constexpr const char* default_precision_format_str = "{}";
+    static constexpr std::string_view default_precision_format_str = "{}";
 };
