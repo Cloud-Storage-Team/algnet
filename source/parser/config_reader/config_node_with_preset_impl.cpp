@@ -78,6 +78,10 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](
                                 std::nullopt);
 }
 
+std::ostream& operator<<(std::ostream& out, const ConfigNodeWithPreset& node){
+    return out << node.get_node();
+}
+
 const std::string& ConfigNodeWithPreset::get_name_or_throw() const {
     return m_node.get_name_or_throw();
 }

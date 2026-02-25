@@ -18,6 +18,8 @@ public:
 
     ConfigNodeWithPresetExpected operator[](std::string_view key) const;
 
+    friend std::ostream& operator<<(std::ostream& out, const ConfigNodeWithPreset& node);
+
     // Returns the base config node.
     const ConfigNode& get_node() const noexcept;
 
