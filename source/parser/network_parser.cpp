@@ -18,7 +18,7 @@ Network parse_network(const std::filesystem::path& path) {
 
     const ConfigNode& connections_node = node["connections"].value_or_throw();
 
-    NetworkContext ctx(std::move(topology), {});
+    NetworkContext ctx(std::move(topology), utils::IdTable<INewConnection>{});
 
     std::optional<ConfigNode> presets_node = node["presets"].to_optional();
     std::optional<ConfigNode> connection_presets_node =

@@ -16,7 +16,7 @@ static utils::IdTable<ISwitch> parse_switches(
 
 static utils::IdTable<ILink> parse_links(
     const std::optional<ConfigNode>& link_presets_node,
-    const ConfigNode& links_node, const utils::IdTable<IDevice> device_table);
+    const ConfigNode& links_node, const utils::IdTable<IDevice>& device_table);
 
 static utils::StrExpected<utils::IdTable<IDevice> > build_device_table(
     const utils::IdTable<IHost>& hosts_table,
@@ -117,7 +117,7 @@ static utils::StrExpected<utils::IdTable<IDevice> > build_device_table(
 
 static utils::IdTable<ILink> parse_links(
     const std::optional<ConfigNode>& link_presets_node,
-    const ConfigNode& links_node, const utils::IdTable<IDevice> device_table) {
+    const ConfigNode& links_node, const utils::IdTable<IDevice>& device_table) {
     utils::IdTable<ILink> links_table;
     for (const auto& link_node : links_node) {
         ConfigNodeWithPreset link_node_with_preset(link_node,

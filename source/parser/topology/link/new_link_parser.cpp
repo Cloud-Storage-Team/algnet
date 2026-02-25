@@ -6,7 +6,7 @@ namespace sim {
 
 static std::shared_ptr<Link> parse_link(
     const ConfigNodeWithPreset& link_node,
-    const utils::IdTable<IDevice> device_table);
+    const utils::IdTable<IDevice>& device_table);
 
 std::shared_ptr<ILink> new_parse_i_link(
     const ConfigNodeWithPreset& link_node,
@@ -16,24 +16,24 @@ std::shared_ptr<ILink> new_parse_i_link(
 
 static std::shared_ptr<Link> parse_link(
     const ConfigNodeWithPreset& link_node,
-    const utils::IdTable<IDevice> device_table) {
-    Id id = link_node.get_name_or_throw();
+    const utils::IdTable<IDevice>& device_table) {
+    const Id id = link_node.get_name_or_throw();
 
-    Id from_id = link_node["from"].value_or_throw().as_or_throw<Id>();
+    const Id from_id = link_node["from"].value_or_throw().as_or_throw<Id>();
     std::shared_ptr<IDevice> from_ptr = device_table.get_or_throw(
         from_id,
         link_node.create_parsing_error(fmt::format(
             "Could not find link's source device with id '{}'", from_id)));
 
-    Id to_id = link_node["to"].value_or_throw().as_or_throw<Id>();
+    const Id to_id = link_node["to"].value_or_throw().as_or_throw<Id>();
     std::shared_ptr<IDevice> to_ptr = device_table.get_or_throw(
         to_id,
         link_node.create_parsing_error(fmt::format(
-            "Could not find link's destination device with id '{}'", from_id)));
+            "Could not find link's destination device with id '{}'", to_id)));
 
-    SpeedGbps speed =
+    const SpeedGbps speed =
         parse_speed(link_node["throughput"].value_or_throw().get_node());
-    TimeNs delay = parse_time(link_node["latency"].value_or_throw().get_node());
+    const TimeNs delay = parse_time(link_node["latency"].value_or_throw().get_node());
     SizeByte egress_buffer_size =
         parse_size(link_node["egress_buffer_size"].value_or_throw().get_node());
     SizeByte ingress_buffer_size = parse_size(
