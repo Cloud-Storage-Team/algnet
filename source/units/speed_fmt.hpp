@@ -17,14 +17,7 @@ struct fmt::formatter<Speed<TSizeBase, TTimeBase>, Char> : DefaultFormatter<doub
         } else {
             out = fmt::formatter<double, Char>::format(t.value(), ctx);
         }
-        for (auto c : TSizeBase::suffix) {
-            *out++ = static_cast<Char>(c);
-        }
-        auto sep = Speed<TSizeBase, TTimeBase>::m_separator;
-        for (auto c : Speed<TSizeBase, TTimeBase>::m_separator) {
-            *out++ = static_cast<Char>(c);
-        }
-        for (auto c: TTimeBase::suffix){
+        for (auto c: Speed<TSizeBase, TTimeBase>::get_suffix()){
             *out++ = static_cast<Char>(c);
         }
         return out;

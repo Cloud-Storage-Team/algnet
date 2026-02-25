@@ -81,9 +81,7 @@ public:
     }
 
     static constexpr std::string get_suffix() {
-        std::string_view separator = m_separator;
-        std::string result_suffix = std::string(TSizeBase::suffix) + std::string(separator) + std::string(TTimeBase::suffix);
-        return result_suffix;
+        return std::string(TSizeBase::suffix) + std::string(m_separator) + std::string(TTimeBase::suffix);
     }
 
     static constexpr std::string_view m_separator = "p";
