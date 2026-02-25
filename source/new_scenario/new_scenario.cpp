@@ -10,7 +10,10 @@ namespace sim {
 NewScenario::NewScenario(Actions a_actions, Network a_network)
     : m_actions(std::move(a_actions)), m_network(std::move(a_network)) {}
 
-Summary NewScenario::simulate() {
+NewSummary NewScenario::simulate() {
+    // TODO: create method recalculate_pathes for Network
+    m_network.get_context().topology.recalculate_paths();
+
     for (auto action : m_actions) {
         action->schedule();
     }
@@ -18,7 +21,7 @@ Summary NewScenario::simulate() {
     while (Scheduler::get_instance().tick()) {
     }
 
-    Summary summary;
+    NewSummary summary;
 
     for (auto action : m_actions) {
         if (auto send_data_action =

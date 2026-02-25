@@ -14,7 +14,7 @@ NewScenario parse_scenario(const std::filesystem::path& path) {
 
     Network network = parse_network(network_config_path);
 
-    ConfigNode actions_node = node["actions"].value_or_throw();
+    ConfigNode actions_node = node["scenario"].value_or_throw();
 
     Actions actions;
 

@@ -11,7 +11,7 @@ namespace sim {
 
 using Actions = std::vector<std::shared_ptr<INewAction>>;
 
-struct Summary {
+struct NewSummary {
     SendDataActionsSummary send_data;
 };
 
@@ -19,7 +19,7 @@ class NewScenario {
 public:
     NewScenario(Actions a_actions, Network a_network);
 
-    Summary simulate();
+    NewSummary simulate();
 
 private:
     Actions m_actions;
