@@ -8,12 +8,13 @@ ConfigNodeExpected::ConfigNodeExpected(utils::StrExpected<ConfigNode> a_node): u
     if (!this->has_value()){
         return std::unexpected(this->error());
     }
-    std::optional<std::string> opt_name = this->value().get_name();
+    const ConfigNode& node = this->value();
+    const std::optional<std::string>& opt_name = node.get_name();
     if (opt_name){
         return utils::StrExpected<std::string>(opt_name.value());
     } else{
         std::stringstream ss;
-        ss << "The node doesn't have hame because " << this->error();
+        ss << "Node" << node << "does not have name";
         return std::unexpected(ss.str());
     }
 }
