@@ -20,7 +20,7 @@ public:
     const TopologyContext& get_context() const;
 
     // Calls BFS for each device to build the routing tables
-    void recalculate_paths() const;
+    void recalculate_pathes() const;
 
 private:
     TopologyContext m_ctx;

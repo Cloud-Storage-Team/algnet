@@ -15,6 +15,7 @@ struct NewSummary {
     SendDataActionsSummary send_data;
 };
 
+// Launch scenaro: network & actions over it
 class NewScenario {
 public:
     NewScenario(Actions a_actions, Network a_network);

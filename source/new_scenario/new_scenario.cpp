@@ -11,8 +11,7 @@ NewScenario::NewScenario(Actions a_actions, Network a_network)
     : m_actions(std::move(a_actions)), m_network(std::move(a_network)) {}
 
 NewSummary NewScenario::simulate() {
-    // TODO: create method recalculate_pathes for Network
-    m_network.get_context().topology.recalculate_paths();
+    m_network.recalculate_pathes();
 
     for (auto action : m_actions) {
         action->schedule();
