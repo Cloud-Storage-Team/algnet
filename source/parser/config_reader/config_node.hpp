@@ -32,6 +32,8 @@ public:
 
     friend std::ostream& operator<<(std::ostream& out, const ConfigNode& node);
 
+    std::string to_string() const;
+
     // yaml-cpp functional
 
     [[nodiscard]] YAML::NodeType::value Type() const;
