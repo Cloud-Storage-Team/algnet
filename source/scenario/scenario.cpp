@@ -13,7 +13,7 @@ std::shared_ptr<SendDataActionsSummary> Scenario::get_summary() const {
     return m_send_data_actions_summary;
 }
 
-void Scenario::start() {
+void Scenario::schedule() const {
     for (auto& action : m_actions) {
         action->schedule();
     }

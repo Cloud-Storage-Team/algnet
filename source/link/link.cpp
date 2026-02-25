@@ -26,16 +26,6 @@ Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
     }
 }
 
-Link::Link(LinkInitArgs args)
-    : Link(args.id.value_or_throw(),
-           IdentifierFactory::get_instance().get_object<IDevice>(
-               args.from_id.value_or_throw()),
-           IdentifierFactory::get_instance().get_object<IDevice>(
-               args.to_id.value_or_throw()),
-           args.speed.value_or_throw(), args.delay.value_or_throw(),
-           args.max_from_egress_buffer_size.value_or_throw(),
-           args.max_to_ingress_buffer_size.value_or_throw()) {}
-
 void Link::schedule_arrival(Packet packet) {
     if (m_to.expired()) {
         LOG_WARN("Destination device pointer is expired");
