@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iomanip>
 #include <concepts>
 #include <cstdint>
 #include <iostream>
@@ -9,24 +10,29 @@
 
 struct Nanosecond {
     static constexpr uint64_t to_nanoseconds_multiplier = 1;
+    static constexpr std::string suffix = "ns";
 };
 
 struct Microsecond {
     static constexpr uint64_t to_nanoseconds_multiplier = 1'000;
+    static constexpr std::string_view suffix = "us";
 };
 
 struct Millisecond {
     static constexpr uint64_t to_nanoseconds_multiplier = 1'000'000;
+    static constexpr std::string_view suffix = "ms";
 };
 
 struct Second {
     static constexpr uint64_t to_nanoseconds_multiplier = 1'000'000'000;
+    static constexpr std::string_view suffix = "s";
 };
 
 // Concept for all types that might be the base for Time
 template <typename T>
 concept IsTimeBase = requires {
     { T::to_nanoseconds_multiplier } -> std::convertible_to<uint64_t>;
+    { T::suffix } -> std::convertible_to<std::string_view>;
 };
 
 template <IsTimeBase TTimeBase>
@@ -97,6 +103,14 @@ public:
     }
 
     bool constexpr operator!=(ThisTime time) const { return !operator==(time); }
+
+    // Outputs the Time with the specified precision and with suffix.
+    // For example: 2.37 Ns
+    std::string constexpr to_string(int precision = 2) const{
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(precision) << value() << TTimeBase::suffix;
+        return ss.str();
+    }
 
 private:
     double m_value_ns;  // Time in nanoseconds

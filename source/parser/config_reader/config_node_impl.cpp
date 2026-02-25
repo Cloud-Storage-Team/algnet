@@ -47,6 +47,12 @@ std::ostream& operator<<(std::ostream& out, const ConfigNode& node) {
     return out;
 }
 
+std::string ConfigNode::to_string() const {
+    std::stringstream ss;
+    ss << *this;
+    return ss.str();
+}
+
 YAML::NodeType::value ConfigNode::Type() const { return m_node.Type(); }
 
 bool ConfigNode::IsNull() const noexcept { return m_node.IsNull(); }
