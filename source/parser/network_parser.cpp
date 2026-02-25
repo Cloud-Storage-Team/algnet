@@ -28,9 +28,14 @@ Network parse_network(const std::filesystem::path& path) {
     for (const auto& connection_node : connections_node) {
         ConfigNodeWithPreset conn_node_with_preset(connection_node,
                                                    connection_presets_node);
-        ctx.connections_table[conn_node_with_preset.get_name_or_throw()] =
-            parse_i_connection(conn_node_with_preset,
-                               ctx.topology.get_context().hosts_table);
+
+        std::shared_ptr<INewConnection> connection = parse_i_connection(
+            conn_node_with_preset, ctx.topology.get_context().hosts_table);
+        Id conn_id = connection->get_id();
+        if (!ctx.connections_table.emplace(conn_id, connection).second) {
+            throw connections_node.create_parsing_error(
+                fmt::format("Two connection with same name: {}", conn_id));
+        }
     }
 
     return Network{std::move(ctx)};

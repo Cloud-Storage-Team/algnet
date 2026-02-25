@@ -25,12 +25,17 @@ static utils::StrExpected<utils::IdTable<IDevice> > build_device_table(
 Topology parse_topology(const ConfigNode& node) {
     std::optional<ConfigNode> presets_node = node["presets"].to_optional();
 
+    auto presets_child_optional =
+        [&](std::string_view key) -> std::optional<ConfigNode> {
+        if (!presets_node) return std::nullopt;
+        return presets_node->operator[](key).to_optional();
+    };
+
     TopologyContext ctx;
     {
         // hosts parsing
         std::optional<ConfigNode> host_presets_node =
-            (presets_node ? presets_node.value()["host"].to_optional()
-                          : std::nullopt);
+            presets_child_optional("host");
 
         ConfigNode hosts_node = node["hosts"].value_or_throw();
         ctx.hosts_table = parse_hosts(host_presets_node, hosts_node);
@@ -39,8 +44,7 @@ Topology parse_topology(const ConfigNode& node) {
     {
         // switches parsing
         std::optional<ConfigNode> switches_presets_node =
-            (presets_node ? presets_node.value()["switch"].to_optional()
-                          : std::nullopt);
+            presets_child_optional("switch");
 
         ConfigNode packet_spraying_node =
             node["packet-spraying"].value_or_throw();
@@ -53,8 +57,7 @@ Topology parse_topology(const ConfigNode& node) {
     {
         // links parsing
         std::optional<ConfigNode> links_presets_node =
-            (presets_node ? presets_node.value()["link"].to_optional()
-                          : std::nullopt);
+            presets_child_optional("link");
 
         utils::IdTable<IDevice> device_table =
             build_device_table(ctx.hosts_table, ctx.switches_table)
@@ -77,7 +80,11 @@ static utils::IdTable<IHost> parse_hosts(
                                                    host_presets_node);
         std::shared_ptr<IHost> host =
             HostParser::parse_i_host(host_node_with_preset);
-        hosts_table[host->get_id()] = host;
+        Id host_id = host->get_id();
+        if (!hosts_table.emplace(host_id, host).second) {
+            throw hosts_node.create_parsing_error(
+                fmt::format("Two hosts with same name: {}", host_id));
+        }
     }
     return hosts_table;
 }
@@ -91,7 +98,11 @@ static utils::IdTable<ISwitch> parse_switches(
                                                      switches_presets_node);
         std::shared_ptr<ISwitch> swtch = SwitchParser::parse_i_switch(
             switch_node_with_preset, packet_spraying_node);
-        switches_table[swtch->get_id()] = swtch;
+        Id switch_id = swtch->get_id();
+        if (!switches_table.emplace(switch_id, swtch).second) {
+            throw switches_node.create_parsing_error(
+                fmt::format("Two switches with same name: {}", switch_id));
+        }
     }
     return switches_table;
 }
@@ -106,9 +117,10 @@ static utils::StrExpected<utils::IdTable<IDevice> > build_device_table(
 
     for (const auto& [switch_name, swtch] : switches_table) {
         if (!device_table.emplace(switch_name, swtch).second) {
-            return std::unexpected(
+            return std::unexpected(fmt::format(
                 "Could not add switch named {} to device table: device with "
-                "such name already exists");
+                "such name already exists",
+                switch_name));
         }
     }
 
@@ -124,7 +136,11 @@ static utils::IdTable<ILink> parse_links(
                                                    link_presets_node);
         std::shared_ptr<ILink> link =
             new_parse_i_link(link_node_with_preset, device_table);
-        links_table[link->get_id()] = link;
+        Id link_id = link->get_id();
+        if (!links_table.emplace(link->get_id(), link).second) {
+            throw links_node.create_parsing_error(
+                fmt::format("Two links with same name: {}", link_id));
+        }
     }
     return links_table;
 }
