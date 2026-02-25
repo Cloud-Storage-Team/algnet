@@ -1,0 +1,29 @@
+#pragma once
+
+#include <memory>
+#include <vector>
+
+#include "network/network.hpp"
+#include "new_action/i_new_action.hpp"
+#include "utils/actions_summary.hpp"
+
+namespace sim {
+
+using Actions = std::vector<std::shared_ptr<INewAction>>;
+
+struct Summary {
+    SendDataActionsSummary send_data;
+};
+
+class NewScenario {
+public:
+    NewScenario(Actions a_actions, Network a_network);
+
+    Summary simulate();
+
+private:
+    Actions m_actions;
+    Network m_network;
+};
+
+}  // namespace sim
