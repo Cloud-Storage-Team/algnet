@@ -92,7 +92,8 @@ MetricsTable SingleCCMplb::get_metrics_table() const {
     return MetricsTable{{MplbMetricMetadatas::FAIRNESS, m_fairness_storage}};
 }
 
-void SingleCCMplb::write_metrics(std::filesystem::path output_dir_path) const {
+void SingleCCMplb::write_inner_metrics(
+    std::filesystem::path output_dir_path) const {
     collect_and_save_all_metrics(m_path_chooser->get_flows_table(),
                                  output_dir_path / "flows");
 }

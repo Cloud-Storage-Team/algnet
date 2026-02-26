@@ -35,8 +35,9 @@ ConnectionContext NewConnection::get_context() const { return m_context; }
 
 MetricsTable NewConnection::get_metrics_table() const { return {}; }
 
-void NewConnection::write_metrics(std::filesystem::path output_dir) const {
-    m_mplb->write_metrics(output_dir / "mplb");
+void NewConnection::write_inner_metrics(
+    std::filesystem::path output_dir) const {
+    m_mplb->write_all_metrics(output_dir / "mplb");
 }
 
 Id NewConnection::get_id() const { return m_id; }

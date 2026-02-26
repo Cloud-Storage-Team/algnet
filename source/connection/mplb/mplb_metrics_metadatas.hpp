@@ -4,6 +4,6 @@
 namespace sim {
 
 struct MplbMetricMetadatas {
-    static constexpr MetricId FAIRNESS = {"Fairness", ""};
+    static constexpr MetricId FAIRNESS = {"Fairness", "Fairness"};
 };
 }  // namespace sim

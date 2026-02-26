@@ -1,6 +1,7 @@
 #pragma once
 #include <spdlog/fmt/fmt.h>
 
+#include <filesystem>
 #include <functional>
 #include <memory>
 #include <string>
@@ -32,7 +33,14 @@ struct hash<sim::MetricId> {
 
 namespace sim {
 
-using MetricsTable =
-    std::unordered_map<MetricId, std::shared_ptr<const MetricsStorage>>;
+class MetricsTable
+    : public std::unordered_map<MetricId,
+                                std::shared_ptr<const MetricsStorage>> {
+public:
+    using std::unordered_map<
+        MetricId, std::shared_ptr<const MetricsStorage>>::unordered_map;
+
+    void draw_pictures(std::filesystem::path output_dir) const;
+};
 
 }  // namespace sim

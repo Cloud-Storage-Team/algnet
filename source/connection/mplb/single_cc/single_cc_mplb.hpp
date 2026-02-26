@@ -25,7 +25,8 @@ public:
     virtual MetricsTable get_metrics_table() const final;
 
     // Put metrics of all inner objects to given directory
-    virtual void write_metrics(std::filesystem::path output_dir) const final;
+    virtual void write_inner_metrics(
+        std::filesystem::path output_dir) const final;
 
 private:
     SingleCCMplb(std::unique_ptr<ITcpCC> a_cc,

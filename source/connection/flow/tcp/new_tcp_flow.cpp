@@ -40,8 +40,10 @@ MetricsTable NewTcpFlow::get_metrics_table() const {
         {FlowMetricMetadatas::PACKET_REORDERING, m_metrics.packet_reordering}};
 }
 
-void NewTcpFlow::write_metrics(
-    [[maybe_unused]] std::filesystem::path output_dir) const {};
+void NewTcpFlow::write_inner_metrics(
+    [[maybe_unused]] std::filesystem::path output_dir) const {
+    // get_metrics_table().draw_pictures(output_dir);
+};
 
 NewTcpFlow::NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
                        std::shared_ptr<IHost> a_receiver, bool a_ecn_capable,
