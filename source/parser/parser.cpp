@@ -8,7 +8,6 @@
 #include "parser/topology/host/host_parser.hpp"
 #include "parser/topology/link/link_parser.hpp"
 #include "parser/topology/switch/switch_parser.hpp"
-#include "preset_storage.hpp"
 
 namespace sim {
 
@@ -43,8 +42,8 @@ Simulator YamlParser::build_simulator_from_config(
 
     parse_if_present(topology_config["hosts"],
                      [this, &hosts_presets_node](ConfigNode node) {
-                        process_hosts(node, hosts_presets_node);
-                    });
+                         process_hosts(node, hosts_presets_node);
+                     });
 
     const ConfigNode packet_spraying_node =
         topology_config["packet-spraying"].value_or_throw();
@@ -56,10 +55,11 @@ Simulator YamlParser::build_simulator_from_config(
         }
     }
 
-    parse_if_present(topology_config["switches"],
-                     [this, &switches_presets_node, &packet_spraying_node](ConfigNode node) {
-                         process_switches(node, switches_presets_node, packet_spraying_node);
-                     });
+    parse_if_present(
+        topology_config["switches"],
+        [this, &switches_presets_node, &packet_spraying_node](ConfigNode node) {
+            process_switches(node, switches_presets_node, packet_spraying_node);
+        });
 
     std::optional<ConfigNode> links_presets_node = std::nullopt;
     if (topology_presets_node.has_value()) {
@@ -82,41 +82,50 @@ Simulator YamlParser::build_simulator_from_config(
     return std::move(m_simulator);
 }
 
-void YamlParser::process_hosts(const ConfigNode &hosts_node, const std::optional<ConfigNode> &hosts_presets_node) {
+void YamlParser::process_hosts(
+    const ConfigNode &hosts_node,
+    const std::optional<ConfigNode> &hosts_presets_node) {
     process_identifiables<IHost>(
         hosts_node,
         [this](std::shared_ptr<IHost> host) {
             return m_simulator.add_host(host);
         },
-        [&hosts_presets_node](const ConfigNode& hosts_node){
-            return HostParser::parse_i_host(ConfigNodeWithPreset(hosts_node, hosts_presets_node));
+        [&hosts_presets_node](const ConfigNode &hosts_node) {
+            return HostParser::parse_i_host(
+                ConfigNodeWithPreset(hosts_node, hosts_presets_node));
         },
         "Can not add host.");
 }
 
-void YamlParser::process_switches(const ConfigNode &switches_node,
-                                const std::optional<ConfigNode> &switches_presets_node,
-                                const ConfigNode &packet_spraying_node) {
+void YamlParser::process_switches(
+    const ConfigNode &switches_node,
+    const std::optional<ConfigNode> &switches_presets_node,
+    const ConfigNode &packet_spraying_node) {
     process_identifiables<ISwitch>(
         switches_node,
         [this](std::shared_ptr<ISwitch> swtch) {
             return m_simulator.add_switch(swtch);
         },
-        [&packet_spraying_node, &switches_presets_node](const ConfigNode &switch_node) {
-            return SwitchParser::parse_i_switch(ConfigNodeWithPreset(switch_node, switches_presets_node), packet_spraying_node);
+        [&packet_spraying_node,
+         &switches_presets_node](const ConfigNode &switch_node) {
+            return SwitchParser::parse_i_switch(
+                ConfigNodeWithPreset(switch_node, switches_presets_node),
+                packet_spraying_node);
         },
         "Can not add switch.");
 }
 
-void YamlParser::process_links(const ConfigNode &links_node,
-                               const std::optional<ConfigNode> &link_presets_node) {
+void YamlParser::process_links(
+    const ConfigNode &links_node,
+    const std::optional<ConfigNode> &link_presets_node) {
     process_identifiables<ILink>(
         links_node,
         [this](std::shared_ptr<ILink> link) {
             return m_simulator.add_link(link);
         },
         [&link_presets_node](const ConfigNode &link_node) {
-            return LinkParser::parse_i_link(ConfigNodeWithPreset(link_node, link_presets_node));
+            return LinkParser::parse_i_link(
+                ConfigNodeWithPreset(link_node, link_presets_node));
         },
         "Can not add link.");
 }

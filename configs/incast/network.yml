@@ -1,0 +1,39 @@
+topology_config_path: topology.yml
+
+presets:
+  connection:
+    default:
+      type: mplb-connection
+      mplb:
+        type: single-cc
+        packet-size: 1500B
+        cc:
+          type: tahoe
+        path-chooser:
+          type: round-robin
+          flows:
+            flow:
+              type: tcp
+
+connections:
+  connection-1:
+    preset-name: default
+    sender_id: sender-1
+    receiver_id: receiver
+  connection-2:
+    preset-name: default
+    sender_id: sender-2
+    receiver_id: receiver
+  connection-3:
+    preset-name: default
+    sender_id: sender-3
+    receiver_id: receiver
+  connection-4:
+    preset-name: default
+    sender_id: sender-4
+    receiver_id: receiver
+  connection-5:
+    preset-name: default
+    sender_id: sender-5
+    receiver_id: receiver
+

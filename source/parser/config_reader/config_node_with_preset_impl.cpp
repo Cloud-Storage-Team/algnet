@@ -1,4 +1,4 @@
-#include "./config_node_with_preset.hpp"
+#include "config_node_with_preset.hpp"
 
 namespace sim {
 
@@ -78,6 +78,10 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](
                                 std::nullopt);
 }
 
+std::ostream& operator<<(std::ostream& out, const ConfigNodeWithPreset& node){
+    return out << node.get_node();
+}
+
 const std::string& ConfigNodeWithPreset::get_name_or_throw() const {
     return m_node.get_name_or_throw();
 }
@@ -89,6 +93,10 @@ std::runtime_error ConfigNodeWithPreset::create_parsing_error(
 
 const ConfigNode& ConfigNodeWithPreset::get_node() const noexcept {
     return m_node;
+}
+
+[[nodiscard]] const std::optional<std::string>& ConfigNodeWithPreset::get_name() const{
+    return m_node.get_name();
 }
 
 const std::optional<ConfigNode> ConfigNodeWithPreset::get_presets_node()

@@ -1,10 +1,12 @@
 #pragma once
 #include <expected>
 #include <functional>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <variant>
+#include <optional>
 
 #include "logger/logger.hpp"
 

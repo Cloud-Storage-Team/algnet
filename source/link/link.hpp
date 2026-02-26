@@ -9,26 +9,12 @@
 
 namespace sim {
 
-struct LinkInitArgs {
-    utils::StrExpected<Id> id = std::unexpected("Missing id");
-    utils::StrExpected<Id> from_id = std::unexpected("Missing from id");
-    utils::StrExpected<Id> to_id = std::unexpected("Missing to id");
-    utils::StrExpected<SpeedGbps> speed = std::unexpected("Missing speed");
-    utils::StrExpected<TimeNs> delay = std::unexpected("Missing delay");
-    utils::StrExpected<SizeByte> max_from_egress_buffer_size =
-        std::unexpected("Missing max from egress buffer size");
-    utils::StrExpected<SizeByte> max_to_ingress_buffer_size =
-        std::unexpected("Missing max to ingress buffer size");
-    ;
-};
-
 class Link : public ILink, public std::enable_shared_from_this<Link> {
 public:
     Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
          SpeedGbps a_speed = SpeedGbps(1), TimeNs a_delay = TimeNs(0),
          SizeByte a_max_from_egress_buffer_size = SizeByte(4096),
          SizeByte a_max_to_ingress_buffer_size = SizeByte(4096));
-    explicit Link(LinkInitArgs args);
     ~Link() = default;
 
     void schedule_arrival(Packet packet) final;

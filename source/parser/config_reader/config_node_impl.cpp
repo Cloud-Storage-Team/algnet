@@ -47,6 +47,12 @@ std::ostream& operator<<(std::ostream& out, const ConfigNode& node) {
     return out;
 }
 
+std::string ConfigNode::to_string() const {
+    std::stringstream ss;
+    ss << *this;
+    return ss.str();
+}
+
 YAML::NodeType::value ConfigNode::Type() const { return m_node.Type(); }
 
 bool ConfigNode::IsNull() const noexcept { return m_node.IsNull(); }
@@ -116,7 +122,7 @@ ConfigNode::Iterator ConfigNode::begin() const {
 
 ConfigNode::Iterator ConfigNode::end() const { return Iterator(m_node.end()); }
 
-utils::StrExpected<ConfigNode> ConfigNode::operator[](
+ConfigNodeExpected ConfigNode::operator[](
     std::string_view key) const {
     const YAML::Node child_node = m_node[key];
     if (!child_node) {
@@ -127,9 +133,9 @@ utils::StrExpected<ConfigNode> ConfigNode::operator[](
     }
     if (child_node.IsNull()) {
         // if node is null, its name should be empty
-        return ConfigNode(std::move(child_node), std::nullopt);
+        return ConfigNodeExpected(ConfigNode(std::move(child_node), std::nullopt));
     }
-    return ConfigNode(std::move(child_node), std::string(key));
+    return ConfigNodeExpected(ConfigNode(std::move(child_node), std::string(key)));
 };
 
 ConfigNode load_file(std::filesystem::path path) {

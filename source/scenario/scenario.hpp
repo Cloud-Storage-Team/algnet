@@ -12,9 +12,6 @@ class Scenario {
 public:
     Scenario();
 
-    Scenario(const Scenario&) = delete;
-    Scenario& operator=(const Scenario&) = delete;
-
     Scenario(Scenario&&) noexcept = default;
     Scenario& operator=(Scenario&&) noexcept = default;
 
@@ -22,7 +19,7 @@ public:
     void add_action(std::shared_ptr<IAction> action);
 
     // Run all actions (schedule them in the simulator)
-    void start();
+    void schedule() const;
 
     std::shared_ptr<SendDataActionsSummary> get_summary() const;
 

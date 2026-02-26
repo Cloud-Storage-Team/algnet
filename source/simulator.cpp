@@ -81,7 +81,7 @@ void Simulator::start() {
         Scheduler::get_instance().add<Stop>(m_stop_time.value());
     }
 
-    m_scenario.start();
+    m_scenario.schedule();
 
     while (Scheduler::get_instance().tick()) {
     }

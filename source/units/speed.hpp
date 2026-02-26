@@ -1,6 +1,7 @@
 #pragma once
+
 #include "size.hpp"
-#include "speed.hpp"
+#include "time.hpp"
 
 template <IsSizeBase TSizeBase, IsTimeBase TTimeBase>
 class Speed {
@@ -70,6 +71,20 @@ public:
     constexpr bool operator!=(ThisSpeed speed) const {
         return !(*this == speed);
     }
+
+    // Outputs the Speed with the specified precision and with suffix.
+    // For example: 3.35 Mb/ms
+    std::string constexpr to_string(int precision = 2) const{
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(precision) << value() << TSizeBase::suffix << m_separator << TTimeBase::suffix;
+        return ss.str();
+    }
+
+    static constexpr std::string get_suffix() {
+        return std::string(TSizeBase::suffix) + std::string(m_separator) + std::string(TTimeBase::suffix);
+    }
+
+    static constexpr std::string_view m_separator = "p";
 
 private:
     double m_value_bit_per_ns;  // value in bit per nanosecond
