@@ -1,5 +1,5 @@
 #include "action/new_action_parser.hpp"
-#include "new_scernario_parser.hpp"
+#include "new_scenario_parser.hpp"
 #include "parser/config_reader/config_node.hpp"
 #include "parser/network_parser.hpp"
 #include "parser/relative_path_parser.hpp"

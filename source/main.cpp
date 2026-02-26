@@ -18,7 +18,7 @@ int main(const int argc, char** argv) {
         cxxopts::value<bool>()->default_value("false"))(
         "no-plots", "Disables plots generation",
         cxxopts::value<bool>()->default_value("false"))(
-        "metrics-filter", "Fiter for collecting metrics pathes",
+        "metrics-filter", "Filter for collecting metrics pathes",
         cxxopts::value<std::string>()->default_value(".*"))(
         "use-new-simulator", "Use new acritecture or old one",
         cxxopts::value<bool>()->default_value("false"))("h,help",
