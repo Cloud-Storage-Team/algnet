@@ -27,7 +27,7 @@ TEST_P(RoundRobinPathChooserParamTest, ChoosesFlowsAlmostUniformly) {
         auto flow =
             std::make_shared<NiceMock<NewFlowGMock>>(fmt::format("Flow_{}", i));
         std::shared_ptr<sim::INewFlow> as_base = flow;
-        flows.insert(as_base);
+        ASSERT_TRUE(flows.emplace(flow->name, as_base).second);
         concrete_flows.emplace_back(flow);
     }
 

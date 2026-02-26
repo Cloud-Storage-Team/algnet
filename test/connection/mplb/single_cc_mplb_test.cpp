@@ -11,8 +11,8 @@ namespace test {
 class SingleCCMplbTest : public ::testing::Test {};
 
 TEST_F(SingleCCMplbTest, SimpleSend) {
-    std::set<std::shared_ptr<sim::INewFlow> > pathes = {
-        std::make_shared<NewFlowMock>()};
+    std::shared_ptr<sim::INewFlow> flow_mock = std::make_shared<NewFlowMock>();
+    utils::IdTable<sim::INewFlow> pathes = {{"", flow_mock}};
 
     std::unique_ptr<sim::IPathChooser> path_chooser =
         std::make_unique<PathChooserMock>(pathes);
@@ -50,8 +50,8 @@ TEST_F(SingleCCMplbTest, SimpleSend) {
 }
 
 TEST_F(SingleCCMplbTest, IncorrectSend) {
-    std::set<std::shared_ptr<sim::INewFlow> > pathes = {
-        std::make_shared<NewFlowMock>()};
+    sim::IPathChooser::FlowsSet pathes = {
+        {"", std::make_shared<NewFlowMock>()}};
 
     std::unique_ptr<sim::IPathChooser> path_chooser =
         std::make_unique<PathChooserMock>(pathes);

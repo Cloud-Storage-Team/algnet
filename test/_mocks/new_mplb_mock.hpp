@@ -22,7 +22,7 @@ public:
     }
 
     sim::MPLBContext get_context() const final {
-        return sim::MPLBContext{m_flows, SizeByte(0), SizeByte(0), m_quota};
+        return sim::MPLBContext{SizeByte(0), SizeByte(0), m_quota};
     }
 
     void send_all_data() {

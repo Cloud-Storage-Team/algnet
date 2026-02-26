@@ -15,6 +15,8 @@ private:
     using TPtr = std::shared_ptr<T>;
 
 public:
+    using std::unordered_map<Id, std::shared_ptr<T> >::unordered_map;
+
     std::optional<TPtr> get(const Id& id) const noexcept {
         auto it = this->find(id);
         if (it == this->end()) {

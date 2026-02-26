@@ -10,7 +10,9 @@ std::shared_ptr<INewFlow> RoundRobinPathChooser::choose_flow() {
     if (m_flows.empty()) {
         throw std::runtime_error("Could not choose flow: flows set is empty");
     }
-    return *m_next_flow++;
+    std::shared_ptr<INewFlow> result = (*m_next_flow).second;
+    m_next_flow++;
+    return result;
 }
 
 const IPathChooser::FlowsSet& RoundRobinPathChooser::get_flows() const {

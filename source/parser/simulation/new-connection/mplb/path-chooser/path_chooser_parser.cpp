@@ -27,7 +27,11 @@ std::unique_ptr<RoundRobinPathChooser> parse_round_robin_path_chooser(
         ConfigNodeWithPreset flow_node(node, flows_node.get_presets_node());
 
         std::shared_ptr<INewFlow> flow = parse_i_flow(flow_node, endpoints);
-        flows.emplace(flow);
+        Id flow_id = flow->get_id();
+        if (!flows.emplace(flow_id, flow).second) {
+            throw flows_node.create_parsing_error(
+                fmt::format("Two flows with same name: {}", flow_id));
+        }
     }
 
     return std::make_unique<RoundRobinPathChooser>(std::move(flows));

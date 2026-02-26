@@ -91,8 +91,7 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
 }
 
 MPLBContext SingleCCMplb::get_context() const {
-    return MPLBContext{m_path_chooser->get_flows(), m_sent_data_size,
-                       m_delivered_data_size, get_quota()};
+    return MPLBContext{m_sent_data_size, m_delivered_data_size, get_quota()};
 }
 
 SizeByte SingleCCMplb::get_quota() const {
