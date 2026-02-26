@@ -22,8 +22,7 @@ public:
 
     virtual MetricsTable get_metrics_table() const final;
 
-    virtual void write_inner_metrics(
-        std::filesystem::path output_dir) const final;
+    virtual void write_metrics(std::filesystem::path output_dir) const final;
 
     Id get_id() const final;
 

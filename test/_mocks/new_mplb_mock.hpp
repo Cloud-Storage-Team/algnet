@@ -34,7 +34,7 @@ public:
 
     sim::MetricsTable get_metrics_table() const final { return {}; }
 
-    void write_inner_metrics(
+    void write_metrics(
         [[maybe_unused]] std::filesystem::path path) const final {}
 
 private:

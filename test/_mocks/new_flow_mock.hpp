@@ -37,7 +37,7 @@ public:
     }
 
     // Put metrics of all inner objects to given directory
-    virtual void write_inner_metrics(
+    virtual void write_metrics(
         [[maybe_unused]] std::filesystem::path output_dir) const final {}
 
 private:

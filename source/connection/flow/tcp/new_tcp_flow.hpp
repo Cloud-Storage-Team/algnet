@@ -23,8 +23,7 @@ public:
 
     virtual MetricsTable get_metrics_table() const final;
 
-    virtual void write_inner_metrics(
-        std::filesystem::path output_dir) const final;
+    virtual void write_metrics(std::filesystem::path output_dir) const final;
 
 private:
     NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,

@@ -33,7 +33,7 @@ void collect_and_save_all_metrics(const utils::IdTable<T>& id_table,
     for (const auto& [id, object] : id_table) {
         std::filesystem::path flow_path = output_dir / id;
 
-        object->write_inner_metrics(std::move(flow_path));
+        object->write_metrics(std::move(flow_path));
     }
 }
 
