@@ -41,9 +41,7 @@ MetricsTable NewTcpFlow::get_metrics_table() const {
 }
 
 void NewTcpFlow::write_inner_metrics(
-    [[maybe_unused]] std::filesystem::path output_dir) const {
-
-};
+    [[maybe_unused]] std::filesystem::path output_dir) const {};
 
 NewTcpFlow::NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
                        std::shared_ptr<IHost> a_receiver, bool a_ecn_capable,

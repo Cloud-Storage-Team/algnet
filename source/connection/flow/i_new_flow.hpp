@@ -1,19 +1,14 @@
 #pragma once
 
 #include "device/interfaces/i_host.hpp"
+#include "endpoints.hpp"
 #include "metrics/metrics_storage.hpp"
 #include "metrics/metrics_table/i_metricable.hpp"
-#include "packet.hpp"
 #include "packet_ack_info.hpp"
 #include "packet_info.hpp"
 #include "utils/statistics.hpp"
 
 namespace sim {
-
-struct Endpoints {
-    std::shared_ptr<IHost> sender;
-    std::shared_ptr<IHost> receiver;
-};
 
 struct FlowContext : public Endpoints {
     SizeByte sent_size;

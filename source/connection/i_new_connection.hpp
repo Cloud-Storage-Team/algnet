@@ -5,6 +5,7 @@
 #include "data.hpp"
 #include "mplb/i_new_mplb.hpp"
 #include "types.hpp"
+#include "utils/identifier_factory.hpp"
 
 namespace sim {
 

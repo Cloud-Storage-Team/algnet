@@ -33,7 +33,6 @@ public:
     }
 
 private:
-    std::set<std::shared_ptr<sim::INewFlow> > m_flows;
     SizeByte m_quota;
     std::vector<OnDeliveryCallback> m_callbacks;
     bool m_send_immediately;
