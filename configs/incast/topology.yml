@@ -1,0 +1,74 @@
+presets:
+  link:
+    default:
+      latency: 0ns
+      throughput: 100Gbps
+      ingress_buffer_size: 1024000B
+      egress_buffer_size: 1024000B
+packet-spraying:
+  type: ecmp
+
+hosts:
+  sender-1:
+  sender-2:
+  sender-3:
+  sender-4:
+  sender-5:
+  receiver:
+
+switches:
+  switch:
+    ecn:
+      min: 0.1
+      max: 0.3
+      probability: 0.5
+
+links:
+  link0:
+    from: sender-1
+    to: switch
+    preset-name: default
+  link1:
+    from: switch
+    to: sender-1
+    preset-name: default
+  link2:
+    from: sender-2
+    to: switch
+    preset-name: default
+  link3:
+    from: switch
+    to: sender-2
+    preset-name: default
+  link4:
+    from: sender-3
+    to: switch
+    preset-name: default
+  link5:
+    from: switch
+    to: sender-3
+    preset-name: default
+  link6:
+    from: sender-4
+    to: switch
+    preset-name: default
+  link7:
+    from: switch
+    to: sender-4
+    preset-name: default
+  link8:
+    from: sender-5
+    to: switch
+    preset-name: default
+  link9:
+    from: switch
+    to: sender-5
+    preset-name: default
+  link10:
+    from: switch
+    to: receiver
+    preset-name: default
+  link11:
+    from: receiver
+    to: switch
+    preset-name: default

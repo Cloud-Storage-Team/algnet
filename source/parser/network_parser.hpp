@@ -1,7 +1,7 @@
 #pragma once
 #include <filesystem>
 
-#include "simulator/network/network.hpp"
+#include "new_scenario/network/network.hpp"
 
 namespace sim {
 
