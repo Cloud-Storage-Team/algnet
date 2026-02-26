@@ -47,10 +47,7 @@ NewTcpFlow::NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
                        std::shared_ptr<IHost> a_receiver, bool a_ecn_capable,
                        RTO a_rto)
     : m_id(std::move(a_id)),
-      m_context({Endpoints{a_sender, a_receiver}, SizeByte(0), SizeByte(0),
-                 SizeByte(0),
-
-                 std::nullopt, std::nullopt, utils::Statistics<TimeNs>()}),
+      m_context(a_sender, a_receiver),
       m_ecn_capable(a_ecn_capable),
       m_rto(std::move(a_rto)),
       m_metrics({std::make_shared<MetricsStorage>(),
@@ -172,6 +169,7 @@ void NewTcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
         (now - ack.generated_time);
 
     m_metrics.delivery_rate->add_record(now, delivery_rate.value());
+    m_context.delivery_rate_statistics.add_record(delivery_rate);
 
     callback({PacketAckInfo{rtt, m_context.rtt_statistics.get_mean().value(),
                             ack.congestion_experienced}});

@@ -25,6 +25,8 @@ public:
                TTimeBase::to_nanoseconds_multiplier;
     }
 
+    explicit constexpr operator double() const { return value(); }
+
     constexpr double value_bit_per_ns() const { return m_value_bit_per_ns; }
 
     constexpr ThisSpeed operator+(ThisSpeed speed) const {
@@ -74,14 +76,16 @@ public:
 
     // Outputs the Speed with the specified precision and with suffix.
     // For example: 3.35 Mb/ms
-    std::string constexpr to_string(int precision = 2) const{
+    std::string constexpr to_string(int precision = 2) const {
         std::stringstream ss;
-        ss << std::fixed << std::setprecision(precision) << value() << TSizeBase::suffix << m_separator << TTimeBase::suffix;
+        ss << std::fixed << std::setprecision(precision) << value()
+           << TSizeBase::suffix << m_separator << TTimeBase::suffix;
         return ss.str();
     }
 
     static constexpr std::string get_suffix() {
-        return std::string(TSizeBase::suffix) + std::string(m_separator) + std::string(TTimeBase::suffix);
+        return std::string(TSizeBase::suffix) + std::string(m_separator) +
+               std::string(TTimeBase::suffix);
     }
 
     static constexpr std::string_view m_separator = "p";

@@ -11,13 +11,15 @@
 namespace sim {
 
 struct FlowContext : public Endpoints {
-    SizeByte sent_size;
-    SizeByte delivered_size;
-    SizeByte retransmit_size;
+    using Endpoints::Endpoints;
+    SizeByte sent_size = SizeByte(0);
+    SizeByte delivered_size = SizeByte(0);
+    SizeByte retransmit_size = SizeByte(0);
 
-    std::optional<TimeNs> start_time;
-    std::optional<TimeNs> last_ack_receive_time;
+    std::optional<TimeNs> start_time = std::nullopt;
+    std::optional<TimeNs> last_ack_receive_time = std::nullopt;
     utils::Statistics<TimeNs> rtt_statistics;
+    utils::Statistics<SpeedGbps> delivery_rate_statistics;
 };
 
 // Transport layer interface for reliable data delivery along single physical
