@@ -14,8 +14,7 @@ public:
                     SizeByte(0),
                     std::nullopt,
                     std::nullopt,
-                    utils::Statistics<TimeNs>(),
-                    sim::FlowContext::Metrics()} {}
+                    utils::Statistics<TimeNs>()} {}
 
     Id get_id() const final { return ""; }
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "../i_new_flow.hpp"
+#include "metrics/metrics_table/i_metricable.hpp"
 #include "metrics/packet_reordering/simple_packet_reordering.hpp"
 #include "rto.hpp"
 #include "utils/packet_num_monitor.hpp"
@@ -7,6 +8,7 @@
 namespace sim {
 
 class NewTcpFlow : public INewFlow,
+                   public IMetricable,
                    public std::enable_shared_from_this<NewTcpFlow> {
 public:
     static std::shared_ptr<NewTcpFlow> create_shared(
@@ -19,6 +21,10 @@ public:
     virtual const FlowContext& get_context() const final;
 
     virtual Id get_id() const final;
+
+    virtual MetricsTable get_metrics_table() const final;
+
+    virtual void write_metrics(std::filesystem::path output_dir) const final;
 
 private:
     NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
@@ -69,6 +75,12 @@ private:
 
     // RTO parameters
     RTO m_rto;
+
+    struct Mertics {
+        MetricsStorage rtt;
+        MetricsStorage delivery_rate;
+        MetricsStorage packet_reordering;
+    } m_metrics;
 };
 
 }  // namespace sim

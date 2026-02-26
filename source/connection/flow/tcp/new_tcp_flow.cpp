@@ -1,5 +1,6 @@
 #include "new_tcp_flow.hpp"
 
+#include "flow_metrics_metadatas.hpp"
 #include "scheduler.hpp"
 #include "utils/avg_rtt_packet_flag.hpp"
 
@@ -32,6 +33,18 @@ const FlowContext& NewTcpFlow::get_context() const { return m_context; };
 
 Id NewTcpFlow::get_id() const { return m_id; }
 
+MetricsTable NewTcpFlow::get_metrics_table() const {
+    return MetricsTable{
+        {FlowMetricMetadatas::RTT, m_metrics.rtt},
+        {FlowMetricMetadatas::DELIVERY_RATE, m_metrics.delivery_rate},
+        {FlowMetricMetadatas::PACKET_REORDERING, m_metrics.packet_reordering}};
+}
+
+void NewTcpFlow::write_metrics(
+    [[maybe_unused]] std::filesystem::path output_dir) const {
+
+};
+
 NewTcpFlow::NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
                        std::shared_ptr<IHost> a_receiver, bool a_ecn_capable,
                        RTO a_rto)
@@ -39,8 +52,7 @@ NewTcpFlow::NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
       m_context({Endpoints{a_sender, a_receiver}, SizeByte(0), SizeByte(0),
                  SizeByte(0),
 
-                 std::nullopt, std::nullopt, utils::Statistics<TimeNs>(),
-                 FlowContext::Metrics()}),
+                 std::nullopt, std::nullopt, utils::Statistics<TimeNs>()}),
       m_ecn_capable(a_ecn_capable),
       m_rto(std::move(a_rto)) {
     if (!m_flag_manager.register_flag_by_amount(m_packet_type_label,
@@ -109,7 +121,7 @@ void NewTcpFlow::send_data_packet(Packet data) {
 void NewTcpFlow::process_data_packet(const Packet& data,
                                      PacketCallback callback) {
     m_packet_reordering.add_record(data.packet_num);
-    m_context.metrics.packet_reordering.add_record(
+    m_metrics.packet_reordering.add_record(
         Scheduler::get_instance().get_current_time(),
         m_packet_reordering.value());
     Packet ack = data;
@@ -141,7 +153,7 @@ void NewTcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
     TimeNs rtt = now - ack.sent_time;
     m_context.rtt_statistics.add_record(rtt);
 
-    m_context.metrics.rtt.add_record(now, rtt.value());
+    m_metrics.rtt.add_record(now, rtt.value());
 
     update_rto_on_ack();
 
@@ -158,7 +170,7 @@ void NewTcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
         (m_context.delivered_size - ack.delivered_data_size_at_origin) /
         (now - ack.generated_time);
 
-    m_context.metrics.delivery_rate.add_record(now, delivery_rate.value());
+    m_metrics.delivery_rate.add_record(now, delivery_rate.value());
 
     callback({PacketAckInfo{rtt, m_context.rtt_statistics.get_mean().value(),
                             ack.congestion_experienced}});

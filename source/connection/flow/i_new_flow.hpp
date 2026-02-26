@@ -22,12 +22,6 @@ struct FlowContext : public Endpoints {
     std::optional<TimeNs> start_time;
     std::optional<TimeNs> last_ack_receive_time;
     utils::Statistics<TimeNs> rtt_statistics;
-
-    struct Metrics {
-        MetricsStorage rtt;
-        MetricsStorage delivery_rate;
-        MetricsStorage packet_reordering;
-    } metrics;
 };
 
 // Transport layer interface for reliable data delivery along single physical
