@@ -44,7 +44,7 @@ int main(const int argc, char** argv) {
 
     if (flags["use-new-simulator"].as<bool>()) {
         sim::NewScenario scenario = sim::parse_scenario(config_path);
-        const sim::NewSummary& summary = scenario.simulate();
+        sim::NewSummary summary = scenario.simulate();
 
         sim::write_to_csv(actions_summary_path, summary.send_data);
         return 0;
