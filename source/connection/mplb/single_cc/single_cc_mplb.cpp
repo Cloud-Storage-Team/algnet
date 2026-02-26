@@ -95,17 +95,8 @@ MetricsTable SingleCCMplb::get_metrics_table() const { return {}; }
 
 void SingleCCMplb::write_inner_metrics(
     std::filesystem::path output_dir_path) const {
-    const IPathChooser::FlowsTable& flows_table =
-        m_path_chooser->get_flows_table();
-    MetricsMultiIdTable table = collect_and_combine_metrics(flows_table);
-
-    std::filesystem::path flows_dir = output_dir_path / "flows";
-    table.draw_plots(flows_dir);
-    for (const auto& [flow_id, flow] : flows_table) {
-        std::filesystem::path flow_path = flows_dir / flow_id;
-
-        flow->write_inner_metrics(flow_path);
-    }
+    collect_and_save_all_metrics(m_path_chooser->get_flows_table(),
+                                 output_dir_path / "flows");
 }
 
 MPLBContext SingleCCMplb::get_context() const {

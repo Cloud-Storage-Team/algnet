@@ -23,4 +23,18 @@ MetricsMultiIdTable collect_and_combine_metrics(
     return result;
 }
 
+template <IdentifiableAndMetricable T>
+void collect_and_save_all_metrics(const utils::IdTable<T>& id_table,
+                                  std::filesystem::path output_dir) {
+    MetricsMultiIdTable metrics_multi_id_table =
+        collect_and_combine_metrics(id_table);
+
+    metrics_multi_id_table.draw_plots(output_dir);
+    for (const auto& [id, object] : id_table) {
+        std::filesystem::path flow_path = output_dir / id;
+
+        object->write_inner_metrics(std::move(flow_path));
+    }
+}
+
 }  // namespace sim
