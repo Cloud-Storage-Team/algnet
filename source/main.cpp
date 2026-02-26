@@ -2,7 +2,7 @@
 
 #include "logger/logger.hpp"
 #include "metrics/metrics_collector.hpp"
-#include "parser/new_scenario/new_scernario_parser.hpp"
+#include "parser/new_scenario/new_scenario_parser.hpp"
 #include "parser/parser.hpp"
 #include "utils/statistics.hpp"
 #include "utils/summary.hpp"

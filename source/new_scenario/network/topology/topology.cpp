@@ -12,7 +12,7 @@ Topology::Topology(TopologyContext a_ctx) : m_ctx(std::move(a_ctx)) {
 
 const TopologyContext& Topology::get_context() const { return m_ctx; }
 
-void Topology::recalculate_pathes() const {
+void Topology::recalculate_paths() const {
     auto process_device = [](std::shared_ptr<IRoutingDevice> src_device) {
         RoutingTable routing_table = bfs(src_device);
         for (const auto& [dest_device_id, links] : routing_table) {
