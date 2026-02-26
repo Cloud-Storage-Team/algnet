@@ -32,6 +32,11 @@ public:
         m_callbacks.clear();
     }
 
+    sim::MetricsTable get_metrics_table() const final { return {}; }
+
+    void write_inner_metrics(
+        [[maybe_unused]] std::filesystem::path path) const final {}
+
 private:
     SizeByte m_quota;
     std::vector<OnDeliveryCallback> m_callbacks;

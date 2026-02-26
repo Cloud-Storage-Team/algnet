@@ -20,6 +20,12 @@ public:
 
     virtual MPLBContext get_context() const final;
 
+    virtual MetricsTable get_metrics_table() const final;
+
+    // Put metrics of all inner objects to given directory
+    virtual void write_inner_metrics(
+        std::filesystem::path output_dir) const final;
+
 private:
     SingleCCMplb(std::unique_ptr<ITcpCC> a_cc,
                  std::unique_ptr<IPathChooser> a_path_chooser,

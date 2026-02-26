@@ -1,6 +1,10 @@
 #pragma once
-#include <map>
+#include <spdlog/fmt/fmt.h>
+
+#include <functional>
+#include <memory>
 #include <string>
+#include <unordered_map>
 
 #include "metrics/metrics_storage.hpp"
 
@@ -13,6 +17,22 @@ struct MetricId {
     auto operator<=>(const MetricId&) const = default;
 };
 
-using MetricsTable = std::map<MetricId, const MetricsStorage&>;
+}  // namespace sim
+
+namespace std {
+template <>
+struct hash<sim::MetricId> {
+    std::size_t operator()(const sim::MetricId& metric_id) const noexcept {
+        return std::hash<std::string>()(metric_id.name) ^
+               std::hash<std::string>()(metric_id.unit_name);
+    }
+};
+
+}  // namespace std
+
+namespace sim {
+
+using MetricsTable =
+    std::unordered_map<MetricId, std::shared_ptr<const MetricsStorage>>;
 
 }  // namespace sim

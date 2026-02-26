@@ -4,6 +4,7 @@
 
 #include "event/call_at_time.hpp"
 #include "event/send_data.hpp"
+#include "metrics/metrics_table/combine_metrics_tables.hpp"
 #include "scheduler.hpp"
 #include "utils/callback_observer.hpp"
 
@@ -88,6 +89,14 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
     }
 
     return {};
+}
+
+MetricsTable SingleCCMplb::get_metrics_table() const { return {}; }
+
+void SingleCCMplb::write_inner_metrics(
+    [[maybe_unused]] std::filesystem::path output_dir_path) const {
+    MetricsMultiIdTable table =
+        collect_and_combine_metrics(m_path_chooser->get_flows_table());
 }
 
 MPLBContext SingleCCMplb::get_context() const {

@@ -77,9 +77,9 @@ private:
     RTO m_rto;
 
     struct Mertics {
-        MetricsStorage rtt;
-        MetricsStorage delivery_rate;
-        MetricsStorage packet_reordering;
+        std::shared_ptr<MetricsStorage> rtt;
+        std::shared_ptr<MetricsStorage> delivery_rate;
+        std::shared_ptr<MetricsStorage> packet_reordering;
     } m_metrics;
 };
 

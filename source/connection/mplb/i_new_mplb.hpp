@@ -4,6 +4,7 @@
 #include <utility>
 
 #include "data.hpp"
+#include "metrics/metrics_table/i_metricable.hpp"
 #include "utils/str_expected.hpp"
 
 namespace sim {
@@ -17,7 +18,7 @@ struct MPLBContext {
 // Multipath module - transport layer interface of reliable data delivery along
 // multiple physical paths.
 // Owns multiple flows; balances the load between them
-class INewMPLB {
+class INewMPLB : public virtual IMetricable {
 public:
     // Forward data to transport layer
     // Returns error given data might not be sent (e.g. its size greater than
