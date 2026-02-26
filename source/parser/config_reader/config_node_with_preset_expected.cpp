@@ -17,7 +17,7 @@ ConfigNodeWithPresetExpected::get_name() const {
         return utils::StrExpected<std::string>(opt_name.value());
     } else {
         std::stringstream ss;
-        ss << "Node" << node << " doesn't have name";
+        ss << "Node " << node << " doesn't have name";
         return std::unexpected(ss.str());
     }
 }
