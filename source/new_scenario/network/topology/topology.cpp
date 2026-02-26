@@ -3,7 +3,12 @@
 #include "utils/algorithms.hpp"
 
 namespace sim {
-Topology::Topology(TopologyContext a_ctx) : m_ctx(std::move(a_ctx)) {}
+Topology::Topology(TopologyContext a_ctx) : m_ctx(std::move(a_ctx)) {
+    for (const auto& [id, link] : m_ctx.links_table) {
+        link->get_from()->add_outlink(link);
+        link->get_to()->add_inlink(link);
+    }
+}
 
 const TopologyContext& Topology::get_context() const { return m_ctx; }
 

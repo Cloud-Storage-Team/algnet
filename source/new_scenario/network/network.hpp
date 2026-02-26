@@ -10,9 +10,12 @@ struct NetworkContext {
     utils::IdTable<INewConnection> connections_table;
 };
 
+// Tetwork itself: topolog & connections
 class Network {
 public:
     explicit Network(NetworkContext a_ctx);
+
+    void recalculate_pathes();
 
     const NetworkContext& get_context() const;
 
