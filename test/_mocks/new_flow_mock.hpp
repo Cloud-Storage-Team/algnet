@@ -32,6 +32,14 @@ public:
 
     const sim::FlowContext& get_context() const final { return m_context; }
 
+    virtual sim::MetricsTable get_metrics_table() const final {
+        return sim::MetricsTable{};
+    }
+
+    // Put metrics of all inner objects to given directory
+    virtual void write_inner_metrics(
+        [[maybe_unused]] std::filesystem::path output_dir) const final {}
+
 private:
     bool m_send_immediately;
     std::vector<sim::PacketInfo> m_sending_queue;

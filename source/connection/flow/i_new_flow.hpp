@@ -2,6 +2,7 @@
 
 #include "device/interfaces/i_host.hpp"
 #include "metrics/metrics_storage.hpp"
+#include "metrics/metrics_table/i_metricable.hpp"
 #include "packet.hpp"
 #include "packet_ack_info.hpp"
 #include "packet_info.hpp"
@@ -26,7 +27,7 @@ struct FlowContext : public Endpoints {
 
 // Transport layer interface for reliable data delivery along single physical
 // path
-class INewFlow : public virtual Identifiable {
+class INewFlow : public virtual Identifiable, public virtual IMetricable {
 public:
     virtual void send(std::vector<PacketInfo> packets) = 0;
 
