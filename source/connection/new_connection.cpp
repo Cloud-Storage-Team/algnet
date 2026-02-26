@@ -9,7 +9,9 @@ std::shared_ptr<NewConnection> NewConnection::create_shared(
 }
 
 NewConnection::NewConnection(Id a_id, std::shared_ptr<INewMPLB> a_mplb)
-    : m_id(std::move(a_id)), m_context{SizeByte(0), SizeByte(0), a_mplb} {}
+    : m_id(std::move(a_id)),
+      m_context{SizeByte(0), SizeByte(0)},
+      m_mplb(a_mplb) {}
 
 utils::StrExpected<void> NewConnection::send_data(Data data,
                                                   OnDeliveryCallback callback) {
@@ -30,6 +32,13 @@ utils::StrExpected<void> NewConnection::send_data(Data data,
 }
 
 ConnectionContext NewConnection::get_context() const { return m_context; }
+
+MetricsTable NewConnection::get_metrics_table() const { return {}; }
+
+void NewConnection::write_inner_metrics(
+    std::filesystem::path output_dir) const {
+    m_mplb->write_inner_metrics(output_dir / "mplb");
+}
 
 Id NewConnection::get_id() const { return m_id; }
 
@@ -53,7 +62,7 @@ void NewConnection::send_new_portion() {
             continue;
         }
 
-        SizeByte quota = m_context.mplb->get_context().sending_quota;
+        SizeByte quota = m_mplb->get_context().sending_quota;
         if (quota == SizeByte(0)) {
             LOG_INFO(fmt::format(
                 "Sending quota is zero; could not send data with id {}",
@@ -97,7 +106,7 @@ void NewConnection::send_new_portion() {
         };
 
         context.sent += delivery_size;
-        m_context.mplb->send_data(Data(id, delivery_size), callback)
+        m_mplb->send_data(Data(id, delivery_size), callback)
             .log_err_if_not_present(
                 fmt::format("Error on sending data in connection {}", m_id));
     }

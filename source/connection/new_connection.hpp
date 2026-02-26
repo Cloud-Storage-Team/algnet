@@ -5,6 +5,7 @@
 #include <queue>
 
 #include "i_new_connection.hpp"
+#include "mplb/i_new_mplb.hpp"
 
 namespace sim {
 
@@ -18,6 +19,11 @@ public:
         Data data, OnDeliveryCallback callback) final;
 
     ConnectionContext get_context() const final;
+
+    virtual MetricsTable get_metrics_table() const final;
+
+    virtual void write_inner_metrics(
+        std::filesystem::path output_dir) const final;
 
     Id get_id() const final;
 
@@ -36,6 +42,7 @@ private:
 
     Id m_id;
     ConnectionContext m_context;
+    std::shared_ptr<INewMPLB> m_mplb;
     std::map<DataId, DataContext> m_data_context_table;
     std::queue<DataId> m_sending_queue;
 };
