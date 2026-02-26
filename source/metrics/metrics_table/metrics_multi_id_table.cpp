@@ -8,7 +8,7 @@ void MetricsMultiIdTable::draw_plots(std::filesystem::path output_dir) {
     const static std::size_t MAX_LEGENG_SIZE = 5;
     for (const auto& [metric_name, multi_id_storage] : *this) {
         std::filesystem::path metric_output_path =
-            output_dir / fmt::format("{}.cvg", metric_name.name);
+            output_dir / fmt::format("{}.svg", metric_name.name);
 
         auto fig = matplot::figure(true);
         auto ax = fig->current_axes();

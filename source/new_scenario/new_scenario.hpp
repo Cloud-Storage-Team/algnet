@@ -22,6 +22,8 @@ public:
 
     NewSummary simulate();
 
+    const Network& get_network() const;
+
 private:
     Actions m_actions;
     Network m_network;

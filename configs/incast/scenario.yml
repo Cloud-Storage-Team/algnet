@@ -4,7 +4,7 @@ scenario:
 - action: send_data
   id: send-1
   when: 0ns
-  size: 9000B
+  size: 50KB
   repeat_count: 1
   connections: ^connection.*
   repeat_interval: 500000ns

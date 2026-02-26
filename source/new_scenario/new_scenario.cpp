@@ -35,4 +35,6 @@ NewSummary NewScenario::simulate() {
     return summary;
 }
 
+const Network& NewScenario::get_network() const { return m_network; }
+
 }  // namespace sim
