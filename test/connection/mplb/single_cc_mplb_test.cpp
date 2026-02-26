@@ -50,7 +50,7 @@ TEST_F(SingleCCMplbTest, SimpleSend) {
 }
 
 TEST_F(SingleCCMplbTest, IncorrectSend) {
-    sim::IPathChooser::FlowsSet pathes = {
+    sim::IPathChooser::FlowsTable pathes = {
         {"", std::make_shared<NewFlowMock>()}};
 
     std::unique_ptr<sim::IPathChooser> path_chooser =

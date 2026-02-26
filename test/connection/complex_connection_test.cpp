@@ -43,7 +43,7 @@ public:
     std::shared_ptr<sim::SingleCCMplb> mplb = sim::SingleCCMplb::create_shared(
         std::make_unique<sim::TcpTahoeCC>(),
         std::make_unique<sim::RoundRobinPathChooser>(
-            sim::IPathChooser::FlowsSet({{flow->get_id(), flow}})));
+            sim::IPathChooser::FlowsTable({{flow->get_id(), flow}})));
 
     // connection
     std::shared_ptr<sim::NewConnection> connection =
