@@ -1,0 +1,10 @@
+network_config_path: network.yml
+
+scenario:
+- action: send_data
+  id: send-1
+  when: 0ns
+  size: 30KB
+  repeat_count: 1
+  connections: ^conn.*
+  repeat_interval: 500000ns
