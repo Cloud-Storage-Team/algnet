@@ -26,7 +26,8 @@ SingleCCMplb::SingleCCMplb(std::unique_ptr<ITcpCC> a_cc,
       m_delivered_data_size(0),
       m_packets_in_flight(0),
       m_path_chooser(std::move(a_path_chooser)),
-      m_packet_size(a_packet_size) {}
+      m_packet_size(a_packet_size),
+      m_delivery_rate_fairness(m_path_chooser->get_flows_table()) {}
 
 utils::StrExpected<void> SingleCCMplb::send_data(Data data,
                                                  OnDeliveryCallback callback) {
@@ -63,12 +64,11 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
                 flow->get_context().delivery_rate_statistics.get_last();
             Id flow_id = flow->get_id();
             if (opt_delivery_rate.has_value()) {
-                SpeedGbps fairness = mplb->m_delivery_rate_fairness.update(
+                double fairness = mplb->m_delivery_rate_fairness.update(
                     flow_id, opt_delivery_rate.value());
 
                 mplb->m_fairness_storage->add_record(
-                    Scheduler::get_instance().get_current_time(),
-                    fairness.value());
+                    Scheduler::get_instance().get_current_time(), fairness);
             } else {
                 LOG_WARN(
                     fmt::format("Delivery rate statistics of flow {} does not "
