@@ -12,10 +12,10 @@ class SingleCCMplbTest : public ::testing::Test {};
 
 TEST_F(SingleCCMplbTest, SimpleSend) {
     std::shared_ptr<sim::INewFlow> flow_mock = std::make_shared<NewFlowMock>();
-    utils::IdTable<sim::INewFlow> pathes = {{"", flow_mock}};
+    utils::IdTable<sim::INewFlow> paths = {{"", flow_mock}};
 
     std::unique_ptr<sim::IPathChooser> path_chooser =
-        std::make_unique<PathChooserMock>(pathes);
+        std::make_unique<PathChooserMock>(paths);
 
     std::unique_ptr<sim::ITcpCC> cc = std::make_unique<CCMock>(1, TimeNs(0));
 
@@ -50,11 +50,11 @@ TEST_F(SingleCCMplbTest, SimpleSend) {
 }
 
 TEST_F(SingleCCMplbTest, IncorrectSend) {
-    sim::IPathChooser::FlowsTable pathes = {
+    sim::IPathChooser::FlowsTable paths = {
         {"", std::make_shared<NewFlowMock>()}};
 
     std::unique_ptr<sim::IPathChooser> path_chooser =
-        std::make_unique<PathChooserMock>(pathes);
+        std::make_unique<PathChooserMock>(paths);
 
     std::unique_ptr<sim::ITcpCC> cc = std::make_unique<CCMock>(1, TimeNs(0));
 

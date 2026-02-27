@@ -30,8 +30,11 @@ public:
         std::filesystem::path output_dir) const final;
 
 private:
+    void record_cwnd() const;
+
     std::unique_ptr<ITcpCC> m_cc;
-    std::shared_ptr<MetricsStorage> m_cwnd_storage = std::make_shared<MetricsStorage>();
+    std::shared_ptr<MetricsStorage> m_cwnd_storage =
+        std::make_shared<MetricsStorage>();
 };
 
 }  // namespace sim

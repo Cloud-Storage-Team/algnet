@@ -10,14 +10,12 @@ MetricableCC::MetricableCC(std::unique_ptr<ITcpCC> a_cc)
 
 void MetricableCC::on_ack(TimeNs rtt, TimeNs avg_rtt, bool ecn_flag) {
     m_cc->on_ack(rtt, avg_rtt, ecn_flag);
-    m_cwnd_storage->add_record(Scheduler::get_instance().get_current_time(),
-                               m_cc->get_cwnd());
+    record_cwnd();
 }
 
 void MetricableCC::on_timeout() {
     m_cc->on_timeout();
-    m_cwnd_storage->add_record(Scheduler::get_instance().get_current_time(),
-                               m_cc->get_cwnd());
+    record_cwnd();
 }
 
 TimeNs MetricableCC::get_pacing_delay() const {
@@ -34,5 +32,10 @@ MetricsTable MetricableCC::get_metrics_table() const {
 
 void MetricableCC::write_inner_metrics(
     [[maybe_unused]] std::filesystem::path output_dir) const {}
+
+void MetricableCC::record_cwnd() const {
+    m_cwnd_storage->add_record(Scheduler::get_instance().get_current_time(),
+                               m_cc->get_cwnd());
+}
 
 }  // namespace sim
