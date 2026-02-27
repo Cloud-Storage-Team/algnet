@@ -10,6 +10,12 @@ public:
     virtual MetricsTable get_metrics_table() const = 0;
 
     // Put metrics of all ONLY inner objects to given directory
+    //
+    // ATTENTION: method write_all_metrics writes inner metrics & metrics
+    // collected be object itself in same directory, so to avoid file name
+    // conflicts, while implementation of `write_inner_metrics` it is recomended
+    // to write metrics to subdirrectories of `output_dir`, not to bare
+    // `output_dir`
     virtual void write_inner_metrics(
         std::filesystem::path output_dir) const = 0;
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "../../flow/tcp/i_tcp_cc.hpp"
+#include "../../flow/tcp/metricable_cc.hpp"
 #include "../i_new_mplb.hpp"
 #include "../path_chooser/i_path_chooser.hpp"
 #include "metrics/fairness/fairness.hpp"
@@ -34,7 +34,7 @@ private:
                  SizeByte a_packet_size);
     SizeByte get_quota() const;
 
-    std::unique_ptr<ITcpCC> m_cc;
+    MetricableCC m_cc;
 
     SizeByte m_sent_data_size;
     SizeByte m_delivered_data_size;

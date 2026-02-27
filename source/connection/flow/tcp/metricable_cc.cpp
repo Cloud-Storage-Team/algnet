@@ -28,12 +28,10 @@ double MetricableCC::get_cwnd() const { return m_cc->get_cwnd(); }
 
 std::string MetricableCC::to_string() const { return m_cc->to_string(); }
 
-// Get metrics that object collect by itself
 MetricsTable MetricableCC::get_metrics_table() const {
     return MetricsTable{{CCMetricMetadatas::CWND, m_cwnd_storage}};
 }
 
-// Put metrics of all ONLY inner objects to given directory
 void MetricableCC::write_inner_metrics(
     [[maybe_unused]] std::filesystem::path output_dir) const {}
 

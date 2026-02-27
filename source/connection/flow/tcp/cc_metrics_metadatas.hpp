@@ -4,6 +4,6 @@
 namespace sim {
 
 struct CCMetricMetadatas {
-    static constexpr MetricId CWND = {"CWND", "Packets"};
+    static constexpr MetricId CWND = {"cwnd", "Packets"};
 };
 }  // namespace sim

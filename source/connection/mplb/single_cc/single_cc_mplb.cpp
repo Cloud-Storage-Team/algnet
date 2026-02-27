@@ -37,7 +37,7 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
                         data.size.value(), quota.value()));
     }
 
-    TimeNs pacing_delay = m_cc->get_pacing_delay();
+    TimeNs pacing_delay = m_cc.get_pacing_delay();
     TimeNs shift(0);
 
     std::size_t packets_count =
@@ -55,7 +55,7 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
         std::shared_ptr<SingleCCMplb> mplb = shared_from_this();
         PacketCallback packet_callback = [observer, mplb,
                                           flow](PacketAckInfo info) {
-            mplb->m_cc->on_ack(info.rtt, info.avg_rtt, info.ecn_flag);
+            mplb->m_cc.on_ack(info.rtt, info.avg_rtt, info.ecn_flag);
             mplb->m_packets_in_flight--;
             mplb->m_delivered_data_size += mplb->m_packet_size;
             observer->on_single_callback();
@@ -96,6 +96,7 @@ void SingleCCMplb::write_inner_metrics(
     std::filesystem::path output_dir_path) const {
     collect_and_save_all_metrics(m_path_chooser->get_flows_table(),
                                  output_dir_path / "flows");
+    m_cc.write_all_metrics(output_dir_path / "cc");
 }
 
 MPLBContext SingleCCMplb::get_context() const {
@@ -103,7 +104,7 @@ MPLBContext SingleCCMplb::get_context() const {
 }
 
 SizeByte SingleCCMplb::get_quota() const {
-    const double cwnd = m_cc->get_cwnd();
+    const double cwnd = m_cc.get_cwnd();
 
     // Effective window: the whole part of cwnd; if cwnd < 1 and inflight ==
     // 0, allow 1 packet
