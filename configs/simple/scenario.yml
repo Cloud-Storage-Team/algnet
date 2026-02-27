@@ -1,0 +1,8 @@
+network_config_path: network.yml
+
+scenario:
+- action: send_data
+  id: send
+  when: 0ns
+  size: 50KB
+  connections: connection
