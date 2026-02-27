@@ -1,7 +1,7 @@
 #pragma once
-#include "i_metricable.hpp"
-#include "metrics_multi_id_table.hpp"
 #include <unordered_map>
+
+#include "i_metricable.hpp"
 #include "utils/id_table.hpp"
 
 namespace sim {

@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <filesystem>
 #include <functional>
 #include <memory>
@@ -23,9 +22,15 @@ struct MetricId {
 namespace std {
 template <>
 struct hash<sim::MetricId> {
+    static constexpr std::size_t RANDOM_VALUE = 0x23478;
+    static constexpr std::size_t RANDOM_SHIFT_1 = 6;
+    static constexpr std::size_t RANDOM_SHIFT_2 = 2;
+
     std::size_t operator()(const sim::MetricId& metric_id) const noexcept {
-        return std::hash<std::string>()(metric_id.name) ^
-               std::hash<std::string>()(metric_id.unit_name);
+        size_t h1 = hash<string>{}(metric_id.name);
+        size_t h2 = hash<string>{}(metric_id.unit_name);
+        return h1 ^ (h2 + RANDOM_VALUE + (h1 << RANDOM_SHIFT_1) +
+                     (h1 >> RANDOM_SHIFT_2));
     }
 };
 
