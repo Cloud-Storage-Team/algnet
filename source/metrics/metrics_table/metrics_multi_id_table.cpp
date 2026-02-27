@@ -5,7 +5,7 @@
 namespace sim {
 
 void MetricsMultiIdTable::draw_plots(std::filesystem::path output_dir) {
-    const static std::size_t MAX_LEGENG_SIZE = 5;
+    const static std::size_t MAX_LEGEND_SIZE = 5;
     for (const auto& [metric_name, multi_id_storage] : *this) {
         std::filesystem::path metric_output_path =
             output_dir / fmt::format("{}.svg", metric_name.name);
@@ -22,7 +22,7 @@ void MetricsMultiIdTable::draw_plots(std::filesystem::path output_dir) {
         ax->ylabel(metric_name.unit_name);
         ax->title(metric_name.name);
 
-        if (multi_id_storage.size() <= MAX_LEGENG_SIZE) {
+        if (multi_id_storage.size() <= MAX_LEGEND_SIZE) {
             ax->legend(std::vector<std::string>());
         }
 
