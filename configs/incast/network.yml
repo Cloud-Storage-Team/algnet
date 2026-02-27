@@ -12,7 +12,11 @@ presets:
         path-chooser:
           type: round-robin
           flows:
-            flow:
+            flow-1:
+              type: tcp
+            flow-2:
+              type: tcp
+            flow-3:
               type: tcp
 
 connections:

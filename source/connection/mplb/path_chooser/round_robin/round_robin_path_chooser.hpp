@@ -6,15 +6,15 @@ namespace sim {
 
 class RoundRobinPathChooser : public IPathChooser {
 public:
-    explicit RoundRobinPathChooser(FlowsSet a_flows);
+    explicit RoundRobinPathChooser(utils::IdTable<INewFlow> a_flows);
 
     virtual std::shared_ptr<INewFlow> choose_flow() final;
 
-    virtual const FlowsSet& get_flows() const final;
+    virtual const FlowsTable& get_flows_table() const final;
 
 private:
-    FlowsSet m_flows;
-    LoopIterator<FlowsSet::iterator> m_next_flow;
+    FlowsTable m_flows;
+    LoopIterator<FlowsTable::iterator> m_next_flow;
 };
 
 }  // namespace sim

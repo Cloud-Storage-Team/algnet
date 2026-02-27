@@ -4,14 +4,11 @@
 #include <algorithm>
 #include <cstddef>
 #include <optional>
-#include <type_traits>
 
+#include "explicitly_convertable.hpp"
 #include "logger/logger.hpp"
 
 namespace utils {
-
-template <typename T, typename U>
-concept ExplicitlyConvertable = requires(T t) { static_cast<U>(t); };
 
 template <typename T>
 requires ExplicitlyConvertable<T, double>

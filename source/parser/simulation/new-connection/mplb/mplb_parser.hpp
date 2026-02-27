@@ -1,4 +1,5 @@
 #pragma once
+#include "connection/flow/endpoints.hpp"
 #include "connection/mplb/i_new_mplb.hpp"
 #include "parser/config_reader/config_node_with_preset.hpp"
 

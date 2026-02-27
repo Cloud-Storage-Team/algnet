@@ -7,16 +7,8 @@ class NewFlowMock : public sim::INewFlow {
 public:
     NewFlowMock(bool a_send_emmediately = true)
         : m_send_immediately(a_send_emmediately),
-          m_context{
-              sim::Endpoints{std::shared_ptr<sim::IHost>(nullptr),
-                             std::shared_ptr<sim::IHost>(nullptr)},
-              SizeByte(0),
-              SizeByte(0),
-              SizeByte(0),
-              std::nullopt,
-              std::nullopt,
-              utils::Statistics<TimeNs>(),
-          } {}
+          m_context{std::shared_ptr<sim::IHost>(nullptr),
+                    std::shared_ptr<sim::IHost>(nullptr)} {}
 
     Id get_id() const final { return ""; }
 
@@ -33,6 +25,14 @@ public:
     sim::FlowContext& get_mutable_context() { return m_context; }
 
     const sim::FlowContext& get_context() const final { return m_context; }
+
+    virtual sim::MetricsTable get_metrics_table() const final {
+        return sim::MetricsTable{};
+    }
+
+    // Put metrics of all inner objects to given directory
+    virtual void write_inner_metrics(
+        [[maybe_unused]] std::filesystem::path output_dir) const final {}
 
 private:
     bool m_send_immediately;

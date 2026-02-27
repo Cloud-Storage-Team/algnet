@@ -17,6 +17,8 @@ public:
 
     void recalculate_pathes();
 
+    void save_metrics(std::filesystem::path output_dir) const;
+
     const NetworkContext& get_context() const;
 
 private:

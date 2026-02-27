@@ -8,4 +8,5 @@ struct PlotMetadata {
     std::string y_label;
     std::string title;
 };
+
 }  // namespace sim

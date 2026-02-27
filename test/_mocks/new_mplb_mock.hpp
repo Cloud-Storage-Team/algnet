@@ -22,7 +22,7 @@ public:
     }
 
     sim::MPLBContext get_context() const final {
-        return sim::MPLBContext{m_flows, SizeByte(0), SizeByte(0), m_quota};
+        return sim::MPLBContext{SizeByte(0), SizeByte(0), m_quota};
     }
 
     void send_all_data() {
@@ -32,8 +32,12 @@ public:
         m_callbacks.clear();
     }
 
+    sim::MetricsTable get_metrics_table() const final { return {}; }
+
+    void write_inner_metrics(
+        [[maybe_unused]] std::filesystem::path path) const final {}
+
 private:
-    std::set<std::shared_ptr<sim::INewFlow> > m_flows;
     SizeByte m_quota;
     std::vector<OnDeliveryCallback> m_callbacks;
     bool m_send_immediately;

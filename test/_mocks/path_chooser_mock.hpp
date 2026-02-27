@@ -5,17 +5,16 @@ namespace test {
 
 class PathChooserMock : public sim::IPathChooser {
 public:
-    PathChooserMock(std::set<std::shared_ptr<sim::INewFlow> > a_flows)
-        : m_flows(a_flows) {};
+    PathChooserMock(FlowsTable a_flows) : m_flows(std::move(a_flows)) {};
 
     virtual std::shared_ptr<sim::INewFlow> choose_flow() final {
-        return *m_flows.begin();
+        return m_flows.begin()->second;
     }
 
-    virtual const FlowsSet& get_flows() const final { return m_flows; }
+    virtual const FlowsTable& get_flows_table() const final { return m_flows; }
 
 private:
-    std::set<std::shared_ptr<sim::INewFlow> > m_flows;
+    FlowsTable m_flows;
 };
 
 }  // namespace test
