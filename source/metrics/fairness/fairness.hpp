@@ -20,7 +20,7 @@ public:
         }
     }
 
-    // updates value for id & returs new fairness
+    // updates value for id & returns new fairness
     T update(const Id& id, T val) {
         auto it = m_values.find(id);
         if (it == m_values.end()) {
@@ -34,7 +34,7 @@ public:
         m_sum -= table_value;
         m_sum += casted_value;
 
-        // updte square sum
+        // update square sum
         m_squiares_sum -= table_value * table_value;
         m_squiares_sum += casted_value * casted_value;
 

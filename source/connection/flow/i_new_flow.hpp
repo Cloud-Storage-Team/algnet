@@ -10,7 +10,7 @@
 
 namespace sim {
 
-struct FlowContext : public Endpoints {
+struct FlowContext : Endpoints {
     using Endpoints::Endpoints;
     SizeByte sent_size = SizeByte(0);
     SizeByte delivered_size = SizeByte(0);

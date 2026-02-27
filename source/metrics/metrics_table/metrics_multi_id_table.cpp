@@ -14,7 +14,7 @@ void MetricsMultiIdTable::draw_plots(std::filesystem::path output_dir) {
         auto ax = fig->current_axes();
         ax->hold(matplot::on);
 
-        for (auto& [id, values] : multi_id_storage) {
+        for (const auto& [id, values] : multi_id_storage) {
             values->draw_on_plot(fig, id);
         }
 
