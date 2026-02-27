@@ -15,7 +15,7 @@ class ComplexConnectionTest : public testing::Test {
 public:
     void TearDown() override { sim::Scheduler::get_instance().clear(); };
     void SetUp() override {
-    sim::Scheduler::get_instance().clear();
+        sim::Scheduler::get_instance().clear();
         sender->add_outlink(fwd_link);
         sender->update_routing_table(receiver->get_id(), fwd_link, 1);
         receiver->add_inlink(fwd_link);
@@ -27,7 +27,8 @@ public:
 
     // hosts
     std::shared_ptr<sim::Host> sender = std::make_shared<sim::Host>("sender");
-    std::shared_ptr<sim::Host> receiver = std::make_shared<sim::Host>("receiver");
+    std::shared_ptr<sim::Host> receiver =
+        std::make_shared<sim::Host>("receiver");
 
     // links
     std::shared_ptr<sim::Link> fwd_link =
@@ -42,7 +43,7 @@ public:
     std::shared_ptr<sim::SingleCCMplb> mplb = sim::SingleCCMplb::create_shared(
         std::make_unique<sim::TcpTahoeCC>(),
         std::make_unique<sim::RoundRobinPathChooser>(
-            sim::IPathChooser::FlowsSet({flow})));
+            sim::IPathChooser::FlowsTable({{flow->get_id(), flow}})));
 
     // connection
     std::shared_ptr<sim::NewConnection> connection =

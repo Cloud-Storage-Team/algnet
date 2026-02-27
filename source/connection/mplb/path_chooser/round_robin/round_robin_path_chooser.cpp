@@ -2,7 +2,7 @@
 
 namespace sim {
 
-RoundRobinPathChooser::RoundRobinPathChooser(FlowsSet a_flows)
+RoundRobinPathChooser::RoundRobinPathChooser(FlowsTable a_flows)
     : m_flows(std::move(a_flows)),
       m_next_flow(m_flows.begin(), m_flows.end()) {}
 
@@ -10,10 +10,12 @@ std::shared_ptr<INewFlow> RoundRobinPathChooser::choose_flow() {
     if (m_flows.empty()) {
         throw std::runtime_error("Could not choose flow: flows set is empty");
     }
-    return *m_next_flow++;
+    std::shared_ptr<INewFlow> result = (*m_next_flow).second;
+    m_next_flow++;
+    return result;
 }
 
-const IPathChooser::FlowsSet& RoundRobinPathChooser::get_flows() const {
+const IPathChooser::FlowsTable& RoundRobinPathChooser::get_flows_table() const {
     return m_flows;
 }
 

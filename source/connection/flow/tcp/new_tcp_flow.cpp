@@ -1,6 +1,6 @@
 #include "new_tcp_flow.hpp"
 
-#include "metrics/metrics_collector.hpp"
+#include "flow_metrics_metadatas.hpp"
 #include "scheduler.hpp"
 #include "utils/avg_rtt_packet_flag.hpp"
 
@@ -33,16 +33,26 @@ const FlowContext& NewTcpFlow::get_context() const { return m_context; };
 
 Id NewTcpFlow::get_id() const { return m_id; }
 
+MetricsTable NewTcpFlow::get_metrics_table() const {
+    return MetricsTable{
+        {FlowMetricMetadatas::RTT, m_metrics.rtt},
+        {FlowMetricMetadatas::DELIVERY_RATE, m_metrics.delivery_rate},
+        {FlowMetricMetadatas::PACKET_REORDERING, m_metrics.packet_reordering}};
+}
+
+void NewTcpFlow::write_inner_metrics(
+    [[maybe_unused]] std::filesystem::path output_dir) const {};
+
 NewTcpFlow::NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
                        std::shared_ptr<IHost> a_receiver, bool a_ecn_capable,
                        RTO a_rto)
     : m_id(std::move(a_id)),
-      m_context({Endpoints{a_sender, a_receiver}, SizeByte(0), SizeByte(0),
-                 SizeByte(0),
-
-                 std::nullopt, std::nullopt, utils::Statistics<TimeNs>()}),
+      m_context(a_sender, a_receiver),
       m_ecn_capable(a_ecn_capable),
-      m_rto(std::move(a_rto)) {
+      m_rto(std::move(a_rto)),
+      m_metrics({std::make_shared<MetricsStorage>(),
+                 std::make_shared<MetricsStorage>(),
+                 std::make_shared<MetricsStorage>()}) {
     if (!m_flag_manager.register_flag_by_amount(m_packet_type_label,
                                                 PacketType::ENUM_SIZE)) {
         throw std::runtime_error("Can not register packet type label");
@@ -71,18 +81,11 @@ Packet NewTcpFlow::create_data_packet(PacketInfo info,
 
     packet.flow = nullptr;
 
-    std::weak_ptr<NewTcpFlow> flow_weak = shared_from_this();
+    std::shared_ptr<NewTcpFlow> flow = shared_from_this();
 
-    packet.callback = [flow_weak, delivery_callback = info.callback](
+    packet.callback = [flow, delivery_callback = info.callback](
                           const Packet& delivered_packet) {
-        if (flow_weak.expired()) {
-            LOG_ERROR(fmt::format(
-                "Can not process data packet {}: flow pointer expired",
-                delivered_packet.to_string()));
-            return;
-        }
-        flow_weak.lock()->process_data_packet(delivered_packet,
-                                              delivery_callback);
+        flow->process_data_packet(delivered_packet, delivery_callback);
     };
     packet.generated_time = info.generated_time;
     packet.sent_time = Scheduler::get_instance().get_current_time();
@@ -115,6 +118,10 @@ void NewTcpFlow::send_data_packet(Packet data) {
 
 void NewTcpFlow::process_data_packet(const Packet& data,
                                      PacketCallback callback) {
+    m_packet_reordering.add_record(data.packet_num);
+    m_metrics.packet_reordering->add_record(
+        Scheduler::get_instance().get_current_time(),
+        m_packet_reordering.value());
     Packet ack = data;
     ack.source_id = m_context.receiver->get_id();
     ack.dest_id = m_context.sender->get_id();
@@ -126,17 +133,10 @@ void NewTcpFlow::process_data_packet(const Packet& data,
                         m_id, ack.to_string()));
     SizeByte data_packet_size = data.size;
 
-    std::weak_ptr<NewTcpFlow> flow_weak = shared_from_this();
-    ack.callback = [flow_weak, callback,
+    std::shared_ptr<NewTcpFlow> flow = shared_from_this();
+    ack.callback = [flow, callback,
                     data_packet_size](const Packet& delivered_ack) {
-        if (flow_weak.expired()) {
-            LOG_ERROR(
-                fmt::format("Flow pointer expired; could not process ack {}",
-                            delivered_ack.to_string()));
-            return;
-        }
-        flow_weak.lock()->process_ack(delivered_ack, data_packet_size,
-                                      callback);
+        flow->process_ack(delivered_ack, data_packet_size, callback);
     };
 
     m_context.receiver->enqueue_packet(ack);
@@ -150,7 +150,8 @@ void NewTcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
     // (see process_data_packet)
     TimeNs rtt = now - ack.sent_time;
     m_context.rtt_statistics.add_record(rtt);
-    MetricsCollector::get_instance().add_RTT(m_id, now, rtt);
+
+    m_metrics.rtt->add_record(now, rtt.value());
 
     update_rto_on_ack();
 
@@ -166,8 +167,9 @@ void NewTcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
     SpeedGbps delivery_rate =
         (m_context.delivered_size - ack.delivered_data_size_at_origin) /
         (now - ack.generated_time);
-    MetricsCollector::get_instance().add_delivery_rate(m_id, now,
-                                                       delivery_rate);
+
+    m_metrics.delivery_rate->add_record(now, delivery_rate.value());
+    m_context.delivery_rate_statistics.add_record(delivery_rate);
 
     callback({PacketAckInfo{rtt, m_context.rtt_statistics.get_mean().value(),
                             ack.congestion_experienced}});

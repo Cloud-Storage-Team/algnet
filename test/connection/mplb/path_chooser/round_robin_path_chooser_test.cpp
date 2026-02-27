@@ -20,14 +20,14 @@ TEST_P(RoundRobinPathChooserParamTest, ChoosesFlowsAlmostUniformly) {
     const RRParams p = GetParam();
     ASSERT_GT(p.flows_count, 0u);
 
-    sim::IPathChooser::FlowsSet flows;
+    sim::IPathChooser::FlowsTable flows;
     std::vector<std::shared_ptr<NiceMock<NewFlowGMock>>> concrete_flows;
 
     for (size_t i = 0; i < p.flows_count; ++i) {
         auto flow =
             std::make_shared<NiceMock<NewFlowGMock>>(fmt::format("Flow_{}", i));
         std::shared_ptr<sim::INewFlow> as_base = flow;
-        flows.insert(as_base);
+        ASSERT_TRUE(flows.emplace(flow->name, as_base).second);
         concrete_flows.emplace_back(flow);
     }
 

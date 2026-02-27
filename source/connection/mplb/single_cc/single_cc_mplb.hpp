@@ -1,7 +1,9 @@
 #pragma once
-#include "../../flow/tcp/i_tcp_cc.hpp"
+#include "../../flow/tcp/metricable_cc.hpp"
 #include "../i_new_mplb.hpp"
 #include "../path_chooser/i_path_chooser.hpp"
+#include "metrics/fairness/fairness.hpp"
+#include "metrics/metrics_storage.hpp"
 
 namespace sim {
 
@@ -20,13 +22,19 @@ public:
 
     virtual MPLBContext get_context() const final;
 
+    virtual MetricsTable get_metrics_table() const final;
+
+    // Put metrics of all inner objects to given directory
+    virtual void write_inner_metrics(
+        std::filesystem::path output_dir) const final;
+
 private:
     SingleCCMplb(std::unique_ptr<ITcpCC> a_cc,
                  std::unique_ptr<IPathChooser> a_path_chooser,
                  SizeByte a_packet_size);
     SizeByte get_quota() const;
 
-    std::unique_ptr<ITcpCC> m_cc;
+    MetricableCC m_cc;
 
     SizeByte m_sent_data_size;
     SizeByte m_delivered_data_size;
@@ -34,6 +42,12 @@ private:
 
     std::unique_ptr<IPathChooser> m_path_chooser;
     SizeByte m_packet_size;
+
+    // fairness for flows
+    JainsFairnessIndex<SpeedGbps> m_delivery_rate_fairness;
+
+    std::shared_ptr<MetricsStorage> m_fairness_storage =
+        std::make_shared<MetricsStorage>();
 };
 
 }  // namespace sim

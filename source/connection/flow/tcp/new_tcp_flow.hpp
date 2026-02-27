@@ -1,5 +1,7 @@
 #pragma once
 #include "../i_new_flow.hpp"
+#include "metrics/metrics_table/i_metricable.hpp"
+#include "metrics/packet_reordering/simple_packet_reordering.hpp"
 #include "rto.hpp"
 #include "utils/packet_num_monitor.hpp"
 
@@ -18,6 +20,11 @@ public:
     virtual const FlowContext& get_context() const final;
 
     virtual Id get_id() const final;
+
+    virtual MetricsTable get_metrics_table() const final;
+
+    virtual void write_inner_metrics(
+        std::filesystem::path output_dir) const final;
 
 private:
     NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
@@ -60,6 +67,7 @@ private:
 
     Id m_id;
     FlowContext m_context;
+    SimplePacketReordering m_packet_reordering;
     bool m_ecn_capable;
 
     size_t m_next_packet_num = 0;
@@ -67,6 +75,12 @@ private:
 
     // RTO parameters
     RTO m_rto;
+
+    struct Metrics {
+        std::shared_ptr<MetricsStorage> rtt;
+        std::shared_ptr<MetricsStorage> delivery_rate;
+        std::shared_ptr<MetricsStorage> packet_reordering;
+    } m_metrics;
 };
 
 }  // namespace sim
