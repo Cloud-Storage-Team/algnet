@@ -10,6 +10,8 @@ env:
   EXECUTABLE_NAME: nons
   TEST_EXECUTABLE_NAME: test_nons
   METRICS_ARTIFACT_DIR: metrics
+  OLD_METRICS_ARTIFACT_DIR: metrics/old
+  NEW_METRICS_ARTIFACT_DIR: metrics/new
 
 jobs:
   clang-format:
@@ -71,11 +73,14 @@ jobs:
     - name: Add executable flag
       run: chmod +x ${{env.EXECUTABLE_NAME}}
 
-    - name: Run simulation
-      run: python3 scripts/run_simulations.py -e ./${{env.EXECUTABLE_NAME}} -c configuration_examples/simulation_examples --output-dir ./${{env.METRICS_ARTIFACT_DIR}}
+    - name: Run old simulations
+      run: python3 scripts/run_simulations.py -e ./${{env.EXECUTABLE_NAME}} -c configuration_examples/simulation_examples --output-dir ./${{env.OLD_METRICS_ARTIFACT_DIR}}
+
+    - name: Run new simulations
+      run: python3 scripts/run_new_simulations.py -e ./${{env.EXECUTABLE_NAME}} -c configs/scenario-configs.txt --output-dir ./${{env.NEW_METRICS_ARTIFACT_DIR}}
 
     - name: Create html
-      run: python3 scripts/generate-html.py ./metrics
+      run: python3 scripts/generate-html.py ./${{env.METRICS_ARTIFACT_DIR}}
 
     - name: Upload metrics
       uses: actions/upload-artifact@v4
@@ -89,7 +94,7 @@ jobs:
     - name: Calculate deploy destination dir
       run: |
         DEPLOY_DIR=$(python3 scripts/calculate_deploy_dir.py -c github_context.json);
-        echo "DEPLOY_DIR=${DEPLOY_DIR}/${{env.METRICS_ARTIFACT_DIR}}" >> $GITHUB_ENV;     
+        echo "DEPLOY_DIR=${DEPLOY_DIR}/${{env.METRICS_ARTIFACT_DIR}}" >> $GITHUB_ENV;
 
     - name: Deploy to GitHub Pages
       if: ${{env.DEPLOY_DIR}} != ''
@@ -126,7 +131,7 @@ jobs:
     needs: build
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Download nons executable
       uses: actions/download-artifact@v4
       with:
@@ -134,7 +139,7 @@ jobs:
 
     - name: Add executable flag
       run: chmod +x ${{env.EXECUTABLE_NAME}}
-    
+
     - name: Update PYTHONPOATH
       run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
