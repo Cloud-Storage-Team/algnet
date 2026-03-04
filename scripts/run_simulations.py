@@ -8,6 +8,7 @@ import argparse
 
 def check_directory(dirname: str):
     if not os.path.isdir(dirname):
+        check_directory(os.path.dirname(dirname))
         os.mkdir(dirname)
 
 
