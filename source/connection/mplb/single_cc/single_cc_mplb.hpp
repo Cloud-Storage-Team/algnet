@@ -13,8 +13,7 @@ public:
     virtual ~SingleCCMplb() = default;
 
     static std::shared_ptr<SingleCCMplb> create_shared(
-        std::unique_ptr<ITcpCC> a_cc,
-        std::unique_ptr<IPathChooser> a_path_chooser,
+        MetricableCC a_cc, std::unique_ptr<IPathChooser> a_path_chooser,
         SizeByte a_packet_size = SizeByte(1500));
 
     [[nodiscard]] virtual utils::StrExpected<void> send_data(
@@ -29,7 +28,7 @@ public:
         std::filesystem::path output_dir) const final;
 
 private:
-    SingleCCMplb(std::unique_ptr<ITcpCC> a_cc,
+    SingleCCMplb(MetricableCC a_cc,
                  std::unique_ptr<IPathChooser> a_path_chooser,
                  SizeByte a_packet_size);
     SizeByte get_quota() const;

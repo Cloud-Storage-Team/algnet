@@ -12,13 +12,13 @@
 namespace sim {
 
 std::shared_ptr<SingleCCMplb> SingleCCMplb::create_shared(
-    std::unique_ptr<ITcpCC> a_cc, std::unique_ptr<IPathChooser> a_path_chooser,
+    MetricableCC a_cc, std::unique_ptr<IPathChooser> a_path_chooser,
     SizeByte a_packet_size) {
     return std::shared_ptr<SingleCCMplb>(new SingleCCMplb(
         std::move(a_cc), std::move(a_path_chooser), a_packet_size));
 }
 
-SingleCCMplb::SingleCCMplb(std::unique_ptr<ITcpCC> a_cc,
+SingleCCMplb::SingleCCMplb(MetricableCC a_cc,
                            std::unique_ptr<IPathChooser> a_path_chooser,
                            SizeByte a_packet_size)
     : m_cc(std::move(a_cc)),
