@@ -74,10 +74,10 @@ jobs:
       run: chmod +x ${{env.EXECUTABLE_NAME}}
 
     - name: Run old simulations
-      run: python3 scripts/run_simulations.py -e ./${{env.EXECUTABLE_NAME}} --no_logs -c configuration_examples/simulation_examples --output-dir ./${{env.OLD_METRICS_ARTIFACT_DIR}}
+      run: python3 scripts/run_simulations.py -e ./${{env.EXECUTABLE_NAME}} --no-logs -c configuration_examples/simulation_examples --output-dir ./${{env.OLD_METRICS_ARTIFACT_DIR}}
 
     - name: Run new simulations
-      run: python3 scripts/run_new_simulations.py -e ./${{env.EXECUTABLE_NAME}} --no_logs -c configs/scenario-configs.txt --output-dir ./${{env.NEW_METRICS_ARTIFACT_DIR}}
+      run: python3 scripts/run_new_simulations.py -e ./${{env.EXECUTABLE_NAME}} --no-logs -c configs/scenario-configs.txt --output-dir ./${{env.NEW_METRICS_ARTIFACT_DIR}}
 
     - name: Create html
       run: python3 scripts/generate-html.py ./${{env.METRICS_ARTIFACT_DIR}}
