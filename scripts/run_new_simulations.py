@@ -11,7 +11,7 @@ def get_network_path(scenario_config_path: str):
     config_file_dirname = os.path.dirname(scenario_config_path)
     relative_network_path = config.get("network_config_path", "")
     if not relative_network_path:
-        sys.exit("Error: No topology_config_path found in the configuration file.")
+        sys.exit("Error: No network_config_path found in the configuration file.")
     network_path = os.path.join(config_file_dirname, relative_network_path)
     return network_path
 
@@ -19,6 +19,8 @@ def get_topology_path(simulation_config_path: str):
     with open(simulation_config_path, "r") as f:
         config = yaml.safe_load(f)
     config_file_dirname = os.path.dirname(simulation_config_path)
+    if not isinstance(config, dict):
+        raise ValueError(f"Invalid YAML structure in {path}: expected mapping")
     relative_topology_path = config.get("topology_config_path", "")
     if not relative_topology_path:
         sys.exit("Error: No topology_config_path found in the configuration file.")
@@ -62,8 +64,8 @@ def main(args):
     paths_base = os.path.dirname(os.path.abspath(scenario_configs_path))
 
     for rel_scenario_config_path in get_relative_paths(scenario_configs_path):
-        print(f"Scnerio config path: {rel_scenario_config_path}")
-        if not rel_scenario_config_path.endswith(".yml") and not rel_scenario_config_path.endswith(".yaml"):
+        print(f"Scenario config path: {rel_scenario_config_path}")
+        if not rel_scenario_config_path.lower().endswith((".yml", ".yaml")):
             continue
 
         abs_scenario_config_path = os.path.join(paths_base, rel_scenario_config_path)
