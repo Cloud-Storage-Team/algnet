@@ -25,47 +25,34 @@ static utils::StrExpected<utils::IdTable<IDevice> > build_device_table(
 Topology parse_topology(const ConfigNode& node) {
     std::optional<ConfigNode> presets_node = node["presets"].to_optional();
 
-    auto presets_child_optional =
-        [&](std::string_view key) -> std::optional<ConfigNode> {
-        if (!presets_node) return std::nullopt;
-        return presets_node->operator[](key).to_optional();
-    };
-
     TopologyContext ctx;
     {
         // hosts parsing
-        std::optional<ConfigNode> host_presets_node =
-            presets_child_optional("host");
 
         ConfigNode hosts_node = node["hosts"].value_or_throw();
-        ctx.hosts_table = parse_hosts(host_presets_node, hosts_node);
+        ctx.hosts_table = parse_hosts(presets_node, hosts_node);
     }
 
     {
         // switches parsing
-        std::optional<ConfigNode> switches_presets_node =
-            presets_child_optional("switch");
 
         ConfigNode packet_spraying_node =
             node["packet-spraying"].value_or_throw();
 
         ConfigNode switches_node = node["switches"].value_or_throw();
-        ctx.switches_table = parse_switches(
-            switches_presets_node, packet_spraying_node, switches_node);
+        ctx.switches_table =
+            parse_switches(presets_node, packet_spraying_node, switches_node);
     }
 
     {
         // links parsing
-        std::optional<ConfigNode> links_presets_node =
-            presets_child_optional("link");
 
         utils::IdTable<IDevice> device_table =
             build_device_table(ctx.hosts_table, ctx.switches_table)
                 .value_or_throw();
 
         ConfigNode links_node = node["links"].value_or_throw();
-        ctx.links_table =
-            parse_links(links_presets_node, links_node, device_table);
+        ctx.links_table = parse_links(presets_node, links_node, device_table);
     }
 
     return Topology(std::move(ctx));

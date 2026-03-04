@@ -1,36 +1,34 @@
 presets:
-  link:
-    edge-host:
-      latency: 1000ns
-      throughput: 1Gbps
-      ingress_buffer_size: 4096KB
-      egress_buffer_size: 4096KB
-    aggr-edge:
-      latency: 1000ns
-      throughput: 10Gbps
-      ingress_buffer_size: 4096KB
-      egress_buffer_size: 4096KB
-    aggr-core:
-      latency: 1000ns
-      throughput: 100Gbps
-      ingress_buffer_size: 4096KB
-      egress_buffer_size: 4096KB
-  switch:
-    edge:
-      ecn:
-        min: 0.2
-        max: 0.3
-        probability: 0.5
-    aggr:
-      ecn:
-        min: 0.2
-        max: 0.3
-        probability: 0.7
-    core:
-      ecn:
-        min: 0.2
-        max: 0.3
-        probability: 1.0
+  edge-host-link:
+    latency: 1000ns
+    throughput: 1Gbps
+    ingress_buffer_size: 4096KB
+    egress_buffer_size: 4096KB
+  aggr-edge-link:
+    latency: 1000ns
+    throughput: 10Gbps
+    ingress_buffer_size: 4096KB
+    egress_buffer_size: 4096KB
+  aggr-core-link:
+    latency: 1000ns
+    throughput: 100Gbps
+    ingress_buffer_size: 4096KB
+    egress_buffer_size: 4096KB
+  edge-switch:
+    ecn:
+      min: 0.2
+      max: 0.3
+      probability: 0.5
+  aggr-switch:
+    ecn:
+      min: 0.2
+      max: 0.3
+      probability: 0.7
+  core-switch:
+    ecn:
+      min: 0.2
+      max: 0.3
+      probability: 1.0
 packet-spraying:
   type: ecmp
 hosts:
@@ -68,447 +66,447 @@ hosts:
     layer: 3
 switches:
   core1:
-    preset-name: core
+    preset-name: core-switch
     layer: 0
   core2:
-    preset-name: core
+    preset-name: core-switch
     layer: 0
   core3:
-    preset-name: core
+    preset-name: core-switch
     layer: 0
   core4:
-    preset-name: core
+    preset-name: core-switch
     layer: 0
   pod1_aggr1:
-    preset-name: aggr
+    preset-name: aggr-switch
     layer: 1
   pod1_aggr2:
-    preset-name: aggr
+    preset-name: aggr-switch
     layer: 1
   pod1_edge1:
-    preset-name: edge
+    preset-name: edge-switch
     layer: 2
   pod1_edge2:
-    preset-name: edge
+    preset-name: edge-switch
     layer: 2
   pod2_aggr1:
-    preset-name: aggr
+    preset-name: aggr-switch
     layer: 1
   pod2_aggr2:
-    preset-name: aggr
+    preset-name: aggr-switch
     layer: 1
   pod2_edge1:
-    preset-name: edge
+    preset-name: edge-switch
     layer: 2
   pod2_edge2:
-    preset-name: edge
+    preset-name: edge-switch
     layer: 2
   pod3_aggr1:
-    preset-name: aggr
+    preset-name: aggr-switch
     layer: 1
   pod3_aggr2:
-    preset-name: aggr
+    preset-name: aggr-switch
     layer: 1
   pod3_edge1:
-    preset-name: edge
+    preset-name: edge-switch
     layer: 2
   pod3_edge2:
-    preset-name: edge
+    preset-name: edge-switch
     layer: 2
   pod4_aggr1:
-    preset-name: aggr
+    preset-name: aggr-switch
     layer: 1
   pod4_aggr2:
-    preset-name: aggr
+    preset-name: aggr-switch
     layer: 1
   pod4_edge1:
-    preset-name: edge
+    preset-name: edge-switch
     layer: 2
   pod4_edge2:
-    preset-name: edge
+    preset-name: edge-switch
     layer: 2
 links:
   link_0:
     from: pod1_host1
     to: pod1_edge1
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_1:
     from: pod1_edge1
     to: pod1_host1
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_2:
     from: pod1_host2
     to: pod1_edge1
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_3:
     from: pod1_edge1
     to: pod1_host2
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_4:
     from: pod1_host3
     to: pod1_edge2
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_5:
     from: pod1_edge2
     to: pod1_host3
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_6:
     from: pod1_host4
     to: pod1_edge2
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_7:
     from: pod1_edge2
     to: pod1_host4
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_8:
     from: pod2_host1
     to: pod2_edge1
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_9:
     from: pod2_edge1
     to: pod2_host1
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_10:
     from: pod2_host2
     to: pod2_edge1
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_11:
     from: pod2_edge1
     to: pod2_host2
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_12:
     from: pod2_host3
     to: pod2_edge2
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_13:
     from: pod2_edge2
     to: pod2_host3
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_14:
     from: pod2_host4
     to: pod2_edge2
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_15:
     from: pod2_edge2
     to: pod2_host4
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_16:
     from: pod3_host1
     to: pod3_edge1
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_17:
     from: pod3_edge1
     to: pod3_host1
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_18:
     from: pod3_host2
     to: pod3_edge1
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_19:
     from: pod3_edge1
     to: pod3_host2
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_20:
     from: pod3_host3
     to: pod3_edge2
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_21:
     from: pod3_edge2
     to: pod3_host3
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_22:
     from: pod3_host4
     to: pod3_edge2
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_23:
     from: pod3_edge2
     to: pod3_host4
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_24:
     from: pod4_host1
     to: pod4_edge1
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_25:
     from: pod4_edge1
     to: pod4_host1
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_26:
     from: pod4_host2
     to: pod4_edge1
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_27:
     from: pod4_edge1
     to: pod4_host2
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_28:
     from: pod4_host3
     to: pod4_edge2
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_29:
     from: pod4_edge2
     to: pod4_host3
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_30:
     from: pod4_host4
     to: pod4_edge2
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_31:
     from: pod4_edge2
     to: pod4_host4
-    preset-name: edge-host
+    preset-name: edge-host-link
   link_32:
     from: pod1_edge1
     to: pod1_aggr1
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_33:
     from: pod1_aggr1
     to: pod1_edge1
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_34:
     from: pod1_edge1
     to: pod1_aggr2
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_35:
     from: pod1_aggr2
     to: pod1_edge1
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_36:
     from: pod1_edge2
     to: pod1_aggr1
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_37:
     from: pod1_aggr1
     to: pod1_edge2
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_38:
     from: pod1_edge2
     to: pod1_aggr2
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_39:
     from: pod1_aggr2
     to: pod1_edge2
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_40:
     from: pod2_edge1
     to: pod2_aggr1
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_41:
     from: pod2_aggr1
     to: pod2_edge1
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_42:
     from: pod2_edge1
     to: pod2_aggr2
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_43:
     from: pod2_aggr2
     to: pod2_edge1
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_44:
     from: pod2_edge2
     to: pod2_aggr1
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_45:
     from: pod2_aggr1
     to: pod2_edge2
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_46:
     from: pod2_edge2
     to: pod2_aggr2
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_47:
     from: pod2_aggr2
     to: pod2_edge2
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_48:
     from: pod3_edge1
     to: pod3_aggr1
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_49:
     from: pod3_aggr1
     to: pod3_edge1
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_50:
     from: pod3_edge1
     to: pod3_aggr2
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_51:
     from: pod3_aggr2
     to: pod3_edge1
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_52:
     from: pod3_edge2
     to: pod3_aggr1
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_53:
     from: pod3_aggr1
     to: pod3_edge2
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_54:
     from: pod3_edge2
     to: pod3_aggr2
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_55:
     from: pod3_aggr2
     to: pod3_edge2
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_56:
     from: pod4_edge1
     to: pod4_aggr1
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_57:
     from: pod4_aggr1
     to: pod4_edge1
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_58:
     from: pod4_edge1
     to: pod4_aggr2
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_59:
     from: pod4_aggr2
     to: pod4_edge1
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_60:
     from: pod4_edge2
     to: pod4_aggr1
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_61:
     from: pod4_aggr1
     to: pod4_edge2
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_62:
     from: pod4_edge2
     to: pod4_aggr2
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_63:
     from: pod4_aggr2
     to: pod4_edge2
-    preset-name: aggr-edge
+    preset-name: aggr-edge-link
   link_64:
     from: pod1_aggr1
     to: core1
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_65:
     from: core1
     to: pod1_aggr1
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_66:
     from: pod1_aggr1
     to: core2
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_67:
     from: core2
     to: pod1_aggr1
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_68:
     from: pod1_aggr2
     to: core3
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_69:
     from: core3
     to: pod1_aggr2
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_70:
     from: pod1_aggr2
     to: core4
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_71:
     from: core4
     to: pod1_aggr2
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_72:
     from: pod2_aggr1
     to: core1
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_73:
     from: core1
     to: pod2_aggr1
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_74:
     from: pod2_aggr1
     to: core2
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_75:
     from: core2
     to: pod2_aggr1
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_76:
     from: pod2_aggr2
     to: core3
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_77:
     from: core3
     to: pod2_aggr2
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_78:
     from: pod2_aggr2
     to: core4
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_79:
     from: core4
     to: pod2_aggr2
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_80:
     from: pod3_aggr1
     to: core1
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_81:
     from: core1
     to: pod3_aggr1
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_82:
     from: pod3_aggr1
     to: core2
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_83:
     from: core2
     to: pod3_aggr1
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_84:
     from: pod3_aggr2
     to: core3
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_85:
     from: core3
     to: pod3_aggr2
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_86:
     from: pod3_aggr2
     to: core4
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_87:
     from: core4
     to: pod3_aggr2
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_88:
     from: pod4_aggr1
     to: core1
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_89:
     from: core1
     to: pod4_aggr1
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_90:
     from: pod4_aggr1
     to: core2
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_91:
     from: core2
     to: pod4_aggr1
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_92:
     from: pod4_aggr2
     to: core3
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_93:
     from: core3
     to: pod4_aggr2
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_94:
     from: pod4_aggr2
     to: core4
-    preset-name: aggr-core
+    preset-name: aggr-core-link
   link_95:
     from: core4
     to: pod4_aggr2
-    preset-name: aggr-core
+    preset-name: aggr-core-link

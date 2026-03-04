@@ -1,10 +1,9 @@
 presets:
-  link:
-    default:
-      latency: 0ns
-      throughput: 100Gbps
-      ingress_buffer_size: 64KB
-      egress_buffer_size: 64KB
+  default-link:
+    latency: 0ns
+    throughput: 100Gbps
+    ingress_buffer_size: 64KB
+    egress_buffer_size: 64KB
 
 packet-spraying:
   type: ecmp
@@ -23,40 +22,40 @@ links:
   fwd-1:
     from: host-1
     to: switch
-    preset-name: default
+    preset-name: default-link
   fwd-2:
     from: host-2
     to: switch
-    preset-name: default
+    preset-name: default-link
   fwd-3:
     from: host-3
     to: switch
-    preset-name: default
+    preset-name: default-link
   fwd-4:
     from: host-4
     to: switch
-    preset-name: default
+    preset-name: default-link
   fwd-5:
     from: host-5
     to: switch
-    preset-name: default
+    preset-name: default-link
   back-1:
     from: switch
     to: host-1
-    preset-name: default
+    preset-name: default-link
   back-2:
     from: switch
     to: host-2
-    preset-name: default
+    preset-name: default-link
   back-3:
     from: switch
     to: host-3
-    preset-name: default
+    preset-name: default-link
   back-4:
     from: switch
     to: host-4
-    preset-name: default
+    preset-name: default-link
   back-5:
     from: switch
     to: host-5
-    preset-name: default
+    preset-name: default-link
