@@ -1,0 +1,17 @@
+topology_config_path: topology.yml
+
+connections:
+  connection:
+    sender_id: sender
+    receiver_id: receiver
+    type: mplb-connection
+    mplb:
+      type: single-cc
+      packet-size: 1500B
+      cc:
+        type: tahoe
+      path-chooser:
+        type: round-robin
+        flows:
+          flow:
+            type: tcp

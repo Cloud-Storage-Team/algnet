@@ -1,0 +1,39 @@
+topology_config_path: topology.yml
+
+presets:
+  connection:
+    default:
+      type: mplb-connection
+      mplb:
+        type: single-cc
+        packet-size: 1500B
+        cc:
+          type: swift
+          base_target: 36000ns
+        path-chooser:
+          type: round-robin
+          flows:
+            flow-1:
+              type: tcp
+            flow-2:
+              type: tcp
+            flow-3:
+              type: tcp
+
+connections:
+  connection-pod1_host1--pod2_host1:
+    preset-name: default
+    sender_id: pod1_host1
+    receiver_id: pod2_host1
+  connection-pod1_host1--pod2_host2:
+    preset-name: default
+    sender_id: pod1_host1
+    receiver_id: pod2_host2
+  connection-pod1_host1--pod2_host3:
+    preset-name: default
+    sender_id: pod1_host1
+    receiver_id: pod2_host3
+  connection-pod1_host1--pod2_host4:
+    preset-name: default
+    sender_id: pod1_host1
+    receiver_id: pod2_host4
