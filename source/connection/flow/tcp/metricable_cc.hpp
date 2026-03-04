@@ -16,7 +16,7 @@ class MetricableCC : public ITcpCC, public IMetricable {
 public:
     static constexpr inline MetricableCcMetricsFilters DEFAULT_FLAGS = {};
     explicit MetricableCC(std::unique_ptr<ITcpCC> a_cc,
-                          MetricableCcMetricsFilters a_flags);
+                          MetricableCcMetricsFilters a_flags = DEFAULT_FLAGS);
 
     virtual void on_ack(TimeNs rtt, TimeNs avg_rtt, bool ecn_flag) final;
 
