@@ -7,14 +7,21 @@
 
 namespace sim {
 
+struct SingleCCMetricsFilters {
+    bool fairness = true;
+};
+
 class SingleCCMplb : public INewMPLB,
                      public std::enable_shared_from_this<SingleCCMplb> {
 public:
     virtual ~SingleCCMplb() = default;
 
+    static constexpr inline SingleCCMetricsFilters DEFAULT_METRICS_FILTERS = {};
+
     static std::shared_ptr<SingleCCMplb> create_shared(
         MetricableCC a_cc, std::unique_ptr<IPathChooser> a_path_chooser,
-        SizeByte a_packet_size = SizeByte(1500));
+        SizeByte a_packet_size = SizeByte(1500),
+        SingleCCMetricsFilters a_metrics_filters = DEFAULT_METRICS_FILTERS);
 
     [[nodiscard]] virtual utils::StrExpected<void> send_data(
         Data data, OnDeliveryCallback callback) final;
@@ -30,7 +37,8 @@ public:
 private:
     SingleCCMplb(MetricableCC a_cc,
                  std::unique_ptr<IPathChooser> a_path_chooser,
-                 SizeByte a_packet_size);
+                 SizeByte a_packet_size,
+                 SingleCCMetricsFilters a_metrics_filters);
     SizeByte get_quota() const;
 
     MetricableCC m_cc;
@@ -47,6 +55,8 @@ private:
 
     std::shared_ptr<MetricsStorage> m_fairness_storage =
         std::make_shared<MetricsStorage>();
+
+    SingleCCMetricsFilters m_metrics_filters;
 };
 
 }  // namespace sim

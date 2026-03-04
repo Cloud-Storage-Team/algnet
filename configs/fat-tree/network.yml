@@ -16,8 +16,6 @@ presets:
       
       cc:
         type: swift
-        # metrics_filters:
-        #   cwnd: false
         base_target: 36000ns
 
       path-chooser:
