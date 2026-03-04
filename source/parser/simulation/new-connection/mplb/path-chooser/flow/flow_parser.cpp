@@ -23,8 +23,8 @@ RTO parse_rto(const ConfigNodeWithPreset& node) {
                parse_time(node["max"].value().get_node()));
 }
 
-TcpFlowOutputMetricFlags parse_metrics_flags(const ConfigNodeWithPreset& node) {
-    TcpFlowOutputMetricFlags flags;
+TcpFlowMetricsFilters parse_metrics_flags(const ConfigNodeWithPreset& node) {
+    TcpFlowMetricsFilters flags;
     if (const ConfigNodeWithPresetExpected& rtt_node = node["rtt"]; rtt_node) {
         flags.rtt = rtt_node.value().as_or_throw<bool>();
     }
@@ -52,8 +52,8 @@ std::shared_ptr<NewTcpFlow> parse_tcp_flow(
         NewTcpFlow::DEFAULT_ECN_CAPABLE);
 
     const ConfigNodeWithPresetExpected& metrics_flags_node =
-        flow_node["output_metrics"];
-    TcpFlowOutputMetricFlags metrics_flags =
+        flow_node["metrics_filters"];
+    TcpFlowMetricsFilters metrics_flags =
         (metrics_flags_node ? parse_metrics_flags(metrics_flags_node.value())
                             : NewTcpFlow::DEFAULT_METRICS_FLAGS);
 

@@ -7,7 +7,7 @@
 
 namespace sim {
 
-struct TcpFlowOutputMetricFlags {
+struct TcpFlowMetricsFilters {
     bool rtt = true;
     bool delivery_rate = true;
     bool reordering = true;
@@ -20,13 +20,13 @@ public:
         RTO(TimeNs(2000), Time<Second>(1));
 
     constexpr static inline bool DEFAULT_ECN_CAPABLE = true;
-    constexpr static inline TcpFlowOutputMetricFlags DEFAULT_METRICS_FLAGS = {};
+    constexpr static inline TcpFlowMetricsFilters DEFAULT_METRICS_FLAGS = {};
 
     static std::shared_ptr<NewTcpFlow> create_shared(
         Id a_id, std::shared_ptr<IHost> a_sender,
         std::shared_ptr<IHost> a_receiver,
         bool a_ecn_capable = DEFAULT_ECN_CAPABLE, RTO a_rto = DEFAULT_START_RTO,
-        TcpFlowOutputMetricFlags a_metrics_flags = DEFAULT_METRICS_FLAGS);
+        TcpFlowMetricsFilters a_metrics_flags = DEFAULT_METRICS_FLAGS);
 
     virtual void send(std::vector<PacketInfo> packets_info) final;
 
@@ -42,7 +42,7 @@ public:
 private:
     NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
                std::shared_ptr<IHost> a_receiver, bool a_ecn_capable, RTO a_rto,
-               TcpFlowOutputMetricFlags a_metrics_flags);
+               TcpFlowMetricsFilters a_metrics_flags);
 
     Packet create_data_packet(PacketInfo info, std::shared_ptr<IHost> sender,
                               std::shared_ptr<IHost> receiver);
@@ -92,7 +92,7 @@ private:
         std::shared_ptr<MetricsStorage> packet_reordering;
     } m_metrics;
 
-    TcpFlowOutputMetricFlags m_metrics_flags;
+    TcpFlowMetricsFilters m_metrics_filters;
 };
 
 }  // namespace sim

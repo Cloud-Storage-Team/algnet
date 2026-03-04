@@ -7,16 +7,16 @@
 
 namespace sim {
 
-struct MetricableCcOutputMetricsFlags {
+struct MetricableCcMetricsFilters {
     bool cwnd = true;
 };
 
 // Wrapper of std::unique_ptr<ITcpCC> that supports metrics collecting
 class MetricableCC : public ITcpCC, public IMetricable {
 public:
-    static constexpr inline MetricableCcOutputMetricsFlags DEFAULT_FLAGS = {};
+    static constexpr inline MetricableCcMetricsFilters DEFAULT_FLAGS = {};
     explicit MetricableCC(std::unique_ptr<ITcpCC> a_cc,
-                          MetricableCcOutputMetricsFlags a_flags);
+                          MetricableCcMetricsFilters a_flags);
 
     virtual void on_ack(TimeNs rtt, TimeNs avg_rtt, bool ecn_flag) final;
 
@@ -41,7 +41,7 @@ private:
     std::unique_ptr<ITcpCC> m_cc;
     std::shared_ptr<MetricsStorage> m_cwnd_storage =
         std::make_shared<MetricsStorage>();
-    MetricableCcOutputMetricsFlags m_metrics_flags;
+    MetricableCcMetricsFilters m_metrics_filters;
 };
 
 }  // namespace sim

@@ -3,7 +3,7 @@ topology_config_path: topology.yml
 presets:
   default-flow:
     type: tcp
-    output_metrics:
+    metrics_filters:
       rtt: true
       reordering: false
       delivery_rate: false
@@ -16,7 +16,7 @@ presets:
       
       cc:
         type: swift
-        # output_metrics:
+        # metrics_filters:
         #   cwnd: false
         base_target: 36000ns
 

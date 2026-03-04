@@ -10,7 +10,7 @@ std::string NewTcpFlow::m_packet_type_label = "type";
 
 std::shared_ptr<NewTcpFlow> NewTcpFlow::create_shared(
     Id a_id, std::shared_ptr<IHost> a_sender, std::shared_ptr<IHost> a_receiver,
-    bool a_ecn_capable, RTO a_rto, TcpFlowOutputMetricFlags a_metrics_flags) {
+    bool a_ecn_capable, RTO a_rto, TcpFlowMetricsFilters a_metrics_flags) {
     return std::shared_ptr<NewTcpFlow>(
         new NewTcpFlow(std::move(a_id), a_sender, a_receiver, a_ecn_capable,
                        std::move(a_rto), std::move(a_metrics_flags)));
@@ -35,14 +35,14 @@ Id NewTcpFlow::get_id() const { return m_id; }
 
 MetricsTable NewTcpFlow::get_metrics_table() const {
     MetricsTable metrics_table;
-    if (m_metrics_flags.rtt) {
+    if (m_metrics_filters.rtt) {
         metrics_table.emplace(FlowMetricMetadatas::RTT, m_metrics.rtt);
     }
-    if (m_metrics_flags.delivery_rate) {
+    if (m_metrics_filters.delivery_rate) {
         metrics_table.emplace(FlowMetricMetadatas::DELIVERY_RATE,
                               m_metrics.delivery_rate);
     }
-    if (m_metrics_flags.reordering) {
+    if (m_metrics_filters.reordering) {
         metrics_table.emplace(FlowMetricMetadatas::PACKET_REORDERING,
                               m_metrics.packet_reordering);
     }
@@ -54,7 +54,7 @@ void NewTcpFlow::write_inner_metrics(
 
 NewTcpFlow::NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
                        std::shared_ptr<IHost> a_receiver, bool a_ecn_capable,
-                       RTO a_rto, TcpFlowOutputMetricFlags a_metrics_flags)
+                       RTO a_rto, TcpFlowMetricsFilters a_metrics_flags)
     : m_id(std::move(a_id)),
       m_context(a_sender, a_receiver),
       m_ecn_capable(a_ecn_capable),
@@ -62,7 +62,7 @@ NewTcpFlow::NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
       m_metrics({std::make_shared<MetricsStorage>(),
                  std::make_shared<MetricsStorage>(),
                  std::make_shared<MetricsStorage>()}),
-      m_metrics_flags(std::move(a_metrics_flags)) {
+      m_metrics_filters(std::move(a_metrics_flags)) {
     if (!m_flag_manager.register_flag_by_amount(m_packet_type_label,
                                                 PacketType::ENUM_SIZE)) {
         throw std::runtime_error("Can not register packet type label");
