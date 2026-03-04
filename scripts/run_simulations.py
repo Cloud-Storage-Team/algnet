@@ -99,6 +99,7 @@ def main(args):
             simulation_config_filepath,
             "--output-dir",
             metrics_dir,
+            "--no-logs"
         ]
         if parsed_args.no_logs:
             simulator_args.append("--no-logs")

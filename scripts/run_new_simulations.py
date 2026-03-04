@@ -97,7 +97,8 @@ def main(args):
             abs_scenario_config_path,
             "--output-dir",
             metrics_dir,
-            "--use-new-simulator"
+            "--use-new-simulator",
+            "--no-logs"
         ]
         if parsed_args.no_logs:
             simulator_args.append("--no-logs")
