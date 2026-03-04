@@ -100,7 +100,6 @@ def main(args):
             "--output-dir",
             metrics_dir,
             "--use-new-simulator",
-            "--no-logs"
         ]
         if parsed_args.no_logs:
             simulator_args.append("--no-logs")
