@@ -6,7 +6,7 @@
 namespace sim {
 
 MetricableCC::MetricableCC(std::unique_ptr<ITcpCC> a_cc,
-                           MetricableCcMetricsFilters a_flags)
+                           MetricableCCMetricsFilters a_flags)
     : m_cc(std::move(a_cc)), m_metrics_filters(std::move(a_flags)) {}
 
 void MetricableCC::on_ack(TimeNs rtt, TimeNs avg_rtt, bool ecn_flag) {

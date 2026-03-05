@@ -35,17 +35,17 @@ Id NewTcpFlow::get_id() const { return m_id; }
 
 MetricsTable NewTcpFlow::get_metrics_table() const {
     MetricsTable metrics_table;
-    if (m_metrics_filters.rtt) {
-        metrics_table.emplace(FlowMetricMetadatas::RTT, m_metrics.rtt);
-    }
-    if (m_metrics_filters.delivery_rate) {
-        metrics_table.emplace(FlowMetricMetadatas::DELIVERY_RATE,
-                              m_metrics.delivery_rate);
-    }
-    if (m_metrics_filters.reordering) {
-        metrics_table.emplace(FlowMetricMetadatas::PACKET_REORDERING,
-                              m_metrics.packet_reordering);
-    }
+    auto add_if = [&](bool cond, const MetricId& metric_id,
+                      std::shared_ptr<MetricsStorage> metric_storage) {
+        if (cond) {
+            metrics_table.emplace(metric_id, metric_storage);
+        }
+    };
+    add_if(m_metrics_filters.rtt, FlowMetricMetadatas::RTT, m_metrics.rtt);
+    add_if(m_metrics_filters.delivery_rate, FlowMetricMetadatas::DELIVERY_RATE,
+           m_metrics.delivery_rate);
+    add_if(m_metrics_filters.reordering, FlowMetricMetadatas::PACKET_REORDERING,
+           m_metrics.packet_reordering);
     return metrics_table;
 }
 
