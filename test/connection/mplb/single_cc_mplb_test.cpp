@@ -22,7 +22,7 @@ TEST_F(SingleCCMplbTest, SimpleSend) {
     SizeByte packet_size(1500);
 
     auto mplb = sim::SingleCCMplb::create_shared(
-        std::move(cc), std::move(path_chooser), packet_size);
+        sim::MetricableCC(std::move(cc)), std::move(path_chooser), packet_size);
     bool delivered = false;
     OnDeliveryCallback callback = [&delivered]() { delivered = true; };
     auto res = mplb->send_data(
@@ -62,7 +62,7 @@ TEST_F(SingleCCMplbTest, IncorrectSend) {
     SizeByte big_packet_size(3000);
 
     auto mplb = sim::SingleCCMplb::create_shared(
-        std::move(cc), std::move(path_chooser), quota);
+        sim::MetricableCC(std::move(cc)), std::move(path_chooser), quota);
     bool delivered = false;
     OnDeliveryCallback callback = [&delivered]() { delivered = true; };
     auto res = mplb->send_data(

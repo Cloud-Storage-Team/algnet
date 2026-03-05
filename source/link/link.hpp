@@ -4,17 +4,25 @@
 
 #include "event/event.hpp"
 #include "link/i_link.hpp"
+#include "metrics/metrics_table/i_metricable.hpp"
 #include "packet_queue/link_queue.hpp"
 #include "utils/str_expected.hpp"
 
 namespace sim {
 
+struct LinkMetricsFilters {
+    bool queues_size = true;
+};
+
 class Link : public ILink, public std::enable_shared_from_this<Link> {
 public:
+    static constexpr inline LinkMetricsFilters DEFAULT_METRICS_FILTERS = {};
+
     Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
          SpeedGbps a_speed = SpeedGbps(1), TimeNs a_delay = TimeNs(0),
          SizeByte a_max_from_egress_buffer_size = SizeByte(4096),
-         SizeByte a_max_to_ingress_buffer_size = SizeByte(4096));
+         SizeByte a_max_to_ingress_buffer_size = SizeByte(4096),
+         LinkMetricsFilters a_metrics_filters = DEFAULT_METRICS_FILTERS);
     ~Link() = default;
 
     void schedule_arrival(Packet packet) final;
@@ -31,6 +39,11 @@ public:
     SizeByte get_max_to_ingress_queue_size() const final;
 
     Id get_id() const final;
+
+    virtual MetricsTable get_metrics_table() const final;
+
+    virtual void write_inner_metrics(
+        std::filesystem::path output_dir) const final;
 
 private:
     class Transmit : public Event {
@@ -52,6 +65,7 @@ private:
         Packet m_paket;
     };
 
+private:
     // Head packet leaves source egress queue
     void transmit();
 
@@ -63,6 +77,7 @@ private:
     // Schedule Transmit event
     void start_head_packet_sending();
 
+private:
     Id m_id;
     std::weak_ptr<IDevice> m_from;
     std::weak_ptr<IDevice> m_to;
@@ -70,11 +85,12 @@ private:
 
     TimeNs m_propagation_delay;
 
-    // Queue at the ingress port of the m_to device
+    // Queue at the egress port of the m_from device
     LinkQueue m_from_egress;
 
-    // Queue at the egress port of the m_to device
+    // Queue at the ingress port of the m_to device
     LinkQueue m_to_ingress;
+    LinkMetricsFilters m_metrics_filters;
 };
 
 }  // namespace sim

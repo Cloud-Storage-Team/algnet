@@ -5,8 +5,9 @@
 
 namespace sim {
 
-MetricableCC::MetricableCC(std::unique_ptr<ITcpCC> a_cc)
-    : m_cc(std::move(a_cc)) {}
+MetricableCC::MetricableCC(std::unique_ptr<ITcpCC> a_cc,
+                           MetricableCCMetricsFilters a_flags)
+    : m_cc(std::move(a_cc)), m_metrics_filters(std::move(a_flags)) {}
 
 void MetricableCC::on_ack(TimeNs rtt, TimeNs avg_rtt, bool ecn_flag) {
     m_cc->on_ack(rtt, avg_rtt, ecn_flag);
@@ -27,7 +28,11 @@ double MetricableCC::get_cwnd() const { return m_cc->get_cwnd(); }
 std::string MetricableCC::to_string() const { return m_cc->to_string(); }
 
 MetricsTable MetricableCC::get_metrics_table() const {
-    return MetricsTable{{CCMetricMetadatas::CWND, m_cwnd_storage}};
+    MetricsTable metrics_table;
+    if (m_metrics_filters.cwnd) {
+        metrics_table.emplace(CCMetricMetadatas::CWND, m_cwnd_storage);
+    }
+    return metrics_table;
 }
 
 void MetricableCC::write_inner_metrics(

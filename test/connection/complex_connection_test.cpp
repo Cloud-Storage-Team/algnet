@@ -41,7 +41,7 @@ public:
 
     // mplb
     std::shared_ptr<sim::SingleCCMplb> mplb = sim::SingleCCMplb::create_shared(
-        std::make_unique<sim::TcpTahoeCC>(),
+        sim::MetricableCC(std::make_unique<sim::TcpTahoeCC>()),
         std::make_unique<sim::RoundRobinPathChooser>(
             sim::IPathChooser::FlowsTable({{flow->get_id(), flow}})));
 

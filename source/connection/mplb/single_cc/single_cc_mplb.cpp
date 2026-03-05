@@ -12,22 +12,25 @@
 namespace sim {
 
 std::shared_ptr<SingleCCMplb> SingleCCMplb::create_shared(
-    std::unique_ptr<ITcpCC> a_cc, std::unique_ptr<IPathChooser> a_path_chooser,
-    SizeByte a_packet_size) {
-    return std::shared_ptr<SingleCCMplb>(new SingleCCMplb(
-        std::move(a_cc), std::move(a_path_chooser), a_packet_size));
+    MetricableCC a_cc, std::unique_ptr<IPathChooser> a_path_chooser,
+    SizeByte a_packet_size, SingleCCMetricsFilters a_metrics_filters) {
+    return std::shared_ptr<SingleCCMplb>(
+        new SingleCCMplb(std::move(a_cc), std::move(a_path_chooser),
+                         a_packet_size, std::move(a_metrics_filters)));
 }
 
-SingleCCMplb::SingleCCMplb(std::unique_ptr<ITcpCC> a_cc,
+SingleCCMplb::SingleCCMplb(MetricableCC a_cc,
                            std::unique_ptr<IPathChooser> a_path_chooser,
-                           SizeByte a_packet_size)
+                           SizeByte a_packet_size,
+                           SingleCCMetricsFilters a_metrics_filters)
     : m_cc(std::move(a_cc)),
       m_sent_data_size(0),
       m_delivered_data_size(0),
       m_packets_in_flight(0),
       m_path_chooser(std::move(a_path_chooser)),
       m_packet_size(a_packet_size),
-      m_delivery_rate_fairness(m_path_chooser->get_flows_table()) {}
+      m_delivery_rate_fairness(m_path_chooser->get_flows_table()),
+      m_metrics_filters(std::move(a_metrics_filters)) {}
 
 utils::StrExpected<void> SingleCCMplb::send_data(Data data,
                                                  OnDeliveryCallback callback) {
@@ -89,7 +92,12 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
 }
 
 MetricsTable SingleCCMplb::get_metrics_table() const {
-    return MetricsTable{{MplbMetricMetadatas::FAIRNESS, m_fairness_storage}};
+    MetricsTable metrics_table;
+    if (m_metrics_filters.fairness) {
+        metrics_table.emplace(MplbMetricMetadatas::FAIRNESS,
+                              m_fairness_storage);
+    }
+    return metrics_table;
 }
 
 void SingleCCMplb::write_inner_metrics(

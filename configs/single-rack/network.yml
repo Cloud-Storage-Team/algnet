@@ -1,99 +1,98 @@
 topology_config_path: topology.yml
 
 presets:
-  connection:
-    default:
-      type: mplb-connection
-      mplb:
-        type: single-cc
-        packet-size: 1500B
-        cc:
-          type: tahoe
-        path-chooser:
-          type: round-robin
-          flows:
-            flow:
-              type: tcp
+  default-connection:
+    type: mplb-connection
+    mplb:
+      type: single-cc
+      packet-size: 1500B
+      cc:
+        type: tahoe
+      path-chooser:
+        type: round-robin
+        flows:
+          flow:
+            type: tcp
 
 connections:
   conn_1--2:
     sender_id: host-1
     receiver_id: host-2
-    preset-name: default
+    preset-name: default-connection
   conn_1--3:
     sender_id: host-1
     receiver_id: host-3
-    preset-name: default
+    preset-name: default-connection
   conn_1--4:
     sender_id: host-1
     receiver_id: host-4
-    preset-name: default
+    preset-name: default-connection
   conn_1--5:
     sender_id: host-1
     receiver_id: host-5
-    preset-name: default
+    preset-name: default-connection
   conn_2--1:
     sender_id: host-2
     receiver_id: host-1
-    preset-name: default
+    preset-name: default-connection
   conn_2--3:
     sender_id: host-2
     receiver_id: host-3
-    preset-name: default
+    preset-name: default-connection
   conn_2--4:
     sender_id: host-2
     receiver_id: host-4
-    preset-name: default
+    preset-name: default-connection
   conn_2--5:
     sender_id: host-2
     receiver_id: host-5
-    preset-name: default
+    preset-name: default-connection
   conn_3--1:
     sender_id: host-3
     receiver_id: host-1
-    preset-name: default
+    preset-name: default-connection
   conn_3--2:
     sender_id: host-3
     receiver_id: host-2
-    preset-name: default
+    preset-name: default-connection
   conn_3--4:
     sender_id: host-3
     receiver_id: host-4
-    preset-name: default
+    preset-name: default-connection
   conn_3--5:
     sender_id: host-3
     receiver_id: host-5
-    preset-name: default
+    preset-name: default-connection
   conn_4--1:
     sender_id: host-4
     receiver_id: host-1
-    preset-name: default
+    preset-name: default-connection
   conn_4--2:
     sender_id: host-4
     receiver_id: host-2
-    preset-name: default
+    preset-name: default-connection
   conn_4--3:
     sender_id: host-4
     receiver_id: host-3
-    preset-name: default
+    preset-name: default-connection
   conn_4--5:
     sender_id: host-4
     receiver_id: host-5
-    preset-name: default
+    preset-name: default-connection
   conn_5--1:
     sender_id: host-5
     receiver_id: host-1
-    preset-name: default
+    preset-name: default-connection
   conn_5--2:
     sender_id: host-5
     receiver_id: host-2
-    preset-name: default
+    preset-name: default-connection
   conn_5--3:
     sender_id: host-5
     receiver_id: host-3
-    preset-name: default
+    preset-name: default-connection
   conn_5--4:
     sender_id: host-5
     receiver_id: host-4
-    preset-name: default
+    preset-name: default-connection
 

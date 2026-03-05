@@ -14,6 +14,17 @@ std::shared_ptr<ILink> new_parse_i_link(
     return parse_link(link_node, device_table);
 }
 
+static LinkMetricsFilters parse_metrics_filters(
+    const ConfigNodeWithPresetExpected& node) {
+    LinkMetricsFilters filters = Link::DEFAULT_METRICS_FILTERS;
+    if (const ConfigNodeWithPresetExpected& queue_sizes_node =
+            node["queue_sizes"];
+        queue_sizes_node) {
+        filters.queues_size = queue_sizes_node.value().as_or_throw<bool>();
+    }
+    return filters;
+}
+
 static std::shared_ptr<Link> parse_link(
     const ConfigNodeWithPreset& link_node,
     const utils::IdTable<IDevice>& device_table) {
@@ -33,13 +44,19 @@ static std::shared_ptr<Link> parse_link(
 
     const SpeedGbps speed =
         parse_speed(link_node["throughput"].value_or_throw().get_node());
-    const TimeNs delay = parse_time(link_node["latency"].value_or_throw().get_node());
+    const TimeNs delay =
+        parse_time(link_node["latency"].value_or_throw().get_node());
     SizeByte egress_buffer_size =
         parse_size(link_node["egress_buffer_size"].value_or_throw().get_node());
     SizeByte ingress_buffer_size = parse_size(
         link_node["ingress_buffer_size"].value_or_throw().get_node());
+
+    LinkMetricsFilters metrics_filters =
+        parse_metrics_filters(link_node["metrics_filters"]);
+
     return std::make_shared<Link>(id, from_ptr, to_ptr, speed, delay,
-                                  egress_buffer_size, ingress_buffer_size);
+                                  egress_buffer_size, ingress_buffer_size,
+                                  metrics_filters);
 }
 
 }  // namespace sim
