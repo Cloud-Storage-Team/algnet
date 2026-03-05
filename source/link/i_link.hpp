@@ -3,13 +3,14 @@
 #include <optional>
 
 #include "device/interfaces/i_device.hpp"
+#include "metrics/metrics_table/i_metricable.hpp"
 
 namespace sim {
 
 /**
  * Unidirectional link from the source to a_next
  */
-class ILink : public Identifiable {
+class ILink : public Identifiable, public IMetricable {
 public:
     virtual ~ILink() = default;
 

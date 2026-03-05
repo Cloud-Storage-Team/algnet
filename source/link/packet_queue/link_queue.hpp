@@ -1,5 +1,6 @@
 #pragma once
 
+#include "metrics/metrics_storage.hpp"
 #include "simple_packet_queue.hpp"
 
 namespace sim {
@@ -24,9 +25,15 @@ public:
     bool empty() const final;
     SizeByte get_max_size() const final;
 
+    std::shared_ptr<const MetricsStorage> get_queue_size_storage() const;
+
 private:
+    void record_size();
+
     SimplePacketQueue m_queue;
     Id m_link_id;
     LinkQueueType m_type;
+
+    std::shared_ptr<MetricsStorage> m_queue_size_storage;
 };
 }  // namespace sim

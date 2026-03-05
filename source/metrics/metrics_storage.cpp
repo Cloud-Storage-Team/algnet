@@ -42,6 +42,9 @@ matplot::figure_handle MetricsStorage::get_picture(
 
 void MetricsStorage::draw_plot(std::filesystem::path path,
                                PlotMetadata metadata) const {
+    if (m_records.empty()) {
+        return;
+    }
     auto fig = get_picture(metadata);
     matplot::safe_save(fig, path.string());
 }

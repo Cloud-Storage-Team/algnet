@@ -4,6 +4,8 @@ presets:
     throughput: 100Gbps
     ingress_buffer_size: 64KB
     egress_buffer_size: 64KB
+    metrics_filters:
+      queue_sizes: false
 
 packet-spraying:
   type: random

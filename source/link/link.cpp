@@ -9,7 +9,8 @@ namespace sim {
 Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
            SpeedGbps a_speed, TimeNs a_delay,
            SizeByte a_max_from_egress_buffer_size,
-           SizeByte a_max_to_ingress_buffer_size)
+           SizeByte a_max_to_ingress_buffer_size,
+           LinkMetricsFilters a_metrics_filters)
     : m_id(a_id),
       m_from(a_from),
       m_to(a_to),
@@ -18,7 +19,8 @@ Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
       m_from_egress(a_max_from_egress_buffer_size, a_id,
                     LinkQueueType::FromEgress),
       m_to_ingress(a_max_to_ingress_buffer_size, a_id,
-                   LinkQueueType::ToIngress) {
+                   LinkQueueType::ToIngress),
+      m_metrics_filters(a_metrics_filters) {
     if (a_from.expired() || a_to.expired()) {
         LOG_WARN("Passed link to device is expired");
     } else if (a_speed == SpeedGbps(0)) {
@@ -91,6 +93,20 @@ SizeByte Link::get_max_to_ingress_queue_size() const {
 }
 
 Id Link::get_id() const { return m_id; }
+
+MetricsTable Link::get_metrics_table() const {
+    MetricsTable result;
+    if (m_metrics_filters.queues_size) {
+        result.emplace("ingress queue size",
+                       m_from_egress.get_queue_size_storage());
+        result.emplace("egress queue size",
+                       m_to_ingress.get_queue_size_storage());
+    }
+    return result;
+}
+
+void Link::write_inner_metrics(
+    [[maybe_unused]] std::filesystem::path output_dir) const {}
 
 Link::Arrive::Arrive(TimeNs a_time, std::weak_ptr<Link> a_link, Packet a_packet)
     : Event(a_time), m_link(a_link), m_paket(a_packet) {}
