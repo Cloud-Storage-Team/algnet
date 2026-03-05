@@ -20,6 +20,9 @@ void NewTcpFlow::send(std::vector<PacketInfo> packets_info) {
     if (packets_info.empty()) {
         return;
     }
+    if (!m_context.start_time.has_value()) {
+        m_context.start_time = Scheduler::get_instance().get_current_time();
+    }
     auto sender = m_context.sender;
     auto receiver = m_context.receiver;
     for (auto info : packets_info) {
@@ -161,6 +164,7 @@ void NewTcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
                         m_id, ack.to_string()));
         return;
     }
+    m_context.last_ack_receive_time = now;
 
     m_context.delivered_size += data_packet_size;
 
