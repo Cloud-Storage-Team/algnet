@@ -75,7 +75,7 @@ TEST_F(ComplexConnectionTest, SendOnePortion) {
     // because portion size might not divide packet size
     ASSERT_GE(mplb_ctx.delivered_data_size, portion_size);
 
-    ASSERT_EQ(connection_ctx.total_data_confirmed, portion_size);
+    ASSERT_EQ(connection_ctx.total_data_delivered, portion_size);
 
     ASSERT_EQ(count_callback_called, 1);
 }

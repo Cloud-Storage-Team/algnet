@@ -19,6 +19,8 @@ presets:
               type: tcp
             flow-3:
               type: tcp
+            flow-4:
+              type: tcp
 
 connections:
   connection-pod1_host1--pod2_host1:

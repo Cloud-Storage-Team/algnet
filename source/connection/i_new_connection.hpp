@@ -6,13 +6,16 @@
 #include "metrics/metrics_table/i_metricable.hpp"
 #include "types.hpp"
 #include "utils/identifier_factory.hpp"
+#include "utils/statistics.hpp"
 #include "utils/str_expected.hpp"
 
 namespace sim {
 
 struct ConnectionContext {
-    SizeByte total_data_added;
-    SizeByte total_data_confirmed;
+    SizeByte total_data_added = SizeByte(0);
+    SizeByte total_data_delivered = SizeByte(0);
+    utils::Statistics<SpeedGbps> delivery_rate_statistics =
+        utils::Statistics<SpeedGbps>();
 };
 
 // Logical path in network. Corresponds to application layer in TCP\IP stack
