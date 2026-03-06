@@ -15,7 +15,8 @@ void NewConnectionsSummary::write_to_csv(
     utils::create_all_directories(output_path);
     std::ofstream out(output_path);
     if (!out) {
-        throw std::runtime_error("Failed to create file for summary");
+        throw std::runtime_error(
+            fmt::format("Failed to create file for summary: {}", output_path.string()));
     }
     out << "Connection id";
     out << ", Sent size (bytes)";

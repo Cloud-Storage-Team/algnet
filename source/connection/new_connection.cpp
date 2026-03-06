@@ -101,7 +101,7 @@ void NewConnection::process_data_delivery(DataId id, SizeByte delivery_size,
                                           TimeNs send_time) {
     m_context.total_data_delivered += delivery_size;
 
-    TimeNs now = Scheduler::get_instance().get_current_time();
+    const TimeNs now = Scheduler::get_instance().get_current_time();
     SpeedGbps delivery_rate =
         (m_context.total_data_delivered - total_delivered_on_send) /
         (now - send_time);
