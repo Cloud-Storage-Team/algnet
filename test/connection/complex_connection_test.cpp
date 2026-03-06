@@ -36,8 +36,8 @@ public:
     std::shared_ptr<sim::Link> back_link =
         std::make_shared<sim::Link>("back_link", receiver, sender);
 
-    std::shared_ptr<sim::NewTcpFlow> flow =
-        sim::NewTcpFlow::create_shared("flow", sender, receiver);
+    std::shared_ptr<sim::NewTcpFlow> flow = sim::NewTcpFlow::create_shared(
+        "flow", sim::FlowFourTuple(sim::Endpoints(sender, receiver)));
 
     // mplb
     std::shared_ptr<sim::SingleCCMplb> mplb = sim::SingleCCMplb::create_shared(
