@@ -1,6 +1,5 @@
 #pragma once
-#include "endpoints.hpp"
-
+#include <cstdint>
 namespace sim {
 
 using Port = std::uint32_t;

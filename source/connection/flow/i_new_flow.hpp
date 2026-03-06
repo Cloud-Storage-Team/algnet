@@ -11,7 +11,6 @@
 namespace sim {
 
 struct FlowContext : FlowFourTuple {
-    using FlowFourTuple::FlowFourTuple;
     SizeByte sent_size = SizeByte(0);
     SizeByte delivered_size = SizeByte(0);
     SizeByte retransmit_size = SizeByte(0);
@@ -20,6 +19,8 @@ struct FlowContext : FlowFourTuple {
     std::optional<TimeNs> last_ack_receive_time = std::nullopt;
     utils::Statistics<TimeNs> rtt_statistics;
     utils::Statistics<SpeedGbps> delivery_rate_statistics;
+
+    FlowContext(FlowFourTuple four_tuple) : FlowFourTuple(four_tuple) {}
 };
 
 // Transport layer interface for reliable data delivery along single physical
