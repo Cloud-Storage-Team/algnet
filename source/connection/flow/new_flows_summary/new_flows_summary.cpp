@@ -45,7 +45,6 @@ void NewFlowsSummary::write_to_csv(std::filesystem::path output_path) const {
         out << ", " << fct;
         out << "\n";
     }
-    out.close();
 }
 
 }  // namespace sim
