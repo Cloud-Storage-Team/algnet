@@ -9,10 +9,10 @@ namespace sim {
 std::string NewTcpFlow::m_packet_type_label = "type";
 
 std::shared_ptr<NewTcpFlow> NewTcpFlow::create_shared(
-    Id a_id, std::shared_ptr<IHost> a_sender, std::shared_ptr<IHost> a_receiver,
-    bool a_ecn_capable, RTO a_rto, TcpFlowMetricsFilters a_metrics_flags) {
+    Id a_id, FlowFourTuple a_four_tuple, bool a_ecn_capable, RTO a_rto,
+    TcpFlowMetricsFilters a_metrics_flags) {
     return std::shared_ptr<NewTcpFlow>(
-        new NewTcpFlow(std::move(a_id), a_sender, a_receiver, a_ecn_capable,
+        new NewTcpFlow(std::move(a_id), std::move(a_four_tuple), a_ecn_capable,
                        std::move(a_rto), std::move(a_metrics_flags)));
 }
 
@@ -55,11 +55,10 @@ MetricsTable NewTcpFlow::get_metrics_table() const {
 void NewTcpFlow::write_inner_metrics(
     [[maybe_unused]] std::filesystem::path output_dir) const {};
 
-NewTcpFlow::NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
-                       std::shared_ptr<IHost> a_receiver, bool a_ecn_capable,
+NewTcpFlow::NewTcpFlow(Id a_id, FlowFourTuple a_four_tuple, bool a_ecn_capable,
                        RTO a_rto, TcpFlowMetricsFilters a_metrics_flags)
     : m_id(std::move(a_id)),
-      m_context(a_sender, a_receiver),
+      m_context(a_four_tuple),
       m_ecn_capable(a_ecn_capable),
       m_rto(std::move(a_rto)),
       m_metrics({std::make_shared<MetricsStorage>(),

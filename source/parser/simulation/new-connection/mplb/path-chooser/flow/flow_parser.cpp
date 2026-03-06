@@ -56,9 +56,10 @@ std::shared_ptr<NewTcpFlow> parse_tcp_flow(
         (metrics_flags_node ? parse_metrics_flags(metrics_flags_node.value())
                             : NewTcpFlow::DEFAULT_METRICS_FLAGS);
 
+    // TODO: generete ports for FourTuple
     return NewTcpFlow::create_shared(flow_node.get_name_or_throw(),
-                                     endpoints.sender, endpoints.receiver,
-                                     ecn_capable, rto, metrics_flags);
+                                     FlowFourTuple(endpoints), ecn_capable, rto,
+                                     metrics_flags);
 }
 
 }  // namespace sim
