@@ -20,13 +20,14 @@ std::string to_string(LinkQueueType type) {
 }
 
 LinkQueue::LinkQueue(SizeByte a_queue_size, Id a_link_id, LinkQueueType a_type)
-    : m_queue(a_queue_size), m_link_id(a_link_id), m_type(a_type) {}
+    : m_queue(a_queue_size),
+      m_link_id(a_link_id),
+      m_type(a_type),
+      m_queue_size_storage(std::make_shared<MetricsStorage>()) {}
 
 bool LinkQueue::push(Packet packet) {
     bool result = m_queue.push(std::move(packet));
-    MetricsCollector::get_instance().add_queue_size(
-        m_link_id, Scheduler::get_instance().get_current_time(),
-        m_queue.get_size(), m_type);
+    record_size();
     return result;
 }
 
@@ -34,9 +35,7 @@ Packet LinkQueue::front() const { return m_queue.front(); }
 
 void LinkQueue::pop() {
     m_queue.pop();
-    MetricsCollector::get_instance().add_queue_size(
-        m_link_id, Scheduler::get_instance().get_current_time(),
-        m_queue.get_size(), m_type);
+    record_size();
 }
 
 SizeByte LinkQueue::get_size() const { return m_queue.get_size(); }
@@ -44,5 +43,18 @@ SizeByte LinkQueue::get_size() const { return m_queue.get_size(); }
 bool LinkQueue::empty() const { return m_queue.empty(); }
 
 SizeByte LinkQueue::get_max_size() const { return m_queue.get_max_size(); }
+
+std::shared_ptr<const MetricsStorage> LinkQueue::get_queue_size_storage()
+    const {
+    return m_queue_size_storage;
+}
+
+void LinkQueue::record_size() {
+    TimeNs now = Scheduler::get_instance().get_current_time();
+    SizeByte queue_size = m_queue.get_size();
+    MetricsCollector::get_instance().add_queue_size(m_link_id, now, queue_size,
+                                                    m_type);
+    m_queue_size_storage->add_record(now, queue_size.value());
+}
 
 }  // namespace sim

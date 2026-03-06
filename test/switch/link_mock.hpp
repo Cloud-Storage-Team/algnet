@@ -27,6 +27,13 @@ public:
 
     Id get_id() const final;
 
+    virtual sim::MetricsTable get_metrics_table() const final {
+        return sim::MetricsTable{};
+    }
+
+    virtual void write_inner_metrics(
+        [[maybe_unused]] std::filesystem::path output_dir) const final {};
+
 private:
     std::weak_ptr<sim::IDevice> m_from;
     std::weak_ptr<sim::IDevice> m_to;

@@ -7,13 +7,26 @@
 
 namespace sim {
 
+struct TcpFlowMetricsFilters {
+    bool rtt = true;
+    bool delivery_rate = true;
+    bool reordering = true;
+};
+
 class NewTcpFlow : public INewFlow,
                    public std::enable_shared_from_this<NewTcpFlow> {
 public:
+    constexpr static inline RTO DEFAULT_START_RTO =
+        RTO(TimeNs(2000), Time<Second>(1));
+
+    constexpr static inline bool DEFAULT_ECN_CAPABLE = true;
+    constexpr static inline TcpFlowMetricsFilters DEFAULT_METRICS_FLAGS = {};
+
     static std::shared_ptr<NewTcpFlow> create_shared(
         Id a_id, std::shared_ptr<IHost> a_sender,
-        std::shared_ptr<IHost> a_receiver, bool a_ecn_capable = true,
-        RTO a_rto = DEFAULT_START_RTO);
+        std::shared_ptr<IHost> a_receiver,
+        bool a_ecn_capable = DEFAULT_ECN_CAPABLE, RTO a_rto = DEFAULT_START_RTO,
+        TcpFlowMetricsFilters a_metrics_flags = DEFAULT_METRICS_FLAGS);
 
     virtual void send(std::vector<PacketInfo> packets_info) final;
 
@@ -28,8 +41,8 @@ public:
 
 private:
     NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
-               std::shared_ptr<IHost> a_receiver, bool a_ecn_capable,
-               RTO a_rto);
+               std::shared_ptr<IHost> a_receiver, bool a_ecn_capable, RTO a_rto,
+               TcpFlowMetricsFilters a_metrics_flags);
 
     Packet create_data_packet(PacketInfo info, std::shared_ptr<IHost> sender,
                               std::shared_ptr<IHost> receiver);
@@ -59,9 +72,6 @@ private:
     static std::string m_packet_type_label;
     const static inline TTL M_MAX_TTL = 31;
 
-    constexpr static inline RTO DEFAULT_START_RTO =
-        RTO(TimeNs(2000), Time<Second>(1));
-
     // flag manager that used for every packet
     BaseFlagManager m_flag_manager;
 
@@ -81,6 +91,8 @@ private:
         std::shared_ptr<MetricsStorage> delivery_rate;
         std::shared_ptr<MetricsStorage> packet_reordering;
     } m_metrics;
+
+    TcpFlowMetricsFilters m_metrics_filters;
 };
 
 }  // namespace sim

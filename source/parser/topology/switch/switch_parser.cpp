@@ -34,7 +34,7 @@ std::unique_ptr<IPacketHasher> SwitchParser::parse_hasher(
                            .value_or_throw()
                            .as<std::string>()
                            .value_or_throw();
-    if (type == "random") {
+`    if (type == "random") {
         return std::make_unique<RandomHasher>();
     }
     if (type == "ecmp") {
