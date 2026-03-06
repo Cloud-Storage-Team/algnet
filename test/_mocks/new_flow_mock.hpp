@@ -7,7 +7,7 @@ class NewFlowMock : public sim::INewFlow {
 public:
     NewFlowMock(bool a_send_emmediately = true)
         : m_send_immediately(a_send_emmediately),
-          m_context{sim::FlowFourT`uple(
+          m_context{sim::FlowFourTuple(
               sim::Endpoints(std::shared_ptr<sim::IHost>(nullptr),
                              std::shared_ptr<sim::IHost>(nullptr)))} {}
 
