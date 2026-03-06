@@ -12,9 +12,9 @@ void Network::recalculate_pathes() { m_ctx.topology.recalculate_paths(); }
 void Network::save_metrics(std::filesystem::path output_dir) const {
     const auto& connections_table = m_ctx.connections_table;
 
-    collect_and_save_all_metrics(connections_table, output_dir);
+    collect_and_save_all_metrics(connections_table, output_dir / "connections");
     NewConnectionsSummary(connections_table)
-        .write_to_csv(output_dir / "summary.csv");
+        .write_to_csv(output_dir / "connections_summary.csv");
 
     std::filesystem::path link_metrics_path = output_dir / "links";
     for (const auto& [link_id, link] :

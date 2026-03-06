@@ -108,7 +108,7 @@ void SingleCCMplb::write_inner_metrics(
     collect_and_save_all_metrics(flows_table, flows_output_path);
 
     NewFlowsSummary(flows_table)
-        .write_to_csv(flows_output_path / "summary.csv");
+        .write_to_csv(output_dir_path / "flows_summary.csv");
 
     m_cc.write_all_metrics(output_dir_path / "cc");
 }

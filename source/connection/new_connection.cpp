@@ -24,6 +24,10 @@ utils::StrExpected<void> NewConnection::send_data(Data data,
                         "id already sent",
                         m_id, data.to_string()));
     }
+    if (m_context.first_send_data_time == std::nullopt) {
+        m_context.first_send_data_time =
+            Scheduler::get_instance().get_current_time();
+    }
     m_data_context_table[data_id] =
         DataContext{data.size, SizeByte(0), SizeByte(0), callback};
     m_context.total_data_added += data.size;
@@ -111,6 +115,7 @@ void NewConnection::process_data_delivery(DataId id, SizeByte delivery_size,
         if (context.delivered >= context.total_size) {
             LOG_INFO(fmt::format("All data with id {} delivered; call callback",
                                  id.to_string()));
+            m_context.last_data_delivery_time = now;
             context.callback();
         }
     } else {
