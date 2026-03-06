@@ -36,8 +36,8 @@ public:
     std::shared_ptr<sim::Link> back_link =
         std::make_shared<sim::Link>("back_link", receiver, sender);
 
-    std::shared_ptr<sim::NewTcpFlow> flow =
-        sim::NewTcpFlow::create_shared("flow", sender, receiver);
+    std::shared_ptr<sim::NewTcpFlow> flow = sim::NewTcpFlow::create_shared(
+        "flow", sim::FlowFourTuple(sim::Endpoints(sender, receiver)));
 
     // mplb
     std::shared_ptr<sim::SingleCCMplb> mplb = sim::SingleCCMplb::create_shared(
@@ -75,7 +75,7 @@ TEST_F(ComplexConnectionTest, SendOnePortion) {
     // because portion size might not divide packet size
     ASSERT_GE(mplb_ctx.delivered_data_size, portion_size);
 
-    ASSERT_EQ(connection_ctx.total_data_confirmed, portion_size);
+    ASSERT_EQ(connection_ctx.total_data_delivered, portion_size);
 
     ASSERT_EQ(count_callback_called, 1);
 }

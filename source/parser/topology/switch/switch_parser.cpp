@@ -12,12 +12,14 @@
 namespace sim {
 
 std::shared_ptr<ISwitch> SwitchParser::parse_i_switch(
-    const ConfigNodeWithPreset& switch_node, const ConfigNode& packet_spraying_node) {
+    const ConfigNodeWithPreset& switch_node,
+    const ConfigNode& packet_spraying_node) {
     return parse_default_switch(switch_node, packet_spraying_node);
 }
 
 std::shared_ptr<Switch> SwitchParser::parse_default_switch(
-    const ConfigNodeWithPreset& switch_node, const ConfigNode& packet_spraying_node) {
+    const ConfigNodeWithPreset& switch_node,
+    const ConfigNode& packet_spraying_node) {
     Id id = switch_node.get_name_or_throw();
     ConfigNodeWithPresetExpected ecn_node = switch_node["ecn"];
     ECN ecn(1.0, 1.0, 0.0);

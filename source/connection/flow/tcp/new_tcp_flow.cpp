@@ -9,16 +9,19 @@ namespace sim {
 std::string NewTcpFlow::m_packet_type_label = "type";
 
 std::shared_ptr<NewTcpFlow> NewTcpFlow::create_shared(
-    Id a_id, std::shared_ptr<IHost> a_sender, std::shared_ptr<IHost> a_receiver,
-    bool a_ecn_capable, RTO a_rto, TcpFlowMetricsFilters a_metrics_flags) {
+    Id a_id, FlowFourTuple a_four_tuple, bool a_ecn_capable, RTO a_rto,
+    TcpFlowMetricsFilters a_metrics_flags) {
     return std::shared_ptr<NewTcpFlow>(
-        new NewTcpFlow(std::move(a_id), a_sender, a_receiver, a_ecn_capable,
+        new NewTcpFlow(std::move(a_id), std::move(a_four_tuple), a_ecn_capable,
                        std::move(a_rto), std::move(a_metrics_flags)));
 }
 
 void NewTcpFlow::send(std::vector<PacketInfo> packets_info) {
     if (packets_info.empty()) {
         return;
+    }
+    if (!m_context.start_time.has_value()) {
+        m_context.start_time = Scheduler::get_instance().get_current_time();
     }
     auto sender = m_context.sender;
     auto receiver = m_context.receiver;
@@ -52,11 +55,10 @@ MetricsTable NewTcpFlow::get_metrics_table() const {
 void NewTcpFlow::write_inner_metrics(
     [[maybe_unused]] std::filesystem::path output_dir) const {};
 
-NewTcpFlow::NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
-                       std::shared_ptr<IHost> a_receiver, bool a_ecn_capable,
+NewTcpFlow::NewTcpFlow(Id a_id, FlowFourTuple a_four_tuple, bool a_ecn_capable,
                        RTO a_rto, TcpFlowMetricsFilters a_metrics_flags)
     : m_id(std::move(a_id)),
-      m_context(a_sender, a_receiver),
+      m_context(a_four_tuple),
       m_ecn_capable(a_ecn_capable),
       m_rto(std::move(a_rto)),
       m_metrics({std::make_shared<MetricsStorage>(),
@@ -86,6 +88,8 @@ Packet NewTcpFlow::create_data_packet(PacketInfo info,
 
     packet.data_id = std::move(info.id);
     packet.source_id = sender->get_id();
+    packet.sender_port = m_context.sender_port;
+    packet.receriver_port = m_context.receriver_port;
     packet.dest_id = receiver->get_id();
     packet.size = info.packet_size;
 
@@ -134,7 +138,9 @@ void NewTcpFlow::process_data_packet(const Packet& data,
         m_packet_reordering.value());
     Packet ack = data;
     ack.source_id = m_context.receiver->get_id();
+    ack.sender_port = m_context.receriver_port;
     ack.dest_id = m_context.sender->get_id();
+    ack.receriver_port = m_context.sender_port;
     ack.size = SizeByte(1);
     ack.ttl = M_MAX_TTL;
     ack.flags.set_flag(m_packet_type_label, PacketType::ACK)
@@ -171,6 +177,7 @@ void NewTcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
                         m_id, ack.to_string()));
         return;
     }
+    m_context.last_ack_receive_time = now;
 
     m_context.delivered_size += data_packet_size;
 

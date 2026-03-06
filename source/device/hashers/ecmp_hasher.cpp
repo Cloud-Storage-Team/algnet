@@ -9,7 +9,8 @@ std::uint32_t ECMPHasher::get_hash(const Packet& packet) {
 
     std::hash<std::string> hasher;
     std::string header_str =
-        fmt::format("{} {} {}", flow_id, packet.source_id, packet.dest_id);
+        fmt::format("{} {} {} {} {}", flow_id, packet.source_id, packet.dest_id,
+                    packet.sender_port, packet.receriver_port);
     return static_cast<uint32_t>(hasher(header_str));
 }
 

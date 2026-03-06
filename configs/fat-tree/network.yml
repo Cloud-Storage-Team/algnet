@@ -4,19 +4,24 @@ presets:
   default-flow:
     type: tcp
     metrics_filters:
-      rtt: true
+      rtt: false
       reordering: false
       delivery_rate: false
-  
+
   default-connection:
     type: mplb-connection
     mplb:
       type: single-cc
       packet-size: 1500B
-      
+
+      metrics_filters:
+        fairness: false
+
       cc:
         type: swift
-        base_target: 36000ns
+        base_target: 20000ns
+        metrics_filters:
+          cwnd: false
 
       path-chooser:
         type: round-robin
@@ -24,11 +29,11 @@ presets:
           flow-1:
             type: tcp
             preset-name: default-flow
-          
+
           flow-2:
             type: tcp
             preset-name: default-flow
-          
+
           flow-3:
             type: tcp
             preset-name: default-flow

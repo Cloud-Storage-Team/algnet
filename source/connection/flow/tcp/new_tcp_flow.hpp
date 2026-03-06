@@ -23,9 +23,8 @@ public:
     constexpr static inline TcpFlowMetricsFilters DEFAULT_METRICS_FLAGS = {};
 
     static std::shared_ptr<NewTcpFlow> create_shared(
-        Id a_id, std::shared_ptr<IHost> a_sender,
-        std::shared_ptr<IHost> a_receiver,
-        bool a_ecn_capable = DEFAULT_ECN_CAPABLE, RTO a_rto = DEFAULT_START_RTO,
+        Id a_id, FlowFourTuple a_four_tuple, bool a_ecn_capable = true,
+        RTO a_rto = DEFAULT_START_RTO,
         TcpFlowMetricsFilters a_metrics_flags = DEFAULT_METRICS_FLAGS);
 
     virtual void send(std::vector<PacketInfo> packets_info) final;
@@ -40,9 +39,8 @@ public:
         std::filesystem::path output_dir) const final;
 
 private:
-    NewTcpFlow(Id a_id, std::shared_ptr<IHost> a_sender,
-               std::shared_ptr<IHost> a_receiver, bool a_ecn_capable, RTO a_rto,
-               TcpFlowMetricsFilters a_metrics_flags);
+    NewTcpFlow(Id a_id, FlowFourTuple a_four_tuple, bool a_ecn_capable,
+               RTO a_rto, TcpFlowMetricsFilters a_metrics_flags);
 
     Packet create_data_packet(PacketInfo info, std::shared_ptr<IHost> sender,
                               std::shared_ptr<IHost> receiver);

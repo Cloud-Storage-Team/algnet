@@ -33,6 +33,10 @@ private:
 
     void send_new_portion();
 
+    void process_data_delivery(DataId data_id, SizeByte delivery_size,
+                               SizeByte total_delivered_on_send,
+                               TimeNs send_time);
+
     struct DataContext {
         SizeByte total_size;
         SizeByte sent;

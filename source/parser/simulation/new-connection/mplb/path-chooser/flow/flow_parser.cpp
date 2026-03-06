@@ -1,5 +1,7 @@
 #include "flow_parser.hpp"
 
+#include <random>
+
 #include "connection/flow/tcp/new_tcp_flow.hpp"
 #include "parser/parse_utils.hpp"
 
@@ -41,9 +43,18 @@ TcpFlowMetricsFilters parse_metrics_flags(const ConfigNodeWithPreset& node) {
     return flags;
 }
 
+EndpointPorts generate_ports() {
+    static constexpr size_t RANDOM_SEED = 31;
+    static std::mt19937 rnd(RANDOM_SEED);
+
+    static constexpr size_t MAX_PORT = 5000;
+
+    static std::uniform_int_distribution<int> range(0, MAX_PORT);
+    return EndpointPorts(range(rnd), range(rnd));
+}
+
 std::shared_ptr<NewTcpFlow> parse_tcp_flow(
     const ConfigNodeWithPreset& flow_node, Endpoints endpoints) {
-    // TODO: add RTO & ecn_capable parsing (I am too lazy, sorry)
     const ConfigNodeWithPresetExpected& rto_node = flow_node["rto"];
     RTO rto = (rto_node ? parse_rto(rto_node.value())
                         : NewTcpFlow::DEFAULT_START_RTO);
@@ -57,8 +68,10 @@ std::shared_ptr<NewTcpFlow> parse_tcp_flow(
         (metrics_flags_node ? parse_metrics_flags(metrics_flags_node.value())
                             : NewTcpFlow::DEFAULT_METRICS_FLAGS);
 
+    EndpointPorts ports = generate_ports();
+
     return NewTcpFlow::create_shared(flow_node.get_name_or_throw(),
-                                     endpoints.sender, endpoints.receiver,
+                                     FlowFourTuple(endpoints, ports),
                                      ecn_capable, rto, metrics_flags);
 }
 

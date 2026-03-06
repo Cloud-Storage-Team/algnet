@@ -1,7 +1,7 @@
 #pragma once
 
 #include "device/interfaces/i_host.hpp"
-#include "endpoints.hpp"
+#include "flow_four_tuple.hpp"
 #include "metrics/metrics_storage.hpp"
 #include "metrics/metrics_table/i_metricable.hpp"
 #include "packet_ack_info.hpp"
@@ -10,8 +10,7 @@
 
 namespace sim {
 
-struct FlowContext : Endpoints {
-    using Endpoints::Endpoints;
+struct FlowContext : FlowFourTuple {
     SizeByte sent_size = SizeByte(0);
     SizeByte delivered_size = SizeByte(0);
     SizeByte retransmit_size = SizeByte(0);
@@ -20,6 +19,8 @@ struct FlowContext : Endpoints {
     std::optional<TimeNs> last_ack_receive_time = std::nullopt;
     utils::Statistics<TimeNs> rtt_statistics;
     utils::Statistics<SpeedGbps> delivery_rate_statistics;
+
+    FlowContext(FlowFourTuple four_tuple) : FlowFourTuple(four_tuple) {}
 };
 
 // Transport layer interface for reliable data delivery along single physical

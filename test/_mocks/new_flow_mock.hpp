@@ -7,8 +7,9 @@ class NewFlowMock : public sim::INewFlow {
 public:
     NewFlowMock(bool a_send_emmediately = true)
         : m_send_immediately(a_send_emmediately),
-          m_context{std::shared_ptr<sim::IHost>(nullptr),
-                    std::shared_ptr<sim::IHost>(nullptr)} {}
+          m_context{sim::FlowFourTuple(
+              sim::Endpoints(std::shared_ptr<sim::IHost>(nullptr),
+                             std::shared_ptr<sim::IHost>(nullptr)))} {}
 
     Id get_id() const final { return ""; }
 

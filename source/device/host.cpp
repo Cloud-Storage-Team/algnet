@@ -46,7 +46,7 @@ TimeNs Host::process() {
         if (packet.flow != nullptr) {
             packet.flow->update(packet);
         } else {
-            LOG_WARN("Packet flow does not exist");
+            LOG_INFO("Packet flow does not exist");
         }
 
         packet.callback(packet);

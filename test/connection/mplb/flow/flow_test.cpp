@@ -19,8 +19,8 @@ struct FlowTest : public ::testing::Test {
 
     SizeByte packet_size = SizeByte(100);
 
-    std::shared_ptr<sim::NewTcpFlow> flow =
-        sim::NewTcpFlow::create_shared("", sender_mock, receiver_mock);
+    std::shared_ptr<sim::NewTcpFlow> flow = sim::NewTcpFlow::create_shared(
+        "", sim::FlowFourTuple(sim::Endpoints(sender_mock, receiver_mock)));
 
     bool callback_called = false;
     std::vector<sim::PacketInfo> packets_info = {sim::PacketInfo(

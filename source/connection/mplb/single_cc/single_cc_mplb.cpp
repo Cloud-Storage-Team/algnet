@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "../mplb_metrics_metadatas.hpp"
+#include "connection/flow/new_flows_summary/new_flows_summary.hpp"
 #include "event/call_at_time.hpp"
 #include "event/send_data.hpp"
 #include "metrics/metrics_table/combine_metrics_tables.hpp"
@@ -102,8 +103,13 @@ MetricsTable SingleCCMplb::get_metrics_table() const {
 
 void SingleCCMplb::write_inner_metrics(
     std::filesystem::path output_dir_path) const {
-    collect_and_save_all_metrics(m_path_chooser->get_flows_table(),
-                                 output_dir_path / "flows");
+    std::filesystem::path flows_output_path = output_dir_path / "flows";
+    const auto& flows_table = m_path_chooser->get_flows_table();
+    collect_and_save_all_metrics(flows_table, flows_output_path);
+
+    NewFlowsSummary(flows_table)
+        .write_to_csv(output_dir_path / "flows_summary.csv");
+
     m_cc.write_all_metrics(output_dir_path / "cc");
 }
 
