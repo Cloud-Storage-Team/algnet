@@ -8,12 +8,12 @@ def get_host_names(topology : dict) -> list[str]:
         return sorted(topology["hosts"].keys())
     except KeyError as e:
         raise RuntimeError(f"Topology config missing field {e}")
-    
+
 def generate_simulation_config(
         host_names : list[str],
         config : dict,
         topology_config_path : str) -> dict:
-    
+
     try:
         flows_per_connection = config["flows_per_connection"]
         presets = config["presets"]
@@ -23,14 +23,14 @@ def generate_simulation_config(
                 default_connection_preset = connection_presets["default"]
             except KeyError as e:
                 raise RuntimeError(f"connection->{e}")
-        
+
             flow_presets = presets["flow"]
             try:
                 default_flow_preset = flow_presets["default"]
             except KeyError as e:
                 raise RuntimeError(f"flow->{e}")
         except KeyError as e:
-            raise RuntimeError(f"presets->{e}")    
+            raise RuntimeError(f"presets->{e}")
     except KeyError as e:
         raise RuntimeError(f"Config missing field {e}")
 
@@ -54,11 +54,11 @@ def generate_simulation_config(
 
             for flow_num in range(1, flows_per_connection + 1):
                 connection["flows"][f"flow_{flow_num}"] = default_flow_preset
-            
+
             simulation_config["connections"][connection_name] = connection
 
     simulation_config["scenario"] = config["scenario"]
-    
+
     return simulation_config
 
 def main():
@@ -76,12 +76,12 @@ def main():
 
     output_dir = os.path.dirname(output_path)
     topology_path_rel_from_output = os.path.relpath(topology_path, output_dir)
-    
+
     simulation_config = generate_simulation_config(host_names, config, topology_path_rel_from_output)
 
     save_yaml(simulation_config, output_path)
     print(f"Your simulation config saved to {output_path}")
-    
+
 
 if __name__ == "__main__":
     main()
