@@ -4,7 +4,6 @@
 #include "metrics/metrics_collector.hpp"
 #include "parser/new_scenario/new_scenario_parser.hpp"
 #include "utils/statistics.hpp"
-#include "utils/summary.hpp"
 
 int main(const int argc, char** argv) {
     cxxopts::Options options("NoNS", "Discrete-event based simulator");
