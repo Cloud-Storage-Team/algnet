@@ -17,7 +17,7 @@ private:
     // where last_time is the last time packet from given flow was catched
     // and shift is a integer that should be addeded to ECMP hash for packets
     // from this flow
-    std::map<Id, std::pair<TimeNs, std::uint32_t> > m_flow_table;
+    std::map<FourTuple, std::pair<TimeNs, std::uint32_t> > m_flow_table;
 
     ECMPHasher m_ecmp_hasher;
 };

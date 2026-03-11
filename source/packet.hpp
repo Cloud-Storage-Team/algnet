@@ -2,9 +2,9 @@
 
 #include <string>
 
-#include "connection/flow/endpoint_ports.hpp"
 #include "data.hpp"
 #include "utils/flag_manager.hpp"
+#include "four_tuple.hpp"
 
 namespace sim {
 
@@ -13,16 +13,6 @@ using PathHash = std::uint32_t;
 struct Packet;
 
 using OnPacketDeliveryCallback = std::function<void(const Packet&)>;
-
-struct FourTuple : EndpointPorts {
-    Id sender_id;
-    Id receiver_id;
-
-    FourTuple(Id a_source_id, Id a_dest_id, EndpointPorts ports = {})
-        : EndpointPorts(ports),
-          sender_id(a_source_id),
-          receiver_id(a_dest_id) {}
-};
 
 struct Packet : FourTuple {
     Packet(SizeByte a_size = SizeByte(0), Id a_source_id = "",

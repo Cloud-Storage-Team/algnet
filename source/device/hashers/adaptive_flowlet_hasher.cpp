@@ -11,41 +11,33 @@ AdaptiveFlowletHasher::AdaptiveFlowletHasher(double a_factor)
 std::uint32_t AdaptiveFlowletHasher::get_hash(const Packet& packet) {
     std::uint32_t ecmp_hash = m_ecmp_hasher.get_hash(packet);
 
-    LOG_ERROR(
-        fmt::format("Try to use AdaptiveFlowletHasher on packet {}; "
-                    "flow does not set!",
-                    packet.to_string()));
-    return ecmp_hash;
+    FourTuple four_tuple = static_cast<FourTuple>(packet);
 
-    // TODO: fix it (ise four-tuple)
+    TimeNs curr_time = Scheduler::get_instance().get_current_time();
+    auto it = m_flow_table.find(four_tuple);
+    if (it == m_flow_table.end()) {
+        m_flow_table[four_tuple] = {curr_time, 0};
+        return ecmp_hash;
+    }
 
-    // Id flow_id = flow->get_id();
+    auto& [last_seen, shift] = it->second;
+    TimeNs elapsed_from_last_seen = curr_time - last_seen;
 
-    // TimeNs curr_time = Scheduler::get_instance().get_current_time();
-    // auto it = m_flow_table.find(flow_id);
-    // if (it == m_flow_table.end()) {
-    //     m_flow_table[flow_id] = {curr_time, 0};
-    //     return ecmp_hash;
-    // }
+    utils::StrExpected<TimeNs> exp_avg_rtt = get_avg_rtt_label(packet.flags);
+    bool is_not_present = exp_avg_rtt.log_err_if_not_present(
+        "Adaptive flowlet hasher could not find avg rtt;"
+        "returned previous hash");
+    if (is_not_present) {
+        return ecmp_hash + shift;
+    }
+    TimeNs flowlet_threshold = exp_avg_rtt.value() * m_factor;
 
-    // auto& [last_seen, shift] = it->second;
-    // TimeNs elapsed_from_last_seen = curr_time - last_seen;
+    if (elapsed_from_last_seen > flowlet_threshold) {
+        shift++;
+    }
+    last_seen = curr_time;
 
-    // utils::StrExpected<TimeNs> exp_avg_rtt = get_avg_rtt_label(packet.flags);
-    // bool is_not_present = exp_avg_rtt.log_err_if_not_present(
-    //     "Adaptive flowlet hasher could not find avg rtt;"
-    //     "returned previous hash");
-    // if (is_not_present) {
-    //     return ecmp_hash + shift;
-    // }
-    // TimeNs flowlet_threshold = exp_avg_rtt.value() * m_factor;
-
-    // if (elapsed_from_last_seen > flowlet_threshold) {
-    //     shift++;
-    // }
-    // last_seen = curr_time;
-
-    // return ecmp_hash + shift;
+    return ecmp_hash + shift;
 }
 
 }  // namespace sim
