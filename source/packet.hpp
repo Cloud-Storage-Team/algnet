@@ -2,10 +2,9 @@
 
 #include <string>
 
-#include "connection/flow/endpoint_ports.hpp"
-#include "connection/flow/i_flow.hpp"
 #include "data.hpp"
 #include "utils/flag_manager.hpp"
+#include "four_tuple.hpp"
 
 namespace sim {
 
@@ -15,18 +14,10 @@ struct Packet;
 
 using OnPacketDeliveryCallback = std::function<void(const Packet&)>;
 
-struct FourTuple : EndpointPorts {
-    Id source_id;
-    Id dest_id;
-
-    FourTuple(Id a_source_id, Id a_dest_id, EndpointPorts ports = {})
-        : EndpointPorts(ports), source_id(a_source_id), dest_id(a_dest_id) {}
-};
-
 struct Packet : FourTuple {
-    Packet(SizeByte a_size = SizeByte(0), IFlow* a_flow = nullptr,
-           Id a_source_id = "", Id a_dest_id = "",
-           TimeNs a_generated_time = TimeNs(0), TimeNs a_sent_time = TimeNs(0),
+    Packet(SizeByte a_size = SizeByte(0), Id a_source_id = "",
+           Id a_dest_id = "", TimeNs a_generated_time = TimeNs(0),
+           TimeNs a_sent_time = TimeNs(0),
            SizeByte a_delivered_at_origin = SizeByte(0),
            bool a_ecn_capable_transport = true,
            bool a_congestion_experienced = false);
@@ -38,7 +29,6 @@ struct Packet : FourTuple {
     BaseFlagManager flags;
     DataId data_id;  // Identifier of data transaction
     SizeByte size;
-    IFlow* flow;
 
     // Note: callback takes packet itself because it might be changed while
     // travelling along the net

@@ -54,7 +54,7 @@ bool RoutingModule::add_outlink(std::shared_ptr<ILink> link) {
     return true;
 }
 
-bool RoutingModule::update_routing_table(Id dest_id,
+bool RoutingModule::update_routing_table(Id receiver_id,
                                          std::shared_ptr<ILink> link,
                                          size_t paths_count) {
     if (!is_valid_link(link)) {
@@ -70,13 +70,13 @@ bool RoutingModule::update_routing_table(Id dest_id,
     }
     auto link_dest = link->get_to();
 
-    m_routing_table[dest_id][link] += paths_count;
+    m_routing_table[receiver_id][link] += paths_count;
     return true;
 }
 
 std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
     Packet packet) const {
-    auto iterator = m_routing_table.find(packet.dest_id);
+    auto iterator = m_routing_table.find(packet.receiver_id);
     if (iterator == m_routing_table.end()) {
         return nullptr;
     }

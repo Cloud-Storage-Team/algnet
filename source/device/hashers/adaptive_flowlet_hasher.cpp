@@ -11,22 +11,12 @@ AdaptiveFlowletHasher::AdaptiveFlowletHasher(double a_factor)
 std::uint32_t AdaptiveFlowletHasher::get_hash(const Packet& packet) {
     std::uint32_t ecmp_hash = m_ecmp_hasher.get_hash(packet);
 
-    IFlow* flow = packet.flow;
-
-    if (!flow) {
-        LOG_ERROR(
-            fmt::format("Try to use AdaptiveFlowletHasher on packet {}; "
-                        "flow does not set!",
-                        packet.to_string()));
-        return ecmp_hash;
-    }
-
-    Id flow_id = flow->get_id();
+    FourTuple four_tuple = static_cast<FourTuple>(packet);
 
     TimeNs curr_time = Scheduler::get_instance().get_current_time();
-    auto it = m_flow_table.find(flow_id);
+    auto it = m_flow_table.find(four_tuple);
     if (it == m_flow_table.end()) {
-        m_flow_table[flow_id] = {curr_time, 0};
+        m_flow_table[four_tuple] = {curr_time, 0};
         return ecmp_hash;
     }
 

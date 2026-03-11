@@ -1,6 +1,5 @@
 #include "link_queue.hpp"
 
-#include "metrics/metrics_collector.hpp"
 #include "scheduler.hpp"
 #include "simple_packet_queue.hpp"
 
@@ -52,8 +51,6 @@ std::shared_ptr<const MetricsStorage> LinkQueue::get_queue_size_storage()
 void LinkQueue::record_size() {
     TimeNs now = Scheduler::get_instance().get_current_time();
     SizeByte queue_size = m_queue.get_size();
-    MetricsCollector::get_instance().add_queue_size(m_link_id, now, queue_size,
-                                                    m_type);
     m_queue_size_storage->add_record(now, queue_size.value());
 }
 

@@ -1,0 +1,9 @@
+network_config_path: huge-network.yml
+
+scenario:
+- action: send_data
+  id: send-1
+  when: 0ns
+  size: 5MB
+  repeat_count: 1
+  connections: ^conn.*

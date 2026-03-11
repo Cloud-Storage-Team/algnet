@@ -42,13 +42,7 @@ TimeNs Host::process() {
     LOG_INFO("Processing packet from link on host. Packet: " +
              packet.to_string());
 
-    if (packet.dest_id == get_id()) {
-        if (packet.flow != nullptr) {
-            packet.flow->update(packet);
-        } else {
-            LOG_INFO("Packet flow does not exist");
-        }
-
+    if (packet.receiver_id == get_id()) {
         packet.callback(packet);
     } else {
         LOG_WARN(
