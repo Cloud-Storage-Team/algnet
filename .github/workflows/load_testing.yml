@@ -76,6 +76,7 @@ jobs:
 
     - name: Insall linux-tools
       run: |
+        sudo apt-get update
         sudo apt install linux-tools-common linux-tools-generic
         sudo apt install linux-tools-azure
         sudo apt install linux-tools-$(uname -r)
