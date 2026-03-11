@@ -13,8 +13,6 @@ int main(const int argc, char** argv) {
         cxxopts::value<std::string>()->default_value("metrics"))(
         "no-logs", "Output without logs",
         cxxopts::value<bool>()->default_value("false"))(
-        "no-plots", "Disables plots generation",
-        cxxopts::value<bool>()->default_value("false"))(
         "metrics-filter", "Filter for collecting metrics pathes",
         cxxopts::value<std::string>()->default_value(".*"))("h,help",
                                                             "Print usage");

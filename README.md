@@ -18,8 +18,6 @@ cmake --build build
     --config path
     [--output-dir output-dir-name]
     [--no-logs]
-    [--no-plots]
-    [--metrics-filter]
 ```
 
 Options:
@@ -29,9 +27,6 @@ Options:
     --output-dir arg      Output directory for metrics and plots
                         (default: metrics)
     --no-logs             Output without logs
-    --no-plots            Disables plots generation
-    --metrics-filter arg  Fiter for collecting metrics pathes
-                        (default: .*)
 -h, --help                Print usage
 ```
 

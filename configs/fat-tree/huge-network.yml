@@ -1,0 +1,1001 @@
+topology_config_path: topology.yml
+
+presets:
+  default-flow:
+    type: tcp
+    metrics_filters:
+      rtt: false
+      reordering: false
+      delivery_rate: false
+
+  default-connection:
+    type: mplb-connection
+    mplb:
+      type: single-cc
+      packet-size: 1500B
+
+      metrics_filters:
+        fairness: false
+
+      cc:
+        type: swift
+        base_target: 20000ns
+        metrics_filters:
+          cwnd: false
+
+      path-chooser:
+        type: round-robin
+        flows:
+          flow-1:
+            type: tcp
+            preset-name: default-flow
+
+          flow-2:
+            type: tcp
+            preset-name: default-flow
+
+          flow-3:
+            type: tcp
+            preset-name: default-flow
+
+connections:
+  conn_pod1_host1--pod1_host2:
+    sender_id: pod1_host1
+    receiver_id: pod1_host2
+    preset-name: default-connection
+  conn_pod1_host1--pod1_host3:
+    sender_id: pod1_host1
+    receiver_id: pod1_host3
+    preset-name: default-connection
+  conn_pod1_host1--pod1_host4:
+    sender_id: pod1_host1
+    receiver_id: pod1_host4
+    preset-name: default-connection
+  conn_pod1_host1--pod2_host1:
+    sender_id: pod1_host1
+    receiver_id: pod2_host1
+    preset-name: default-connection
+  conn_pod1_host1--pod2_host2:
+    sender_id: pod1_host1
+    receiver_id: pod2_host2
+    preset-name: default-connection
+  conn_pod1_host1--pod2_host3:
+    sender_id: pod1_host1
+    receiver_id: pod2_host3
+    preset-name: default-connection
+  conn_pod1_host1--pod2_host4:
+    sender_id: pod1_host1
+    receiver_id: pod2_host4
+    preset-name: default-connection
+  conn_pod1_host1--pod3_host1:
+    sender_id: pod1_host1
+    receiver_id: pod3_host1
+    preset-name: default-connection
+  conn_pod1_host1--pod3_host2:
+    sender_id: pod1_host1
+    receiver_id: pod3_host2
+    preset-name: default-connection
+  conn_pod1_host1--pod3_host3:
+    sender_id: pod1_host1
+    receiver_id: pod3_host3
+    preset-name: default-connection
+  conn_pod1_host1--pod3_host4:
+    sender_id: pod1_host1
+    receiver_id: pod3_host4
+    preset-name: default-connection
+  conn_pod1_host1--pod4_host1:
+    sender_id: pod1_host1
+    receiver_id: pod4_host1
+    preset-name: default-connection
+  conn_pod1_host1--pod4_host2:
+    sender_id: pod1_host1
+    receiver_id: pod4_host2
+    preset-name: default-connection
+  conn_pod1_host1--pod4_host3:
+    sender_id: pod1_host1
+    receiver_id: pod4_host3
+    preset-name: default-connection
+  conn_pod1_host1--pod4_host4:
+    sender_id: pod1_host1
+    receiver_id: pod4_host4
+    preset-name: default-connection
+  conn_pod1_host2--pod1_host1:
+    sender_id: pod1_host2
+    receiver_id: pod1_host1
+    preset-name: default-connection
+  conn_pod1_host2--pod1_host3:
+    sender_id: pod1_host2
+    receiver_id: pod1_host3
+    preset-name: default-connection
+  conn_pod1_host2--pod1_host4:
+    sender_id: pod1_host2
+    receiver_id: pod1_host4
+    preset-name: default-connection
+  conn_pod1_host2--pod2_host1:
+    sender_id: pod1_host2
+    receiver_id: pod2_host1
+    preset-name: default-connection
+  conn_pod1_host2--pod2_host2:
+    sender_id: pod1_host2
+    receiver_id: pod2_host2
+    preset-name: default-connection
+  conn_pod1_host2--pod2_host3:
+    sender_id: pod1_host2
+    receiver_id: pod2_host3
+    preset-name: default-connection
+  conn_pod1_host2--pod2_host4:
+    sender_id: pod1_host2
+    receiver_id: pod2_host4
+    preset-name: default-connection
+  conn_pod1_host2--pod3_host1:
+    sender_id: pod1_host2
+    receiver_id: pod3_host1
+    preset-name: default-connection
+  conn_pod1_host2--pod3_host2:
+    sender_id: pod1_host2
+    receiver_id: pod3_host2
+    preset-name: default-connection
+  conn_pod1_host2--pod3_host3:
+    sender_id: pod1_host2
+    receiver_id: pod3_host3
+    preset-name: default-connection
+  conn_pod1_host2--pod3_host4:
+    sender_id: pod1_host2
+    receiver_id: pod3_host4
+    preset-name: default-connection
+  conn_pod1_host2--pod4_host1:
+    sender_id: pod1_host2
+    receiver_id: pod4_host1
+    preset-name: default-connection
+  conn_pod1_host2--pod4_host2:
+    sender_id: pod1_host2
+    receiver_id: pod4_host2
+    preset-name: default-connection
+  conn_pod1_host2--pod4_host3:
+    sender_id: pod1_host2
+    receiver_id: pod4_host3
+    preset-name: default-connection
+  conn_pod1_host2--pod4_host4:
+    sender_id: pod1_host2
+    receiver_id: pod4_host4
+    preset-name: default-connection
+  conn_pod1_host3--pod1_host1:
+    sender_id: pod1_host3
+    receiver_id: pod1_host1
+    preset-name: default-connection
+  conn_pod1_host3--pod1_host2:
+    sender_id: pod1_host3
+    receiver_id: pod1_host2
+    preset-name: default-connection
+  conn_pod1_host3--pod1_host4:
+    sender_id: pod1_host3
+    receiver_id: pod1_host4
+    preset-name: default-connection
+  conn_pod1_host3--pod2_host1:
+    sender_id: pod1_host3
+    receiver_id: pod2_host1
+    preset-name: default-connection
+  conn_pod1_host3--pod2_host2:
+    sender_id: pod1_host3
+    receiver_id: pod2_host2
+    preset-name: default-connection
+  conn_pod1_host3--pod2_host3:
+    sender_id: pod1_host3
+    receiver_id: pod2_host3
+    preset-name: default-connection
+  conn_pod1_host3--pod2_host4:
+    sender_id: pod1_host3
+    receiver_id: pod2_host4
+    preset-name: default-connection
+  conn_pod1_host3--pod3_host1:
+    sender_id: pod1_host3
+    receiver_id: pod3_host1
+    preset-name: default-connection
+  conn_pod1_host3--pod3_host2:
+    sender_id: pod1_host3
+    receiver_id: pod3_host2
+    preset-name: default-connection
+  conn_pod1_host3--pod3_host3:
+    sender_id: pod1_host3
+    receiver_id: pod3_host3
+    preset-name: default-connection
+  conn_pod1_host3--pod3_host4:
+    sender_id: pod1_host3
+    receiver_id: pod3_host4
+    preset-name: default-connection
+  conn_pod1_host3--pod4_host1:
+    sender_id: pod1_host3
+    receiver_id: pod4_host1
+    preset-name: default-connection
+  conn_pod1_host3--pod4_host2:
+    sender_id: pod1_host3
+    receiver_id: pod4_host2
+    preset-name: default-connection
+  conn_pod1_host3--pod4_host3:
+    sender_id: pod1_host3
+    receiver_id: pod4_host3
+    preset-name: default-connection
+  conn_pod1_host3--pod4_host4:
+    sender_id: pod1_host3
+    receiver_id: pod4_host4
+    preset-name: default-connection
+  conn_pod1_host4--pod1_host1:
+    sender_id: pod1_host4
+    receiver_id: pod1_host1
+    preset-name: default-connection
+  conn_pod1_host4--pod1_host2:
+    sender_id: pod1_host4
+    receiver_id: pod1_host2
+    preset-name: default-connection
+  conn_pod1_host4--pod1_host3:
+    sender_id: pod1_host4
+    receiver_id: pod1_host3
+    preset-name: default-connection
+  conn_pod1_host4--pod2_host1:
+    sender_id: pod1_host4
+    receiver_id: pod2_host1
+    preset-name: default-connection
+  conn_pod1_host4--pod2_host2:
+    sender_id: pod1_host4
+    receiver_id: pod2_host2
+    preset-name: default-connection
+  conn_pod1_host4--pod2_host3:
+    sender_id: pod1_host4
+    receiver_id: pod2_host3
+    preset-name: default-connection
+  conn_pod1_host4--pod2_host4:
+    sender_id: pod1_host4
+    receiver_id: pod2_host4
+    preset-name: default-connection
+  conn_pod1_host4--pod3_host1:
+    sender_id: pod1_host4
+    receiver_id: pod3_host1
+    preset-name: default-connection
+  conn_pod1_host4--pod3_host2:
+    sender_id: pod1_host4
+    receiver_id: pod3_host2
+    preset-name: default-connection
+  conn_pod1_host4--pod3_host3:
+    sender_id: pod1_host4
+    receiver_id: pod3_host3
+    preset-name: default-connection
+  conn_pod1_host4--pod3_host4:
+    sender_id: pod1_host4
+    receiver_id: pod3_host4
+    preset-name: default-connection
+  conn_pod1_host4--pod4_host1:
+    sender_id: pod1_host4
+    receiver_id: pod4_host1
+    preset-name: default-connection
+  conn_pod1_host4--pod4_host2:
+    sender_id: pod1_host4
+    receiver_id: pod4_host2
+    preset-name: default-connection
+  conn_pod1_host4--pod4_host3:
+    sender_id: pod1_host4
+    receiver_id: pod4_host3
+    preset-name: default-connection
+  conn_pod1_host4--pod4_host4:
+    sender_id: pod1_host4
+    receiver_id: pod4_host4
+    preset-name: default-connection
+  conn_pod2_host1--pod1_host1:
+    sender_id: pod2_host1
+    receiver_id: pod1_host1
+    preset-name: default-connection
+  conn_pod2_host1--pod1_host2:
+    sender_id: pod2_host1
+    receiver_id: pod1_host2
+    preset-name: default-connection
+  conn_pod2_host1--pod1_host3:
+    sender_id: pod2_host1
+    receiver_id: pod1_host3
+    preset-name: default-connection
+  conn_pod2_host1--pod1_host4:
+    sender_id: pod2_host1
+    receiver_id: pod1_host4
+    preset-name: default-connection
+  conn_pod2_host1--pod2_host2:
+    sender_id: pod2_host1
+    receiver_id: pod2_host2
+    preset-name: default-connection
+  conn_pod2_host1--pod2_host3:
+    sender_id: pod2_host1
+    receiver_id: pod2_host3
+    preset-name: default-connection
+  conn_pod2_host1--pod2_host4:
+    sender_id: pod2_host1
+    receiver_id: pod2_host4
+    preset-name: default-connection
+  conn_pod2_host1--pod3_host1:
+    sender_id: pod2_host1
+    receiver_id: pod3_host1
+    preset-name: default-connection
+  conn_pod2_host1--pod3_host2:
+    sender_id: pod2_host1
+    receiver_id: pod3_host2
+    preset-name: default-connection
+  conn_pod2_host1--pod3_host3:
+    sender_id: pod2_host1
+    receiver_id: pod3_host3
+    preset-name: default-connection
+  conn_pod2_host1--pod3_host4:
+    sender_id: pod2_host1
+    receiver_id: pod3_host4
+    preset-name: default-connection
+  conn_pod2_host1--pod4_host1:
+    sender_id: pod2_host1
+    receiver_id: pod4_host1
+    preset-name: default-connection
+  conn_pod2_host1--pod4_host2:
+    sender_id: pod2_host1
+    receiver_id: pod4_host2
+    preset-name: default-connection
+  conn_pod2_host1--pod4_host3:
+    sender_id: pod2_host1
+    receiver_id: pod4_host3
+    preset-name: default-connection
+  conn_pod2_host1--pod4_host4:
+    sender_id: pod2_host1
+    receiver_id: pod4_host4
+    preset-name: default-connection
+  conn_pod2_host2--pod1_host1:
+    sender_id: pod2_host2
+    receiver_id: pod1_host1
+    preset-name: default-connection
+  conn_pod2_host2--pod1_host2:
+    sender_id: pod2_host2
+    receiver_id: pod1_host2
+    preset-name: default-connection
+  conn_pod2_host2--pod1_host3:
+    sender_id: pod2_host2
+    receiver_id: pod1_host3
+    preset-name: default-connection
+  conn_pod2_host2--pod1_host4:
+    sender_id: pod2_host2
+    receiver_id: pod1_host4
+    preset-name: default-connection
+  conn_pod2_host2--pod2_host1:
+    sender_id: pod2_host2
+    receiver_id: pod2_host1
+    preset-name: default-connection
+  conn_pod2_host2--pod2_host3:
+    sender_id: pod2_host2
+    receiver_id: pod2_host3
+    preset-name: default-connection
+  conn_pod2_host2--pod2_host4:
+    sender_id: pod2_host2
+    receiver_id: pod2_host4
+    preset-name: default-connection
+  conn_pod2_host2--pod3_host1:
+    sender_id: pod2_host2
+    receiver_id: pod3_host1
+    preset-name: default-connection
+  conn_pod2_host2--pod3_host2:
+    sender_id: pod2_host2
+    receiver_id: pod3_host2
+    preset-name: default-connection
+  conn_pod2_host2--pod3_host3:
+    sender_id: pod2_host2
+    receiver_id: pod3_host3
+    preset-name: default-connection
+  conn_pod2_host2--pod3_host4:
+    sender_id: pod2_host2
+    receiver_id: pod3_host4
+    preset-name: default-connection
+  conn_pod2_host2--pod4_host1:
+    sender_id: pod2_host2
+    receiver_id: pod4_host1
+    preset-name: default-connection
+  conn_pod2_host2--pod4_host2:
+    sender_id: pod2_host2
+    receiver_id: pod4_host2
+    preset-name: default-connection
+  conn_pod2_host2--pod4_host3:
+    sender_id: pod2_host2
+    receiver_id: pod4_host3
+    preset-name: default-connection
+  conn_pod2_host2--pod4_host4:
+    sender_id: pod2_host2
+    receiver_id: pod4_host4
+    preset-name: default-connection
+  conn_pod2_host3--pod1_host1:
+    sender_id: pod2_host3
+    receiver_id: pod1_host1
+    preset-name: default-connection
+  conn_pod2_host3--pod1_host2:
+    sender_id: pod2_host3
+    receiver_id: pod1_host2
+    preset-name: default-connection
+  conn_pod2_host3--pod1_host3:
+    sender_id: pod2_host3
+    receiver_id: pod1_host3
+    preset-name: default-connection
+  conn_pod2_host3--pod1_host4:
+    sender_id: pod2_host3
+    receiver_id: pod1_host4
+    preset-name: default-connection
+  conn_pod2_host3--pod2_host1:
+    sender_id: pod2_host3
+    receiver_id: pod2_host1
+    preset-name: default-connection
+  conn_pod2_host3--pod2_host2:
+    sender_id: pod2_host3
+    receiver_id: pod2_host2
+    preset-name: default-connection
+  conn_pod2_host3--pod2_host4:
+    sender_id: pod2_host3
+    receiver_id: pod2_host4
+    preset-name: default-connection
+  conn_pod2_host3--pod3_host1:
+    sender_id: pod2_host3
+    receiver_id: pod3_host1
+    preset-name: default-connection
+  conn_pod2_host3--pod3_host2:
+    sender_id: pod2_host3
+    receiver_id: pod3_host2
+    preset-name: default-connection
+  conn_pod2_host3--pod3_host3:
+    sender_id: pod2_host3
+    receiver_id: pod3_host3
+    preset-name: default-connection
+  conn_pod2_host3--pod3_host4:
+    sender_id: pod2_host3
+    receiver_id: pod3_host4
+    preset-name: default-connection
+  conn_pod2_host3--pod4_host1:
+    sender_id: pod2_host3
+    receiver_id: pod4_host1
+    preset-name: default-connection
+  conn_pod2_host3--pod4_host2:
+    sender_id: pod2_host3
+    receiver_id: pod4_host2
+    preset-name: default-connection
+  conn_pod2_host3--pod4_host3:
+    sender_id: pod2_host3
+    receiver_id: pod4_host3
+    preset-name: default-connection
+  conn_pod2_host3--pod4_host4:
+    sender_id: pod2_host3
+    receiver_id: pod4_host4
+    preset-name: default-connection
+  conn_pod2_host4--pod1_host1:
+    sender_id: pod2_host4
+    receiver_id: pod1_host1
+    preset-name: default-connection
+  conn_pod2_host4--pod1_host2:
+    sender_id: pod2_host4
+    receiver_id: pod1_host2
+    preset-name: default-connection
+  conn_pod2_host4--pod1_host3:
+    sender_id: pod2_host4
+    receiver_id: pod1_host3
+    preset-name: default-connection
+  conn_pod2_host4--pod1_host4:
+    sender_id: pod2_host4
+    receiver_id: pod1_host4
+    preset-name: default-connection
+  conn_pod2_host4--pod2_host1:
+    sender_id: pod2_host4
+    receiver_id: pod2_host1
+    preset-name: default-connection
+  conn_pod2_host4--pod2_host2:
+    sender_id: pod2_host4
+    receiver_id: pod2_host2
+    preset-name: default-connection
+  conn_pod2_host4--pod2_host3:
+    sender_id: pod2_host4
+    receiver_id: pod2_host3
+    preset-name: default-connection
+  conn_pod2_host4--pod3_host1:
+    sender_id: pod2_host4
+    receiver_id: pod3_host1
+    preset-name: default-connection
+  conn_pod2_host4--pod3_host2:
+    sender_id: pod2_host4
+    receiver_id: pod3_host2
+    preset-name: default-connection
+  conn_pod2_host4--pod3_host3:
+    sender_id: pod2_host4
+    receiver_id: pod3_host3
+    preset-name: default-connection
+  conn_pod2_host4--pod3_host4:
+    sender_id: pod2_host4
+    receiver_id: pod3_host4
+    preset-name: default-connection
+  conn_pod2_host4--pod4_host1:
+    sender_id: pod2_host4
+    receiver_id: pod4_host1
+    preset-name: default-connection
+  conn_pod2_host4--pod4_host2:
+    sender_id: pod2_host4
+    receiver_id: pod4_host2
+    preset-name: default-connection
+  conn_pod2_host4--pod4_host3:
+    sender_id: pod2_host4
+    receiver_id: pod4_host3
+    preset-name: default-connection
+  conn_pod2_host4--pod4_host4:
+    sender_id: pod2_host4
+    receiver_id: pod4_host4
+    preset-name: default-connection
+  conn_pod3_host1--pod1_host1:
+    sender_id: pod3_host1
+    receiver_id: pod1_host1
+    preset-name: default-connection
+  conn_pod3_host1--pod1_host2:
+    sender_id: pod3_host1
+    receiver_id: pod1_host2
+    preset-name: default-connection
+  conn_pod3_host1--pod1_host3:
+    sender_id: pod3_host1
+    receiver_id: pod1_host3
+    preset-name: default-connection
+  conn_pod3_host1--pod1_host4:
+    sender_id: pod3_host1
+    receiver_id: pod1_host4
+    preset-name: default-connection
+  conn_pod3_host1--pod2_host1:
+    sender_id: pod3_host1
+    receiver_id: pod2_host1
+    preset-name: default-connection
+  conn_pod3_host1--pod2_host2:
+    sender_id: pod3_host1
+    receiver_id: pod2_host2
+    preset-name: default-connection
+  conn_pod3_host1--pod2_host3:
+    sender_id: pod3_host1
+    receiver_id: pod2_host3
+    preset-name: default-connection
+  conn_pod3_host1--pod2_host4:
+    sender_id: pod3_host1
+    receiver_id: pod2_host4
+    preset-name: default-connection
+  conn_pod3_host1--pod3_host2:
+    sender_id: pod3_host1
+    receiver_id: pod3_host2
+    preset-name: default-connection
+  conn_pod3_host1--pod3_host3:
+    sender_id: pod3_host1
+    receiver_id: pod3_host3
+    preset-name: default-connection
+  conn_pod3_host1--pod3_host4:
+    sender_id: pod3_host1
+    receiver_id: pod3_host4
+    preset-name: default-connection
+  conn_pod3_host1--pod4_host1:
+    sender_id: pod3_host1
+    receiver_id: pod4_host1
+    preset-name: default-connection
+  conn_pod3_host1--pod4_host2:
+    sender_id: pod3_host1
+    receiver_id: pod4_host2
+    preset-name: default-connection
+  conn_pod3_host1--pod4_host3:
+    sender_id: pod3_host1
+    receiver_id: pod4_host3
+    preset-name: default-connection
+  conn_pod3_host1--pod4_host4:
+    sender_id: pod3_host1
+    receiver_id: pod4_host4
+    preset-name: default-connection
+  conn_pod3_host2--pod1_host1:
+    sender_id: pod3_host2
+    receiver_id: pod1_host1
+    preset-name: default-connection
+  conn_pod3_host2--pod1_host2:
+    sender_id: pod3_host2
+    receiver_id: pod1_host2
+    preset-name: default-connection
+  conn_pod3_host2--pod1_host3:
+    sender_id: pod3_host2
+    receiver_id: pod1_host3
+    preset-name: default-connection
+  conn_pod3_host2--pod1_host4:
+    sender_id: pod3_host2
+    receiver_id: pod1_host4
+    preset-name: default-connection
+  conn_pod3_host2--pod2_host1:
+    sender_id: pod3_host2
+    receiver_id: pod2_host1
+    preset-name: default-connection
+  conn_pod3_host2--pod2_host2:
+    sender_id: pod3_host2
+    receiver_id: pod2_host2
+    preset-name: default-connection
+  conn_pod3_host2--pod2_host3:
+    sender_id: pod3_host2
+    receiver_id: pod2_host3
+    preset-name: default-connection
+  conn_pod3_host2--pod2_host4:
+    sender_id: pod3_host2
+    receiver_id: pod2_host4
+    preset-name: default-connection
+  conn_pod3_host2--pod3_host1:
+    sender_id: pod3_host2
+    receiver_id: pod3_host1
+    preset-name: default-connection
+  conn_pod3_host2--pod3_host3:
+    sender_id: pod3_host2
+    receiver_id: pod3_host3
+    preset-name: default-connection
+  conn_pod3_host2--pod3_host4:
+    sender_id: pod3_host2
+    receiver_id: pod3_host4
+    preset-name: default-connection
+  conn_pod3_host2--pod4_host1:
+    sender_id: pod3_host2
+    receiver_id: pod4_host1
+    preset-name: default-connection
+  conn_pod3_host2--pod4_host2:
+    sender_id: pod3_host2
+    receiver_id: pod4_host2
+    preset-name: default-connection
+  conn_pod3_host2--pod4_host3:
+    sender_id: pod3_host2
+    receiver_id: pod4_host3
+    preset-name: default-connection
+  conn_pod3_host2--pod4_host4:
+    sender_id: pod3_host2
+    receiver_id: pod4_host4
+    preset-name: default-connection
+  conn_pod3_host3--pod1_host1:
+    sender_id: pod3_host3
+    receiver_id: pod1_host1
+    preset-name: default-connection
+  conn_pod3_host3--pod1_host2:
+    sender_id: pod3_host3
+    receiver_id: pod1_host2
+    preset-name: default-connection
+  conn_pod3_host3--pod1_host3:
+    sender_id: pod3_host3
+    receiver_id: pod1_host3
+    preset-name: default-connection
+  conn_pod3_host3--pod1_host4:
+    sender_id: pod3_host3
+    receiver_id: pod1_host4
+    preset-name: default-connection
+  conn_pod3_host3--pod2_host1:
+    sender_id: pod3_host3
+    receiver_id: pod2_host1
+    preset-name: default-connection
+  conn_pod3_host3--pod2_host2:
+    sender_id: pod3_host3
+    receiver_id: pod2_host2
+    preset-name: default-connection
+  conn_pod3_host3--pod2_host3:
+    sender_id: pod3_host3
+    receiver_id: pod2_host3
+    preset-name: default-connection
+  conn_pod3_host3--pod2_host4:
+    sender_id: pod3_host3
+    receiver_id: pod2_host4
+    preset-name: default-connection
+  conn_pod3_host3--pod3_host1:
+    sender_id: pod3_host3
+    receiver_id: pod3_host1
+    preset-name: default-connection
+  conn_pod3_host3--pod3_host2:
+    sender_id: pod3_host3
+    receiver_id: pod3_host2
+    preset-name: default-connection
+  conn_pod3_host3--pod3_host4:
+    sender_id: pod3_host3
+    receiver_id: pod3_host4
+    preset-name: default-connection
+  conn_pod3_host3--pod4_host1:
+    sender_id: pod3_host3
+    receiver_id: pod4_host1
+    preset-name: default-connection
+  conn_pod3_host3--pod4_host2:
+    sender_id: pod3_host3
+    receiver_id: pod4_host2
+    preset-name: default-connection
+  conn_pod3_host3--pod4_host3:
+    sender_id: pod3_host3
+    receiver_id: pod4_host3
+    preset-name: default-connection
+  conn_pod3_host3--pod4_host4:
+    sender_id: pod3_host3
+    receiver_id: pod4_host4
+    preset-name: default-connection
+  conn_pod3_host4--pod1_host1:
+    sender_id: pod3_host4
+    receiver_id: pod1_host1
+    preset-name: default-connection
+  conn_pod3_host4--pod1_host2:
+    sender_id: pod3_host4
+    receiver_id: pod1_host2
+    preset-name: default-connection
+  conn_pod3_host4--pod1_host3:
+    sender_id: pod3_host4
+    receiver_id: pod1_host3
+    preset-name: default-connection
+  conn_pod3_host4--pod1_host4:
+    sender_id: pod3_host4
+    receiver_id: pod1_host4
+    preset-name: default-connection
+  conn_pod3_host4--pod2_host1:
+    sender_id: pod3_host4
+    receiver_id: pod2_host1
+    preset-name: default-connection
+  conn_pod3_host4--pod2_host2:
+    sender_id: pod3_host4
+    receiver_id: pod2_host2
+    preset-name: default-connection
+  conn_pod3_host4--pod2_host3:
+    sender_id: pod3_host4
+    receiver_id: pod2_host3
+    preset-name: default-connection
+  conn_pod3_host4--pod2_host4:
+    sender_id: pod3_host4
+    receiver_id: pod2_host4
+    preset-name: default-connection
+  conn_pod3_host4--pod3_host1:
+    sender_id: pod3_host4
+    receiver_id: pod3_host1
+    preset-name: default-connection
+  conn_pod3_host4--pod3_host2:
+    sender_id: pod3_host4
+    receiver_id: pod3_host2
+    preset-name: default-connection
+  conn_pod3_host4--pod3_host3:
+    sender_id: pod3_host4
+    receiver_id: pod3_host3
+    preset-name: default-connection
+  conn_pod3_host4--pod4_host1:
+    sender_id: pod3_host4
+    receiver_id: pod4_host1
+    preset-name: default-connection
+  conn_pod3_host4--pod4_host2:
+    sender_id: pod3_host4
+    receiver_id: pod4_host2
+    preset-name: default-connection
+  conn_pod3_host4--pod4_host3:
+    sender_id: pod3_host4
+    receiver_id: pod4_host3
+    preset-name: default-connection
+  conn_pod3_host4--pod4_host4:
+    sender_id: pod3_host4
+    receiver_id: pod4_host4
+    preset-name: default-connection
+  conn_pod4_host1--pod1_host1:
+    sender_id: pod4_host1
+    receiver_id: pod1_host1
+    preset-name: default-connection
+  conn_pod4_host1--pod1_host2:
+    sender_id: pod4_host1
+    receiver_id: pod1_host2
+    preset-name: default-connection
+  conn_pod4_host1--pod1_host3:
+    sender_id: pod4_host1
+    receiver_id: pod1_host3
+    preset-name: default-connection
+  conn_pod4_host1--pod1_host4:
+    sender_id: pod4_host1
+    receiver_id: pod1_host4
+    preset-name: default-connection
+  conn_pod4_host1--pod2_host1:
+    sender_id: pod4_host1
+    receiver_id: pod2_host1
+    preset-name: default-connection
+  conn_pod4_host1--pod2_host2:
+    sender_id: pod4_host1
+    receiver_id: pod2_host2
+    preset-name: default-connection
+  conn_pod4_host1--pod2_host3:
+    sender_id: pod4_host1
+    receiver_id: pod2_host3
+    preset-name: default-connection
+  conn_pod4_host1--pod2_host4:
+    sender_id: pod4_host1
+    receiver_id: pod2_host4
+    preset-name: default-connection
+  conn_pod4_host1--pod3_host1:
+    sender_id: pod4_host1
+    receiver_id: pod3_host1
+    preset-name: default-connection
+  conn_pod4_host1--pod3_host2:
+    sender_id: pod4_host1
+    receiver_id: pod3_host2
+    preset-name: default-connection
+  conn_pod4_host1--pod3_host3:
+    sender_id: pod4_host1
+    receiver_id: pod3_host3
+    preset-name: default-connection
+  conn_pod4_host1--pod3_host4:
+    sender_id: pod4_host1
+    receiver_id: pod3_host4
+    preset-name: default-connection
+  conn_pod4_host1--pod4_host2:
+    sender_id: pod4_host1
+    receiver_id: pod4_host2
+    preset-name: default-connection
+  conn_pod4_host1--pod4_host3:
+    sender_id: pod4_host1
+    receiver_id: pod4_host3
+    preset-name: default-connection
+  conn_pod4_host1--pod4_host4:
+    sender_id: pod4_host1
+    receiver_id: pod4_host4
+    preset-name: default-connection
+  conn_pod4_host2--pod1_host1:
+    sender_id: pod4_host2
+    receiver_id: pod1_host1
+    preset-name: default-connection
+  conn_pod4_host2--pod1_host2:
+    sender_id: pod4_host2
+    receiver_id: pod1_host2
+    preset-name: default-connection
+  conn_pod4_host2--pod1_host3:
+    sender_id: pod4_host2
+    receiver_id: pod1_host3
+    preset-name: default-connection
+  conn_pod4_host2--pod1_host4:
+    sender_id: pod4_host2
+    receiver_id: pod1_host4
+    preset-name: default-connection
+  conn_pod4_host2--pod2_host1:
+    sender_id: pod4_host2
+    receiver_id: pod2_host1
+    preset-name: default-connection
+  conn_pod4_host2--pod2_host2:
+    sender_id: pod4_host2
+    receiver_id: pod2_host2
+    preset-name: default-connection
+  conn_pod4_host2--pod2_host3:
+    sender_id: pod4_host2
+    receiver_id: pod2_host3
+    preset-name: default-connection
+  conn_pod4_host2--pod2_host4:
+    sender_id: pod4_host2
+    receiver_id: pod2_host4
+    preset-name: default-connection
+  conn_pod4_host2--pod3_host1:
+    sender_id: pod4_host2
+    receiver_id: pod3_host1
+    preset-name: default-connection
+  conn_pod4_host2--pod3_host2:
+    sender_id: pod4_host2
+    receiver_id: pod3_host2
+    preset-name: default-connection
+  conn_pod4_host2--pod3_host3:
+    sender_id: pod4_host2
+    receiver_id: pod3_host3
+    preset-name: default-connection
+  conn_pod4_host2--pod3_host4:
+    sender_id: pod4_host2
+    receiver_id: pod3_host4
+    preset-name: default-connection
+  conn_pod4_host2--pod4_host1:
+    sender_id: pod4_host2
+    receiver_id: pod4_host1
+    preset-name: default-connection
+  conn_pod4_host2--pod4_host3:
+    sender_id: pod4_host2
+    receiver_id: pod4_host3
+    preset-name: default-connection
+  conn_pod4_host2--pod4_host4:
+    sender_id: pod4_host2
+    receiver_id: pod4_host4
+    preset-name: default-connection
+  conn_pod4_host3--pod1_host1:
+    sender_id: pod4_host3
+    receiver_id: pod1_host1
+    preset-name: default-connection
+  conn_pod4_host3--pod1_host2:
+    sender_id: pod4_host3
+    receiver_id: pod1_host2
+    preset-name: default-connection
+  conn_pod4_host3--pod1_host3:
+    sender_id: pod4_host3
+    receiver_id: pod1_host3
+    preset-name: default-connection
+  conn_pod4_host3--pod1_host4:
+    sender_id: pod4_host3
+    receiver_id: pod1_host4
+    preset-name: default-connection
+  conn_pod4_host3--pod2_host1:
+    sender_id: pod4_host3
+    receiver_id: pod2_host1
+    preset-name: default-connection
+  conn_pod4_host3--pod2_host2:
+    sender_id: pod4_host3
+    receiver_id: pod2_host2
+    preset-name: default-connection
+  conn_pod4_host3--pod2_host3:
+    sender_id: pod4_host3
+    receiver_id: pod2_host3
+    preset-name: default-connection
+  conn_pod4_host3--pod2_host4:
+    sender_id: pod4_host3
+    receiver_id: pod2_host4
+    preset-name: default-connection
+  conn_pod4_host3--pod3_host1:
+    sender_id: pod4_host3
+    receiver_id: pod3_host1
+    preset-name: default-connection
+  conn_pod4_host3--pod3_host2:
+    sender_id: pod4_host3
+    receiver_id: pod3_host2
+    preset-name: default-connection
+  conn_pod4_host3--pod3_host3:
+    sender_id: pod4_host3
+    receiver_id: pod3_host3
+    preset-name: default-connection
+  conn_pod4_host3--pod3_host4:
+    sender_id: pod4_host3
+    receiver_id: pod3_host4
+    preset-name: default-connection
+  conn_pod4_host3--pod4_host1:
+    sender_id: pod4_host3
+    receiver_id: pod4_host1
+    preset-name: default-connection
+  conn_pod4_host3--pod4_host2:
+    sender_id: pod4_host3
+    receiver_id: pod4_host2
+    preset-name: default-connection
+  conn_pod4_host3--pod4_host4:
+    sender_id: pod4_host3
+    receiver_id: pod4_host4
+    preset-name: default-connection
+  conn_pod4_host4--pod1_host1:
+    sender_id: pod4_host4
+    receiver_id: pod1_host1
+    preset-name: default-connection
+  conn_pod4_host4--pod1_host2:
+    sender_id: pod4_host4
+    receiver_id: pod1_host2
+    preset-name: default-connection
+  conn_pod4_host4--pod1_host3:
+    sender_id: pod4_host4
+    receiver_id: pod1_host3
+    preset-name: default-connection
+  conn_pod4_host4--pod1_host4:
+    sender_id: pod4_host4
+    receiver_id: pod1_host4
+    preset-name: default-connection
+  conn_pod4_host4--pod2_host1:
+    sender_id: pod4_host4
+    receiver_id: pod2_host1
+    preset-name: default-connection
+  conn_pod4_host4--pod2_host2:
+    sender_id: pod4_host4
+    receiver_id: pod2_host2
+    preset-name: default-connection
+  conn_pod4_host4--pod2_host3:
+    sender_id: pod4_host4
+    receiver_id: pod2_host3
+    preset-name: default-connection
+  conn_pod4_host4--pod2_host4:
+    sender_id: pod4_host4
+    receiver_id: pod2_host4
+    preset-name: default-connection
+  conn_pod4_host4--pod3_host1:
+    sender_id: pod4_host4
+    receiver_id: pod3_host1
+    preset-name: default-connection
+  conn_pod4_host4--pod3_host2:
+    sender_id: pod4_host4
+    receiver_id: pod3_host2
+    preset-name: default-connection
+  conn_pod4_host4--pod3_host3:
+    sender_id: pod4_host4
+    receiver_id: pod3_host3
+    preset-name: default-connection
+  conn_pod4_host4--pod3_host4:
+    sender_id: pod4_host4
+    receiver_id: pod3_host4
+    preset-name: default-connection
+  conn_pod4_host4--pod4_host1:
+    sender_id: pod4_host4
+    receiver_id: pod4_host1
+    preset-name: default-connection
+  conn_pod4_host4--pod4_host2:
+    sender_id: pod4_host4
+    receiver_id: pod4_host2
+    preset-name: default-connection
+  conn_pod4_host4--pod4_host3:
+    sender_id: pod4_host4
+    receiver_id: pod4_host3
+    preset-name: default-connection
