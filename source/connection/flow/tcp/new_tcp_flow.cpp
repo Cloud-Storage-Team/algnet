@@ -93,8 +93,6 @@ Packet NewTcpFlow::create_data_packet(PacketInfo info,
     packet.dest_id = receiver->get_id();
     packet.size = info.packet_size;
 
-    packet.flow = nullptr;
-
     std::shared_ptr<NewTcpFlow> flow = shared_from_this();
 
     packet.callback = [flow, delivery_callback = info.callback](

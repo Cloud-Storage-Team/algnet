@@ -4,7 +4,6 @@
 #include <memory>
 #include <vector>
 
-#include "../_mocks/flow_mock.hpp"
 #include "../utils/fake_packet.hpp"
 #include "device/host.hpp"
 #include "device/switch.hpp"
@@ -80,8 +79,7 @@ TEST_F(TestSwitch, test_no_packets_on_inlinks) {
 TEST_F(TestSwitch, test_no_destination_route) {
     auto switch_device = std::make_shared<sim::Switch>("");
     auto receiver = std::make_shared<HostMock>();
-    FlowMock flow(receiver);
-    sim::Packet packet(SizeByte(0), &flow);
+    sim::Packet packet(SizeByte(0));
 
     std::shared_ptr<sim::IDevice> null_device(nullptr);
     std::shared_ptr<LinkMock> switch_inlink =
@@ -99,71 +97,6 @@ TEST_F(TestSwitch, test_no_destination_route) {
     ASSERT_EQ(switch_reciever_link->get_arrived_packets(),
               std::vector<sim::Packet>());
 }
-
-static bool compare_packets(const sim::Packet& p1, const sim::Packet& p2) {
-    return p1.flow < p2.flow;
-}
-
-void test_senders(size_t senders_count) {
-    // create devices
-    auto switch_device = std::make_shared<sim::Switch>("");
-    std::shared_ptr<HostMock> receiver = std::make_shared<HostMock>();
-    // create flows
-    std::vector<FlowMock> flows;
-    flows.reserve(senders_count);
-    for (size_t i = 0; i < senders_count; i++) {
-        flows.push_back(FlowMock(receiver));
-    }
-
-    // create packets
-    std::vector<sim::Packet> packets(senders_count);
-    for (size_t i = 0; i < senders_count; i++) {
-        packets[i] = sim::Packet(SizeByte(i), &flows[i], "",
-                                 flows[i].get_receiver()->get_id());
-        packets[i].ttl = 2;
-    }
-
-    // create links
-    std::vector<std::shared_ptr<LinkMock> > links;
-    links.reserve(senders_count);
-
-    std::shared_ptr<sim::IDevice> device_mock = std::make_shared<HostMock>();
-    for (size_t i = 0; i < senders_count; i++) {
-        links.push_back(std::make_shared<LinkMock>(device_mock, switch_device));
-    }
-    std::shared_ptr<LinkMock> switch_reciever_link =
-        std::make_shared<LinkMock>(switch_device, receiver);
-    switch_device->update_routing_table(receiver->get_id(),
-                                        switch_reciever_link);
-
-    // set ingress packets
-    for (size_t i = 0; i < senders_count; i++) {
-        links[i]->set_ingress_packet(packets[i]);
-    }
-
-    // add inlinks to switch device and update its routing table
-    for (size_t i = 0; i < senders_count; i++) {
-        switch_device->add_inlink(links[i]);
-    }
-
-    for (size_t i = 0; i < senders_count; i++) {
-        switch_device->process();
-    }
-    std::vector<sim::Packet> arrived_packets =
-        switch_reciever_link->get_arrived_packets();
-
-    for (auto packet : packets) {
-        packet.ttl -= 2;
-    }
-
-    std::sort(packets.begin(), packets.end(), compare_packets);
-    std::sort(arrived_packets.begin(), arrived_packets.end(), compare_packets);
-    ASSERT_EQ(arrived_packets, packets);
-}
-
-TEST_F(TestSwitch, test_one_sender) { test_senders(1); }
-
-TEST_F(TestSwitch, test_multiple_senders) { test_senders(5); }
 
 // this test checks that packets passed throw same path have equal path hash
 // and packets passed throw different pathes have different path hashes
@@ -194,7 +127,7 @@ TEST_F(TestSwitch, test_path_hash) {
     switch_2->update_routing_table(receiver->get_id(),
                                    link_switch_2_to_receiver);
 
-    sim::Packet packet_template(SizeByte(1), nullptr, sender->get_id(),
+    sim::Packet packet_template(SizeByte(1), sender->get_id(),
                                 receiver->get_id());
     sim::Packet first_packet_route_1(packet_template);
     sim::Packet second_packet_route_1(packet_template);

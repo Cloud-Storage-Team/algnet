@@ -1,7 +1,6 @@
 #include <cxxopts.hpp>
 
 #include "logger/logger.hpp"
-#include "metrics/metrics_collector.hpp"
 #include "parser/new_scenario/new_scenario_parser.hpp"
 #include "utils/statistics.hpp"
 

@@ -1,6 +1,5 @@
 #include "event.hpp"
 
-#include "metrics/metrics_collector.hpp"
 #include "scheduler.hpp"
 
 namespace sim {
