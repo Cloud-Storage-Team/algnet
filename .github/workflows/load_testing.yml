@@ -75,7 +75,9 @@ jobs:
       run: git clone https://github.com/brendangregg/FlameGraph.git
 
     - name: Insall linux-tools
-      run: sudo apt install linux-tools-common linux-tools-generic
+      run: |
+        sudo apt install linux-tools-common linux-tools-generic
+        sudo apt install linux-tools-azure
 
     - name: Configure CMake for perf
       run: cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=Release -DBUILD_PROJECT=ON -DBUILD_TESTS=OFF -DLOG_LEVEL=LOG_LEVEL_ERROR -DCMAKE_CXX_FLAGS="-g -fno-omit-frame-pointer"
