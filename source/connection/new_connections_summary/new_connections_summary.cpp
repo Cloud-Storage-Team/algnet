@@ -27,21 +27,20 @@ void NewConnectionsSummary::write_to_csv(
     for (const auto& [id, ctx] : m_contexts_table) {
         SpeedGbps effective_delivery_rate =
             ctx.delivery_rate_statistics.get_mean().value_or(SpeedGbps(0));
-        std::optional<TimeNs> cct =
-            (ctx.first_send_data_time.has_value() &&
-                     ctx.last_data_delivery_time.has_value()
-                 ? std::optional(ctx.last_data_delivery_time.value() -
-                                 ctx.first_send_data_time.value())
-                 : std::nullopt);
+        TimeNs cct = (ctx.first_send_data_time.has_value() &&
+                              ctx.last_data_delivery_time.has_value()
+                          ? ctx.last_data_delivery_time.value() -
+                                ctx.first_send_data_time.value()
+                          : TimeNs(0.0));
         SpeedGbps delivery_rate =
-            (cct.has_value() ? SpeedGbps(ctx.total_data_delivered / cct.value())
-                             : SpeedGbps(0.0));
+            (cct != TimeNs(0.0) ? SpeedGbps(ctx.total_data_delivered / cct)
+                                : SpeedGbps(0.0));
         out << id;
         out << ", " << ctx.total_data_added;
         out << ", " << ctx.total_data_delivered;
         out << ", " << effective_delivery_rate;
         out << ", " << delivery_rate;
-        out << ", " << cct.value_or(TimeNs(0.0));
+        out << ", " << cct;
         out << '\n';
     }
 }
