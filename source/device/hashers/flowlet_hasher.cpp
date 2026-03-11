@@ -12,8 +12,8 @@ std::uint32_t FLowletHasher::get_hash(const Packet& packet) {
 
     // TODO: move to separate function
     Id flow_id =
-        fmt::format("{} {} {} {}", packet.source_id, packet.sender_port,
-                    packet.dest_id, packet.receriver_port);
+        fmt::format("{} {} {} {}", packet.sender_id, packet.sender_port,
+                    packet.receiver_id, packet.receriver_port);
     TimeNs curr_time = Scheduler::get_instance().get_current_time();
     auto it = m_flow_table.find(flow_id);
 

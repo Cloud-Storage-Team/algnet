@@ -18,7 +18,7 @@ Packet::Packet(SizeByte a_size, Id a_source_id, Id a_dest_id,
       congestion_experienced(a_congestion_experienced) {}
 
 bool Packet::operator==(const Packet& packet) const {
-    return source_id == packet.source_id && dest_id == packet.dest_id &&
+    return sender_id == packet.sender_id && receiver_id == packet.receiver_id &&
            size == packet.size &&
            flags.get_bit_storage() == packet.flags.get_bit_storage();
 }
@@ -27,8 +27,8 @@ bool Packet::operator==(const Packet& packet) const {
 // packets)
 std::string Packet::to_string() const {
     std::ostringstream oss;
-    oss << "Packet[source_id: " << source_id;
-    oss << ", dest_id: " << dest_id;
+    oss << "Packet[sender_id: " << sender_id;
+    oss << ", receiver_id: " << receiver_id;
     oss << ", packet_num: " << packet_num;
     oss << ", size(byte): " << size;
     oss << ", generated time: " << generated_time;

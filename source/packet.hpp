@@ -15,11 +15,13 @@ struct Packet;
 using OnPacketDeliveryCallback = std::function<void(const Packet&)>;
 
 struct FourTuple : EndpointPorts {
-    Id source_id;
-    Id dest_id;
+    Id sender_id;
+    Id receiver_id;
 
     FourTuple(Id a_source_id, Id a_dest_id, EndpointPorts ports = {})
-        : EndpointPorts(ports), source_id(a_source_id), dest_id(a_dest_id) {}
+        : EndpointPorts(ports),
+          sender_id(a_source_id),
+          receiver_id(a_dest_id) {}
 };
 
 struct Packet : FourTuple {

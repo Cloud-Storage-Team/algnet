@@ -6,7 +6,7 @@ std::uint32_t SymmetricHasher::get_hash(const Packet& packet) {
     std::hash<std::string> hasher;
 
     std::string combined_id_str =
-        std::to_string(hasher(packet.source_id) ^ hasher(packet.dest_id));
+        std::to_string(hasher(packet.sender_id) ^ hasher(packet.receiver_id));
 
     // TODO: fix it (add four-tuple)
 

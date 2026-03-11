@@ -87,10 +87,10 @@ Packet NewTcpFlow::create_data_packet(PacketInfo info,
     set_avg_rtt_if_present(packet);
 
     packet.data_id = std::move(info.id);
-    packet.source_id = sender->get_id();
+    packet.sender_id = sender->get_id();
     packet.sender_port = m_context.sender_port;
     packet.receriver_port = m_context.receriver_port;
-    packet.dest_id = receiver->get_id();
+    packet.receiver_id = receiver->get_id();
     packet.size = info.packet_size;
 
     std::shared_ptr<NewTcpFlow> flow = shared_from_this();
@@ -135,9 +135,9 @@ void NewTcpFlow::process_data_packet(const Packet& data,
         Scheduler::get_instance().get_current_time(),
         m_packet_reordering.value());
     Packet ack = data;
-    ack.source_id = m_context.receiver->get_id();
+    ack.sender_id = m_context.receiver->get_id();
     ack.sender_port = m_context.receriver_port;
-    ack.dest_id = m_context.sender->get_id();
+    ack.receiver_id = m_context.sender->get_id();
     ack.receriver_port = m_context.sender_port;
     ack.size = SizeByte(1);
     ack.ttl = M_MAX_TTL;
