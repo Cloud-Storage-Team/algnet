@@ -2,7 +2,7 @@
 
 #include "../_mocks/host_gmock.hpp"
 #include "parser/config_reader/config_node_with_preset.hpp"
-#include "parser/simulation/new-connection/connection_parser.hpp"
+#include "parser/network/new-connection/connection_parser.hpp"
 
 namespace sim {
 

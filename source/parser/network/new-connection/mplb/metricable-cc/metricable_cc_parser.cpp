@@ -1,6 +1,6 @@
 #include "metricable_cc_parser.hpp"
 
-#include "parser/simulation/connection/flow/tcp/cc/tcp_cc_parser.hpp"
+#include "parser/network/connection/flow/tcp/cc/tcp_cc_parser.hpp"
 
 namespace sim {
 MetricableCC parse_metricable_cc(const ConfigNodeWithPreset& node) {

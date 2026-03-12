@@ -2,8 +2,8 @@
 
 #include "action/action_parser.hpp"
 #include "parser/config_reader/config_node.hpp"
+#include "parser/network/network_parser.hpp"
 #include "parser/relative_path_parser.hpp"
-#include "parser/simulation/network_parser.hpp"
 
 namespace sim {
 
