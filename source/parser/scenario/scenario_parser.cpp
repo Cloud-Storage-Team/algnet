@@ -1,4 +1,4 @@
-#include "new_scenario_parser.hpp"
+#include "scenario_parser.hpp"
 
 #include "action/action_parser.hpp"
 #include "parser/config_reader/config_node.hpp"

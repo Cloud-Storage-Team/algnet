@@ -1,4 +1,4 @@
-#include "new_scenario.hpp"
+#include "scenario.hpp"
 
 #include <memory>
 
