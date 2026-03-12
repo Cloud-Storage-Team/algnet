@@ -1,8 +1,8 @@
 #include "network_parser.hpp"
 
+#include "parser/relative_path_parser.hpp"
 #include "parser/simulation/new-connection/connection_parser.hpp"
 #include "parser/topology/topology_parser.hpp"
-#include "relative_path_parser.hpp"
 
 namespace sim {
 
