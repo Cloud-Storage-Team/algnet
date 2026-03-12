@@ -1,6 +1,6 @@
 #include "network_parser.hpp"
 
-#include "new-connection/connection_parser.hpp"
+#include "connection/connection_parser.hpp"
 #include "parser/relative_path_parser.hpp"
 #include "parser/topology/topology_parser.hpp"
 
