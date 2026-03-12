@@ -1,12 +1,12 @@
 #include "connection_parser.hpp"
 
 #include "mplb/mplb_parser.hpp"
-#include "network/connection/new_connection.hpp"
+#include "network/connection/connection.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
 
-std::shared_ptr<NewConnection> parse_connection(
+std::shared_ptr<Connection> parse_connection(
     const ConfigNodeWithPreset& node, const utils::IdTable<IHost>& hosts_table);
 
 std::shared_ptr<INewConnection> parse_i_connection(
@@ -20,7 +20,7 @@ std::shared_ptr<INewConnection> parse_i_connection(
         fmt::format("Unsupported connection type: {}", type));
 }
 
-std::shared_ptr<NewConnection> parse_connection(
+std::shared_ptr<Connection> parse_connection(
     const ConfigNodeWithPreset& node,
     const utils::IdTable<IHost>& hosts_table) {
     Id connection_id = node.get_name_or_throw();
@@ -41,7 +41,7 @@ std::shared_ptr<NewConnection> parse_connection(
     std::shared_ptr<INewMPLB> mplb = parse_i_mplb(node["mplb"].value_or_throw(),
                                                   Endpoints{sender, receiver});
 
-    return NewConnection::create_shared(std::move(connection_id), mplb);
+    return Connection::create_shared(std::move(connection_id), mplb);
 }
 
 }  // namespace sim

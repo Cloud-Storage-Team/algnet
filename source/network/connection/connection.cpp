@@ -1,22 +1,21 @@
-#include "new_connection.hpp"
+#include "connection.hpp"
 
 #include "scheduler/scheduler.hpp"
 
 namespace sim {
 
-std::shared_ptr<NewConnection> NewConnection::create_shared(
+std::shared_ptr<Connection> Connection::create_shared(
     Id a_id, std::shared_ptr<INewMPLB> a_mplb) {
-    return std::shared_ptr<NewConnection>(
-        new NewConnection(std::move(a_id), a_mplb));
+    return std::shared_ptr<Connection>(new Connection(std::move(a_id), a_mplb));
 }
 
-NewConnection::NewConnection(Id a_id, std::shared_ptr<INewMPLB> a_mplb)
+Connection::Connection(Id a_id, std::shared_ptr<INewMPLB> a_mplb)
     : m_id(std::move(a_id)),
       m_context{SizeByte(0), SizeByte(0)},
       m_mplb(a_mplb) {}
 
-utils::StrExpected<void> NewConnection::send_data(Data data,
-                                                  OnDeliveryCallback callback) {
+utils::StrExpected<void> Connection::send_data(Data data,
+                                               OnDeliveryCallback callback) {
     DataId data_id = data.id;
     if (m_data_context_table.contains(data_id)) {
         return std::unexpected(
@@ -37,18 +36,17 @@ utils::StrExpected<void> NewConnection::send_data(Data data,
     return {};
 }
 
-ConnectionContext NewConnection::get_context() const { return m_context; }
+ConnectionContext Connection::get_context() const { return m_context; }
 
-MetricsTable NewConnection::get_metrics_table() const { return {}; }
+MetricsTable Connection::get_metrics_table() const { return {}; }
 
-void NewConnection::write_inner_metrics(
-    std::filesystem::path output_dir) const {
+void Connection::write_inner_metrics(std::filesystem::path output_dir) const {
     m_mplb->write_all_metrics(output_dir / "mplb");
 }
 
-Id NewConnection::get_id() const { return m_id; }
+Id Connection::get_id() const { return m_id; }
 
-void NewConnection::send_new_portion() {
+void Connection::send_new_portion() {
     while (!m_sending_queue.empty()) {
         DataId id = m_sending_queue.front();
 
@@ -79,7 +77,7 @@ void NewConnection::send_new_portion() {
         SizeByte delivery_size =
             std::min(context.total_size - context.sent, quota);
 
-        std::shared_ptr<NewConnection> connection = shared_from_this();
+        std::shared_ptr<Connection> connection = shared_from_this();
 
         TimeNs send_time = Scheduler::get_instance().get_current_time();
         SizeByte total_delivered_on_send = m_context.total_data_delivered;
@@ -96,9 +94,9 @@ void NewConnection::send_new_portion() {
     }
 }
 
-void NewConnection::process_data_delivery(DataId id, SizeByte delivery_size,
-                                          SizeByte total_delivered_on_send,
-                                          TimeNs send_time) {
+void Connection::process_data_delivery(DataId id, SizeByte delivery_size,
+                                       SizeByte total_delivered_on_send,
+                                       TimeNs send_time) {
     m_context.total_data_delivered += delivery_size;
 
     const TimeNs now = Scheduler::get_instance().get_current_time();

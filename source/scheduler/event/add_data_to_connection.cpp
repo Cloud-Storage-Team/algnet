@@ -1,4 +1,4 @@
-#include "add_data_to_new_connection.hpp"
+#include "add_data_to_connection.hpp"
 
 namespace sim {
 

@@ -9,10 +9,10 @@
 
 namespace sim {
 
-class NewConnection : public INewConnection,
-                      public std::enable_shared_from_this<NewConnection> {
+class Connection : public INewConnection,
+                   public std::enable_shared_from_this<Connection> {
 public:
-    static std::shared_ptr<NewConnection> create_shared(
+    static std::shared_ptr<Connection> create_shared(
         Id a_id, std::shared_ptr<INewMPLB> a_mplb);
 
     [[nodiscard]] utils::StrExpected<void> send_data(
@@ -29,7 +29,7 @@ public:
 
 private:
     // to avoid creating on stack
-    NewConnection(Id a_id, std::shared_ptr<INewMPLB> mplb);
+    Connection(Id a_id, std::shared_ptr<INewMPLB> mplb);
 
     void send_new_portion();
 

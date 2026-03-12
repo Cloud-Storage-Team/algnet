@@ -1,8 +1,7 @@
-#include "network/connection/new_connection.hpp"
-
 #include <gtest/gtest.h>
 
 #include "../_mocks/new_mplb_mock.hpp"
+#include "network/connection/connection.hpp"
 
 namespace test {
 class NewConnectionSendTest : public testing::Test {
@@ -13,7 +12,7 @@ public:
 
 TEST_F(NewConnectionSendTest, SimpleSend) {
     auto mplb = std::make_shared<MplbMock>(SizeByte(100));
-    auto connection = sim::NewConnection::create_shared("", mplb);
+    auto connection = sim::Connection::create_shared("", mplb);
 
     bool delivered = false;
 
@@ -29,7 +28,7 @@ TEST_F(NewConnectionSendTest, SimpleSend) {
 
 TEST_F(NewConnectionSendTest, SendManyPortions) {
     auto mplb = std::make_shared<MplbMock>(SizeByte(10));
-    auto connection = sim::NewConnection::create_shared("", mplb);
+    auto connection = sim::Connection::create_shared("", mplb);
 
     bool delivered = false;
 
@@ -45,7 +44,7 @@ TEST_F(NewConnectionSendTest, SendManyPortions) {
 
 TEST_F(NewConnectionSendTest, IncorrectSend) {
     auto mplb = std::make_shared<MplbMock>(SizeByte(0));
-    auto connection = sim::NewConnection::create_shared("", mplb);
+    auto connection = sim::Connection::create_shared("", mplb);
 
     bool delivered = false;
 
@@ -58,7 +57,7 @@ TEST_F(NewConnectionSendTest, IncorrectSend) {
 
 TEST_F(NewConnectionSendTest, SendRepeatingDataIds) {
     auto mplb = std::make_shared<MplbMock>(SizeByte(100));
-    auto connection = sim::NewConnection::create_shared("", mplb);
+    auto connection = sim::Connection::create_shared("", mplb);
 
     sim::DataId id("id");
     {
@@ -83,7 +82,7 @@ TEST_F(NewConnectionSendTest, SendRepeatingDataIds) {
 
 TEST_F(NewConnectionSendTest, SendManyIds) {
     auto mplb = std::make_shared<MplbMock>(SizeByte(100), false);
-    auto connection = sim::NewConnection::create_shared("", mplb);
+    auto connection = sim::Connection::create_shared("", mplb);
 
     const size_t IDS_COUNT = 3;
 
