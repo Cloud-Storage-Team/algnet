@@ -1,7 +1,7 @@
 #pragma once
 #include <filesystem>
 
-#include "new_scenario/new_scenario.hpp"
+#include "scenario/new_scenario.hpp"
 
 namespace sim {
 
