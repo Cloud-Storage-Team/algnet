@@ -78,7 +78,7 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](
                                 std::nullopt);
 }
 
-std::ostream& operator<<(std::ostream& out, const ConfigNodeWithPreset& node){
+std::ostream& operator<<(std::ostream& out, const ConfigNodeWithPreset& node) {
     return out << node.get_node();
 }
 
@@ -95,7 +95,8 @@ const ConfigNode& ConfigNodeWithPreset::get_node() const noexcept {
     return m_node;
 }
 
-[[nodiscard]] const std::optional<std::string>& ConfigNodeWithPreset::get_name() const{
+[[nodiscard]] const std::optional<std::string>& ConfigNodeWithPreset::get_name()
+    const {
     return m_node.get_name();
 }
 
