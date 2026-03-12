@@ -1,4 +1,4 @@
-#include "new_link_parser.hpp"
+#include "link_parser.hpp"
 
 #include "parser/parse_utils.hpp"
 
@@ -8,7 +8,7 @@ static std::shared_ptr<Link> parse_link(
     const ConfigNodeWithPreset& link_node,
     const utils::IdTable<IDevice>& device_table);
 
-std::shared_ptr<ILink> new_parse_i_link(
+std::shared_ptr<ILink> parse_i_link(
     const ConfigNodeWithPreset& link_node,
     const utils::IdTable<IDevice>& device_table) {
     return parse_link(link_node, device_table);
