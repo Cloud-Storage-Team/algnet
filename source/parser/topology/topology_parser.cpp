@@ -1,7 +1,7 @@
 #include "topology_parser.hpp"
 
 #include "host/host_parser.hpp"
-#include "link/new_link_parser.hpp"
+#include "link/link_parser.hpp"
 #include "switch/switch_parser.hpp"
 
 namespace sim {
@@ -122,7 +122,7 @@ static utils::IdTable<ILink> parse_links(
         ConfigNodeWithPreset link_node_with_preset(link_node,
                                                    link_presets_node);
         std::shared_ptr<ILink> link =
-            new_parse_i_link(link_node_with_preset, device_table);
+            parse_i_link(link_node_with_preset, device_table);
         Id link_id = link->get_id();
         if (!links_table.emplace(link->get_id(), link).second) {
             throw links_node.create_parsing_error(

@@ -1,14 +1,14 @@
 #pragma once
 
 #include <spdlog/fmt/bundled/format.h>
+
 #include <cstdlib>
 
-#include "time.hpp"
 #include "default_formatter.hpp"
+#include "time.hpp"
 
 template <IsTimeBase TTimeBase, typename Char>
 struct fmt::formatter<Time<TTimeBase>, Char> : DefaultFormatter<double, Char> {
-
     template <typename FormatContext>
     auto format(const Time<TTimeBase>& t, FormatContext& ctx) const {
         auto out = ctx.out();
@@ -22,6 +22,7 @@ struct fmt::formatter<Time<TTimeBase>, Char> : DefaultFormatter<double, Char> {
         }
         return out;
     }
+
 private:
     static constexpr std::string_view default_precision_format_str = "{:.1f}";
 };

@@ -1,12 +1,12 @@
 #include <gmock/gmock.h>
 
-#include "connection/flow/i_new_flow.hpp"
+#include "network/connection/flow/i_flow.hpp"
 
 namespace test {
 
-struct NewFlowGMock : public sim::INewFlow {
+struct FlowGMock : public sim::IFlow {
 public:
-    explicit NewFlowGMock(std::string name = "") : name(std::move(name)) {}
+    explicit FlowGMock(std::string name = "") : name(std::move(name)) {}
 
     MOCK_METHOD(void, send, (std::vector<sim::PacketInfo> packets), (override));
     MOCK_METHOD(const sim::FlowContext&, get_context, (), (const, override));

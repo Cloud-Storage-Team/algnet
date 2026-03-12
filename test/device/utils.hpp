@@ -1,9 +1,9 @@
 #pragma once
 #include <gtest/gtest.h>
 
-#include "device/routing_module.hpp"
-#include "link/i_link.hpp"
-#include "packet.hpp"
+#include "network/connection/flow/packet.hpp"
+#include "topology/device/routing_module.hpp"
+#include "topology/link/i_link.hpp"
 
 namespace test {
 

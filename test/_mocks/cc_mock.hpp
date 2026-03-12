@@ -1,5 +1,5 @@
 #pragma once
-#include "connection/flow/tcp/i_tcp_cc.hpp"
+#include "network/connection/mplb/cc/i_tcp_cc.hpp"
 
 namespace test {
 class CCMock : public sim::ITcpCC {

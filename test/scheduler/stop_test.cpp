@@ -1,4 +1,4 @@
-#include "event/stop.hpp"
+#include "scheduler/event/stop.hpp"
 
 #include <gtest/gtest.h>
 

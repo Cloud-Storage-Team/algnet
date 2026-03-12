@@ -1,10 +1,10 @@
 #pragma once
 
 #include "size.hpp"
-#include "speed.hpp"
-#include "time.hpp"
 #include "size_fmt.hpp"
+#include "speed.hpp"
 #include "speed_fmt.hpp"
+#include "time.hpp"
 #include "time_fmt.hpp"
 
 template <IsSizeBase TSizeBase, IsTimeBase TTimeBase>

@@ -2,10 +2,9 @@
 
 #include <spdlog/fmt/bundled/format.h>
 
-template<typename T, typename Char>
-    requires fmt::formattable<T, Char>
-struct DefaultFormatter: fmt::formatter<T, Char>{
-
+template <typename T, typename Char>
+requires fmt::formattable<T, Char>
+struct DefaultFormatter : fmt::formatter<T, Char> {
     template <typename ParseContext>
     constexpr auto parse(ParseContext& ctx) {
         auto it = ctx.begin();

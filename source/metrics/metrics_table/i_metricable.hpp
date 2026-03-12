@@ -13,9 +13,9 @@ public:
     //
     // ATTENTION: method write_all_metrics writes inner metrics & metrics
     // collected by object itself in same directory, so to avoid file name
-    // conflicts, while implementation of `write_inner_metrics` it is recommended
-    // to write metrics to subdirrectories of `output_dir`, not directly to
-    // `output_dir`
+    // conflicts, while implementation of `write_inner_metrics` it is
+    // recommended to write metrics to subdirrectories of `output_dir`, not
+    // directly to `output_dir`
     virtual void write_inner_metrics(
         std::filesystem::path output_dir) const = 0;
 

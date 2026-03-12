@@ -1,4 +1,4 @@
-#include "parser/network_parser.hpp"
+#include "parser/network/network_parser.hpp"
 
 #include <gtest/gtest.h>
 

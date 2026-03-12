@@ -1,9 +1,9 @@
 #pragma once
 #include <gmock/gmock.h>
 
-#include "device/interfaces/i_host.hpp"
-#include "link/i_link.hpp"
-#include "packet.hpp"
+#include "network/connection/flow/packet.hpp"
+#include "topology/device/interfaces/i_host.hpp"
+#include "topology/link/i_link.hpp"
 
 namespace test {
 class HostGMock : public sim::IHost {

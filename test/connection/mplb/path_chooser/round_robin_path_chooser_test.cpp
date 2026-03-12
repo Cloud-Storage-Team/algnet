@@ -1,4 +1,4 @@
-#include "connection/mplb/path_chooser/round_robin/round_robin_path_chooser.hpp"
+#include "network/connection/mplb/path_chooser/round_robin/round_robin_path_chooser.hpp"
 
 #include <gtest/gtest.h>
 
@@ -21,19 +21,19 @@ TEST_P(RoundRobinPathChooserParamTest, ChoosesFlowsAlmostUniformly) {
     ASSERT_GT(p.flows_count, 0u);
 
     sim::IPathChooser::FlowsTable flows;
-    std::vector<std::shared_ptr<NiceMock<NewFlowGMock>>> concrete_flows;
+    std::vector<std::shared_ptr<NiceMock<FlowGMock>>> concrete_flows;
 
     for (size_t i = 0; i < p.flows_count; ++i) {
         auto flow =
-            std::make_shared<NiceMock<NewFlowGMock>>(fmt::format("Flow_{}", i));
-        std::shared_ptr<sim::INewFlow> as_base = flow;
+            std::make_shared<NiceMock<FlowGMock>>(fmt::format("Flow_{}", i));
+        std::shared_ptr<sim::IFlow> as_base = flow;
         ASSERT_TRUE(flows.emplace(flow->name, as_base).second);
         concrete_flows.emplace_back(flow);
     }
 
     sim::RoundRobinPathChooser chooser(flows);
 
-    std::unordered_map<std::shared_ptr<sim::INewFlow>, size_t> counts;
+    std::unordered_map<std::shared_ptr<sim::IFlow>, size_t> counts;
     counts.reserve(p.flows_count);
 
     for (size_t i = 0; i < p.repeat_count; ++i) {

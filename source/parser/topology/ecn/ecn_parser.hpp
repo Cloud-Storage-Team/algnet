@@ -4,8 +4,8 @@
 
 #include <memory>
 
-#include "device/ecn.hpp"
 #include "parser/config_reader/config_node_with_preset.hpp"
+#include "topology/device/ecn.hpp"
 
 namespace sim {
 

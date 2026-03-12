@@ -1,0 +1,17 @@
+#pragma once
+
+#include "network/connection/flow/i_flow.hpp"
+#include "utils/id_table.hpp"
+
+namespace sim {
+
+class IPathChooser {
+public:
+    using FlowsTable = utils::IdTable<IFlow>;
+
+    virtual std::shared_ptr<IFlow> choose_flow() = 0;
+
+    virtual const FlowsTable& get_flows_table() const = 0;
+};
+
+}  // namespace sim

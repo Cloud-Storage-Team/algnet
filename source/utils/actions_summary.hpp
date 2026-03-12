@@ -1,7 +1,7 @@
 #pragma once
 #include <fstream>
 
-#include "data.hpp"
+#include "network/connection/data.hpp"
 #include "str_expected.hpp"
 
 namespace sim {

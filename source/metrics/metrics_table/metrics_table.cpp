@@ -1,4 +1,5 @@
 #include "metrics_table.hpp"
+
 #include <spdlog/fmt/fmt.h>
 
 namespace sim {

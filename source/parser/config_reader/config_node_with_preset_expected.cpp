@@ -22,7 +22,8 @@ ConfigNodeWithPresetExpected::get_name() const {
     }
 }
 
-[[nodiscard]] ConfigNodeWithPresetExpected ConfigNodeWithPresetExpected::operator[](std::string_view key) const {
+[[nodiscard]] ConfigNodeWithPresetExpected
+ConfigNodeWithPresetExpected::operator[](std::string_view key) const {
     if (!this->has_value()) {
         return *this;
     }

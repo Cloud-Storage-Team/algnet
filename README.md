@@ -42,8 +42,8 @@ E.g. if `--metrics-filter = "cwnd/.*"`, NoNS measures only CWND values, if `--me
 
 If you want to implement TCP-like algorithm, follow these steps:
 
-1. Create class (`YourCC` further) that implements [`ITcpCC`](source/connection/flow/tcp/i_tcp_cc.hpp). It should be a class that contains all logic of your congestion control algorithm. See example: [`TcpTahoeCC`](source/connection/flow/tcp/tahoe/tcp_tahoe_cc.cpp).
-2. Add implementation of parsing `YourCC` and put it to [directory](source/parser/simulation/connection/flow/tcp/cc/) with tcp congestion control parsers and call it from [`common TCP congestion control parser`](source/parser/simulation/connection/flow/tcp/cc/tcp_cc_parser.cpp)
+1. Create class (`YourCC` further) that implements [`ITcpCC`](source/network/connection/mplb/cc/i_tcp_cc.hpp). It should be a class that contains all logic of your congestion control algorithm. See example: [`TcpTahoeCC`](source/network/connection/mplb/cc/tahoe/tcp_tahoe_cc.cpp).
+2. Add implementation of parsing `YourCC` and put it to [directory](source/network/connection/mplb/cc/) with tcp congestion control parsers and call it from [`common TCP congestion control parser`](source/parser/network/connection/mplb/cc/tcp_cc_parser.hpp)
 
 ## Results of simulations
 

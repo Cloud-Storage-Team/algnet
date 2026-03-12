@@ -1,7 +1,7 @@
 #pragma once
 #include <gtest/gtest.h>
 
-#include "link/packet_queue/i_packet_queue.hpp"
+#include "topology/link/packet_queue/i_packet_queue.hpp"
 
 namespace test {
 

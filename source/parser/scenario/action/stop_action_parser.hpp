@@ -1,0 +1,9 @@
+#pragma once
+#include "parser/config_reader/config_node.hpp"
+#include "scenario/action/stop_time_action.hpp"
+
+namespace sim {
+
+std::shared_ptr<StopTimeAction> parse_stop_time_action(const ConfigNode& node);
+
+}

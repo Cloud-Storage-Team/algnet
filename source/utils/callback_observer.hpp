@@ -2,8 +2,7 @@
 #include "types.hpp"
 
 namespace utils {
-class
-CallbackObserver {
+class CallbackObserver {
 public:
     CallbackObserver(std::size_t a_count, OnDeliveryCallback a_callback);
 

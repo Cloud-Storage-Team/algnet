@@ -1,7 +1,7 @@
 #pragma once
-#include <iomanip>
 #include <concepts>
 #include <cstdint>
+#include <iomanip>
 #include <iostream>
 #include <string>
 #include <type_traits>
@@ -129,9 +129,10 @@ public:
 
     // Outputs the Size with the specified precision and with suffix.
     // For example: 1.53 Kb
-    std::string constexpr to_string(int precision = 2) const{
+    std::string constexpr to_string(int precision = 2) const {
         std::stringstream ss;
-        ss << std::fixed << std::setprecision(precision) << value() << TSizeBase::suffix;
+        ss << std::fixed << std::setprecision(precision) << value()
+           << TSizeBase::suffix;
         return ss.str();
     }
 
