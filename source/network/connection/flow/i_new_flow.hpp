@@ -25,7 +25,7 @@ struct FlowContext : FlowFourTuple {
 
 // Transport layer interface for reliable data delivery along single physical
 // path
-class INewFlow : public virtual Identifiable, public virtual IMetricable {
+class IFlow : public virtual Identifiable, public virtual IMetricable {
 public:
     virtual void send(std::vector<PacketInfo> packets) = 0;
 

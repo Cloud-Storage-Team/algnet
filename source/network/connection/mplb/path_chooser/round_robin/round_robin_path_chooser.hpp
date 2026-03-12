@@ -6,9 +6,9 @@ namespace sim {
 
 class RoundRobinPathChooser : public IPathChooser {
 public:
-    explicit RoundRobinPathChooser(utils::IdTable<INewFlow> a_flows);
+    explicit RoundRobinPathChooser(utils::IdTable<IFlow> a_flows);
 
-    virtual std::shared_ptr<INewFlow> choose_flow() final;
+    virtual std::shared_ptr<IFlow> choose_flow() final;
 
     virtual const FlowsTable& get_flows_table() const final;
 

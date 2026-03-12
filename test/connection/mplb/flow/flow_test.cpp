@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "../../../_mocks/host_gmock.hpp"
-#include "network/connection/flow/tcp/new_tcp_flow.hpp"
+#include "network/connection/flow/tcp/tcp_flow.hpp"
 #include "scheduler/scheduler.hpp"
 
 namespace test {
@@ -19,7 +19,7 @@ struct FlowTest : public ::testing::Test {
 
     SizeByte packet_size = SizeByte(100);
 
-    std::shared_ptr<sim::NewTcpFlow> flow = sim::NewTcpFlow::create_shared(
+    std::shared_ptr<sim::TcpFlow> flow = sim::TcpFlow::create_shared(
         "", sim::FlowFourTuple(sim::Endpoints(sender_mock, receiver_mock)));
 
     bool callback_called = false;

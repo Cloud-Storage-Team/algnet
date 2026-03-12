@@ -4,7 +4,7 @@
 
 namespace test {
 
-struct NewFlowGMock : public sim::INewFlow {
+struct NewFlowGMock : public sim::IFlow {
 public:
     explicit NewFlowGMock(std::string name = "") : name(std::move(name)) {}
 

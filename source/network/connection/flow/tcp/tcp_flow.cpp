@@ -1,4 +1,4 @@
-#include "new_tcp_flow.hpp"
+#include "tcp_flow.hpp"
 
 #include "flow_metrics_metadatas.hpp"
 #include "scheduler/scheduler.hpp"
@@ -6,17 +6,17 @@
 
 namespace sim {
 
-std::string NewTcpFlow::m_packet_type_label = "type";
+std::string TcpFlow::m_packet_type_label = "type";
 
-std::shared_ptr<NewTcpFlow> NewTcpFlow::create_shared(
+std::shared_ptr<TcpFlow> TcpFlow::create_shared(
     Id a_id, FlowFourTuple a_four_tuple, bool a_ecn_capable, RTO a_rto,
     TcpFlowMetricsFilters a_metrics_flags) {
-    return std::shared_ptr<NewTcpFlow>(
-        new NewTcpFlow(std::move(a_id), std::move(a_four_tuple), a_ecn_capable,
-                       std::move(a_rto), std::move(a_metrics_flags)));
+    return std::shared_ptr<TcpFlow>(
+        new TcpFlow(std::move(a_id), std::move(a_four_tuple), a_ecn_capable,
+                    std::move(a_rto), std::move(a_metrics_flags)));
 }
 
-void NewTcpFlow::send(std::vector<PacketInfo> packets_info) {
+void TcpFlow::send(std::vector<PacketInfo> packets_info) {
     if (packets_info.empty()) {
         return;
     }
@@ -32,11 +32,11 @@ void NewTcpFlow::send(std::vector<PacketInfo> packets_info) {
     }
 }
 
-const FlowContext& NewTcpFlow::get_context() const { return m_context; };
+const FlowContext& TcpFlow::get_context() const { return m_context; };
 
-Id NewTcpFlow::get_id() const { return m_id; }
+Id TcpFlow::get_id() const { return m_id; }
 
-MetricsTable NewTcpFlow::get_metrics_table() const {
+MetricsTable TcpFlow::get_metrics_table() const {
     MetricsTable metrics_table;
     auto add_if = [&](bool cond, const MetricId& metric_id,
                       std::shared_ptr<MetricsStorage> metric_storage) {
@@ -52,11 +52,11 @@ MetricsTable NewTcpFlow::get_metrics_table() const {
     return metrics_table;
 }
 
-void NewTcpFlow::write_inner_metrics(
+void TcpFlow::write_inner_metrics(
     [[maybe_unused]] std::filesystem::path output_dir) const {};
 
-NewTcpFlow::NewTcpFlow(Id a_id, FlowFourTuple a_four_tuple, bool a_ecn_capable,
-                       RTO a_rto, TcpFlowMetricsFilters a_metrics_flags)
+TcpFlow::TcpFlow(Id a_id, FlowFourTuple a_four_tuple, bool a_ecn_capable,
+                 RTO a_rto, TcpFlowMetricsFilters a_metrics_flags)
     : m_id(std::move(a_id)),
       m_context(a_four_tuple),
       m_ecn_capable(a_ecn_capable),
@@ -74,9 +74,9 @@ NewTcpFlow::NewTcpFlow(Id a_id, FlowFourTuple a_four_tuple, bool a_ecn_capable,
     }
 }
 
-Packet NewTcpFlow::create_data_packet(PacketInfo info,
-                                      std::shared_ptr<IHost> sender,
-                                      std::shared_ptr<IHost> receiver) {
+Packet TcpFlow::create_data_packet(PacketInfo info,
+                                   std::shared_ptr<IHost> sender,
+                                   std::shared_ptr<IHost> receiver) {
     Packet packet;
     packet.packet_num = m_next_packet_num++;
 
@@ -93,7 +93,7 @@ Packet NewTcpFlow::create_data_packet(PacketInfo info,
     packet.receiver_id = receiver->get_id();
     packet.size = info.packet_size;
 
-    std::shared_ptr<NewTcpFlow> flow = shared_from_this();
+    std::shared_ptr<TcpFlow> flow = shared_from_this();
 
     packet.callback = [flow, delivery_callback = info.callback](
                           const Packet& delivered_packet) {
@@ -109,7 +109,7 @@ Packet NewTcpFlow::create_data_packet(PacketInfo info,
     return packet;
 }
 
-void NewTcpFlow::set_avg_rtt_if_present(Packet& packet) {
+void TcpFlow::set_avg_rtt_if_present(Packet& packet) {
     std::optional<TimeNs> avg_rtt = m_context.rtt_statistics.get_mean();
     if (avg_rtt.has_value()) {
         set_avg_rtt_flag(packet.flags, avg_rtt.value())
@@ -117,7 +117,7 @@ void NewTcpFlow::set_avg_rtt_if_present(Packet& packet) {
     }
 }
 
-void NewTcpFlow::send_data_packet(Packet data) {
+void TcpFlow::send_data_packet(Packet data) {
     TimeNs now = Scheduler::get_instance().get_current_time();
 
     Scheduler::get_instance().add<Timeout>(now + m_rto.current,
@@ -128,8 +128,7 @@ void NewTcpFlow::send_data_packet(Packet data) {
     m_context.sender->enqueue_packet(std::move(data));
 }
 
-void NewTcpFlow::process_data_packet(const Packet& data,
-                                     PacketCallback callback) {
+void TcpFlow::process_data_packet(const Packet& data, PacketCallback callback) {
     m_packet_reordering.add_record(data.packet_num);
     m_metrics.packet_reordering->add_record(
         Scheduler::get_instance().get_current_time(),
@@ -147,7 +146,7 @@ void NewTcpFlow::process_data_packet(const Packet& data,
                         m_id, ack.to_string()));
     SizeByte data_packet_size = data.size;
 
-    std::shared_ptr<NewTcpFlow> flow = shared_from_this();
+    std::shared_ptr<TcpFlow> flow = shared_from_this();
     ack.callback = [flow, callback,
                     data_packet_size](const Packet& delivered_ack) {
         flow->process_ack(delivered_ack, data_packet_size, callback);
@@ -156,8 +155,8 @@ void NewTcpFlow::process_data_packet(const Packet& data,
     m_context.receiver->enqueue_packet(ack);
 }
 
-void NewTcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
-                             PacketCallback callback) {
+void TcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
+                          PacketCallback callback) {
     TimeNs now = Scheduler::get_instance().get_current_time();
 
     // here ack.sent_time is the time when corresponding DATA packet was sent
@@ -191,14 +190,14 @@ void NewTcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
 }
 
 // After ACK with a valid RTT: formula + transition to STEADY (once)
-void NewTcpFlow::update_rto_on_ack() {
+void TcpFlow::update_rto_on_ack() {
     auto mean = m_context.rtt_statistics.get_mean().value();
     TimeNs std = m_context.rtt_statistics.get_std().value();
     m_rto.current = std::min(mean * 2 + std * 4, m_rto.max);
     m_rto.is_steady = true;
 }
 
-void NewTcpFlow::on_timeout(Packet data) {
+void TcpFlow::on_timeout(Packet data) {
     if (m_ack_monitor.is_confirmed(data.packet_num)) {
         LOG_INFO(fmt::format(
             "Flow {}: packet {} is confirmed when timeout reached; no "
@@ -211,21 +210,21 @@ void NewTcpFlow::on_timeout(Packet data) {
 }
 
 // Before the first ACK: exponential growth by timeout
-void NewTcpFlow::update_rto_on_timeout() {
+void TcpFlow::update_rto_on_timeout() {
     if (!m_rto.is_steady) {
         m_rto.current = std::min(m_rto.current * 2, m_rto.max);
     }
     // in STEADY, don't touch RTO by timeout
 }
 
-void NewTcpFlow::retransmit_packet(Packet data) {
+void TcpFlow::retransmit_packet(Packet data) {
     m_context.retransmit_size += data.size;
     send_data_packet(std::move(data));
 }
 
-class NewTcpFlow::Timeout : public Event {
+class TcpFlow::Timeout : public Event {
 public:
-    Timeout(TimeNs a_time, std::weak_ptr<NewTcpFlow> a_flow, Packet a_packet)
+    Timeout(TimeNs a_time, std::weak_ptr<TcpFlow> a_flow, Packet a_packet)
         : Event(a_time), m_flow(a_flow), m_packet(std::move(a_packet)) {}
 
     void operator()() {
@@ -238,7 +237,7 @@ public:
     }
 
 private:
-    std::weak_ptr<NewTcpFlow> m_flow;
+    std::weak_ptr<TcpFlow> m_flow;
     Packet m_packet;
 };
 

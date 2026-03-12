@@ -3,7 +3,7 @@
 #include "network/connection/flow/i_new_flow.hpp"
 
 namespace test {
-class NewFlowMock : public sim::INewFlow {
+class NewFlowMock : public sim::IFlow {
 public:
     NewFlowMock(bool a_send_emmediately = true)
         : m_send_immediately(a_send_emmediately),

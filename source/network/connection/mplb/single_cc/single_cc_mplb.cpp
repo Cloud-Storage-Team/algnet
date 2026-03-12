@@ -55,7 +55,7 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
     for (size_t packet_num = 0; packet_num < packets_count; packet_num++) {
         // TODO: think about pacing delay & sending data to many flows (is it
         // really needed in such case?)
-        std::shared_ptr<INewFlow> flow = m_path_chooser->choose_flow();
+        std::shared_ptr<IFlow> flow = m_path_chooser->choose_flow();
         shift += pacing_delay;
         std::shared_ptr<SingleCCMplb> mplb = shared_from_this();
         PacketCallback packet_callback = [observer, mplb,

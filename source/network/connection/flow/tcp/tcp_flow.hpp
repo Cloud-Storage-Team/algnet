@@ -13,8 +13,7 @@ struct TcpFlowMetricsFilters {
     bool reordering = true;
 };
 
-class NewTcpFlow : public INewFlow,
-                   public std::enable_shared_from_this<NewTcpFlow> {
+class TcpFlow : public IFlow, public std::enable_shared_from_this<TcpFlow> {
 public:
     constexpr static inline RTO DEFAULT_START_RTO =
         RTO(TimeNs(2000), Time<Second>(1));
@@ -22,7 +21,7 @@ public:
     constexpr static inline bool DEFAULT_ECN_CAPABLE = true;
     constexpr static inline TcpFlowMetricsFilters DEFAULT_METRICS_FLAGS = {};
 
-    static std::shared_ptr<NewTcpFlow> create_shared(
+    static std::shared_ptr<TcpFlow> create_shared(
         Id a_id, FlowFourTuple a_four_tuple, bool a_ecn_capable = true,
         RTO a_rto = DEFAULT_START_RTO,
         TcpFlowMetricsFilters a_metrics_flags = DEFAULT_METRICS_FLAGS);
@@ -39,8 +38,8 @@ public:
         std::filesystem::path output_dir) const final;
 
 private:
-    NewTcpFlow(Id a_id, FlowFourTuple a_four_tuple, bool a_ecn_capable,
-               RTO a_rto, TcpFlowMetricsFilters a_metrics_flags);
+    TcpFlow(Id a_id, FlowFourTuple a_four_tuple, bool a_ecn_capable, RTO a_rto,
+            TcpFlowMetricsFilters a_metrics_flags);
 
     Packet create_data_packet(PacketInfo info, std::shared_ptr<IHost> sender,
                               std::shared_ptr<IHost> receiver);

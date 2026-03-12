@@ -2,7 +2,7 @@
 
 #include "network/connection/connection.hpp"
 #include "network/connection/flow/packet.hpp"
-#include "network/connection/flow/tcp/new_tcp_flow.hpp"
+#include "network/connection/flow/tcp/tcp_flow.hpp"
 #include "network/connection/mplb/cc/tahoe/tcp_tahoe_cc.hpp"
 #include "network/connection/mplb/path_chooser/round_robin/round_robin_path_chooser.hpp"
 #include "network/connection/mplb/single_cc/single_cc_mplb.hpp"
@@ -36,7 +36,7 @@ public:
     std::shared_ptr<sim::Link> back_link =
         std::make_shared<sim::Link>("back_link", receiver, sender);
 
-    std::shared_ptr<sim::NewTcpFlow> flow = sim::NewTcpFlow::create_shared(
+    std::shared_ptr<sim::TcpFlow> flow = sim::TcpFlow::create_shared(
         "flow", sim::FlowFourTuple(sim::Endpoints(sender, receiver)));
 
     // mplb

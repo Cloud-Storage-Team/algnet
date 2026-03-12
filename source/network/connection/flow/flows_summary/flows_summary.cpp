@@ -3,7 +3,7 @@
 #include "utils/filesystem.hpp"
 
 namespace sim {
-FlowsSummary::FlowsSummary(const utils::IdTable<INewFlow>& flows_table) {
+FlowsSummary::FlowsSummary(const utils::IdTable<IFlow>& flows_table) {
     for (const auto& [id, flow] : flows_table) {
         m_flows_contexts.emplace(id, flow->get_context());
     }

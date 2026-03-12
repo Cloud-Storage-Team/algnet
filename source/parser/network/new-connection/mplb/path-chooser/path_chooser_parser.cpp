@@ -26,7 +26,7 @@ std::unique_ptr<RoundRobinPathChooser> parse_round_robin_path_chooser(
     for (ConfigNode node : flows_node.get_node()) {
         ConfigNodeWithPreset flow_node(node, flows_node.get_presets_node());
 
-        std::shared_ptr<INewFlow> flow = parse_i_flow(flow_node, endpoints);
+        std::shared_ptr<IFlow> flow = parse_i_flow(flow_node, endpoints);
         Id flow_id = flow->get_id();
         if (!flows.emplace(flow_id, flow).second) {
             throw flows_node.create_parsing_error(

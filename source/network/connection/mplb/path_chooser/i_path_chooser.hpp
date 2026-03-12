@@ -7,9 +7,9 @@ namespace sim {
 
 class IPathChooser {
 public:
-    using FlowsTable = utils::IdTable<INewFlow>;
+    using FlowsTable = utils::IdTable<IFlow>;
 
-    virtual std::shared_ptr<INewFlow> choose_flow() = 0;
+    virtual std::shared_ptr<IFlow> choose_flow() = 0;
 
     virtual const FlowsTable& get_flows_table() const = 0;
 };

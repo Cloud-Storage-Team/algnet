@@ -2,15 +2,15 @@
 
 #include <random>
 
-#include "network/connection/flow/tcp/new_tcp_flow.hpp"
+#include "network/connection/flow/tcp/tcp_flow.hpp"
 #include "parser/parse_utils.hpp"
 
 namespace sim {
-std::shared_ptr<NewTcpFlow> parse_tcp_flow(
-    const ConfigNodeWithPreset& flow_node, Endpoints endpoints);
+std::shared_ptr<TcpFlow> parse_tcp_flow(const ConfigNodeWithPreset& flow_node,
+                                        Endpoints endpoints);
 
-std::shared_ptr<INewFlow> parse_i_flow(const ConfigNodeWithPreset& flow_node,
-                                       Endpoints endpoints) {
+std::shared_ptr<IFlow> parse_i_flow(const ConfigNodeWithPreset& flow_node,
+                                    Endpoints endpoints) {
     std::string type =
         flow_node["type"].value_or_throw().as_or_throw<std::string>();
     if (type == "tcp") {
@@ -53,26 +53,26 @@ EndpointPorts generate_ports() {
     return EndpointPorts(range(rnd), range(rnd));
 }
 
-std::shared_ptr<NewTcpFlow> parse_tcp_flow(
-    const ConfigNodeWithPreset& flow_node, Endpoints endpoints) {
+std::shared_ptr<TcpFlow> parse_tcp_flow(const ConfigNodeWithPreset& flow_node,
+                                        Endpoints endpoints) {
     const ConfigNodeWithPresetExpected& rto_node = flow_node["rto"];
-    RTO rto = (rto_node ? parse_rto(rto_node.value())
-                        : NewTcpFlow::DEFAULT_START_RTO);
+    RTO rto =
+        (rto_node ? parse_rto(rto_node.value()) : TcpFlow::DEFAULT_START_RTO);
 
     bool ecn_capable = flow_node["ecn_capable"].as<bool>().value_or(
-        NewTcpFlow::DEFAULT_ECN_CAPABLE);
+        TcpFlow::DEFAULT_ECN_CAPABLE);
 
     const ConfigNodeWithPresetExpected& metrics_flags_node =
         flow_node["metrics_filters"];
     TcpFlowMetricsFilters metrics_flags =
         (metrics_flags_node ? parse_metrics_flags(metrics_flags_node.value())
-                            : NewTcpFlow::DEFAULT_METRICS_FLAGS);
+                            : TcpFlow::DEFAULT_METRICS_FLAGS);
 
     EndpointPorts ports = generate_ports();
 
-    return NewTcpFlow::create_shared(flow_node.get_name_or_throw(),
-                                     FlowFourTuple(endpoints, ports),
-                                     ecn_capable, rto, metrics_flags);
+    return TcpFlow::create_shared(flow_node.get_name_or_throw(),
+                                  FlowFourTuple(endpoints, ports), ecn_capable,
+                                  rto, metrics_flags);
 }
 
 }  // namespace sim

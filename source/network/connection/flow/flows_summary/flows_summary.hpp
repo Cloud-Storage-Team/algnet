@@ -7,7 +7,7 @@ namespace sim {
 
 class FlowsSummary {
 public:
-    explicit FlowsSummary(const utils::IdTable<INewFlow>& flows_table);
+    explicit FlowsSummary(const utils::IdTable<IFlow>& flows_table);
 
     void write_to_csv(std::filesystem::path output_path) const;
 
