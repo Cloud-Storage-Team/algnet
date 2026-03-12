@@ -3,7 +3,7 @@
 #include <ranges>
 #include <regex>
 
-#include "network/connection/i_new_connection.hpp"
+#include "network/connection/i_connection.hpp"
 #include "parser/parse_utils.hpp"
 
 namespace sim {

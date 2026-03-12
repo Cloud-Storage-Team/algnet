@@ -2,7 +2,7 @@
 #include <random>
 
 #include "i_action.hpp"
-#include "network/connection/i_new_connection.hpp"
+#include "network/connection/i_connection.hpp"
 #include "scheduler/scheduler.hpp"
 #include "types.hpp"
 #include "utils/actions_summary.hpp"

@@ -1,6 +1,6 @@
 #pragma once
 #include "event.hpp"
-#include "network/connection/i_new_connection.hpp"
+#include "network/connection/i_connection.hpp"
 
 namespace sim {
 

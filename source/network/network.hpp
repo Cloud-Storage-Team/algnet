@@ -1,5 +1,5 @@
 #pragma once
-#include "network/connection/i_new_connection.hpp"
+#include "network/connection/i_connection.hpp"
 #include "topology/topology.hpp"
 #include "utils/id_table.hpp"
 

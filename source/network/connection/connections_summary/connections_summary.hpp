@@ -1,7 +1,7 @@
 #pragma once
 #include <filesystem>
 
-#include "../i_new_connection.hpp"
+#include "../i_connection.hpp"
 #include "utils/id_table.hpp"
 
 namespace sim {
