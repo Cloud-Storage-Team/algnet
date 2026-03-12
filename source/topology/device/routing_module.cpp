@@ -1,10 +1,10 @@
-#include "device/routing_module.hpp"
+#include "topology/device/routing_module.hpp"
 
 #include <algorithm>
 
 #include "hashers/ecmp_hasher.hpp"
-#include "link/i_link.hpp"
 #include "logger/logger.hpp"
+#include "topology/link/i_link.hpp"
 #include "utils/validation.hpp"
 
 namespace sim {

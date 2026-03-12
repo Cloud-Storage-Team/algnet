@@ -1,10 +1,10 @@
 #pragma once
 
-#include "device/interfaces/i_switch.hpp"
-#include "device/routing_module.hpp"
-#include "device/scheduling_module.hpp"
 #include "ecn.hpp"
 #include "event/process.hpp"
+#include "topology/device/interfaces/i_switch.hpp"
+#include "topology/device/routing_module.hpp"
+#include "topology/device/scheduling_module.hpp"
 
 namespace sim {
 

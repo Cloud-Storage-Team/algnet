@@ -1,7 +1,7 @@
 #pragma once
-#include "device/interfaces/i_host.hpp"
-#include "device/interfaces/i_switch.hpp"
-#include "link/i_link.hpp"
+#include "topology/device/interfaces/i_host.hpp"
+#include "topology/device/interfaces/i_switch.hpp"
+#include "topology/link/i_link.hpp"
 #include "utils/id_table.hpp"
 
 namespace sim {

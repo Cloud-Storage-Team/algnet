@@ -5,11 +5,11 @@
 #include <vector>
 
 #include "../utils/fake_packet.hpp"
-#include "device/host.hpp"
-#include "device/switch.hpp"
 #include "host_mock.hpp"
 #include "link_mock.hpp"
 #include "packet.hpp"
+#include "topology/device/host.hpp"
+#include "topology/device/switch.hpp"
 
 namespace test {
 

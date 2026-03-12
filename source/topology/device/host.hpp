@@ -1,12 +1,12 @@
 #pragma once
 #include <queue>
 
-#include "device/routing_module.hpp"
-#include "device/scheduling_module.hpp"
 #include "ecn.hpp"
 #include "event/process.hpp"
 #include "event/send_data.hpp"
 #include "interfaces/i_host.hpp"
+#include "topology/device/routing_module.hpp"
+#include "topology/device/scheduling_module.hpp"
 
 namespace sim {
 

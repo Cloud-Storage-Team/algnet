@@ -1,8 +1,8 @@
 #include "links_queue_size_storage.hpp"
 
 #include "draw_plots.hpp"
-#include "link/i_link.hpp"
 #include "multi_id_metrics_storage.hpp"
+#include "topology/link/i_link.hpp"
 #include "utils/safe_matplot.hpp"
 #include "write_to_csv.hpp"
 

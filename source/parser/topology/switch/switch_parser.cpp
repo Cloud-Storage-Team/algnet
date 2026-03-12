@@ -1,13 +1,13 @@
 #include "switch_parser.hpp"
 
-#include "device/hashers/adaptive_flowlet_hasher.hpp"
-#include "device/hashers/ecmp_hasher.hpp"
-#include "device/hashers/flowlet_hasher.hpp"
-#include "device/hashers/random_hasher.hpp"
-#include "device/hashers/salt_ecmp_hasher.hpp"
-#include "device/hashers/symmetric_hasher.hpp"
 #include "parser/parse_utils.hpp"
 #include "parser/topology/ecn/ecn_parser.hpp"
+#include "topology/device/hashers/adaptive_flowlet_hasher.hpp"
+#include "topology/device/hashers/ecmp_hasher.hpp"
+#include "topology/device/hashers/flowlet_hasher.hpp"
+#include "topology/device/hashers/random_hasher.hpp"
+#include "topology/device/hashers/salt_ecmp_hasher.hpp"
+#include "topology/device/hashers/symmetric_hasher.hpp"
 
 namespace sim {
 

@@ -5,8 +5,8 @@
 #include <regex>
 #include <utility>
 
-#include "link/packet_queue/link_queue.hpp"
 #include "metrics_storage.hpp"
+#include "topology/link/packet_queue/link_queue.hpp"
 #include "types.hpp"
 
 namespace sim {

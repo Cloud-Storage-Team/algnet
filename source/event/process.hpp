@@ -1,6 +1,6 @@
 #pragma once
-#include "device/interfaces/i_processing_device.hpp"
 #include "event.hpp"
+#include "topology/device/interfaces/i_processing_device.hpp"
 
 namespace sim {
 

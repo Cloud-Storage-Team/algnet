@@ -3,9 +3,9 @@
 #include <queue>
 
 #include "event/event.hpp"
-#include "link/i_link.hpp"
 #include "metrics/metrics_table/i_metricable.hpp"
 #include "packet_queue/link_queue.hpp"
+#include "topology/link/i_link.hpp"
 #include "utils/str_expected.hpp"
 
 namespace sim {

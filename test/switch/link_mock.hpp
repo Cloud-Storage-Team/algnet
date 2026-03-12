@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "link/i_link.hpp"
 #include "packet.hpp"
+#include "topology/link/i_link.hpp"
 
 class LinkMock : public sim::ILink {
 public:

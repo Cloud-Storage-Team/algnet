@@ -1,6 +1,6 @@
 #pragma once
-#include "device/interfaces/i_host.hpp"
 #include "event.hpp"
+#include "topology/device/interfaces/i_host.hpp"
 
 namespace sim {
 

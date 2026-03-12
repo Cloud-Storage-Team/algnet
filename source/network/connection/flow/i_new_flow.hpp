@@ -1,11 +1,11 @@
 #pragma once
 
-#include "device/interfaces/i_host.hpp"
 #include "flow_four_tuple.hpp"
 #include "metrics/metrics_storage.hpp"
 #include "metrics/metrics_table/i_metricable.hpp"
 #include "packet_ack_info.hpp"
 #include "packet_info.hpp"
+#include "topology/device/interfaces/i_host.hpp"
 #include "utils/statistics.hpp"
 
 namespace sim {

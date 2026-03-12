@@ -2,8 +2,8 @@
 
 #include <unordered_map>
 
-#include "device/interfaces/i_routing_device.hpp"
 #include "hashers/i_hasher.hpp"
+#include "topology/device/interfaces/i_routing_device.hpp"
 #include "utils/loop_iterator.hpp"
 
 namespace sim {

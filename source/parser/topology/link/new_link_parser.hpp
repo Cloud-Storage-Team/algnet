@@ -1,8 +1,8 @@
 #pragma once
 
 #pragma once
-#include "link/link.hpp"
 #include "parser/config_reader/config_node_with_preset.hpp"
+#include "topology/link/link.hpp"
 #include "utils/id_table.hpp"
 
 namespace sim {

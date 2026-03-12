@@ -2,8 +2,8 @@
 
 #include <unordered_map>
 
-#include "device/interfaces/i_routing_device.hpp"
-#include "link/i_link.hpp"
+#include "topology/device/interfaces/i_routing_device.hpp"
+#include "topology/link/i_link.hpp"
 
 namespace sim {
 

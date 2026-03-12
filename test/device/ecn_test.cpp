@@ -1,4 +1,4 @@
-#include "device/ecn.hpp"
+#include "topology/device/ecn.hpp"
 
 #include <gtest/gtest.h>
 

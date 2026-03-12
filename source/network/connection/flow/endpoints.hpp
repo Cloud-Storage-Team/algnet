@@ -1,7 +1,7 @@
 #pragma once
-#include "device/interfaces/i_host.hpp"
-#include "link/i_link.hpp"
 #include "packet.hpp"
+#include "topology/device/interfaces/i_host.hpp"
+#include "topology/link/i_link.hpp"
 
 namespace sim {
 struct Endpoints {

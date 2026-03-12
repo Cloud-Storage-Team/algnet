@@ -2,8 +2,8 @@
 
 #include <optional>
 
-#include "device/interfaces/i_device.hpp"
 #include "metrics/metrics_table/i_metricable.hpp"
+#include "topology/device/interfaces/i_device.hpp"
 
 namespace sim {
 
