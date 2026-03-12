@@ -4,7 +4,7 @@
 
 #include "../mplb_metrics_metadatas.hpp"
 #include "metrics/metrics_table/combine_metrics_tables.hpp"
-#include "network/connection/flow/new_flows_summary/new_flows_summary.hpp"
+#include "network/connection/flow/flows_summary/flows_summary.hpp"
 #include "scheduler/event/call_at_time.hpp"
 #include "scheduler/event/send_data.hpp"
 #include "scheduler/scheduler.hpp"
@@ -107,7 +107,7 @@ void SingleCCMplb::write_inner_metrics(
     const auto& flows_table = m_path_chooser->get_flows_table();
     collect_and_save_all_metrics(flows_table, flows_output_path);
 
-    NewFlowsSummary(flows_table)
+    FlowsSummary(flows_table)
         .write_to_csv(output_dir_path / "flows_summary.csv");
 
     m_cc.write_all_metrics(output_dir_path / "cc");

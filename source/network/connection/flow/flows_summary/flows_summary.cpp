@@ -1,15 +1,15 @@
-#include "new_flows_summary.hpp"
+#include "flows_summary.hpp"
 
 #include "utils/filesystem.hpp"
 
 namespace sim {
-NewFlowsSummary::NewFlowsSummary(const utils::IdTable<INewFlow>& flows_table) {
+FlowsSummary::FlowsSummary(const utils::IdTable<INewFlow>& flows_table) {
     for (const auto& [id, flow] : flows_table) {
         m_flows_contexts.emplace(id, flow->get_context());
     }
 }
 
-void NewFlowsSummary::write_to_csv(std::filesystem::path output_path) const {
+void FlowsSummary::write_to_csv(std::filesystem::path output_path) const {
     utils::create_all_directories(output_path);
     std::ofstream out(output_path);
     if (!out) {
