@@ -6,7 +6,7 @@
 #include <cmath>
 #include <string>
 
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 
 namespace sim {
 

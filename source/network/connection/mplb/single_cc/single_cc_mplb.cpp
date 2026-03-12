@@ -3,11 +3,11 @@
 #include <cmath>
 
 #include "../mplb_metrics_metadatas.hpp"
-#include "event/call_at_time.hpp"
-#include "event/send_data.hpp"
 #include "metrics/metrics_table/combine_metrics_tables.hpp"
 #include "network/connection/flow/new_flows_summary/new_flows_summary.hpp"
-#include "scheduler.hpp"
+#include "scheduler/event/call_at_time.hpp"
+#include "scheduler/event/send_data.hpp"
+#include "scheduler/scheduler.hpp"
 #include "utils/callback_observer.hpp"
 
 namespace sim {

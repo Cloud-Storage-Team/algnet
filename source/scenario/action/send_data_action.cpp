@@ -1,6 +1,6 @@
 #include "send_data_action.hpp"
 
-#include "event/add_data_to_new_connection.hpp"
+#include "scheduler/event/add_data_to_new_connection.hpp"
 #include "utils/callback_observer.hpp"
 
 namespace sim {

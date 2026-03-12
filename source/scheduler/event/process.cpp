@@ -1,6 +1,6 @@
 #include "process.hpp"
 
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 
 namespace sim {
 

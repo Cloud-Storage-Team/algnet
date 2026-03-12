@@ -1,7 +1,7 @@
 #include "topology/link/link.hpp"
 
 #include "logger/logger.hpp"
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 #include "utils/str_expected.hpp"
 
 namespace sim {

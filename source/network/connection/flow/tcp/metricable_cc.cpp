@@ -1,7 +1,7 @@
 #include "metricable_cc.hpp"
 
 #include "cc_metrics_metadatas.hpp"
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 
 namespace sim {
 

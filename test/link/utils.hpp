@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "network/connection/flow/packet.hpp"
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 #include "topology/device/interfaces/i_routing_device.hpp"
 #include "topology/link/link.hpp"
 

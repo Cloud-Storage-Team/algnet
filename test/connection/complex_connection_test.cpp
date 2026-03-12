@@ -6,7 +6,7 @@
 #include "network/connection/mplb/path_chooser/round_robin/round_robin_path_chooser.hpp"
 #include "network/connection/mplb/single_cc/single_cc_mplb.hpp"
 #include "network/connection/new_connection.hpp"
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 #include "topology/device/host.hpp"
 #include "topology/link/link.hpp"
 

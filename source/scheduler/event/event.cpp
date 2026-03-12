@@ -1,6 +1,6 @@
 #include "event.hpp"
 
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 
 namespace sim {
 

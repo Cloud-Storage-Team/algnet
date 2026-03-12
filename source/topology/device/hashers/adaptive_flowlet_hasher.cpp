@@ -1,6 +1,6 @@
 #include "adaptive_flowlet_hasher.hpp"
 
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 #include "utils/avg_rtt_packet_flag.hpp"
 
 namespace sim {

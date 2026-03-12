@@ -1,7 +1,7 @@
 #include "new_tcp_flow.hpp"
 
 #include "flow_metrics_metadatas.hpp"
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 #include "utils/avg_rtt_packet_flag.hpp"
 
 namespace sim {

@@ -2,7 +2,7 @@
 
 #include "../../../_mocks/host_gmock.hpp"
 #include "network/connection/flow/tcp/new_tcp_flow.hpp"
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 
 namespace test {
 

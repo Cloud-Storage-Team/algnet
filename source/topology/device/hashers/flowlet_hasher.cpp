@@ -1,6 +1,6 @@
 #include "flowlet_hasher.hpp"
 
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 
 namespace sim {
 

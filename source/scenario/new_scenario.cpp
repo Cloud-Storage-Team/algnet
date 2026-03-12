@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "action/send_data_action.hpp"
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 
 namespace sim {
 

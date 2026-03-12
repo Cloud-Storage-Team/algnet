@@ -3,7 +3,7 @@
 
 #include "i_new_action.hpp"
 #include "network/connection/i_new_connection.hpp"
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 #include "types.hpp"
 #include "utils/actions_summary.hpp"
 

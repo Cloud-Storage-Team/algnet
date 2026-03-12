@@ -1,6 +1,6 @@
 #include "new_connection.hpp"
 
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 
 namespace sim {
 

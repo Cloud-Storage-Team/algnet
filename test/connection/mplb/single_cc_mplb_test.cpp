@@ -5,7 +5,7 @@
 #include "../../_mocks/cc_mock.hpp"
 #include "../../_mocks/new_flow_mock.hpp"
 #include "../../_mocks/path_chooser_mock.hpp"
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 
 namespace test {
 class SingleCCMplbTest : public ::testing::Test {};

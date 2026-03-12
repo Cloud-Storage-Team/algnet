@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ecn.hpp"
-#include "event/process.hpp"
+#include "scheduler/event/process.hpp"
 #include "topology/device/interfaces/i_switch.hpp"
 #include "topology/device/routing_module.hpp"
 #include "topology/device/scheduling_module.hpp"

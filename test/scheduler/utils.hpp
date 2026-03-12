@@ -4,7 +4,7 @@
 
 #include <ctime>
 
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 
 namespace test {
 

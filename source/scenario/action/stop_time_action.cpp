@@ -1,7 +1,7 @@
 #include "stop_time_action.hpp"
 
-#include "event/stop.hpp"
-#include "scheduler.hpp"
+#include "scheduler/event/stop.hpp"
+#include "scheduler/scheduler.hpp"
 
 namespace sim {
 

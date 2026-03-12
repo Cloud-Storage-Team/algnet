@@ -1,6 +1,6 @@
 #include "link_queue.hpp"
 
-#include "scheduler.hpp"
+#include "scheduler/scheduler.hpp"
 #include "simple_packet_queue.hpp"
 
 namespace sim {
