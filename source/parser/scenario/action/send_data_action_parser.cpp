@@ -20,7 +20,7 @@ static std::vector<std::shared_ptr<IConnection>> get_target_connections(
     return result;
 }
 
-std::shared_ptr<NewSendDataAction> parse_send_data_action(
+std::shared_ptr<SendDataAction> parse_send_data_action(
     const ConfigNode& node,
     const utils::IdTable<IConnection> connections_table) {
     const TimeNs when = parse_time(node["when"].value_or_throw());
@@ -47,7 +47,7 @@ std::shared_ptr<NewSendDataAction> parse_send_data_action(
 
     RawDataId data_id = node["id"].value_or_throw().as_or_throw<RawDataId>();
 
-    return std::make_shared<NewSendDataAction>(
+    return std::make_shared<SendDataAction>(
         when, size, data_id, conns, repeat_count, repeat_interval, jitter);
 }
 

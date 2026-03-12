@@ -9,12 +9,12 @@
 
 namespace sim {
 
-class NewSendDataAction : public IAction {
+class SendDataAction : public IAction {
 public:
-    NewSendDataAction(TimeNs a_when, SizeByte a_size, RawDataId a_raw_data_id,
-                      std::vector<std::shared_ptr<IConnection>> a_conns,
-                      size_t a_repeat_count, TimeNs a_repeat_interval,
-                      TimeNs a_jitter);
+    SendDataAction(TimeNs a_when, SizeByte a_size, RawDataId a_raw_data_id,
+                   std::vector<std::shared_ptr<IConnection>> a_conns,
+                   size_t a_repeat_count, TimeNs a_repeat_interval,
+                   TimeNs a_jitter);
 
     void schedule() final;
 

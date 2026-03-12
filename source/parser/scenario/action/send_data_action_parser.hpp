@@ -6,7 +6,7 @@
 
 namespace sim {
 
-std::shared_ptr<NewSendDataAction> parse_send_data_action(
+std::shared_ptr<SendDataAction> parse_send_data_action(
     const ConfigNode& node,
     const utils::IdTable<IConnection> connections_table);
 

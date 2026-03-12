@@ -4,7 +4,6 @@
 
 namespace sim {
 
-std::shared_ptr<NewStopTimeAction> parse_stop_time_action(
-    const ConfigNode& node);
+std::shared_ptr<StopTimeAction> parse_stop_time_action(const ConfigNode& node);
 
 }

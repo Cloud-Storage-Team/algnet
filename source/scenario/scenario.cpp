@@ -24,7 +24,7 @@ Summary Scenario::simulate() {
 
     for (auto action : m_actions) {
         if (auto send_data_action =
-                std::dynamic_pointer_cast<NewSendDataAction>(action);
+                std::dynamic_pointer_cast<SendDataAction>(action);
             send_data_action) {
             for (const auto& row : send_data_action->get_summary()) {
                 summary.send_data.emplace_back(row);

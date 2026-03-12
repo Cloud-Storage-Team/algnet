@@ -5,10 +5,8 @@
 
 namespace sim {
 
-NewStopTimeAction::NewStopTimeAction(TimeNs a_time) : m_time(a_time) {}
+StopTimeAction::StopTimeAction(TimeNs a_time) : m_time(a_time) {}
 
-void NewStopTimeAction::schedule() {
-    Scheduler::get_instance().add<Stop>(m_time);
-}
+void StopTimeAction::schedule() { Scheduler::get_instance().add<Stop>(m_time); }
 
 }  // namespace sim

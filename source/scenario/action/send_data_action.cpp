@@ -5,7 +5,7 @@
 
 namespace sim {
 
-NewSendDataAction::NewSendDataAction(
+SendDataAction::SendDataAction(
     TimeNs a_when, SizeByte a_size, RawDataId a_raw_data_id,
     std::vector<std::shared_ptr<IConnection>> a_conns, size_t a_repeat_count,
     TimeNs a_repeat_interval, TimeNs a_jitter)
@@ -18,7 +18,7 @@ NewSendDataAction::NewSendDataAction(
       m_jitter(a_jitter),
       m_summary(std::make_shared<SendDataActionsSummary>()) {}
 
-void NewSendDataAction::schedule() {
+void SendDataAction::schedule() {
     const bool use_jitter = m_jitter > TimeNs(0);
 
     std::size_t connections_count = m_conns.size();
@@ -69,7 +69,7 @@ void NewSendDataAction::schedule() {
     }
 }
 
-const SendDataActionsSummary& NewSendDataAction::get_summary() const {
+const SendDataActionsSummary& SendDataAction::get_summary() const {
     return *m_summary;
 }
 

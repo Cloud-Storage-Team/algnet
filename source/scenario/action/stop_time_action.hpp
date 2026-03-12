@@ -5,9 +5,9 @@
 
 namespace sim {
 
-class NewStopTimeAction : public IAction {
+class StopTimeAction : public IAction {
 public:
-    NewStopTimeAction(TimeNs a_time);
+    StopTimeAction(TimeNs a_time);
 
     void schedule() final;
 
