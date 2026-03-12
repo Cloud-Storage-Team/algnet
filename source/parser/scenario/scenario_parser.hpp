@@ -5,6 +5,6 @@
 
 namespace sim {
 
-NewScenario parse_scenario(const std::filesystem::path& path);
+Scenario parse_scenario(const std::filesystem::path& path);
 
 }

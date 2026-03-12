@@ -35,8 +35,8 @@ int main(const int argc, char** argv) {
     std::filesystem::path actions_summary_path(output_dir /
                                                "actions_summary.csv");
 
-    sim::NewScenario scenario = sim::parse_scenario(config_path);
-    sim::NewSummary summary = scenario.simulate();
+    sim::Scenario scenario = sim::parse_scenario(config_path);
+    sim::Summary summary = scenario.simulate();
 
     sim::write_to_csv(actions_summary_path, summary.send_data);
     scenario.get_network().save_metrics(output_dir / "network");

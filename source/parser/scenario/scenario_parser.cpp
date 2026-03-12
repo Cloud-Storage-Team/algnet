@@ -7,7 +7,7 @@
 
 namespace sim {
 
-NewScenario parse_scenario(const std::filesystem::path& path) {
+Scenario parse_scenario(const std::filesystem::path& path) {
     ConfigNode node = load_file(path);
 
     std::string network_config_path =
@@ -24,7 +24,7 @@ NewScenario parse_scenario(const std::filesystem::path& path) {
             parse_action(action_node, network.get_context().connections_table));
     }
 
-    return NewScenario(std::move(actions), std::move(network));
+    return Scenario(std::move(actions), std::move(network));
 }
 
 }  // namespace sim

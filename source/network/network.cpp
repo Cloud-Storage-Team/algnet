@@ -1,7 +1,7 @@
 #include "network.hpp"
 
+#include "connection/connections_summary/connections_summary.hpp"
 #include "metrics/metrics_table/combine_metrics_tables.hpp"
-#include "network/connection/new_connections_summary/new_connections_summary.hpp"
 
 namespace sim {
 
@@ -13,7 +13,7 @@ void Network::save_metrics(std::filesystem::path output_dir) const {
     const auto& connections_table = m_ctx.connections_table;
 
     collect_and_save_all_metrics(connections_table, output_dir / "connections");
-    NewConnectionsSummary(connections_table)
+    ConnectionsSummary(connections_table)
         .write_to_csv(output_dir / "connections_summary.csv");
 
     std::filesystem::path link_metrics_path = output_dir / "links";

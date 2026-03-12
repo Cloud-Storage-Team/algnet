@@ -7,10 +7,10 @@
 
 namespace sim {
 
-NewScenario::NewScenario(Actions a_actions, Network a_network)
+Scenario::Scenario(Actions a_actions, Network a_network)
     : m_actions(std::move(a_actions)), m_network(std::move(a_network)) {}
 
-NewSummary NewScenario::simulate() {
+Summary Scenario::simulate() {
     m_network.recalculate_pathes();
 
     for (auto action : m_actions) {
@@ -20,7 +20,7 @@ NewSummary NewScenario::simulate() {
     while (Scheduler::get_instance().tick()) {
     }
 
-    NewSummary summary;
+    Summary summary;
 
     for (auto action : m_actions) {
         if (auto send_data_action =
@@ -35,6 +35,6 @@ NewSummary NewScenario::simulate() {
     return summary;
 }
 
-const Network& NewScenario::get_network() const { return m_network; }
+const Network& Scenario::get_network() const { return m_network; }
 
 }  // namespace sim

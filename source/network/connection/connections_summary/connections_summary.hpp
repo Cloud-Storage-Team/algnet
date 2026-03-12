@@ -6,9 +6,9 @@
 
 namespace sim {
 
-class NewConnectionsSummary {
+class ConnectionsSummary {
 public:
-    explicit NewConnectionsSummary(
+    explicit ConnectionsSummary(
         const utils::IdTable<INewConnection>& connections_table);
 
     void write_to_csv(std::filesystem::path output_path) const;

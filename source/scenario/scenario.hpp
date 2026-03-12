@@ -11,16 +11,16 @@ namespace sim {
 
 using Actions = std::vector<std::shared_ptr<INewAction>>;
 
-struct NewSummary {
+struct Summary {
     SendDataActionsSummary send_data;
 };
 
 // Launch scenaro: network & actions over it
-class NewScenario {
+class Scenario {
 public:
-    NewScenario(Actions a_actions, Network a_network);
+    Scenario(Actions a_actions, Network a_network);
 
-    NewSummary simulate();
+    Summary simulate();
 
     const Network& get_network() const;
 

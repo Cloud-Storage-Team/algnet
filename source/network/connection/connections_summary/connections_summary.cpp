@@ -1,17 +1,16 @@
-#include "new_connections_summary.hpp"
+#include "connections_summary.hpp"
 
 #include "utils/filesystem.hpp"
 
 namespace sim {
-NewConnectionsSummary::NewConnectionsSummary(
+ConnectionsSummary::ConnectionsSummary(
     const utils::IdTable<INewConnection>& connections_table) {
     for (const auto& [id, connection] : connections_table) {
         m_contexts_table.emplace(id, connection->get_context());
     }
 }
 
-void NewConnectionsSummary::write_to_csv(
-    std::filesystem::path output_path) const {
+void ConnectionsSummary::write_to_csv(std::filesystem::path output_path) const {
     utils::create_all_directories(output_path);
     std::ofstream out(output_path);
     if (!out) {
