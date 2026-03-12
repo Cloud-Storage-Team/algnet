@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
+
 #include <cmath>
 
 #include "units/size_fmt.hpp"
-
 
 TEST(SizeFormatTest, DefaultValue) {
     // default precision

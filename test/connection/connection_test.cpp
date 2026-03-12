@@ -1,7 +1,8 @@
+#include "network/connection/connection.hpp"
+
 #include <gtest/gtest.h>
 
 #include "../_mocks/mplb_mock.hpp"
-#include "network/connection/connection.hpp"
 
 namespace test {
 class ConnectionSendTest : public testing::Test {

@@ -6,7 +6,6 @@
 #include <string>
 #include <type_traits>
 #include <variant>
-#include <optional>
 
 #include "logger/logger.hpp"
 
