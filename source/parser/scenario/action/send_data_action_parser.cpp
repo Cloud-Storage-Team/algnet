@@ -9,9 +9,9 @@
 namespace sim {
 
 // Get target connections from the YAML node
-static std::vector<std::shared_ptr<INewConnection>> get_target_connections(
-    std::regex re, const utils::IdTable<INewConnection> connections_table) {
-    std::vector<std::shared_ptr<INewConnection>> result;
+static std::vector<std::shared_ptr<IConnection>> get_target_connections(
+    std::regex re, const utils::IdTable<IConnection> connections_table) {
+    std::vector<std::shared_ptr<IConnection>> result;
     for (const auto& [id, connection] : connections_table) {
         if (std::regex_match(connection->get_id(), re)) {
             result.emplace_back(connection);
@@ -22,7 +22,7 @@ static std::vector<std::shared_ptr<INewConnection>> get_target_connections(
 
 std::shared_ptr<NewSendDataAction> parse_send_data_action(
     const ConfigNode& node,
-    const utils::IdTable<INewConnection> connections_table) {
+    const utils::IdTable<IConnection> connections_table) {
     const TimeNs when = parse_time(node["when"].value_or_throw());
     const SizeByte size = parse_size(node["size"].value_or_throw());
     const std::regex connections_regex =

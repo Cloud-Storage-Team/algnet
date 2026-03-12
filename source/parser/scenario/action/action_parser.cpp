@@ -1,11 +1,12 @@
 #include "action_parser.hpp"
+
 #include "send_data_action_parser.hpp"
 #include "stop_action_parser.hpp"
 
 namespace sim {
 std::shared_ptr<INewAction> parse_action(
     const ConfigNode& node,
-    const utils::IdTable<INewConnection> connections_table) {
+    const utils::IdTable<IConnection> connections_table) {
     const std::string action_type =
         node["action"].value_or_throw().as_or_throw<std::string>();
     if (action_type == "send_data") {

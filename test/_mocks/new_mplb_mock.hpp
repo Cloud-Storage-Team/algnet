@@ -6,7 +6,7 @@
 #include "network/connection/mplb/i_new_mplb.hpp"
 
 namespace test {
-class MplbMock : public sim::INewMPLB {
+class MplbMock : public sim::IMPLB {
 public:
     MplbMock(SizeByte quota, bool a_send_immediately = true)
         : m_quota(quota), m_send_immediately(a_send_immediately) {}

@@ -6,7 +6,7 @@
 
 namespace sim {
 
-std::shared_ptr<INewConnection> parse_i_connection(
+std::shared_ptr<IConnection> parse_i_connection(
     const ConfigNodeWithPreset& node, const utils::IdTable<IHost>& hosts_table);
 
 }  // namespace sim

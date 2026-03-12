@@ -4,7 +4,7 @@
 
 namespace sim {
 ConnectionsSummary::ConnectionsSummary(
-    const utils::IdTable<INewConnection>& connections_table) {
+    const utils::IdTable<IConnection>& connections_table) {
     for (const auto& [id, connection] : connections_table) {
         m_contexts_table.emplace(id, connection->get_context());
     }

@@ -10,8 +10,8 @@ namespace sim {
 std::shared_ptr<SingleCCMplb> parse_single_cc_mplb(
     const ConfigNodeWithPreset& node, Endpoints endpoints);
 
-std::shared_ptr<INewMPLB> parse_i_mplb(const ConfigNodeWithPreset& node,
-                                       Endpoints endpoints) {
+std::shared_ptr<IMPLB> parse_i_mplb(const ConfigNodeWithPreset& node,
+                                    Endpoints endpoints) {
     std::string type = node["type"].value_or_throw().as_or_throw<std::string>();
     if (type == "single-cc") {
         return parse_single_cc_mplb(node, std::move(endpoints));

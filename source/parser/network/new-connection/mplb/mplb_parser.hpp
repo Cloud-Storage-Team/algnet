@@ -5,7 +5,7 @@
 
 namespace sim {
 
-std::shared_ptr<INewMPLB> parse_i_mplb(const ConfigNodeWithPreset& node,
-                                       Endpoints endpoints);
+std::shared_ptr<IMPLB> parse_i_mplb(const ConfigNodeWithPreset& node,
+                                    Endpoints endpoints);
 
 }

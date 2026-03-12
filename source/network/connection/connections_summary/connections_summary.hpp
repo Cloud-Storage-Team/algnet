@@ -9,7 +9,7 @@ namespace sim {
 class ConnectionsSummary {
 public:
     explicit ConnectionsSummary(
-        const utils::IdTable<INewConnection>& connections_table);
+        const utils::IdTable<IConnection>& connections_table);
 
     void write_to_csv(std::filesystem::path output_path) const;
 

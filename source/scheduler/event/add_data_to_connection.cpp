@@ -3,7 +3,7 @@
 namespace sim {
 
 AddDataToNewConnection::AddDataToNewConnection(
-    TimeNs a_when, std::shared_ptr<INewConnection> a_conn, Data a_data,
+    TimeNs a_when, std::shared_ptr<IConnection> a_conn, Data a_data,
     OnDeliveryCallback a_callback)
     : Event(a_when),
       m_connection(a_conn),

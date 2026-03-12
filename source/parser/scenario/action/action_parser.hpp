@@ -8,5 +8,5 @@ namespace sim {
 
 std::shared_ptr<INewAction> parse_action(
     const ConfigNode& node,
-    const utils::IdTable<INewConnection> connections_table);
+    const utils::IdTable<IConnection> connections_table);
 }  // namespace sim

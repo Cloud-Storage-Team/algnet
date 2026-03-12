@@ -11,7 +11,7 @@ struct SingleCCMetricsFilters {
     bool fairness = true;
 };
 
-class SingleCCMplb : public INewMPLB,
+class SingleCCMplb : public IMPLB,
                      public std::enable_shared_from_this<SingleCCMplb> {
 public:
     virtual ~SingleCCMplb() = default;

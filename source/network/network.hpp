@@ -6,7 +6,7 @@
 namespace sim {
 struct NetworkContext {
     Topology topology;
-    utils::IdTable<INewConnection> connections_table;
+    utils::IdTable<IConnection> connections_table;
 };
 
 // Tetwork itself: topolog & connections

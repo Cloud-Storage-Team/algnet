@@ -7,7 +7,7 @@ namespace sim {
 
 NewSendDataAction::NewSendDataAction(
     TimeNs a_when, SizeByte a_size, RawDataId a_raw_data_id,
-    std::vector<std::shared_ptr<INewConnection>> a_conns, size_t a_repeat_count,
+    std::vector<std::shared_ptr<IConnection>> a_conns, size_t a_repeat_count,
     TimeNs a_repeat_interval, TimeNs a_jitter)
     : m_when(a_when),
       m_size(a_size),

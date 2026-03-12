@@ -21,7 +21,7 @@ struct ConnectionContext {
 };
 
 // Logical path in network. Corresponds to application layer in TCP\IP stack
-class INewConnection : public virtual Identifiable, public virtual IMetricable {
+class IConnection : public virtual Identifiable, public virtual IMetricable {
 public:
     [[nodiscard]] virtual utils::StrExpected<void> send_data(
         Data data, OnDeliveryCallback callback) = 0;

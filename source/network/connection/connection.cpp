@@ -5,11 +5,11 @@
 namespace sim {
 
 std::shared_ptr<Connection> Connection::create_shared(
-    Id a_id, std::shared_ptr<INewMPLB> a_mplb) {
+    Id a_id, std::shared_ptr<IMPLB> a_mplb) {
     return std::shared_ptr<Connection>(new Connection(std::move(a_id), a_mplb));
 }
 
-Connection::Connection(Id a_id, std::shared_ptr<INewMPLB> a_mplb)
+Connection::Connection(Id a_id, std::shared_ptr<IMPLB> a_mplb)
     : m_id(std::move(a_id)),
       m_context{SizeByte(0), SizeByte(0)},
       m_mplb(a_mplb) {}

@@ -9,13 +9,13 @@ namespace sim {
  */
 class AddDataToNewConnection : public Event {
 public:
-    AddDataToNewConnection(TimeNs when, std::shared_ptr<INewConnection> conn,
+    AddDataToNewConnection(TimeNs when, std::shared_ptr<IConnection> conn,
                            Data a_data, OnDeliveryCallback a_callback);
     ~AddDataToNewConnection() = default;
     void operator()() final;
 
 private:
-    std::shared_ptr<INewConnection> m_connection;
+    std::shared_ptr<IConnection> m_connection;
     Data m_data;
     OnDeliveryCallback m_callback;
 };
