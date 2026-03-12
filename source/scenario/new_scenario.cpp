@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "new_action/send_data_action.hpp"
+#include "action/send_data_action.hpp"
 #include "scheduler.hpp"
 
 namespace sim {

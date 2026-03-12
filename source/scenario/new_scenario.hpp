@@ -3,8 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include "action/i_new_action.hpp"
 #include "network/network.hpp"
-#include "new_action/i_new_action.hpp"
 #include "utils/actions_summary.hpp"
 
 namespace sim {

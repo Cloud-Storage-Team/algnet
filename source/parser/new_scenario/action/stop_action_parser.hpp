@@ -1,6 +1,6 @@
 #pragma once
 #include "parser/config_reader/config_node.hpp"
-#include "scenario/new_action/stop_time_action.hpp"
+#include "scenario/action/stop_time_action.hpp"
 
 namespace sim {
 
