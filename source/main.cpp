@@ -1,7 +1,7 @@
 #include <cxxopts.hpp>
 
 #include "logger/logger.hpp"
-#include "parser/new_scenario/new_scenario_parser.hpp"
+#include "parser/scenario/new_scenario_parser.hpp"
 #include "utils/statistics.hpp"
 
 int main(const int argc, char** argv) {
