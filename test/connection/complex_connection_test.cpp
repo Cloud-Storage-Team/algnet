@@ -2,7 +2,7 @@
 
 #include "network/connection/flow/packet.hpp"
 #include "network/connection/flow/tcp/new_tcp_flow.hpp"
-#include "network/connection/flow/tcp/tahoe/tcp_tahoe_cc.hpp"
+#include "network/connection/mplb/cc/tahoe/tcp_tahoe_cc.hpp"
 #include "network/connection/mplb/path_chooser/round_robin/round_robin_path_chooser.hpp"
 #include "network/connection/mplb/single_cc/single_cc_mplb.hpp"
 #include "network/connection/new_connection.hpp"

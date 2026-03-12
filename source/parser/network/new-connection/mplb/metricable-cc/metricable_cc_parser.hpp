@@ -1,5 +1,5 @@
 #pragma once
-#include "network/connection/flow/tcp/metricable_cc.hpp"
+#include "network/connection/mplb/cc/metricable_cc.hpp"
 #include "parser/config_reader/config_node_with_preset.hpp"
 
 namespace sim {
