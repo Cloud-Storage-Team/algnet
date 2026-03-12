@@ -4,7 +4,7 @@
 #include "stop_action_parser.hpp"
 
 namespace sim {
-std::shared_ptr<INewAction> parse_action(
+std::shared_ptr<IAction> parse_action(
     const ConfigNode& node,
     const utils::IdTable<IConnection> connections_table) {
     const std::string action_type =

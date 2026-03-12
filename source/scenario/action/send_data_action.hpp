@@ -1,7 +1,7 @@
 #pragma once
 #include <random>
 
-#include "i_new_action.hpp"
+#include "i_action.hpp"
 #include "network/connection/i_new_connection.hpp"
 #include "scheduler/scheduler.hpp"
 #include "types.hpp"
@@ -9,7 +9,7 @@
 
 namespace sim {
 
-class NewSendDataAction : public INewAction {
+class NewSendDataAction : public IAction {
 public:
     NewSendDataAction(TimeNs a_when, SizeByte a_size, RawDataId a_raw_data_id,
                       std::vector<std::shared_ptr<IConnection>> a_conns,

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "i_new_action.hpp"
+#include "i_action.hpp"
 #include "types.hpp"
 
 namespace sim {
 
-class NewStopTimeAction : public INewAction {
+class NewStopTimeAction : public IAction {
 public:
     NewStopTimeAction(TimeNs a_time);
 

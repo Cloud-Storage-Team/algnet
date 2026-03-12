@@ -3,13 +3,13 @@
 #include <memory>
 #include <vector>
 
-#include "action/i_new_action.hpp"
+#include "action/i_action.hpp"
 #include "network/network.hpp"
 #include "utils/actions_summary.hpp"
 
 namespace sim {
 
-using Actions = std::vector<std::shared_ptr<INewAction>>;
+using Actions = std::vector<std::shared_ptr<IAction>>;
 
 struct Summary {
     SendDataActionsSummary send_data;

@@ -3,9 +3,9 @@
 
 namespace sim {
 
-class INewAction {
+class IAction {
 public:
-    virtual ~INewAction() = default;
+    virtual ~IAction() = default;
     virtual void schedule() = 0;
 };
 
