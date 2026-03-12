@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include "data.hpp"
 #include "metrics/metrics_table/i_metricable.hpp"
+#include "network/connection/data.hpp"
 #include "types.hpp"
 #include "utils/identifier_factory.hpp"
 #include "utils/statistics.hpp"

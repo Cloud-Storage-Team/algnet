@@ -3,8 +3,8 @@
 #include <optional>
 #include <utility>
 
-#include "data.hpp"
 #include "metrics/metrics_table/i_metricable.hpp"
+#include "network/connection/data.hpp"
 #include "utils/str_expected.hpp"
 
 namespace sim {

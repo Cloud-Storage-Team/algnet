@@ -2,9 +2,9 @@
 
 #include <string>
 
-#include "data.hpp"
-#include "utils/flag_manager.hpp"
 #include "four_tuple.hpp"
+#include "network/connection/data.hpp"
+#include "utils/flag_manager.hpp"
 
 namespace sim {
 

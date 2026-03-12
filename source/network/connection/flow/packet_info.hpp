@@ -1,5 +1,5 @@
 #pragma once
-#include "data.hpp"
+#include "network/connection/data.hpp"
 #include "packet_ack_info.hpp"
 #include "types.hpp"
 
