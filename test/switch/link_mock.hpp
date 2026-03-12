@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "packet.hpp"
+#include "network/connection/flow/packet.hpp"
 #include "topology/link/i_link.hpp"
 
 class LinkMock : public sim::ILink {

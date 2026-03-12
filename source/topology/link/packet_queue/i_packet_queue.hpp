@@ -1,5 +1,5 @@
 #pragma once
-#include "packet.hpp"
+#include "network/connection/flow/packet.hpp"
 #include "types.hpp"
 
 namespace sim {

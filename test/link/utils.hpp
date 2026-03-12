@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "packet.hpp"
+#include "network/connection/flow/packet.hpp"
 #include "scheduler.hpp"
 #include "topology/device/interfaces/i_routing_device.hpp"
 #include "topology/link/link.hpp"

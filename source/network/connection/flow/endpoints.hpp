@@ -1,5 +1,5 @@
 #pragma once
-#include "packet.hpp"
+#include "network/connection/flow/packet.hpp"
 #include "topology/device/interfaces/i_host.hpp"
 #include "topology/link/i_link.hpp"
 

@@ -7,7 +7,7 @@
 #include "../utils/fake_packet.hpp"
 #include "host_mock.hpp"
 #include "link_mock.hpp"
-#include "packet.hpp"
+#include "network/connection/flow/packet.hpp"
 #include "topology/device/host.hpp"
 #include "topology/device/switch.hpp"
 

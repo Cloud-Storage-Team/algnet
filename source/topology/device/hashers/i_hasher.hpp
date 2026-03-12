@@ -1,6 +1,6 @@
 #pragma once
 
-#include "packet.hpp"
+#include "network/connection/flow/packet.hpp"
 
 namespace sim {
 

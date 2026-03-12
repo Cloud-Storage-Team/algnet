@@ -3,7 +3,7 @@
 #include <string>
 
 #include "logger/logger.hpp"
-#include "packet.hpp"
+#include "network/connection/flow/packet.hpp"
 #include "topology/device/interfaces/i_device.hpp"
 
 namespace test {
