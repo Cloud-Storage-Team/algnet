@@ -3,7 +3,7 @@
 #include <set>
 #include <vector>
 
-#include "network/connection/mplb/i_new_mplb.hpp"
+#include "network/connection/mplb/i_mplb.hpp"
 
 namespace test {
 class MplbMock : public sim::IMPLB {

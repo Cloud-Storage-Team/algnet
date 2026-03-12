@@ -1,6 +1,6 @@
 #pragma once
 
-#include "network/connection/flow/i_new_flow.hpp"
+#include "network/connection/flow/i_flow.hpp"
 #include "utils/id_table.hpp"
 
 namespace sim {

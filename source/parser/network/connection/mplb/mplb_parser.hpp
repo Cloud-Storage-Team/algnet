@@ -1,6 +1,6 @@
 #pragma once
 #include "network/connection/flow/endpoints.hpp"
-#include "network/connection/mplb/i_new_mplb.hpp"
+#include "network/connection/mplb/i_mplb.hpp"
 #include "parser/config_reader/config_node_with_preset.hpp"
 
 namespace sim {

@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "../../_mocks/cc_mock.hpp"
-#include "../../_mocks/new_flow_mock.hpp"
+#include "../../_mocks/flow_mock.hpp"
 #include "../../_mocks/path_chooser_mock.hpp"
 #include "scheduler/scheduler.hpp"
 
@@ -11,7 +11,7 @@ namespace test {
 class SingleCCMplbTest : public ::testing::Test {};
 
 TEST_F(SingleCCMplbTest, SimpleSend) {
-    std::shared_ptr<sim::IFlow> flow_mock = std::make_shared<NewFlowMock>();
+    std::shared_ptr<sim::IFlow> flow_mock = std::make_shared<FlowMock>();
     utils::IdTable<sim::IFlow> paths = {{"", flow_mock}};
 
     std::unique_ptr<sim::IPathChooser> path_chooser =
@@ -50,8 +50,7 @@ TEST_F(SingleCCMplbTest, SimpleSend) {
 }
 
 TEST_F(SingleCCMplbTest, IncorrectSend) {
-    sim::IPathChooser::FlowsTable paths = {
-        {"", std::make_shared<NewFlowMock>()}};
+    sim::IPathChooser::FlowsTable paths = {{"", std::make_shared<FlowMock>()}};
 
     std::unique_ptr<sim::IPathChooser> path_chooser =
         std::make_unique<PathChooserMock>(paths);

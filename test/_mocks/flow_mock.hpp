@@ -1,11 +1,11 @@
 #pragma once
 
-#include "network/connection/flow/i_new_flow.hpp"
+#include "network/connection/flow/i_flow.hpp"
 
 namespace test {
-class NewFlowMock : public sim::IFlow {
+class FlowMock : public sim::IFlow {
 public:
-    NewFlowMock(bool a_send_emmediately = true)
+    FlowMock(bool a_send_emmediately = true)
         : m_send_immediately(a_send_emmediately),
           m_context{sim::FlowFourTuple(
               sim::Endpoints(std::shared_ptr<sim::IHost>(nullptr),

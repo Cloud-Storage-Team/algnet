@@ -62,7 +62,7 @@ void SendDataAction::schedule() {
                 0, m_jitter.value_nanoseconds());
 
             TimeNs jitter_gap = use_jitter ? TimeNs(dist(rng)) : TimeNs(0);
-            Scheduler::get_instance().add<AddDataToNewConnection>(
+            Scheduler::get_instance().add<AddDataToConnection>(
                 start_time + jitter_gap, conn, data,
                 single_connection_callback);
         }

@@ -1,6 +1,6 @@
 #pragma once
 #include "../cc/metricable_cc.hpp"
-#include "../i_new_mplb.hpp"
+#include "../i_mplb.hpp"
 #include "../path_chooser/i_path_chooser.hpp"
 #include "metrics/fairness/fairness.hpp"
 #include "metrics/metrics_storage.hpp"

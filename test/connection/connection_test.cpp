@@ -1,16 +1,16 @@
 #include <gtest/gtest.h>
 
-#include "../_mocks/new_mplb_mock.hpp"
+#include "../_mocks/mplb_mock.hpp"
 #include "network/connection/connection.hpp"
 
 namespace test {
-class NewConnectionSendTest : public testing::Test {
+class ConnectionSendTest : public testing::Test {
 public:
     void TearDown() override {};
     void SetUp() override {};
 };
 
-TEST_F(NewConnectionSendTest, SimpleSend) {
+TEST_F(ConnectionSendTest, SimpleSend) {
     auto mplb = std::make_shared<MplbMock>(SizeByte(100));
     auto connection = sim::Connection::create_shared("", mplb);
 
@@ -26,7 +26,7 @@ TEST_F(NewConnectionSendTest, SimpleSend) {
     ASSERT_TRUE(delivered);
 }
 
-TEST_F(NewConnectionSendTest, SendManyPortions) {
+TEST_F(ConnectionSendTest, SendManyPortions) {
     auto mplb = std::make_shared<MplbMock>(SizeByte(10));
     auto connection = sim::Connection::create_shared("", mplb);
 
@@ -42,7 +42,7 @@ TEST_F(NewConnectionSendTest, SendManyPortions) {
     ASSERT_TRUE(delivered);
 }
 
-TEST_F(NewConnectionSendTest, IncorrectSend) {
+TEST_F(ConnectionSendTest, IncorrectSend) {
     auto mplb = std::make_shared<MplbMock>(SizeByte(0));
     auto connection = sim::Connection::create_shared("", mplb);
 
@@ -55,7 +55,7 @@ TEST_F(NewConnectionSendTest, IncorrectSend) {
         << "On delivery callback should not be triggered, but it did";
 }
 
-TEST_F(NewConnectionSendTest, SendRepeatingDataIds) {
+TEST_F(ConnectionSendTest, SendRepeatingDataIds) {
     auto mplb = std::make_shared<MplbMock>(SizeByte(100));
     auto connection = sim::Connection::create_shared("", mplb);
 
@@ -80,7 +80,7 @@ TEST_F(NewConnectionSendTest, SendRepeatingDataIds) {
     }
 }
 
-TEST_F(NewConnectionSendTest, SendManyIds) {
+TEST_F(ConnectionSendTest, SendManyIds) {
     auto mplb = std::make_shared<MplbMock>(SizeByte(100), false);
     auto connection = sim::Connection::create_shared("", mplb);
 

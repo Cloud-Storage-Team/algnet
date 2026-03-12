@@ -5,7 +5,7 @@
 #include <queue>
 
 #include "i_connection.hpp"
-#include "mplb/i_new_mplb.hpp"
+#include "mplb/i_mplb.hpp"
 
 namespace sim {
 

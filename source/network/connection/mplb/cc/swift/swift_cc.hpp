@@ -66,7 +66,7 @@ private:
     // Based on m_last_rtt
     [[nodiscard]] bool compute_can_decrease() const;
 
-    void update_cwnd(double neww_cwnd);
+    void update_cwnd(double new_cwnd);
 
     // ---------- Tunables ----------
     const TimeNs m_base_target;  // base RTT budget (ns)

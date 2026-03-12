@@ -7,11 +7,11 @@ namespace sim {
 /**
  * Adding data to the connection level at a specified time
  */
-class AddDataToNewConnection : public Event {
+class AddDataToConnection : public Event {
 public:
-    AddDataToNewConnection(TimeNs when, std::shared_ptr<IConnection> conn,
-                           Data a_data, OnDeliveryCallback a_callback);
-    ~AddDataToNewConnection() = default;
+    AddDataToConnection(TimeNs when, std::shared_ptr<IConnection> conn,
+                        Data a_data, OnDeliveryCallback a_callback);
+    ~AddDataToConnection() = default;
     void operator()() final;
 
 private:
