@@ -1,7 +1,7 @@
 #include "connection_parser.hpp"
 
-#include "connection/new_connection.hpp"
 #include "mplb/mplb_parser.hpp"
+#include "network/connection/new_connection.hpp"
 #include "utils/identifier_factory.hpp"
 
 namespace sim {
@@ -10,7 +10,8 @@ std::shared_ptr<NewConnection> parse_connection(
     const ConfigNodeWithPreset& node, const utils::IdTable<IHost>& hosts_table);
 
 std::shared_ptr<INewConnection> parse_i_connection(
-    const ConfigNodeWithPreset& node, const utils::IdTable<IHost>& hosts_table) {
+    const ConfigNodeWithPreset& node,
+    const utils::IdTable<IHost>& hosts_table) {
     std::string type = node["type"].value_or_throw().as_or_throw<std::string>();
     if (type == "mplb-connection") {
         return parse_connection(node, hosts_table);
@@ -20,7 +21,8 @@ std::shared_ptr<INewConnection> parse_i_connection(
 }
 
 std::shared_ptr<NewConnection> parse_connection(
-    const ConfigNodeWithPreset& node, const utils::IdTable<IHost>& hosts_table) {
+    const ConfigNodeWithPreset& node,
+    const utils::IdTable<IHost>& hosts_table) {
     Id connection_id = node.get_name_or_throw();
 
     Id sender_id =

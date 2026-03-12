@@ -1,6 +1,6 @@
 #pragma once
 
-#include "connection/flow/i_new_flow.hpp"
+#include "network/connection/flow/i_new_flow.hpp"
 
 namespace test {
 class NewFlowMock : public sim::INewFlow {

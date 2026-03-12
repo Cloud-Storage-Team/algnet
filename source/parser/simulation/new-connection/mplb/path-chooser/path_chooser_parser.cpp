@@ -1,6 +1,6 @@
 #include "path_chooser_parser.hpp"
 
-#include "connection/mplb/path_chooser/round_robin/round_robin_path_chooser.hpp"
+#include "network/connection/mplb/path_chooser/round_robin/round_robin_path_chooser.hpp"
 #include "parser/simulation/new-connection/mplb/path-chooser/flow/flow_parser.hpp"
 
 namespace sim {

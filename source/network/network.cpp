@@ -1,7 +1,7 @@
 #include "network.hpp"
 
-#include "connection/new_connections_summary/new_connections_summary.hpp"
 #include "metrics/metrics_table/combine_metrics_tables.hpp"
+#include "network/connection/new_connections_summary/new_connections_summary.hpp"
 
 namespace sim {
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "connection/i_new_connection.hpp"
+#include "network/connection/i_new_connection.hpp"
 #include "parser/config_reader/config_node.hpp"
 #include "scenario/action/i_new_action.hpp"
 #include "utils/id_table.hpp"

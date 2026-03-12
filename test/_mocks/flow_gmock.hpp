@@ -1,6 +1,6 @@
 #include <gmock/gmock.h>
 
-#include "connection/flow/i_new_flow.hpp"
+#include "network/connection/flow/i_new_flow.hpp"
 
 namespace test {
 

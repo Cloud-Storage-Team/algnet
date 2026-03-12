@@ -1,5 +1,5 @@
 #pragma once
-#include "connection/flow/i_new_flow.hpp"
+#include "network/connection/flow/i_new_flow.hpp"
 #include "parser/config_reader/config_node_with_preset.hpp"
 
 namespace sim {

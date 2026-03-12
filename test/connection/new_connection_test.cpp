@@ -1,4 +1,4 @@
-#include "connection/new_connection.hpp"
+#include "network/connection/new_connection.hpp"
 
 #include <gtest/gtest.h>
 

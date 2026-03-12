@@ -1,6 +1,6 @@
 #pragma once
-#include "connection/i_new_connection.hpp"
 #include "event.hpp"
+#include "network/connection/i_new_connection.hpp"
 
 namespace sim {
 
@@ -10,7 +10,7 @@ namespace sim {
 class AddDataToNewConnection : public Event {
 public:
     AddDataToNewConnection(TimeNs when, std::shared_ptr<INewConnection> conn,
-                        Data a_data, OnDeliveryCallback a_callback);
+                           Data a_data, OnDeliveryCallback a_callback);
     ~AddDataToNewConnection() = default;
     void operator()() final;
 

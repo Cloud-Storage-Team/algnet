@@ -1,5 +1,5 @@
 #pragma once
-#include "connection/mplb/path_chooser/i_path_chooser.hpp"
+#include "network/connection/mplb/path_chooser/i_path_chooser.hpp"
 
 namespace test {
 

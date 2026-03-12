@@ -1,6 +1,6 @@
 #pragma once
-#include "connection/i_new_connection.hpp"
 #include "device/interfaces/i_host.hpp"
+#include "network/connection/i_new_connection.hpp"
 #include "parser/config_reader/config_node_with_preset.hpp"
 #include "utils/id_table.hpp"
 

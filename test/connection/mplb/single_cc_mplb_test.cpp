@@ -1,4 +1,4 @@
-#include "connection/mplb/single_cc/single_cc_mplb.hpp"
+#include "network/connection/mplb/single_cc/single_cc_mplb.hpp"
 
 #include <gtest/gtest.h>
 

@@ -2,7 +2,7 @@
 
 #include <random>
 
-#include "connection/flow/tcp/new_tcp_flow.hpp"
+#include "network/connection/flow/tcp/new_tcp_flow.hpp"
 #include "parser/parse_utils.hpp"
 
 namespace sim {

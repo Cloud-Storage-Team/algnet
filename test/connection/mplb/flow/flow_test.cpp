@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "../../../_mocks/host_gmock.hpp"
-#include "connection/flow/tcp/new_tcp_flow.hpp"
+#include "network/connection/flow/tcp/new_tcp_flow.hpp"
 #include "scheduler.hpp"
 
 namespace test {
