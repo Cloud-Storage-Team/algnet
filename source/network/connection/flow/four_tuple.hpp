@@ -1,7 +1,7 @@
 #pragma once
 #include <spdlog/fmt/fmt.h>
 
-#include "network/connection/flow/endpoint_ports.hpp"
+#include "endpoint_ports.hpp"
 #include "types.hpp"
 
 namespace sim {
