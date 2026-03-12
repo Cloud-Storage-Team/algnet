@@ -31,7 +31,8 @@ T simple_parse_with_default(const sim::ConfigNode& node,
     static_assert(std::is_copy_constructible_v<T>,
                   "T must be copy constructible");
 
-    if (sim::ConfigNodeExpected value_node = node[field_name]; value_node.has_value()) {
+    if (sim::ConfigNodeExpected value_node = node[field_name];
+        value_node.has_value()) {
         return value_node.value().as_or_throw<T>();
     }
     return default_value;

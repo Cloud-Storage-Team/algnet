@@ -1,14 +1,13 @@
 #pragma once
 
 #include <spdlog/fmt/bundled/format.h>
+
 #include <cstdlib>
 
 #include "size.hpp"
 
 template <IsSizeBase TSizeBase, typename Char>
-struct fmt::formatter<Size<TSizeBase>, Char>
-    : fmt::formatter<uint64_t, Char>
-{
+struct fmt::formatter<Size<TSizeBase>, Char> : fmt::formatter<uint64_t, Char> {
     using Base = fmt::formatter<uint64_t, Char>;
 
     template <typename ParseContext>

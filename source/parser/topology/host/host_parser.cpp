@@ -4,7 +4,8 @@
 
 namespace sim {
 
-std::shared_ptr<IHost> HostParser::parse_i_host(const ConfigNodeWithPreset& host_node) {
+std::shared_ptr<IHost> HostParser::parse_i_host(
+    const ConfigNodeWithPreset& host_node) {
     return parse_default_host(host_node);
 }
 
