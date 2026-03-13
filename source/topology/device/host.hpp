@@ -17,12 +17,12 @@ public:
     Host(Id a_id, ECN a_ecn = ECN(1.0, 1.0, 1.0));
     ~Host() = default;
 
-    bool notify_about_arrival(TimeNs arrive_time) final;
+    bool notify_about_arrival() final;
 
     TimeNs process() final;
     TimeNs send_packet() final;
 
-    void enqueue_packet(Packet packet) final;
+    void enqueue_packet(const Packet& packet) final;
 
 private:
     std::queue<Packet> m_nic_buffer;

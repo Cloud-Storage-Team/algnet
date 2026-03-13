@@ -27,9 +27,9 @@ public:
                               size_t paths_count) final;
     std::shared_ptr<sim::ILink> next_inlink() final;
     std::shared_ptr<sim::ILink> get_link_to_destination(
-        sim::Packet packet) const final;
+        const sim::Packet& packet) const final;
     std::set<std::shared_ptr<sim::ILink>> get_outlinks() final;
-    bool notify_about_arrival(TimeNs arrival_time) final;
+    bool notify_about_arrival() final;
 
     TimeNs process() final;
 };

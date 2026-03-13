@@ -75,7 +75,7 @@ bool RoutingModule::update_routing_table(Id receiver_id,
 }
 
 std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
-    Packet packet) const {
+    const Packet& packet) const {
     auto iterator = m_routing_table.find(packet.receiver_id);
     if (iterator == m_routing_table.end()) {
         return nullptr;

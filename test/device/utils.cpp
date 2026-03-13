@@ -2,9 +2,7 @@
 
 namespace test {
 
-bool TestDevice::notify_about_arrival([[maybe_unused]] TimeNs arrival_time) {
-    return false;
-};
+bool TestDevice::notify_about_arrival() { return false; };
 
 TimeNs TestDevice::process() { return TimeNs(0); };
 

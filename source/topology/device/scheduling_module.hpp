@@ -9,12 +9,12 @@ template <typename TDevice, typename TEvent>
 class SchedulingModule {
 public:
     // increment counter; return true if counter = 1
-    bool notify_about_arriving(TimeNs arrival_time,
-                               std::weak_ptr<TDevice> subject) {
+    bool notify_about_arriving(std::weak_ptr<TDevice> subject) {
         m_cnt++;
         bool result = (m_cnt == 1);
         if (result) {
-            reschedule_event(arrival_time, subject);
+            reschedule_event(Scheduler::get_instance().get_current_time(),
+                             subject);
         }
 
         return result;

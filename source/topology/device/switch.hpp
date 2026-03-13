@@ -16,7 +16,7 @@ public:
            std::unique_ptr<IPacketHasher> a_packet_hasher = nullptr);
     ~Switch() = default;
 
-    bool notify_about_arrival(TimeNs arrival_time) final;
+    bool notify_about_arrival() final;
 
     // Process a packet by moving it from ingress to egress
     // and schedule next process event after a delay.

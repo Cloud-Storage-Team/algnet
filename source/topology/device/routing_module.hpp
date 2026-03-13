@@ -21,7 +21,8 @@ public:
                               size_t paths_count = 1) final;
     // returns next inlink and moves inlinks set iterator forward
     std::shared_ptr<ILink> next_inlink() final;
-    std::shared_ptr<ILink> get_link_to_destination(Packet packet) const final;
+    std::shared_ptr<ILink> get_link_to_destination(
+        const Packet& packet) const final;
     std::set<std::shared_ptr<ILink>> get_outlinks() final;
 
     void correctify_inlinks();

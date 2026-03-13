@@ -16,7 +16,7 @@ public:
     TestDevice(Id a_id = "") : sim::RoutingModule(a_id) {};
     ~TestDevice() = default;
 
-    bool notify_about_arrival(TimeNs arrival_time) final;
+    bool notify_about_arrival() final;
 
     // Process a packet by moving it from ingress to egress
     // and schedule next process event after a delay.

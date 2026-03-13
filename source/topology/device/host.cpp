@@ -3,21 +3,20 @@
 #include <spdlog/fmt/fmt.h>
 
 #include "logger/logger.hpp"
+#include "utils/defer.hpp"
 #include "utils/validation.hpp"
 
 namespace sim {
 
 Host::Host(Id a_id, ECN a_ecn) : RoutingModule(a_id), m_ecn(a_ecn) {}
 
-bool Host::notify_about_arrival(TimeNs arrival_time) {
-    return m_process_scheduler.notify_about_arriving(arrival_time,
-                                                     weak_from_this());
+bool Host::notify_about_arrival() {
+    return m_process_scheduler.notify_about_arriving(weak_from_this());
 };
 
-void Host::enqueue_packet(Packet packet) {
+void Host::enqueue_packet(const Packet& packet) {
     m_nic_buffer.push(packet);
-    m_send_data_scheduler.notify_about_arriving(
-        Scheduler::get_instance().get_current_time(), weak_from_this());
+    m_send_data_scheduler.notify_about_arriving(weak_from_this());
     LOG_INFO(fmt::format("Packet {} arrived to host", packet.to_string()));
 }
 
@@ -36,7 +35,7 @@ TimeNs Host::process() {
         return total_processing_time;
     }
 
-    Packet packet = opt_packet.value();
+    Packet& packet = opt_packet.value();
 
     // TODO: add some sender ID for easier packet path tracing
     LOG_INFO("Processing packet from link on host. Packet: " +
@@ -79,11 +78,11 @@ TimeNs Host::send_packet() {
     TimeNs total_processing_time = TimeNs(1);
 
     if (m_nic_buffer.empty()) {
-        LOG_WARN("No packets to send");
+        LOG_ERROR(fmt::format("Host {}: no packets to send", get_id()));
         return total_processing_time;
     }
-    Packet data_packet = m_nic_buffer.front();
-    m_nic_buffer.pop();
+    Packet& data_packet = m_nic_buffer.front();
+    utils::Defer defer{[this] { m_nic_buffer.pop(); }};
 
     LOG_INFO(fmt::format("Taken new data packet on host {}. Packet: {}",
                          get_id(), data_packet.to_string()));

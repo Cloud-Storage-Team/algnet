@@ -171,8 +171,7 @@ void Link::arrive(const Packet& packet) {
         return;
     }
 
-    m_to.lock()->notify_about_arrival(
-        Scheduler::get_instance().get_current_time());
+    m_to.lock()->notify_about_arrival();
     LOG_INFO("Packet arrived to the next device. Packet: " +
              packet.to_string());
 };
