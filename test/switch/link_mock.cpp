@@ -9,7 +9,7 @@ std::shared_ptr<sim::IDevice> LinkMock::get_from() const {
 }
 std::shared_ptr<sim::IDevice> LinkMock::get_to() const { return m_to.lock(); }
 
-void LinkMock::schedule_arrival(sim::Packet a_packet) {
+void LinkMock::schedule_arrival(const sim::Packet& a_packet) {
     m_arrived_packets.push_back(a_packet);
 }
 

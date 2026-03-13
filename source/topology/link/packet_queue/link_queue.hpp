@@ -17,8 +17,8 @@ public:
     LinkQueue(SizeByte a_max_size, Id a_link_id, LinkQueueType a_type);
     ~LinkQueue() = default;
 
-    bool push(Packet packet) final;
-    Packet front() const final;
+    bool push(const Packet& packet) final;
+    const Packet& front() const final;
     void pop() final;
 
     SizeByte get_size() const final;

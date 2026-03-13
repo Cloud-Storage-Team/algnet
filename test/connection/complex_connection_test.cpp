@@ -32,9 +32,9 @@ public:
 
     // links
     std::shared_ptr<sim::Link> fwd_link =
-        std::make_shared<sim::Link>("fwd_link", sender, receiver);
+        sim::Link::create_shared("fwd_link", sender, receiver);
     std::shared_ptr<sim::Link> back_link =
-        std::make_shared<sim::Link>("back_link", receiver, sender);
+        sim::Link::create_shared("back_link", receiver, sender);
 
     std::shared_ptr<sim::TcpFlow> flow = sim::TcpFlow::create_shared(
         "flow", sim::FlowFourTuple(sim::Endpoints(sender, receiver)));

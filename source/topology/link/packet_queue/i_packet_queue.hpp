@@ -7,8 +7,8 @@ class IPacketQueue {
 public:
     virtual ~IPacketQueue() = default;
 
-    virtual bool push(Packet packet) = 0;
-    virtual Packet front() const = 0;
+    virtual bool push(const Packet& packet) = 0;
+    virtual const Packet& front() const = 0;
     virtual void pop() = 0;
 
     virtual bool empty() const = 0;

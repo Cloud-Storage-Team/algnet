@@ -24,13 +24,13 @@ LinkQueue::LinkQueue(SizeByte a_queue_size, Id a_link_id, LinkQueueType a_type)
       m_type(a_type),
       m_queue_size_storage(std::make_shared<MetricsStorage>()) {}
 
-bool LinkQueue::push(Packet packet) {
-    bool result = m_queue.push(std::move(packet));
+bool LinkQueue::push(const Packet& packet) {
+    bool result = m_queue.push(packet);
     record_size();
     return result;
 }
 
-Packet LinkQueue::front() const { return m_queue.front(); }
+const Packet& LinkQueue::front() const { return m_queue.front(); }
 
 void LinkQueue::pop() {
     m_queue.pop();

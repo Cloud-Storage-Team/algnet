@@ -21,7 +21,7 @@ TestLink::TestLink(std::shared_ptr<sim::IDevice> a_src,
                    sim::Packet packet_to_return)
     : src(a_src), dst(a_dest), packet(packet_to_return) {}
 
-void TestLink::schedule_arrival([[maybe_unused]] sim::Packet packet) {};
+void TestLink::schedule_arrival([[maybe_unused]] const sim::Packet& packet) {};
 
 std::optional<sim::Packet> TestLink::get_packet() { return {packet}; };
 

@@ -32,7 +32,7 @@ public:
              sim::Packet packet_to_return = sim::Packet());
     ~TestLink() = default;
 
-    void schedule_arrival(sim::Packet packet) final;
+    void schedule_arrival(const sim::Packet& packet) final;
     std::optional<sim::Packet> get_packet() final;
     std::shared_ptr<sim::IDevice> get_from() const final;
     std::shared_ptr<sim::IDevice> get_to() const final;

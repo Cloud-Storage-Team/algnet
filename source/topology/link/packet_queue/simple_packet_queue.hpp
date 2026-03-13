@@ -12,8 +12,8 @@ public:
     // Adds packet to queue
     // returns true on succseed (remaining space is enought), false
     // otherwice
-    bool push(Packet packet) final;
-    Packet front() const final;
+    bool push(const Packet& packet) final;
+    const Packet& front() const final;
     void pop() final;
 
     SizeByte get_size() const final;

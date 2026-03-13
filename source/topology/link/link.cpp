@@ -1,44 +1,32 @@
 #include "topology/link/link.hpp"
 
+#include <spdlog/fmt/fmt.h>
+
 #include "logger/logger.hpp"
 #include "scheduler/scheduler.hpp"
 #include "utils/str_expected.hpp"
 
 namespace sim {
 
-Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
-           SpeedGbps a_speed, TimeNs a_delay,
-           SizeByte a_max_from_egress_buffer_size,
-           SizeByte a_max_to_ingress_buffer_size,
-           LinkMetricsFilters a_metrics_filters)
-    : m_id(a_id),
-      m_from(a_from),
-      m_to(a_to),
-      m_speed(a_speed),
-      m_propagation_delay(a_delay),
-      m_from_egress(a_max_from_egress_buffer_size, a_id,
-                    LinkQueueType::FromEgress),
-      m_to_ingress(a_max_to_ingress_buffer_size, a_id,
-                   LinkQueueType::ToIngress),
-      m_metrics_filters(a_metrics_filters) {
-    if (a_from.expired() || a_to.expired()) {
-        LOG_WARN("Passed link to device is expired");
-    } else if (a_speed == SpeedGbps(0)) {
-        LOG_WARN("Passed zero link speed");
-    }
+std::shared_ptr<Link> Link::create_shared(
+    Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
+    SpeedGbps a_speed, TimeNs a_propagation_delay,
+    SizeByte a_max_from_egress_buffer_size,
+    SizeByte a_max_to_ingress_buffer_size,
+    LinkMetricsFilters a_metrics_filters) {
+    return std::shared_ptr<Link>(
+        new Link(a_id, a_from, a_to, a_speed, a_propagation_delay,
+                 a_max_from_egress_buffer_size, a_max_to_ingress_buffer_size,
+                 a_metrics_filters));
 }
 
-void Link::schedule_arrival(Packet packet) {
-    if (m_to.expired()) {
-        LOG_WARN("Destination device pointer is expired");
-        return;
-    }
-
+void Link::schedule_arrival(const Packet& packet) {
     bool empty_before_push = m_from_egress.empty();
 
     if (!m_from_egress.push(packet)) {
-        LOG_ERROR("Egress buffer overflow; packet " + packet.to_string() +
-                  " lost");
+        LOG_ERROR(
+            fmt::format("Link {}: from egress buffer overflow; packet {} lost",
+                        m_id, packet.to_string()));
         return;
     }
 
@@ -108,27 +96,48 @@ MetricsTable Link::get_metrics_table() const {
 void Link::write_inner_metrics(
     [[maybe_unused]] std::filesystem::path output_dir) const {}
 
-Link::Arrive::Arrive(TimeNs a_time, std::weak_ptr<Link> a_link, Packet a_packet)
-    : Event(a_time), m_link(a_link), m_paket(a_packet) {}
-
-void Link::Arrive::operator()() {
-    if (m_link.expired()) {
-        return;
+Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
+           SpeedGbps a_speed, TimeNs a_propagation_delay,
+           SizeByte a_max_from_egress_buffer_size,
+           SizeByte a_max_to_ingress_buffer_size,
+           LinkMetricsFilters a_metrics_filters)
+    : m_id(a_id),
+      m_from(a_from),
+      m_to(a_to),
+      m_speed(a_speed),
+      m_propagation_delay(a_propagation_delay),
+      m_from_egress(a_max_from_egress_buffer_size, a_id,
+                    LinkQueueType::FromEgress),
+      m_to_ingress(a_max_to_ingress_buffer_size, a_id,
+                   LinkQueueType::ToIngress),
+      m_metrics_filters(a_metrics_filters) {
+    if (a_from.expired() || a_to.expired()) {
+        LOG_WARN("Passed link to device is expired");
+    } else if (a_speed == SpeedGbps(0)) {
+        LOG_WARN("Passed zero link speed");
     }
-
-    m_link.lock()->arrive(std::move(m_paket));
 }
 
-Link::Transmit::Transmit(TimeNs a_time, std::weak_ptr<Link> a_link)
-    : Event(a_time), m_link(a_link) {}
+class Link::Transmit : public Event {
+public:
+    Transmit(TimeNs a_time, std::shared_ptr<Link> a_link)
+        : Event(a_time), m_link(a_link) {}
+    void operator()() final { m_link->transmit(); }
 
-void Link::Transmit::operator()() {
-    if (m_link.expired()) {
-        return;
-    }
+private:
+    std::shared_ptr<Link> m_link;
+};
 
-    m_link.lock()->transmit();
-}
+class Link::Arrive : public Event {
+public:
+    Arrive(TimeNs a_time, std::shared_ptr<Link> a_link, const Packet& a_packet)
+        : Event(a_time), m_link(a_link), m_packet(a_packet) {}
+    void operator()() final { m_link->arrive(m_packet); }
+
+private:
+    std::shared_ptr<Link> m_link;
+    Packet m_packet;
+};
 
 TimeNs Link::get_transmission_delay(const Packet& packet) const {
     if (m_speed == SpeedGbps(0)) {
@@ -140,7 +149,8 @@ TimeNs Link::get_transmission_delay(const Packet& packet) const {
 
 void Link::transmit() {
     if (m_from_egress.empty()) {
-        LOG_ERROR("Transmit on link with empty source egress buffer");
+        LOG_ERROR(fmt::format(
+            "Transmit on link {} with empty source egress buffer", m_id));
         return;
     }
     TimeNs current_time = Scheduler::get_instance().get_current_time();
@@ -153,10 +163,11 @@ void Link::transmit() {
     }
 }
 
-void Link::arrive(Packet packet) {
+void Link::arrive(const Packet& packet) {
     if (!m_to_ingress.push(packet)) {
-        LOG_ERROR("Ingress buffer overflow; packet " + packet.to_string() +
-                  " lost");
+        LOG_ERROR(
+            fmt::format("Ingress buffer on link {} overflow; packet {} lost",
+                        m_id, packet.to_string()));
         return;
     }
 
