@@ -29,17 +29,16 @@ TimeNs Host::process() {
         return total_processing_time;
     }
 
-    std::optional<Packet> opt_packet = current_inlink->get_packet();
-    if (!opt_packet.has_value()) {
+    if (!current_inlink->has_packet()) {
         LOG_WARN("No available packets from inlink for device");
         return total_processing_time;
     }
 
-    Packet& packet = opt_packet.value();
+    Packet& packet = current_inlink->get_packet();
+    utils::Defer defer{[current_inlink]() { current_inlink->pop_packet(); }};
 
-    // TODO: add some sender ID for easier packet path tracing
-    LOG_INFO("Processing packet from link on host. Packet: " +
-             packet.to_string());
+    LOG_INFO(fmt::format("Host {}: processing packet {}", get_id(),
+                         packet.to_string()));
 
     if (packet.receiver_id == get_id()) {
         packet.callback(packet);

@@ -32,6 +32,8 @@ bool LinkQueue::push(const Packet& packet) {
 
 const Packet& LinkQueue::front() const { return m_queue.front(); }
 
+Packet& LinkQueue::front() { return m_queue.front(); }
+
 void LinkQueue::pop() {
     m_queue.pop();
     record_size();

@@ -20,6 +20,13 @@ const Packet& SimplePacketQueue::front() const {
     return m_queue.front();
 }
 
+Packet& SimplePacketQueue::front() {
+    if (m_queue.empty()) {
+        throw std::runtime_error("Can not get front packet from empty queue");
+    }
+    return m_queue.front();
+}
+
 void SimplePacketQueue::pop() {
     if (m_queue.empty()) {
         throw std::runtime_error("Can not pop packet from empty queue");

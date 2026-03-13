@@ -11,7 +11,7 @@ TEST_F(LinkTest, NoPacketToGet) {
         std::make_shared<DeviceMock>(DeviceMock());
     auto link = sim::Link::create_shared("", src, dst);
 
-    ASSERT_FALSE(link->get_packet().has_value());
+    ASSERT_FALSE(link->has_packet());
 }
 
 }  // namespace test

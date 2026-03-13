@@ -22,10 +22,11 @@ TEST_F(LinkTest, ScheduledCorrectly) {
     }
 
     for (int i = 0; i < NUMBER_OF_PACKETS; i++) {
-        ASSERT_TRUE(link->get_packet().has_value());
+        ASSERT_TRUE(link->has_packet());
+        ASSERT_NO_THROW(link->pop_packet());
     }
 
-    ASSERT_FALSE(link->get_packet().has_value());
+    ASSERT_FALSE(link->has_packet());
 }
 
 }  // namespace test

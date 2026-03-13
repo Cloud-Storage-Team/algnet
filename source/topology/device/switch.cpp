@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "logger/logger.hpp"
+#include "utils/defer.hpp"
 #include "utils/validation.hpp"
 
 namespace sim {
@@ -26,11 +27,11 @@ TimeNs Switch::process() {
     // requests queue size here to consider processing packet
     float ingress_queue_filling = link->get_to_ingress_queue_size() /
                                   link->get_max_to_ingress_queue_size();
-    std::optional<Packet> optional_packet = link->get_packet();
-    if (!optional_packet.has_value()) {
+    if (!link->has_packet()) {
         return total_processing_time;
     }
-    Packet packet = optional_packet.value();
+    Packet& packet = link->get_packet();
+    utils::Defer defer{[link]() { link->pop_packet(); }};
 
     std::shared_ptr<ILink> next_link = get_link_to_destination(packet);
 
@@ -39,9 +40,8 @@ TimeNs Switch::process() {
         return total_processing_time;
     }
 
-    // TODO: add some switch ID for easier packet path tracing
-    LOG_INFO("Processing packet from link on switch. Packet: " +
-             packet.to_string());
+    LOG_INFO(fmt::format("Switch {}: processing packet {}", get_id(),
+                         packet.to_string()));
 
     // ECN mark for data packets
     if (packet.ecn_capable_transport) {

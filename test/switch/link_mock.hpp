@@ -12,7 +12,11 @@ public:
     ~LinkMock() = default;
     virtual void schedule_arrival(const sim::Packet& a_packet) final;
     virtual void process_arrival(sim::Packet packet) final;
-    virtual std::optional<sim::Packet> get_packet() final;
+
+    virtual bool has_packet() const final;
+    virtual sim::Packet& get_packet() final;
+    virtual void pop_packet() final;
+
     virtual std::shared_ptr<sim::IDevice> get_from() const final;
     virtual std::shared_ptr<sim::IDevice> get_to() const final;
 

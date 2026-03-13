@@ -35,16 +35,19 @@ void Link::schedule_arrival(const Packet& packet) {
     }
 };
 
-std::optional<Packet> Link::get_packet() {
+bool Link::has_packet() const { return !m_to_ingress.empty(); }
+
+Packet& Link::get_packet() {
     if (m_to_ingress.empty()) {
-        LOG_INFO("Ingress packet queue is empty");
-        return {};
+        throw std::runtime_error(fmt::format(
+            "Link {}: call get_packet when destination device queue is empty",
+            m_id));
     }
 
-    Packet packet = m_to_ingress.front();
-    m_to_ingress.pop();
-    return packet;
+    return m_to_ingress.front();
 };
+
+void Link::pop_packet() { m_to_ingress.pop(); }
 
 std::shared_ptr<IDevice> Link::get_from() const {
     if (m_from.expired()) {

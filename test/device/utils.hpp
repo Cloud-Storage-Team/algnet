@@ -33,7 +33,9 @@ public:
     ~TestLink() = default;
 
     void schedule_arrival(const sim::Packet& packet) final;
-    std::optional<sim::Packet> get_packet() final;
+    bool has_packet() const final { return true; }
+    sim::Packet& get_packet() final;
+    void pop_packet() final {}
     std::shared_ptr<sim::IDevice> get_from() const final;
     std::shared_ptr<sim::IDevice> get_to() const final;
 

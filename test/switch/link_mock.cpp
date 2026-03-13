@@ -19,7 +19,11 @@ void LinkMock::set_ingress_packet(sim::Packet a_packet) {
     m_ingress_packet.emplace(a_packet);
 }
 
-std::optional<sim::Packet> LinkMock::get_packet() { return m_ingress_packet; }
+bool LinkMock::has_packet() const { return m_ingress_packet.has_value(); }
+
+sim::Packet& LinkMock::get_packet() { return m_ingress_packet.value(); }
+
+void LinkMock::pop_packet() { m_ingress_packet.reset(); }
 
 std::vector<sim::Packet> LinkMock::get_arrived_packets() const {
     return m_arrived_packets;

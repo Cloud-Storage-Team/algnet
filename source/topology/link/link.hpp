@@ -27,7 +27,9 @@ public:
 
     virtual void schedule_arrival(const Packet& packet) final;
 
-    virtual std::optional<Packet> get_packet() final;
+    virtual bool has_packet() const final;
+    virtual Packet& get_packet() final;
+    virtual void pop_packet() final;
 
     virtual std::shared_ptr<IDevice> get_from() const final;
     virtual std::shared_ptr<IDevice> get_to() const final;

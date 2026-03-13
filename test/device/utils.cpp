@@ -21,7 +21,7 @@ TestLink::TestLink(std::shared_ptr<sim::IDevice> a_src,
 
 void TestLink::schedule_arrival([[maybe_unused]] const sim::Packet& packet) {};
 
-std::optional<sim::Packet> TestLink::get_packet() { return {packet}; };
+sim::Packet& TestLink::get_packet() { return packet; };
 
 std::shared_ptr<sim::IDevice> TestLink::get_from() const { return src.lock(); };
 std::shared_ptr<sim::IDevice> TestLink::get_to() const { return dst.lock(); };

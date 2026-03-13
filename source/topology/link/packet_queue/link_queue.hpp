@@ -17,15 +17,17 @@ public:
     LinkQueue(SizeByte a_max_size, Id a_link_id, LinkQueueType a_type);
     ~LinkQueue() = default;
 
-    bool push(const Packet& packet) final;
-    const Packet& front() const final;
-    void pop() final;
+    virtual bool push(const Packet& packet) final;
+    virtual const Packet& front() const final;
+    virtual Packet& front() final;
+    virtual void pop() final;
 
-    SizeByte get_size() const final;
-    bool empty() const final;
-    SizeByte get_max_size() const final;
+    virtual SizeByte get_size() const final;
+    virtual bool empty() const final;
+    virtual SizeByte get_max_size() const final;
 
-    std::shared_ptr<const MetricsStorage> get_queue_size_storage() const;
+    virtual std::shared_ptr<const MetricsStorage> get_queue_size_storage()
+        const;
 
 private:
     void record_size();

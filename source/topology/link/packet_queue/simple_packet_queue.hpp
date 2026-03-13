@@ -12,13 +12,14 @@ public:
     // Adds packet to queue
     // returns true on succseed (remaining space is enought), false
     // otherwice
-    bool push(const Packet& packet) final;
-    const Packet& front() const final;
-    void pop() final;
+    virtual bool push(const Packet& packet) final;
+    virtual const Packet& front() const final;
+    virtual Packet& front() final;
+    virtual void pop() final;
 
-    SizeByte get_size() const final;
-    bool empty() const final;
-    SizeByte get_max_size() const final;
+    virtual SizeByte get_size() const final;
+    virtual bool empty() const final;
+    virtual SizeByte get_max_size() const final;
 
 private:
     std::queue<Packet> m_queue;
