@@ -140,10 +140,12 @@ void TcpFlow::process_data_packet(const Packet& data, PacketCallback callback) {
     ack.receiver_port = m_context.sender_port;
     ack.size = SizeByte(1);
     ack.ttl = M_MAX_TTL;
-    ack.flags.set_flag(m_packet_type_label, PacketType::ACK)
-        .log_err_if_not_present(
+    auto exp_void = ack.flags.set_flag(m_packet_type_label, PacketType::ACK);
+    if (!exp_void.has_value()) {
+        LOG_ERROR(
             fmt::format("Flow {}: could not set type label to ack packet {}",
                         m_id, ack.to_string()));
+    }
     SizeByte data_packet_size = data.size;
 
     std::shared_ptr<TcpFlow> flow = shared_from_this();
