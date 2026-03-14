@@ -1,9 +1,11 @@
 #pragma once
 
+#include <cmath>
 #include <concepts>
 #include <cstdint>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <type_traits>
 
 #include "ld_comparation.hpp"
@@ -34,6 +36,9 @@ concept IsTimeBase = requires {
     { T::to_nanoseconds_multiplier } -> std::convertible_to<uint64_t>;
     { T::suffix } -> std::convertible_to<std::string_view>;
 };
+
+template <typename T>
+concept IsNumeric = std::is_integral_v<T> || std::is_floating_point_v<T>;
 
 template <IsTimeBase TTimeBase>
 class Time {
@@ -67,8 +72,13 @@ public:
         return Time<Nanosecond>(m_value_ns - time.m_value_ns);
     }
 
-    constexpr ThisTime operator*(std::uint64_t mult) const {
-        return Time<Nanosecond>(m_value_ns * mult);
+    template <typename T>
+    constexpr inline ThisTime operator*(T mult) const {
+        if constexpr (std::is_integral_v<T>) {
+            return Time<Nanosecond>(m_value_ns * mult);
+        } else {
+            return Time<Nanosecond>(std::round(m_value_ns * mult));
+        }
     }
 
     constexpr ThisTime& operator++() {
@@ -80,16 +90,38 @@ public:
         return static_cast<double>(m_value_ns) / time.value_nanoseconds();
     }
 
-    constexpr ThisTime operator/(std::uint64_t value) const {
-        return Time<Nanosecond>(m_value_ns / value);
+    template <typename T>
+    requires IsNumeric<T>
+    ThisTime operator/(T value) const {
+        if constexpr (std::is_integral_v<T>) {
+            return Time<Nanosecond>(m_value_ns / value);
+        } else {
+            return Time<Nanosecond>(std::round(m_value_ns / value));
+        }
     }
 
     constexpr void operator+=(ThisTime time) { m_value_ns += time.m_value_ns; }
     constexpr void operator-=(ThisTime time) { m_value_ns -= time.m_value_ns; }
 
-    constexpr void operator*=(std::uint64_t mult) { m_value_ns *= mult; }
+    template <typename T>
+    requires IsNumeric<T>
+    constexpr void operator*=(T mult) {
+        if constexpr (std::is_integral_v<T>) {
+            m_value_ns *= mult;
+        } else {
+            m_value_ns = std::round(m_value_ns * mult);
+        }
+    }
 
-    constexpr void operator/=(std::uint64_t mult) { m_value_ns /= mult; }
+    template <typename T>
+    requires IsNumeric<T>
+    constexpr void operator/=(T mult) {
+        if constexpr (std::is_integral_v<T>) {
+            m_value_ns /= mult;
+        } else {
+            m_value_ns = std::round(m_value_ns / mult);
+        }
+    }
 
     bool constexpr operator<(ThisTime time) const {
         return m_value_ns < time.m_value_ns;
