@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 #include "size.hpp"
 #include "size_fmt.hpp"
 #include "speed.hpp"
@@ -10,7 +12,8 @@
 template <IsSizeBase TSizeBase, IsTimeBase TTimeBase>
 constexpr Speed<TSizeBase, TTimeBase> operator/(Size<TSizeBase> size,
                                                 Time<TTimeBase> time) {
-    return Speed<Bit, Nanosecond>(size.value_bits() / time.value_nanoseconds());
+    return Speed<Bit, Nanosecond>(
+        size.value_bits() / static_cast<double>(time.value_nanoseconds()));
 }
 
 template <IsSizeBase TSpeedSizeBase, IsTimeBase TSpeedTimeBase,
@@ -24,5 +27,6 @@ template <IsSizeBase TSizeBase, IsSizeBase TSpeedSizeBase,
           IsTimeBase TSpeedTimeBase>
 constexpr Time<Nanosecond> operator/(
     Size<TSizeBase> size, Speed<TSpeedSizeBase, TSpeedTimeBase> speed) {
-    return Time<Nanosecond>(size.value_bits() / speed.value_bit_per_ns());
+    return Time<Nanosecond>(
+        std::round(size.value_bits() / speed.value_bit_per_ns()));
 }
