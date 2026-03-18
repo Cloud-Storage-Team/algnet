@@ -1,8 +1,8 @@
-#include "topology/device/routing_module.hpp"
+#include "routing_module.hpp"
 
 #include <algorithm>
 
-#include "hashers/ecmp_hasher.hpp"
+#include "../hashers/ecmp_hasher.hpp"
 #include "logger/logger.hpp"
 #include "topology/link/i_link.hpp"
 #include "utils/validation.hpp"

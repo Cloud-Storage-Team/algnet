@@ -3,9 +3,9 @@
 
 #include "ecn.hpp"
 #include "interfaces/i_host.hpp"
+#include "routing_module/routing_module.hpp"
 #include "scheduler/event/process.hpp"
 #include "scheduler/event/send_data.hpp"
-#include "topology/device/routing_module.hpp"
 #include "topology/device/scheduling_module.hpp"
 
 namespace sim {

@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 
 #include "network/connection/flow/packet.hpp"
-#include "topology/device/routing_module.hpp"
+#include "topology/device/routing_module/routing_module.hpp"
 #include "topology/link/i_link.hpp"
 
 namespace test {

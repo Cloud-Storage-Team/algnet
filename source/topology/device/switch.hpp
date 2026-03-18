@@ -1,9 +1,9 @@
 #pragma once
 
 #include "ecn.hpp"
+#include "routing_module/routing_module.hpp"
 #include "scheduler/event/process.hpp"
 #include "topology/device/interfaces/i_switch.hpp"
-#include "topology/device/routing_module.hpp"
 #include "topology/device/scheduling_module.hpp"
 
 namespace sim {
