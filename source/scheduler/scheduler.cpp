@@ -18,34 +18,27 @@ bool Scheduler::tick() {
         event->operator()();
     };
 
-    while (!m_near_events.empty() && m_near_events.front().empty()) {
-        m_near_events.pop_front();
-    }
-    // now m_near_events is empty or its first storage is not empty
-
     if (!m_near_events.empty()) {
-        // run first near event
-        std::unique_ptr<Event> event = std::move(m_near_events[0].front());
-        m_near_events[0].pop();
-        run_event(std::move(event));
+        run_event(m_near_events.pop_first());
         return true;
+    }
+    // no near events
+
+    if (m_far_events.empty()) {
+        return false;
     }
 
-    if (!m_far_events.empty()) {
-        // no near events, but have some far ones => run first from far ones
-        run_event(take_top_far_event());
-        return true;
-    }
+    // no near events, but have some far ones => run first from far ones
+    run_event(take_top_far_event());
+    return true;
 
     // no near nor fat events => nothing to do
     return false;
 }
 
 void Scheduler::clear() {
-    std::priority_queue<std::unique_ptr<Event>,
-                        std::vector<std::unique_ptr<Event>>, EventComparator>()
-        .swap(m_far_events);
-    std::deque<std::queue<std::unique_ptr<Event>>>().swap(m_near_events);
+    m_near_events =
+        NearEventsStorage(M_MAX_COUNTSORT_CAPACITY.value_nanoseconds());
     m_current_event_local_time = TimeNs(0);
 }
 

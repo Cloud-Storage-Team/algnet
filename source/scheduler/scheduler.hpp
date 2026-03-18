@@ -5,6 +5,7 @@
 #include <queue>
 
 #include "event/event.hpp"
+#include "near_events_storage.hpp"
 #include "types.hpp"
 
 namespace sim {
@@ -41,7 +42,7 @@ public:
         }
 
         if (is_near_event(event)) {
-            add_near_event(std::move(event));
+            m_near_events.add(std::move(event), m_current_event_local_time);
         } else {
             m_far_events.emplace(std::move(event));
         }
@@ -52,10 +53,13 @@ public:
     TimeNs get_current_time();
 
 private:
-    static constexpr inline TimeNs M_MAX_COUNTSORT_CAPACITY = TimeNs(100'000);
+    static constexpr inline TimeNs M_MAX_COUNTSORT_CAPACITY = TimeNs(50'000);
 
     // Private constructor to prevent instantiation
-    Scheduler() : m_current_event_local_time(TimeNs(0)) {}
+    Scheduler()
+        : m_near_events(M_MAX_COUNTSORT_CAPACITY.value_nanoseconds()),
+          m_current_event_local_time(TimeNs(0)) {}
+
     // No copy constructor and assignment operators
     Scheduler(const Scheduler&) = delete;
     Scheduler& operator=(const Scheduler&) = delete;
@@ -64,18 +68,6 @@ private:
         const std::unique_ptr<Event>& event) {
         return event->get_time() <
                m_current_event_local_time + M_MAX_COUNTSORT_CAPACITY;
-    }
-
-    inline void add_near_event(std::unique_ptr<Event> event) {
-        std::uint32_t relative_event_time =
-            (event->get_time() - m_current_event_local_time)
-                .value_nanoseconds();
-
-        if (m_near_events.size() <= relative_event_time) {
-            m_near_events.resize(relative_event_time + 1);
-        }
-
-        m_near_events[relative_event_time].emplace(std::move(event));
     }
 
     inline std::unique_ptr<Event> take_top_far_event() {
@@ -90,14 +82,15 @@ private:
             const std::unique_ptr<Event>& event = m_far_events.top();
 
             if (is_near_event(event)) {
-                add_near_event(take_top_far_event());
+                m_near_events.add(take_top_far_event(),
+                                  m_current_event_local_time);
             } else {
                 break;
             }
         }
     }
 
-    std::deque<std::queue<std::unique_ptr<Event>>> m_near_events;
+    NearEventsStorage m_near_events;
 
     std::priority_queue<std::unique_ptr<Event>,
                         std::vector<std::unique_ptr<Event>>, EventComparator>
