@@ -6,7 +6,7 @@
 namespace sim {
 class SimplePacketReordering : public IPacketReordering {
 public:
-    explicit SimplePacketReordering(std::size_t a_max_packets = 1'000'000);
+    explicit SimplePacketReordering(std::size_t a_max_packets = 512);
     ~SimplePacketReordering() = default;
 
     void add_record(PacketNum packet_num) final;

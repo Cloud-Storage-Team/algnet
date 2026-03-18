@@ -7,12 +7,14 @@ namespace sim {
 // Base class for event
 class Event {
 public:
-    Event(TimeNs a_time);
+    explicit inline Event(TimeNs a_time) : m_time(a_time) {}
     virtual ~Event() = default;
     virtual void operator()() = 0;
 
-    TimeNs get_time() const;
-    bool operator>(const Event &other) const;
+    inline TimeNs get_time() const { return m_time; }
+    inline bool operator>(const Event &other) const {
+        return m_time > other.m_time;
+    }
 
 protected:
     const TimeNs m_time;
