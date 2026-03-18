@@ -3,6 +3,7 @@
 #include <unordered_map>
 
 #include "../hashers/i_hasher.hpp"
+#include "ecmp_next_hops.hpp"
 #include "topology/device/interfaces/i_routing_device.hpp"
 #include "utils/loop_iterator.hpp"
 
@@ -40,7 +41,7 @@ private:
         m_outlinks;
 
     // A routing table: maps the final destination to a specific link
-    std::unordered_map<Id, MapWeakPtr<ILink, int>> m_routing_table;
+    std::unordered_map<Id, EcmpNextHops> m_routing_table;
 
     // Iterator for the next ingress to process
     LoopIterator<std::set<std::weak_ptr<ILink>,

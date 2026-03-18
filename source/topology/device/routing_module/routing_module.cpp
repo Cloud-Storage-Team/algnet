@@ -70,7 +70,7 @@ bool RoutingModule::update_routing_table(Id receiver_id,
     }
     auto link_dest = link->get_to();
 
-    m_routing_table[receiver_id][link] += paths_count;
+    m_routing_table[receiver_id].add_link(link, paths_count);
     return true;
 }
 
@@ -81,27 +81,12 @@ std::shared_ptr<ILink> RoutingModule::get_link_to_destination(
         return nullptr;
     }
 
-    const auto& link_map = iterator->second;
-    if (link_map.empty()) {
-        return nullptr;
-    }
+    const auto& ecmp_next_hops = iterator->second;
 
-    int total_weight = 0;
-    for (const auto& [link, weight] : link_map) {
-        total_weight += weight;
-    }
+    std::uint32_t hash =
+        m_hasher->get_hash(packet) % ecmp_next_hops.get_max_hash();
 
-    int hash = m_hasher->get_hash(packet) % total_weight;
-
-    int cumulative_weight = 0;
-    for (const auto& [link, weight] : link_map) {
-        cumulative_weight += weight;
-        if (hash < cumulative_weight) {
-            return link.lock();
-        }
-    }
-
-    return nullptr;
+    return ecmp_next_hops[hash];
 }
 
 std::shared_ptr<ILink> RoutingModule::next_inlink() {

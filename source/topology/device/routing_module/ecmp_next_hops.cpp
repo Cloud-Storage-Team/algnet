@@ -16,8 +16,10 @@ void EcmpNextHops::add_link(std::shared_ptr<ILink> link,
 
         if (same_link) {
             old_routes_count += routes_count;
+            return;
         }
     }
+    m_next_hops.emplace_back(link, routes_count);
 }
 
 std::shared_ptr<ILink> EcmpNextHops::operator[](std::size_t hash) const {
@@ -31,7 +33,7 @@ std::shared_ptr<ILink> EcmpNextHops::operator[](std::size_t hash) const {
             "Given hash {} is grateater or equal to maximal one ({})", hash,
             max_hash));
     }
-    
+
     return cache.links_table[hash];
 }
 
