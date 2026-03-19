@@ -13,7 +13,7 @@ namespace sim {
 template <std::size_t Size>
 class EventsStorage {
 public:
-    void add(std::unique_ptr<Event> event, std::size_t index) {
+    void add(std::unique_ptr<Event>&& event, std::size_t index) {
         std::size_t cap = capacity();
         if (index >= cap) {
             throw std::runtime_error(
@@ -34,17 +34,21 @@ public:
         return m_empty;
     }
 
-    std::unique_ptr<Event> take_first() {
+    std::unique_ptr<Event>& top() {
         if (empty()) {
             throw std::runtime_error(
                 "Try to pop first event from empty storage");
         }
         // state is correct
 
-        std::unique_ptr<Event> event =
-            std::move(m_buckets[m_current_bucket_index].front());
+        return m_buckets[m_current_bucket_index].front();
+    }
+
+    void pop() {
+        if (empty()) {
+            throw std::runtime_error("Pop from empty events storage");
+        }
         m_buckets[m_current_bucket_index].pop();
-        return event;
     }
 
     void clear() {

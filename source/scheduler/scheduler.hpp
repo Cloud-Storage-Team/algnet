@@ -69,20 +69,17 @@ private:
                m_current_event_local_time + M_MAX_COUNTSORT_CAPACITY;
     }
 
-    inline std::unique_ptr<Event> take_top_far_event() {
-        std::unique_ptr<Event> event =
-            std::move(const_cast<std::unique_ptr<Event>&>(m_far_events.top()));
-        m_far_events.pop();
-        return event;
+    inline std::unique_ptr<Event>& top_far_event() {
+        return const_cast<std::unique_ptr<Event>&>(m_far_events.top());
     }
 
     inline void correctify_state() {
         while (!m_far_events.empty()) {
-            const std::unique_ptr<Event>& event = m_far_events.top();
+            std::unique_ptr<Event>& event = top_far_event();
 
             if (is_near_event(event)) {
-                m_near_events.add(take_top_far_event(),
-                                  m_current_event_local_time);
+                m_near_events.add(std::move(event), m_current_event_local_time);
+                m_far_events.pop();
             } else {
                 break;
             }

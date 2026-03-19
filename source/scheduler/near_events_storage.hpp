@@ -11,7 +11,7 @@ namespace sim {
 template <std::size_t Size>
 class NearEventsStorage {
 public:
-    void add(std::unique_ptr<Event> event, TimeNs current_time) {
+    void add(std::unique_ptr<Event>&& event, TimeNs current_time) {
         std::uint32_t relative_event_time =
             (event->get_time() - current_time).value_nanoseconds();
 
@@ -25,13 +25,21 @@ public:
         }
     }
 
-    std::unique_ptr<Event> take_first() {
+    std::unique_ptr<Event>& top() {
+        if (empty()) {
+            throw std::runtime_error(
+                "Try to take event from empty near events storage");
+        }
+        // state is correct due to empty() call inside it
+        return m_storage_pair.first().top();
+    }
+
+    void pop() {
         if (empty()) {
             throw std::runtime_error(
                 "Try to pop event from empty near events storage");
         }
-        // state is correct due to empty() call inside it
-        return m_storage_pair.first().take_first();
+        m_storage_pair.first().pop();
     }
 
     bool empty() {
