@@ -22,7 +22,7 @@ public:
     MOCK_METHOD(std::shared_ptr<sim::ILink>, next_inlink, (), (final));
     MOCK_METHOD(std::set<std::shared_ptr<sim::ILink>>, get_outlinks, (),
                 (final));
-    MOCK_METHOD(Id, get_id, (), (final, const));
+    MOCK_METHOD(const Id&, get_id, (), (final, const));
     MOCK_METHOD(TimeNs, process, (), (final));
 };
 }  // namespace test

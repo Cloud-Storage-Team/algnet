@@ -28,6 +28,8 @@ public:
 
     void enqueue_packet(const sim::Packet& packet) final;
     TimeNs send_packet() final;
+private:
+    Id id = "";
 };
 
 }  // namespace test

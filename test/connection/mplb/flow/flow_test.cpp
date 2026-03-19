@@ -10,6 +10,8 @@ using ::testing::_;
 using ::testing::Invoke;
 using ::testing::NiceMock;
 
+using ::testing::ReturnRef;
+
 struct FlowTest : public ::testing::Test {
     std::shared_ptr<NiceMock<HostGMock>> sender_mock =
         std::make_shared<NiceMock<HostGMock>>();
@@ -31,6 +33,13 @@ struct FlowTest : public ::testing::Test {
 };
 
 TEST_F(FlowTest, SendOnePacket) {
+    Id sender_id = "sender";
+    Id receiver_id = "receiver";
+    EXPECT_CALL(*sender_mock, get_id()).WillRepeatedly(ReturnRef(sender_id));
+
+    EXPECT_CALL(*receiver_mock, get_id())
+        .WillRepeatedly(ReturnRef(receiver_id));
+
     EXPECT_CALL(*sender_mock, enqueue_packet(_))
         .Times(1)
         .WillOnce(Invoke([](sim::Packet packet) { packet.callback(packet); }));
@@ -60,6 +69,13 @@ TEST_F(FlowTest, RetransmitPacket) {
     EXPECT_CALL(*receiver_mock, enqueue_packet(_))
         .Times(1)
         .WillOnce(Invoke([](sim::Packet packet) { packet.callback(packet); }));
+
+    Id sender_id = "sender";
+    Id receiver_id = "receiver";
+    EXPECT_CALL(*sender_mock, get_id()).WillRepeatedly(ReturnRef(sender_id));
+
+    EXPECT_CALL(*receiver_mock, get_id())
+        .WillRepeatedly(ReturnRef(receiver_id));
 
     flow->send(packets_info);
 
