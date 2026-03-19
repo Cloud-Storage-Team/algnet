@@ -26,27 +26,22 @@ public:
         const Packet& packet) const final;
     std::set<std::shared_ptr<ILink>> get_outlinks() final;
 
-    void correctify_inlinks();
-    void correctify_outlinks();
-
 private:
     Id m_id;
     std::unique_ptr<IPacketHasher> m_hasher;
 
-    // Ordered set as we need to iterate over the ingress buffers
-    std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
-        m_inlinks;
+    using LinksStorage = std::set<std::shared_ptr<ILink>>;
 
-    std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
-        m_outlinks;
+    // Ordered set as we need to iterate over the ingress buffers
+    LinksStorage m_inlinks;
+
+    LinksStorage m_outlinks;
 
     // A routing table: maps the final destination to a specific link
-    std::unordered_map<Id, EcmpNextHops> m_routing_table;
+    std::unordered_map<IdWithHash, EcmpNextHops> m_routing_table;
 
     // Iterator for the next ingress to process
-    LoopIterator<std::set<std::weak_ptr<ILink>,
-                          std::owner_less<std::weak_ptr<ILink>>>::iterator>
-        m_next_inlink;
+    LoopIterator<LinksStorage::iterator> m_next_inlink;
 };
 
 }  // namespace sim

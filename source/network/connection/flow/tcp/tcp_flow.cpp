@@ -135,9 +135,9 @@ void TcpFlow::process_data_packet(const Packet& data,
         Scheduler::get_instance().get_current_time(),
         m_packet_reordering.value());
     Packet ack = data;
-    ack.sender_id = m_context.receiver->get_id();
+    ack.sender_id = IdWithHash(m_context.receiver->get_id());
     ack.sender_port = m_context.receiver_port;
-    ack.receiver_id = m_context.sender->get_id();
+    ack.receiver_id = IdWithHash(m_context.sender->get_id());
     ack.receiver_port = m_context.sender_port;
     ack.size = SizeByte(1);
     ack.ttl = M_MAX_TTL;

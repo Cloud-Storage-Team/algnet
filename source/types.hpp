@@ -5,6 +5,7 @@
 #include <string>
 
 #include "units/units.hpp"
+#include "id.hpp"
 
 using TimeNs = Time<Nanosecond>;
 using SizeByte = Size<Byte>;
