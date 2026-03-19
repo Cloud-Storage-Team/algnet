@@ -53,7 +53,7 @@ public:
     TimeNs get_current_time();
 
 private:
-    static constexpr inline TimeNs M_MAX_COUNTSORT_CAPACITY = TimeNs(50'000);
+    static constexpr inline TimeNs M_MAX_COUNTSORT_CAPACITY = TimeNs(10'000);
 
     // Private constructor to prevent instantiation
     Scheduler()

@@ -39,6 +39,9 @@ bool Scheduler::tick() {
 void Scheduler::clear() {
     m_near_events =
         NearEventsStorage(M_MAX_COUNTSORT_CAPACITY.value_nanoseconds());
+    std::priority_queue<std::unique_ptr<Event>,
+                        std::vector<std::unique_ptr<Event>>, EventComparator>()
+        .swap(m_far_events);
     m_current_event_local_time = TimeNs(0);
 }
 
