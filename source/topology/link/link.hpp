@@ -40,7 +40,7 @@ public:
     virtual SizeByte get_to_ingress_queue_size() const final;
     virtual SizeByte get_max_to_ingress_queue_size() const final;
 
-    virtual Id get_id() const final;
+    virtual const Id& get_id() const final;
 
     virtual MetricsTable get_metrics_table() const final;
 

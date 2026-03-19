@@ -34,7 +34,7 @@ void TcpFlow::send(std::vector<PacketInfo> packets_info) {
 
 const FlowContext& TcpFlow::get_context() const { return m_context; };
 
-Id TcpFlow::get_id() const { return m_id; }
+const Id& TcpFlow::get_id() const { return m_id; }
 
 MetricsTable TcpFlow::get_metrics_table() const {
     MetricsTable metrics_table;
@@ -128,7 +128,8 @@ void TcpFlow::send_data_packet(Packet data) {
     m_context.sender->enqueue_packet(std::move(data));
 }
 
-void TcpFlow::process_data_packet(const Packet& data, PacketCallback callback) {
+void TcpFlow::process_data_packet(const Packet& data,
+                                  const PacketCallback& callback) {
     m_packet_reordering.add_record(data.packet_num);
     m_metrics.packet_reordering->add_record(
         Scheduler::get_instance().get_current_time(),

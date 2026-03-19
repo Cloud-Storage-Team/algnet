@@ -8,7 +8,7 @@ void LinkTest::SetUp() {}
 
 void LinkTest::TearDown() { sim::Scheduler::get_instance().clear(); }
 
-Id DeviceMock::get_id() const { return ""; };
+const Id& DeviceMock::get_id() const { return ""; };
 
 bool DeviceMock::add_inlink([[maybe_unused]] std::shared_ptr<sim::ILink> link) {
     return false;

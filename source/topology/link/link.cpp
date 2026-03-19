@@ -83,7 +83,7 @@ SizeByte Link::get_max_to_ingress_queue_size() const {
     return m_to_ingress.get_max_size();
 }
 
-Id Link::get_id() const { return m_id; }
+const Id& Link::get_id() const { return m_id; }
 
 MetricsTable Link::get_metrics_table() const {
     MetricsTable result;
@@ -159,7 +159,7 @@ void Link::transmit() {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
     Scheduler::get_instance().add<Arrive>(current_time + m_propagation_delay,
                                           shared_from_this(),
-                                          m_from_egress.front());
+                                          std::move(m_from_egress.front()));
     m_from_egress.pop();
     if (!m_from_egress.empty()) {
         start_head_packet_sending();

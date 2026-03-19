@@ -29,7 +29,7 @@ public:
     void set_ingress_packet(sim::Packet a_paket);
     std::vector<sim::Packet> get_arrived_packets() const;
 
-    Id get_id() const final;
+    const Id& get_id() const final;
 
     virtual sim::MetricsTable get_metrics_table() const final {
         return sim::MetricsTable{};

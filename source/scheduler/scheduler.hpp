@@ -12,7 +12,9 @@ namespace sim {
 
 struct EventComparator {
     bool operator()(const std::unique_ptr<Event>& lhs,
-                    const std::unique_ptr<Event>& rhs) const;
+                    const std::unique_ptr<Event>& rhs) const {
+        return (*lhs.get()) > (*rhs.get());
+    }
 };
 
 // Scheduler is implemented as a Singleton class
@@ -53,16 +55,13 @@ public:
     TimeNs get_current_time();
 
 private:
-    static constexpr inline TimeNs M_MAX_COUNTSORT_CAPACITY = TimeNs(10'000);
+    static constexpr inline TimeNs M_MAX_COUNTSORT_CAPACITY = TimeNs(2'000);
 
-    // Private constructor to prevent instantiation
-    Scheduler()
-        : m_near_events(M_MAX_COUNTSORT_CAPACITY.value_nanoseconds()),
-          m_current_event_local_time(TimeNs(0)) {}
-
-    // No copy constructor and assignment operators
-    Scheduler(const Scheduler&) = delete;
-    Scheduler& operator=(const Scheduler&) = delete;
+    // Private constructor, copy constructor & assignment to prevent
+    // instantiation
+    Scheduler() : m_current_event_local_time(TimeNs(0)) {}
+    Scheduler(const Scheduler&) = default;
+    Scheduler& operator=(const Scheduler&) = default;
 
     [[nodiscard]] inline bool is_near_event(
         const std::unique_ptr<Event>& event) {
@@ -90,7 +89,8 @@ private:
         }
     }
 
-    NearEventsStorage m_near_events;
+    NearEventsStorage<M_MAX_COUNTSORT_CAPACITY.value_nanoseconds()>
+        m_near_events;
 
     std::priority_queue<std::unique_ptr<Event>,
                         std::vector<std::unique_ptr<Event>>, EventComparator>

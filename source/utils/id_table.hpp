@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <type_traits>
 
-#include "identifier_factory.hpp"
+#include "identifiable.hpp"
 
 namespace utils {
 

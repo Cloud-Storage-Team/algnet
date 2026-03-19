@@ -6,11 +6,6 @@
 
 namespace sim {
 
-bool EventComparator::operator()(const std::unique_ptr<Event>& lhs,
-                                 const std::unique_ptr<Event>& rhs) const {
-    return (*lhs.get()) > (*rhs.get());
-}
-
 bool Scheduler::tick() {
     auto run_event = [this](std::unique_ptr<Event> event) {
         m_current_event_local_time = event->get_time();
@@ -19,7 +14,7 @@ bool Scheduler::tick() {
     };
 
     if (!m_near_events.empty()) {
-        run_event(m_near_events.pop_first());
+        run_event(m_near_events.take_first());
         return true;
     }
     // no near events
@@ -37,8 +32,7 @@ bool Scheduler::tick() {
 }
 
 void Scheduler::clear() {
-    m_near_events =
-        NearEventsStorage(M_MAX_COUNTSORT_CAPACITY.value_nanoseconds());
+    m_near_events.clear();
     std::priority_queue<std::unique_ptr<Event>,
                         std::vector<std::unique_ptr<Event>>, EventComparator>()
         .swap(m_far_events);

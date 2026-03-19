@@ -37,4 +37,4 @@ SizeByte LinkMock::get_max_from_egress_buffer_size() const {
 SizeByte LinkMock::get_to_ingress_queue_size() const { return SizeByte(0); }
 SizeByte LinkMock::get_max_to_ingress_queue_size() const { return SizeByte(0); }
 
-Id LinkMock::get_id() const { return ""; }
+const Id& LinkMock::get_id() const { return ""; }

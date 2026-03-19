@@ -2,7 +2,7 @@
 
 #include <set>
 
-#include "utils/identifier_factory.hpp"
+#include "utils/identifiable.hpp"
 
 namespace sim {
 

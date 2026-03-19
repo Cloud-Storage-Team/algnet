@@ -15,7 +15,7 @@ public:
                   std::unique_ptr<IPacketHasher> a_hasher = nullptr);
     virtual ~RoutingModule() = default;
 
-    Id get_id() const final;
+    const Id& get_id() const final;
     bool add_inlink(std::shared_ptr<ILink> link) final;
     bool add_outlink(std::shared_ptr<ILink> link) final;
     bool update_routing_table(Id dest_id, std::shared_ptr<ILink> link,

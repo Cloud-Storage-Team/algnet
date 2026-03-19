@@ -30,7 +30,7 @@ public:
 
     virtual const FlowContext& get_context() const final;
 
-    virtual Id get_id() const final;
+    virtual const Id& get_id() const final;
 
     virtual MetricsTable get_metrics_table() const final;
 
@@ -49,7 +49,7 @@ private:
     void send_data_packet(Packet data);
 
     void process_data_packet(const Packet& data_packet,
-                             PacketCallback callback);
+                             const PacketCallback& callback);
 
     void process_ack(const Packet& ack, SizeByte data_packet_size,
                      PacketCallback callback);

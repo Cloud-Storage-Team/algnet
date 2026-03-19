@@ -2,7 +2,7 @@
 
 #include "mplb/mplb_parser.hpp"
 #include "network/connection/connection.hpp"
-#include "utils/identifier_factory.hpp"
+#include "utils/identifiable.hpp"
 
 namespace sim {
 

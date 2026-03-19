@@ -20,7 +20,7 @@ class DeviceMock : public sim::IDevice {
 public:
     ~DeviceMock() = default;
 
-    Id get_id() const final;
+    const Id& get_id() const final;
     bool add_inlink(std::shared_ptr<sim::ILink> link) final;
     bool add_outlink(std::shared_ptr<sim::ILink> link) final;
     bool update_routing_table(Id dest_id, std::shared_ptr<sim::ILink> link,

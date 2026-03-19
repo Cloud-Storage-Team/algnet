@@ -14,7 +14,7 @@ RoutingModule::RoutingModule(Id a_id, std::unique_ptr<IPacketHasher> a_hasher)
       m_hasher(a_hasher ? std::move(a_hasher)
                         : std::make_unique<ECMPHasher>()) {}
 
-Id RoutingModule::get_id() const { return m_id; }
+const Id& RoutingModule::get_id() const { return m_id; }
 
 bool RoutingModule::add_inlink(std::shared_ptr<ILink> link) {
     if (!is_valid_link(link)) {

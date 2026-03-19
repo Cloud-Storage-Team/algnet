@@ -45,7 +45,7 @@ public:
     SizeByte get_to_ingress_queue_size() const final;
     SizeByte get_max_to_ingress_queue_size() const final;
 
-    Id get_id() const final;
+    const Id& get_id() const final;
 
     virtual sim::MetricsTable get_metrics_table() const final { return {}; }
 

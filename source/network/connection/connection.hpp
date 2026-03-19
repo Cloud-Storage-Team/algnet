@@ -25,7 +25,7 @@ public:
     virtual void write_inner_metrics(
         std::filesystem::path output_dir) const final;
 
-    Id get_id() const final;
+    virtual const Id& get_id() const final;
 
 private:
     // to avoid creating on stack
