@@ -4,18 +4,11 @@
 #include <memory>
 #include <queue>
 
-#include "event/event.hpp"
+#include "event/new_event.hpp"
 #include "near_events_storage.hpp"
 #include "types.hpp"
 
 namespace sim {
-
-struct EventComparator {
-    bool operator()(const std::unique_ptr<Event>& lhs,
-                    const std::unique_ptr<Event>& rhs) const {
-        return (*lhs.get()) > (*rhs.get());
-    }
-};
 
 // Scheduler is implemented as a Singleton class
 // which provides a global access to a single instance
@@ -27,26 +20,18 @@ public:
         return instance;
     }
 
-    template <typename TEvent, typename... Args>
-    void add(Args&&... args) {
-        static_assert(std::is_constructible_v<TEvent, Args&&...>,
-                      "Event must be constructible from given args");
-        static_assert(std::is_base_of_v<Event, TEvent>,
-                      "TEvent must inherit from Event");
-
-        std::unique_ptr<Event> event(
-            std::make_unique<TEvent>(std::forward<Args>(args)...));
-
-        TimeNs event_time = event->get_time();
-
+    template <typename TEvent, typename Func>
+    requires std::constructible_from<NewEvent, TimeNs, Func&&>
+    void add(TimeNs event_time, Func&& func) {
         if (event_time < m_current_event_local_time) {
             throw std::runtime_error("Try to schedule event in the past!");
         }
 
-        if (is_near_event(event)) {
-            m_near_events.add(std::move(event), m_current_event_local_time);
+        if (is_near_event(event_time)) {
+            m_near_events.add(NewEvent(event_time, std::forward<Func>(func)),
+                              m_current_event_local_time);
         } else {
-            m_far_events.emplace(std::move(event));
+            m_far_events.emplace(event_time, std::forward<Func>(func));
         }
     }
 
@@ -63,21 +48,20 @@ private:
     Scheduler(const Scheduler&) = default;
     Scheduler& operator=(const Scheduler&) = default;
 
-    [[nodiscard]] inline bool is_near_event(
-        const std::unique_ptr<Event>& event) {
-        return event->get_time() <
+    [[nodiscard]] inline bool is_near_event(TimeNs event_time) {
+        return event_time <
                m_current_event_local_time + M_MAX_COUNTSORT_CAPACITY;
     }
 
-    inline std::unique_ptr<Event>& top_far_event() {
-        return const_cast<std::unique_ptr<Event>&>(m_far_events.top());
+    inline NewEvent& top_far_event() {
+        return const_cast<NewEvent&>(m_far_events.top());
     }
 
     inline void correctify_state() {
         while (!m_far_events.empty()) {
-            std::unique_ptr<Event>& event = top_far_event();
+            NewEvent& event = top_far_event();
 
-            if (is_near_event(event)) {
+            if (is_near_event(event.time)) {
                 m_near_events.add(std::move(event), m_current_event_local_time);
                 m_far_events.pop();
             } else {
@@ -89,8 +73,8 @@ private:
     NearEventsStorage<M_MAX_COUNTSORT_CAPACITY.value_nanoseconds()>
         m_near_events;
 
-    std::priority_queue<std::unique_ptr<Event>,
-                        std::vector<std::unique_ptr<Event>>, EventComparator>
+    std::priority_queue<NewEvent, std::vector<NewEvent>,
+                        std::greater<NewEvent> >
         m_far_events;
 
     TimeNs m_current_event_local_time;

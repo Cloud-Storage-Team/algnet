@@ -7,16 +7,16 @@
 namespace sim {
 
 bool Scheduler::tick() {
-    auto run_event = [this](std::unique_ptr<Event> event) {
-        m_current_event_local_time = event->get_time();
-        event->operator()();
+    auto run_event = [this](NewEvent& event) {
+        m_current_event_local_time = event.time;
+        std::invoke(event.call);
         correctify_state();
     };
 
     if (!m_near_events.empty()) {
-        std::unique_ptr<Event> event = std::move(m_near_events.top());
+        NewEvent event = std::move(m_near_events.top());
         m_near_events.pop();
-        run_event(std::move(event));
+        run_event(event);
         return true;
     }
     // no near events
@@ -26,16 +26,16 @@ bool Scheduler::tick() {
     }
 
     // no near events, but have some far ones => run first from far ones
-    std::unique_ptr<Event> far_event = std::move(top_far_event());
+    NewEvent far_event = std::move(top_far_event());
     m_far_events.pop();
-    run_event(std::move(far_event));
+    run_event(far_event);
     return true;
 }
 
 void Scheduler::clear() {
     m_near_events.clear();
-    std::priority_queue<std::unique_ptr<Event>,
-                        std::vector<std::unique_ptr<Event>>, EventComparator>()
+    std::priority_queue<NewEvent, std::vector<NewEvent>,
+                        std::greater<NewEvent> >()
         .swap(m_far_events);
     m_current_event_local_time = TimeNs(0);
 }

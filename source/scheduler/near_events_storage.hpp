@@ -2,7 +2,7 @@
 #include <deque>
 #include <queue>
 
-#include "event/event.hpp"
+#include "event/new_event.hpp"
 #include "events_storage.hpp"
 #include "types.hpp"
 
@@ -11,9 +11,9 @@ namespace sim {
 template <std::size_t Size>
 class NearEventsStorage {
 public:
-    void add(std::unique_ptr<Event>&& event, TimeNs current_time) {
+    void add(NewEvent&& event, TimeNs current_time) {
         std::uint32_t relative_event_time =
-            (event->get_time() - current_time).value_nanoseconds();
+            (event.time - current_time).value_nanoseconds();
 
         EventsStorage<Size>& first_storage = m_storage_pair.first();
         std::size_t first_bucket_capacity = first_storage.capacity();
@@ -25,7 +25,7 @@ public:
         }
     }
 
-    std::unique_ptr<Event>& top() {
+    NewEvent& top() {
         if (empty()) {
             throw std::runtime_error(
                 "Try to take event from empty near events storage");

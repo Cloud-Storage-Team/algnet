@@ -5,7 +5,7 @@
 #include <bitset>
 #include <queue>
 
-#include "event/event.hpp"
+#include "event/new_event.hpp"
 #include "types.hpp"
 
 namespace sim {
@@ -13,7 +13,7 @@ namespace sim {
 template <std::size_t Size>
 class EventsStorage {
 public:
-    void add(std::unique_ptr<Event>&& event, std::size_t index) {
+    void add(NewEvent&& event, std::size_t index) {
         std::size_t cap = capacity();
         if (index >= cap) {
             throw std::runtime_error(
@@ -34,7 +34,7 @@ public:
         return m_empty;
     }
 
-    std::unique_ptr<Event>& top() {
+    NewEvent& top() {
         if (empty()) {
             throw std::runtime_error(
                 "Try to pop first event from empty storage");
@@ -53,7 +53,7 @@ public:
 
     void clear() {
         for (auto& bucket : m_buckets) {
-            std::queue<std::unique_ptr<Event> >().swap(bucket);
+            std::queue<NewEvent>().swap(bucket);
         }
         m_not_empty_buckets.reset();
         m_current_bucket_index = 0;
@@ -78,7 +78,7 @@ private:
         }
     }
 
-    std::array<std::queue<std::unique_ptr<Event> >, Size> m_buckets;
+    std::array<std::queue<NewEvent>, Size> m_buckets;
     std::bitset<Size> m_not_empty_buckets;
 
     bool m_empty = true;
