@@ -36,6 +36,4 @@ void HostMock::enqueue_packet([[maybe_unused]] const sim::Packet& packet) {
     return;
 }
 
-TimeNs HostMock::send_packet() { return TimeNs(0); }
-
 }  // namespace test

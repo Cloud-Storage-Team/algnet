@@ -6,7 +6,6 @@
 #include "metrics/metrics_table/combine_metrics_tables.hpp"
 #include "network/connection/flow/flows_summary/flows_summary.hpp"
 #include "scheduler/event/call_at_time.hpp"
-#include "scheduler/event/send_data.hpp"
 #include "scheduler/scheduler.hpp"
 #include "utils/callback_observer.hpp"
 

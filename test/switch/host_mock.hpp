@@ -27,7 +27,6 @@ public:
     const Id& get_id() const final;
 
     void enqueue_packet(const sim::Packet& packet) final;
-    TimeNs send_packet() final;
 
 private:
     Id id = "";

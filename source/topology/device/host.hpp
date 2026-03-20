@@ -5,7 +5,6 @@
 #include "interfaces/i_host.hpp"
 #include "routing_module/routing_module.hpp"
 #include "scheduler/event/process.hpp"
-#include "scheduler/event/send_data.hpp"
 #include "topology/device/scheduling_module.hpp"
 
 namespace sim {
@@ -20,15 +19,16 @@ public:
     bool notify_about_arrival() final;
 
     TimeNs process() final;
-    TimeNs send_packet() final;
 
     void enqueue_packet(const Packet& packet) final;
 
 private:
+    void send_packet();
+
     std::queue<Packet> m_nic_buffer;
     ECN m_ecn;
-    SchedulingModule<IHost, Process> m_process_scheduler;
-    SchedulingModule<IHost, SendData> m_send_data_scheduler;
+
+    std::size_t m_packets_on_inlinks = 0;
 };
 
 }  // namespace sim
