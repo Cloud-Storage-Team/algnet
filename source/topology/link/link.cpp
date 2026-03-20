@@ -3,6 +3,7 @@
 #include <spdlog/fmt/fmt.h>
 
 #include "logger/logger.hpp"
+#include "scheduler/event/call_at_time.hpp"
 #include "scheduler/scheduler.hpp"
 #include "utils/str_expected.hpp"
 
@@ -121,27 +122,6 @@ Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
     }
 }
 
-class Link::Transmit : public Event {
-public:
-    Transmit(TimeNs a_time, std::shared_ptr<Link> a_link)
-        : Event(a_time), m_link(a_link) {}
-    void operator()() final { m_link->transmit(); }
-
-private:
-    std::shared_ptr<Link> m_link;
-};
-
-class Link::Arrive : public Event {
-public:
-    Arrive(TimeNs a_time, std::shared_ptr<Link> a_link, const Packet& a_packet)
-        : Event(a_time), m_link(a_link), m_packet(a_packet) {}
-    void operator()() final { m_link->arrive(m_packet); }
-
-private:
-    std::shared_ptr<Link> m_link;
-    Packet m_packet;
-};
-
 TimeNs Link::get_transmission_delay(const Packet& packet) const {
     if (m_speed == SpeedGbps(0)) {
         LOG_WARN("Passed zero link speed");
@@ -157,9 +137,14 @@ void Link::transmit() {
         return;
     }
     TimeNs current_time = Scheduler::get_instance().get_current_time();
-    Scheduler::get_instance().add<Arrive>(current_time + m_propagation_delay,
-                                          shared_from_this(),
-                                          std::move(m_from_egress.front()));
+
+    Scheduler::get_instance().add<CallAtTime>(
+        current_time + m_propagation_delay,
+        [link = shared_from_this(),
+         packet = std::move(m_from_egress.front())]() {
+            link->arrive(packet);
+        });
+
     m_from_egress.pop();
     if (!m_from_egress.empty()) {
         start_head_packet_sending();
@@ -181,9 +166,9 @@ void Link::arrive(const Packet& packet) {
 
 void Link::start_head_packet_sending() {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
-    Scheduler::get_instance().add<Transmit>(
+    Scheduler::get_instance().add<CallAtTime>(
         current_time + get_transmission_delay(m_from_egress.front()),
-        shared_from_this());
+        [link = shared_from_this()]() { link->transmit(); });
 }
 
 }  // namespace sim

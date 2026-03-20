@@ -53,9 +53,6 @@ private:
          SizeByte a_max_from_egress_buffer_size,
          SizeByte a_max_to_ingress_buffer_size,
          LinkMetricsFilters a_metrics_filters);
-    class Transmit;
-
-    class Arrive;
 
 private:
     // Head packet leaves source egress queue
