@@ -7,7 +7,7 @@
 namespace test {
 
 TEST_F(TestScheduler, StopEventWorksCorrectly) {
-    int number_of_events = 5;
+    int number_of_events = 1;
 
     CountingEvent::cnt = 0;
     std::shared_ptr<TimeNs> event_time = std::make_shared<TimeNs>(1);

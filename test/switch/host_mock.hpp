@@ -22,8 +22,6 @@ public:
     std::set<std::shared_ptr<sim::ILink>> get_outlinks() final;
     bool notify_about_arrival() final;
 
-    TimeNs process() final;
-
     const Id& get_id() const final;
 
     void enqueue_packet(const sim::Packet& packet) final;

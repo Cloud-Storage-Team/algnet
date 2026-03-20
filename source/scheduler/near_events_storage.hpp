@@ -57,9 +57,8 @@ private:
 
         void correctify_state() {
             if (first().empty()) {
-                // first storage is empty -> correctiry state of second one &
-                // swap them
-                swap_storages();
+                // first storage is empty -> swap storages
+                m_swaped ^= 1;
             }
         }
 
@@ -68,8 +67,6 @@ private:
             m_first.clear();
             m_second.clear();
         }
-
-        void swap_storages() { m_swaped ^= 1; }
 
     private:
         EventsStorage<Size> m_first;

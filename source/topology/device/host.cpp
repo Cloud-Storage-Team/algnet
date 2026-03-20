@@ -4,6 +4,7 @@
 
 #include "logger/logger.hpp"
 #include "scheduler/event/call_at_time.hpp"
+#include "scheduler/scheduler.hpp"
 #include "utils/defer.hpp"
 #include "utils/validation.hpp"
 
@@ -30,14 +31,14 @@ void Host::enqueue_packet(const Packet& packet) {
     // packets sending already started;
 }
 
-TimeNs Host::process() {
+void Host::process() {
     static constexpr TimeNs PACKET_PROCESSING_TIME = TimeNs(1);
 
     std::shared_ptr<ILink> current_inlink = next_inlink();
 
     if (current_inlink == nullptr) {
         LOG_WARN("No available inlinks for device");
-        return PACKET_PROCESSING_TIME;
+        return;
     }
 
     auto process_lambda = [host = shared_from_this()]() { host->process(); };
@@ -72,21 +73,21 @@ TimeNs Host::process() {
 
         if (next_link == nullptr) {
             LOG_WARN("No link corresponds to destination device");
-            return PACKET_PROCESSING_TIME;
+            return;
         }
 
         if (packet.ttl == 0) {
             LOG_ERROR(
                 fmt::format("Packet ttl expired on device {}; packet {} lost",
                             get_id(), packet.to_string()));
-            return PACKET_PROCESSING_TIME;
+            return;
         }
         packet.ttl--;
 
         next_link->schedule_arrival(packet);
     }
 
-    return PACKET_PROCESSING_TIME;
+    return;
 }
 
 void Host::send_packet() {

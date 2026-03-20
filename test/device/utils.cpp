@@ -4,8 +4,6 @@ namespace test {
 
 bool TestDevice::notify_about_arrival() { return false; };
 
-TimeNs TestDevice::process() { return TimeNs(0); };
-
 std::vector<std::shared_ptr<sim::IDevice>> createTestDevices(size_t count) {
     std::vector<std::shared_ptr<sim::IDevice>> devices;
     for (size_t i = 0; i < count; ++i) {

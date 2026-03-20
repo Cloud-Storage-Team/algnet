@@ -26,8 +26,6 @@ std::shared_ptr<sim::ILink> HostMock::get_link_to_destination(
 
 bool HostMock::notify_about_arrival() { return false; }
 
-TimeNs HostMock::process() { return TimeNs(1); }
-
 std::set<std::shared_ptr<sim::ILink>> HostMock::get_outlinks() { return {}; }
 
 const Id& HostMock::get_id() const { return id; }

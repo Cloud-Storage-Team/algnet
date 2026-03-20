@@ -4,8 +4,6 @@
 #include "ecn.hpp"
 #include "interfaces/i_host.hpp"
 #include "routing_module/routing_module.hpp"
-#include "scheduler/event/process.hpp"
-#include "topology/device/scheduling_module.hpp"
 
 namespace sim {
 
@@ -18,11 +16,10 @@ public:
 
     bool notify_about_arrival() final;
 
-    TimeNs process() final;
-
     void enqueue_packet(const Packet& packet) final;
 
 private:
+    void process();
     void send_packet();
 
     std::queue<Packet> m_nic_buffer;

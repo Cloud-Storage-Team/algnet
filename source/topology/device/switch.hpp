@@ -2,9 +2,7 @@
 
 #include "ecn.hpp"
 #include "routing_module/routing_module.hpp"
-#include "scheduler/event/process.hpp"
 #include "topology/device/interfaces/i_switch.hpp"
-#include "topology/device/scheduling_module.hpp"
 
 namespace sim {
 
@@ -18,15 +16,15 @@ public:
 
     bool notify_about_arrival() final;
 
+private:
     // Process a packet by moving it from ingress to egress
     // and schedule next process event after a delay.
     // Packets are taken from ingress buffers on a round-robin basis.
     // The iterator over ingress buffers is stored in m_next_link.
-    TimeNs process() final;
+    void process();
 
-private:
-    SchedulingModule<ISwitch, Process> m_process_scheduler;
     ECN m_ecn;
+    std::size_t m_packets_on_inlinks = 0;
 };
 
 }  // namespace sim

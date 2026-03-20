@@ -11,7 +11,7 @@ namespace test {
 class TestScheduler : public testing::Test {
 public:
     void TearDown() override { sim::Scheduler::get_instance().clear(); }
-    void SetUp() override {};
+    void SetUp() override { sim::Scheduler::get_instance().clear(); };
 };
 
 struct EmptyEvent : public sim::Event {

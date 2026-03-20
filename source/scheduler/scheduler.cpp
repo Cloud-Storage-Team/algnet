@@ -7,15 +7,16 @@
 namespace sim {
 
 bool Scheduler::tick() {
-    auto run_event = [this](std::unique_ptr<Event>& event) {
+    auto run_event = [this](std::unique_ptr<Event> event) {
         m_current_event_local_time = event->get_time();
-        correctify_state();
         event->operator()();
+        correctify_state();
     };
 
     if (!m_near_events.empty()) {
-        run_event(m_near_events.top());
+        std::unique_ptr<Event> event = std::move(m_near_events.top());
         m_near_events.pop();
+        run_event(std::move(event));
         return true;
     }
     // no near events
@@ -27,7 +28,7 @@ bool Scheduler::tick() {
     // no near events, but have some far ones => run first from far ones
     std::unique_ptr<Event> far_event = std::move(top_far_event());
     m_far_events.pop();
-    run_event(far_event);
+    run_event(std::move(far_event));
     return true;
 }
 
