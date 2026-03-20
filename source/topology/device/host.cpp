@@ -97,31 +97,33 @@ void Host::send_packet() {
                               get_id()));
         return;
     }
-    Packet& data_packet = m_nic_buffer.front();
-    utils::Defer defer{[this] { m_nic_buffer.pop(); }};
+    {
+        Packet& data_packet = m_nic_buffer.front();
+        utils::Defer defer{[this] { m_nic_buffer.pop(); }};
 
-    LOG_INFO(fmt::format("Taken new data packet on host {}. Packet: {}",
-                         get_id(), data_packet.to_string()));
+        LOG_INFO(fmt::format("Taken new data packet on host {}. Packet: {}",
+                             get_id(), data_packet.to_string()));
 
-    auto next_link = get_link_to_destination(data_packet);
-    if (next_link == nullptr) {
-        LOG_WARN("Link to send data packet does not exist");
-        return;
-    }
-
-    LOG_INFO(fmt::format("Sent new packet from host. Packet: {}", get_id(),
-                         data_packet.to_string()));
-
-    if (data_packet.ecn_capable_transport) {
-        float egress_queue_filling =
-            (next_link->get_from_egress_queue_size() + data_packet.size) /
-            next_link->get_max_from_egress_buffer_size();
-        if (m_ecn.get_congestion_mark(egress_queue_filling)) {
-            data_packet.congestion_experienced = true;
+        auto next_link = get_link_to_destination(data_packet);
+        if (next_link == nullptr) {
+            LOG_WARN("Link to send data packet does not exist");
+            return;
         }
-    }
 
-    next_link->schedule_arrival(data_packet);
+        LOG_INFO(fmt::format("Sent new packet from host. Packet: {}", get_id(),
+                             data_packet.to_string()));
+
+        if (data_packet.ecn_capable_transport) {
+            float egress_queue_filling =
+                (next_link->get_from_egress_queue_size() + data_packet.size) /
+                next_link->get_max_from_egress_buffer_size();
+            if (m_ecn.get_congestion_mark(egress_queue_filling)) {
+                data_packet.congestion_experienced = true;
+            }
+        }
+
+        next_link->schedule_arrival(data_packet);
+    }
 
     if (!m_nic_buffer.empty()) {
         Scheduler& sched = Scheduler::get_instance();
