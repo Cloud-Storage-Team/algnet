@@ -3,7 +3,7 @@
 #include <cassert>
 #include <queue>
 
-#include "event/event.hpp"
+#include "event.hpp"
 
 namespace sim {
 

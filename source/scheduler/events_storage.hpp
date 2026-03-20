@@ -6,7 +6,7 @@
 #include <cassert>
 #include <queue>
 
-#include "event/new_event.hpp"
+#include "event.hpp"
 #include "types.hpp"
 
 namespace sim {

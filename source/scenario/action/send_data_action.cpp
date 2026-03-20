@@ -1,6 +1,5 @@
 #include "send_data_action.hpp"
 
-#include "scheduler/event/call_at_time.hpp"
 #include "utils/callback_observer.hpp"
 
 namespace sim {
@@ -62,7 +61,7 @@ void SendDataAction::schedule() {
                 0, m_jitter.value_nanoseconds());
 
             TimeNs jitter_gap = use_jitter ? TimeNs(dist(rng)) : TimeNs(0);
-            Scheduler::get_instance().add<CallAtTime>(
+            Scheduler::get_instance().add(
                 start_time + jitter_gap,
                 [conn, data, single_connection_callback]() {
                     auto res =

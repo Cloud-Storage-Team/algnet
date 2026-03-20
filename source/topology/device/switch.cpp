@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include "logger/logger.hpp"
-#include "scheduler/event/call_at_time.hpp"
 #include "scheduler/scheduler.hpp"
 #include "utils/defer.hpp"
 #include "utils/validation.hpp"
@@ -40,9 +39,8 @@ void Switch::process() {
     utils::Defer defer_reschedule{[this]() {
         if (--m_packets_on_inlinks != 0) {
             Scheduler& sched = Scheduler::get_instance();
-            sched.add<CallAtTime>(
-                sched.get_current_time() + PACKET_PROCESSING_TIME,
-                [swtch = shared_from_this()]() { swtch->process(); });
+            sched.add(sched.get_current_time() + PACKET_PROCESSING_TIME,
+                      [swtch = shared_from_this()]() { swtch->process(); });
         }
     }};
 

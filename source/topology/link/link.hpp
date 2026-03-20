@@ -4,7 +4,6 @@
 
 #include "metrics/metrics_table/i_metricable.hpp"
 #include "packet_queue/link_queue.hpp"
-#include "scheduler/event/event.hpp"
 #include "topology/link/i_link.hpp"
 #include "utils/str_expected.hpp"
 

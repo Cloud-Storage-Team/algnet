@@ -2,7 +2,7 @@
 #include <deque>
 #include <queue>
 
-#include "event/new_event.hpp"
+#include "event.hpp"
 #include "events_storage.hpp"
 #include "types.hpp"
 

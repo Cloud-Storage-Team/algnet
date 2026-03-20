@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "scheduler/event/call_at_time.hpp"
 #include "scheduler/scheduler.hpp"
 #include "utils.hpp"
 
@@ -15,7 +14,7 @@ TEST_F(TestScheduler, ExpectedProcessingOrder) {
     uint32_t max_time = 1e9;
 
     for (std::size_t i = 0; i < number_of_events; i++) {
-        sim::Scheduler::get_instance().add<sim::CallAtTime>(
+        sim::Scheduler::get_instance().add(
             TimeNs(rand() % (max_time - min_time + 1)), [&]() {
                 TimeNs cur_time =
                     sim::Scheduler::get_instance().get_current_time();

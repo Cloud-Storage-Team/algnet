@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "scheduler/event/call_at_time.hpp"
 #include "scheduler/scheduler.hpp"
 #include "utils.hpp"
 
@@ -11,8 +10,8 @@ TEST_F(TestScheduler, AddExpectedAmountOfElements) {
 
     std::size_t cnt_called = 0;
     for (std::size_t i = 0; i < number_of_events; i++) {
-        sim::Scheduler::get_instance().add<sim::CallAtTime>(
-            TimeNs(i), [&cnt_called]() { cnt_called++; });
+        sim::Scheduler::get_instance().add(TimeNs(i),
+                                           [&cnt_called]() { cnt_called++; });
     }
 
     while (sim::Scheduler::get_instance().tick()) {

@@ -1,7 +1,6 @@
 #include "tcp_flow.hpp"
 
 #include "flow_metrics_metadatas.hpp"
-#include "scheduler/event/call_at_time.hpp"
 #include "scheduler/scheduler.hpp"
 #include "utils/avg_rtt_packet_flag.hpp"
 
@@ -119,7 +118,7 @@ void TcpFlow::set_avg_rtt_if_present(Packet& packet) {
 void TcpFlow::send_data_packet(Packet data) {
     TimeNs now = Scheduler::get_instance().get_current_time();
 
-    Scheduler::get_instance().add<CallAtTime>(
+    Scheduler::get_instance().add(
         now + m_rto.current,
         [flow = shared_from_this(), data]() { flow->on_timeout(data); });
     m_context.sent_size += data.size;

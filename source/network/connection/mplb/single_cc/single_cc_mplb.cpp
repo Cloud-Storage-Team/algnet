@@ -5,7 +5,6 @@
 #include "../mplb_metrics_metadatas.hpp"
 #include "metrics/metrics_table/combine_metrics_tables.hpp"
 #include "network/connection/flow/flows_summary/flows_summary.hpp"
-#include "scheduler/event/call_at_time.hpp"
 #include "scheduler/scheduler.hpp"
 #include "utils/callback_observer.hpp"
 
@@ -80,7 +79,7 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
             }
         };
         PacketInfo info{data.id, m_packet_size, packet_callback, now};
-        Scheduler::get_instance().add<CallAtTime>(
+        Scheduler::get_instance().add(
             now + shift, [mplb, flow, packet_info = std::move(info)]() {
                 mplb->m_sent_data_size += packet_info.packet_size;
                 flow->send(std::vector<PacketInfo>({std::move(packet_info)}));

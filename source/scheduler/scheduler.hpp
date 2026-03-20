@@ -4,7 +4,7 @@
 #include <memory>
 #include <queue>
 
-#include "event/new_event.hpp"
+#include "event.hpp"
 #include "near_events_scheduler.hpp"
 #include "types.hpp"
 
@@ -20,7 +20,7 @@ public:
         return instance;
     }
 
-    template <typename TEvent, typename Func>
+    template <typename Func>
     requires std::constructible_from<NewEvent, TimeNs, Func&&>
     void add(TimeNs event_time, Func&& func) {
         if (event_time < m_current_event_local_time) {

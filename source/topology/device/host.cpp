@@ -3,7 +3,6 @@
 #include <spdlog/fmt/fmt.h>
 
 #include "logger/logger.hpp"
-#include "scheduler/event/call_at_time.hpp"
 #include "scheduler/scheduler.hpp"
 #include "utils/defer.hpp"
 #include "utils/validation.hpp"
@@ -53,9 +52,8 @@ void Host::process() {
     utils::Defer defer_reschedule{[this]() {
         if (--m_packets_on_inlinks != 0) {
             Scheduler& sched = Scheduler::get_instance();
-            sched.add<CallAtTime>(
-                sched.get_current_time() + PACKET_PROCESSING_TIME,
-                [host = shared_from_this()]() { host->process(); });
+            sched.add(sched.get_current_time() + PACKET_PROCESSING_TIME,
+                      [host = shared_from_this()]() { host->process(); });
         }
     }};
 
@@ -127,9 +125,8 @@ void Host::send_packet() {
 
     if (!m_nic_buffer.empty()) {
         Scheduler& sched = Scheduler::get_instance();
-        sched.add<CallAtTime>(
-            sched.get_current_time() + PACKET_PROCESSING_TIME,
-            [host = shared_from_this()]() { host->send_packet(); });
+        sched.add(sched.get_current_time() + PACKET_PROCESSING_TIME,
+                  [host = shared_from_this()]() { host->send_packet(); });
     }
 }
 

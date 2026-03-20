@@ -3,7 +3,6 @@
 #include <spdlog/fmt/fmt.h>
 
 #include "logger/logger.hpp"
-#include "scheduler/event/call_at_time.hpp"
 #include "scheduler/scheduler.hpp"
 #include "utils/str_expected.hpp"
 
@@ -138,7 +137,7 @@ void Link::transmit() {
     }
     TimeNs current_time = Scheduler::get_instance().get_current_time();
 
-    Scheduler::get_instance().add<CallAtTime>(
+    Scheduler::get_instance().add(
         current_time + m_propagation_delay,
         [link = shared_from_this(),
          packet = std::move(m_from_egress.front())]() {
@@ -166,7 +165,7 @@ void Link::arrive(const Packet& packet) {
 
 void Link::start_head_packet_sending() {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
-    Scheduler::get_instance().add<CallAtTime>(
+    Scheduler::get_instance().add(
         current_time + get_transmission_delay(m_from_egress.front()),
         [link = shared_from_this()]() { link->transmit(); });
 }

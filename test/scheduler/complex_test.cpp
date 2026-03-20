@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "scheduler/event/call_at_time.hpp"
 #include "scheduler/scheduler.hpp"
 #include "utils.hpp"
 
@@ -15,7 +14,7 @@ TEST_F(TestScheduler, BigExpectedProcessingOrder) {
     uint32_t max_time = 3000;
 
     for (std::size_t i = 0; i < number_of_events; i++) {
-        sim::Scheduler::get_instance().add<sim::CallAtTime>(
+        sim::Scheduler::get_instance().add(
             TimeNs(rand() % (max_time - min_time + 1)), [&]() {
                 TimeNs cur_time =
                     sim::Scheduler::get_instance().get_current_time();
@@ -23,14 +22,14 @@ TEST_F(TestScheduler, BigExpectedProcessingOrder) {
                 last_time = cur_time;
                 for (std::size_t i = 0; i < number_of_events; i++) {
                     TimeNs random_shift(rand() % max_time);
-                    sim::Scheduler::get_instance().add<sim::CallAtTime>(
+                    sim::Scheduler::get_instance().add(
                         cur_time + random_shift, [&]() {
                             TimeNs cur_time = sim::Scheduler::get_instance()
                                                   .get_current_time();
                             EXPECT_GE(cur_time, last_time);
                             last_time = cur_time;
                             TimeNs random_shift(rand() % max_time);
-                            sim::Scheduler::get_instance().add<sim::CallAtTime>(
+                            sim::Scheduler::get_instance().add(
                                 cur_time + random_shift, [&]() {});
                         });
                 }
