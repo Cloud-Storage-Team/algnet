@@ -1,5 +1,6 @@
 #include "scheduler/scheduler.hpp"
 
+#include <cassert>
 #include <queue>
 
 #include "event/event.hpp"
@@ -8,6 +9,7 @@ namespace sim {
 
 bool Scheduler::tick() {
     auto run_event = [this](NewEvent& event) {
+        assert(event.time >= m_current_event_local_time);
         m_current_event_local_time = event.time;
         std::invoke(event.call);
         correctify_state();
@@ -15,6 +17,9 @@ bool Scheduler::tick() {
 
     if (!m_near_events.empty()) {
         NewEvent event = std::move(m_near_events.top());
+        if (!m_far_events.empty()) {
+            assert(m_near_events.top().time < m_far_events.top().time);
+        }
         m_near_events.pop();
         run_event(event);
         return true;

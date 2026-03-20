@@ -1,6 +1,7 @@
 #pragma once
 
 #include <deque>
+#include <iostream>
 #include <memory>
 #include <queue>
 
@@ -23,13 +24,14 @@ public:
     template <typename TEvent, typename Func>
     requires std::constructible_from<NewEvent, TimeNs, Func&&>
     void add(TimeNs event_time, Func&& func) {
+        std::cout << "Add event for time " << event_time << " at moment "
+                  << m_current_event_local_time << std::endl;
         if (event_time < m_current_event_local_time) {
             throw std::runtime_error("Try to schedule event in the past!");
         }
 
         if (is_near_event(event_time)) {
-            m_near_events.add(NewEvent(event_time, std::forward<Func>(func)),
-                              m_current_event_local_time);
+            m_near_events.add(NewEvent(event_time, std::forward<Func>(func)));
         } else {
             m_far_events.emplace(event_time, std::forward<Func>(func));
         }
@@ -60,9 +62,10 @@ private:
     inline void correctify_state() {
         while (!m_far_events.empty()) {
             NewEvent& event = top_far_event();
+            assert(event.time >= m_current_event_local_time);
 
             if (is_near_event(event.time)) {
-                m_near_events.add(std::move(event), m_current_event_local_time);
+                m_near_events.add(std::move(event));
                 m_far_events.pop();
             } else {
                 break;
