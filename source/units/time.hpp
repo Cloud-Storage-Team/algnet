@@ -127,8 +127,16 @@ public:
         return m_value_ns < time.m_value_ns;
     }
 
+    bool constexpr operator<=(ThisTime time) const {
+        return m_value_ns <= time.m_value_ns;
+    }
+
     bool constexpr operator>(ThisTime time) const {
         return m_value_ns > time.m_value_ns;
+    }
+
+    bool constexpr operator>=(ThisTime time) const {
+        return m_value_ns >= time.m_value_ns;
     }
 
     bool constexpr operator==(ThisTime time) const {
