@@ -1,12 +1,11 @@
 #pragma once
 
 #include <deque>
-#include <iostream>
 #include <memory>
 #include <queue>
 
 #include "event/new_event.hpp"
-#include "near_events_storage.hpp"
+#include "near_events_scheduler.hpp"
 #include "types.hpp"
 
 namespace sim {
@@ -24,8 +23,6 @@ public:
     template <typename TEvent, typename Func>
     requires std::constructible_from<NewEvent, TimeNs, Func&&>
     void add(TimeNs event_time, Func&& func) {
-        std::cout << "Add event for time " << event_time << " at moment "
-                  << m_current_event_local_time << std::endl;
         if (event_time < m_current_event_local_time) {
             throw std::runtime_error("Try to schedule event in the past!");
         }
@@ -73,7 +70,7 @@ private:
         }
     }
 
-    NearEventsStorage<M_MAX_COUNTSORT_CAPACITY.value_nanoseconds()>
+    NearEventsScheduler<M_MAX_COUNTSORT_CAPACITY.value_nanoseconds()>
         m_near_events;
 
     std::priority_queue<NewEvent, std::vector<NewEvent>,

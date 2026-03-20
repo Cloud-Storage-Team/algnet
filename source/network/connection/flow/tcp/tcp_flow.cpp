@@ -222,7 +222,7 @@ void TcpFlow::update_rto_on_timeout() {
 
 void TcpFlow::retransmit_packet(const Packet& data) {
     m_context.retransmit_size += data.size;
-    send_data_packet(std::move(data));
+    send_data_packet(data);
 }
 
 }  // namespace sim
