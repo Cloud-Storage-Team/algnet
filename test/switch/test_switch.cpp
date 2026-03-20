@@ -136,7 +136,7 @@ TEST_F(TestSwitch, test_path_hash) {
     switch_2->notify_about_arrival();
     while (sim::Scheduler::get_instance().tick()) {
     }
-    
+
     auto arrived_packets_route_2 =
         link_switch_2_to_receiver->get_arrived_packets();
     ASSERT_EQ(arrived_packets_route_2.size(), 1);

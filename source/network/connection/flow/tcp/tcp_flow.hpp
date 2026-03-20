@@ -56,14 +56,11 @@ private:
 
     void update_rto_on_ack();
 
-    void on_timeout(Packet data);
+    void on_timeout(const Packet& data);
     void update_rto_on_timeout();
-    void retransmit_packet(Packet data);
+    void retransmit_packet(const Packet& data);
 
 private:
-    // timeout event
-    class Timeout;
-
     // flag labels
     enum PacketType { ACK, DATA, ENUM_SIZE };
     static std::string m_packet_type_label;
