@@ -8,12 +8,13 @@
 
 namespace sim {
 
-std::shared_ptr<IHost> parse_host(const ConfigNodeWithPreset& preset, const Id& id);   
+std::shared_ptr<IHost> parse_host(const ConfigNodeWithPreset& preset,
+                                  const Id& id);
 
 class HostParser {
 public:
     static std::shared_ptr<IHost> parse_i_host(
         const ConfigNodeWithPreset& host_node);
-}; 
+};
 
 }  // namespace sim
