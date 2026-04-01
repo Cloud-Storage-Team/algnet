@@ -9,8 +9,9 @@
 
 namespace sim {
 
-Switch::Switch(Id a_id, ECN&& a_ecn, std::unique_ptr<IPacketHasher> a_hasher)
-    : RoutingModule(a_id, std::move(a_hasher)), m_ecn(std::move(a_ecn)) {}
+Switch::Switch(Id a_id, const ECN& a_ecn,
+               std::unique_ptr<IPacketHasher> a_hasher)
+    : RoutingModule(a_id, std::move(a_hasher)), m_ecn(a_ecn) {}
 
 bool Switch::notify_about_arrival() {
     if (++m_packets_on_inlinks == 1) {

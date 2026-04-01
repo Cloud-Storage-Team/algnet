@@ -7,6 +7,14 @@
 
 namespace sim {
 
+std::shared_ptr<ILink> parse_i_link(std::shared_ptr<IDevice> from,
+                                    std::shared_ptr<IDevice> to, const Id& id,
+                                    const ConfigNodeWithPreset& link_preset);
+
+std::shared_ptr<ILink> parse_i_link(std::shared_ptr<IDevice> from,
+                                    std::shared_ptr<IDevice> to,
+                                    const ConfigNodeWithPreset& link_preset);
+
 std::shared_ptr<ILink> parse_i_link(
     const ConfigNodeWithPreset& link_node,
     const utils::IdTable<IDevice>& device_table);
