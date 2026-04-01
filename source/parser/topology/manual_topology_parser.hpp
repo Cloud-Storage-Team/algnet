@@ -4,7 +4,7 @@
 
 namespace sim {
 
-// Parses topology.
-Topology parse_topology(const ConfigNode& node);
+// Parses manual topology.
+Topology parse_manual_topology(const ConfigNode& node);
 
 }  // namespace sim
