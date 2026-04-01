@@ -4,7 +4,6 @@
 
 #include "metrics/metrics_table/i_metricable.hpp"
 #include "packet_queue/link_queue.hpp"
-#include "scheduler/event/event.hpp"
 #include "topology/link/i_link.hpp"
 #include "utils/str_expected.hpp"
 
@@ -18,27 +17,29 @@ class Link : public ILink, public std::enable_shared_from_this<Link> {
 public:
     static constexpr inline LinkMetricsFilters DEFAULT_METRICS_FILTERS = {};
 
-    Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
-         SpeedGbps a_speed = SpeedGbps(1), TimeNs a_delay = TimeNs(0),
-         SizeByte a_max_from_egress_buffer_size = SizeByte(4096),
-         SizeByte a_max_to_ingress_buffer_size = SizeByte(4096),
-         LinkMetricsFilters a_metrics_filters = DEFAULT_METRICS_FILTERS);
-    ~Link() = default;
+    static std::shared_ptr<Link> create_shared(
+        Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
+        SpeedGbps a_speed = SpeedGbps(1), TimeNs a_delay = TimeNs(0),
+        SizeByte a_max_from_egress_buffer_size = SizeByte(4096),
+        SizeByte a_max_to_ingress_buffer_size = SizeByte(4096),
+        LinkMetricsFilters a_metrics_filters = DEFAULT_METRICS_FILTERS);
 
-    void schedule_arrival(Packet packet) final;
+    virtual void schedule_arrival(const Packet& packet) final;
 
-    std::optional<Packet> get_packet() final;
+    virtual bool has_packet() const final;
+    virtual Packet& get_packet() final;
+    virtual void pop_packet() final;
 
-    std::shared_ptr<IDevice> get_from() const final;
-    std::shared_ptr<IDevice> get_to() const final;
+    virtual std::shared_ptr<IDevice> get_from() const final;
+    virtual std::shared_ptr<IDevice> get_to() const final;
 
-    SizeByte get_from_egress_queue_size() const final;
-    SizeByte get_max_from_egress_buffer_size() const final;
+    virtual SizeByte get_from_egress_queue_size() const final;
+    virtual SizeByte get_max_from_egress_buffer_size() const final;
 
-    SizeByte get_to_ingress_queue_size() const final;
-    SizeByte get_max_to_ingress_queue_size() const final;
+    virtual SizeByte get_to_ingress_queue_size() const final;
+    virtual SizeByte get_max_to_ingress_queue_size() const final;
 
-    Id get_id() const final;
+    virtual const Id& get_id() const final;
 
     virtual MetricsTable get_metrics_table() const final;
 
@@ -46,31 +47,18 @@ public:
         std::filesystem::path output_dir) const final;
 
 private:
-    class Transmit : public Event {
-    public:
-        Transmit(TimeNs a_time, std::weak_ptr<Link> a_link);
-        void operator()() final;
-
-    private:
-        std::weak_ptr<Link> m_link;
-    };
-
-    class Arrive : public Event {
-    public:
-        Arrive(TimeNs a_time, std::weak_ptr<Link> a_link, Packet a_packet);
-        void operator()() final;
-
-    private:
-        std::weak_ptr<Link> m_link;
-        Packet m_paket;
-    };
+    Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
+         SpeedGbps a_speed, TimeNs a_delay,
+         SizeByte a_max_from_egress_buffer_size,
+         SizeByte a_max_to_ingress_buffer_size,
+         LinkMetricsFilters a_metrics_filters);
 
 private:
     // Head packet leaves source egress queue
     void transmit();
 
     // Packet arrives to destination ingress queue
-    void arrive(Packet packet);
+    void arrive(const Packet& packet);
 
     TimeNs get_transmission_delay(const Packet& packet) const;
 

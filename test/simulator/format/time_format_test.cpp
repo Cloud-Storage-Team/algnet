@@ -6,19 +6,13 @@
 
 TEST(TimeFormatTest, DefaultPrecision) {
     // default precision
-    Time<Nanosecond> byte(1.23456);
-    EXPECT_EQ(fmt::format("{}", byte), "1.2ns");
-}
-
-TEST(TimeFormatTest, LargeValue) {
-    // use large value
-    Time<Millisecond> t(1e9);
-    EXPECT_EQ(fmt::format("{}", t), "1000000000.0ms");
+    Time<Nanosecond> ns(1);
+    EXPECT_EQ(fmt::format("{}", ns), "1.0ns");
 }
 
 TEST(TimeFormatTest, CustomPrecision) {
-    // specify precision
-    Time<Second> t(1.23456);
-    EXPECT_EQ(fmt::format("{:.1f}", t), "1.2s");
-    EXPECT_EQ(fmt::format("{:.4f}", t), "1.2346s");
+    // custom precision
+    Time<Microsecond> t(Time<Nanosecond>(230));
+    EXPECT_EQ(fmt::format("{}", t), "0.2us");
+    EXPECT_EQ(fmt::format("{:.2f}", t), "0.23us");
 }

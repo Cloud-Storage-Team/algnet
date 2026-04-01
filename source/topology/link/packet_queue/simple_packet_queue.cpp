@@ -4,16 +4,23 @@ namespace sim {
 SimplePacketQueue::SimplePacketQueue(SizeByte a_max_size)
     : m_queue(), m_size(0), m_max_size(a_max_size) {}
 
-bool SimplePacketQueue::push(Packet packet) {
+bool SimplePacketQueue::push(const Packet& packet) {
     if (m_size + packet.size > m_max_size) {
         return false;
     }
     m_size += packet.size;
-    m_queue.push(std::move(packet));
+    m_queue.push(packet);
     return true;
 }
 
-Packet SimplePacketQueue::front() const {
+const Packet& SimplePacketQueue::front() const {
+    if (m_queue.empty()) {
+        throw std::runtime_error("Can not get front packet from empty queue");
+    }
+    return m_queue.front();
+}
+
+Packet& SimplePacketQueue::front() {
     if (m_queue.empty()) {
         throw std::runtime_error("Can not get front packet from empty queue");
     }

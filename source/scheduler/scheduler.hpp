@@ -1,17 +1,14 @@
 #pragma once
 
+#include <deque>
 #include <memory>
 #include <queue>
 
-#include "event/event.hpp"
+#include "event.hpp"
+#include "near_events_scheduler.hpp"
 #include "types.hpp"
 
 namespace sim {
-
-struct EventComparator {
-    bool operator()(const std::unique_ptr<Event>& lhs,
-                    const std::unique_ptr<Event>& rhs) const;
-};
 
 // Scheduler is implemented as a Singleton class
 // which provides a global access to a single instance
@@ -23,14 +20,18 @@ public:
         return instance;
     }
 
-    template <typename TEvent, typename... Args>
-    void add(Args&&... args) {
-        static_assert(std::is_constructible_v<TEvent, Args&&...>,
-                      "Event must be constructible from given args");
-        static_assert(std::is_base_of_v<Event, TEvent>,
-                      "TEvent must inherit from Event");
+    template <typename Func>
+    requires std::constructible_from<NewEvent, TimeNs, Func&&>
+    void add(TimeNs event_time, Func&& func) {
+        if (event_time < m_current_event_local_time) {
+            throw std::runtime_error("Try to schedule event in the past!");
+        }
 
-        m_events.emplace(std::make_unique<TEvent>(args...));
+        if (is_near_event(event_time)) {
+            m_near_events.add(NewEvent(event_time, std::forward<Func>(func)));
+        } else {
+            m_far_events.emplace(event_time, std::forward<Func>(func));
+        }
     }
 
     void clear();  // Clear all events
@@ -38,15 +39,43 @@ public:
     TimeNs get_current_time();
 
 private:
-    // Private constructor to prevent instantiation
-    Scheduler() : m_current_event_local_time(TimeNs(0)) {}
-    // No copy constructor and assignment operators
-    Scheduler(const Scheduler&) = delete;
-    Scheduler& operator=(const Scheduler&) = delete;
+    static constexpr inline TimeNs M_MAX_COUNTSORT_CAPACITY = TimeNs(2'000);
 
-    std::priority_queue<std::unique_ptr<Event>,
-                        std::vector<std::unique_ptr<Event>>, EventComparator>
-        m_events;
+    // Private constructor, copy constructor & assignment to prevent
+    // instantiation
+    Scheduler() : m_current_event_local_time(TimeNs(0)) {}
+    Scheduler(const Scheduler&) = default;
+    Scheduler& operator=(const Scheduler&) = default;
+
+    [[nodiscard]] inline bool is_near_event(TimeNs event_time) {
+        return event_time <
+               m_current_event_local_time + M_MAX_COUNTSORT_CAPACITY;
+    }
+
+    inline NewEvent& top_far_event() {
+        return const_cast<NewEvent&>(m_far_events.top());
+    }
+
+    inline void correctify_state() {
+        while (!m_far_events.empty()) {
+            NewEvent& event = top_far_event();
+            assert(event.time >= m_current_event_local_time);
+
+            if (is_near_event(event.time)) {
+                m_near_events.add(std::move(event));
+                m_far_events.pop();
+            } else {
+                break;
+            }
+        }
+    }
+
+    NearEventsScheduler<M_MAX_COUNTSORT_CAPACITY.value_nanoseconds()>
+        m_near_events;
+
+    std::priority_queue<NewEvent, std::vector<NewEvent>,
+                        std::greater<NewEvent> >
+        m_far_events;
 
     TimeNs m_current_event_local_time;
 };

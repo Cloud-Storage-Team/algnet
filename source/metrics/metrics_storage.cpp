@@ -7,7 +7,7 @@
 namespace sim {
 
 void MetricsStorage::add_record(TimeNs time, double value) {
-    m_records.emplace_back(time, value);
+    m_records.push_back({time, value});
 }
 
 const std::vector<std::pair<TimeNs, double>>& MetricsStorage::get_records()

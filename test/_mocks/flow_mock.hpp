@@ -11,7 +11,7 @@ public:
               sim::Endpoints(std::shared_ptr<sim::IHost>(nullptr),
                              std::shared_ptr<sim::IHost>(nullptr)))} {}
 
-    Id get_id() const final { return ""; }
+    const Id& get_id() const final { return m_id; }
 
     void send(std::vector<sim::PacketInfo> packets_info) final {
         for (auto& info : packets_info) {
@@ -39,6 +39,7 @@ private:
     bool m_send_immediately;
     std::vector<sim::PacketInfo> m_sending_queue;
     sim::FlowContext m_context;
+    Id m_id = "";
 };
 
 }  // namespace test

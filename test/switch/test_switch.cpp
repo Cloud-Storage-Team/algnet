@@ -8,6 +8,7 @@
 #include "host_mock.hpp"
 #include "link_mock.hpp"
 #include "network/connection/flow/packet.hpp"
+#include "scheduler/scheduler.hpp"
 #include "topology/device/host.hpp"
 #include "topology/device/switch.hpp"
 
@@ -15,8 +16,8 @@ namespace test {
 
 class TestSwitch : public testing::Test {
 public:
-    void TearDown() override {};
-    void SetUp() override {};
+    void TearDown() override { sim::Scheduler::get_instance().clear(); };
+    void SetUp() override { sim::Scheduler::get_instance().clear(); };
 };
 
 TEST_F(TestSwitch, test_add_nullptr_link) {
@@ -55,27 +56,6 @@ TEST_F(TestSwitch, add_foreign_inlink) {
         switch_device->update_routing_table(temp_device->get_id(), link));
 }
 
-TEST_F(TestSwitch, test_no_senders) {
-    auto switch_device = std::make_shared<sim::Switch>("");
-    // TODO: replace with ASSERT_FALSE when process returns bool instead of
-    // void
-    switch_device->process();
-}
-
-TEST_F(TestSwitch, test_no_packets_on_inlinks) {
-    auto switch_device = std::make_shared<sim::Switch>("");
-
-    // create links
-    std::shared_ptr<sim::IDevice> null_device(nullptr);
-    std::shared_ptr<LinkMock> switch_inlink =
-        std::make_shared<LinkMock>(null_device, switch_device);
-
-    switch_device->add_inlink(switch_inlink);
-
-    switch_device->process();
-    // TODO: add ASSERT_FALSE when process returns bool instead of void
-}
-
 TEST_F(TestSwitch, test_no_destination_route) {
     auto switch_device = std::make_shared<sim::Switch>("");
     auto receiver = std::make_shared<HostMock>();
@@ -91,8 +71,10 @@ TEST_F(TestSwitch, test_no_destination_route) {
         std::make_shared<LinkMock>(switch_device, receiver);
     // no update of switch routing table
 
-    // TODO: add ASSERT_FALSE when process returns bool instead of void
-    switch_device->process();
+    switch_device->notify_about_arrival();
+
+    while (sim::Scheduler::get_instance().tick()) {
+    }
 
     ASSERT_EQ(switch_reciever_link->get_arrived_packets(),
               std::vector<sim::Packet>());
@@ -134,9 +116,15 @@ TEST_F(TestSwitch, test_path_hash) {
     sim::Packet packet_route_2(packet_template);
 
     link_sender_to_switch_1->set_ingress_packet(first_packet_route_1);
-    switch_1->process();
+    switch_1->notify_about_arrival();
+    while (sim::Scheduler::get_instance().tick()) {
+    }
+
     link_sender_to_switch_1->set_ingress_packet(second_packet_route_1);
-    switch_1->process();
+    switch_1->notify_about_arrival();
+    while (sim::Scheduler::get_instance().tick()) {
+    }
+
     auto arrived_packets_route_1 =
         link_switch_1_to_receiver->get_arrived_packets();
     ASSERT_EQ(arrived_packets_route_1.size(), 2);
@@ -145,7 +133,10 @@ TEST_F(TestSwitch, test_path_hash) {
               arrived_packets_route_1[1].path_hash);
 
     link_sender_to_switch_2->set_ingress_packet(packet_route_2);
-    switch_2->process();
+    switch_2->notify_about_arrival();
+    while (sim::Scheduler::get_instance().tick()) {
+    }
+
     auto arrived_packets_route_2 =
         link_switch_2_to_receiver->get_arrived_packets();
     ASSERT_EQ(arrived_packets_route_2.size(), 1);

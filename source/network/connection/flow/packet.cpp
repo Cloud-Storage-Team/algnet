@@ -27,8 +27,8 @@ bool Packet::operator==(const Packet& packet) const {
 // packets)
 std::string Packet::to_string() const {
     std::ostringstream oss;
-    oss << "Packet[sender_id: " << sender_id;
-    oss << ", receiver_id: " << receiver_id;
+    oss << "Packet[sender_id: " << sender_id.id;
+    oss << ", receiver_id: " << receiver_id.id;
     oss << ", packet_num: " << packet_num;
     oss << ", size(byte): " << size;
     oss << ", generated time: " << generated_time;

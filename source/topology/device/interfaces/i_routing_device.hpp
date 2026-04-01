@@ -2,7 +2,7 @@
 
 #include <set>
 
-#include "utils/identifier_factory.hpp"
+#include "utils/identifiable.hpp"
 
 namespace sim {
 
@@ -18,7 +18,7 @@ public:
     virtual bool update_routing_table(Id dest_id, std::shared_ptr<ILink> link,
                                       size_t paths_count = 1) = 0;
     virtual std::shared_ptr<ILink> get_link_to_destination(
-        Packet packet) const = 0;
+        const Packet& packet) const = 0;
     virtual std::shared_ptr<ILink> next_inlink() = 0;
     virtual std::set<std::shared_ptr<ILink>> get_outlinks() = 0;
 };

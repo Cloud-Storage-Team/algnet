@@ -10,9 +10,13 @@ public:
     LinkMock(std::weak_ptr<sim::IDevice> a_from,
              std::weak_ptr<sim::IDevice> a_to);
     ~LinkMock() = default;
-    virtual void schedule_arrival(sim::Packet a_packet) final;
+    virtual void schedule_arrival(const sim::Packet& a_packet) final;
     virtual void process_arrival(sim::Packet packet) final;
-    virtual std::optional<sim::Packet> get_packet() final;
+
+    virtual bool has_packet() const final;
+    virtual sim::Packet& get_packet() final;
+    virtual void pop_packet() final;
+
     virtual std::shared_ptr<sim::IDevice> get_from() const final;
     virtual std::shared_ptr<sim::IDevice> get_to() const final;
 
@@ -25,7 +29,7 @@ public:
     void set_ingress_packet(sim::Packet a_paket);
     std::vector<sim::Packet> get_arrived_packets() const;
 
-    Id get_id() const final;
+    const Id& get_id() const final;
 
     virtual sim::MetricsTable get_metrics_table() const final {
         return sim::MetricsTable{};

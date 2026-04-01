@@ -4,7 +4,7 @@
 #include <type_traits>
 
 #include "metrics_multi_id_table.hpp"
-#include "utils/identifier_factory.hpp"
+#include "utils/identifiable.hpp"
 
 namespace sim {
 

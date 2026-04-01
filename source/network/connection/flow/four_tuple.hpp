@@ -7,8 +7,8 @@
 namespace sim {
 
 struct FourTuple : EndpointPorts {
-    Id sender_id;
-    Id receiver_id;
+    IdWithHash sender_id;
+    IdWithHash receiver_id;
 
     FourTuple(Id a_source_id, Id a_dest_id, EndpointPorts ports = {})
         : EndpointPorts(ports),
@@ -24,7 +24,7 @@ template <>
 struct std::hash<sim::FourTuple> {
     std::size_t operator()(const sim::FourTuple& tuple) const noexcept {
         return std::hash<std::string>()(
-            fmt::format("{} {} {} {}", tuple.sender_id, tuple.sender_port,
-                        tuple.receiver_id, tuple.receiver_port));
+            fmt::format("{} {} {} {}", tuple.sender_id.id, tuple.sender_port,
+                        tuple.receiver_id.id, tuple.receiver_port));
     };
 };

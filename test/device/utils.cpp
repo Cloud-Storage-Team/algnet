@@ -2,11 +2,7 @@
 
 namespace test {
 
-bool TestDevice::notify_about_arrival([[maybe_unused]] TimeNs arrival_time) {
-    return false;
-};
-
-TimeNs TestDevice::process() { return TimeNs(0); };
+bool TestDevice::notify_about_arrival() { return false; };
 
 std::vector<std::shared_ptr<sim::IDevice>> createTestDevices(size_t count) {
     std::vector<std::shared_ptr<sim::IDevice>> devices;
@@ -21,9 +17,9 @@ TestLink::TestLink(std::shared_ptr<sim::IDevice> a_src,
                    sim::Packet packet_to_return)
     : src(a_src), dst(a_dest), packet(packet_to_return) {}
 
-void TestLink::schedule_arrival([[maybe_unused]] sim::Packet packet) {};
+void TestLink::schedule_arrival([[maybe_unused]] const sim::Packet& packet) {};
 
-std::optional<sim::Packet> TestLink::get_packet() { return {packet}; };
+sim::Packet& TestLink::get_packet() { return packet; };
 
 std::shared_ptr<sim::IDevice> TestLink::get_from() const { return src.lock(); };
 std::shared_ptr<sim::IDevice> TestLink::get_to() const { return dst.lock(); };
@@ -38,6 +34,6 @@ SizeByte TestLink::get_max_to_ingress_queue_size() const {
     return SizeByte(4096);
 }
 
-Id TestLink::get_id() const { return ""; }
+const Id& TestLink::get_id() const { return ""; }
 
 }  // namespace test

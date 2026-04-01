@@ -2,7 +2,8 @@
 
 #include <unordered_map>
 
-#include "hashers/i_hasher.hpp"
+#include "../hashers/i_hasher.hpp"
+#include "ecmp_next_hops.hpp"
 #include "topology/device/interfaces/i_routing_device.hpp"
 #include "utils/loop_iterator.hpp"
 
@@ -14,37 +15,33 @@ public:
                   std::unique_ptr<IPacketHasher> a_hasher = nullptr);
     virtual ~RoutingModule() = default;
 
-    Id get_id() const final;
+    const Id& get_id() const final;
     bool add_inlink(std::shared_ptr<ILink> link) final;
     bool add_outlink(std::shared_ptr<ILink> link) final;
     bool update_routing_table(Id dest_id, std::shared_ptr<ILink> link,
                               size_t paths_count = 1) final;
     // returns next inlink and moves inlinks set iterator forward
     std::shared_ptr<ILink> next_inlink() final;
-    std::shared_ptr<ILink> get_link_to_destination(Packet packet) const final;
+    std::shared_ptr<ILink> get_link_to_destination(
+        const Packet& packet) const final;
     std::set<std::shared_ptr<ILink>> get_outlinks() final;
-
-    void correctify_inlinks();
-    void correctify_outlinks();
 
 private:
     Id m_id;
     std::unique_ptr<IPacketHasher> m_hasher;
 
-    // Ordered set as we need to iterate over the ingress buffers
-    std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
-        m_inlinks;
+    using LinksStorage = std::set<std::shared_ptr<ILink>>;
 
-    std::set<std::weak_ptr<ILink>, std::owner_less<std::weak_ptr<ILink>>>
-        m_outlinks;
+    // Ordered set as we need to iterate over the ingress buffers
+    LinksStorage m_inlinks;
+
+    LinksStorage m_outlinks;
 
     // A routing table: maps the final destination to a specific link
-    std::unordered_map<Id, MapWeakPtr<ILink, int>> m_routing_table;
+    std::unordered_map<IdWithHash, EcmpNextHops> m_routing_table;
 
     // Iterator for the next ingress to process
-    LoopIterator<std::set<std::weak_ptr<ILink>,
-                          std::owner_less<std::weak_ptr<ILink>>>::iterator>
-        m_next_inlink;
+    LoopIterator<LinksStorage::iterator> m_next_inlink;
 };
 
 }  // namespace sim

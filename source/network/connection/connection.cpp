@@ -44,7 +44,7 @@ void Connection::write_inner_metrics(std::filesystem::path output_dir) const {
     m_mplb->write_all_metrics(output_dir / "mplb");
 }
 
-Id Connection::get_id() const { return m_id; }
+const Id& Connection::get_id() const { return m_id; }
 
 void Connection::send_new_portion() {
     while (!m_sending_queue.empty()) {

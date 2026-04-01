@@ -1,6 +1,5 @@
 #include "send_data_action.hpp"
 
-#include "scheduler/event/add_data_to_connection.hpp"
 #include "utils/callback_observer.hpp"
 
 namespace sim {
@@ -62,9 +61,15 @@ void SendDataAction::schedule() {
                 0, m_jitter.value_nanoseconds());
 
             TimeNs jitter_gap = use_jitter ? TimeNs(dist(rng)) : TimeNs(0);
-            Scheduler::get_instance().add<AddDataToConnection>(
-                start_time + jitter_gap, conn, data,
-                single_connection_callback);
+            Scheduler::get_instance().add(
+                start_time + jitter_gap,
+                [conn, data, single_connection_callback]() {
+                    auto res =
+                        conn->send_data(data, single_connection_callback);
+                    if (!res.has_value()) {
+                        LOG_ERROR(std::move(res.error()));
+                    }
+                });
         }
     }
 }

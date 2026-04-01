@@ -18,9 +18,19 @@ public:
      * Update the source egress delay and schedule the arrival event
      * based on the egress queueing and transmission delays.
      */
-    virtual void schedule_arrival(Packet packet) = 0;
+    virtual void schedule_arrival(const Packet& packet) = 0;
 
-    virtual std::optional<Packet> get_packet() = 0;
+    // Checks is there at least one packet on to ingress queue
+    virtual bool has_packet() const = 0;
+
+    // Returns first packet from queue on destination device.
+    // If queue is empty, throws error
+    virtual Packet& get_packet() = 0;
+
+    // Pops first packet from queue on destination device
+    // If queue is empty, throws std::runtime_error
+    virtual void pop_packet() = 0;
+
     virtual std::shared_ptr<IDevice> get_from() const = 0;
     virtual std::shared_ptr<IDevice> get_to() const = 0;
 

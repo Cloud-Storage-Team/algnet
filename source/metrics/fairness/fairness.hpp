@@ -3,7 +3,6 @@
 
 #include "utils/explicitly_convertable.hpp"
 #include "utils/id_table.hpp"
-#include "utils/identifier_factory.hpp"
 
 namespace sim {
 

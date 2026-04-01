@@ -54,9 +54,9 @@ static std::shared_ptr<Link> parse_link(
     LinkMetricsFilters metrics_filters =
         parse_metrics_filters(link_node["metrics_filters"]);
 
-    return std::make_shared<Link>(id, from_ptr, to_ptr, speed, delay,
-                                  egress_buffer_size, ingress_buffer_size,
-                                  metrics_filters);
+    return Link::create_shared(id, from_ptr, to_ptr, speed, delay,
+                               egress_buffer_size, ingress_buffer_size,
+                               metrics_filters);
 }
 
 }  // namespace sim

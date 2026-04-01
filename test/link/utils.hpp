@@ -20,18 +20,16 @@ class DeviceMock : public sim::IDevice {
 public:
     ~DeviceMock() = default;
 
-    Id get_id() const final;
+    const Id& get_id() const final;
     bool add_inlink(std::shared_ptr<sim::ILink> link) final;
     bool add_outlink(std::shared_ptr<sim::ILink> link) final;
     bool update_routing_table(Id dest_id, std::shared_ptr<sim::ILink> link,
                               size_t paths_count) final;
     std::shared_ptr<sim::ILink> next_inlink() final;
     std::shared_ptr<sim::ILink> get_link_to_destination(
-        sim::Packet packet) const final;
+        const sim::Packet& packet) const final;
     std::set<std::shared_ptr<sim::ILink>> get_outlinks() final;
-    bool notify_about_arrival(TimeNs arrival_time) final;
-
-    TimeNs process() final;
+    bool notify_about_arrival() final;
 };
 
 }  // namespace test

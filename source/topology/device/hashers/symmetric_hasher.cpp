@@ -3,9 +3,7 @@
 
 namespace sim {
 std::uint32_t SymmetricHasher::get_hash(const Packet& packet) {
-    std::hash<std::string> hasher;
-
-    return hasher(packet.sender_id) ^ hasher(packet.receiver_id) ^
+    return packet.sender_id.hash ^ packet.receiver_id.hash ^
            packet.sender_port ^ packet.receiver_port;
 }
 

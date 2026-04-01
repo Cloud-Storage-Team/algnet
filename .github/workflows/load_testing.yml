@@ -90,6 +90,9 @@ jobs:
     - name: Update PYTHONPATH
       run: echo "PYTHONPATH=${{ github.workspace }}/scripts" >> $GITHUB_ENV
 
+    - name: Build perf
+      run: sudo scripts/build-perf.sh
+
     - name: Run perf
       run: |
         sudo perf record -F 99 -g -- ./${{env.EXECUTABLE_PATH}} -c ${{env.SCENARIO_CONFIG_PATH}} --no-logs > perf.data

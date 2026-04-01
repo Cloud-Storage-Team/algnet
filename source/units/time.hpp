@@ -1,9 +1,11 @@
 #pragma once
 
+#include <cmath>
 #include <concepts>
 #include <cstdint>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <type_traits>
 
 #include "ld_comparation.hpp"
@@ -35,28 +37,32 @@ concept IsTimeBase = requires {
     { T::suffix } -> std::convertible_to<std::string_view>;
 };
 
+template <typename T>
+concept IsNumeric = std::is_integral_v<T> || std::is_floating_point_v<T>;
+
 template <IsTimeBase TTimeBase>
 class Time {
 public:
     using ThisTime = Time<TTimeBase>;
 
-    constexpr Time() : m_value_ns(0.0) {}
+    constexpr Time() : m_value_ns(0) {}
     template <IsTimeBase USizeBase>
     constexpr Time(Time<USizeBase> a_size)
         : m_value_ns(a_size.value_nanoseconds()) {}
 
     // Attention: a_value given in TTimeBase units!
-    explicit constexpr Time(double a_value)
+    explicit constexpr Time(std::uint64_t a_value)
         : m_value_ns(a_value * TTimeBase::to_nanoseconds_multiplier) {}
 
     constexpr double value() const {
         // Round up here to get maximal time
-        return m_value_ns / TTimeBase::to_nanoseconds_multiplier;
+        return static_cast<double>(m_value_ns) /
+               TTimeBase::to_nanoseconds_multiplier;
     }
 
     explicit constexpr operator double() const { return value(); }
 
-    constexpr double value_nanoseconds() const { return m_value_ns; }
+    constexpr std::uint64_t value_nanoseconds() const { return m_value_ns; }
 
     constexpr ThisTime operator+(ThisTime time) const {
         return Time<Nanosecond>(m_value_ns + time.m_value_ns);
@@ -66,8 +72,13 @@ public:
         return Time<Nanosecond>(m_value_ns - time.m_value_ns);
     }
 
-    constexpr ThisTime operator*(double mult) const {
-        return Time<Nanosecond>(m_value_ns * mult);
+    template <typename T>
+    constexpr inline ThisTime operator*(T mult) const {
+        if constexpr (std::is_integral_v<T>) {
+            return Time<Nanosecond>(m_value_ns * mult);
+        } else {
+            return Time<Nanosecond>(std::round(m_value_ns * mult));
+        }
     }
 
     constexpr ThisTime& operator++() {
@@ -76,30 +87,60 @@ public:
     }
 
     constexpr double operator/(ThisTime time) const {
-        return m_value_ns / time.value_nanoseconds();
+        return static_cast<double>(m_value_ns) / time.value_nanoseconds();
     }
 
-    constexpr ThisTime operator/(double value) const {
-        return Time<Nanosecond>(m_value_ns / value);
+    template <typename T>
+    requires IsNumeric<T>
+    ThisTime operator/(T value) const {
+        if constexpr (std::is_integral_v<T>) {
+            return Time<Nanosecond>(m_value_ns / value);
+        } else {
+            return Time<Nanosecond>(std::round(m_value_ns / value));
+        }
     }
 
     constexpr void operator+=(ThisTime time) { m_value_ns += time.m_value_ns; }
     constexpr void operator-=(ThisTime time) { m_value_ns -= time.m_value_ns; }
 
-    constexpr void operator*=(double mult) { m_value_ns *= mult; }
+    template <typename T>
+    requires IsNumeric<T>
+    constexpr void operator*=(T mult) {
+        if constexpr (std::is_integral_v<T>) {
+            m_value_ns *= mult;
+        } else {
+            m_value_ns = std::round(m_value_ns * mult);
+        }
+    }
 
-    constexpr void operator/=(double mult) { m_value_ns /= mult; }
+    template <typename T>
+    requires IsNumeric<T>
+    constexpr void operator/=(T mult) {
+        if constexpr (std::is_integral_v<T>) {
+            m_value_ns /= mult;
+        } else {
+            m_value_ns = std::round(m_value_ns / mult);
+        }
+    }
 
     bool constexpr operator<(ThisTime time) const {
         return m_value_ns < time.m_value_ns;
+    }
+
+    bool constexpr operator<=(ThisTime time) const {
+        return m_value_ns <= time.m_value_ns;
     }
 
     bool constexpr operator>(ThisTime time) const {
         return m_value_ns > time.m_value_ns;
     }
 
+    bool constexpr operator>=(ThisTime time) const {
+        return m_value_ns >= time.m_value_ns;
+    }
+
     bool constexpr operator==(ThisTime time) const {
-        return equal(m_value_ns, time.value_nanoseconds());
+        return m_value_ns == time.value_nanoseconds();
     }
 
     bool constexpr operator!=(ThisTime time) const { return !operator==(time); }
@@ -114,11 +155,11 @@ public:
     }
 
 private:
-    double m_value_ns;  // Time in nanoseconds
+    std::uint64_t m_value_ns;  // Time in nanoseconds
 };
 
 template <IsTimeBase TTimeBase>
-Time<TTimeBase> operator*(double mult, Time<TTimeBase> time) {
+Time<TTimeBase> operator*(std::uint64_t mult, Time<TTimeBase> time) {
     return time * mult;
 }
 

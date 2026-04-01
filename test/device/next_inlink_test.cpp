@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "topology/device/routing_module.hpp"
+#include "topology/device/routing_module/routing_module.hpp"
 #include "utils.hpp"
 
 namespace test {
