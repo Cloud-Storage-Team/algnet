@@ -90,8 +90,7 @@ def main(args):
             output_image_path
         ]
         result = run_subprocess(image_generator_args)
-        if result.returncode != 0:
-            sys.exit(1)
+        # ignore image generator fails 
 
         simulator_args = [
             simulator_path,
