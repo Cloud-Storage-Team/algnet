@@ -13,4 +13,4 @@ Topology parse_topology(const ConfigNode& node) {
         fmt::format("Unexpected topology type: {}", type));
 }
 
-}
+}  // namespace sim
