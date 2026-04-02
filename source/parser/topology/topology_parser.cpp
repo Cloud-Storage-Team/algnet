@@ -12,7 +12,7 @@ Topology parse_topology(const ConfigNodeWithPreset& node) {
     if (type == "custom") {
         return parse_manual_topology(node.get_node());
     } else if (type == "incast") {
-        return parse_incast_topology(node.get_node());
+        return parse_incast_topology(node);
     } else if (type == "leaf-spine") {
         return parse_leaf_spine_topology(node);
     }

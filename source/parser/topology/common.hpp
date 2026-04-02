@@ -5,6 +5,7 @@
 
 namespace sim {
 
+
 void add_directed_link(std::shared_ptr<IDevice> from,
                        std::shared_ptr<IDevice> to,
                        const ConfigNodeWithPreset& preset,
