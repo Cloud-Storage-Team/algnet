@@ -8,9 +8,9 @@
 
 namespace sim {
 
-std::shared_ptr<ISwitch> parse_switch(const ConfigNodeWithPreset& preset,
-                                      const ConfigNodeWithPreset& packet_spraying_node,
-                                      const Id& id);
+std::shared_ptr<ISwitch> parse_switch(
+    const ConfigNodeWithPreset& preset,
+    const ConfigNodeWithPreset& packet_spraying_node, const Id& id);
 
 class SwitchParser {
 public:

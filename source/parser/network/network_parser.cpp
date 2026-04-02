@@ -12,7 +12,8 @@ Network parse_network(const std::filesystem::path& path) {
     std::string topology_config_path =
         parse_relative_path(node, "topology_config_path", path.parent_path());
 
-    const ConfigNodeWithPreset topology_config = load_file_with_presets(topology_config_path);
+    const ConfigNodeWithPreset topology_config =
+        load_file_with_presets(topology_config_path);
 
     Topology topology = parse_topology(topology_config);
 

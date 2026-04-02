@@ -22,7 +22,7 @@ TEST(LeafSpineTopologyParsing, CheckTopology) {
     std::size_t expected_links_count =
         2 * (ctx.leaf_switches.size() * ctx.spine_switches.size() +
              ctx.hosts.size());
-             
+
     ASSERT_EQ(ctx.links.size(), expected_links_count);
 }
 
