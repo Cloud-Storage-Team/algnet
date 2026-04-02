@@ -1,6 +1,7 @@
-type: custom
+type: leaf-spine
+
 presets:
-  default-link:
+  link:
     latency: 0ns
     throughput: 100Gbps
     ingress_buffer_size: 64KB
@@ -11,121 +12,16 @@ presets:
 packet-spraying:
   type: random
 
-hosts:
-  host-1:
-  host-2:
-  host-3:
-  host-4:
-
 switches:
-  spine_1:
-  spine_2:
-  leaf_1:
-  leaf_2:
-  leaf_3:
-  leaf_4:
+  spine:
+    count: 2
+  leaf:
+    count: 4
+
+hosts:
 
 links:
-  # spine_1 links
-  spine_1--leaf_1:
-    from: spine_1
-    to: leaf_1
-    preset-name: default-link
-  leaf_1--spine_1:
-    from: leaf_1
-    to: spine_1
-    preset-name: default-link
-  spine_1--leaf_2:
-    from: spine_1
-    to: leaf_2
-    preset-name: default-link
-  leaf_2--spine_1:
-    from: leaf_2
-    to: spine_1
-    preset-name: default-link
-  spine_1--leaf_3:
-    from: spine_1
-    to: leaf_3
-    preset-name: default-link
-  leaf_3--spine_1:
-    from: leaf_3
-    to: spine_1
-    preset-name: default-link
-  spine_1--leaf_4:
-    from: spine_1
-    to: leaf_4
-    preset-name: default-link
-  leaf_4--spine_1:
-    from: leaf_4
-    to: spine_1
-    preset-name: default-link
-
-  # spine_2 links
-  spine_2--leaf_1:
-    from: spine_2
-    to: leaf_1
-    preset-name: default-link
-  leaf_1--spine_2:
-    from: leaf_1
-    to: spine_2
-    preset-name: default-link
-  spine_2--leaf_2:
-    from: spine_2
-    to: leaf_2
-    preset-name: default-link
-  leaf_2--spine_2:
-    from: leaf_2
-    to: spine_2
-    preset-name: default-link
-  spine_2--leaf_3:
-    from: spine_2
-    to: leaf_3
-    preset-name: default-link
-  leaf_3--spine_2:
-    from: leaf_3
-    to: spine_2
-    preset-name: default-link
-  spine_2--leaf_4:
-    from: spine_2
-    to: leaf_4
-    preset-name: default-link
-  leaf_4--spine_2:
-    from: leaf_4
-    to: spine_2
-    preset-name: default-link
-
-  leaf_1--host-1:
-    from: leaf_1
-    to: host-1
-    preset-name: default-link
-  host-1--leaf_1:
-    from: host-1
-    to: leaf_1
-    preset-name: default-link
-
-  leaf_2--host-2:
-    from: leaf_2
-    to: host-2
-    preset-name: default-link
-  host-2--leaf_2:
-    from: host-2
-    to: leaf_2
-    preset-name: default-link
-
-  leaf_3--host-3:
-    from: leaf_3
-    to: host-3
-    preset-name: default-link
-  host-3--leaf_3:
-    from: host-3
-    to: leaf_3
-    preset-name: default-link
-
-  leaf_4--host-4:
-    from: leaf_4
-    to: host-4
-    preset-name: default-link
-  host-4--leaf_4:
-    from: host-4
-    to: leaf_4
-    preset-name: default-link
+  leaf-spine:
+    preset-name: link
+  host-leaf:
+    preset-name: link

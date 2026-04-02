@@ -44,8 +44,8 @@ IncastTopologyContext parse_incast_topology_context(
 
     // create switch
     const ConfigNodeWithPreset& switch_node = node["switch"].value_or_throw();
-    const ConfigNode& packet_spraying_node =
-        node["packet-spraying"].value_or_throw().get_node();
+    const ConfigNodeWithPreset& packet_spraying_node =
+        node["packet-spraying"].value_or_throw();
 
     Id switch_id = "switch";
     ctx.swtch = parse_switch(switch_node, packet_spraying_node, switch_id);

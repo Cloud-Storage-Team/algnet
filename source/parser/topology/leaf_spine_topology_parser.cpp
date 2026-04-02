@@ -70,7 +70,7 @@ static std::vector<std::shared_ptr<ISwitch>> create_spine_switches(
 
     for (std::size_t i = 1; i <= count; i++) {
         std::shared_ptr<ISwitch> swtch = parse_switch(
-            switches_params, packet_spraying.get_node(),
+            switches_params, packet_spraying,
             create_name(name_prefix, fmt::format("spine-switch-{}", i)));
         switches.emplace_back(swtch);
     }
@@ -88,7 +88,7 @@ static std::vector<std::shared_ptr<ISwitch>> create_leaf_switches(
 
     for (std::size_t i = 1; i <= count; i++) {
         std::shared_ptr<ISwitch> swtch = parse_switch(
-            switches_params, packet_spraying.get_node(),
+            switches_params, packet_spraying,
             create_name(name_prefix, fmt::format("leaf-switch-{}", i)));
         switches.emplace_back(swtch);
     }

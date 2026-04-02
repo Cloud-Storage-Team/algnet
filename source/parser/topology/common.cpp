@@ -23,4 +23,19 @@ void add_links_between(std::shared_ptr<IDevice> from,
     add_directed_link(to, from, preset, links_table);
 };
 
+void add_directed_link(std::shared_ptr<IDevice> from,
+                       std::shared_ptr<IDevice> to,
+                       const ConfigNodeWithPreset& preset,
+                       Storage<ILink>& links) {
+    links.emplace_back(parse_i_link(from, to, preset));
+}
+
+void add_links_between(std::shared_ptr<IDevice> device_1,
+                       std::shared_ptr<IDevice> device_2,
+                       const ConfigNodeWithPreset& preset,
+                       Storage<ILink>& links) {
+    add_directed_link(device_1, device_2, preset, links);
+    add_directed_link(device_2, device_1, preset, links);
+}
+
 }  // namespace sim

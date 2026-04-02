@@ -39,7 +39,7 @@ presets:
 packet-spraying:
   type: ecmp
 hosts:
-  pod1_host1:
+  pod-1_edge-1_host-1:
     layer: 3
   pod1_host2:
     layer: 3
@@ -47,13 +47,13 @@ hosts:
     layer: 3
   pod1_host4:
     layer: 3
-  pod2_host1:
+  pod-2_edge-1_host-1:
     layer: 3
-  pod2_host2:
+  pod-2_edge-1_host-2:
     layer: 3
-  pod2_host3:
+  pod-2_edge-2_host-1:
     layer: 3
-  pod2_host4:
+  pod-2_edge-2_host-2:
     layer: 3
   pod3_host1:
     layer: 3
@@ -134,12 +134,12 @@ switches:
     layer: 2
 links:
   link_0:
-    from: pod1_host1
+    from: pod-1_edge-1_host-1
     to: pod1_edge1
     preset-name: edge-host-link
   link_1:
     from: pod1_edge1
-    to: pod1_host1
+    to: pod-1_edge-1_host-1
     preset-name: edge-host-link
   link_2:
     from: pod1_host2
@@ -166,36 +166,36 @@ links:
     to: pod1_host4
     preset-name: edge-host-link
   link_8:
-    from: pod2_host1
+    from: pod-2_edge-1_host-1
     to: pod2_edge1
     preset-name: edge-host-link
   link_9:
     from: pod2_edge1
-    to: pod2_host1
+    to: pod-2_edge-1_host-1
     preset-name: edge-host-link
   link_10:
-    from: pod2_host2
+    from: pod-2_edge-1_host-2
     to: pod2_edge1
     preset-name: edge-host-link
   link_11:
     from: pod2_edge1
-    to: pod2_host2
+    to: pod-2_edge-1_host-2
     preset-name: edge-host-link
   link_12:
-    from: pod2_host3
+    from: pod-2_edge-2_host-1
     to: pod2_edge2
     preset-name: edge-host-link
   link_13:
     from: pod2_edge2
-    to: pod2_host3
+    to: pod-2_edge-2_host-1
     preset-name: edge-host-link
   link_14:
-    from: pod2_host4
+    from: pod-2_edge-2_host-2
     to: pod2_edge2
     preset-name: edge-host-link
   link_15:
     from: pod2_edge2
-    to: pod2_host4
+    to: pod-2_edge-2_host-2
     preset-name: edge-host-link
   link_16:
     from: pod3_host1

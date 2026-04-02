@@ -1,4 +1,5 @@
 #pragma once
+#include "common.hpp"
 #include "parser/config_reader/config_node_with_preset.hpp"
 #include "topology/topology.hpp"
 
@@ -9,9 +10,6 @@ Topology parse_leaf_spine_topology(const ConfigNodeWithPreset& node);
 
 // More detailed parsers
 struct LeafSpineTopologyContext {
-    template <typename T>
-    using Storage = std::vector<std::shared_ptr<T> >;
-
     Storage<ISwitch> spine_switches;
     Storage<ISwitch> leaf_switches;
     Storage<IHost> hosts;

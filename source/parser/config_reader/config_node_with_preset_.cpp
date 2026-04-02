@@ -29,7 +29,9 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](
                 // config hasn't field 'preset-name'. Returns message about it
                 std::stringstream ss;
                 ss << "Key error: node " << m_node << ":\n";
-                ss << "does not have key `preset-name`";
+                ss << "does not have key '" << key << "';\n";
+                ss << "Could not fild preset for it because `preset-name` does "
+                      "not set";
                 return std::unexpected(ss.str());
             }
             // field 'preset-name' was found. Tries to convert it to string

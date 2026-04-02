@@ -12,7 +12,8 @@ static utils::IdTable<IHost> parse_hosts(
 
 static utils::IdTable<ISwitch> parse_switches(
     const std::optional<ConfigNode>& switches_presets_node,
-    const ConfigNode& packet_spraying_node, const ConfigNode& switches_node);
+    const ConfigNodeWithPreset& packet_spraying_node,
+    const ConfigNode& switches_node);
 
 static utils::IdTable<ILink> parse_links(
     const std::optional<ConfigNode>& link_presets_node,
@@ -24,6 +25,7 @@ static utils::StrExpected<utils::IdTable<IDevice> > build_device_table(
 
 Topology parse_manual_topology(const ConfigNode& node) {
     std::optional<ConfigNode> presets_node = node["presets"].to_optional();
+    ConfigNodeWithPreset node_with_preset(node, presets_node);
 
     TopologyContext ctx;
     {
@@ -36,8 +38,8 @@ Topology parse_manual_topology(const ConfigNode& node) {
     {
         // switches parsing
 
-        ConfigNode packet_spraying_node =
-            node["packet-spraying"].value_or_throw();
+        const ConfigNodeWithPreset& packet_spraying_node =
+            node_with_preset["packet-spraying"].value_or_throw();
 
         ConfigNode switches_node = node["switches"].value_or_throw();
         ctx.switches_table =
@@ -78,7 +80,8 @@ static utils::IdTable<IHost> parse_hosts(
 
 static utils::IdTable<ISwitch> parse_switches(
     const std::optional<ConfigNode>& switches_presets_node,
-    const ConfigNode& packet_spraying_node, const ConfigNode& switches_node) {
+    const ConfigNodeWithPreset& packet_spraying_node,
+    const ConfigNode& switches_node) {
     utils::IdTable<ISwitch> switches_table;
     for (const auto& switch_node : switches_node) {
         ConfigNodeWithPreset switch_node_with_preset(switch_node,
