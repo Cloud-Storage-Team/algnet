@@ -17,6 +17,14 @@ private:
 public:
     using std::unordered_map<Id, std::shared_ptr<T> >::unordered_map;
 
+    void add(TPtr ptr) {
+        const Id& id = ptr->get_id();
+        if (!this->emplace(id, ptr).second) {
+            throw std::runtime_error(
+                fmt::format("Duplicate of object with id {}", id));
+        }
+    }
+
     std::optional<TPtr> get(const Id& id) const noexcept {
         auto it = this->find(id);
         if (it == this->end()) {

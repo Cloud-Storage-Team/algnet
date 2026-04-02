@@ -12,7 +12,8 @@ TEST(IncastTopologyParsing, CustomBottleneck) {
         std::filesystem::path(__FILE__).parent_path() /
         "incast_custom_bottleneck.yml";
 
-    const ConfigNode config = load_file(bus_topology_path);
+    const ConfigNodeWithPreset config =
+        load_file_with_presets(bus_topology_path);
 
     Topology top = parse_topology(config);
 
@@ -50,7 +51,8 @@ TEST(IncastTopologyParsing, CommonBottleneck) {
         std::filesystem::path(__FILE__).parent_path() /
         "incast_common_bottleneck.yml";
 
-    const ConfigNode config = load_file(bus_topology_path);
+    const ConfigNodeWithPreset config =
+        load_file_with_presets(bus_topology_path);
 
     Topology top = parse_topology(config);
 

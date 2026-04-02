@@ -12,10 +12,10 @@ packet-spraying:
   type: random
 
 hosts:
-  host_1:
-  host_2:
-  host_3:
-  host_4:
+  host-1:
+  host-2:
+  host-3:
+  host-4:
 
 switches:
   spine_1:
@@ -94,38 +94,38 @@ links:
     to: spine_2
     preset-name: default-link
 
-  leaf_1--host_1:
+  leaf_1--host-1:
     from: leaf_1
-    to: host_1
+    to: host-1
     preset-name: default-link
-  host_1--leaf_1:
-    from: host_1
+  host-1--leaf_1:
+    from: host-1
     to: leaf_1
     preset-name: default-link
 
-  leaf_2--host_2:
+  leaf_2--host-2:
     from: leaf_2
-    to: host_2
+    to: host-2
     preset-name: default-link
-  host_2--leaf_2:
-    from: host_2
+  host-2--leaf_2:
+    from: host-2
     to: leaf_2
     preset-name: default-link
 
-  leaf_3--host_3:
+  leaf_3--host-3:
     from: leaf_3
-    to: host_3
+    to: host-3
     preset-name: default-link
-  host_3--leaf_3:
-    from: host_3
+  host-3--leaf_3:
+    from: host-3
     to: leaf_3
     preset-name: default-link
 
-  leaf_4--host_4:
+  leaf_4--host-4:
     from: leaf_4
-    to: host_4
+    to: host-4
     preset-name: default-link
-  host_4--leaf_4:
-    from: host_4
+  host-4--leaf_4:
+    from: host-4
     to: leaf_4
     preset-name: default-link

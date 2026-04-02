@@ -52,4 +52,6 @@ private:
     mutable std::optional<ConfigNode> m_preset;
 };
 
+ConfigNodeWithPreset load_file_with_presets(std::filesystem::path path);
+
 }  // namespace sim

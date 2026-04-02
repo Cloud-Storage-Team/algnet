@@ -105,4 +105,9 @@ const std::optional<ConfigNode> ConfigNodeWithPreset::get_presets_node()
     return m_presets_node;
 }
 
+ConfigNodeWithPreset load_file_with_presets(std::filesystem::path path) {
+    ConfigNode node = load_file(path);
+    return ConfigNodeWithPreset(node, node["presets"].to_optional());
+}
+
 }  // namespace sim

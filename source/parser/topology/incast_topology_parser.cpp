@@ -1,7 +1,7 @@
 #include "incast_topology_parser.hpp"
 
+#include "common.hpp"
 #include "host/host_parser.hpp"
-#include "link/link_parser.hpp"
 #include "switch/switch_parser.hpp"
 
 namespace sim {
@@ -43,32 +43,16 @@ Topology parse_incast_topology(const ConfigNode& node) {
         node_with_preset["links"].value_or_throw();
 
     utils::IdTable<ILink> links;
-    auto add_two_way_link = [&links](const ConfigNodeWithPreset& preset,
-                                     std::shared_ptr<IDevice> from,
-                                     std::shared_ptr<IDevice> to) {
-        auto add_directed_link = [&preset, &links](
-                                     std::shared_ptr<IDevice> from,
-                                     std::shared_ptr<IDevice> to) {
-            std::shared_ptr<ILink> link = parse_i_link(from, to, preset);
-            if (!links.emplace(link->get_id(), link).second) {
-                throw std::runtime_error(fmt::format(
-                    "Duplicate of link with name {} ", link->get_id()));
-            }
-        };
-
-        add_directed_link(from, to);
-        add_directed_link(to, from);
-    };
 
     // create links from between senders and switch
     for (const auto& [_, sender] : senders) {
-        add_two_way_link(links_preset, sender, swtch);
+        add_links_between(sender, swtch, links_preset, links);
     }
 
     const ConfigNodeWithPreset& bottleneck_link_preset =
         ConfigNodeWithPreset(node)["bottleneck-link"].value_or(links_preset);
 
-    add_two_way_link(bottleneck_link_preset, swtch, receiver);
+    add_links_between(swtch, receiver, bottleneck_link_preset, links);
 
     TopologyContext ctx;
 

@@ -1,0 +1,29 @@
+type: leaf-spine
+
+presets:
+  link:
+    latency: 0ns
+    throughput: 100Gbps
+    ingress_buffer_size: 64KB
+    egress_buffer_size: 64KB
+    metrics_filters:
+      queue_sizes: false
+
+packet-spraying:
+  type: random
+
+switches:
+  spine:
+    count: 2
+  
+  leaf:
+    count: 4
+
+hosts:
+
+links:
+  leaf-spine:
+    preset-name: link
+  
+  host-leaf:
+    preset-name: link
