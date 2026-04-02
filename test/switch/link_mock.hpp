@@ -26,6 +26,8 @@ public:
     virtual SizeByte get_to_ingress_queue_size() const final;
     virtual SizeByte get_max_to_ingress_queue_size() const final;
 
+    virtual const sim::LinkContext& get_ctx() const final { return m_ctx; }
+
     void set_ingress_packet(sim::Packet a_paket);
     std::vector<sim::Packet> get_arrived_packets() const;
 
@@ -43,4 +45,5 @@ private:
     std::weak_ptr<sim::IDevice> m_to;
     std::vector<sim::Packet> m_arrived_packets;
     std::optional<sim::Packet> m_ingress_packet;
+    sim::LinkContext m_ctx;
 };

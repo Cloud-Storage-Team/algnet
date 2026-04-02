@@ -83,6 +83,8 @@ SizeByte Link::get_max_to_ingress_queue_size() const {
     return m_to_ingress.get_max_size();
 }
 
+const LinkContext& Link::get_ctx() const { return m_ctx; }
+
 const Id& Link::get_id() const { return m_id; }
 
 MetricsTable Link::get_metrics_table() const {
@@ -107,8 +109,7 @@ Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
     : m_id(a_id),
       m_from(a_from),
       m_to(a_to),
-      m_speed(a_speed),
-      m_propagation_delay(a_propagation_delay),
+      m_ctx{a_speed, a_propagation_delay},
       m_from_egress(a_max_from_egress_buffer_size, a_id,
                     LinkQueueType::FromEgress),
       m_to_ingress(a_max_to_ingress_buffer_size, a_id,
@@ -122,11 +123,11 @@ Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
 }
 
 TimeNs Link::get_transmission_delay(const Packet& packet) const {
-    if (m_speed == SpeedGbps(0)) {
+    if (m_ctx.speed == SpeedGbps(0)) {
         LOG_WARN("Passed zero link speed");
         return TimeNs(0);
     }
-    return packet.size / m_speed;
+    return packet.size / m_ctx.speed;
 };
 
 void Link::transmit() {
@@ -138,7 +139,7 @@ void Link::transmit() {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
 
     Scheduler::get_instance().add(
-        current_time + m_propagation_delay,
+        current_time + m_ctx.latency,
         [link = shared_from_this(),
          packet = std::move(m_from_egress.front())]() {
             link->arrive(packet);

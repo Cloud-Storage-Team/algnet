@@ -46,10 +46,13 @@ public:
     virtual void write_inner_metrics(
         [[maybe_unused]] std::filesystem::path output_dir) const final {};
 
+    virtual const sim::LinkContext& get_ctx() const final { return m_ctx; }
+
 private:
     std::weak_ptr<sim::IDevice> src;
     std::weak_ptr<sim::IDevice> dst;
     sim::Packet packet;
+    sim::LinkContext m_ctx;
 };
 
 }  // namespace test

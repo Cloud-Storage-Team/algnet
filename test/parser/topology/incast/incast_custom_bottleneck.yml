@@ -1,16 +1,16 @@
 type: incast
 
 links:
-  latency: 0ns
-  throughput: 100Gbps
-  ingress_buffer_size: 1024000B
-  egress_buffer_size: 1024000B
+  latency: 1000ns
+  throughput: 10Gbps
+  ingress_buffer_size: 64KB
+  egress_buffer_size: 64KB
 
 bottleneck-link:
-  latency: 0ns
+  latency: 500ns
   throughput: 100Gbps
-  ingress_buffer_size: 1024000B
-  egress_buffer_size: 1024000B
+  ingress_buffer_size: 128KB
+  egress_buffer_size: 128KB 
 
 packet-spraying:
   type: ecmp
