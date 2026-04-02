@@ -4,6 +4,23 @@
 
 namespace sim {
 
+// Parses incast topology.
+Topology parse_leaf_spine_topology(const ConfigNodeWithPreset& node);
+
+// More detailed parsers
+struct LeafSpineTopologyContext {
+    template <typename T>
+    using Storage = std::vector<std::shared_ptr<T> >;
+
+    Storage<ISwitch> spine_switches;
+    Storage<ISwitch> leaf_switches;
+    Storage<IHost> hosts;
+
+    utils::IdTable<ILink> links;
+
+    TopologyContext to_topology_context() const;
+};
+
 struct LeafSpineParams {
     using NodeRef = const ConfigNodeWithPreset&;
 
@@ -18,10 +35,10 @@ struct LeafSpineParams {
     NodeRef host_leaf_links;
 };
 
-// Parses incast topology.
-Topology parse_leaf_spine_topology(const ConfigNodeWithPreset& node);
+LeafSpineTopologyContext parse_leaf_spine_topology_context(
+    const ConfigNodeWithPreset& node);
 
-TopologyContext create_leaf_spine_topology_context(
+LeafSpineTopologyContext create_leaf_spine_topology_context(
     LeafSpineParams params, const std::string& names_prefix = "");
 
 }  // namespace sim
