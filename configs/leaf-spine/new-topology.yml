@@ -15,7 +15,6 @@ packet-spraying:
 switches:
   spine:
     count: 2
-  
   leaf:
     count: 4
 
@@ -24,6 +23,5 @@ hosts:
 links:
   leaf-spine:
     preset-name: link
-  
   host-leaf:
     preset-name: link

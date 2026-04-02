@@ -11,7 +11,8 @@ TEST(TopologyParsing, BusTopology) {
     std::filesystem::path bus_topology_path =
         std::filesystem::path(__FILE__).parent_path() / "bus_topology.yml";
 
-    const ConfigNodeWithPreset config = load_file_with_presets(bus_topology_path);
+    const ConfigNodeWithPreset config =
+        load_file_with_presets(bus_topology_path);
 
     Topology top = parse_topology(config);
 
