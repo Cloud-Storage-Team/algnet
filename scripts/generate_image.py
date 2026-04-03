@@ -14,6 +14,11 @@ def generate_topology(config_file, output_file, picture_label="Network Topology"
     # Load the YAML configuration
     with open(config_file) as f:
         config = yaml.safe_load(f)
+    
+    topology_type = config["type"]
+    if topology_type != "custom":
+        print(f"Could not generate image for topology type that differs from \"custom\" (\"{topology_type}\" found)", file=sys.stderr)
+        sys.exit(-1)
 
     # Create a directed graph with top-to-bottom layout
     graph = Digraph(engine="dot")

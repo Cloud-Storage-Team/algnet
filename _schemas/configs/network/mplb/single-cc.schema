@@ -1,0 +1,14 @@
+packet-size:
+  _type: units/Size
+  _doc: Size of packets that will be used
+
+cc:
+  _type: cc/metricable_cc
+  _doc: Congestion control
+
+path-chooser:
+  _type: one-of
+  _variants:
+    - path-chooser/round-robin
+
+  _doc: Path chooser that should be used

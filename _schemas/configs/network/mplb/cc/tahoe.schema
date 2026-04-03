@@ -1,0 +1,12 @@
+start_cwnd:
+  _type: double
+  
+  _default: 1.0
+  _doc: Initial congestion window
+
+sstresh:
+  _type: double
+  
+  _default: 8.0
+  _doc: Slow start threshold
+

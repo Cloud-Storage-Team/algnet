@@ -4,6 +4,8 @@
 
 #include <filesystem>
 
+#include "check_connectivity.hpp"
+
 namespace sim {
 namespace test2 {
 
@@ -11,7 +13,8 @@ TEST(TopologyParsing, BusTopology) {
     std::filesystem::path bus_topology_path =
         std::filesystem::path(__FILE__).parent_path() / "bus_topology.yml";
 
-    const ConfigNode config = load_file(bus_topology_path);
+    const ConfigNodeWithPreset config =
+        load_file_with_presets(bus_topology_path);
 
     Topology top = parse_topology(config);
 
@@ -20,6 +23,7 @@ TEST(TopologyParsing, BusTopology) {
     ASSERT_EQ(ctx.hosts_table.size(), 4);
     ASSERT_EQ(ctx.switches_table.size(), 1);
     ASSERT_EQ(ctx.links_table.size(), 8);
+    check_connectivity(top);
 }
 
 }  // namespace test2

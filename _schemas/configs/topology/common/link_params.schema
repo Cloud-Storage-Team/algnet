@@ -1,0 +1,21 @@
+latency:
+  _type: units/Time
+  _doc: Speed of light latency of packet transmission  
+
+throughput: 
+  _type: units/Speed  
+  _doc: Throughput of link
+
+ingress_buffer_size:
+  type: units/Size  
+  _doc: Ingress device buffer size
+
+egress_buffer_size:
+  type: units/Size
+  _doc: Eggress device buffer size
+
+metrics_filters:
+  queue_sizes:
+    _type: bool
+    _default: true
+    _doc: Is it need to collect queue size metrics  

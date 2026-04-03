@@ -1,0 +1,7 @@
+network_config_path:
+  _type: string
+  _doc: path (absolute or relative) to network config.
+
+scenario:
+  _type: actions/action[]
+  _doc: List of actions

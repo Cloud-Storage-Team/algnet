@@ -16,50 +16,50 @@ presets:
 
 connections:
   conn_1--2:
-    sender_id: host_1
-    receiver_id: host_2
+    sender_id: host-1
+    receiver_id: host-2
     preset-name: default-connection
   conn_1--3:
-    sender_id: host_1
-    receiver_id: host_3
+    sender_id: host-1
+    receiver_id: host-3
     preset-name: default-connection
   conn_1--4:
-    sender_id: host_1
-    receiver_id: host_4
+    sender_id: host-1
+    receiver_id: host-4
     preset-name: default-connection
   conn_2--1:
-    sender_id: host_2
-    receiver_id: host_1
+    sender_id: host-2
+    receiver_id: host-1
     preset-name: default-connection
   conn_2--3:
-    sender_id: host_2
-    receiver_id: host_3
+    sender_id: host-2
+    receiver_id: host-3
     preset-name: default-connection
   conn_2--4:
-    sender_id: host_2
-    receiver_id: host_4
+    sender_id: host-2
+    receiver_id: host-4
     preset-name: default-connection
   conn_3--1:
-    sender_id: host_3
-    receiver_id: host_1
+    sender_id: host-3
+    receiver_id: host-1
     preset-name: default-connection
   conn_3--2:
-    sender_id: host_3
-    receiver_id: host_2
+    sender_id: host-3
+    receiver_id: host-2
     preset-name: default-connection
   conn_3--4:
-    sender_id: host_3
-    receiver_id: host_4
+    sender_id: host-3
+    receiver_id: host-4
     preset-name: default-connection
   conn_4--1:
-    sender_id: host_4
-    receiver_id: host_1
+    sender_id: host-4
+    receiver_id: host-1
     preset-name: default-connection
   conn_4--2:
-    sender_id: host_4
-    receiver_id: host_2
+    sender_id: host-4
+    receiver_id: host-2
     preset-name: default-connection
   conn_4--3:
-    sender_id: host_4
-    receiver_id: host_3
+    sender_id: host-4
+    receiver_id: host-3
     preset-name: default-connection

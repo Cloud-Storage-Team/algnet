@@ -29,7 +29,9 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](
                 // config hasn't field 'preset-name'. Returns message about it
                 std::stringstream ss;
                 ss << "Key error: node " << m_node << ":\n";
-                ss << "does not have key `preset-name`";
+                ss << "does not have key '" << key << "';\n";
+                ss << "Could not fild preset for it because `preset-name` does "
+                      "not set";
                 return std::unexpected(ss.str());
             }
             // field 'preset-name' was found. Tries to convert it to string
@@ -103,6 +105,11 @@ const ConfigNode& ConfigNodeWithPreset::get_node() const noexcept {
 const std::optional<ConfigNode> ConfigNodeWithPreset::get_presets_node()
     const noexcept {
     return m_presets_node;
+}
+
+ConfigNodeWithPreset load_file_with_presets(std::filesystem::path path) {
+    ConfigNode node = load_file(path);
+    return ConfigNodeWithPreset(node, node["presets"].to_optional());
 }
 
 }  // namespace sim

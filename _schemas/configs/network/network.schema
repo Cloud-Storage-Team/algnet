@@ -1,0 +1,7 @@
+topology_config_path:
+  _type: string
+  _doc: Path ro topology config. Might be absolute or relative  
+
+connections:
+  _type: connection{}
+  _doc: List of abailable connections - user interfaces of data transreffing  

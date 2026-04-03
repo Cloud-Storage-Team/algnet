@@ -41,20 +41,20 @@ presets:
 connections:
   connection-pod1_host1--pod2_host1:
     preset-name: default-connection
-    sender_id: pod1_host1
-    receiver_id: pod2_host1
+    sender_id: pod-1_edge-1_host-1
+    receiver_id: pod-2_edge-1_host-1
 
   connection-pod1_host1--pod2_host2:
     preset-name: default-connection
-    sender_id: pod1_host1
-    receiver_id: pod2_host2
+    sender_id: pod-1_edge-1_host-1
+    receiver_id: pod-2_edge-1_host-2
 
   connection-pod1_host1--pod2_host3:
     preset-name: default-connection
-    sender_id: pod1_host1
-    receiver_id: pod2_host3
+    sender_id: pod-1_edge-1_host-1
+    receiver_id: pod-2_edge-2_host-1
 
   connection-pod1_host1--pod2_host4:
     preset-name: default-connection
-    sender_id: pod1_host1
-    receiver_id: pod2_host4
+    sender_id: pod-1_edge-1_host-1
+    receiver_id: pod-2_edge-2_host-2

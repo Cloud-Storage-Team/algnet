@@ -1,0 +1,29 @@
+rto:
+  start:
+    _type: units/Time
+    _default: 2000ns
+    _doc: Initial retransmit timout
+  max:
+    _type: units/Time
+    _default: 1s
+    _doc: Maximal retransmit timeout
+
+ecn_capable:
+  _type: bool
+  _default: false
+  _doc: Does flow supports explicit congestion notification  
+
+metrics_filters:
+  rtt:
+    _type: bool
+    _default: true
+    _doc: Is it need to collect round trip time statistice
+  delivery_rate:
+    _type: bool
+    _default: true
+    _doc: Is it need to collect delivery rate statistice
+  reordering:
+    _type: bool
+    _default: true
+    _doc: Is it need to collect delivery rate statistice
+  

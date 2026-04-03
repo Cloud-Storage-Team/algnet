@@ -1,0 +1,12 @@
+sender_id:
+  _type: string
+  _doc: Sender host id
+receiver_id:
+  _type: string
+  _doc: Receiver host id
+
+mplb:
+  _type: one-of
+  _variants:
+    - single-cc
+  _doc: Multi path load ballancer that should be used for transreffing data parts by this connection

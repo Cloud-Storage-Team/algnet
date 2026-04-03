@@ -5,8 +5,6 @@
 namespace sim {
 
 // Parses topology.
-// ATTENTION: thinks that all presets node are placed under
-// node["presets"]["hosts"/"switches"/"links"]
-Topology parse_topology(const ConfigNode& node);
+Topology parse_topology(const ConfigNodeWithPreset& node);
 
 }  // namespace sim

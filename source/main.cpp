@@ -6,16 +6,13 @@
 
 int main(const int argc, char** argv) {
     cxxopts::Options options("NoNS", "Discrete-event based simulator");
-    options.add_options()("c,config",
-                          "Path to the simulation configuration file",
+    options.add_options()("c,config", "Path to the scenario configuration file",
                           cxxopts::value<std::string>())(
         "output-dir", "Output directory for metrics and plots",
         cxxopts::value<std::string>()->default_value("metrics"))(
         "no-logs", "Output without logs",
-        cxxopts::value<bool>()->default_value("false"))(
-        "metrics-filter", "Filter for collecting metrics pathes",
-        cxxopts::value<std::string>()->default_value(".*"))("h,help",
-                                                            "Print usage");
+        cxxopts::value<bool>()->default_value("false"))("h,help",
+                                                        "Print usage");
 
     auto flags = options.parse(argc, argv);
     std::filesystem::path output_dir = flags["output-dir"].as<std::string>();

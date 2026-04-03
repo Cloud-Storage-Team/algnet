@@ -39,6 +39,8 @@ public:
     virtual SizeByte get_to_ingress_queue_size() const final;
     virtual SizeByte get_max_to_ingress_queue_size() const final;
 
+    const LinkContext& get_ctx() const final;
+
     virtual const Id& get_id() const final;
 
     virtual MetricsTable get_metrics_table() const final;
@@ -69,9 +71,8 @@ private:
     Id m_id;
     std::weak_ptr<IDevice> m_from;
     std::weak_ptr<IDevice> m_to;
-    SpeedGbps m_speed;
 
-    TimeNs m_propagation_delay;
+    LinkContext m_ctx;
 
     // Queue at the egress port of the m_from device
     LinkQueue m_from_egress;

@@ -1,0 +1,26 @@
+packet-spraying:
+  _type: derived
+  _derived: configs/topology/common/empty-packet-spraying.schema
+  _doc: Packet spraying for all switches
+
+links:
+  _type: configs/topology/common/link_params.schema
+  _doc: Parameters of links
+  
+bottleneck-link:
+  _type: configs/topology/common/link_params.schema
+  _doc: Parameters of bottleneck link. If not set, bottleneck link parameters takes from links section
+
+senders:
+  count:
+    _type: unsigned int
+    _doc: Count of senders
+  follow: configs/topology/common/host.schema
+
+switch:
+  _type: configs/topology/common/switch
+  _doc: Switch parameters
+
+receiver:
+  _type: configs/topology/common/host
+  _doc: Receiver parameters

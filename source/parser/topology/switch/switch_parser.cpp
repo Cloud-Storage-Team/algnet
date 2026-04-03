@@ -1,66 +1,28 @@
 #include "switch_parser.hpp"
 
-#include "parser/parse_utils.hpp"
+#include "packet_hasher_parser.hpp"
 #include "parser/topology/ecn/ecn_parser.hpp"
-#include "topology/device/hashers/adaptive_flowlet_hasher.hpp"
-#include "topology/device/hashers/ecmp_hasher.hpp"
-#include "topology/device/hashers/flowlet_hasher.hpp"
-#include "topology/device/hashers/random_hasher.hpp"
-#include "topology/device/hashers/salt_ecmp_hasher.hpp"
-#include "topology/device/hashers/symmetric_hasher.hpp"
 
 namespace sim {
 
-std::shared_ptr<ISwitch> SwitchParser::parse_i_switch(
-    const ConfigNodeWithPreset& switch_node,
-    const ConfigNode& packet_spraying_node) {
-    return parse_default_switch(switch_node, packet_spraying_node);
-}
-
-std::shared_ptr<Switch> SwitchParser::parse_default_switch(
-    const ConfigNodeWithPreset& switch_node,
-    const ConfigNode& packet_spraying_node) {
-    Id id = switch_node.get_name_or_throw();
-    ConfigNodeWithPresetExpected ecn_node = switch_node["ecn"];
+std::shared_ptr<ISwitch> parse_switch(
+    const ConfigNodeWithPreset& preset,
+    const ConfigNodeWithPreset& packet_spraying_node, const Id& id) {
+    ConfigNodeWithPresetExpected ecn_node = preset["ecn"];
     ECN ecn(1.0, 1.0, 0.0);
     if (ecn_node.has_value()) {
         ecn = EcnParser::parse_ecn(ecn_node.value());
     }
-    return std::make_shared<Switch>(id, std::move(ecn),
-                                    parse_hasher(packet_spraying_node, id));
+    return std::make_shared<Switch>(
+        id, std::move(ecn),
+        parse_packet_hasher(packet_spraying_node.get_node(), id));
 }
 
-std::unique_ptr<IPacketHasher> SwitchParser::parse_hasher(
-    const ConfigNode& packet_spraying_node, Id switch_id) {
-    std::string type = packet_spraying_node["type"]
-                           .value_or_throw()
-                           .as<std::string>()
-                           .value_or_throw();
-    if (type == "random") {
-        return std::make_unique<RandomHasher>();
-    }
-    if (type == "ecmp") {
-        return std::make_unique<ECMPHasher>();
-    }
-    if (type == "flowlet") {
-        TimeNs threshold =
-            parse_time(packet_spraying_node["threshold"].value_or_throw());
-        return std::make_unique<FLowletHasher>(threshold);
-    }
-    if (type == "adaptive_flowlet") {
-        ConfigNodeExpected factor_node = packet_spraying_node["factor"];
-        if (factor_node.has_value()) {
-            double factor = factor_node.value().as_or_throw<double>();
-            return std::make_unique<AdaptiveFlowletHasher>(factor);
-        } else {
-            return std::make_unique<AdaptiveFlowletHasher>();
-        }
-    }
-    if (type == "salt") {
-        return std::make_unique<SaltECMPHasher>(std::move(switch_id));
-    }
-    throw packet_spraying_node.create_parsing_error(
-        fmt::format("Unexpected packet sprayng type: {}", type));
+std::shared_ptr<ISwitch> SwitchParser::parse_i_switch(
+    const ConfigNodeWithPreset& switch_node,
+    const ConfigNodeWithPreset& packet_spraying_node) {
+    Id id = switch_node.get_name_or_throw();
+    return parse_switch(switch_node, packet_spraying_node, id);
 }
 
 }  // namespace sim

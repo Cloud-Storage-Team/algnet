@@ -1,11 +1,22 @@
 #pragma once
 
 #include <optional>
+#include <utility>
 
 #include "metrics/metrics_table/i_metricable.hpp"
 #include "topology/device/interfaces/i_device.hpp"
 
 namespace sim {
+
+struct LinkContext {
+    SpeedGbps speed;
+    TimeNs latency;
+
+    bool operator<(const LinkContext& ctx) const {
+        return std::make_pair(speed, latency) <
+               std::make_pair(ctx.speed, ctx.latency);
+    }
+};
 
 /**
  * Unidirectional link from the source to a_next
@@ -39,6 +50,8 @@ public:
 
     virtual SizeByte get_to_ingress_queue_size() const = 0;
     virtual SizeByte get_max_to_ingress_queue_size() const = 0;
+
+    virtual const LinkContext& get_ctx() const = 0;
 };
 
 }  // namespace sim
