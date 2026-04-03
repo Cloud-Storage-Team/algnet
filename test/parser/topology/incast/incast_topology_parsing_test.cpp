@@ -2,6 +2,7 @@
 
 #include <filesystem>
 
+#include "../check_connectivity.hpp"
 #include "parser/topology/incast_topology_parser.hpp"
 
 namespace sim {
@@ -42,6 +43,7 @@ TEST(IncastTopologyParsing, CustomBottleneck) {
     sort(eq_links_counts.begin(), eq_links_counts.end());
     ASSERT_EQ(eq_links_counts, std::vector<std::size_t>(
                                    {receivers_count * 2, senders_count * 2}));
+    check_connectivity(Topology(ctx.to_topology_context()));
 }
 
 TEST(IncastTopologyParsing, CommonBottleneck) {

@@ -4,6 +4,8 @@
 
 #include <filesystem>
 
+#include "check_connectivity.hpp"
+
 namespace sim {
 namespace test2 {
 
@@ -21,6 +23,7 @@ TEST(TopologyParsing, BusTopology) {
     ASSERT_EQ(ctx.hosts_table.size(), 4);
     ASSERT_EQ(ctx.switches_table.size(), 1);
     ASSERT_EQ(ctx.links_table.size(), 8);
+    check_connectivity(top);
 }
 
 }  // namespace test2

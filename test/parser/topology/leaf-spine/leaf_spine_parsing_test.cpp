@@ -2,6 +2,7 @@
 
 #include <filesystem>
 
+#include "../check_connectivity.hpp"
 #include "parser/topology/leaf_spine_topology_parser.hpp"
 
 namespace sim {
@@ -24,6 +25,7 @@ TEST(LeafSpineTopologyParsing, CheckTopology) {
              ctx.hosts.size());
 
     ASSERT_EQ(ctx.links.size(), expected_links_count);
+    check_connectivity(Topology(ctx.to_topology_context()));
 }
 
 }  // namespace test2
