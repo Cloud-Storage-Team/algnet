@@ -1,6 +1,7 @@
+#include "check_connectivity.hpp"
+
 #include <gtest/gtest.h>
 
-#include "check_connectivity.hpp"
 #include "utils/algorithms.hpp"
 
 namespace sim {
