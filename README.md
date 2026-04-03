@@ -30,7 +30,7 @@ Options:
 -h, --help                Print usage
 ```
 
-Examples of configs are placed under [`configs`](configs/) directory. See scenario format description [here](configs/_docs/scneario-config.md).
+Examples of configs are placed under [`configs`](configs/) directory. See config schemas [here](_schemas/configs/).
 
 ## How to add a new congestion control algorithm
 
