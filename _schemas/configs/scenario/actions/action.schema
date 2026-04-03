@@ -1,7 +1,7 @@
 action:
   _type: one-of
-  _variants:
-    - send_data
-    - stop_time
-  
-  _doc: 
+  _options:
+    - send_data: send_data.schema
+    - stop_time: stop_time.schema
+
+  _doc:

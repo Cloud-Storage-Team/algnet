@@ -7,6 +7,6 @@ receiver_id:
 
 mplb:
   _type: one-of
-  _variants:
-    - single-cc
+  _options:
+    - single-cc: singe-cc.schema
   _doc: Multi path load ballancer that should be used for transreffing data parts by this connection

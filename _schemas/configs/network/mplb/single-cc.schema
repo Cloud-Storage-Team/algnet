@@ -1,14 +1,14 @@
 packet-size:
-  _type: units/Size
+  _type: /units/Size.schema
   _doc: Size of packets that will be used
 
 cc:
-  _type: cc/metricable_cc
+  _type: cc/metricable-cc.schema
   _doc: Congestion control
 
 path-chooser:
   _type: one-of
-  _variants:
-    - path-chooser/round-robin
+  _options:
+    - round-robin: path-chooser/round-robin.schema
 
   _doc: Path chooser that should be used

@@ -1,11 +1,8 @@
 _type: one-of
 
-_variants:
-  - basic
-  - swift
-  - tahoe
+_options:
+- basic: basic.schema
+- swift: swift.schema
+- tahoe: tahoe.schema
 
-cwnd:
-  _type: bool
-  _default: true
-  _doc: Is it need to collect congestion window metric
+_extend: cc-metrics.schema
