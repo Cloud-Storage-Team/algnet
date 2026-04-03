@@ -1,0 +1,11 @@
+_type: one-of
+
+_variants:
+  - basic
+  - swift
+  - tahoe
+
+cwnd:
+  _type: bool
+  _default: true
+  _doc: Is it need to collect congestion window metric

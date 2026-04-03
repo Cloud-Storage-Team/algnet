@@ -1,0 +1,42 @@
+base_target: 
+  _type: units/Time
+  _doc: Minimal (fabric link with 1 hop) RTT
+
+start_cwnd:
+  _type: double
+  _default: 1.0
+  _doc: Initial congestion window
+
+ai:
+  _type: double
+  _default: 0.5
+  _doc: Additive increase factor
+
+md:
+  _type: double
+  _default: 0.5
+  _doc: Multiple decrease factor
+
+max_mdf:
+  _type: double
+  _default: 0.3
+  _doc: Upper bound on MD factor per RTT
+
+fs_range:
+  _type: double
+  _default: 1.5
+  _doc: Max queue head-room (flow-scaling term)
+
+fs_min_cwnd:
+  _type: double
+  _default: 0.1
+  _doc: cwnd where flow-scaling hits fs_range
+  
+fs_max_cwnd:
+  _type: double
+  _default: 100.0
+  _doc: cwnd where flow-scaling goes to zero
+
+metrics_filters:
+  _default: 
+  cwnd: false

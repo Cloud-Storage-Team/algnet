@@ -1,0 +1,7 @@
+action:
+  _type: one-of
+  _variants:
+    - send_data
+    - stop_time
+  
+  _doc: 

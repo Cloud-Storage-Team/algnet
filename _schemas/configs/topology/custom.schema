@@ -1,0 +1,19 @@
+packet-spraying:
+  _type: derived
+  _derived: configs/topology/common/empty-packet-spraying.schema
+  _doc: Packet spraying for all switches
+
+packet-spraying:
+  type: ecmp
+
+hosts:
+  _type: configs/topology/common/host{}
+  _doc: Hosts description
+
+switches:
+  _type: configs/topology/common/switch{}
+  _doc: Hosts list
+
+links:
+  _type: configs/topology/common/link{}
+  _doc: Links list

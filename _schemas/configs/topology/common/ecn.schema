@@ -1,0 +1,9 @@
+min:
+  _type: float
+  _doc: Min ECN threshold
+max:
+  _type: float
+  _doc: Max ECN threshold
+probability:
+  _type: float
+  _doc: Probabability to drop packet if queue filling is in [min, max] interval 
