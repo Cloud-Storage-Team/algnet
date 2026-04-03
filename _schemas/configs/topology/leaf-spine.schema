@@ -1,22 +1,19 @@
-follow: empty-topology.schema
-
 packet-spraying:
-  _type: derived
-  _derived: common/empty-packet-spraying.schema
+  _type: common/packet-spraying/packet-spraying.schema
   _doc: Packet spraying for all switches
 
 switches:
   spine:
     count:
-      _type: unsigned int
+      _type: size_t
       _doc: Count of spine switches
-    follow: common/switch.schema
+    _extend: common/switch.schema
 
   leaf:
     count:
-      _type: unsigned int
+      _type: size_t
       _doc: Count of leaf switches
-    follow: common/switch.schema
+    _extend: common/switch.schema
 
 hosts:
   _type: common/host.schema

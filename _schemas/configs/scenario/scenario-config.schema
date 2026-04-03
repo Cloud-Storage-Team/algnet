@@ -3,5 +3,6 @@ network_config_path:
   _doc: path (absolute or relative) to network config.
 
 scenario:
-  _type: actions/action[]
+  _type: list
+  _elem_type: actions/action.schema
   _doc: List of actions

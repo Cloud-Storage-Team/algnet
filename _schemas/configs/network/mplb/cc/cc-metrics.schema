@@ -1,0 +1,5 @@
+metrics_filters:
+  cwnd:
+    _type: bool
+    _default: true
+    _doc: Is it need to collect congestion window metric

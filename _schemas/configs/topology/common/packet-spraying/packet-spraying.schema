@@ -1,0 +1,8 @@
+_type: one-of
+_options:
+  - adaptive_flowlet: adaptive_flowlet.schema
+  - ecmp: ecmp.schema
+  - flowlet: flowlet.schema
+  - random: random.schema
+  - salt: salt.schema
+_doc: Available packet spraying types

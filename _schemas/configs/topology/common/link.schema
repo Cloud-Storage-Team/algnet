@@ -1,8 +1,8 @@
-follow: link_params.schema
+_extend: link_params.schema
 
 from:
   _type: string
-  _doc: Link start device 
+  _doc: Link start device
 to:
   _type: string
   _doc: Link end device

@@ -1,3 +1,4 @@
 flows:
-  _type: flow{}
-  _doc: List of avalable flows
+  _type: map
+  _key_type: flow.schema
+  _doc: Map of avalable flows

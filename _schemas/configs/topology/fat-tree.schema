@@ -1,38 +1,37 @@
 packet-spraying:
-  _type: derived
-  _derived: common/empty-packet-spraying.schema
+  _type: packet-spraying/packet-spraying.schema
   _doc: Packet spraying for all switches
 
 switches:
   ports-count:
-    _type: unsigned int
+    _type: size_t
     _doc: Count of ports of each switch (k from common pictures)
-  
+
   core:
-    _type: common/switch
+    _type: common/switch.schema
     _doc: Core layer switches description
-  aggr: 
-    _type: common/switch
+  aggr:
+    _type: common/switch.schema
     _doc: Aggredtion layer switches description
 
   edge:
-    _type: common/switch
-    
+    _type: common/switch.schema
+
     _doc: Edge layer switches description
 
 hosts:
-  _type: common/host
+  _type: common/host.schema
   _doc: Hosts description
 
 links:
   core-aggr:
-    _type: common/link_params
+    _type: common/link_params.schema
     _doc: Parameters of links between core and aggregation layers
-  
+
   aggr-edge:
-    _type: common/link_params
+    _type: common/link_params.schema
     _doc: Parameters of links between aggregation and edge layers
-  
+
   edge-host:
-    _type: common/link_params
+    _type: common/link_params.schema
     _doc: Parameters of links between edge switches and hosts

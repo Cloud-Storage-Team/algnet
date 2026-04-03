@@ -1,6 +1,6 @@
 _type: one-of
-_variants:
-  - custom
-  - incast
-  - leaf-spine
-  - fat-tree
+_options:
+  - custom: custom.schema
+  - incast: incast.schema
+  - leaf-spine: leaf-spine.schema
+  - fat-tree: fat-tree.schema
