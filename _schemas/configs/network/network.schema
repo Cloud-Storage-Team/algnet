@@ -4,5 +4,6 @@ topology_config_path:
 
 connections:
   _type: map
-  _key_type: connection.schema
+  _values:
+    _type: connection.schema
   _doc: Map of abailable connections - user interfaces of data transreffing

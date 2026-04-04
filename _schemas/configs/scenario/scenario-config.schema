@@ -4,5 +4,6 @@ network_config_path:
 
 scenario:
   _type: list
-  _elem_type: actions/action.schema
+  _items:
+    _type: actions/action.schema
   _doc: List of actions

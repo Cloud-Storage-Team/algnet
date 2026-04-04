@@ -1,17 +1,17 @@
 latency:
-  _type: /units/Time.schema
+  _type: ../../../units/Time.schema
   _doc: Speed of light latency of packet transmission
 
 throughput:
-  _type: /units/Speed.schema
+  _type: ../../../units/Speed.schema
   _doc: Throughput of link
 
 ingress_buffer_size:
-  type: /units/Size.schema
+  type: ../../../units/Size.schema
   _doc: Ingress device buffer size
 
 egress_buffer_size:
-  type: /units/Size.schema
+  type: ../../../units/Size.schema
   _doc: Eggress device buffer size
 
 metrics_filters:

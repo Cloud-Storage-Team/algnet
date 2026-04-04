@@ -4,15 +4,18 @@ packet-spraying:
 
 hosts:
   _type: map
-  _key_type: common/host.schema
+  _values:
+    _type: common/host.schema
   _doc: Hosts map
 
 switches:
   _type: map
-  _key_type: common/switch.schema
+  _values:
+    _type: common/switch.schema
   _doc: Switches map
 
 links:
   _type: map
-  _key_type: common/link.schema
+  _values:
+    _type: common/link.schema
   _doc: Links map

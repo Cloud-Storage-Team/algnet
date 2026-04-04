@@ -2,19 +2,19 @@ id:
   _type: string
   _doc: Id of action. Should be unique
 when:
-  _type: /units/Time.schema
+  _type: ../../../units/Time.schema
   _doc: The time at which the data will start being sent
 size:
-  _type: /units/Size.schema
+  _type: ../../../units/Size.schema
   _doc: The amount of data to send
 connections:
-  _type: string
+  _type: regex
   _doc: Specifies which connections to use for sending data. Supports regular expression
 repeat_count:
   _type: size_t
   _default: 1
   _doc: Sets the number of times to perform an action
 repeat_interval:
-  _type: Time
+  _type: ../../../units/Time.schema
   _default: 0ns
   _doc: Sets the time interval after which actions will be performed
