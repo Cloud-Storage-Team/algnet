@@ -1,5 +1,5 @@
 base_target:
-  _type: /units/Time.schema
+  _type: ../../../units/Time.schema
   _doc: Minimal (fabric link with 1 hop) RTT
 
 start_cwnd:
@@ -36,7 +36,3 @@ fs_max_cwnd:
   _type: double
   _default: 100.0
   _doc: cwnd where flow-scaling goes to zero
-
-metrics_filters:
-  _default:
-  cwnd: false

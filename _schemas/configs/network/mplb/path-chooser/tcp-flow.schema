@@ -1,10 +1,10 @@
 rto:
   start:
-    _type: /units/Time.schema
+    _type: ../../../../units/Time.schema
     _default: 2000ns
     _doc: Initial retransmit timout
   max:
-    _type: /units/Time.schema
+    _type: ../../../../units/Time.schema
     _default: 1s
     _doc: Maximal retransmit timeout
 
