@@ -16,8 +16,8 @@ void validate(const YAML::Node& schema_node, const ConfigNodeWithPreset& config_
     }
 
     // check if config node has unknown fields
-    for (auto it: config_node){
-        std::string field = it.first.as<std::string>();
+    for (const auto& node: config_node){
+        std::string field = node.get_name_or_throw();
         if (!schema_fields.contains(field)){
             std::stringstream ss;
             ss << "Config node: " << config_node.get_name_or_throw();
