@@ -80,6 +80,8 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](
                                 std::nullopt);
 }
 
+bool ConfigNodeWithPreset::IsMap() const noexcept { return m_node.IsMap(); }
+
 std::ostream& operator<<(std::ostream& out, const ConfigNodeWithPreset& node) {
     return out << node.get_node();
 }

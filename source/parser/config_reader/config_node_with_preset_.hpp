@@ -16,6 +16,8 @@ public:
 
     ConfigNodeWithPresetExpected operator[](std::string_view key) const;
 
+    [[nodiscard]] bool IsMap() const noexcept;
+
     friend std::ostream& operator<<(std::ostream& out,
                                     const ConfigNodeWithPreset& node);
 
