@@ -16,6 +16,8 @@ public:
 
     ConfigNodeWithPresetExpected operator[](std::string_view key) const;
 
+    [[nodiscard]] bool IsMap() const noexcept;
+
     friend std::ostream& operator<<(std::ostream& out,
                                     const ConfigNodeWithPreset& node);
 
@@ -41,6 +43,28 @@ public:
     const std::optional<ConfigNode> get_presets_node() const noexcept;
 
     std::runtime_error create_parsing_error(std::string_view error) const;
+
+    class Iterator {
+    public:
+        Iterator(YAML::const_iterator a_it);
+
+        Iterator& operator++();
+
+        Iterator operator++(int);
+
+        bool operator==(const Iterator& rhs) const;
+
+        bool operator!=(const Iterator& rhs) const;
+
+        ConfigNodeWithPreset operator*() const;
+
+    private:
+        // Invariant: m_stacktrace_node is not null
+        YAML::const_iterator m_iterator;
+    };
+
+    Iterator begin() const;
+    Iterator end() const;
 
 private:
     // m_node contains information about config node and probably preset name

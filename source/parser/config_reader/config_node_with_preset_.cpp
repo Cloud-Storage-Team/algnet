@@ -80,6 +80,8 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](
                                 std::nullopt);
 }
 
+bool ConfigNodeWithPreset::IsMap() const noexcept { return m_node.IsMap(); }
+
 std::ostream& operator<<(std::ostream& out, const ConfigNodeWithPreset& node) {
     return out << node.get_node();
 }
@@ -111,5 +113,65 @@ ConfigNodeWithPreset load_file_with_presets(std::filesystem::path path) {
     ConfigNode node = load_file(path);
     return ConfigNodeWithPreset(node, node["presets"].to_optional());
 }
+
+ConfigNodeWithPreset::Iterator::Iterator(YAML::const_iterator a_it) : m_iterator(a_it) {}
+
+ConfigNodeWithPreset::Iterator& ConfigNodeWithPreset::Iterator::operator++() {
+    ++m_iterator;
+    return *this;
+}
+
+ConfigNodeWithPreset::Iterator ConfigNodeWithPreset::Iterator::operator++(int) {
+    Iterator iterator_copy(*this);
+    ++(*this);
+    return iterator_copy;
+}
+
+bool ConfigNodeWithPreset::Iterator::operator==(const Iterator& rhs) const {
+    return m_iterator == rhs.m_iterator;
+}
+
+bool ConfigNodeWithPreset::Iterator::operator!=(const Iterator& rhs) const {
+    return m_iterator != rhs.m_iterator;
+}
+
+ConfigNodeWithPreset ConfigNodeWithPreset::Iterator::operator*() const {
+    // Explanation: iterator_value under *m_iterator inherited from
+    // YAML::Node and std::pair<YAML::Node, YAML::Node>, but only one value of
+    // this pair is correct (please, tell them about std::variant...)
+    if (m_iterator->IsDefined()) {
+        // iterator goes over "named" nodes like
+        // list:
+        //  - value_0
+        //  - value_1
+        //  ...
+        YAML::Node node = *m_iterator;
+        return ConfigNodeWithPreset(ConfigNode(node, std::nullopt));
+    } else {
+        // iterator goes over "named" nodes like
+        // list:
+        //  node_1: ...
+        //  node_2: ...
+        //  ...
+        YAML::Node key_node = m_iterator->first;
+        YAML::Node value_node = m_iterator->second;
+        if (!key_node || !value_node) {
+            throw std::runtime_error(
+                "Can not take value under config node iterator; all possible "
+                "nodes are invalid");
+        }
+        std::string key = key_node.as<std::string>();
+        return ConfigNodeWithPreset(ConfigNode(value_node, key));
+    }
+}
+
+ConfigNodeWithPreset::Iterator ConfigNodeWithPreset::begin() const {
+    return Iterator(m_node.get_node().begin());
+}
+
+ConfigNodeWithPreset::Iterator ConfigNodeWithPreset::end() const {
+    return Iterator(m_node.get_node().end());
+}
+
 
 }  // namespace sim
