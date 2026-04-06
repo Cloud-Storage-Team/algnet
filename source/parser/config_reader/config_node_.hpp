@@ -15,7 +15,8 @@ class ConfigNodeExpected;
 class ConfigNode {
 public:
     explicit ConfigNode(YAML::Node a_node = YAML::Node(YAML::NodeType::Null),
-                        std::optional<std::string> a_name = std::nullopt);
+                        std::optional<std::string> a_name = std::nullopt,
+                        std::optional<std::string> a_path_node = std::nullopt);
 
     // Some functional over yaml-cpp
 
@@ -25,8 +26,11 @@ public:
 
     [[nodiscard]] const std::string& get_name_or_throw() const;
 
+
     [[nodiscard]] std::runtime_error create_parsing_error(
         std::string_view error) const;
+
+    const std::optional<std::string>& get_path_node();
 
     friend std::ostream& operator<<(std::ostream& out, const ConfigNode& node);
 
@@ -64,7 +68,7 @@ public:
 
     class Iterator {
     public:
-        Iterator(YAML::const_iterator a_it);
+        Iterator(YAML::const_iterator a_it, const ConfigNode* a_owner);
 
         Iterator& operator++();
 
@@ -79,6 +83,7 @@ public:
     private:
         // Invariant: m_stacktrace_node is not null
         YAML::const_iterator m_iterator;
+        const ConfigNode* m_owner;
     };
 
     Iterator begin() const;
@@ -92,6 +97,8 @@ private:
     const YAML::Node m_node;
 
     const std::optional<std::string> m_name;
+
+    std::optional<std::string> m_path_node;
 };
 
 ConfigNode load_file(std::filesystem::path path);
