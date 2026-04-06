@@ -46,7 +46,7 @@ public:
 
     class Iterator {
     public:
-        Iterator(YAML::const_iterator a_it);
+        Iterator(ConfigNode::Iterator a_it);
 
         Iterator& operator++();
 
@@ -59,8 +59,7 @@ public:
         ConfigNodeWithPreset operator*() const;
 
     private:
-        // Invariant: m_stacktrace_node is not null
-        YAML::const_iterator m_iterator;
+        ConfigNode::Iterator m_iterator;
     };
 
     Iterator begin() const;

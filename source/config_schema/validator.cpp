@@ -5,6 +5,47 @@
 
 namespace sim{
 
+bool is_meta_field(const std::string& field){
+    return !field.empty() && field[0] == '_';
+}
+
+void validate_field(const YAML::Node& schema_node, const ConfigNodeWithPreset& config_node){
+    if (schema_node["_type"]){
+        std::string type = schema_node["_type"].as<std::string>();
+        if (type == "size_t"){
+            config_node.as_or_throw<size_t>();
+        } else if (type == "int"){
+            config_node.as_or_throw<int>();
+        } else if (type == "double"){
+            config_node.as_or_throw<double>();
+        } else if (type == "bool"){
+            config_node.as_or_throw<bool>();
+        } else if (type == "string"){
+            config_node.as_or_throw<std::string>();
+        } else if (type == "regex"){
+            std::string pattern = config_node.as_or_throw<std::string>();
+            try {
+                std::regex r(pattern);
+            } catch (const std::regex_error&) {
+                throw std::runtime_error("Incorrect type specified std::regex");
+            }
+        } else if (type.ends_with(".schema")){
+            YAML::Node sub_schema = YAML::LoadFile(type);
+            if (!config_node.IsMap()){
+                throw std::runtime_error(config_node.get_name_or_throw() + " must be object.");
+            }
+            validate(sub_schema, config_node);
+        } else{
+            throw std::runtime_error("Unknown type: " + type);
+        }
+    } else{
+        if (!config_node.IsMap()){
+            throw std::runtime_error(config_node.get_name_or_throw() + " must be object.");
+        }
+        validate(schema_node, config_node);
+    }
+}
+
 void validate(const YAML::Node& schema_node, const ConfigNodeWithPreset& config_node){
     // create set of requried fields
     std::unordered_set<std::string> schema_fields;
@@ -46,47 +87,6 @@ void validate(const YAML::Node& schema_node, const ConfigNodeWithPreset& config_
         if (!is_meta_field(field)){
             validate_field(it.second, config_node[field].value());
         }
-    }
-}
-
-bool is_meta_field(const std::string& field){
-    return !field.empty() && field[0] == '_';
-}
-
-void validate_field(const YAML::Node schema_node, const ConfigNodeWithPreset& config_node){
-    if (schema_node["_type"]){
-        std::string type = schema_node["_type"].as<std::string>();
-        if (type == "size_t"){
-            config_node.as_or_throw<size_t>();
-        } else if (type == "int"){
-            config_node.as_or_throw<int>();
-        } else if (type == "double"){
-            config_node.as_or_throw<double>();
-        } else if (type == "bool"){
-            config_node.as_or_throw<bool>();
-        } else if (type == "string"){
-            config_node.as_or_throw<std::string>();
-        } else if (type == "regex"){
-            std::string pattern = config_node.as_or_throw<std::string>();
-            try {
-                std::regex r(pattern);
-            } catch (const std::regex_error&) {
-                throw std::runtime_error("Incorrect type specified std::regex");
-            }
-        } else if (type.ends_with(".schema")){
-            YAML::Node sub_schema = YAML::LoadFile(type);
-            if (!config_node.IsMap()){
-                throw std::runtime_error(config_node.get_name_or_throw() + " must be object.");
-            }
-            validate(sub_schema, config_node);
-        } else{
-            throw std::runtime_error("Unknown type: " + type);
-        }
-    } else{
-        if (!config_node.IsMap()){
-            throw std::runtime_error(config_node.get_name_or_throw() + " must be object.");
-        }
-        validate(schema_node, config_node);
     }
 }
 
