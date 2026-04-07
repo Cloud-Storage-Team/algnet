@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 
-#include "parser/config_reader/config_node_with_preset.hpp"
 #include "parser/config_reader/config_node.hpp"
+#include "parser/config_reader/config_node_with_preset.hpp"
 
-namespace sim{
-namespace test2{
+namespace sim {
+namespace test2 {
 
-TEST(PathConfigNode, InsertedPath){
+TEST(PathConfigNode, InsertedPath) {
     YAML::Node root = YAML::Load(R"(
 a:
   b:
@@ -21,17 +21,17 @@ a:
     ASSERT_EQ(c.get_path_node(), "root\\a\\b\\c");
 }
 
-TEST(PathConfigNode, MissingKey){
+TEST(PathConfigNode, MissingKey) {
     std::filesystem::path bus_topology_path =
-        std::filesystem::path(__FILE__).parent_path() /
-        "bus_network.yml";
+        std::filesystem::path(__FILE__).parent_path() / "bus_network.yml";
     ConfigNode node = load_file(bus_topology_path);
     auto result = node["connections"]["connection-1->1"].value();
 
-    ASSERT_EQ(result.get_path_node(), bus_topology_path.string() + "\\connections\\connection-1->1");
+    ASSERT_EQ(result.get_path_node(),
+              bus_topology_path.string() + "\\connections\\connection-1->1");
 }
 
-TEST(PathConfigNodeWithPreset, InsertedPath){
+TEST(PathConfigNodeWithPreset, InsertedPath) {
     YAML::Node root = YAML::Load(R"(
 a:
   b:
@@ -47,15 +47,15 @@ a:
     ASSERT_EQ(c.get_path_node(), "root\\a\\b\\c");
 }
 
-TEST(PathConfigNodeWithPreset, MissingKey){
+TEST(PathConfigNodeWithPreset, MissingKey) {
     std::filesystem::path bus_topology_path =
-        std::filesystem::path(__FILE__).parent_path() /
-        "bus_network.yml";
+        std::filesystem::path(__FILE__).parent_path() / "bus_network.yml";
     ConfigNodeWithPreset node = load_file_with_presets(bus_topology_path);
     auto result = node["connections"]["connection-1->1"].value();
 
-    ASSERT_EQ(result.get_path_node(), bus_topology_path.string() + "\\connections\\connection-1->1");
+    ASSERT_EQ(result.get_path_node(),
+              bus_topology_path.string() + "\\connections\\connection-1->1");
 }
 
-}
-} // namespace sim
+}  // namespace test2
+}  // namespace sim

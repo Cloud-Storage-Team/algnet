@@ -49,7 +49,8 @@ private:
     // m_preset - preset node which that is used to supplement fields of m_node
     // m_presets_node - node it which preset node should be searched (id it
     // needs)
-    // m_path_node - the place where this node is located. in the form of folder1.folder2.node1.node2
+    // m_path_node - the place where this node is located. in the form of
+    // folder1.folder2.node1.node2
     const ConfigNode m_node;
     const std::optional<ConfigNode> m_presets_node;
     mutable std::optional<ConfigNode> m_preset;
