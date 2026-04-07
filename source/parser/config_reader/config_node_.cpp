@@ -33,7 +33,7 @@ std::runtime_error ConfigNode::create_parsing_error(
     return std::runtime_error(ss.str());
 }
 
-const std::optional<std::string>& ConfigNode::get_path_node() {
+const std::optional<std::string>& ConfigNode::get_path_node() const{
     return m_path_node;
 }
 
@@ -129,7 +129,10 @@ ConfigNode::Iterator ConfigNode::end() const { return Iterator(m_node.end(), thi
 
 ConfigNodeExpected ConfigNode::operator[](std::string_view key) const {
     const YAML::Node child_node = m_node[key];
-    const std::string current_path = m_path_node.value() + "\\" + std::string(key);
+    std::string current_path = std::string(key);
+    if (m_path_node.has_value()){
+        current_path = m_path_node.value() + "\\" + std::string(key);
+    }
     if (!child_node) {
         std::stringstream ss;
         ss << "Key error: node " << *this << "which is located by path:" << current_path << ":\n";
@@ -146,7 +149,7 @@ ConfigNodeExpected ConfigNode::operator[](std::string_view key) const {
 };
 
 ConfigNode load_file(std::filesystem::path path) {
-    return ConfigNode(YAML::LoadFile(path.string()), path.string());
+    return ConfigNode(YAML::LoadFile(path.string()), std::nullopt, path.string());
 }
 
 }  // namespace sim

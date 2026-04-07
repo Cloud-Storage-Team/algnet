@@ -30,7 +30,7 @@ public:
     [[nodiscard]] std::runtime_error create_parsing_error(
         std::string_view error) const;
 
-    const std::optional<std::string>& get_path_node();
+    const std::optional<std::string>& get_path_node() const;
 
     friend std::ostream& operator<<(std::ostream& out, const ConfigNode& node);
 
@@ -98,7 +98,7 @@ private:
 
     const std::optional<std::string> m_name;
 
-    std::optional<std::string> m_path_node;
+    mutable std::optional<std::string> m_path_node;
 };
 
 ConfigNode load_file(std::filesystem::path path);

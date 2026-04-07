@@ -1,5 +1,3 @@
-#pragma once
-
 #include <gtest/gtest.h>
 
 #include "parser/config_reader/config_node_with_preset.hpp"
@@ -16,9 +14,9 @@ a:
 )");
     ConfigNode node(root, std::nullopt, "root");
     auto a = node["a"].value();
-    auto b = node["b"].value();
-    auto c = node["c"].value();
-    ASSERT_EQ(a.get_path_node(), "root\\a");
+    auto b = a["b"].value();
+    auto c = b["c"].value();
+
     ASSERT_EQ(b.get_path_node(), "root\\a\\b");
     ASSERT_EQ(c.get_path_node(), "root\\a\\b\\c");
 }
@@ -27,9 +25,36 @@ TEST(PathConfigNode, MissingKey){
     std::filesystem::path bus_topology_path =
         std::filesystem::path(__FILE__).parent_path() /
         "bus_network.yml";
-    ConfigNode node = load_file(path);
-    auto result = node["connection-1->1"].value();
-    ASSERT_EQ(result.get_path_node(), bus_topology_path.string() + "connections\\connection-1->1");
+    ConfigNode node = load_file(bus_topology_path);
+    auto result = node["connections"]["connection-1->1"].value();
+
+    ASSERT_EQ(result.get_path_node(), bus_topology_path.string() + "\\connections\\connection-1->1");
+}
+
+TEST(PathConfigNodeWithPreset, InsertedPath){
+    YAML::Node root = YAML::Load(R"(
+a:
+  b:
+    c: 1
+)");
+    ConfigNode tmp(root, std::nullopt, "root");
+    ConfigNodeWithPreset node(tmp);
+    auto a = node["a"].value();
+    auto b = a["b"].value();
+    auto c = b["c"].value();
+
+    ASSERT_EQ(b.get_path_node(), "root\\a\\b");
+    ASSERT_EQ(c.get_path_node(), "root\\a\\b\\c");
+}
+
+TEST(PathConfigNodeWithPreset, MissingKey){
+    std::filesystem::path bus_topology_path =
+        std::filesystem::path(__FILE__).parent_path() /
+        "bus_network.yml";
+    ConfigNodeWithPreset node = load_file_with_presets(bus_topology_path);
+    auto result = node["connections"]["connection-1->1"].value();
+
+    ASSERT_EQ(result.get_path_node(), bus_topology_path.string() + "\\connections\\connection-1->1");
 }
 
 }
