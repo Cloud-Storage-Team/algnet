@@ -25,7 +25,7 @@ TEST(PathConfigNode, PathExists) {
     std::filesystem::path check_path =
         std::filesystem::path(__FILE__).parent_path() / "check_paths.yml";
     ConfigNode node = load_file(check_path);
-    auto result = node["connections"]["connection-1->1"].value();
+    auto result = node["test"]["level1"].value();
     ASSERT_EQ(result.get_config_path(), check_path);
 }
 
@@ -49,7 +49,7 @@ TEST(PathConfigNodeWithPreset, PathExists) {
     std::filesystem::path bus_topology_path =
         std::filesystem::path(__FILE__).parent_path() / "check_paths.yml";
     ConfigNodeWithPreset node = load_file_with_presets(bus_topology_path);
-    auto result = node["connections"]["connection-1->1"].value();
+    auto result = node["test"]["level1"].value();
 
     ASSERT_EQ(result.get_config_path(), bus_topology_path);
 }

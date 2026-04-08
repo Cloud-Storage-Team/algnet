@@ -1,21 +1,4 @@
-topology_config_path: "check_paths.yml"
-
-presets:
-  default-connection:
-    type: mplb-connection
-    mplb:
-      type: single-cc
-      packet-size: 1500B
-      cc:
-        type: tahoe
-      path-chooser:
-        type: round-robin
-        flows:
-          flow:
-            type: tcp
-
-connections:
-  connection-1->1:
-    preset-name: default-connection
-    sender_id: sender1
-    receiver_id: receiver1
+test:
+  level1: 1
+  level2: 2
+  level3: 3
