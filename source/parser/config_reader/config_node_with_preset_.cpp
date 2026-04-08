@@ -59,6 +59,7 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](
                 return std::unexpected(ss.str());
             }
             // preset was found successfull. put the found value in m_preset
+
             m_preset.emplace(preset_node.value());
         }
         // tries to find key in preset
