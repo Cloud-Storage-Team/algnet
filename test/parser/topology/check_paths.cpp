@@ -27,8 +27,7 @@ TEST(PathConfigNode, MissingKey) {
     ConfigNode node = load_file(bus_topology_path);
     auto result = node["connections"]["connection-1->1"].value();
 
-    ASSERT_EQ(result.get_path_node(),
-              bus_topology_path.string());
+    ASSERT_EQ(result.get_path_node(), bus_topology_path.string());
 }
 
 TEST(PathConfigNodeWithPreset, InsertedPath) {
@@ -53,8 +52,7 @@ TEST(PathConfigNodeWithPreset, MissingKey) {
     ConfigNodeWithPreset node = load_file_with_presets(bus_topology_path);
     auto result = node["connections"]["connection-1->1"].value();
 
-    ASSERT_EQ(result.get_path_node(),
-              bus_topology_path.string());
+    ASSERT_EQ(result.get_path_node(), bus_topology_path.string());
 }
 
 }  // namespace test2

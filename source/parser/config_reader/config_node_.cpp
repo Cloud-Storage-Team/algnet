@@ -47,10 +47,10 @@ std::ostream& operator<<(std::ostream& out, const ConfigNode& node) {
         out << "without name";
     }
     if (mark.line >= 0 && mark.column >= 0) {
-        if (node.m_path_node.has_value()){
+        if (node.m_path_node.has_value()) {
             out << "config path: " << node.m_path_node.value();
-        } else{
-            out << "config path: null"; 
+        } else {
+            out << "config path: null";
         }
         out << " at line " << mark.line + 1 << " column " << mark.column + 1;
     } else {
