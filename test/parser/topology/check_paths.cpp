@@ -12,13 +12,13 @@ a:
   b:
     c: 1
 )");
-    ConfigNode node(root, std::nullopt, "root");
+    ConfigNode node(root, std::nullopt);
     auto a = node["a"].value();
     auto b = a["b"].value();
     auto c = b["c"].value();
 
-    ASSERT_EQ(b.get_path_node(), "root\\a\\b");
-    ASSERT_EQ(c.get_path_node(), "root\\a\\b\\c");
+    ASSERT_EQ(b.get_path_node(), std::nullopt);
+    ASSERT_EQ(c.get_path_node(), std::nullopt);
 }
 
 TEST(PathConfigNode, MissingKey) {
@@ -28,7 +28,7 @@ TEST(PathConfigNode, MissingKey) {
     auto result = node["connections"]["connection-1->1"].value();
 
     ASSERT_EQ(result.get_path_node(),
-              bus_topology_path.string() + "\\connections\\connection-1->1");
+              bus_topology_path.string());
 }
 
 TEST(PathConfigNodeWithPreset, InsertedPath) {
@@ -43,8 +43,8 @@ a:
     auto b = a["b"].value();
     auto c = b["c"].value();
 
-    ASSERT_EQ(b.get_path_node(), "root\\a\\b");
-    ASSERT_EQ(c.get_path_node(), "root\\a\\b\\c");
+    ASSERT_EQ(b.get_path_node(), "root");
+    ASSERT_EQ(c.get_path_node(), "root");
 }
 
 TEST(PathConfigNodeWithPreset, MissingKey) {
@@ -54,7 +54,7 @@ TEST(PathConfigNodeWithPreset, MissingKey) {
     auto result = node["connections"]["connection-1->1"].value();
 
     ASSERT_EQ(result.get_path_node(),
-              bus_topology_path.string() + "\\connections\\connection-1->1");
+              bus_topology_path.string());
 }
 
 }  // namespace test2

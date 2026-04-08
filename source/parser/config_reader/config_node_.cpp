@@ -30,8 +30,7 @@ const std::string& ConfigNode::get_name_or_throw() const {
 std::runtime_error ConfigNode::create_parsing_error(
     std::string_view error) const {
     std::stringstream ss;
-    ss << "Error while parsing node " << *this
-       << "which is located by path:" << m_path_node.value() << ":\n";
+    ss << "Error while parsing node " << *this;
     ss << error << '\n';
     return std::runtime_error(ss.str());
 }
@@ -48,6 +47,11 @@ std::ostream& operator<<(std::ostream& out, const ConfigNode& node) {
         out << "without name";
     }
     if (mark.line >= 0 && mark.column >= 0) {
+        if (node.m_path_node.has_value()){
+            out << "config path: " << node.m_path_node.value();
+        } else{
+            out << "config path: null"; 
+        }
         out << " at line " << mark.line + 1 << " column " << mark.column + 1;
     } else {
         out << " at unknown location";
@@ -74,7 +78,7 @@ const std::string& ConfigNode::Tag() const noexcept { return m_node.Tag(); }
 std::size_t ConfigNode::size() const noexcept { return m_node.size(); }
 
 ConfigNode::Iterator::Iterator(YAML::const_iterator a_it,
-                               const ConfigNode* a_owner)
+                               const ConfigNode& a_owner)
     : m_iterator(a_it), m_owner(a_owner) {}
 
 ConfigNode::Iterator& ConfigNode::Iterator::operator++() {
@@ -107,7 +111,7 @@ ConfigNode ConfigNode::Iterator::operator*() const {
         //  - value_1
         //  ...
         YAML::Node node = *m_iterator;
-        return ConfigNode(node, std::nullopt, m_owner->m_path_node);
+        return ConfigNode(node, std::nullopt, m_owner.get_path_node());
     } else {
         // iterator goes over "named" nodes like
         // list:
@@ -122,38 +126,33 @@ ConfigNode ConfigNode::Iterator::operator*() const {
                 "nodes are invalid");
         }
         std::string key = key_node.as<std::string>();
-        return ConfigNode(value_node, key, m_owner->m_path_node);
+        return ConfigNode(value_node, key, m_owner.get_path_node());
     }
 }
 
 ConfigNode::Iterator ConfigNode::begin() const {
-    return Iterator(m_node.begin(), this);
+    return Iterator(m_node.begin(), *this);
 }
 
 ConfigNode::Iterator ConfigNode::end() const {
-    return Iterator(m_node.end(), this);
+    return Iterator(m_node.end(), *this);
 }
 
 ConfigNodeExpected ConfigNode::operator[](std::string_view key) const {
     const YAML::Node child_node = m_node[key];
-    std::string current_path = std::string(key);
-    if (m_path_node.has_value()) {
-        current_path = m_path_node.value() + "\\" + std::string(key);
-    }
     if (!child_node) {
         std::stringstream ss;
-        ss << "Key error: node " << *this
-           << "which is located by path:" << current_path << ":\n";
+        ss << "Key error: node " << *this;
         ss << "does not have key `" << key << '`';
         return std::unexpected(ss.str());
     }
     if (child_node.IsNull()) {
         // if node is null, its name should be empty
         return ConfigNodeExpected(
-            ConfigNode(std::move(child_node), std::nullopt, current_path));
+            ConfigNode(std::move(child_node), std::nullopt, m_path_node));
     }
     return ConfigNodeExpected(
-        ConfigNode(std::move(child_node), std::string(key), current_path));
+        ConfigNode(std::move(child_node), std::string(key), m_path_node));
 };
 
 ConfigNode load_file(std::filesystem::path path) {

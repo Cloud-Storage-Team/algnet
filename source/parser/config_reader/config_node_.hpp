@@ -67,7 +67,7 @@ public:
 
     class Iterator {
     public:
-        Iterator(YAML::const_iterator a_it, const ConfigNode* a_owner);
+        Iterator(YAML::const_iterator a_it, const ConfigNode& a_owner);
 
         Iterator& operator++();
 
@@ -82,7 +82,7 @@ public:
     private:
         // Invariant: m_stacktrace_node is not null
         YAML::const_iterator m_iterator;
-        const ConfigNode* m_owner;
+        const ConfigNode& m_owner;
     };
 
     Iterator begin() const;
@@ -97,7 +97,7 @@ private:
 
     const std::optional<std::string> m_name;
 
-    mutable std::optional<std::string> m_path_node;
+    const std::optional<std::string> m_path_node;
 };
 
 ConfigNode load_file(std::filesystem::path path);
