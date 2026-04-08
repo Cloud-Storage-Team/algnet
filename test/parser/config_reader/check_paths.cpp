@@ -26,9 +26,6 @@ TEST(PathConfigNode, PathExists) {
         std::filesystem::path(__FILE__).parent_path() / "check_paths.yml";
     ConfigNode node = load_file(check_path);
     auto result = node["connections"]["connection-1->1"].value();
-    printf("path: %s\n", check_path);
-    printf("result path: %s\n", result.get_config_path());
-    fflush(stdout);
     ASSERT_EQ(result.get_config_path(), check_path);
 }
 

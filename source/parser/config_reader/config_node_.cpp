@@ -31,7 +31,7 @@ const std::string& ConfigNode::get_name_or_throw() const {
 std::runtime_error ConfigNode::create_parsing_error(
     std::string_view error) const {
     std::stringstream ss;
-    ss << "Error while parsing node " << *this;
+    ss << "Error while parsing node " << *this << ":\n";
     ss << error << '\n';
     return std::runtime_error(ss.str());
 }
@@ -144,7 +144,7 @@ ConfigNodeExpected ConfigNode::operator[](std::string_view key) const {
     const YAML::Node child_node = m_node[key];
     if (!child_node) {
         std::stringstream ss;
-        ss << "Key error: node " << *this;
+        ss << "Key error: node " << *this << ":\n";
         ss << "does not have key `" << key << '`';
         return std::unexpected(ss.str());
     }
