@@ -156,8 +156,7 @@ ConfigNodeExpected ConfigNode::operator[](std::string_view key) const {
 };
 
 ConfigNode load_file(std::filesystem::path path) {
-    return ConfigNode(YAML::LoadFile(path.string()), std::nullopt,
-                      path);
+    return ConfigNode(YAML::LoadFile(path.string()), std::nullopt, path);
 }
 
 }  // namespace sim
