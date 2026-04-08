@@ -47,6 +47,8 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](
                 return std::unexpected(ss.str());
             }
             // conversion is successful. tries to find preset in m_presets_node
+
+            
             ConfigNodeExpected preset_node = presets_node[preset_name.value()];
             if (!preset_node.has_value()) {
                 // m_presets_node hasn't preset with the specified name in
@@ -119,7 +121,8 @@ ConfigNodeWithPreset load_file_with_presets(std::filesystem::path path) {
     return ConfigNodeWithPreset(node, node["presets"].to_optional());
 }
 
-ConfigNodeWithPreset::Iterator::Iterator(ConfigNode::Iterator a_it) : m_iterator(a_it) {}
+ConfigNodeWithPreset::Iterator::Iterator(ConfigNode::Iterator a_it)
+    : m_iterator(a_it) {}
 
 ConfigNodeWithPreset::Iterator& ConfigNodeWithPreset::Iterator::operator++() {
     ++m_iterator;
@@ -151,6 +154,5 @@ ConfigNodeWithPreset::Iterator ConfigNodeWithPreset::begin() const {
 ConfigNodeWithPreset::Iterator ConfigNodeWithPreset::end() const {
     return Iterator(m_node.end());
 }
-
 
 }  // namespace sim
