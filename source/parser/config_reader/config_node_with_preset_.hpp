@@ -36,7 +36,7 @@ public:
         return as<T>().value_or_throw();
     }
 
-    const std::optional<std::string>& get_path_node() const;
+    const std::optional<std::filesystem::path>& get_path_node() const;
 
     [[nodiscard]] const std::string& get_name_or_throw() const;
 

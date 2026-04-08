@@ -3,7 +3,7 @@
 namespace sim {
 
 ConfigNode::ConfigNode(YAML::Node a_node, std::optional<std::string> a_name,
-                       std::optional<std::string> a_path_node)
+                       std::optional<std::filesystem::path> a_path_node)
     : m_node(std::move(a_node)),
       m_name(std::move(a_name)),
       m_path_node(std::move(a_path_node)) {
@@ -35,7 +35,7 @@ std::runtime_error ConfigNode::create_parsing_error(
     return std::runtime_error(ss.str());
 }
 
-const std::optional<std::string>& ConfigNode::get_path_node() const {
+const std::optional<std::filesystem::path>& ConfigNode::get_path_node() const {
     return m_path_node;
 }
 
@@ -48,7 +48,7 @@ std::ostream& operator<<(std::ostream& out, const ConfigNode& node) {
     }
     if (mark.line >= 0 && mark.column >= 0) {
         if (node.m_path_node.has_value()) {
-            out << "config path: " << node.m_path_node.value();
+            out << "config path: " << node.m_path_node.value().string();
         } else {
             out << "config path: null";
         }
@@ -157,7 +157,7 @@ ConfigNodeExpected ConfigNode::operator[](std::string_view key) const {
 
 ConfigNode load_file(std::filesystem::path path) {
     return ConfigNode(YAML::LoadFile(path.string()), std::nullopt,
-                      path.string());
+                      path);
 }
 
 }  // namespace sim
