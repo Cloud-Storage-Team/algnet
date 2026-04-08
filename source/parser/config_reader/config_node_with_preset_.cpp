@@ -85,8 +85,8 @@ std::ostream& operator<<(std::ostream& out, const ConfigNodeWithPreset& node) {
 }
 
 const std::optional<std::filesystem::path>&
-ConfigNodeWithPreset::get_path_node() const {
-    return m_node.get_path_node();
+ConfigNodeWithPreset::get_config_path() const {
+    return m_node.get_config_path();
 }
 
 const std::string& ConfigNodeWithPreset::get_name_or_throw() const {
