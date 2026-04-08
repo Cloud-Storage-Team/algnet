@@ -8,8 +8,13 @@
 #include "units/units.hpp"
 
 using TimeNs = Time<Nanosecond>;
+using TimeUs = Time<Microsecond>;
+
 using SizeByte = Size<Byte>;
+
 using SpeedGbps = Speed<GBit, Second>;
+using SpeedMbps = Speed<MBit, Second>;
+
 using Id = std::string;
 using OnDeliveryCallback = std::function<void()>;
 
