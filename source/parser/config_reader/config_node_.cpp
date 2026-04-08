@@ -2,8 +2,12 @@
 
 namespace sim {
 
-ConfigNode::ConfigNode(YAML::Node a_node, std::optional<std::string> a_name)
-    : m_node(std::move(a_node)), m_name(std::move(a_name)) {
+ConfigNode::ConfigNode(
+    const YAML::Node& a_node, const std::optional<std::string>& a_name,
+    const std::optional<std::filesystem::path>& a_config_path)
+    : m_node(std::move(a_node)),
+      m_name(std::move(a_name)),
+      m_config_path(std::move(a_config_path)) {
     if (!m_node) {
         throw std::runtime_error(
             "Can not construct ConfigNode: given YAML::Node is "
@@ -32,6 +36,11 @@ std::runtime_error ConfigNode::create_parsing_error(
     return std::runtime_error(ss.str());
 }
 
+const std::optional<std::filesystem::path>& ConfigNode::get_config_path()
+    const {
+    return m_config_path;
+}
+
 std::ostream& operator<<(std::ostream& out, const ConfigNode& node) {
     YAML::Mark mark = node.m_node.Mark();
     if (node.m_name) {
@@ -40,6 +49,11 @@ std::ostream& operator<<(std::ostream& out, const ConfigNode& node) {
         out << "without name";
     }
     if (mark.line >= 0 && mark.column >= 0) {
+        if (node.m_config_path.has_value()) {
+            out << "config path: " << node.m_config_path.value().string();
+        } else {
+            out << "config path: null";
+        }
         out << " at line " << mark.line + 1 << " column " << mark.column + 1;
     } else {
         out << " at unknown location";
@@ -65,7 +79,9 @@ const std::string& ConfigNode::Tag() const noexcept { return m_node.Tag(); }
 // size/iterator
 std::size_t ConfigNode::size() const noexcept { return m_node.size(); }
 
-ConfigNode::Iterator::Iterator(YAML::const_iterator a_it) : m_iterator(a_it) {}
+ConfigNode::Iterator::Iterator(YAML::const_iterator a_it,
+                               const ConfigNode& a_owner)
+    : m_iterator(a_it), m_owner(a_owner) {}
 
 ConfigNode::Iterator& ConfigNode::Iterator::operator++() {
     ++m_iterator;
@@ -97,7 +113,7 @@ ConfigNode ConfigNode::Iterator::operator*() const {
         //  - value_1
         //  ...
         YAML::Node node = *m_iterator;
-        return ConfigNode(node, std::nullopt);
+        return ConfigNode(node, std::nullopt, m_owner.get_config_path());
     } else {
         // iterator goes over "named" nodes like
         // list:
@@ -112,15 +128,17 @@ ConfigNode ConfigNode::Iterator::operator*() const {
                 "nodes are invalid");
         }
         std::string key = key_node.as<std::string>();
-        return ConfigNode(value_node, key);
+        return ConfigNode(value_node, key, m_owner.get_config_path());
     }
 }
 
 ConfigNode::Iterator ConfigNode::begin() const {
-    return Iterator(m_node.begin());
+    return Iterator(m_node.begin(), *this);
 }
 
-ConfigNode::Iterator ConfigNode::end() const { return Iterator(m_node.end()); }
+ConfigNode::Iterator ConfigNode::end() const {
+    return Iterator(m_node.end(), *this);
+}
 
 ConfigNodeExpected ConfigNode::operator[](std::string_view key) const {
     const YAML::Node child_node = m_node[key];
@@ -133,14 +151,14 @@ ConfigNodeExpected ConfigNode::operator[](std::string_view key) const {
     if (child_node.IsNull()) {
         // if node is null, its name should be empty
         return ConfigNodeExpected(
-            ConfigNode(std::move(child_node), std::nullopt));
+            ConfigNode(std::move(child_node), std::nullopt, m_config_path));
     }
     return ConfigNodeExpected(
-        ConfigNode(std::move(child_node), std::string(key)));
+        ConfigNode(std::move(child_node), std::string(key), m_config_path));
 };
 
 ConfigNode load_file(std::filesystem::path path) {
-    return ConfigNode(YAML::LoadFile(path.string()));
+    return ConfigNode(YAML::LoadFile(path.string()), std::nullopt, path);
 }
 
 }  // namespace sim
