@@ -47,8 +47,6 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](
                 return std::unexpected(ss.str());
             }
             // conversion is successful. tries to find preset in m_presets_node
-
-            
             ConfigNodeExpected preset_node = presets_node[preset_name.value()];
             if (!preset_node.has_value()) {
                 // m_presets_node hasn't preset with the specified name in
