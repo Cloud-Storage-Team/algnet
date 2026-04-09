@@ -1,5 +1,6 @@
 #include "network_parser.hpp"
 
+#include "all-to-all_network_parser.hpp"
 #include "custom_network_parser.hpp"
 #include "parser/relative_path_parser.hpp"
 #include "parser/topology/topology_parser.hpp"
@@ -17,7 +18,14 @@ Network parse_network(const std::filesystem::path& path) {
 
     Topology topology = parse_topology(topology_config);
 
-    return parse_custom_network(topology, node.get_node());
+    std::string type = node["type"].value_or_throw().as_or_throw<std::string>();
+    if (type == "custom") {
+        return parse_custom_network(topology, node.get_node());
+    } else if (type == "all-to-all") {
+        return parse_all_to_all_network(topology, node);
+    }
+    throw node.create_parsing_error(
+        fmt::format("Undefined network type: {}", type));
 }
 
 }  // namespace sim

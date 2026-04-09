@@ -1,4 +1,8 @@
 topology_config_path: topology.yml
+type: all-to-all
+
+connections_params:
+  preset-name: default-connection
 
 presets:
   default-connection:

@@ -6,5 +6,5 @@ scenario:
   when: 0ns
   size: 30KB
   repeat_count: 1
-  connections: ^conn.*
+  connections: .*
   repeat_interval: 500000ns
