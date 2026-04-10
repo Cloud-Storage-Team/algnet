@@ -9,7 +9,6 @@ namespace sim {
 std::shared_ptr<IConnection> parse_i_connection(
     const ConfigNodeWithPreset& node, const utils::IdTable<IHost>& hosts_table);
 
-
 std::shared_ptr<IConnection> parse_i_connection(
     std::shared_ptr<IHost> sender, std::shared_ptr<IHost> receiver,
     const ConfigNodeWithPreset& params);
@@ -17,6 +16,5 @@ std::shared_ptr<IConnection> parse_i_connection(
 std::shared_ptr<IConnection> parse_i_connection(
     std::shared_ptr<IHost> sender, std::shared_ptr<IHost> receiver,
     const ConfigNodeWithPreset& params, const Id& connection_id);
-
 
 }  // namespace sim
