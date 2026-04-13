@@ -2,8 +2,11 @@
 
 #include <spdlog/fmt/fmt.h>
 
+#include <fstream>
+
 #include "logger/logger.hpp"
 #include "scheduler/scheduler.hpp"
+#include "utils/filesystem.hpp"
 #include "utils/str_expected.hpp"
 
 namespace sim {
@@ -98,9 +101,6 @@ MetricsTable Link::get_metrics_table() const {
     return result;
 }
 
-void Link::write_inner_metrics(
-    [[maybe_unused]] std::filesystem::path output_dir) const {}
-
 Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
            SpeedGbps a_speed, TimeNs a_propagation_delay,
            SizeByte a_max_from_egress_buffer_size,
@@ -169,6 +169,84 @@ void Link::start_head_packet_sending() {
     Scheduler::get_instance().add(
         current_time + get_transmission_delay(m_from_egress.front()),
         [link = shared_from_this()]() { link->transmit(); });
+}
+
+void Link::write_inner_metrics(std::filesystem::path output_dir) const {
+    write_thoughput_to_csv(output_dir / "throughput.csv");
+
+    write_ingress_queue_metrics_to_csv(output_dir / "ingress_buffer.csv");
+
+    write_eggress_queue_metrics_to_csv(output_dir / "egress_buffer.csv");
+}
+
+void Link::write_ingress_queue_metrics_to_csv(
+    std::filesystem::path output_path) const {
+    utils::create_all_directories(output_path);
+    std::ofstream out(output_path);
+    if (!out) {
+        throw std::runtime_error(fmt::format(
+            "Failed to create file for summary: {}", output_path.string()));
+    }
+    out << "Maximal size"
+        << ", Average size"
+        << ", Peak size"
+        << ", Packets transmitted"
+        << ", Packets dropped"
+        << ", Drop percent\n";
+
+    out << m_to_ingress.get_size() << ", " << m_to_ingress.get_mean() << ", "
+        << m_to_ingress.get_max_size() << ", "
+        << m_to_ingress.get_total_transmitted() << ", "
+        << m_to_ingress.get_total_dropped() << ", "
+        << m_to_ingress.get_total_dropped() /
+               static_cast<double>(m_to_ingress.get_total_dropped() +
+                                   m_to_ingress.get_total_dropped())
+        << "\n";
+}
+
+void Link::write_eggress_queue_metrics_to_csv(
+    std::filesystem::path output_path) const {
+    utils::create_all_directories(output_path);
+    std::ofstream out(output_path);
+    if (!out) {
+        throw std::runtime_error(fmt::format(
+            "Failed to create file for summary: {}", output_path.string()));
+    }
+    out << "Maximal size"
+        << ", Average size"
+        << ", Peak size"
+        << ", Packets transmitted"
+        << ", Packets dropped"
+        << ", Drop percent\n";
+
+    out << m_to_ingress.get_size() << ", " << m_to_ingress.get_mean() << ", "
+        << m_to_ingress.get_max_size() << ", "
+        << m_to_ingress.get_total_transmitted() << ", "
+        << m_to_ingress.get_total_dropped() << ", "
+        << m_to_ingress.get_total_dropped() /
+               static_cast<double>(m_to_ingress.get_total_dropped() +
+                                   m_to_ingress.get_total_dropped())
+        << "\n";
+}
+
+void Link::write_thoughput_to_csv(std::filesystem::path output_path) const {
+    utils::create_all_directories(output_path);
+    std::ofstream out(output_path);
+    if (!out) {
+        throw std::runtime_error(fmt::format(
+            "Failed to create file for summary: {}", output_path.string()));
+    }
+    out << "Capacity"
+        << ", Actual"
+        << ", Utilization"
+        << ", Latency\n";
+
+    TimeNs elapsed_time = m_ctx.m_last_transmission - m_ctx.m_last_transmission;
+    uint64_t actual = m_ctx.m_total_data.value() / elapsed_time.value();
+    uint64_t utilization = actual / m_ctx.speed.value();
+
+    out << m_ctx.speed << ", " << actual << ", " << utilization << ", "
+        << m_ctx.latency << "\n";
 }
 
 }  // namespace sim

@@ -12,13 +12,13 @@ public:
 };
 
 TEST_F(ConnectionSendTest, SimpleSend) {
-    auto mplb = std::make_shared<MplbMock>(SizeByte(100));
+    auto mplb = std::make_shared<MplbMock>(SizeByte(100ul));
     auto connection = sim::Connection::create_shared("", mplb);
 
     bool delivered = false;
 
     if (auto res =
-            connection->send_data(sim::Data(sim::DataId(), SizeByte(100)),
+            connection->send_data(sim::Data(sim::DataId(), SizeByte(100ul)),
                                   [&]() { delivered = true; });
         !res.has_value()) {
         FAIL() << res.error();
@@ -28,13 +28,13 @@ TEST_F(ConnectionSendTest, SimpleSend) {
 }
 
 TEST_F(ConnectionSendTest, SendManyPortions) {
-    auto mplb = std::make_shared<MplbMock>(SizeByte(10));
+    auto mplb = std::make_shared<MplbMock>(SizeByte(10ul));
     auto connection = sim::Connection::create_shared("", mplb);
 
     bool delivered = false;
 
     if (auto res =
-            connection->send_data(sim::Data(sim::DataId(), SizeByte(100)),
+            connection->send_data(sim::Data(sim::DataId(), SizeByte(100ul)),
                                   [&]() { delivered = true; });
         !res.has_value()) {
         FAIL() << res.error();
@@ -44,12 +44,12 @@ TEST_F(ConnectionSendTest, SendManyPortions) {
 }
 
 TEST_F(ConnectionSendTest, IncorrectSend) {
-    auto mplb = std::make_shared<MplbMock>(SizeByte(0));
+    auto mplb = std::make_shared<MplbMock>(SizeByte(0ul));
     auto connection = sim::Connection::create_shared("", mplb);
 
     bool delivered = false;
 
-    auto res = connection->send_data(sim::Data(sim::DataId(), SizeByte(100)),
+    auto res = connection->send_data(sim::Data(sim::DataId(), SizeByte(100ul)),
                                      [&]() { delivered = true; });
     ASSERT_TRUE(res.has_value()) << res.error();
     ASSERT_FALSE(delivered)
@@ -57,14 +57,14 @@ TEST_F(ConnectionSendTest, IncorrectSend) {
 }
 
 TEST_F(ConnectionSendTest, SendRepeatingDataIds) {
-    auto mplb = std::make_shared<MplbMock>(SizeByte(100));
+    auto mplb = std::make_shared<MplbMock>(SizeByte(100ul));
     auto connection = sim::Connection::create_shared("", mplb);
 
     sim::DataId id("id");
     {
         bool delivered = false;
 
-        auto res = connection->send_data(sim::Data(id, SizeByte(100)),
+        auto res = connection->send_data(sim::Data(id, SizeByte(100ul)),
                                          [&]() { delivered = true; });
         ASSERT_TRUE(res.has_value()) << res.error();
         ASSERT_TRUE(delivered) << "Data should be delivered, but it was not";
@@ -72,7 +72,7 @@ TEST_F(ConnectionSendTest, SendRepeatingDataIds) {
     {
         bool delivered = false;
 
-        auto res = connection->send_data(sim::Data(id, SizeByte(100)),
+        auto res = connection->send_data(sim::Data(id, SizeByte(100ul)),
                                          [&]() { delivered = true; });
         ASSERT_FALSE(res.has_value())
             << "Sending portion of data with repeating id should fail";
@@ -82,7 +82,7 @@ TEST_F(ConnectionSendTest, SendRepeatingDataIds) {
 }
 
 TEST_F(ConnectionSendTest, SendManyIds) {
-    auto mplb = std::make_shared<MplbMock>(SizeByte(100), false);
+    auto mplb = std::make_shared<MplbMock>(SizeByte(100ul), false);
     auto connection = sim::Connection::create_shared("", mplb);
 
     const size_t IDS_COUNT = 3;
@@ -93,7 +93,7 @@ TEST_F(ConnectionSendTest, SendManyIds) {
         ids[i] = fmt::format("id_{}", i);
 
         auto res =
-            connection->send_data(sim::Data(ids[i], SizeByte(100)),
+            connection->send_data(sim::Data(ids[i], SizeByte(100ul)),
                                   [&delivered, i]() { delivered[i] = true; });
         ASSERT_TRUE(res.has_value()) << res.error();
         ASSERT_FALSE(delivered[i]) << fmt::format(

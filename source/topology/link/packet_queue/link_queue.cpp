@@ -27,6 +27,12 @@ LinkQueue::LinkQueue(SizeByte a_queue_size, Id a_link_id, LinkQueueType a_type)
 bool LinkQueue::push(const Packet& packet) {
     bool result = m_queue.push(packet);
     record_size();
+    if (result) {
+        m_total_packets_transmitted++;
+    } else {
+        m_total_packets_dropped++;
+    }
+    m_delivery_bytes_statistics.add_record(packet.size);
     return result;
 }
 
@@ -48,6 +54,19 @@ SizeByte LinkQueue::get_max_size() const { return m_queue.get_max_size(); }
 std::shared_ptr<const MetricsStorage> LinkQueue::get_queue_size_storage()
     const {
     return m_queue_size_storage;
+}
+
+uint64_t LinkQueue::get_total_transmitted() const {
+    return m_total_packets_transmitted;
+}
+
+uint64_t LinkQueue::get_total_dropped() const {
+    return m_total_packets_dropped;
+}
+
+SizeByte LinkQueue::get_mean() const {
+    std::optional<SizeByte> result = m_delivery_bytes_statistics.get_mean();
+    return (result.has_value() ? result.value() : SizeByte(0ul));
 }
 
 void LinkQueue::record_size() {

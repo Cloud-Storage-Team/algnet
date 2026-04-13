@@ -24,14 +24,14 @@ sim::Packet& TestLink::get_packet() { return packet; };
 std::shared_ptr<sim::IDevice> TestLink::get_from() const { return src.lock(); };
 std::shared_ptr<sim::IDevice> TestLink::get_to() const { return dst.lock(); };
 
-SizeByte TestLink::get_from_egress_queue_size() const { return SizeByte(0); }
+SizeByte TestLink::get_from_egress_queue_size() const { return SizeByte(0ul); }
 SizeByte TestLink::get_max_from_egress_buffer_size() const {
-    return SizeByte(4096);
+    return SizeByte(4096ul);
 }
 
-SizeByte TestLink::get_to_ingress_queue_size() const { return SizeByte(0); }
+SizeByte TestLink::get_to_ingress_queue_size() const { return SizeByte(0ul); }
 SizeByte TestLink::get_max_to_ingress_queue_size() const {
-    return SizeByte(4096);
+    return SizeByte(4096ul);
 }
 
 const Id& TestLink::get_id() const { return ""; }

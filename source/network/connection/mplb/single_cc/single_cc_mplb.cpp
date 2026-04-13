@@ -23,9 +23,9 @@ SingleCCMplb::SingleCCMplb(MetricableCC a_cc,
                            SizeByte a_packet_size,
                            SingleCCMetricsFilters a_metrics_filters)
     : m_cc(std::move(a_cc)),
-      m_sent_data_size(0),
-      m_delivered_data_size(0),
-      m_packets_in_flight(0),
+      m_sent_data_size(0ul),
+      m_delivered_data_size(0ul),
+      m_packets_in_flight(0ul),
       m_path_chooser(std::move(a_path_chooser)),
       m_packet_size(a_packet_size),
       m_delivery_rate_fairness(m_path_chooser->get_flows_table()),
@@ -44,7 +44,7 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
     TimeNs shift(0);
 
     std::size_t packets_count =
-        (data.size + m_packet_size - SizeByte(1)) / m_packet_size;
+        (data.size + m_packet_size - SizeByte(1ul)) / m_packet_size;
 
     std::shared_ptr<utils::CallbackObserver> observer =
         std::make_shared<utils::CallbackObserver>(packets_count, callback);

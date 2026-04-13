@@ -138,7 +138,7 @@ void TcpFlow::process_data_packet(const Packet& data,
     ack.sender_port = m_context.receiver_port;
     ack.receiver_id = IdWithHash(m_context.sender->get_id());
     ack.receiver_port = m_context.sender_port;
-    ack.size = SizeByte(1);
+    ack.size = SizeByte(1ul);
     ack.ttl = M_MAX_TTL;
     auto exp_void = ack.flags.set_flag(m_packet_type_label, PacketType::ACK);
     if (!exp_void.has_value()) {

@@ -2,6 +2,7 @@
 
 #include "metrics/metrics_storage.hpp"
 #include "simple_packet_queue.hpp"
+#include "utils/statistics.hpp"
 
 namespace sim {
 
@@ -25,6 +26,10 @@ public:
     virtual SizeByte get_size() const final;
     virtual bool empty() const final;
     virtual SizeByte get_max_size() const final;
+    virtual SizeByte get_mean() const final;
+
+    virtual uint64_t get_total_transmitted() const;
+    virtual uint64_t get_total_dropped() const final;
 
     virtual std::shared_ptr<const MetricsStorage> get_queue_size_storage()
         const;
@@ -35,6 +40,10 @@ private:
     SimplePacketQueue m_queue;
     Id m_link_id;
     LinkQueueType m_type;
+    uint64_t m_total_packets_transmitted = 0;
+    uint64_t m_total_packets_dropped = 0;
+    utils::Statistics<SizeByte> m_delivery_bytes_statistics =
+        utils::Statistics<SizeByte>();
 
     std::shared_ptr<MetricsStorage> m_queue_size_storage;
 };

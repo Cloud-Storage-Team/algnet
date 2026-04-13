@@ -86,28 +86,28 @@ utils::StrExpected<SizeByte> parse_size(const std::string &size) {
 
     auto [value, unit] = maybe_value_unit.value();
     if (unit == Bit::suffix) {
-        return SizeByte(Size<Bit>(value));
+        return SizeByte(Size<Bit>(static_cast<uint64_t>(value)));
     }
     if (unit == Byte::suffix) {
-        return SizeByte(value);
+        return SizeByte(static_cast<uint64_t>(value));
     }
     if (unit == KBit::suffix) {
-        return SizeByte(Size<KBit>(value));
+        return SizeByte(Size<KBit>(static_cast<uint64_t>(value)));
     }
     if (unit == KByte::suffix) {
-        return SizeByte(Size<KByte>(value));
+        return SizeByte(Size<KByte>(static_cast<uint64_t>(value)));
     }
     if (unit == MBit::suffix) {
-        return SizeByte(Size<MBit>(value));
+        return SizeByte(Size<MBit>(static_cast<uint64_t>(value)));
     }
     if (unit == MByte::suffix) {
-        return SizeByte(Size<MByte>(value));
+        return SizeByte(Size<MByte>(static_cast<uint64_t>(value)));
     }
     if (unit == GBit::suffix) {
-        return SizeByte(Size<GBit>(value));
+        return SizeByte(Size<GBit>(static_cast<uint64_t>(value)));
     }
     if (unit == GByte::suffix) {
-        return SizeByte(Size<GByte>(value));
+        return SizeByte(Size<GByte>(static_cast<uint64_t>(value)));
     }
     return std::unexpected("Unsupported size unit: " + unit);
 }

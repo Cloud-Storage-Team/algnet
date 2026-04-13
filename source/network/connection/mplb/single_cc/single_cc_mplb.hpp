@@ -20,7 +20,7 @@ public:
 
     static std::shared_ptr<SingleCCMplb> create_shared(
         MetricableCC a_cc, std::unique_ptr<IPathChooser> a_path_chooser,
-        SizeByte a_packet_size = SizeByte(1500),
+        SizeByte a_packet_size = SizeByte(1500ul),
         SingleCCMetricsFilters a_metrics_filters = DEFAULT_METRICS_FILTERS);
 
     [[nodiscard]] virtual utils::StrExpected<void> send_data(

@@ -53,7 +53,7 @@ public:
 TEST_F(ComplexConnectionTest, SendOnePortion) {
     size_t count_callback_called = 0;
 
-    SizeByte portion_size(4500);
+    SizeByte portion_size(4500ul);
 
     auto callback = [&]() { count_callback_called++; };
 
