@@ -40,6 +40,9 @@ public:
     virtual void write_inner_metrics(
         [[maybe_unused]] std::filesystem::path output_dir) const final {};
 
+protected:
+    void record_activity() override;
+
 private:
     std::weak_ptr<sim::IDevice> m_from;
     std::weak_ptr<sim::IDevice> m_to;

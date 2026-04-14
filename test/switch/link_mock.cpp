@@ -40,3 +40,5 @@ SizeByte LinkMock::get_max_to_ingress_queue_size() const {
 }
 
 const Id& LinkMock::get_id() const { return ""; }
+
+void LinkMock::record_activity() {}

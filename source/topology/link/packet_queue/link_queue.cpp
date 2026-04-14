@@ -57,11 +57,46 @@ LinkQueueType LinkQueue::get_type() const { return m_type; }
 
 const LinkQueueContext& LinkQueue::get_ctx() const { return m_ctx; }
 
+void LinkQueue::write_queue_metrics_to_csv(std::ofstream& out) const {
+    if (m_type == LinkQueueType::FromEgress) {
+        out << "Egress buffer of " << m_link_id << "\n";
+    } else {
+        out << "Ingress buffer of " << m_link_id << "\n";
+    }
+
+    out << "Maximal size"
+        << ", Average size"
+        << ", Peak size"
+        << ", Packets transmitted"
+        << ", Packets dropped"
+        << ", Drop percent\n";
+
+    const utils::Statistics<SizeByte> statistics = m_ctx.size_statistics;
+
+    SizeByte average = statistics.get_mean().value_or(SizeByte(0ul));
+
+    double drop_percent = 0;
+    double total_packets =
+        static_cast<double>(m_ctx.packets_dropped + m_ctx.packets_transmitted);
+    if (total_packets > 0) {
+        drop_percent = m_ctx.packets_dropped / total_packets;
+    }
+
+    out << get_max_size();
+    out << ", " << average;
+    out << ", " << statistics.get_peak().value_or(SizeByte(0ul));
+    out << ", " << m_ctx.packets_transmitted;
+    out << ", " << m_ctx.packets_dropped;
+    out << ", " << drop_percent;
+    out << "\n\n";
+}
+
 void LinkQueue::record_size() {
     TimeNs now = Scheduler::get_instance().get_current_time();
     SizeByte queue_size = m_queue.get_size();
     m_queue_size_storage->add_record(now, queue_size.value());
-    m_ctx.size_statistics.add_record(m_queue.get_size());
+    m_ctx.size_statistics.add_record(queue_size);
+    m_ctx.size = queue_size;
 }
 
 }  // namespace sim

@@ -9,11 +9,17 @@
 namespace sim {
 
 struct LinkContext {
+    struct ActivityTime {
+        TimeNs first;
+        TimeNs last;
+
+        TimeNs active_time() const { return last - first; }
+    };
+
     SpeedGbps speed;
     TimeNs latency;
-    std::optional<TimeNs> m_first_activity_time = std::nullopt;
-    std::optional<TimeNs> m_last_activiti_time = std::nullopt;
-    SizeByte m_total_data = SizeByte(0ul);
+    std::optional<ActivityTime> activity_time = std::nullopt;
+    SizeByte total_data_transferred = SizeByte(0ul);
 
     bool operator<(const LinkContext& ctx) const {
         return std::make_pair(speed, latency) <
@@ -55,6 +61,9 @@ public:
     virtual SizeByte get_max_to_ingress_queue_size() const = 0;
 
     virtual const LinkContext& get_ctx() const = 0;
+
+protected:
+    virtual void record_activity() = 0;
 };
 
 }  // namespace sim

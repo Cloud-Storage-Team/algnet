@@ -2,8 +2,6 @@
 
 #include <spdlog/fmt/fmt.h>
 
-#include <algorithm>
-
 #include "logger/logger.hpp"
 #include "scheduler/scheduler.hpp"
 #include "utils/filesystem.hpp"
@@ -32,6 +30,7 @@ void Link::schedule_arrival(const Packet& packet) {
                         m_id, packet.to_string()));
         return;
     }
+    record_activity();
 
     if (empty_before_push) {
         start_head_packet_sending();
@@ -137,11 +136,9 @@ void Link::transmit() {
         return;
     }
 
-    TimeNs current_time = Scheduler::get_instance().get_current_time();
+    record_activity();
 
-    if (!m_ctx.m_first_activity_time.has_value()) {
-        m_ctx.m_first_activity_time = current_time;
-    }
+    TimeNs current_time = Scheduler::get_instance().get_current_time();
 
     Scheduler::get_instance().add(
         current_time + m_ctx.latency,
@@ -163,14 +160,8 @@ void Link::arrive(const Packet& packet) {
                         m_id, packet.to_string()));
         return;
     }
-
+    record_activity();
     m_to.lock()->notify_about_arrival();
-    if (!m_ctx.m_last_activiti_time.has_value()) {
-        m_ctx.m_last_activiti_time = std::make_optional<TimeNs>(0ul);
-    }
-    m_ctx.m_last_activiti_time.value() =
-        std::max(m_ctx.m_last_activiti_time.value(),
-                 Scheduler::get_instance().get_current_time());
 
     LOG_INFO("Packet arrived to the next device. Packet: " +
              packet.to_string());
@@ -183,49 +174,18 @@ void Link::start_head_packet_sending() {
         [link = shared_from_this()]() { link->transmit(); });
 }
 
-void Link::write_queue_metrics_to_csv(std::ofstream& out,
-                                      const LinkQueue& queue) const {
-    if (queue.get_type() == LinkQueueType::FromEgress) {
-        out << "Egress buffer (switch)\n";
-    } else {
-        out << "Ingress buffer (host)\n";
-    }
-
-    out << "Maximal size"
-        << ", Average size"
-        << ", Peak size"
-        << ", Packets transmitted"
-        << ", Packets dropped"
-        << ", Drop percent\n";
-
-    std::optional<SizeByte> average_opt =
-        queue.get_ctx().size_statistics.get_mean();
-    SizeByte average =
-        (average_opt.has_value() ? average_opt.value() : SizeByte(0ul));
-    double drop_percent =
-        queue.get_ctx().packets_dropped /
-        static_cast<double>(queue.get_ctx().packets_dropped +
-                            queue.get_ctx().packets_transmitted);
-
-    out << queue.get_ctx().size << ", " << average << ", "
-        << queue.get_max_size() << ", " << queue.get_ctx().packets_transmitted
-        << ", " << queue.get_ctx().packets_dropped << ", " << drop_percent
-        << "\n\n";
-}
-
 void Link::write_inner_metrics(std::filesystem::path output_dir) const {
-    std::filesystem::path output_path = output_dir / "metrics.csv";
+    std::filesystem::path output_path = output_dir / "summary.csv";
     utils::create_all_directories(output_path);
     std::ofstream out(output_path);
     if (!out) {
         throw std::runtime_error(fmt::format(
-            "Failed to create file for summary: {}", output_path.string()));
+            "Failed to create file for report of link '{}': (file path: {})",
+            m_id, output_path.string()));
     }
     write_thoughput_to_csv(out);
-
-    write_queue_metrics_to_csv(out, m_to_ingress);
-
-    write_queue_metrics_to_csv(out, m_from_egress);
+    m_to_ingress.write_queue_metrics_to_csv(out);
+    m_from_egress.write_queue_metrics_to_csv(out);
 }
 
 void Link::write_thoughput_to_csv(std::ofstream& out) const {
@@ -236,28 +196,36 @@ void Link::write_thoughput_to_csv(std::ofstream& out) const {
         << ", Utilization"
         << ", Latency\n";
 
-    if (!m_ctx.m_first_activity_time || !m_ctx.m_last_activiti_time) {
+    if (!m_ctx.activity_time.has_value()) {
         out << m_ctx.speed << ", " << 0 << ", " << 0 << ", " << m_ctx.latency
             << "\n\n";
         return;
     }
 
-    TimeNs elapsed_time = m_ctx.m_last_activiti_time.value() -
-                          m_ctx.m_first_activity_time.value();
+    TimeNs elapsed_time = m_ctx.activity_time.value().active_time();
 
-    if (elapsed_time.value() == 0) {
+    if (elapsed_time == TimeNs(0)) {
         out << m_ctx.speed << ", " << 0 << ", " << 0 << ", " << m_ctx.latency
             << "\n\n";
         return;
     }
 
-    uint64_t actual = m_ctx.m_total_data.value() / elapsed_time.value();
+    SpeedGbps actual = m_ctx.total_data_transferred / elapsed_time;
 
-    uint64_t utilization =
-        (m_ctx.speed.value() == 0 ? 0 : actual / m_ctx.speed.value());
+    double utilization =
+        (m_ctx.speed == SpeedGbps(0) ? 0.0 : actual / m_ctx.speed);
 
     out << m_ctx.speed << ", " << actual << ", " << utilization << ", "
         << m_ctx.latency << "\n\n";
+}
+
+void Link::record_activity() {
+    TimeNs now = Scheduler::get_instance().get_current_time();
+    if (!m_ctx.activity_time.has_value()) {
+        m_ctx.activity_time = LinkContext::ActivityTime{now, now};
+    } else {
+        m_ctx.activity_time->last = now;
+    }
 }
 
 }  // namespace sim
