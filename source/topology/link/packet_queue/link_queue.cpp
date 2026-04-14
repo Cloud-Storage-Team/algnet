@@ -26,13 +26,12 @@ LinkQueue::LinkQueue(SizeByte a_queue_size, Id a_link_id, LinkQueueType a_type)
 
 bool LinkQueue::push(const Packet& packet) {
     bool result = m_queue.push(packet);
-    record_size();
     if (result) {
-        m_total_packets_transmitted++;
+        m_ctx.packets_transmitted++;
     } else {
-        m_total_packets_dropped++;
+        m_ctx.packets_dropped++;
     }
-    m_delivery_bytes_statistics.add_record(packet.size);
+    record_size();
     return result;
 }
 
@@ -45,8 +44,6 @@ void LinkQueue::pop() {
     record_size();
 }
 
-SizeByte LinkQueue::get_size() const { return m_queue.get_size(); }
-
 bool LinkQueue::empty() const { return m_queue.empty(); }
 
 SizeByte LinkQueue::get_max_size() const { return m_queue.get_max_size(); }
@@ -56,23 +53,15 @@ std::shared_ptr<const MetricsStorage> LinkQueue::get_queue_size_storage()
     return m_queue_size_storage;
 }
 
-uint64_t LinkQueue::get_total_transmitted() const {
-    return m_total_packets_transmitted;
-}
+LinkQueueType LinkQueue::get_type() const { return m_type; }
 
-uint64_t LinkQueue::get_total_dropped() const {
-    return m_total_packets_dropped;
-}
-
-SizeByte LinkQueue::get_mean() const {
-    std::optional<SizeByte> result = m_delivery_bytes_statistics.get_mean();
-    return (result.has_value() ? result.value() : SizeByte(0ul));
-}
+const LinkQueueContext& LinkQueue::get_ctx() const { return m_ctx; }
 
 void LinkQueue::record_size() {
     TimeNs now = Scheduler::get_instance().get_current_time();
     SizeByte queue_size = m_queue.get_size();
     m_queue_size_storage->add_record(now, queue_size.value());
+    m_ctx.size_statistics.add_record(m_queue.get_size());
 }
 
 }  // namespace sim

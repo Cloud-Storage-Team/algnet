@@ -8,12 +8,19 @@ namespace sim {
 
 enum class LinkQueueType { FromEgress, ToIngress };
 
+struct LinkQueueContext {
+    SizeByte size;
+    utils::Statistics<SizeByte> size_statistics;
+    uint64_t packets_transmitted;
+    uint64_t packets_dropped;
+};
+
 std::string to_string(LinkQueueType type);
 
 // Class for two types of links:
 // eggress queue of sourse link device or
 // ingress queue of desination link device
-class LinkQueue : public IPacketQueue {
+class LinkQueue {
 public:
     LinkQueue(SizeByte a_max_size, Id a_link_id, LinkQueueType a_type);
     ~LinkQueue() = default;
@@ -23,13 +30,10 @@ public:
     virtual Packet& front() final;
     virtual void pop() final;
 
-    virtual SizeByte get_size() const final;
-    virtual bool empty() const final;
     virtual SizeByte get_max_size() const final;
-    virtual SizeByte get_mean() const final;
-
-    virtual uint64_t get_total_transmitted() const;
-    virtual uint64_t get_total_dropped() const final;
+    virtual LinkQueueType get_type() const final;
+    virtual bool empty() const final;
+    const LinkQueueContext& get_ctx() const;
 
     virtual std::shared_ptr<const MetricsStorage> get_queue_size_storage()
         const;
@@ -40,10 +44,7 @@ private:
     SimplePacketQueue m_queue;
     Id m_link_id;
     LinkQueueType m_type;
-    uint64_t m_total_packets_transmitted = 0;
-    uint64_t m_total_packets_dropped = 0;
-    utils::Statistics<SizeByte> m_delivery_bytes_statistics =
-        utils::Statistics<SizeByte>();
+    LinkQueueContext m_ctx;
 
     std::shared_ptr<MetricsStorage> m_queue_size_storage;
 };

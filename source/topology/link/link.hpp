@@ -1,5 +1,6 @@
 #pragma once
 
+#include <fstream>
 #include <queue>
 
 #include "metrics/metrics_table/i_metricable.hpp"
@@ -48,15 +49,6 @@ public:
     virtual void write_inner_metrics(
         std::filesystem::path output_dir) const final;
 
-    virtual void write_thoughput_to_csv(
-        std::filesystem::path output_path) const final;
-
-    virtual void write_ingress_queue_metrics_to_csv(
-        std::filesystem::path output_path) const final;
-
-    virtual void write_eggress_queue_metrics_to_csv(
-        std::filesystem::path output_path) const final;
-
 private:
     Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
          SpeedGbps a_speed, TimeNs a_delay,
@@ -75,6 +67,11 @@ private:
 
     // Schedule Transmit event
     void start_head_packet_sending();
+
+    void write_queue_metrics_to_csv(std::ofstream& out,
+                                    const LinkQueue& queue) const;
+
+    void write_thoughput_to_csv(std::ofstream& out) const;
 
 private:
     Id m_id;

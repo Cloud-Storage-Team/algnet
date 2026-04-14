@@ -11,8 +11,8 @@ namespace sim {
 struct LinkContext {
     SpeedGbps speed;
     TimeNs latency;
-    TimeNs m_first_transmission = TimeNs(0);
-    TimeNs m_last_transmission = TimeNs(0);
+    std::optional<TimeNs> m_first_activity_time = std::nullopt;
+    std::optional<TimeNs> m_last_activiti_time = std::nullopt;
     SizeByte m_total_data = SizeByte(0ul);
 
     bool operator<(const LinkContext& ctx) const {

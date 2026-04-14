@@ -78,7 +78,8 @@ public:
     constexpr uint64_t value_bits() const { return m_value_bits; }
 
     explicit constexpr operator double() const {
-        return static_cast<double>(value_bits());
+        return static_cast<double>(m_value_bits) /
+               static_cast<double>(TSizeBase::to_bit_multiplier);
     }
 
     constexpr ThisSize operator+(ThisSize size) const {
