@@ -36,6 +36,4 @@ SizeByte TestLink::get_max_to_ingress_queue_size() const {
 
 const Id& TestLink::get_id() const { return ""; }
 
-void TestLink::record_activity() {}
-
 }  // namespace test

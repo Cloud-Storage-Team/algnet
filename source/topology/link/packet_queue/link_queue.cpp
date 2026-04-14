@@ -18,11 +18,13 @@ std::string to_string(LinkQueueType type) {
     }
 }
 
-LinkQueue::LinkQueue(SizeByte a_queue_size, Id a_link_id, LinkQueueType a_type)
+LinkQueue::LinkQueue(SizeByte a_queue_size, Id a_device_id,
+                     LinkQueueType a_type)
     : m_queue(a_queue_size),
-      m_link_id(a_link_id),
       m_type(a_type),
-      m_queue_size_storage(std::make_shared<MetricsStorage>()) {}
+      m_queue_size_storage(std::make_shared<MetricsStorage>()) {
+    m_ctx.device_id = a_device_id;
+}
 
 bool LinkQueue::push(const Packet& packet) {
     bool result = m_queue.push(packet);
@@ -57,11 +59,11 @@ LinkQueueType LinkQueue::get_type() const { return m_type; }
 
 const LinkQueueContext& LinkQueue::get_ctx() const { return m_ctx; }
 
-void LinkQueue::write_queue_metrics_to_csv(std::ofstream& out) const {
+void LinkQueue::write_metrics_to_csv(std::ofstream& out) const {
     if (m_type == LinkQueueType::FromEgress) {
-        out << "Egress buffer of " << m_link_id << "\n";
+        out << "Egress buffer of " << m_ctx.device_id << "\n";
     } else {
-        out << "Ingress buffer of " << m_link_id << "\n";
+        out << "Ingress buffer of " << m_ctx.device_id << "\n";
     }
 
     out << "Maximal size"
@@ -71,16 +73,15 @@ void LinkQueue::write_queue_metrics_to_csv(std::ofstream& out) const {
         << ", Packets dropped"
         << ", Drop percent\n";
 
-    const utils::Statistics<SizeByte> statistics = m_ctx.size_statistics;
+    const utils::Statistics<SizeByte>& statistics = m_ctx.size_statistics;
 
     SizeByte average = statistics.get_mean().value_or(SizeByte(0ul));
 
-    double drop_percent = 0;
-    double total_packets =
-        static_cast<double>(m_ctx.packets_dropped + m_ctx.packets_transmitted);
-    if (total_packets > 0) {
-        drop_percent = m_ctx.packets_dropped / total_packets;
-    }
+    uint64_t total_packets = m_ctx.packets_dropped + m_ctx.packets_transmitted;
+    double drop_percent =
+        (total_packets == 0
+             ? 0.0
+             : m_ctx.packets_dropped / static_cast<double>(total_packets));
 
     out << get_max_size();
     out << ", " << average;
@@ -88,7 +89,7 @@ void LinkQueue::write_queue_metrics_to_csv(std::ofstream& out) const {
     out << ", " << m_ctx.packets_transmitted;
     out << ", " << m_ctx.packets_dropped;
     out << ", " << drop_percent;
-    out << "\n\n";
+    out << '\n';
 }
 
 void LinkQueue::record_size() {

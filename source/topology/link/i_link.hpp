@@ -12,8 +12,6 @@ struct LinkContext {
     struct ActivityTime {
         TimeNs first;
         TimeNs last;
-
-        TimeNs active_time() const { return last - first; }
     };
 
     SpeedGbps speed;
@@ -61,9 +59,6 @@ public:
     virtual SizeByte get_max_to_ingress_queue_size() const = 0;
 
     virtual const LinkContext& get_ctx() const = 0;
-
-protected:
-    virtual void record_activity() = 0;
 };
 
 }  // namespace sim

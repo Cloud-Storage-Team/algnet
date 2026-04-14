@@ -49,9 +49,6 @@ public:
     virtual void write_inner_metrics(
         std::filesystem::path output_dir) const final;
 
-protected:
-    void record_activity() override;
-
 private:
     Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
          SpeedGbps a_speed, TimeNs a_delay,
@@ -72,6 +69,8 @@ private:
     void start_head_packet_sending();
 
     void write_thoughput_to_csv(std::ofstream& out) const;
+
+    void record_activity();
 
 private:
     Id m_id;

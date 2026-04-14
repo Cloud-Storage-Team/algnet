@@ -48,9 +48,6 @@ public:
 
     virtual const sim::LinkContext& get_ctx() const final { return m_ctx; }
 
-protected:
-    void record_activity() override;
-
 private:
     std::weak_ptr<sim::IDevice> src;
     std::weak_ptr<sim::IDevice> dst;

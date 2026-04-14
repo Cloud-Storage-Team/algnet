@@ -109,12 +109,17 @@ Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
       m_from(a_from),
       m_to(a_to),
       m_ctx{a_speed, a_propagation_delay},
-      m_from_egress(a_max_from_egress_buffer_size, a_id,
+      m_from_egress(a_max_from_egress_buffer_size,
+                    (a_from.lock() ? a_from.lock()->get_id() : Id{}),
                     LinkQueueType::FromEgress),
-      m_to_ingress(a_max_to_ingress_buffer_size, a_id,
+      m_to_ingress(a_max_to_ingress_buffer_size,
+                   (a_to.lock() ? a_to.lock()->get_id() : Id{}),
                    LinkQueueType::ToIngress),
       m_metrics_filters(a_metrics_filters) {
-    if (a_from.expired() || a_to.expired()) {
+    auto from = a_from.lock();
+    auto to = a_to.lock();
+
+    if (!from || !to) {
         LOG_WARN("Passed link to device is expired");
     } else if (a_speed == SpeedGbps(0)) {
         LOG_WARN("Passed zero link speed");
@@ -184,8 +189,8 @@ void Link::write_inner_metrics(std::filesystem::path output_dir) const {
             m_id, output_path.string()));
     }
     write_thoughput_to_csv(out);
-    m_to_ingress.write_queue_metrics_to_csv(out);
-    m_from_egress.write_queue_metrics_to_csv(out);
+    m_to_ingress.write_metrics_to_csv(out);
+    m_from_egress.write_metrics_to_csv(out);
 }
 
 void Link::write_thoughput_to_csv(std::ofstream& out) const {
@@ -198,15 +203,19 @@ void Link::write_thoughput_to_csv(std::ofstream& out) const {
 
     if (!m_ctx.activity_time.has_value()) {
         out << m_ctx.speed << ", " << 0 << ", " << 0 << ", " << m_ctx.latency
-            << "\n\n";
+            << '\n';
         return;
     }
 
-    TimeNs elapsed_time = m_ctx.activity_time.value().active_time();
+    std::optional<LinkContext::ActivityTime> activity_time =
+        m_ctx.activity_time;
+
+    TimeNs elapsed_time =
+        activity_time.value().last - activity_time.value().first;
 
     if (elapsed_time == TimeNs(0)) {
         out << m_ctx.speed << ", " << 0 << ", " << 0 << ", " << m_ctx.latency
-            << "\n\n";
+            << '\n';
         return;
     }
 
@@ -216,7 +225,7 @@ void Link::write_thoughput_to_csv(std::ofstream& out) const {
         (m_ctx.speed == SpeedGbps(0) ? 0.0 : actual / m_ctx.speed);
 
     out << m_ctx.speed << ", " << actual << ", " << utilization << ", "
-        << m_ctx.latency << "\n\n";
+        << m_ctx.latency << '\n';
 }
 
 void Link::record_activity() {

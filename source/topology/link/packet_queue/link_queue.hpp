@@ -9,6 +9,7 @@ namespace sim {
 enum class LinkQueueType { FromEgress, ToIngress };
 
 struct LinkQueueContext {
+    Id device_id;
     SizeByte size;
     utils::Statistics<SizeByte> size_statistics;
     uint64_t packets_transmitted;
@@ -22,7 +23,7 @@ std::string to_string(LinkQueueType type);
 // ingress queue of desination link device
 class LinkQueue {
 public:
-    LinkQueue(SizeByte a_max_size, Id a_link_id, LinkQueueType a_type);
+    LinkQueue(SizeByte a_max_size, Id a_device_id, LinkQueueType a_type);
     ~LinkQueue() = default;
 
     bool push(const Packet& packet);
@@ -34,7 +35,7 @@ public:
     LinkQueueType get_type() const;
     bool empty() const;
     const LinkQueueContext& get_ctx() const;
-    void write_queue_metrics_to_csv(std::ofstream& out) const;
+    void write_metrics_to_csv(std::ofstream& out) const;
 
     std::shared_ptr<const MetricsStorage> get_queue_size_storage() const;
 
@@ -42,7 +43,6 @@ private:
     void record_size();
 
     SimplePacketQueue m_queue;
-    Id m_link_id;
     LinkQueueType m_type;
     LinkQueueContext m_ctx;
 
