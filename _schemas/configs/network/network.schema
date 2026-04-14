@@ -2,8 +2,7 @@ topology_config_path:
   _type: string
   _doc: Path ro topology config. Might be absolute or relative
 
-connections:
-  _type: map
-  _values:
-    _type: connection.schema
-  _doc: Map of abailable connections - user interfaces of data transreffing
+_type: one-of
+_options:
+  - custom: custom.schema
+  - all-to-all: all-to-all.schema
