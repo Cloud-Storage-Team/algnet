@@ -189,7 +189,9 @@ void Link::write_inner_metrics(std::filesystem::path output_dir) const {
             m_id, output_path.string()));
     }
     write_thoughput_to_csv(out);
+    out << '\n';
     m_to_ingress.write_metrics_to_csv(out);
+    out << '\n';
     m_from_egress.write_metrics_to_csv(out);
 }
 
@@ -206,12 +208,9 @@ void Link::write_thoughput_to_csv(std::ofstream& out) const {
             << '\n';
         return;
     }
-
-    std::optional<LinkContext::ActivityTime> activity_time =
-        m_ctx.activity_time;
-
-    TimeNs elapsed_time =
-        activity_time.value().last - activity_time.value().first;
+    const LinkContext::ActivityTime& activity_time =
+        m_ctx.activity_time.value();
+    TimeNs elapsed_time = activity_time.last - activity_time.first;
 
     if (elapsed_time == TimeNs(0)) {
         out << m_ctx.speed << ", " << 0 << ", " << 0 << ", " << m_ctx.latency

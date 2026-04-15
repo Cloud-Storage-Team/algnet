@@ -8,7 +8,7 @@
 class LinkMock : public sim::ILink {
 public:
     LinkMock(std::weak_ptr<sim::IDevice> a_from,
-             std::weak_ptr<sim::IDevice> a_to);
+             std::weak_ptr<sim::IDevice> a_to, Id a_id = "");
     ~LinkMock() = default;
     virtual void schedule_arrival(const sim::Packet& a_packet) final;
     virtual void process_arrival(sim::Packet packet) final;
@@ -46,4 +46,5 @@ private:
     std::vector<sim::Packet> m_arrived_packets;
     std::optional<sim::Packet> m_ingress_packet;
     sim::LinkContext m_ctx;
+    Id m_id;
 };

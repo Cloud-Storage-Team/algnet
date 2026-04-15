@@ -1,8 +1,12 @@
 #include "link_mock.hpp"
 
 LinkMock::LinkMock(std::weak_ptr<sim::IDevice> a_from,
-                   std::weak_ptr<sim::IDevice> a_to)
-    : m_from(a_from), m_to(a_to), m_arrived_packets(), m_ingress_packet() {}
+                   std::weak_ptr<sim::IDevice> a_to, Id a_id)
+    : m_from(a_from),
+      m_to(a_to),
+      m_arrived_packets(),
+      m_ingress_packet(),
+      m_id(a_id) {}
 
 std::shared_ptr<sim::IDevice> LinkMock::get_from() const {
     return m_from.lock();
@@ -39,4 +43,4 @@ SizeByte LinkMock::get_max_to_ingress_queue_size() const {
     return SizeByte(0ul);
 }
 
-const Id& LinkMock::get_id() const { return ""; }
+const Id& LinkMock::get_id() const { return m_id; }

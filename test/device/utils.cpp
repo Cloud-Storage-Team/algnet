@@ -14,8 +14,8 @@ std::vector<std::shared_ptr<sim::IDevice>> createTestDevices(size_t count) {
 
 TestLink::TestLink(std::shared_ptr<sim::IDevice> a_src,
                    std::shared_ptr<sim::IDevice> a_dest,
-                   sim::Packet packet_to_return)
-    : src(a_src), dst(a_dest), packet(packet_to_return) {}
+                   sim::Packet packet_to_return, Id a_id)
+    : m_id(a_id), src(a_src), dst(a_dest), packet(packet_to_return) {}
 
 void TestLink::schedule_arrival([[maybe_unused]] const sim::Packet& packet) {};
 
@@ -34,6 +34,6 @@ SizeByte TestLink::get_max_to_ingress_queue_size() const {
     return SizeByte(4096ul);
 }
 
-const Id& TestLink::get_id() const { return ""; }
+const Id& TestLink::get_id() const { return m_id; }
 
 }  // namespace test
