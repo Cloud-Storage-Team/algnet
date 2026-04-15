@@ -15,10 +15,10 @@ struct Packet;
 using OnPacketDeliveryCallback = std::function<void(const Packet&)>;
 
 struct Packet : FourTuple {
-    Packet(SizeByte a_size = SizeByte(0), Id a_source_id = "",
+    Packet(SizeByte a_size = SizeByte(0ul), Id a_source_id = "",
            Id a_dest_id = "", TimeNs a_generated_time = TimeNs(0),
            TimeNs a_sent_time = TimeNs(0),
-           SizeByte a_delivered_at_origin = SizeByte(0),
+           SizeByte a_delivered_at_origin = SizeByte(0ul),
            bool a_ecn_capable_transport = true,
            bool a_congestion_experienced = false);
 

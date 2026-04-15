@@ -9,8 +9,15 @@
 namespace sim {
 
 struct LinkContext {
+    struct ActivityTime {
+        TimeNs first;
+        TimeNs last;
+    };
+
     SpeedGbps speed;
     TimeNs latency;
+    std::optional<ActivityTime> activity_time = std::nullopt;
+    SizeByte total_data_transferred = SizeByte(0ul);
 
     bool operator<(const LinkContext& ctx) const {
         return std::make_pair(speed, latency) <

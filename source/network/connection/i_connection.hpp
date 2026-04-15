@@ -12,8 +12,8 @@
 namespace sim {
 
 struct ConnectionContext {
-    SizeByte total_data_added = SizeByte(0);
-    SizeByte total_data_delivered = SizeByte(0);
+    SizeByte total_data_added = SizeByte(0ul);
+    SizeByte total_data_delivered = SizeByte(0ul);
     utils::Statistics<SpeedGbps> delivery_rate_statistics =
         utils::Statistics<SpeedGbps>();
     std::optional<TimeNs> first_send_data_time = std::nullopt;

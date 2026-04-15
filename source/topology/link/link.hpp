@@ -1,5 +1,6 @@
 #pragma once
 
+#include <fstream>
 #include <queue>
 
 #include "metrics/metrics_table/i_metricable.hpp"
@@ -20,8 +21,8 @@ public:
     static std::shared_ptr<Link> create_shared(
         Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
         SpeedGbps a_speed = SpeedGbps(1), TimeNs a_delay = TimeNs(0),
-        SizeByte a_max_from_egress_buffer_size = SizeByte(4096),
-        SizeByte a_max_to_ingress_buffer_size = SizeByte(4096),
+        SizeByte a_max_from_egress_buffer_size = SizeByte(4096ul),
+        SizeByte a_max_to_ingress_buffer_size = SizeByte(4096ul),
         LinkMetricsFilters a_metrics_filters = DEFAULT_METRICS_FILTERS);
 
     virtual void schedule_arrival(const Packet& packet) final;
@@ -66,6 +67,10 @@ private:
 
     // Schedule Transmit event
     void start_head_packet_sending();
+
+    void write_thoughput_to_csv(std::ofstream& out) const;
+
+    void record_activity();
 
 private:
     Id m_id;

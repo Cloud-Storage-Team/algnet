@@ -37,6 +37,9 @@ public:
             m_variance =
                 m_variance * m_factor + (delta * delta) * (1 - m_factor);
         }
+        if (!m_peak || record > *m_peak) {
+            m_peak = record;
+        }
     }
 
     std::optional<T> get_last() const {
@@ -57,12 +60,15 @@ public:
                                : std::nullopt);
     }
 
+    std::optional<T> get_peak() const { return m_peak; }
+
 private:
     bool m_have_records;
     const double m_factor;
     double m_last;
     double m_mean;
     double m_variance;
+    std::optional<T> m_peak;
 };
 
 }  // namespace utils
