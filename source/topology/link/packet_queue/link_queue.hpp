@@ -12,8 +12,8 @@ struct LinkQueueContext {
     Id device_id;
     SizeByte size;
     utils::Statistics<SizeByte> size_statistics;
-    uint64_t packets_transmitted;
-    uint64_t packets_dropped;
+    uint64_t packets_transmitted = 0ul;
+    uint64_t packets_dropped = 0ul;
 };
 
 std::string to_string(LinkQueueType type);

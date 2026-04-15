@@ -165,6 +165,7 @@ void Link::arrive(const Packet& packet) {
                         m_id, packet.to_string()));
         return;
     }
+    m_ctx.total_data_transferred += packet.size;
     record_activity();
     m_to.lock()->notify_about_arrival();
 
@@ -198,10 +199,10 @@ void Link::write_inner_metrics(std::filesystem::path output_dir) const {
 void Link::write_thoughput_to_csv(std::ofstream& out) const {
     out << "Throughput\n";
 
-    out << "Capacity"
-        << ", Actual"
-        << ", Utilization"
-        << ", Latency\n";
+    out << "Capacity (Gbps)"
+        << ", Actual (Gbps)"
+        << ", Utilization (%)"
+        << ", Latency (Nanoseconds)\n";
 
     if (!m_ctx.activity_time.has_value()) {
         out << m_ctx.speed << ", " << 0 << ", " << 0 << ", " << m_ctx.latency
@@ -221,7 +222,7 @@ void Link::write_thoughput_to_csv(std::ofstream& out) const {
     SpeedGbps actual = m_ctx.total_data_transferred / elapsed_time;
 
     double utilization =
-        (m_ctx.speed == SpeedGbps(0) ? 0.0 : actual / m_ctx.speed);
+        (m_ctx.speed == SpeedGbps(0) ? 0.0 : actual / m_ctx.speed) * 100.0;
 
     out << m_ctx.speed << ", " << actual << ", " << utilization << ", "
         << m_ctx.latency << '\n';

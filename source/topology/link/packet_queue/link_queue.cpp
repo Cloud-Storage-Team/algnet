@@ -66,9 +66,9 @@ void LinkQueue::write_metrics_to_csv(std::ofstream& out) const {
         out << "Ingress buffer of " << m_ctx.device_id << "\n";
     }
 
-    out << "Maximal size"
-        << ", Average size"
-        << ", Peak size"
+    out << "Maximal size (Bytes)"
+        << ", Average size (Bytes)"
+        << ", Peak size (Bytes)"
         << ", Packets transmitted"
         << ", Packets dropped"
         << ", Drop percent\n";
@@ -81,7 +81,8 @@ void LinkQueue::write_metrics_to_csv(std::ofstream& out) const {
     double drop_percent =
         (total_packets == 0
              ? 0.0
-             : m_ctx.packets_dropped / static_cast<double>(total_packets));
+             : m_ctx.packets_dropped / static_cast<double>(total_packets)) *
+        100.0;
 
     out << get_max_size();
     out << ", " << average;
