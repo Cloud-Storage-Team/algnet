@@ -9,8 +9,8 @@ MetricableCC::MetricableCC(std::unique_ptr<ITcpCC> a_cc,
                            MetricableCCMetricsFilters a_flags)
     : m_cc(std::move(a_cc)), m_metrics_filters(std::move(a_flags)) {}
 
-void MetricableCC::on_ack(TimeNs rtt, TimeNs avg_rtt, bool ecn_flag) {
-    m_cc->on_ack(rtt, avg_rtt, ecn_flag);
+void MetricableCC::on_ack(const PacketAckInfo& info) {
+    m_cc->on_ack(info);
     record_cwnd();
 }
 

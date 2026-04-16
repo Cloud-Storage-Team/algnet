@@ -2,14 +2,17 @@
 
 #include "logger/logger.hpp"
 #include "parser/scenario/scenario_parser.hpp"
+#include "utils/filesystem.hpp"
 #include "utils/statistics.hpp"
 
 int main(const int argc, char** argv) {
     cxxopts::Options options("NoNS", "Discrete-event based simulator");
     options.add_options()("c,config", "Path to the scenario configuration file",
                           cxxopts::value<std::string>())(
-        "output-dir", "Output directory for metrics and plots",
+        "output-dir", "Output directory for metrics, logs and plots",
         cxxopts::value<std::string>()->default_value("metrics"))(
+        "w,wipe-output-dir", "Wipe output directory before run",
+        cxxopts::value<bool>()->default_value("false"))(
         "no-logs", "Output without logs",
         cxxopts::value<bool>()->default_value("false"))("h,help",
                                                         "Print usage");
@@ -29,6 +32,10 @@ int main(const int argc, char** argv) {
 
     std::filesystem::path config_path = flags["config"].as<std::string>();
 
+    if (flags["wipe-output-dir"].as<bool>()) {
+        utils::wipe_folder(output_dir);
+    }
+
     std::filesystem::path actions_summary_path(output_dir /
                                                "actions_summary.csv");
 
@@ -37,6 +44,8 @@ int main(const int argc, char** argv) {
 
     sim::write_to_csv(actions_summary_path, summary.send_data);
     scenario.get_network().save_metrics(output_dir / "network");
+
+    std::cout << "Metrics are written to " << output_dir << "\n\n";
 
     return 0;
 }

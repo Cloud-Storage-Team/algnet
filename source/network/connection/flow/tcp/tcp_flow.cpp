@@ -199,8 +199,7 @@ void TcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
     m_metrics.delivery_rate->add_record(now, delivery_rate.value());
     m_context.delivery_rate_statistics.add_record(delivery_rate);
 
-    callback({PacketAckInfo{rtt, m_context.rtt_statistics.get_mean().value(),
-                            ack.congestion_experienced}});
+    callback({PacketAckInfo{rtt, m_context.rtt_statistics, ack}});
 }
 
 // After ACK with a valid RTT: formula + transition to STEADY (once)

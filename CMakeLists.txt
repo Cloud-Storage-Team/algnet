@@ -54,7 +54,7 @@ if(BUILD_TESTS)
     target_include_directories(${TEST_NAME} PUBLIC "source")
     target_compile_definitions(${TEST_NAME} PRIVATE PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 
-    target_compile_options(${TEST_NAME} PRIVATE -Wall -Wextra)
+    target_compile_options(${TEST_NAME} PRIVATE -Wall -Werror -Wextra)
     target_link_libraries(${TEST_NAME} gtest gmock gtest_main yaml-cpp matplot)
 
     if (DEFINED LOG_LEVEL)
