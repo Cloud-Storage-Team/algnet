@@ -21,4 +21,6 @@ void inline create_all_directories(std::filesystem::path file) {
     }
 }
 
+bool wipe_folder(std::filesystem::path dir_path) noexcept;
+
 }  // namespace utils

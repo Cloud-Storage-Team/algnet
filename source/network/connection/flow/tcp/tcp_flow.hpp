@@ -16,7 +16,7 @@ struct TcpFlowMetricsFilters {
 class TcpFlow : public IFlow, public std::enable_shared_from_this<TcpFlow> {
 public:
     constexpr static inline RTO DEFAULT_START_RTO =
-        RTO(TimeNs(2000), Time<Second>(1));
+        RTO(Time<Millisecond>(200), Time<Second>(1));
 
     constexpr static inline bool DEFAULT_ECN_CAPABLE = true;
     constexpr static inline TcpFlowMetricsFilters DEFAULT_METRICS_FLAGS = {};

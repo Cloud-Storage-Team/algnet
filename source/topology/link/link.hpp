@@ -25,7 +25,7 @@ public:
         SizeByte a_max_to_ingress_buffer_size = SizeByte(4096ul),
         LinkMetricsFilters a_metrics_filters = DEFAULT_METRICS_FILTERS);
 
-    virtual void schedule_arrival(const Packet& packet) final;
+    virtual void schedule_arrival(Packet& packet) final;
 
     virtual bool has_packet() const final;
     virtual Packet& get_packet() final;

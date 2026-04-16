@@ -18,7 +18,7 @@ public:
     explicit MetricableCC(std::unique_ptr<ITcpCC> a_cc,
                           MetricableCCMetricsFilters a_flags = DEFAULT_FLAGS);
 
-    virtual void on_ack(TimeNs rtt, TimeNs avg_rtt, bool ecn_flag) final;
+    virtual void on_ack(const PacketAckInfo& info) final;
 
     virtual void on_timeout() final;
 

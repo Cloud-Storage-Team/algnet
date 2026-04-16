@@ -21,7 +21,7 @@ std::shared_ptr<Link> Link::create_shared(
                  a_metrics_filters));
 }
 
-void Link::schedule_arrival(const Packet& packet) {
+void Link::schedule_arrival(Packet& packet) {
     bool empty_before_push = m_from_egress.empty();
 
     if (!m_from_egress.push(packet)) {
@@ -191,9 +191,9 @@ void Link::write_inner_metrics(std::filesystem::path output_dir) const {
     }
     write_thoughput_to_csv(out);
     out << '\n';
-    m_to_ingress.write_metrics_to_csv(out);
-    out << '\n';
     m_from_egress.write_metrics_to_csv(out);
+    out << '\n';
+    m_to_ingress.write_metrics_to_csv(out);
 }
 
 void Link::write_thoughput_to_csv(std::ofstream& out) const {
