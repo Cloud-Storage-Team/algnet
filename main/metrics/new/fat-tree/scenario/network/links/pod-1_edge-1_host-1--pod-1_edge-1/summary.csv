@@ -1,11 +1,11 @@
 Throughput
 Capacity (Gbps), Actual (Gbps), Utilization (%), Latency (Nanoseconds)
-10, 9.90149, 99.0149, 1000
-
-Ingress buffer of pod-1_edge-1
-Maximal size (Bytes), Average size (Bytes), Peak size (Bytes), Packets transmitted, Packets dropped, Drop percent
-4194304, 667, 1500, 14020, 0, 0
+10, 9.87828, 98.7828, 1000
 
 Egress buffer of pod-1_edge-1_host-1
 Maximal size (Bytes), Average size (Bytes), Peak size (Bytes), Packets transmitted, Packets dropped, Drop percent
-4194304, 4575, 19500, 14020, 0, 0
+4194304, 4575, 19500, 13984, 0, 0
+
+Ingress buffer of pod-1_edge-1
+Maximal size (Bytes), Average size (Bytes), Peak size (Bytes), Packets transmitted, Packets dropped, Drop percent
+4194304, 667, 1500, 13984, 0, 0
