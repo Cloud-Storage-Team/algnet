@@ -21,8 +21,10 @@ std::shared_ptr<Link> Link::create_shared(
                  a_metrics_filters));
 }
 
-void Link::schedule_arrival(const Packet& packet) {
+void Link::schedule_arrival(Packet& packet) {
     bool empty_before_push = m_from_egress.empty();
+    TimeNs now = Scheduler::get_instance().get_current_time();
+    packet.last_idle_start_time = now;
 
     if (!m_from_egress.push(packet)) {
         LOG_ERROR(
@@ -30,6 +32,7 @@ void Link::schedule_arrival(const Packet& packet) {
                         m_id, packet.to_string()));
         return;
     }
+
     record_activity();
 
     if (empty_before_push) {
@@ -175,8 +178,15 @@ void Link::arrive(const Packet& packet) {
 
 void Link::start_head_packet_sending() {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
+
+    // increase idle time
+    Packet& packet = m_from_egress.front();
+    TimeNs idle_time_gain = current_time - packet.last_idle_start_time;
+    packet.idle_time += idle_time_gain;
+    TimeNs transmition_time = get_transmission_delay(packet);
+
     Scheduler::get_instance().add(
-        current_time + get_transmission_delay(m_from_egress.front()),
+        current_time + transmition_time,
         [link = shared_from_this()]() { link->transmit(); });
 }
 

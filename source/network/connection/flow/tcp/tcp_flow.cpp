@@ -164,6 +164,18 @@ void TcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
     // here ack.sent_time is the time when corresponding DATA packet was sent
     // (see process_data_packet)
     TimeNs rtt = now - ack.sent_time;
+
+    TimeNs min_base_target = rtt - ack.idle_time;
+    (void)min_base_target;
+
+    if (min_base_target < TimeNs(6236) || min_base_target > TimeNs(6300)) {
+        // throw std::runtime_error(fmt::format("Impossible min_bae_target =
+        //                                      {}",
+        //                                      min_base_target.value()));
+        throw std::runtime_error(fmt::format("Impossible min_base_target = {}",
+                                             min_base_target.value()));
+    }
+
     m_context.rtt_statistics.add_record(rtt);
 
     m_metrics.rtt->add_record(now, rtt.value());
@@ -221,7 +233,7 @@ void TcpFlow::update_rto_on_timeout() {
 
 void TcpFlow::retransmit_packet(const Packet& data) {
     m_context.retransmit_size += data.size;
-    send_data_packet(data);
+    // send_data_packet(data);
 }
 
 }  // namespace sim

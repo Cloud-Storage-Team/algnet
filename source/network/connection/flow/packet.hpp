@@ -37,6 +37,8 @@ struct Packet : FourTuple {
     TimeNs generated_time;  // Note: ACK's generated time is the data packet
                             // generated time
     TimeNs sent_time;  // Note: ACK's sent time is the data packet sent time
+    TimeNs idle_time = TimeNs(0);
+    TimeNs last_idle_start_time = TimeNs(0);
     SizeByte delivered_data_size_at_origin;  // For ACK this is inherited from
                                              // data packet
     TTL ttl = std::numeric_limits<TTL>::max();
