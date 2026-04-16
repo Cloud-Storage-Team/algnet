@@ -36,7 +36,7 @@ public:
      * Update the source egress delay and schedule the arrival event
      * based on the egress queueing and transmission delays.
      */
-    virtual void schedule_arrival(const Packet& packet) = 0;
+    virtual void schedule_arrival(Packet& packet) = 0;
 
     // Checks is there at least one packet on to ingress queue
     virtual bool has_packet() const = 0;

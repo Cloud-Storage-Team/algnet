@@ -58,7 +58,7 @@ utils::StrExpected<void> SingleCCMplb::send_data(Data data,
         std::shared_ptr<SingleCCMplb> mplb = shared_from_this();
         PacketCallback packet_callback = [observer, mplb,
                                           flow](PacketAckInfo info) {
-            mplb->m_cc.on_ack(info.rtt, info.avg_rtt, info.ecn_flag);
+            mplb->m_cc.on_ack(info);
             mplb->m_packets_in_flight--;
             mplb->m_delivered_data_size += mplb->m_packet_size;
             observer->on_single_callback();

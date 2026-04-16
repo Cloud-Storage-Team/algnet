@@ -34,8 +34,8 @@ TcpSwiftCC::TcpSwiftCC(TimeNs a_base_target, double a_start_cwnd,
     m_beta_flow = m_alpha_flow / std::sqrt(m_fs_max_cwnd);
 }
 
-void TcpSwiftCC::on_ack(TimeNs rtt, [[maybe_unused]] TimeNs avg_rtt,
-                        [[maybe_unused]] bool ecn_flag) {
+void TcpSwiftCC::on_ack(const PacketAckInfo& info) {
+    TimeNs rtt = info.rtt;
     if (rtt < TimeNs(1.0)) {
         throw std::runtime_error("Invalid rtt < 1");
     }

@@ -21,7 +21,7 @@ std::shared_ptr<Link> Link::create_shared(
                  a_metrics_filters));
 }
 
-void Link::schedule_arrival(const Packet& packet) {
+void Link::schedule_arrival(Packet& packet) {
     bool empty_before_push = m_from_egress.empty();
 
     if (!m_from_egress.push(packet)) {

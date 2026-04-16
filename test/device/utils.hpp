@@ -26,7 +26,7 @@ public:
              sim::Packet packet_to_return = sim::Packet(), Id a_id = "");
     ~TestLink() = default;
 
-    void schedule_arrival(const sim::Packet& packet) final;
+    void schedule_arrival(sim::Packet& packet) final;
     bool has_packet() const final { return true; }
     sim::Packet& get_packet() final;
     void pop_packet() final {}
