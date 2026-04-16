@@ -45,7 +45,7 @@ int main(const int argc, char** argv) {
     sim::write_to_csv(actions_summary_path, summary.send_data);
     scenario.get_network().save_metrics(output_dir / "network");
 
-    std::cout << "Metrics are written to " << output_dir << "!\n";
+    std::cout << "Metrics are written to " << output_dir << "\n\n";
 
     return 0;
 }
