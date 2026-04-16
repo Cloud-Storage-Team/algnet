@@ -10,7 +10,8 @@ connections:
       type: single-cc
       packet-size: 1500B
       cc:
-        type: tahoe
+        type: swift
+        base_target: 8800ns
       path-chooser:
         type: round-robin
         flows:

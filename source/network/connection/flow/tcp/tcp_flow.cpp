@@ -164,6 +164,7 @@ void TcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
     // here ack.sent_time is the time when corresponding DATA packet was sent
     // (see process_data_packet)
     TimeNs rtt = now - ack.sent_time;
+
     m_context.rtt_statistics.add_record(rtt);
 
     m_metrics.rtt->add_record(now, rtt.value());

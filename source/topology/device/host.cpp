@@ -21,7 +21,11 @@ bool Host::notify_about_arrival() {
 
 void Host::enqueue_packet(const Packet& packet) {
     LOG_INFO(fmt::format("Packet {} arrived to host", packet.to_string()));
+    TimeNs now = Scheduler::get_instance().get_current_time();
     m_nic_buffer.push(packet);
+
+    Packet& pckt = m_nic_buffer.back();
+    pckt.last_idle_start_time = now;
     if (m_nic_buffer.size() == 1) {
         // first packet in queue => start sending it
         send_packet();
@@ -95,8 +99,15 @@ void Host::send_packet() {
                               get_id()));
         return;
     }
+    Scheduler& sched = Scheduler::get_instance();
+    TimeNs now = sched.get_current_time();
     {
         Packet& data_packet = m_nic_buffer.front();
+
+        // increase idle time
+        TimeNs idle_time_gain = now - data_packet.last_idle_start_time;
+        data_packet.idle_time += idle_time_gain;
+
         utils::Defer defer{[this] { m_nic_buffer.pop(); }};
 
         LOG_INFO(fmt::format("Taken new data packet on host {}. Packet: {}",
@@ -124,7 +135,6 @@ void Host::send_packet() {
     }
 
     if (!m_nic_buffer.empty()) {
-        Scheduler& sched = Scheduler::get_instance();
         sched.add(sched.get_current_time() + PACKET_PROCESSING_TIME,
                   [host = shared_from_this()]() { host->send_packet(); });
     }
