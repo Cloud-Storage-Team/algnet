@@ -23,10 +23,10 @@ class TestLink : public sim::ILink {
 public:
     TestLink(std::shared_ptr<sim::IDevice> a_src,
              std::shared_ptr<sim::IDevice> a_dest,
-             sim::Packet packet_to_return = sim::Packet());
+             sim::Packet packet_to_return = sim::Packet(), Id a_id = "");
     ~TestLink() = default;
 
-    void schedule_arrival(const sim::Packet& packet) final;
+    void schedule_arrival(sim::Packet& packet) final;
     bool has_packet() const final { return true; }
     sim::Packet& get_packet() final;
     void pop_packet() final {}
@@ -51,6 +51,7 @@ public:
 private:
     std::weak_ptr<sim::IDevice> src;
     std::weak_ptr<sim::IDevice> dst;
+    Id m_id;
     sim::Packet packet;
     sim::LinkContext m_ctx;
 };

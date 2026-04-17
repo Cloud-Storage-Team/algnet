@@ -11,9 +11,9 @@
 namespace sim {
 
 struct FlowContext : FlowFourTuple {
-    SizeByte sent_size = SizeByte(0);
-    SizeByte delivered_size = SizeByte(0);
-    SizeByte retransmit_size = SizeByte(0);
+    SizeByte sent_size = SizeByte(0ul);
+    SizeByte delivered_size = SizeByte(0ul);
+    SizeByte retransmit_size = SizeByte(0ul);
 
     std::optional<TimeNs> start_time = std::nullopt;
     std::optional<TimeNs> last_ack_receive_time = std::nullopt;

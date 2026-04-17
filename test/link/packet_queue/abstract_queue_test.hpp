@@ -16,7 +16,7 @@ void TestEmpty(Args&&... args) {
     TPacketQueue queue(std::forward<Args>(args)...);
 
     ASSERT_TRUE(queue.empty());
-    ASSERT_EQ(queue.get_size(), SizeByte(0));
+    ASSERT_EQ(queue.get_size(), SizeByte(0ul));
 
     bool runtime_error_catched = false;
     try {
@@ -49,7 +49,7 @@ void TestPushOnePacket(SizeByte packet_size, Args&&... args) {
     ASSERT_EQ(queue.get_size(), packet.size);
 
     queue.pop();
-    ASSERT_EQ(queue.get_size(), SizeByte(0));
+    ASSERT_EQ(queue.get_size(), SizeByte(0ul));
     ASSERT_TRUE(queue.empty());
 }
 
@@ -71,7 +71,7 @@ void TestOverflow(Args&&... args) {
     SizeByte expected_queue_size = packet_size * NUMBER_OF_PACKETS;
     ASSERT_EQ(queue.get_size(), expected_queue_size);
 
-    sim::Packet overflow_packet(packet_size + SizeByte(1));
+    sim::Packet overflow_packet(packet_size + SizeByte(1ul));
     ASSERT_FALSE(queue.push(overflow_packet));
 
     ASSERT_EQ(queue.get_size(), expected_queue_size);
@@ -82,7 +82,7 @@ void TestOverflow(Args&&... args) {
     }
 
     ASSERT_TRUE(queue.empty());
-    ASSERT_EQ(queue.get_size(), SizeByte(0));
+    ASSERT_EQ(queue.get_size(), SizeByte(0ul));
 }
 
 }  // namespace test

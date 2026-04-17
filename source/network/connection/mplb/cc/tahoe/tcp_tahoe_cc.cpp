@@ -11,10 +11,9 @@ TcpTahoeCC::TcpTahoeCC(double a_start_cwnd, double a_sstresh)
       m_last_congestion_detected(0),
       m_last_avg_rtt(0) {}
 
-void TcpTahoeCC::on_ack([[maybe_unused]] TimeNs rtt, TimeNs avg_rtt,
-                        bool ecn_flag) {
-    m_last_avg_rtt = avg_rtt;
-    if (ecn_flag) {
+void TcpTahoeCC::on_ack(const PacketAckInfo& info) {
+    m_last_avg_rtt = info.rtt_stat.get_mean().value();
+    if (info.ack.congestion_experienced) {
         on_timeout();
     } else if (m_cwnd < m_ssthresh) {
         // Slow start

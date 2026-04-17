@@ -2,7 +2,7 @@
 
 namespace sim {
 SimplePacketQueue::SimplePacketQueue(SizeByte a_max_size)
-    : m_queue(), m_size(0), m_max_size(a_max_size) {}
+    : m_queue(), m_size(0.0), m_max_size(a_max_size) {}
 
 bool SimplePacketQueue::push(const Packet& packet) {
     if (m_size + packet.size > m_max_size) {

@@ -66,6 +66,9 @@ public:
     explicit constexpr Size(uint64_t a_value = 0)
         : m_value_bits(a_value * TSizeBase::to_bit_multiplier) {}
 
+    explicit Size(double a_value)
+        : m_value_bits(std::round(a_value * TSizeBase::to_bit_multiplier)) {}
+
     constexpr uint64_t value() const {
         // Round up here to get maximal size
         return (m_value_bits + TSizeBase::to_bit_multiplier - 1) /
@@ -73,6 +76,11 @@ public:
     }
 
     constexpr uint64_t value_bits() const { return m_value_bits; }
+
+    explicit constexpr operator double() const {
+        return static_cast<double>(m_value_bits) /
+               static_cast<double>(TSizeBase::to_bit_multiplier);
+    }
 
     constexpr ThisSize operator+(ThisSize size) const {
         return Size<Bit>(m_value_bits + size.m_value_bits);

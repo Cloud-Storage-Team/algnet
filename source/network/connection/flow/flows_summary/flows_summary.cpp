@@ -29,7 +29,7 @@ void FlowsSummary::write_to_csv(std::filesystem::path output_path) const {
                  ? ctx.last_ack_receive_time.value() - ctx.start_time.value()
                  : TimeNs(0));
 
-        double overhead = ctx.delivered_size != SizeByte(0)
+        double overhead = ctx.delivered_size != SizeByte(0ul)
                               ? (ctx.sent_size / ctx.delivered_size - 1) * 100
                               : std::nan("");
         // Effective delivery rate is average delivery rate calculated on the
