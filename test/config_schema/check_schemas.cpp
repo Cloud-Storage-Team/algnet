@@ -7,15 +7,22 @@ namespace sim {
 namespace test2 {
 
 TEST(TestBasicTypes, BasicTypes) {
-    ConfigNodeWithPreset node = load_file_with_presets("basic_types.yml");
-    YAML::Node schema_node = YAML::LoadFile("basic_types.schema");
-    validate(schema_node, node);
+    std::filesystem::path current_dir =
+        std::filesystem::path(__FILE__).parent_path();
+    ConfigNodeWithPreset node =
+        load_file_with_presets(current_dir / "basic_types.yml");
+    YAML::Node schema_node =
+        YAML::LoadFile(current_dir.append("basic_types.schema"));
     ASSERT_NO_THROW(validate(schema_node, node));
 }
 
 TEST(TestBasicTypes, WrongBasicTypes) {
-    ConfigNodeWithPreset node = load_file_with_presets("basic_types_wrong.yml");
-    YAML::Node schema_node = YAML::LoadFile("basic_types.schema");
+    std::filesystem::path current_dir =
+        std::filesystem::path(__FILE__).parent_path();
+    ConfigNodeWithPreset node =
+        load_file_with_presets(current_dir / "basic_types_wrong.yml");
+    YAML::Node schema_node =
+        YAML::LoadFile(current_dir.append("basic_types.schema"));
     ASSERT_ANY_THROW(validate(schema_node, node));
 }
 
