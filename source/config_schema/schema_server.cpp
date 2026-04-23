@@ -22,7 +22,7 @@ void SchemaServer::validate_untyped(const ConfigSchema& schema_node,
         std::optional<std::string> tmp_field = it.get_name();
         if (!tmp_field) {
             std::stringstream ss;
-            ss << "Empty schema node:\n";
+            ss << "Schema contains a field without name:\n";
             ss << it;
             throw schema_node.create_parsing_error(ss.str());
         }
@@ -37,15 +37,18 @@ void SchemaServer::validate_untyped(const ConfigSchema& schema_node,
         std::optional<std::string> tmp_field = node.get_name();
         if (!tmp_field) {
             std::stringstream ss;
-            ss << "Empty config node:\n";
+            ss << "Configuration contains a field without name:\n";
             ss << node;
             throw schema_node.create_parsing_error(ss.str());
         }
         std::string field = tmp_field.value();
         if (!schema_fields.contains(field)) {
             std::stringstream ss;
-            ss << "Field does not correspond to schema:\n";
-            ss << schema_node << '\n';
+            ss << "Unknown field '" << field;
+            ss << "' found in configuration:\n";
+            ss << node;
+            ss << "This field is not described in schema:\n";
+            ss << schema_node;
             throw config_node.create_parsing_error(ss.str());
         }
     }
@@ -59,10 +62,11 @@ void SchemaServer::validate_untyped(const ConfigSchema& schema_node,
         ConfigNodeWithPresetExpected field_config = config_node[field_schema];
         if (!field_config.has_value()) {
             std::stringstream ss;
-            ss << "Does not have required field '"
-               << field_config.get_name().value_or("null")
-               << "' described in schema:\n";
-            ss << schema_node;
+            ss << "Required field '" << field_schema;
+            ss << "' is missing in configuration: \n";
+            ss << config_node << '\n';
+            ss << "Field is required by schema node: \n";
+            ss << schema_node << "\n";
             throw config_node.create_parsing_error(ss.str());
         }
     }
@@ -93,7 +97,10 @@ void SchemaServer::validate_untyped(const ConfigSchema& schema_node,
         try {
             std::regex r(pattern);
         } catch (const std::regex_error&) {
-            throw std::runtime_error("Incorrect type specified std::regex");
+            std::stringstream ss;
+            ss << "Field must contain valid regular expression.\n";
+            ss << "Regex pattern: " << pattern << '\n';
+            throw config_node.create_parsing_error(ss.str());
         }
     } else {
         return false;
@@ -120,8 +127,8 @@ void SchemaServer::validate(const ConfigSchema& schema_node,
             schema_node["_type"].value().as<std::string>();
         if (!check_type.has_value()) {
             std::stringstream ss;
-            ss << "Schema: " << schema_node << '\n';
-            ss << "has empty field '_type'";
+            ss << "Schema contains '_type' field, but it is empty or not a "
+                  "string.\n";
             throw schema_node.create_parsing_error(ss.str());
         }
         std::string type = check_type.value();
@@ -131,12 +138,18 @@ void SchemaServer::validate(const ConfigSchema& schema_node,
         if (try_validate_custom_types(schema_node, config_node)) {
             return;
         }
-        throw schema_node.create_parsing_error(
-            fmt::format("Unknown type: {}", type));
+        std::stringstream ss;
+        ss << "Unknown specified type '" << type << "' in schema: ";
+        ss << schema_node;
+        throw schema_node.create_parsing_error(ss.str());
     } else {
         if (!config_node.IsMap()) {
-            throw std::runtime_error(config_node.get_name_or_throw() +
-                                     " must be object.");
+            std::stringstream ss;
+            ss << "Expected object/map for config node:\n";
+            ss << config_node << ".\n";
+            ss << "Because schema has nested fields:\n";
+            ss << schema_node;
+            throw config_node.create_parsing_error(ss.str());
         }
         validate_untyped(schema_node, config_node);
     }

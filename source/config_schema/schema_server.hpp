@@ -28,7 +28,7 @@ private:
     void validate_untyped(const ConfigSchema& schema_node,
                           const ConfigNodeWithPreset& config_node);
 
-    bool is_meta_field(const std::string& field);
+    static bool is_meta_field(const std::string& field);
 
 private:
     const std::filesystem::path m_schemas_dir;
