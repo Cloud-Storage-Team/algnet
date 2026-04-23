@@ -1,5 +1,6 @@
 #pragma once
 
+#include "spdlog/fmt/fmt.h"
 #include "utils/str_expected.hpp"
 
 namespace sim {
@@ -25,4 +26,5 @@ public:
     [[nodiscard]] ConfigNodeExpected operator[](std::string_view key) const;
 };
 
+ConfigNodeExpected safe_load_file(std::filesystem::path path) noexcept;
 }  // namespace sim

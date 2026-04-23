@@ -6,72 +6,71 @@
 namespace sim {
 namespace test2 {
 
-TEST(TestBasicTypes, BasicTypes) {
-    std::filesystem::path current_dir =
-        std::filesystem::path(__FILE__).parent_path();
+class SchemaTest : public ::testing::Test {
+protected:
+    void SetUp() override {
+        current_dir = std::filesystem::path(__FILE__).parent_path();
+        schemas_dir = current_dir / "_schemas";
+        schema_server = std::make_unique<SchemaServer>(schemas_dir);
+    }
+
+    ConfigSchema LoadSchema(const std::string& name) {
+        return load_file(schemas_dir / name);
+    }
+
+    ConfigNodeWithPreset LoadConfigNodeWithPreset(const std::string& name) {
+        return load_file_with_presets(current_dir / name);
+    }
+
+    std::filesystem::path current_dir;
+    std::filesystem::path schemas_dir;
+    std::unique_ptr<SchemaServer> schema_server;
+};
+
+TEST_F(SchemaTest, BasicTypes) {
     ConfigNodeWithPreset node =
-        load_file_with_presets(current_dir / "basic_types.yml");
-    std::filesystem::path schemas_dir = current_dir / "_schemas";
-    ConfigSchema schema_node = load_file(schemas_dir / "basic_types.schema");
-    SchemaServer schema_server(schemas_dir);
-    ASSERT_NO_THROW(schema_server.validate(schema_node, node));
+        LoadConfigNodeWithPreset(current_dir / "basic_types.yml");
+    ConfigSchema schema_node = LoadSchema("basic_types.schema");
+
+    ASSERT_NO_THROW(schema_server->validate(schema_node, node));
 }
 
-TEST(TestBasicTypes, WrongBasicTypes) {
-    std::filesystem::path current_dir =
-        std::filesystem::path(__FILE__).parent_path();
+TEST_F(SchemaTest, WrongBasicTypes) {
     ConfigNodeWithPreset node =
-        load_file_with_presets(current_dir / "basic_types_wrong.yml");
-    std::filesystem::path schemas_dir = current_dir / "_schemas";
-    ConfigSchema schema_node = load_file(schemas_dir / "basic_types.schema");
-    SchemaServer schema_server(schemas_dir);
-    ASSERT_ANY_THROW(schema_server.validate(schema_node, node));
+        LoadConfigNodeWithPreset(current_dir / "basic_types_wrong.yml");
+    ConfigSchema schema_node = LoadSchema("basic_types.schema");
+
+    ASSERT_ANY_THROW(schema_server->validate(schema_node, node));
 }
 
-TEST(TestCustomType, CustomType) {
-    std::filesystem::path current_dir =
-        std::filesystem::path(__FILE__).parent_path();
-    ConfigNodeWithPreset node =
-        load_file_with_presets(current_dir / "custom_type.yml");
-    std::filesystem::path schemas_dir = current_dir / "_schemas";
-    ConfigSchema schema_node =
-        load_file(schemas_dir / "test_with_custom_type.schema");
-    SchemaServer schema_server(schemas_dir);
-    ASSERT_NO_THROW(schema_server.validate(schema_node, node));
+TEST_F(SchemaTest, CustomType) {
+    ConfigSchema schema = LoadSchema("nested_custom_type.schema");
+    ConfigNodeWithPreset node = LoadConfigNodeWithPreset("custom_type.yml");
+
+    ASSERT_NO_THROW(schema_server->validate(schema, node));
 }
 
-TEST(TestCustomType, WrongCustomType) {
-    std::filesystem::path current_dir =
-        std::filesystem::path(__FILE__).parent_path();
+TEST_F(SchemaTest, WrongCustomType) {
+    ConfigSchema schema = LoadSchema("nested_custom_type.schema");
     ConfigNodeWithPreset node =
-        load_file_with_presets(current_dir / "custom_type_wrong.yml");
-    std::filesystem::path schemas_dir = current_dir / "_schemas";
-    ConfigSchema schema_node =
-        load_file(schemas_dir / "test_with_custom_type.schema");
-    SchemaServer schema_server(schemas_dir);
-    ASSERT_ANY_THROW(schema_server.validate(schema_node, node));
+        LoadConfigNodeWithPreset("custom_type_wrong.yml");
+
+    ASSERT_ANY_THROW(schema_server->validate(schema, node));
 }
 
-TEST(TestRootIsType, RootIsType) {
-    std::filesystem::path current_dir =
-        std::filesystem::path(__FILE__).parent_path();
-    ConfigNodeWithPreset node =
-        load_file_with_presets(current_dir / "root_is_type.yml");
-    std::filesystem::path schemas_dir = current_dir / "_schemas";
-    ConfigSchema schema_node = load_file(schemas_dir / "root_is_type.schema");
-    SchemaServer schema_server(schemas_dir);
-    ASSERT_NO_THROW(schema_server.validate(schema_node, node));
+TEST_F(SchemaTest, RootIsType) {
+    ConfigSchema schema = LoadSchema("root_is_type.schema");
+    ConfigNodeWithPreset node = LoadConfigNodeWithPreset("root_is_type.yml");
+
+    ASSERT_NO_THROW(schema_server->validate(schema, node));
 }
 
-TEST(TestRootIsType, WrongRootIsType) {
-    std::filesystem::path current_dir =
-        std::filesystem::path(__FILE__).parent_path();
+TEST_F(SchemaTest, WrongRootIsType) {
+    ConfigSchema schema = LoadSchema("root_is_type.schema");
     ConfigNodeWithPreset node =
-        load_file_with_presets(current_dir / "root_is_type_wrong.yml");
-    std::filesystem::path schemas_dir = current_dir / "_schemas";
-    ConfigSchema schema_node = load_file(schemas_dir / "root_is_type.schema");
-    SchemaServer schema_server(schemas_dir);
-    ASSERT_ANY_THROW(schema_server.validate(schema_node, node));
+        LoadConfigNodeWithPreset("root_is_type_wrong.yml");
+
+    ASSERT_ANY_THROW(schema_server->validate(schema, node));
 }
 
 }  // namespace test2

@@ -17,10 +17,14 @@ public:
                   const ConfigNodeWithPreset& config_node);
 
 private:
+    // if schema_node correspond to basic type, validate config_node and returns
+    // true otherwise, returns false
     [[nodiscard]] bool try_validate_basic_types(
         const ConfigSchema& schema_node,
         const ConfigNodeWithPreset& config_node);
 
+    // if schema_node correspond to custom type, validate config_node and
+    // returns true otherwise, returns false
     [[nodiscard]] bool try_validate_custom_types(
         const ConfigSchema& schema_node,
         const ConfigNodeWithPreset& config_node);

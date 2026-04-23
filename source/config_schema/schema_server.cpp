@@ -8,7 +8,7 @@
 namespace sim {
 
 SchemaServer::SchemaServer(const std::filesystem::path& a_schemas_dir)
-    : m_schemas_dir(std::move(a_schemas_dir)) {}
+    : m_schemas_dir(a_schemas_dir) {}
 
 bool SchemaServer::is_meta_field(const std::string& field) {
     return field.starts_with('_');
@@ -19,34 +19,20 @@ void SchemaServer::validate_untyped(const ConfigSchema& schema_node,
     // create set of requried fields
     std::unordered_set<std::string> schema_fields;
     for (const auto& it : schema_node) {
-        std::optional<std::string> tmp_field = it.get_name();
-        if (!tmp_field) {
-            std::stringstream ss;
-            ss << "Schema contains a field without name:\n";
-            ss << it;
-            throw schema_node.create_parsing_error(ss.str());
-        }
-        std::string field = tmp_field.value();
+        const std::string& field = it.get_name_or_throw();
         if (!is_meta_field(field)) {
             schema_fields.insert(field);
         }
     }
 
     // check if config node has unknown fields
-    for (const auto& node : config_node) {
-        std::optional<std::string> tmp_field = node.get_name();
-        if (!tmp_field) {
-            std::stringstream ss;
-            ss << "Configuration contains a field without name:\n";
-            ss << node;
-            throw schema_node.create_parsing_error(ss.str());
-        }
-        std::string field = tmp_field.value();
+    for (const auto& subnode : config_node) {
+        const std::string& field = subnode.get_name_or_throw();
         if (!schema_fields.contains(field)) {
             std::stringstream ss;
             ss << "Unknown field '" << field;
             ss << "' found in configuration:\n";
-            ss << node;
+            ss << subnode;
             ss << "This field is not described in schema:\n";
             ss << schema_node;
             throw config_node.create_parsing_error(ss.str());
@@ -54,15 +40,12 @@ void SchemaServer::validate_untyped(const ConfigSchema& schema_node,
     }
 
     // check if config node has all required fields
-    for (const auto& it : schema_node) {
-        std::string field_schema = it.get_name().value();
-        if (is_meta_field(field_schema)) {
-            continue;
-        }
-        ConfigNodeWithPresetExpected field_config = config_node[field_schema];
-        if (!field_config.has_value()) {
+    for (const auto& required_field : schema_fields) {
+        ConfigNodeWithPresetExpected exp_field_config =
+            config_node[required_field];
+        if (!exp_field_config.has_value()) {
             std::stringstream ss;
-            ss << "Required field '" << field_schema;
+            ss << "Required field '" << required_field;
             ss << "' is missing in configuration: \n";
             ss << config_node << '\n';
             ss << "Field is required by schema node: \n";
@@ -110,9 +93,21 @@ void SchemaServer::validate_untyped(const ConfigSchema& schema_node,
 
 [[nodiscard]] bool SchemaServer::try_validate_custom_types(
     const ConfigSchema& schema_node, const ConfigNodeWithPreset& config_node) {
-    std::string type = schema_node["_type"].value().as<std::string>().value();
+    ConfigSchema type_node = schema_node["_type"].value();
+    std::string type = type_node.as_or_throw<std::string>();
     if (type.ends_with(".schema")) {
-        ConfigSchema sub_schema = load_file(m_schemas_dir / type);
+        std::filesystem::path nested_schema_path = std::filesystem::path(type);
+        std::filesystem::path sub_schema_path =
+            nested_schema_path.is_absolute()
+                ? nested_schema_path
+                : m_schemas_dir / nested_schema_path;
+        auto exp_sub_schema = safe_load_file(sub_schema_path);
+        if (!exp_sub_schema) {
+            throw schema_node.create_parsing_error(
+                fmt::format("Could not find custom schema {} due to error {}",
+                            type, exp_sub_schema.error()));
+        }
+        ConfigSchema sub_schema = exp_sub_schema.value();
         validate(sub_schema, config_node);
         return true;
     } else {
@@ -122,16 +117,9 @@ void SchemaServer::validate_untyped(const ConfigSchema& schema_node,
 
 void SchemaServer::validate(const ConfigSchema& schema_node,
                             const ConfigNodeWithPreset& config_node) {
-    if (schema_node["_type"]) {
-        utils::StrExpected<std::string> check_type =
-            schema_node["_type"].value().as<std::string>();
-        if (!check_type.has_value()) {
-            std::stringstream ss;
-            ss << "Schema contains '_type' field, but it is empty or not a "
-                  "string.\n";
-            throw schema_node.create_parsing_error(ss.str());
-        }
-        std::string type = check_type.value();
+    ConfigNodeExpected exp_type_node = schema_node["_type"];
+    if (exp_type_node) {
+        std::string type = exp_type_node.value().as_or_throw<std::string>();
         if (try_validate_basic_types(schema_node, config_node)) {
             return;
         }
@@ -157,14 +145,15 @@ void SchemaServer::validate(const ConfigSchema& schema_node,
 
 void SchemaServer::validate(const std::filesystem::path& schema_path,
                             const ConfigNodeWithPreset& config_node) {
-    std::filesystem::path full_path;
-    if (schema_path.is_absolute()) {
-        full_path = schema_path;
-    } else {
-        full_path = m_schemas_dir / schema_path;
+    std::filesystem::path full_path =
+        schema_path.is_absolute() ? schema_path : m_schemas_dir / schema_path;
+    auto exp_sub_schema = safe_load_file(full_path);
+    if (!exp_sub_schema) {
+        throw config_node.create_parsing_error(
+            fmt::format("Could not find schema {} due to error {}",
+                        full_path.string(), exp_sub_schema.error()));
     }
-    ConfigSchema schema_node = load_file(schema_path);
-    validate(schema_node, config_node);
+    validate(exp_sub_schema.value(), config_node);
 }
 
 }  // namespace sim
