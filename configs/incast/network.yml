@@ -7,16 +7,15 @@ presets:
       type: single-cc
       packet-size: 1500B
       cc:
-        type: tahoe
+        type: swift
+        base_target: 5300ns
       path-chooser:
         type: round-robin
         flows:
           flow-1:
             type: tcp
-          flow-2:
-            type: tcp
-          flow-3:
-            type: tcp
+
+type: custom
 
 connections:
   connection-1:

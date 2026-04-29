@@ -59,7 +59,7 @@ TEST_F(TestSwitch, add_foreign_inlink) {
 TEST_F(TestSwitch, test_no_destination_route) {
     auto switch_device = std::make_shared<sim::Switch>("");
     auto receiver = std::make_shared<HostMock>();
-    sim::Packet packet(SizeByte(0));
+    sim::Packet packet(SizeByte(0ul));
 
     std::shared_ptr<sim::IDevice> null_device(nullptr);
     std::shared_ptr<LinkMock> switch_inlink =
@@ -109,7 +109,7 @@ TEST_F(TestSwitch, test_path_hash) {
     switch_2->update_routing_table(receiver->get_id(),
                                    link_switch_2_to_receiver);
 
-    sim::Packet packet_template(SizeByte(1), sender->get_id(),
+    sim::Packet packet_template(SizeByte(1ul), sender->get_id(),
                                 receiver->get_id());
     sim::Packet first_packet_route_1(packet_template);
     sim::Packet second_packet_route_1(packet_template);

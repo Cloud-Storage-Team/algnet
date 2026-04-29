@@ -36,6 +36,8 @@ public:
         return as<T>().value_or_throw();
     }
 
+    const std::optional<std::filesystem::path>& get_config_path() const;
+
     [[nodiscard]] const std::string& get_name_or_throw() const;
 
     const std::optional<ConfigNode> get_presets_node() const noexcept;

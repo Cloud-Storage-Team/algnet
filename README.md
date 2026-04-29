@@ -3,6 +3,20 @@
 ## Overview
 Not Overcomplicated Network Simulator (NoNS) is a free open source project aiming to build a discrete-event network simulator targeted at easy testing of congestion control algorithms.
 
+## Dependencies
+
+NoNS need gnuplot & graphiz to generate plots, so install it:
+```
+sudo apt install --fix-missing gnuplot
+sudo apt install --fix-missing graphviz
+```
+
+Other dependecies are designed as git submodules, so to install them, run
+```
+git submodule init
+git submodule update --init --recursive
+```
+
 ## Build project
 NoNS uses CMake build manager, so project builds in this way:
 
@@ -11,26 +25,12 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
+
 ## Run project
 
-```
-./build/nons
-    --config path
-    [--output-dir output-dir-name]
-    [--no-logs]
-```
+Build project and run it with `-h` option to see help.
 
-Options:
-
-```
--c, --config arg          Path to the scenario configuration file
-    --output-dir arg      Output directory for metrics and plots
-                        (default: metrics)
-    --no-logs             Output without logs
--h, --help                Print usage
-```
-
-Examples of configs are placed under [`configs`](configs/) directory. See config schemas [here](_schemas/configs/).
+Examples of configs that need to run NoNS are placed under [`configs`](configs/) directory. See config schemas [here](_schemas/configs/).
 
 ## How to add a new congestion control algorithm
 

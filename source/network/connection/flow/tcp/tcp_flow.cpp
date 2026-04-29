@@ -138,7 +138,7 @@ void TcpFlow::process_data_packet(const Packet& data,
     ack.sender_port = m_context.receiver_port;
     ack.receiver_id = IdWithHash(m_context.sender->get_id());
     ack.receiver_port = m_context.sender_port;
-    ack.size = SizeByte(1);
+    ack.size = SizeByte(1ul);
     ack.ttl = M_MAX_TTL;
     auto exp_void = ack.flags.set_flag(m_packet_type_label, PacketType::ACK);
     if (!exp_void.has_value()) {
@@ -164,6 +164,7 @@ void TcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
     // here ack.sent_time is the time when corresponding DATA packet was sent
     // (see process_data_packet)
     TimeNs rtt = now - ack.sent_time;
+
     m_context.rtt_statistics.add_record(rtt);
 
     m_metrics.rtt->add_record(now, rtt.value());
@@ -187,8 +188,7 @@ void TcpFlow::process_ack(const Packet& ack, SizeByte data_packet_size,
     m_metrics.delivery_rate->add_record(now, delivery_rate.value());
     m_context.delivery_rate_statistics.add_record(delivery_rate);
 
-    callback({PacketAckInfo{rtt, m_context.rtt_statistics.get_mean().value(),
-                            ack.congestion_experienced}});
+    callback({PacketAckInfo{rtt, m_context.rtt_statistics, ack}});
 }
 
 // After ACK with a valid RTT: formula + transition to STEADY (once)

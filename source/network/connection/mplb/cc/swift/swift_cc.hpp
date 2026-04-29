@@ -47,7 +47,7 @@ public:
                double a_fs_min_cwnd = DEFAULT_FS_MIN_CWND,
                double a_fs_max_cwnd = DEFAULT_FS_MAX_CWND);
 
-    void on_ack(TimeNs rtt, TimeNs avg_rtt, bool ecn_flag) final;
+    void on_ack(const PacketAckInfo& info) final;
     void on_timeout() final;
 
     [[nodiscard]] TimeNs get_pacing_delay() const final;

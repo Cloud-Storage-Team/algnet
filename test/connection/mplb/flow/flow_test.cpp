@@ -19,7 +19,7 @@ struct FlowTest : public ::testing::Test {
     std::shared_ptr<NiceMock<HostGMock>> receiver_mock =
         std::make_shared<NiceMock<HostGMock>>();
 
-    SizeByte packet_size = SizeByte(100);
+    SizeByte packet_size = SizeByte(100ul);
 
     std::shared_ptr<sim::TcpFlow> flow = sim::TcpFlow::create_shared(
         "", sim::FlowFourTuple(sim::Endpoints(sender_mock, receiver_mock)));
@@ -56,7 +56,7 @@ TEST_F(FlowTest, SendOnePacket) {
     auto flow_ctx = flow->get_context();
     ASSERT_EQ(flow_ctx.delivered_size, packet_size);
     ASSERT_EQ(flow_ctx.sent_size, packet_size);
-    ASSERT_EQ(flow_ctx.retransmit_size, SizeByte(0));
+    ASSERT_EQ(flow_ctx.retransmit_size, SizeByte(0ul));
 }
 
 TEST_F(FlowTest, RetransmitPacket) {

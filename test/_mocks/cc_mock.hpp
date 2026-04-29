@@ -7,9 +7,8 @@ public:
     CCMock(double a_cwnd, TimeNs a_pacing_delay)
         : m_cwnd(a_cwnd), m_pacing_delay(a_pacing_delay) {}
 
-    virtual void on_ack([[maybe_unused]] TimeNs rtt,
-                        [[maybe_unused]] TimeNs avg_rtt,
-                        [[maybe_unused]] bool ecn_flag) {}
+    virtual void on_ack([[maybe_unused]] const sim::PacketAckInfo& info) final {
+    }
 
     // Callback that triggers when ACK not delivered on timeout
     virtual void on_timeout() override {};

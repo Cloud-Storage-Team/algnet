@@ -1,4 +1,5 @@
 topology_config_path: topology.yml
+type: custom
 
 connections:
   connection:
@@ -9,7 +10,8 @@ connections:
       type: single-cc
       packet-size: 1500B
       cc:
-        type: tahoe
+        type: swift
+        base_target: 8800ns
       path-chooser:
         type: round-robin
         flows:

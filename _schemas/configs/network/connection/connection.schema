@@ -1,0 +1,8 @@
+sender_id:
+  _type: string
+  _doc: Sender host id
+receiver_id:
+  _type: string
+  _doc: Receiver host id
+
+_extend: connection_params.schema

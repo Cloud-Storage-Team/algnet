@@ -2,39 +2,49 @@
 
 #include "metrics/metrics_storage.hpp"
 #include "simple_packet_queue.hpp"
+#include "utils/statistics.hpp"
 
 namespace sim {
 
 enum class LinkQueueType { FromEgress, ToIngress };
+
+struct LinkQueueContext {
+    Id device_id;
+    SizeByte size;
+    utils::Statistics<SizeByte> size_statistics;
+    uint64_t packets_transmitted = 0ul;
+    uint64_t packets_dropped = 0ul;
+};
 
 std::string to_string(LinkQueueType type);
 
 // Class for two types of links:
 // eggress queue of sourse link device or
 // ingress queue of desination link device
-class LinkQueue : public IPacketQueue {
+class LinkQueue {
 public:
-    LinkQueue(SizeByte a_max_size, Id a_link_id, LinkQueueType a_type);
+    LinkQueue(SizeByte a_max_size, Id a_device_id, LinkQueueType a_type);
     ~LinkQueue() = default;
 
-    virtual bool push(const Packet& packet) final;
-    virtual const Packet& front() const final;
-    virtual Packet& front() final;
-    virtual void pop() final;
+    bool push(const Packet& packet);
+    const Packet& front() const;
+    Packet& front();
+    void pop();
 
-    virtual SizeByte get_size() const final;
-    virtual bool empty() const final;
-    virtual SizeByte get_max_size() const final;
+    SizeByte get_max_size() const;
+    LinkQueueType get_type() const;
+    bool empty() const;
+    const LinkQueueContext& get_ctx() const;
+    void write_metrics_to_csv(std::ofstream& out) const;
 
-    virtual std::shared_ptr<const MetricsStorage> get_queue_size_storage()
-        const;
+    std::shared_ptr<const MetricsStorage> get_queue_size_storage() const;
 
 private:
     void record_size();
 
     SimplePacketQueue m_queue;
-    Id m_link_id;
     LinkQueueType m_type;
+    LinkQueueContext m_ctx;
 
     std::shared_ptr<MetricsStorage> m_queue_size_storage;
 };

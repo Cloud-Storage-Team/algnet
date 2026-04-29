@@ -16,7 +16,8 @@ public:
     void send(std::vector<sim::PacketInfo> packets_info) final {
         for (auto& info : packets_info) {
             if (m_send_immediately) {
-                info.callback(sim::PacketAckInfo{TimeNs(0), TimeNs(0), false});
+                info.callback(sim::PacketAckInfo{
+                    TimeNs(0), utils::Statistics<TimeNs>(), sim::Packet()});
             } else {
                 m_sending_queue.emplace_back(info);
             }

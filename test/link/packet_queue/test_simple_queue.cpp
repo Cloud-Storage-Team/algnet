@@ -12,18 +12,18 @@ public:
 };
 
 TEST_F(SimpleQueueTest, PopFromEmpty) {
-    TestEmpty<sim::SimplePacketQueue>(SizeByte(0));
+    TestEmpty<sim::SimplePacketQueue>(SizeByte(0ul));
 }
 TEST_F(SimpleQueueTest, TestPushEmptyPacket) {
-    TestPushOnePacket<sim::SimplePacketQueue>(SizeByte(0), SizeByte(0));
+    TestPushOnePacket<sim::SimplePacketQueue>(SizeByte(0ul), SizeByte(0ul));
 }
 
 TEST_F(SimpleQueueTest, TestPushOnePacket) {
-    TestPushOnePacket<sim::SimplePacketQueue>(SizeByte(10), SizeByte(10));
+    TestPushOnePacket<sim::SimplePacketQueue>(SizeByte(10ul), SizeByte(10ul));
 }
 
 TEST_F(SimpleQueueTest, TestOverflow) {
-    TestOverflow<sim::SimplePacketQueue>(SizeByte(128));
+    TestOverflow<sim::SimplePacketQueue>(SizeByte(128ul));
 }
 
 }  // namespace test

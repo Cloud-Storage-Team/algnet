@@ -11,7 +11,7 @@ std::shared_ptr<Connection> Connection::create_shared(
 
 Connection::Connection(Id a_id, std::shared_ptr<IMPLB> a_mplb)
     : m_id(std::move(a_id)),
-      m_context{SizeByte(0), SizeByte(0)},
+      m_context{SizeByte(0ul), SizeByte(0ul)},
       m_mplb(a_mplb) {}
 
 utils::StrExpected<void> Connection::send_data(Data data,
@@ -28,7 +28,7 @@ utils::StrExpected<void> Connection::send_data(Data data,
             Scheduler::get_instance().get_current_time();
     }
     m_data_context_table[data_id] =
-        DataContext{data.size, SizeByte(0), SizeByte(0), callback};
+        DataContext{data.size, SizeByte(0ul), SizeByte(0ul), callback};
     m_context.total_data_added += data.size;
     m_sending_queue.push(data_id);
 
@@ -67,7 +67,7 @@ void Connection::send_new_portion() {
         }
 
         SizeByte quota = m_mplb->get_context().sending_quota;
-        if (quota == SizeByte(0)) {
+        if (quota == SizeByte(0ul)) {
             LOG_INFO(fmt::format(
                 "Sending quota is zero; could not send data with id {}",
                 id.to_string()));

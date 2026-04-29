@@ -30,6 +30,9 @@ public:
         const sim::Packet& packet) const final;
     std::set<std::shared_ptr<sim::ILink>> get_outlinks() final;
     bool notify_about_arrival() final;
+
+private:
+    Id m_id = "";
 };
 
 }  // namespace test
