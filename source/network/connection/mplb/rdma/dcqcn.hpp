@@ -1,9 +1,11 @@
 #pragma once
+#include <optional>
+
 #include "types.hpp"
 
 namespace sim {
 
-// DQCCN congection control realization
+// DQCCN congestion control realization
 // Based on NVIDIA documentation:
 // https://enterprise-support.nvidia.com/s/article/DCQCN-CC-algorithm
 // https://enterprise-support.nvidia.com/s/article/dcqcn-parameters
@@ -61,12 +63,49 @@ struct ParamsDQCCN {
     // Minimal rate limit of the QP.
     SpeedMbps rpg_min_rate = SpeedMbps(1);
     // Maximal rate limit of the QP.
-    SpeedMbps rpg_min_dec_fac = SpeedMbps(50);
+    double rpg_min_dec_fac = 0.5;
 };
 
-class DCQCQN {
+class DCQCN {
 public:
-    explicit DCQCQN(const ParamsDQCCN& a_params);
+    explicit DCQCN(const ParamsDQCCN& a_params);
+
+    // enqueue initial events
+    void start();
+
+    // stop creating new events
+    void stop();
+
+    // Calls when sender got congestion notification
+    void on_cnp();
+
+    // Calls when sender got asknowledge of receiving data_size data
+    void on_data_delivery(SizeByte data_size);
+
+    SpeedGbps get_rate() const;
+
+private:
+    void on_rate_reduce_monitor_period();
+    void on_alpha_timer();
+
+    void on_rate_increase_timer(TimeNs last_elapced_cnp);
+    void on_rate_increase_event();
+
+    ParamsDQCCN m_params;
+    SpeedGbps m_current_rate;
+    SpeedGbps m_target_rate;
+    bool m_dec_target_rate = false;
+
+    // Size & time counters (T & BC on Increment scheme part of NVIDIA docs)
+    SizeByte m_bytes_from_last_byte_reset = SizeByte(0);
+    std::uint32_t m_time_counter = 0;
+    std::uint32_t m_byte_counter = 0;
+
+    // Last time CNP was got
+    TimeNs m_last_cnp = TimeNs(0);
+
+    int m_alpha;
+    bool m_stop_request = false;
 };
 
 }  // namespace sim
