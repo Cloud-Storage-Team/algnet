@@ -82,18 +82,18 @@ public:
     // Calls when sender got asknowledge of receiving data_size data
     void on_data_delivery(SizeByte data_size);
 
-    SpeedGbps get_rate() const;
+    SpeedMbps get_rate() const;
 
 private:
     void on_rate_reduce_monitor_period();
     void on_alpha_timer();
 
-    void on_rate_increase_timer(TimeNs last_elapced_cnp);
+    void on_rate_increase_timer(std::optional<TimeNs> last_elapced_cnp);
     void on_rate_increase_event();
 
     ParamsDQCCN m_params;
-    SpeedGbps m_current_rate;
-    SpeedGbps m_target_rate;
+    SpeedMbps m_current_rate;
+    SpeedMbps m_target_rate;
     bool m_dec_target_rate = false;
 
     // Size & time counters (T & BC on Increment scheme part of NVIDIA docs)
@@ -102,7 +102,7 @@ private:
     std::uint32_t m_byte_counter = 0;
 
     // Last time CNP was got
-    TimeNs m_last_cnp = TimeNs(0);
+    std::optional<TimeNs> m_last_cnp = std::nullopt;
 
     int m_alpha;
     bool m_stop_request = false;

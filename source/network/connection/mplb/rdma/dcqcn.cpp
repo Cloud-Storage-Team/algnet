@@ -51,7 +51,7 @@ void DCQCN::on_data_delivery(SizeByte size) {
     }
 }
 
-SpeedGbps DCQCN::get_rate() const { return m_current_rate; }
+SpeedMbps DCQCN::get_rate() const { return m_current_rate; }
 
 void DCQCN::on_rate_reduce_monitor_period() {
     if (m_stop_request) {
@@ -60,29 +60,26 @@ void DCQCN::on_rate_reduce_monitor_period() {
 
     Scheduler& sched = Scheduler::get_instance();
     TimeNs now = sched.get_current_time();
-    if (now > m_last_cnp + m_params.rate_reduce_monitor_period) {
-        // no cnp over last m_params.rate_reduce_monitor_period => just
-        // reshedule event
-        sched.add(now + m_params.rate_reduce_monitor_period,
-                  [this]() { on_rate_reduce_monitor_period(); });
-        return;
-    }
-    // found CNP over last m_params.rate_reduce_monitor_period => reset timers &
-    // reshedule rate_increase_timer event
+    if (m_last_cnp &&
+        now <= m_last_cnp.value() + m_params.rate_reduce_monitor_period) {
+        // found CNP over last m_params.rate_reduce_monitor_period => reset
+        // timers
 
-    if (m_params.clamp_tgt_rate && !m_dec_target_rate) {
-        m_target_rate = m_current_rate;
-    }
-    m_dec_target_rate = true;
+        if (m_params.clamp_tgt_rate && !m_dec_target_rate) {
+            m_target_rate = m_current_rate;
+        }
+        m_dec_target_rate = true;
 
-    // decrement current rate
-    m_current_rate =
-        m_current_rate *
-        std::max(m_params.rpg_min_dec_fac,
-                 (1 - m_alpha / static_cast<double>(1 << m_params.rpg_gd)));
-    m_bytes_from_last_byte_reset = SizeByte(0);
-    m_byte_counter = 0;
-    m_time_counter = 0;
+        // decrement current rate
+        m_current_rate =
+            m_current_rate *
+            std::max(m_params.rpg_min_dec_fac,
+                     (1 - m_alpha / static_cast<double>(1 << m_params.rpg_gd)));
+        m_current_rate = std::max(m_current_rate, m_params.rpg_min_rate);
+        m_bytes_from_last_byte_reset = SizeByte(0);
+        m_byte_counter = 0;
+        m_time_counter = 0;
+    }
 
     sched.add(now + m_params.rpg_time_reset, [this, last_cnp = m_last_cnp]() {
         on_rate_increase_timer(last_cnp);
@@ -97,7 +94,7 @@ void DCQCN::on_alpha_timer() {
     Scheduler& sched = Scheduler::get_instance();
     TimeNs now = sched.get_current_time();
     static constexpr int two_pow = (1 << 10);
-    if (now <= m_last_cnp + m_params.dce_tcp_rtt) {
+    if (m_last_cnp && now <= m_last_cnp.value() + m_params.dce_tcp_rtt) {
         // cnp detected over last m_params.dce_tcp_rtt => increment alpha
         m_alpha =
             (m_params.dce_tcp_g / static_cast<double>(two_pow)) * m_alpha +
@@ -108,7 +105,7 @@ void DCQCN::on_alpha_timer() {
     }
 }
 
-void DCQCN::on_rate_increase_timer(TimeNs last_elapced_cnp) {
+void DCQCN::on_rate_increase_timer(std::optional<TimeNs> last_elapced_cnp) {
     if (m_stop_request) {
         return;
     }

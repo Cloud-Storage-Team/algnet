@@ -36,6 +36,7 @@ public:
 
     void clear();  // Clear all events
     bool tick();
+    uint32_t tick_to(TimeNs time_point);
     TimeNs get_current_time();
 
 private:

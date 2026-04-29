@@ -35,6 +35,23 @@ bool Scheduler::tick() {
     return true;
 }
 
+uint32_t Scheduler::tick_to(TimeNs time_point) {
+    time_point += TimeNs(1);
+    if (time_point <= m_current_event_local_time) {
+        return 0;
+    }
+    bool arrived = false;
+    uint32_t events_count = 0;
+    add(time_point, [&arrived]() { arrived = true; });
+    while (!arrived && tick()) {
+        events_count++;
+    }
+    if (arrived) {
+        events_count--;
+    }
+    return events_count;
+}
+
 void Scheduler::clear() {
     m_near_events.clear();
     std::priority_queue<NewEvent, std::vector<NewEvent>,

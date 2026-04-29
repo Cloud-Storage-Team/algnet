@@ -44,7 +44,7 @@ public:
     }
 
     constexpr ThisSpeed operator/(double mult) const {
-        return ThisSpeed(m_value_bit_per_ns / mult);
+        return Speed<Bit, Nanosecond>(m_value_bit_per_ns / mult);
     }
 
     constexpr double operator/(ThisSpeed speed) const {
