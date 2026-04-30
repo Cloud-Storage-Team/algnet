@@ -34,7 +34,7 @@ void DCQCN::on_cnp() {
 
     TimeNs now = Scheduler::get_instance().get_current_time();
     m_last_cnp = now;
-    m_bytes_from_last_byte_reset = SizeByte(0);
+    m_bytes_from_last_byte_reset = SizeByte(0ul);
     m_time_counter = 0;
 }
 
@@ -76,7 +76,7 @@ void DCQCN::on_rate_reduce_monitor_period() {
             std::max(m_params.rpg_min_dec_fac,
                      (1 - m_alpha / static_cast<double>(1 << m_params.rpg_gd)));
         m_current_rate = std::max(m_current_rate, m_params.rpg_min_rate);
-        m_bytes_from_last_byte_reset = SizeByte(0);
+        m_bytes_from_last_byte_reset = SizeByte(0ul);
         m_byte_counter = 0;
         m_time_counter = 0;
     }

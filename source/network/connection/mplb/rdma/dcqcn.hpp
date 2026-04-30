@@ -17,7 +17,7 @@ struct ParamsDQCCN {
     TimeUs rpg_time_reset = TimeUs(300);
 
     // 	The sent bytes counter between rate increase events.
-    SizeByte rpg_byte_reset = SizeByte(64 * 32767);
+    SizeByte rpg_byte_reset = SizeByte(64 * 32767ul);
 
     // The threshold of rate increase events for moving to next rate increase
     // phase.
@@ -97,7 +97,7 @@ private:
     bool m_dec_target_rate = false;
 
     // Size & time counters (T & BC on Increment scheme part of NVIDIA docs)
-    SizeByte m_bytes_from_last_byte_reset = SizeByte(0);
+    SizeByte m_bytes_from_last_byte_reset = SizeByte(0ul);
     std::uint32_t m_time_counter = 0;
     std::uint32_t m_byte_counter = 0;
 
