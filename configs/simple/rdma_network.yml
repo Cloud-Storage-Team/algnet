@@ -1,0 +1,9 @@
+topology_config_path: topology.yml
+type: custom
+
+connections:
+  connection:
+    type: rdma
+    sender_id: sender
+    receiver_id: receiver
+    dcqcn: {}
