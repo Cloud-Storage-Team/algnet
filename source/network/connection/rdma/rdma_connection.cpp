@@ -4,10 +4,8 @@
 
 namespace sim {
 
-RdmaConnectionPtr RdmaConnection::create_shared(const Id& a_id,
-                                                const DCQCN& a_dcqcn,
-                                                const FlowFourTuple& a_ft) {
-    return RdmaConnectionPtr(new RdmaConnection(a_id, a_dcqcn, a_ft));
+RdmaConnectionPtr RdmaConnection::create_shared(const RdmaParams& a_params) {
+    return RdmaConnectionPtr(new RdmaConnection(a_params));
 }
 
 [[nodiscard]] utils::StrExpected<void> RdmaConnection::send_data(
@@ -54,14 +52,16 @@ void RdmaConnection::write_inner_metrics(
 
 const Id& RdmaConnection::get_id() const { return m_id; }
 
-RdmaConnection::RdmaConnection(const Id& a_id, const DCQCN& a_dcqcn,
-                               const FlowFourTuple& a_ft)
-    : m_id(a_id),
-      m_dcqcn(a_dcqcn),
-      m_sender(a_ft.sender),
-      m_sender_port(a_ft.sender_port),
-      m_receiver(a_ft.receiver),
-      m_receiver_port(a_ft.receiver_port) {}
+RdmaConnection::RdmaConnection(const RdmaParams& a_params)
+    : m_id(a_params.id),
+      m_dcqcn(a_params.dcqcn),
+      m_sender(a_params.ft.sender),
+      m_sender_port(a_params.ft.sender_port),
+      m_packet_size(a_params.packet_size),
+      m_receiver(a_params.ft.receiver),
+      m_receiver_port(a_params.ft.receiver_port),
+      m_ack_threshold(a_params.ack_threshold),
+      m_max_reorder_buffer_size(a_params.reorder_buffer_size / m_packet_size) {}
 
 void RdmaConnection::start_data_sending() {
     m_dcqcn.start();
@@ -119,14 +119,40 @@ Packet RdmaConnection::create_data_packet(const Data& data) {
 }
 
 void RdmaConnection::process_data_packet(const Packet& packet) {
-    if (packet.packet_num != m_next_expected_packet_num) {
+    if (packet.packet_num < m_next_expected_packet_num) {
         LOG_ERROR(
-            fmt::format("RDMA receiver got data packet {} with number that "
-                        "differs from expected {}; ignored",
+            fmt::format("RDMA receiver got data packet {} with number smaller "
+                        "than expected {}; ignored",
                         packet.to_string(), m_next_expected_packet_num));
-        // TODO: correct implementation for such case
-        return;
+    } else if (packet.packet_num == m_next_expected_packet_num) {
+        process_expected_data_packet();
+        while (!m_reorder_buffer.empty() &&
+               m_reorder_buffer.front().has_value()) {
+            m_reorder_buffer.pop_front();
+            process_expected_data_packet();
+        }
+    } else {
+        uint32_t diff = packet.packet_num - m_next_expected_packet_num;
+        if (diff >= m_max_reorder_buffer_size) {
+            LOG_ERROR(fmt::format(
+                "RDMA receiver got data packet {} with number greater "
+                "than expected {}; could not put it to reorder buffer; ignored",
+                packet.to_string(), m_next_expected_packet_num));
+            // TODO: send NAK
+            return;
+        }
+        while (m_reorder_buffer.size() <= diff) {
+            m_reorder_buffer.emplace_back(std::nullopt);
+        }
+        LOG_INFO(
+            fmt::format("RDMA receiver got data packet {} with number greater "
+                        "than expected {}; put it to reorder buffer;",
+                        m_id, packet));
+        m_reorder_buffer[diff].emplace(packet);
     }
+}
+
+void RdmaConnection::process_expected_data_packet() {
     m_next_expected_packet_num++;
     if (++m_data_packets_on_receiver >= m_ack_threshold) {
         m_data_packets_on_receiver = 0;
@@ -211,7 +237,7 @@ void RdmaConnection::confirm_first_unconfirmed_packet() {
     if (data_ctx.delivered >= data_ctx.total_size) {
         LOG_INFO(
             fmt::format("RDMA connection {} delivered data {}; call callback",
-                        m_id, data_id));
+                        m_id, data_id.to_string()));
         data_ctx.callback();
     }
 }

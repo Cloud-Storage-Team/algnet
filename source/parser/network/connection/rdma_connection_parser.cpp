@@ -27,7 +27,9 @@ RdmaConnectionPtr parse_rdma_connection(std::shared_ptr<IHost> sender,
 
     FlowFourTuple ft(Endpoints(sender, receiver), generate_ports());
 
-    return RdmaConnection::create_shared(connection_id, dcqcn, ft);
+    RdmaParams rdma_params{connection_id, dcqcn, ft};
+
+    return RdmaConnection::create_shared(rdma_params);
 }
 
 }  // namespace sim
