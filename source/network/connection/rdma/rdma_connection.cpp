@@ -147,7 +147,7 @@ void RdmaConnection::process_data_packet(const Packet& packet) {
         LOG_INFO(
             fmt::format("RDMA receiver got data packet {} with number greater "
                         "than expected {}; put it to reorder buffer;",
-                        m_id, packet));
+                        m_id, packet.to_string()));
         m_reorder_buffer[diff].emplace(packet);
     }
 }
