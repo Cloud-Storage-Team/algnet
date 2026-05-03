@@ -73,5 +73,36 @@ TEST_F(SchemaTest, WrongRootIsType) {
     ASSERT_ANY_THROW(schema_server->validate(schema, node));
 }
 
+TEST_F(SchemaTest, AbsouletePaths) {
+    ConfigSchema schema = LoadSchema("test_paths.schema");
+    std::string expected_path = schemas_dir / "nested_absolute_path.schema";
+    std::string nested_schema =
+        schema["absolute_path"]["_type"].value().as<std::string>().value();
+    std::filesystem::path nested_schema_path =
+        std::filesystem::path(nested_schema);
+    std::filesystem::path sub_schema_path =
+        nested_schema_path.is_absolute()
+            ? schemas_dir / nested_schema_path.relative_path()
+            : std::filesystem::path(__FILE__).parent_path() /
+                  nested_schema_path;
+    ASSERT_EQ(expected_path, sub_schema_path.string());
+}
+
+TEST_F(SchemaTest, RelativePaths) {
+    ConfigSchema schema = LoadSchema("test_paths.schema");
+    std::string expected_path = std::filesystem::path(__FILE__).parent_path() /
+                                "test_relative_paths/relative_path.schema";
+    std::string nested_schema =
+        schema["relative_path"]["_type"].value().as<std::string>().value();
+    std::filesystem::path nested_schema_path =
+        std::filesystem::path(nested_schema);
+    std::filesystem::path sub_schema_path =
+        nested_schema_path.is_absolute()
+            ? schemas_dir / nested_schema_path.relative_path()
+            : std::filesystem::path(__FILE__).parent_path() /
+                  nested_schema_path;
+    ASSERT_EQ(expected_path, sub_schema_path.string());
+}
+
 }  // namespace test2
 }  // namespace sim

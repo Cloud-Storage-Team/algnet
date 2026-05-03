@@ -99,16 +99,10 @@ void SchemaServer::validate_untyped(const ConfigSchema& schema_node,
         std::filesystem::path nested_schema_path = std::filesystem::path(type);
         std::filesystem::path sub_schema_path =
             nested_schema_path.is_absolute()
-                ? nested_schema_path
-                : m_schemas_dir / nested_schema_path;
-        auto exp_sub_schema = safe_load_file(sub_schema_path);
-        if (!exp_sub_schema) {
-            throw schema_node.create_parsing_error(
-                fmt::format("Could not find custom schema {} due to error {}",
-                            type, exp_sub_schema.error()));
-        }
-        ConfigSchema sub_schema = exp_sub_schema.value();
-        validate(sub_schema, config_node);
+                ? m_schemas_dir / nested_schema_path.relative_path()
+                : std::filesystem::path(__FILE__).parent_path() /
+                      nested_schema_path;
+        validate(sub_schema_path, config_node);
         return true;
     } else {
         return false;
@@ -135,8 +129,9 @@ void SchemaServer::validate(const ConfigSchema& schema_node,
             std::stringstream ss;
             ss << "Expected object/map for config node:\n";
             ss << config_node << ".\n";
-            ss << "Because schema has nested fields:\n";
-            ss << schema_node;
+            ss << "Because schema\n";
+            ss << schema_node << '\n';
+            ss << " has nested fields";
             throw config_node.create_parsing_error(ss.str());
         }
         validate_untyped(schema_node, config_node);
@@ -150,8 +145,8 @@ void SchemaServer::validate(const std::filesystem::path& schema_path,
     auto exp_sub_schema = safe_load_file(full_path);
     if (!exp_sub_schema) {
         throw config_node.create_parsing_error(
-            fmt::format("Could not find schema {} due to error {}",
-                        full_path.string(), exp_sub_schema.error()));
+            fmt::format("Failed to parse corresponding schema file: {}",
+                        exp_sub_schema.error()));
     }
     validate(exp_sub_schema.value(), config_node);
 }

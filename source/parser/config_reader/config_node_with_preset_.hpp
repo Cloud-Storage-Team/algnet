@@ -48,7 +48,8 @@ public:
 
     class Iterator {
     public:
-        Iterator(ConfigNode::Iterator a_it);
+        Iterator(ConfigNode::Iterator a_it,
+                 const ConfigNodeWithPreset& a_parent);
 
         Iterator& operator++();
 
@@ -62,6 +63,7 @@ public:
 
     private:
         ConfigNode::Iterator m_iterator;
+        const ConfigNodeWithPreset& m_parent;
     };
 
     Iterator begin() const;

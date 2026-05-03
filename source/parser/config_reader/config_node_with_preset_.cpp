@@ -120,8 +120,9 @@ ConfigNodeWithPreset load_file_with_presets(std::filesystem::path path) {
     return ConfigNodeWithPreset(node, node["presets"].to_optional());
 }
 
-ConfigNodeWithPreset::Iterator::Iterator(ConfigNode::Iterator a_it)
-    : m_iterator(a_it) {}
+ConfigNodeWithPreset::Iterator::Iterator(ConfigNode::Iterator a_it,
+                                         const ConfigNodeWithPreset& a_parent)
+    : m_iterator(a_it), m_parent(a_parent) {}
 
 ConfigNodeWithPreset::Iterator& ConfigNodeWithPreset::Iterator::operator++() {
     ++m_iterator;
@@ -143,15 +144,15 @@ bool ConfigNodeWithPreset::Iterator::operator!=(const Iterator& rhs) const {
 }
 
 ConfigNodeWithPreset ConfigNodeWithPreset::Iterator::operator*() const {
-    return ConfigNodeWithPreset(*m_iterator);
+    return ConfigNodeWithPreset(*m_iterator, m_parent.get_presets_node());
 }
 
 ConfigNodeWithPreset::Iterator ConfigNodeWithPreset::begin() const {
-    return Iterator(m_node.begin());
+    return Iterator(m_node.begin(), *this);
 }
 
 ConfigNodeWithPreset::Iterator ConfigNodeWithPreset::end() const {
-    return Iterator(m_node.end());
+    return Iterator(m_node.end(), *this);
 }
 
 }  // namespace sim
