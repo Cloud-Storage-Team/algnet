@@ -5,7 +5,7 @@
 namespace sim {
 DCQCN::DCQCN(const ParamsDQCCN& a_params)
     : m_params(a_params),
-      m_current_rate(a_params.rpg_min_rate),
+      m_current_rate(a_params.start_target_rate),
       m_target_rate(m_current_rate),
       m_alpha(m_params.initial_alpha_value) {}
 

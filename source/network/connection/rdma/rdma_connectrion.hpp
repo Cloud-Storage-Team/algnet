@@ -34,6 +34,16 @@ public:
 private:
     RdmaConnection(const RdmaParams& a_params);
 
+    void schedule_ack_timer();
+
+    void on_ack_timer();
+
+    void on_retry_timout();
+
+    void schedule_retry_timout();
+
+    void retransmit_packets();
+
     void start_data_sending();
 
     void schedule_data_send();
@@ -45,6 +55,10 @@ private:
     void process_data_packet(const Packet& data);
 
     void process_expected_data_packet();
+
+    void send_nak();
+
+    void process_nak(const Packet& nak);
 
     void send_ack();
 
@@ -66,6 +80,7 @@ private:
     Port m_sender_port;
 
     SizeByte m_packet_size;
+    TimeNs m_retry_timout = TimeNs(50000);
 
     // Invariant: packet_num of first packet in this queue is equal to
     // m_last_acked_pcn
@@ -94,11 +109,15 @@ private:
     uint32_t m_ack_threshold;
     PacketNum m_next_expected_packet_num = 1;
     static constexpr SizeByte M_ACK_SIZE = SizeByte(1ul);
+    static constexpr SizeByte M_NAK_SIZE = M_ACK_SIZE;
 
     // Invariant: if packet with number i > m_next_packet_num received,
     // m_reorder_buffer[i - m_next_packet_num - 1] contains it
     std::deque<std::optional<Packet> > m_reorder_buffer;
     std::size_t m_max_reorder_buffer_size;
+    TimeNs m_ack_receiver_timout = TimeNs(50000);
+    TimeNs m_last_ack_send = TimeNs(0);
+    bool m_receiver_started = false;
 };
 
 }  // namespace sim

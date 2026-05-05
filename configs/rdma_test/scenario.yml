@@ -1,8 +1,8 @@
-network_config_path: rdma_network.yml
+network_config_path: network.yml
 
 scenario:
 - action: send_data
   id: send
   when: 0ns
-  size: 50KB
+  size: 1MB
   connections: connection

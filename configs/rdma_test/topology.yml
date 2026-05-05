@@ -1,0 +1,83 @@
+type: custom
+presets:
+  default-switch:
+    ecn:
+      min: 0.3
+      max: 0.5
+      probability: 0.2
+  default-link:
+    latency: 1000ns
+    throughput: 10Gbps
+    ingress_buffer_size: 64KB
+    egress_buffer_size: 64KB
+
+packet-spraying:
+  type: flowlet
+  threshold: 1000ns
+
+hosts:
+  sender:
+  receiver:
+
+switches:
+  switch-sender:
+    preset-name: default-switch
+  switch-1:
+    preset-name: default-switch
+  switch-2:
+    preset-name: default-switch
+  switch-receiver:
+    preset-name: default-switch
+links:
+  link-0:
+    from: sender
+    to: switch-sender
+    preset-name: default-link
+    throughput: 20Gbps
+  back-0:
+    from: switch-sender
+    to: sender
+    preset-name: default-link
+    throughput: 20Gbps
+  link-1:
+    from: switch-sender
+    to: switch-1
+    preset-name: default-link
+  link-2:
+    from: switch-1
+    to: switch-sender
+    preset-name: default-link
+  link-3:
+    from: switch-sender
+    to: switch-2
+    preset-name: default-link
+  link-4:
+    from: switch-2
+    to: switch-sender
+    preset-name: default-link
+  link-5:
+    from: switch-receiver
+    to: switch-1
+    preset-name: default-link
+  link-6:
+    from: switch-1
+    to: switch-receiver
+    preset-name: default-link
+  link-7:
+    from: switch-receiver
+    to: switch-2
+    preset-name: default-link
+  link-8:
+    from: switch-2
+    to: switch-receiver
+    preset-name: default-link
+  link-9:
+    from: receiver
+    to: switch-receiver
+    preset-name: default-link
+    throughput: 20Gbps
+  back-9:
+    from: switch-receiver
+    to: receiver
+    preset-name: default-link
+    throughput: 20Gbps

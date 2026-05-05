@@ -63,9 +63,71 @@ RdmaConnection::RdmaConnection(const RdmaParams& a_params)
       m_ack_threshold(a_params.ack_threshold),
       m_max_reorder_buffer_size(a_params.reorder_buffer_size / m_packet_size) {}
 
+void RdmaConnection::schedule_ack_timer() {
+    Scheduler& sched = Scheduler::get_instance();
+    TimeNs now = sched.get_current_time();
+    auto conn = shared_from_this();
+    sched.add(now + m_ack_receiver_timout, [conn]() { conn->on_ack_timer(); });
+}
+
+void RdmaConnection::on_ack_timer() {
+    Scheduler& sched = Scheduler::get_instance();
+    TimeNs now = sched.get_current_time();
+    // TODO: replacse with flag (send <<closing>> packet by sender)
+    if (m_send_queue.empty()) {
+        return;
+    }
+
+    if (m_last_ack_send + m_ack_receiver_timout < now) {
+        LOG_ERROR(fmt::format("RDMA connection {}: ack timer; send ack", m_id));
+        send_ack();
+    }
+
+    schedule_ack_timer();
+}
+
+void RdmaConnection::on_retry_timout() {
+    Scheduler& sched = Scheduler::get_instance();
+    TimeNs now = sched.get_current_time();
+
+    if (m_send_queue.empty()) {
+        LOG_INFO(
+            fmt::format("RMDA connection {}: all packets confirmed; stop retry "
+                        "events scheduling",
+                        m_id));
+        return;
+    }
+
+    if (m_ctx.last_data_delivery_time.value_or(TimeNs(0)) + m_retry_timout <
+        now) {
+        LOG_ERROR(fmt::format(
+            "RDMA connection {}: retry timout expired; retrandsmit packets",
+            m_id));
+        retransmit_packets();
+    }
+    schedule_retry_timout();
+}
+
+void RdmaConnection::schedule_retry_timout() {
+    Scheduler& sched = Scheduler::get_instance();
+    TimeNs now = sched.get_current_time();
+    auto conn = shared_from_this();
+    sched.add(now + m_retry_timout, [conn]() { conn->on_retry_timout(); });
+}
+
+void RdmaConnection::retransmit_packets() {
+    uint32_t i = m_pcn - m_last_acked_pcn - 1;
+    bool sending_stopped = (i >= m_send_queue.size());
+    m_pcn = m_last_acked_pcn + 1;
+    if (sending_stopped) {
+        send_next_data_packet();
+    }
+}
+
 void RdmaConnection::start_data_sending() {
     m_dcqcn.start();
-    schedule_data_send();
+    send_next_data_packet();
+    schedule_retry_timout();
 }
 
 void RdmaConnection::schedule_data_send() {
@@ -119,6 +181,10 @@ Packet RdmaConnection::create_data_packet(const Data& data) {
 }
 
 void RdmaConnection::process_data_packet(const Packet& packet) {
+    if (!m_receiver_started) {
+        m_receiver_started = true;
+        schedule_ack_timer();
+    }
     if (packet.packet_num < m_next_expected_packet_num) {
         LOG_ERROR(
             fmt::format("RDMA receiver got data packet {} with number smaller "
@@ -138,7 +204,7 @@ void RdmaConnection::process_data_packet(const Packet& packet) {
                 "RDMA receiver got data packet {} with number greater "
                 "than expected {}; could not put it to reorder buffer; ignored",
                 packet.to_string(), m_next_expected_packet_num));
-            // TODO: send NAK
+            send_nak();
             return;
         }
         while (m_reorder_buffer.size() <= diff) {
@@ -160,7 +226,42 @@ void RdmaConnection::process_expected_data_packet() {
     }
 }
 
+void RdmaConnection::send_nak() {
+    Packet nak;
+    if (m_next_expected_packet_num == 0) {
+        LOG_ERROR(
+            fmt::format("RDMA connection {}: cold not send nak: next expected "
+                        "packet num = 0",
+                        m_id));
+        return;
+    }
+    nak.packet_num = m_next_expected_packet_num - 1;
+
+    nak.sender_id = m_receiver->get_id();
+    nak.sender_port = m_receiver_port;
+    nak.receiver_port = m_sender_port;
+    nak.receiver_id = m_sender->get_id();
+    nak.size = M_ACK_SIZE;
+
+    RdmaConnectionPtr conn = shared_from_this();
+
+    nak.callback = [conn](const Packet& nak) { conn->process_nak(nak); };
+    TimeNs now = Scheduler::get_instance().get_current_time();
+    nak.generated_time = now;
+    nak.sent_time = now;
+
+    nak.ecn_capable_transport = true;
+    nak.congestion_experienced = false;
+
+    m_receiver->enqueue_packet(nak);
+}
+
+void RdmaConnection::process_nak([[maybe_unused]] const Packet& nak) {
+    retransmit_packets();
+}
+
 void RdmaConnection::send_ack() {
+    m_last_ack_send = Scheduler::get_instance().get_current_time();
     Packet ack;
     if (m_next_expected_packet_num == 0) {
         LOG_ERROR(
@@ -201,6 +302,19 @@ void RdmaConnection::process_ack(const Packet& ack) {
                         m_id));
         return;
     }
+    SizeByte total_data_confirmed =
+        (ack_num - m_last_acked_pcn) * m_packet_size;
+    TimeNs now = Scheduler::get_instance().get_current_time();
+
+    if (m_ctx.last_data_delivery_time.has_value()) {
+        TimeNs time_from_last_delivery =
+            now - m_ctx.last_data_delivery_time.value();
+        SpeedGbps delivery_rate =
+            total_data_confirmed / time_from_last_delivery;
+        m_ctx.delivery_rate_statistics.add_record(delivery_rate);
+    }
+    
+    m_ctx.last_data_delivery_time = now;
     while (m_last_acked_pcn < ack_num) {
         m_last_acked_pcn++;
         confirm_first_unconfirmed_packet();
@@ -208,6 +322,7 @@ void RdmaConnection::process_ack(const Packet& ack) {
 }
 
 void RdmaConnection::confirm_first_unconfirmed_packet() {
+    m_ctx.total_data_delivered += m_packet_size;
     if (m_send_queue.empty()) {
         LOG_ERROR(
             fmt::format("RDMA connection {}: could not confirm packet with "
