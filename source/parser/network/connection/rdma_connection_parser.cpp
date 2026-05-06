@@ -8,13 +8,14 @@
 namespace sim {
 
 static EndpointPorts generate_ports() {
-    static constexpr size_t RANDOM_SEED = 31;
-    static std::mt19937 rnd(RANDOM_SEED);
+    // static constexpr size_t RANDOM_SEED = 42;
+    // static std::mt19937 rnd(RANDOM_SEED);
 
-    static constexpr size_t MAX_PORT = 5000;
+    // static constexpr size_t MAX_PORT = 5000;
 
-    static std::uniform_int_distribution<int> range(0, MAX_PORT);
-    return EndpointPorts(range(rnd), range(rnd));
+    // static std::uniform_int_distribution<int> range(0, MAX_PORT);
+    // return EndpointPorts(range(rnd), range(rnd));
+    return EndpointPorts{0, 1};
 }
 
 RdmaConnectionPtr parse_rdma_connection(std::shared_ptr<IHost> sender,
@@ -29,11 +30,6 @@ RdmaConnectionPtr parse_rdma_connection(std::shared_ptr<IHost> sender,
     FlowFourTuple ft(Endpoints(sender, receiver), generate_ports());
 
     RdmaParams rdma_params{connection_id, dcqcn, ft};
-
-    if (auto reorder_buffer_size_node = params["reorder_buffer_size"]) {
-        rdma_params.reorder_buffer_size =
-            parse_size(reorder_buffer_size_node.value().get_node());
-    }
 
     return RdmaConnection::create_shared(rdma_params);
 }

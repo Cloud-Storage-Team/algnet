@@ -9,8 +9,13 @@ scenario:
 - action: send_data
   id: send-rdma
   when: 0ns
-  size: 1MB
+  size: 10MB
   connections: conn-rdma
+- action: send_data
+  id: send-tahoe
+  when: 0ns
+  size: 10MB
+  connections: conn-tahoe
 # - action: send_data
 #   id: send-2
 #   when: 0ns

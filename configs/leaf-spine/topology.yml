@@ -10,9 +10,10 @@ presets:
       queue_sizes: false
 
 packet-spraying:
+  # type: ecmp
   type: random
   # type: flowlet
-  # threshold: 0ns
+  # threshold: 200000ns
 
 switches:
   spine:

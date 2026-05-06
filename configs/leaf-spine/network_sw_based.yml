@@ -35,6 +35,22 @@ connections:
     receiver_id: host-4
     dcqcn:
       start_target_rate: 10Gbps
-      rpg_time_reset: 1000ns
-      rate_reduce_monitor_period: 10000ns
+      rpg_time_reset: 10000ns
+      rate_reduce_monitor_period: 500ns
       rpg_min_rate: 1Gbps
+      rpg_ai_rate: 1Mbps
+      rpg_hai_rate: 2Gbps
+  conn-tahoe:
+    type: mplb-connection
+    sender_id: host-2
+    receiver_id: host-4
+    mplb:
+      type: single-cc
+      packet-size: 1500B
+      cc:
+        type: tahoe
+      path-chooser:
+        type: round-robin
+        flows:
+          flow:
+            type: tcp

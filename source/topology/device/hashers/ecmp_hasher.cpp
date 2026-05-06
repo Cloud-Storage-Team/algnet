@@ -13,7 +13,9 @@ static inline std::size_t mix(std::size_t h) {
 }
 
 static inline void hash_combine(std::size_t& seed, std::size_t value) {
-    seed ^= mix(value) + 0x9e3779b97f4a7c15ULL + (seed << 6) + (seed >> 2);
+    static constexpr std::size_t BIT_MASK = 0x99999989;
+    seed ^= (mix(value) ^ BIT_MASK) + 0x9e3779b97f4a7c15ULL + (seed << 6) +
+            (seed >> 2);
 }
 
 std::uint32_t ECMPHasher::get_hash(const Packet& packet) {

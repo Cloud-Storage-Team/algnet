@@ -11,6 +11,5 @@ struct RdmaParams {
     SizeByte packet_size = SizeByte(1500ul);
     uint32_t send_window = 256;
     uint32_t ack_threshold = 32;
-    SizeByte reorder_buffer_size = Size<KByte>(64ul);
 };
 }  // namespace sim

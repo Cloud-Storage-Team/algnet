@@ -60,8 +60,7 @@ RdmaConnection::RdmaConnection(const RdmaParams& a_params)
       m_packet_size(a_params.packet_size),
       m_receiver(a_params.ft.receiver),
       m_receiver_port(a_params.ft.receiver_port),
-      m_ack_threshold(a_params.ack_threshold),
-      m_max_reorder_buffer_size(a_params.reorder_buffer_size / m_packet_size) {}
+      m_ack_threshold(a_params.ack_threshold) {}
 
 void RdmaConnection::schedule_ack_timer() {
     Scheduler& sched = Scheduler::get_instance();
@@ -181,7 +180,6 @@ Packet RdmaConnection::create_data_packet(const Data& data) {
 }
 
 void RdmaConnection::process_data_packet(const Packet& packet) {
-    if (packet.num > 160)
     if (!m_receiver_started) {
         m_receiver_started = true;
         schedule_ack_timer();
@@ -193,29 +191,13 @@ void RdmaConnection::process_data_packet(const Packet& packet) {
                         packet.to_string(), m_next_expected_packet_num));
     } else if (packet.packet_num == m_next_expected_packet_num) {
         process_expected_data_packet();
-        while (!m_reorder_buffer.empty() &&
-               m_reorder_buffer.front().has_value()) {
-            m_reorder_buffer.pop_front();
-            process_expected_data_packet();
-        }
     } else {
-        uint32_t diff = packet.packet_num - m_next_expected_packet_num;
-        if (diff >= m_max_reorder_buffer_size) {
-            LOG_ERROR(fmt::format(
-                "RDMA receiver got data packet {} with number greater "
-                "than expected {}; could not put it to reorder buffer; ignored",
-                packet.to_string(), m_next_expected_packet_num));
-            send_nak();
-            return;
-        }
-        while (m_reorder_buffer.size() <= diff) {
-            m_reorder_buffer.emplace_back(std::nullopt);
-        }
-        LOG_INFO(
-            fmt::format("RDMA receiver got data packet {} with number greater "
-                        "than expected {}; put it to reorder buffer;",
-                        m_id, packet.to_string()));
-        m_reorder_buffer[diff].emplace(packet);
+        LOG_ERROR(fmt::format(
+            "RDMA receiver got data packet {} with number greater "
+            "than expected {}; could not put it to reorder buffer; ignored",
+            packet.to_string(), m_next_expected_packet_num));
+        send_nak();
+        return;
     }
     if (packet.congestion_experienced) {
         send_cnp();
@@ -260,7 +242,11 @@ void RdmaConnection::send_nak() {
     m_receiver->enqueue_packet(nak);
 }
 
-void RdmaConnection::process_nak([[maybe_unused]] const Packet& nak) {
+void RdmaConnection::process_nak(const Packet& nak) {
+    while (m_last_acked_pcn < nak.packet_num) {
+        m_last_acked_pcn++;
+        confirm_first_unconfirmed_packet();
+    }
     retransmit_packets();
 }
 
