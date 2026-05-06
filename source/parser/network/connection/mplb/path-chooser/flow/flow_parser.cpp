@@ -71,7 +71,8 @@ std::shared_ptr<TcpFlow> parse_tcp_flow(const ConfigNodeWithPreset& flow_node,
     if (auto exp_ports_nod = flow_node["ports"]) {
         auto ports_node = exp_ports_nod.value();
         ports.sender_port = ports_node["sender"].as<Port>().value_or_throw();
-        ports.sender_port = ports_node["receiver"].as<Port>().value_or_throw();
+        ports.receiver_port =
+            ports_node["receiver"].as<Port>().value_or_throw();
     } else {
         ports = generate_ports();
     }

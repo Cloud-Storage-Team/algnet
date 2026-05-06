@@ -1,0 +1,76 @@
+type: custom
+topology_config_path: topology.yml
+
+connections:
+  host-1--host-6:
+    type: rdma
+    sender_id: host-1
+    receiver_id: host-6
+    ports:
+      sender: 1
+      receiver: 1
+    dcqcn:
+      initial_alpha_value: 200
+      start_target_rate: 10Gbps
+      rpg_time_reset: 10000ns
+      rate_reduce_monitor_period: 500ns
+      rpg_min_rate: 1Gbps
+      rpg_ai_rate: 1Mbps
+      rpg_hai_rate: 2Gbps
+  host-2--host-6:
+    type: rdma
+    sender_id: host-2
+    receiver_id: host-6
+    ports:
+      sender: 1
+      receiver: 2
+    dcqcn:
+      start_target_rate: 10Gbps
+      rpg_time_reset: 10000ns
+      rate_reduce_monitor_period: 500ns
+      rpg_min_rate: 1Gbps
+      rpg_ai_rate: 1Mbps
+      rpg_hai_rate: 2Gbps
+  host-3--host-6:
+    type: rdma
+    sender_id: host-3
+    receiver_id: host-6
+    ports:
+      sender: 1
+      receiver: 3
+    dcqcn:
+      start_target_rate: 10Gbps
+      rpg_time_reset: 10000ns
+      rate_reduce_monitor_period: 500ns
+      rpg_min_rate: 1Gbps
+      rpg_ai_rate: 1Mbps
+      rpg_hai_rate: 2Gbps
+  host-4--host-6:
+    type: rdma
+    sender_id: host-4
+    receiver_id: host-6
+    ports:
+      sender: 11
+      receiver: 4
+    dcqcn:
+      start_target_rate: 10Gbps
+      rpg_time_reset: 10000ns
+      rate_reduce_monitor_period: 500ns
+      rpg_min_rate: 1Gbps
+      rpg_ai_rate: 1Mbps
+      rpg_hai_rate: 2Gbps
+  host-5--host-6:
+    type: rdma
+    sender_id: host-5
+    receiver_id: host-6
+    ports:
+      sender: 1
+      receiver: 5
+    dcqcn:
+      start_target_rate: 10Gbps
+      rpg_time_reset: 10000ns
+      rate_reduce_monitor_period: 500ns
+      rpg_min_rate: 1Gbps
+      rpg_ai_rate: 1Mbps
+      rpg_hai_rate: 2Gbps
+  

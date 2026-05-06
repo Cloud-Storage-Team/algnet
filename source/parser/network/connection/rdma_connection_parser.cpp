@@ -27,7 +27,16 @@ RdmaConnectionPtr parse_rdma_connection(std::shared_ptr<IHost> sender,
 
     DCQCN dcqcn = parse_dcqcn(dcqcn_node);
 
-    FlowFourTuple ft(Endpoints(sender, receiver), generate_ports());
+    EndpointPorts ports;
+    if (auto exp_ports_node = params["ports"]) {
+        auto ports_node = exp_ports_node.value();
+        ports.sender_port = ports_node["sender"].as<Port>().value_or_throw();
+        ports.receiver_port = ports_node["receiver"].as<Port>().value_or_throw();
+    } else {
+        ports = generate_ports();
+    }
+
+    FlowFourTuple ft(Endpoints(sender, receiver), ports);
 
     RdmaParams rdma_params{connection_id, dcqcn, ft};
 

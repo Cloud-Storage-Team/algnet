@@ -185,17 +185,17 @@ void RdmaConnection::process_data_packet(const Packet& packet) {
         schedule_ack_timer();
     }
     if (packet.packet_num < m_next_expected_packet_num) {
-        LOG_ERROR(
-            fmt::format("RDMA receiver got data packet {} with number smaller "
-                        "than expected {}; ignored",
-                        packet.to_string(), m_next_expected_packet_num));
+        LOG_ERROR(fmt::format(
+            "RDMA {}: receiver got data packet {} with number smaller "
+            "than expected {}; ignored",
+            m_id, packet.to_string(), m_next_expected_packet_num));
     } else if (packet.packet_num == m_next_expected_packet_num) {
         process_expected_data_packet();
     } else {
         LOG_ERROR(fmt::format(
-            "RDMA receiver got data packet {} with number greater "
+            "RDMA {}: receiver got data packet {} with number greater "
             "than expected {}; could not put it to reorder buffer; ignored",
-            packet.to_string(), m_next_expected_packet_num));
+            m_id, packet.to_string(), m_next_expected_packet_num));
         send_nak();
         return;
     }
