@@ -1,0 +1,39 @@
+type: leaf-spine
+
+presets:
+  link:
+    latency: 1000ns
+    throughput: 10Gbps
+    ingress_buffer_size: 1MB
+    egress_buffer_size: 1MB
+    metrics_filters:
+      queue_sizes: false
+
+packet-spraying:
+  # type: ecmp
+  type: random
+  # type: flowlet
+  # threshold: 500ns
+
+switches:
+  spine:
+    count: 4
+    ecn:
+      min: 0.3
+      max: 0.5
+      probability: 0.2
+  leaf:
+    ecn:
+      min: 0.3
+      max: 0.5
+      probability: 0.2
+    count: 6
+
+hosts:
+
+links:
+  leaf-spine:
+    preset-name: link
+  host-leaf:
+    preset-name: link
+    throughput: 50Gbps

@@ -67,8 +67,14 @@ std::shared_ptr<TcpFlow> parse_tcp_flow(const ConfigNodeWithPreset& flow_node,
     TcpFlowMetricsFilters metrics_flags =
         (metrics_flags_node ? parse_metrics_flags(metrics_flags_node.value())
                             : TcpFlow::DEFAULT_METRICS_FLAGS);
-
-    EndpointPorts ports = generate_ports();
+    EndpointPorts ports;
+    if (auto exp_ports_nod = flow_node["ports"]) {
+        auto ports_node = exp_ports_nod.value();
+        ports.sender_port = ports_node["sender"].as<Port>().value_or_throw();
+        ports.sender_port = ports_node["receiver"].as<Port>().value_or_throw();
+    } else {
+        ports = generate_ports();
+    }
 
     return TcpFlow::create_shared(flow_node.get_name_or_throw(),
                                   FlowFourTuple(endpoints, ports), ecn_capable,
