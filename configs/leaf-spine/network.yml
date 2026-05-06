@@ -8,59 +8,24 @@ presets:
       type: single-cc
       packet-size: 1500B
       cc:
-        type: tahoe
+        type: swift
+        base_target: 12500ns
       path-chooser:
         type: round-robin
         flows:
-          flow:
+          flow-1:
+            type: tcp
+          flow-2:
+            type: tcp
+          flow-3:
+            type: tcp
+          flow-4:
+            type: tcp
+          flow-5:
             type: tcp
 
 connections:
-  conn_1--2:
-    sender_id: host-1
-    receiver_id: host-2
+  conn:
     preset-name: default-connection
-  conn_1--3:
-    sender_id: host-1
-    receiver_id: host-3
-    preset-name: default-connection
-  conn_1--4:
     sender_id: host-1
     receiver_id: host-4
-    preset-name: default-connection
-  conn_2--1:
-    sender_id: host-2
-    receiver_id: host-1
-    preset-name: default-connection
-  conn_2--3:
-    sender_id: host-2
-    receiver_id: host-3
-    preset-name: default-connection
-  conn_2--4:
-    sender_id: host-2
-    receiver_id: host-4
-    preset-name: default-connection
-  conn_3--1:
-    sender_id: host-3
-    receiver_id: host-1
-    preset-name: default-connection
-  conn_3--2:
-    sender_id: host-3
-    receiver_id: host-2
-    preset-name: default-connection
-  conn_3--4:
-    sender_id: host-3
-    receiver_id: host-4
-    preset-name: default-connection
-  conn_4--1:
-    sender_id: host-4
-    receiver_id: host-1
-    preset-name: default-connection
-  conn_4--2:
-    sender_id: host-4
-    receiver_id: host-2
-    preset-name: default-connection
-  conn_4--3:
-    sender_id: host-4
-    receiver_id: host-3
-    preset-name: default-connection

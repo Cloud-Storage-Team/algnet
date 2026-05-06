@@ -1,0 +1,23 @@
+network_config_path: network_sw_based.yml
+
+scenario:
+# - action: send_data
+#   id: send-1
+#   when: 0ns
+#   size: 1MB
+#   connections: conn-1
+- action: send_data
+  id: send-rdma
+  when: 0ns
+  size: 1MB
+  connections: conn-rdma
+# - action: send_data
+#   id: send-2
+#   when: 0ns
+#   size: 1MB
+#   connections: conn-2
+# - action: send_data
+#   id: send-3
+#   when: 0ns
+#   size: 1MB
+#   connections: conn-3

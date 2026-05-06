@@ -181,6 +181,7 @@ Packet RdmaConnection::create_data_packet(const Data& data) {
 }
 
 void RdmaConnection::process_data_packet(const Packet& packet) {
+    if (packet.num > 160)
     if (!m_receiver_started) {
         m_receiver_started = true;
         schedule_ack_timer();
@@ -215,6 +216,9 @@ void RdmaConnection::process_data_packet(const Packet& packet) {
                         "than expected {}; put it to reorder buffer;",
                         m_id, packet.to_string()));
         m_reorder_buffer[diff].emplace(packet);
+    }
+    if (packet.congestion_experienced) {
+        send_cnp();
     }
 }
 
@@ -313,12 +317,39 @@ void RdmaConnection::process_ack(const Packet& ack) {
             total_data_confirmed / time_from_last_delivery;
         m_ctx.delivery_rate_statistics.add_record(delivery_rate);
     }
-    
+
     m_ctx.last_data_delivery_time = now;
     while (m_last_acked_pcn < ack_num) {
         m_last_acked_pcn++;
         confirm_first_unconfirmed_packet();
     }
+}
+
+void RdmaConnection::send_cnp() {
+    Packet cnp;
+    cnp.packet_num = m_next_expected_packet_num - 1;
+
+    cnp.sender_id = m_receiver->get_id();
+    cnp.sender_port = m_receiver_port;
+    cnp.receiver_port = m_sender_port;
+    cnp.receiver_id = m_sender->get_id();
+    cnp.size = M_ACK_SIZE;
+
+    RdmaConnectionPtr conn = shared_from_this();
+
+    cnp.callback = [conn](const Packet& cnp) { conn->process_cnp(cnp); };
+    TimeNs now = Scheduler::get_instance().get_current_time();
+    cnp.generated_time = now;
+    cnp.sent_time = now;
+
+    cnp.ecn_capable_transport = true;
+    cnp.congestion_experienced = true;
+
+    m_receiver->enqueue_packet(cnp);
+}
+
+void RdmaConnection::process_cnp([[maybe_unused]] const Packet& cnp) {
+    m_dcqcn.on_cnp();
 }
 
 void RdmaConnection::confirm_first_unconfirmed_packet() {

@@ -3,6 +3,7 @@
 #include <random>
 
 #include "dcqcn_parser.hpp"
+#include "parser/parse_utils.hpp"
 
 namespace sim {
 
@@ -28,6 +29,11 @@ RdmaConnectionPtr parse_rdma_connection(std::shared_ptr<IHost> sender,
     FlowFourTuple ft(Endpoints(sender, receiver), generate_ports());
 
     RdmaParams rdma_params{connection_id, dcqcn, ft};
+
+    if (auto reorder_buffer_size_node = params["reorder_buffer_size"]) {
+        rdma_params.reorder_buffer_size =
+            parse_size(reorder_buffer_size_node.value().get_node());
+    }
 
     return RdmaConnection::create_shared(rdma_params);
 }

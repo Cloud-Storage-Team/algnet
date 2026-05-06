@@ -26,7 +26,7 @@ void Switch::process() {
     std::shared_ptr<ILink> link = next_inlink();
 
     if (link == nullptr) {
-        LOG_WARN("No next inlink");
+        LOG_ERROR("No next inlink");
         return;
     }
 
@@ -48,7 +48,7 @@ void Switch::process() {
     std::shared_ptr<ILink> next_link = get_link_to_destination(packet);
 
     if (next_link == nullptr) {
-        LOG_WARN(fmt::format(
+        LOG_ERROR(fmt::format(
             "Switch {}: no link corresponds to destination device for packet "
             "{}",
             get_id(), packet.to_string()));
@@ -84,8 +84,6 @@ void Switch::process() {
 
     // TODO: increase total_processing_time correctly
     next_link->schedule_arrival(packet);
-
-    return;
 }
 
 }  // namespace sim

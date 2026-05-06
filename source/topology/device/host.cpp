@@ -67,7 +67,7 @@ void Host::process() {
     if (packet.receiver_id == get_id()) {
         packet.callback(packet);
     } else {
-        LOG_WARN(
+        LOG_ERROR(
             "Host {}: arrived packet {} which destination differs from this "
             "host; use routing "
             "table to send it further");
@@ -88,8 +88,6 @@ void Host::process() {
 
         next_link->schedule_arrival(packet);
     }
-
-    return;
 }
 
 void Host::send_packet() {
@@ -115,7 +113,7 @@ void Host::send_packet() {
 
         auto next_link = get_link_to_destination(data_packet);
         if (next_link == nullptr) {
-            LOG_WARN("Link to send data packet does not exist");
+            LOG_ERROR("Link to send data packet does not exist");
             return;
         }
 

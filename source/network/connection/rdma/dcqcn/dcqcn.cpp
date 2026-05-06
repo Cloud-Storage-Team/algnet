@@ -81,9 +81,8 @@ void DCQCN::on_rate_reduce_monitor_period() {
         m_time_counter = 0;
     }
 
-    sched.add(now + m_params.rpg_time_reset, [this, last_cnp = m_last_cnp]() {
-        on_rate_increase_timer(last_cnp);
-    });
+    sched.add(now + m_params.rate_reduce_monitor_period,
+              [this]() { on_rate_reduce_monitor_period(); });
 }
 
 void DCQCN::on_alpha_timer() {

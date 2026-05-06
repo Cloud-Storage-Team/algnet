@@ -64,6 +64,10 @@ private:
 
     void process_ack(const Packet& ack);
 
+    void send_cnp();
+
+    void process_cnp(const Packet& cnp);
+
     void confirm_first_unconfirmed_packet();
 
     void send_ack_request();

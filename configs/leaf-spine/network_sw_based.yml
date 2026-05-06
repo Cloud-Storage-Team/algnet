@@ -1,0 +1,40 @@
+type: custom
+topology_config_path: topology.yml
+
+presets:
+  default-connection:
+    type: mplb-connection
+    mplb:
+      type: single-cc
+      packet-size: 1500B
+      cc:
+        type: swift
+        base_target: 12500ns
+      path-chooser:
+        type: round-robin
+        flows:
+          flow:
+            type: tcp
+
+connections:
+  conn-1:
+    preset-name: default-connection
+    sender_id: host-1
+    receiver_id: host-4
+  conn-2:
+    preset-name: default-connection
+    sender_id: host-2
+    receiver_id: host-4
+  conn-3:
+    preset-name: default-connection
+    sender_id: host-3
+    receiver_id: host-4
+  conn-rdma:
+    type: rdma
+    sender_id: host-1
+    receiver_id: host-4
+    dcqcn:
+      start_target_rate: 10Gbps
+      rpg_time_reset: 1000ns
+      rate_reduce_monitor_period: 10000ns
+      rpg_min_rate: 1Gbps
