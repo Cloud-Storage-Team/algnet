@@ -11,6 +11,7 @@ namespace sim {
 // https://enterprise-support.nvidia.com/s/article/dcqcn-parameters
 
 struct ParamsDQCCN {
+    SpeedGbps start_target_rate;
     // -------------Rate increment-------------
 
     // The time period between rate increase events.

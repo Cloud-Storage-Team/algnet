@@ -47,7 +47,7 @@ LeafSpineTopologyContext parse_leaf_spine_topology_context(
     const ConfigNodeWithPreset& leaf_spine_links =
         links["leaf-spine"].value_or_throw();
     const ConfigNodeWithPreset& host_leaf_links =
-        links["leaf-spine"].value_or_throw();
+        links["host-leaf"].value_or_throw();
 
     LeafSpineParams params{packet_spraying, spine_switches,   leaf_switches,
                            hosts,           leaf_spine_links, host_leaf_links};

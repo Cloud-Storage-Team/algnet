@@ -11,13 +11,13 @@ presets:
 
 packet-spraying:
   # type: ecmp
-  type: random
-  # type: flowlet
-  # threshold: 200000ns
+  # type: random
+  type: flowlet
+  threshold: 9000ns
 
 switches:
   spine:
-    count: 2
+    count: 4
     ecn:
       min: 0.3
       max: 0.5
@@ -27,7 +27,7 @@ switches:
       min: 0.3
       max: 0.5
       probability: 0.2
-    count: 4
+    count: 6
 
 hosts:
 
@@ -36,4 +36,4 @@ links:
     preset-name: link
   host-leaf:
     preset-name: link
-    throughput: 20Gbps
+    throughput: 50Gbps
