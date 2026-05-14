@@ -31,7 +31,8 @@ RdmaConnectionPtr parse_rdma_connection(std::shared_ptr<IHost> sender,
     if (auto exp_ports_node = params["ports"]) {
         auto ports_node = exp_ports_node.value();
         ports.sender_port = ports_node["sender"].as<Port>().value_or_throw();
-        ports.receiver_port = ports_node["receiver"].as<Port>().value_or_throw();
+        ports.receiver_port =
+            ports_node["receiver"].as<Port>().value_or_throw();
     } else {
         ports = generate_ports();
     }

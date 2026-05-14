@@ -1,4 +1,5 @@
 #include "dcqcn_parser.hpp"
+
 #include "parser/parse_utils.hpp"
 
 namespace sim {
@@ -45,11 +46,13 @@ DCQCN parse_dcqcn(const ConfigNodeWithPreset& node) {
 
     // -------- Rate decrement --------
     if (auto rate_reduce_period_node = node["rate_reduce_monitor_period"]) {
-        params.rate_reduce_monitor_period = parse_time(rate_reduce_period_node->get_node());
+        params.rate_reduce_monitor_period =
+            parse_time(rate_reduce_period_node->get_node());
     }
 
     if (auto first_cnp_rate_node = node["rate_to_set_on_first_cnp"]) {
-        params.rate_to_set_on_first_cnp = parse_speed(first_cnp_rate_node->get_node());
+        params.rate_to_set_on_first_cnp =
+            parse_speed(first_cnp_rate_node->get_node());
     }
 
     if (auto clamp_tgt_rate_node = node["clamp_tgt_rate"]) {
