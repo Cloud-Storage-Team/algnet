@@ -1,0 +1,28 @@
+network_config_path: network.yml
+
+scenario:
+- action: send_data
+  id: huge-send_1--6
+  when: 0ns
+  size: 10MB
+  connections: host-1--host-6
+- action: send_data
+  id: small_2--6
+  when: 100000ns
+  size: 256KB
+  connections: host-2--host-6
+- action: send_data
+  id: small_3--6
+  when: 100000ns
+  size: 256KB
+  connections: host-3--host-6
+- action: send_data
+  id: small_4--6
+  when: 100000ns
+  size: 256KB
+  connections: host-4--host-6
+# - action: send_data
+#   id: small_5--6
+#   when: 100000ns
+#   size: 256KB
+#   connections: host-5--host-6

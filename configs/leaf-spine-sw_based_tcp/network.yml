@@ -1,0 +1,90 @@
+type: custom
+topology_config_path: topology.yml
+
+connections:
+  host-1--host-6:
+    type: mplb-connection
+    sender_id: host-1
+    receiver_id: host-6
+    mplb:
+      type: single-cc
+      packet-size: 1500B
+      cc:
+        type: tahoe
+      path-chooser:
+        type: round-robin
+        flows:
+          flow:
+            type: tcp
+            ports:
+              sender: 1
+              receiver: 1
+  host-2--host-6:
+    type: mplb-connection
+    sender_id: host-2
+    receiver_id: host-6
+    mplb:
+      type: single-cc
+      packet-size: 1500B
+      cc:
+        type: tahoe
+      path-chooser:
+        type: round-robin
+        flows:
+          flow:
+            type: tcp
+            ports:
+              sender: 1
+              receiver: 2
+  host-3--host-6:
+    type: mplb-connection
+    sender_id: host-3
+    receiver_id: host-6
+    mplb:
+      type: single-cc
+      packet-size: 1500B
+      cc:
+        type: tahoe
+      path-chooser:
+        type: round-robin
+        flows:
+          flow:
+            type: tcp
+            ports:
+              sender: 1
+              receiver: 3
+  host-4--host-6:
+    type: mplb-connection
+    sender_id: host-4
+    receiver_id: host-6
+    mplb:
+      type: single-cc
+      packet-size: 1500B
+      cc:
+        type: tahoe
+      path-chooser:
+        type: round-robin
+        flows:
+          flow:
+            type: tcp
+            ports:
+              sender: 1
+              receiver: 4
+  host-5--host-6:
+    type: mplb-connection
+    sender_id: host-5
+    receiver_id: host-6
+    mplb:
+      type: single-cc
+      packet-size: 1500B
+      cc:
+        type: tahoe
+      path-chooser:
+        type: round-robin
+        flows:
+          flow:
+            type: tcp
+            ports:
+              sender: 1
+              receiver: 5
+  

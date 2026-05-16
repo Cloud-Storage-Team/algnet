@@ -2,6 +2,7 @@
 
 #include "mplb/mplb_parser.hpp"
 #include "network/connection/connection.hpp"
+#include "rdma_connection_parser.hpp"
 #include "utils/identifiable.hpp"
 
 namespace sim {
@@ -25,6 +26,8 @@ std::shared_ptr<IConnection> parse_i_connection(
         params["type"].value_or_throw().as_or_throw<std::string>();
     if (type == "mplb-connection") {
         return parse_mplb_connection(sender, receiver, params, connection_id);
+    } else if (type == "rdma") {
+        return parse_rdma_connection(sender, receiver, params, connection_id);
     }
     throw params.create_parsing_error(
         fmt::format("Unsupported connection type: {}", type));

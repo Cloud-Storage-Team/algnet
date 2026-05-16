@@ -5,7 +5,8 @@
 namespace sim {
 DCQCN::DCQCN(const ParamsDQCCN& a_params)
     : m_params(a_params),
-      m_current_rate(a_params.rpg_min_rate),
+      m_current_rate(std::max(SpeedMbps(m_params.start_target_rate),
+                              m_params.rpg_min_rate)),
       m_target_rate(m_current_rate),
       m_alpha(m_params.initial_alpha_value) {}
 
@@ -81,9 +82,8 @@ void DCQCN::on_rate_reduce_monitor_period() {
         m_time_counter = 0;
     }
 
-    sched.add(now + m_params.rpg_time_reset, [this, last_cnp = m_last_cnp]() {
-        on_rate_increase_timer(last_cnp);
-    });
+    sched.add(now + m_params.rate_reduce_monitor_period,
+              [this]() { on_rate_reduce_monitor_period(); });
 }
 
 void DCQCN::on_alpha_timer() {

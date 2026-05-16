@@ -1,4 +1,6 @@
 #pragma once
+#include <set>
+
 #include "i_packet_reordering.hpp"
 #include "utils/statistics.hpp"
 
@@ -17,5 +19,6 @@ private:
     // When m_packet_num_set.size() growth up it, the smallest element deletes
     std::size_t m_next_packet_num;
     PacketReordering m_reordering;
+    std::set<PacketNum> m_packet_num_set;
 };
 }  // namespace sim

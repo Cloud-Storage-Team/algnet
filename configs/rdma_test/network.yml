@@ -1,0 +1,13 @@
+topology_config_path: topology.yml
+type: custom
+
+connections:
+  connection:
+    type: rdma
+    sender_id: sender
+    receiver_id: receiver
+    dcqcn:
+      start_target_rate: 10Gbps
+      rpg_time_reset: 1000ns
+      rate_reduce_monitor_period: 10000ns
+      rpg_min_rate: 1Gbps
