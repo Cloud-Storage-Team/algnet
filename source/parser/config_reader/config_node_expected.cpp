@@ -1,3 +1,5 @@
+#include <spdlog/fmt/fmt.h>
+
 #include "config_node.hpp"
 
 namespace sim {

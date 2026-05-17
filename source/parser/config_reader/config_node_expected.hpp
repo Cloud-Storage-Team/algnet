@@ -1,6 +1,5 @@
 #pragma once
 
-#include "spdlog/fmt/fmt.h"
 #include "utils/str_expected.hpp"
 
 namespace sim {

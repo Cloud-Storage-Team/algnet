@@ -30,12 +30,10 @@ void SchemaServer::validate_untyped(const ConfigSchema& schema_node,
         const std::string& field = subnode.get_name_or_throw();
         if (!schema_fields.contains(field)) {
             std::stringstream ss;
-            ss << "Unknown field '" << field;
-            ss << "' found in configuration:\n";
-            ss << subnode;
-            ss << "This field is not described in schema:\n";
+            ss << "Node has field `'" << field
+               << "' that does not described in schema:\n";
             ss << schema_node;
-            throw config_node.create_parsing_error(ss.str());
+            throw subnode.create_parsing_error(ss.str());
         }
     }
 
@@ -45,10 +43,8 @@ void SchemaServer::validate_untyped(const ConfigSchema& schema_node,
             config_node[required_field];
         if (!exp_field_config.has_value()) {
             std::stringstream ss;
-            ss << "Required field '" << required_field;
-            ss << "' is missing in configuration: \n";
-            ss << config_node << '\n';
-            ss << "Field is required by schema node: \n";
+            ss << "Missing required field '" << required_field
+               << "' described in schema: \n";
             ss << schema_node << "\n";
             throw config_node.create_parsing_error(ss.str());
         }
@@ -64,19 +60,34 @@ void SchemaServer::validate_untyped(const ConfigSchema& schema_node,
 
 [[nodiscard]] bool SchemaServer::try_validate_basic_types(
     const ConfigSchema& schema_node, const ConfigNodeWithPreset& config_node) {
-    std::string type = schema_node["_type"].value().as<std::string>().value();
+    const ConfigSchema& type_node = schema_node["_type"].value();
+    std::string type = type_node.as_or_throw<std::string>();
+    auto unsafe_cast_config_node_to = [&]<typename T>() -> T {
+        auto as_result = config_node.as<T>();
+        if (!as_result.has_value()) {
+            std::stringstream ss;
+            ss << "Node should contain basic type `" << type
+               << "' due to schema:\n";
+            ss << type_node << "\n";
+            ss << "But its not:\n";
+            ss << as_result.error() << '\n';
+            throw config_node.create_parsing_error(ss.str());
+        }
+        return as_result.value();
+    };
     if (type == "size_t") {
-        config_node.as_or_throw<size_t>();
+        unsafe_cast_config_node_to.operator()<size_t>();
     } else if (type == "int") {
-        config_node.as_or_throw<int>();
+        unsafe_cast_config_node_to.operator()<int>();
     } else if (type == "double") {
-        config_node.as_or_throw<double>();
+        unsafe_cast_config_node_to.operator()<double>();
     } else if (type == "bool") {
-        config_node.as_or_throw<bool>();
+        unsafe_cast_config_node_to.operator()<bool>();
     } else if (type == "string") {
-        config_node.as_or_throw<std::string>();
+        unsafe_cast_config_node_to.operator()<std::string>();
     } else if (type == "regex") {
-        std::string pattern = config_node.as_or_throw<std::string>();
+        std::string pattern =
+            unsafe_cast_config_node_to.operator()<std::string>();
         try {
             std::regex r(pattern);
         } catch (const std::regex_error&) {
@@ -93,14 +104,15 @@ void SchemaServer::validate_untyped(const ConfigSchema& schema_node,
 
 [[nodiscard]] bool SchemaServer::try_validate_custom_types(
     const ConfigSchema& schema_node, const ConfigNodeWithPreset& config_node) {
-    ConfigSchema type_node = schema_node["_type"].value();
+    const ConfigSchema& type_node = schema_node["_type"].value();
     std::string type = type_node.as_or_throw<std::string>();
     if (type.ends_with(".schema")) {
         std::filesystem::path nested_schema_path = std::filesystem::path(type);
         std::filesystem::path sub_schema_path =
             nested_schema_path.is_absolute()
                 ? m_schemas_dir / nested_schema_path.relative_path()
-                : std::filesystem::path(__FILE__).parent_path() /
+                : std::filesystem::path(schema_node.get_config_path().value())
+                          .parent_path() /
                       nested_schema_path;
         validate(sub_schema_path, config_node);
         return true;
@@ -121,17 +133,13 @@ void SchemaServer::validate(const ConfigSchema& schema_node,
             return;
         }
         std::stringstream ss;
-        ss << "Unknown specified type '" << type << "' in schema: ";
-        ss << schema_node;
-        throw schema_node.create_parsing_error(ss.str());
+        throw schema_node.create_parsing_error(
+            fmt::format("Unknown specified type '{}'", type));
     } else {
         if (!config_node.IsMap()) {
             std::stringstream ss;
-            ss << "Expected object/map for config node:\n";
-            ss << config_node << ".\n";
-            ss << "Because schema\n";
+            ss << "Should be map due to schema\n";
             ss << schema_node << '\n';
-            ss << " has nested fields";
             throw config_node.create_parsing_error(ss.str());
         }
         validate_untyped(schema_node, config_node);

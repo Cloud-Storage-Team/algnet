@@ -8,7 +8,7 @@ using ConfigSchema = ConfigNode;
 
 class SchemaServer {
 public:
-    SchemaServer(const std::filesystem::path& a_schema_path);
+    explicit SchemaServer(const std::filesystem::path& a_schemas_dir);
 
     void validate(const ConfigSchema& schema_node,
                   const ConfigNodeWithPreset& config_node);

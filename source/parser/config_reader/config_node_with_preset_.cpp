@@ -117,7 +117,10 @@ const std::optional<ConfigNode> ConfigNodeWithPreset::get_presets_node()
 
 ConfigNodeWithPreset load_file_with_presets(std::filesystem::path path) {
     ConfigNode node = load_file(path);
-    return ConfigNodeWithPreset(node, node["presets"].to_optional());
+    if (node.IsMap()) {
+        return ConfigNodeWithPreset(node, node["presets"].to_optional());
+    }
+    return ConfigNodeWithPreset(node, std::nullopt);
 }
 
 ConfigNodeWithPreset::Iterator::Iterator(ConfigNode::Iterator a_it,
