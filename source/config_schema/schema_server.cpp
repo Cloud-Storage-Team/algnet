@@ -60,7 +60,7 @@ void SchemaServer::validate_untyped(const ConfigSchema& schema_node,
 
 [[nodiscard]] bool SchemaServer::try_validate_basic_types(
     const ConfigSchema& schema_node, const ConfigNodeWithPreset& config_node) {
-    const ConfigSchema& type_node = schema_node["_type"].value();
+    const ConfigSchema type_node = schema_node["_type"].value();
     std::string type = type_node.as_or_throw<std::string>();
     auto unsafe_cast_config_node_to = [&]<typename T>() -> T {
         auto as_result = config_node.as<T>();
