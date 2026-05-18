@@ -76,7 +76,7 @@ TEST_F(SchemaTest, WrongRootIsType) {
 }
 
 TEST_F(SchemaTest, CheckPaths) {
-    ConfigSchema schema = load_schema("test_paths.schema");
+    ConfigSchema schema = load_schema("test_paths/test_paths.schema");
     ConfigNodeWithPreset config_node =
         load_config_node_with_preset("test_paths.yml");
     ASSERT_NO_THROW(schema_server->validate(schema, config_node));
