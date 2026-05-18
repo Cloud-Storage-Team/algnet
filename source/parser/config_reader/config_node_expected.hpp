@@ -25,4 +25,5 @@ public:
     [[nodiscard]] ConfigNodeExpected operator[](std::string_view key) const;
 };
 
+ConfigNodeExpected safe_load_file(std::filesystem::path path) noexcept;
 }  // namespace sim

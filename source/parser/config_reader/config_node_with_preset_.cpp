@@ -59,6 +59,7 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](
                 return std::unexpected(ss.str());
             }
             // preset was found successfull. put the found value in m_preset
+
             m_preset.emplace(preset_node.value());
         }
         // tries to find key in preset
@@ -79,6 +80,8 @@ ConfigNodeWithPresetExpected ConfigNodeWithPreset::operator[](
     return ConfigNodeWithPreset(child_node.value(), m_presets_node,
                                 std::nullopt);
 }
+
+bool ConfigNodeWithPreset::IsMap() const noexcept { return m_node.IsMap(); }
 
 std::ostream& operator<<(std::ostream& out, const ConfigNodeWithPreset& node) {
     return out << node.get_node();
@@ -114,7 +117,45 @@ const std::optional<ConfigNode> ConfigNodeWithPreset::get_presets_node()
 
 ConfigNodeWithPreset load_file_with_presets(std::filesystem::path path) {
     ConfigNode node = load_file(path);
-    return ConfigNodeWithPreset(node, node["presets"].to_optional());
+    if (node.IsMap()) {
+        return ConfigNodeWithPreset(node, node["presets"].to_optional());
+    }
+    return ConfigNodeWithPreset(node, std::nullopt);
+}
+
+ConfigNodeWithPreset::Iterator::Iterator(ConfigNode::Iterator a_it,
+                                         const ConfigNodeWithPreset& a_parent)
+    : m_iterator(a_it), m_parent(a_parent) {}
+
+ConfigNodeWithPreset::Iterator& ConfigNodeWithPreset::Iterator::operator++() {
+    ++m_iterator;
+    return *this;
+}
+
+ConfigNodeWithPreset::Iterator ConfigNodeWithPreset::Iterator::operator++(int) {
+    Iterator iterator_copy(*this);
+    ++(*this);
+    return iterator_copy;
+}
+
+bool ConfigNodeWithPreset::Iterator::operator==(const Iterator& rhs) const {
+    return m_iterator == rhs.m_iterator;
+}
+
+bool ConfigNodeWithPreset::Iterator::operator!=(const Iterator& rhs) const {
+    return m_iterator != rhs.m_iterator;
+}
+
+ConfigNodeWithPreset ConfigNodeWithPreset::Iterator::operator*() const {
+    return ConfigNodeWithPreset(*m_iterator, m_parent.get_presets_node());
+}
+
+ConfigNodeWithPreset::Iterator ConfigNodeWithPreset::begin() const {
+    return Iterator(m_node.begin(), *this);
+}
+
+ConfigNodeWithPreset::Iterator ConfigNodeWithPreset::end() const {
+    return Iterator(m_node.end(), *this);
 }
 
 }  // namespace sim

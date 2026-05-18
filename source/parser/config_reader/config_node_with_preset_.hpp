@@ -16,6 +16,8 @@ public:
 
     ConfigNodeWithPresetExpected operator[](std::string_view key) const;
 
+    [[nodiscard]] bool IsMap() const noexcept;
+
     friend std::ostream& operator<<(std::ostream& out,
                                     const ConfigNodeWithPreset& node);
 
@@ -43,6 +45,29 @@ public:
     const std::optional<ConfigNode> get_presets_node() const noexcept;
 
     std::runtime_error create_parsing_error(std::string_view error) const;
+
+    class Iterator {
+    public:
+        Iterator(ConfigNode::Iterator a_it,
+                 const ConfigNodeWithPreset& a_parent);
+
+        Iterator& operator++();
+
+        Iterator operator++(int);
+
+        bool operator==(const Iterator& rhs) const;
+
+        bool operator!=(const Iterator& rhs) const;
+
+        ConfigNodeWithPreset operator*() const;
+
+    private:
+        ConfigNode::Iterator m_iterator;
+        const ConfigNodeWithPreset& m_parent;
+    };
+
+    Iterator begin() const;
+    Iterator end() const;
 
 private:
     // m_node contains information about config node and probably preset name
