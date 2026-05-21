@@ -26,10 +26,9 @@ public:
              sim::Packet packet_to_return = sim::Packet(), Id a_id = "");
     ~TestLink() = default;
 
-    void schedule_arrival(std::shared_ptr<sim::Packet> packet) final;
+    void schedule_arrival(sim::PacketPtr packet) final;
     bool has_packet() const final { return true; }
-    sim::Packet& get_packet() final;
-    std::shared_ptr<sim::Packet> get_packet_ptr() final;
+    sim::PacketPtr get_packet() final;
     void pop_packet() final {}
     std::shared_ptr<sim::IDevice> get_from() const final;
     std::shared_ptr<sim::IDevice> get_to() const final;
@@ -53,7 +52,7 @@ private:
     std::weak_ptr<sim::IDevice> src;
     std::weak_ptr<sim::IDevice> dst;
     Id m_id;
-    std::shared_ptr<sim::Packet> m_packet;
+    sim::PacketPtr m_packet;
     sim::LinkContext m_ctx;
 };
 

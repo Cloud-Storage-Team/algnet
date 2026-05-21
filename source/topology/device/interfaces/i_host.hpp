@@ -10,7 +10,7 @@ public:
     virtual ~IHost() = default;
 
     // Adds given packet to sending queue
-    virtual void enqueue_packet(std::shared_ptr<Packet> packet) = 0;
+    virtual void enqueue_packet(PacketPtr packet) = 0;
 };
 
 }  // namespace sim

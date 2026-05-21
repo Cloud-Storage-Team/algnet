@@ -26,11 +26,10 @@ public:
         SizeByte a_max_to_ingress_buffer_size = SizeByte(4096ul),
         LinkMetricsFilters a_metrics_filters = DEFAULT_METRICS_FILTERS);
 
-    virtual void schedule_arrival(std::shared_ptr<Packet> packet) final;
+    virtual void schedule_arrival(PacketPtr packet) final;
 
     virtual bool has_packet() const final;
-    virtual Packet& get_packet() final;
-    virtual std::shared_ptr<Packet> get_packet_ptr() final;
+    virtual PacketPtr get_packet() final;
     virtual void pop_packet() final;
 
     virtual std::shared_ptr<IDevice> get_from() const final;
@@ -63,9 +62,9 @@ private:
     void transmit();
 
     // Packet arrives to destination ingress queue
-    void arrive(std::shared_ptr<Packet> packet);
+    void arrive(PacketPtr packet);
 
-    TimeNs get_transmission_delay(const Packet& packet) const;
+    TimeNs get_transmission_delay(PacketPtr packet) const;
 
     // Schedule Transmit event
     void start_head_packet_sending();

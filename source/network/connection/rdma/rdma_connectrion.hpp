@@ -51,23 +51,23 @@ private:
 
     void send_next_data_packet();
 
-    std::shared_ptr<Packet> create_data_packet(const Data& data);
+    PacketPtr create_data_packet(const Data& data);
 
-    void process_data_packet(const Packet& data);
+    void process_data_packet(PacketPtr data);
 
     void process_expected_data_packet();
 
     void send_nak();
 
-    void process_nak(const Packet& nak);
+    void process_nak(PacketPtr nak);
 
     void send_ack();
 
-    void process_ack(const Packet& ack);
+    void process_ack(PacketPtr ack);
 
     void send_cnp();
 
-    void process_cnp(const Packet& cnp);
+    void process_cnp(PacketPtr cnp);
 
     void confirm_first_unconfirmed_packet();
 
@@ -89,7 +89,7 @@ private:
 
     // Invariant: packet_num of first packet in this queue is equal to
     // m_last_acked_pcn
-    std::deque<std::shared_ptr<Packet>> m_send_queue;
+    std::deque<PacketPtr> m_send_queue;
 
     uint32_t m_send_window;
 

@@ -8,7 +8,7 @@ namespace sim {
 struct PacketAckInfo {
     TimeNs rtt;
     const utils::Statistics<TimeNs>& rtt_stat;
-    const Packet& ack;
+    PacketPtr ack;
 };
 
 }  // namespace sim

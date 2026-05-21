@@ -7,10 +7,10 @@ namespace sim {
 FLowletHasher::FLowletHasher(TimeNs a_flowlet_threshold)
     : m_flowlet_threshold(a_flowlet_threshold) {}
 
-std::uint32_t FLowletHasher::get_hash(const Packet& packet) {
+std::uint32_t FLowletHasher::get_hash(PacketPtr packet) {
     std::uint32_t ecmp_hash = m_ecmp_hasher.get_hash(packet);
 
-    const FourTuple& four_tuple = static_cast<const FourTuple&>(packet);
+    const FourTuple& four_tuple = static_cast<const FourTuple&>(*packet);
     TimeNs curr_time = Scheduler::get_instance().get_current_time();
     auto it = m_flow_table.find(four_tuple);
 

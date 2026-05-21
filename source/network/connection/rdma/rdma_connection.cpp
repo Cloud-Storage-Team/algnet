@@ -154,7 +154,7 @@ void RdmaConnection::send_next_data_packet() {
     schedule_data_send();
 }
 
-std::shared_ptr<Packet> RdmaConnection::create_data_packet(const Data& data) {
+PacketPtr RdmaConnection::create_data_packet(const Data& data) {
     auto packet = std::make_shared<Packet>();
     packet->packet_num = m_next_packet_num++;
 
@@ -167,7 +167,7 @@ std::shared_ptr<Packet> RdmaConnection::create_data_packet(const Data& data) {
 
     RdmaConnectionPtr conn = shared_from_this();
 
-    packet->callback = [conn](const Packet& delivered_packet) {
+    packet->callback = [conn](PacketPtr delivered_packet) {
         conn->process_data_packet(delivered_packet);
     };
     TimeNs now = Scheduler::get_instance().get_current_time();
@@ -178,27 +178,27 @@ std::shared_ptr<Packet> RdmaConnection::create_data_packet(const Data& data) {
     return packet;
 }
 
-void RdmaConnection::process_data_packet(const Packet& packet) {
+void RdmaConnection::process_data_packet(PacketPtr packet) {
     if (!m_receiver_started) {
         m_receiver_started = true;
         schedule_ack_timer();
     }
-    if (packet.packet_num < m_next_expected_packet_num) {
+    if (packet->packet_num < m_next_expected_packet_num) {
         LOG_ERROR(fmt::format(
             "RDMA {}: receiver got data packet {} with number smaller "
             "than expected {}; ignored",
-            m_id, packet.to_string(), m_next_expected_packet_num));
-    } else if (packet.packet_num == m_next_expected_packet_num) {
+            m_id, packet->to_string(), m_next_expected_packet_num));
+    } else if (packet->packet_num == m_next_expected_packet_num) {
         process_expected_data_packet();
     } else {
         LOG_ERROR(fmt::format(
             "RDMA {}: receiver got data packet {} with number greater "
             "than expected {}; could not put it to reorder buffer; ignored",
-            m_id, packet.to_string(), m_next_expected_packet_num));
+            m_id, packet->to_string(), m_next_expected_packet_num));
         send_nak();
         return;
     }
-    if (packet.congestion_experienced) {
+    if (packet->congestion_experienced) {
         send_cnp();
     }
 }
@@ -230,7 +230,7 @@ void RdmaConnection::send_nak() {
 
     RdmaConnectionPtr conn = shared_from_this();
 
-    nak->callback = [conn](const Packet& nak) { conn->process_nak(nak); };
+    nak->callback = [conn](PacketPtr nak) { conn->process_nak(nak); };
     TimeNs now = Scheduler::get_instance().get_current_time();
     nak->generated_time = now;
     nak->sent_time = now;
@@ -241,8 +241,8 @@ void RdmaConnection::send_nak() {
     m_receiver->enqueue_packet(std::move(nak));
 }
 
-void RdmaConnection::process_nak(const Packet& nak) {
-    while (m_last_acked_pcn < nak.packet_num) {
+void RdmaConnection::process_nak(PacketPtr nak) {
+    while (m_last_acked_pcn < nak->packet_num) {
         m_last_acked_pcn++;
         confirm_first_unconfirmed_packet();
     }
@@ -269,7 +269,7 @@ void RdmaConnection::send_ack() {
 
     RdmaConnectionPtr conn = shared_from_this();
 
-    ack->callback = [conn](const Packet& delivered_packet) {
+    ack->callback = [conn](PacketPtr delivered_packet) {
         conn->process_ack(delivered_packet);
     };
     TimeNs now = Scheduler::get_instance().get_current_time();
@@ -282,8 +282,8 @@ void RdmaConnection::send_ack() {
     m_receiver->enqueue_packet(std::move(ack));
 }
 
-void RdmaConnection::process_ack(const Packet& ack) {
-    PacketNum ack_num = ack.packet_num;
+void RdmaConnection::process_ack(PacketPtr ack) {
+    PacketNum ack_num = ack->packet_num;
     if (ack_num < m_last_acked_pcn) {
         LOG_ERROR(
             fmt::format("RDMA connection {}: sender got ack with number "
@@ -322,7 +322,7 @@ void RdmaConnection::send_cnp() {
 
     RdmaConnectionPtr conn = shared_from_this();
 
-    cnp->callback = [conn](const Packet& cnp) { conn->process_cnp(cnp); };
+    cnp->callback = [conn](PacketPtr cnp) { conn->process_cnp(cnp); };
     TimeNs now = Scheduler::get_instance().get_current_time();
     cnp->generated_time = now;
     cnp->sent_time = now;
@@ -333,7 +333,7 @@ void RdmaConnection::send_cnp() {
     m_receiver->enqueue_packet(std::move(cnp));
 }
 
-void RdmaConnection::process_cnp([[maybe_unused]] const Packet& cnp) {
+void RdmaConnection::process_cnp([[maybe_unused]] PacketPtr cnp) {
     m_dcqcn.on_cnp();
 }
 
@@ -346,7 +346,7 @@ void RdmaConnection::confirm_first_unconfirmed_packet() {
                         m_id));
         return;
     }
-    const Packet& confirmed = *m_send_queue.front();
+    PacketPtr confirmed = m_send_queue.front();
     utils::Defer defer([this]() {
         m_send_queue.pop_front();
         if (m_send_queue.empty()) {
@@ -354,7 +354,7 @@ void RdmaConnection::confirm_first_unconfirmed_packet() {
         }
     });
 
-    const DataId& data_id = confirmed.data_id;
+    const DataId& data_id = confirmed->data_id;
     auto it = m_data_context_table.find(data_id);
     if (it == m_data_context_table.end()) {
         LOG_ERROR(
@@ -386,7 +386,7 @@ void RdmaConnection::send_ack_request() {
     RdmaConnectionPtr conn = shared_from_this();
 
     ack_request->callback =
-        [conn]([[maybe_unused]] const Packet& delivered_packet) {
+        [conn]([[maybe_unused]] PacketPtr delivered_packet) {
             conn->process_ack_request();
         };
     TimeNs now = Scheduler::get_instance().get_current_time();

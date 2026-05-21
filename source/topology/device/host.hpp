@@ -17,13 +17,13 @@ public:
 
     bool notify_about_arrival() final;
 
-    void enqueue_packet(std::shared_ptr<Packet> packet) final;
+    void enqueue_packet(PacketPtr packet) final;
 
 private:
     void process();
     void send_packet();
 
-    std::queue<std::shared_ptr<Packet>> m_nic_buffer;
+    std::queue<PacketPtr> m_nic_buffer;
     ECN m_ecn;
 
     std::size_t m_packets_on_inlinks = 0;

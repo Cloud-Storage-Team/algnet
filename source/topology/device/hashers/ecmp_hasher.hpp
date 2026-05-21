@@ -8,6 +8,6 @@ public:
     ECMPHasher() = default;
     ~ECMPHasher() = default;
 
-    std::uint32_t get_hash(const Packet& packet) final;
+    std::uint32_t get_hash(PacketPtr packet) final;
 };
 }  // namespace sim

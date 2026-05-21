@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 
 #include "four_tuple.hpp"
@@ -12,7 +13,9 @@ using PathHash = std::uint32_t;
 
 struct Packet;
 
-using OnPacketDeliveryCallback = std::function<void(const Packet&)>;
+using PacketPtr = std::shared_ptr<Packet>;
+
+using OnPacketDeliveryCallback = std::function<void(PacketPtr)>;
 
 struct Packet : FourTuple {
     Packet(SizeByte a_size = SizeByte(0ul), Id a_source_id = "",
@@ -33,7 +36,7 @@ struct Packet : FourTuple {
     // Note: callback takes packet itself because it might be changed while
     // travelling along the net
     OnPacketDeliveryCallback callback =
-        []([[maybe_unused]] const Packet& packet) {};
+        []([[maybe_unused]] PacketPtr packet) {};
     TimeNs generated_time;  // Note: ACK's generated time is the data packet
                             // generated time
     TimeNs sent_time;  // Note: ACK's sent time is the data packet sent time

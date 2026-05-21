@@ -8,10 +8,10 @@ namespace sim {
 AdaptiveFlowletHasher::AdaptiveFlowletHasher(double a_factor)
     : m_factor(a_factor) {}
 
-std::uint32_t AdaptiveFlowletHasher::get_hash(const Packet& packet) {
+std::uint32_t AdaptiveFlowletHasher::get_hash(PacketPtr packet) {
     std::uint32_t ecmp_hash = m_ecmp_hasher.get_hash(packet);
 
-    FourTuple four_tuple = static_cast<FourTuple>(packet);
+    FourTuple four_tuple = static_cast<FourTuple>(*packet);
 
     TimeNs curr_time = Scheduler::get_instance().get_current_time();
     auto it = m_flow_table.find(four_tuple);
@@ -23,7 +23,7 @@ std::uint32_t AdaptiveFlowletHasher::get_hash(const Packet& packet) {
     auto& [last_seen, shift] = it->second;
     TimeNs elapsed_from_last_seen = curr_time - last_seen;
 
-    utils::StrExpected<TimeNs> exp_avg_rtt = get_avg_rtt_label(packet.flags);
+    utils::StrExpected<TimeNs> exp_avg_rtt = get_avg_rtt_label(packet->flags);
     bool is_not_present = exp_avg_rtt.log_err_if_not_present(
         "Adaptive flowlet hasher could not find avg rtt;"
         "returned previous hash");

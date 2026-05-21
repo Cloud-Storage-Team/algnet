@@ -19,7 +19,7 @@ bool Host::notify_about_arrival() {
     return false;
 };
 
-void Host::enqueue_packet(std::shared_ptr<Packet> packet) {
+void Host::enqueue_packet(PacketPtr packet) {
     LOG_INFO(fmt::format("Packet {} arrived to host", packet->to_string()));
     TimeNs now = Scheduler::get_instance().get_current_time();
     packet->last_idle_start_time = now;
@@ -48,7 +48,7 @@ void Host::process() {
         current_inlink = next_inlink();
     }
 
-    Packet& packet = current_inlink->get_packet();
+    PacketPtr packet = current_inlink->get_packet();
     utils::Defer defer{[current_inlink]() { current_inlink->pop_packet(); }};
 
     utils::Defer defer_reschedule{[this]() {
@@ -60,10 +60,10 @@ void Host::process() {
     }};
 
     LOG_INFO(fmt::format("Host {}: processing packet {}", get_id(),
-                         packet.to_string()));
+                         packet->to_string()));
 
-    if (packet.receiver_id == get_id()) {
-        packet.callback(packet);
+    if (packet->receiver_id == get_id()) {
+        packet->callback(packet);
     } else {
         LOG_ERROR(
             "Host {}: arrived packet {} which destination differs from this "
@@ -76,15 +76,15 @@ void Host::process() {
             return;
         }
 
-        if (packet.ttl == 0) {
+        if (packet->ttl == 0) {
             LOG_ERROR(
                 fmt::format("Packet ttl expired on device {}; packet {} lost",
-                            get_id(), packet.to_string()));
+                            get_id(), packet->to_string()));
             return;
         }
-        packet.ttl--;
+        packet->ttl--;
 
-        next_link->schedule_arrival(current_inlink->get_packet_ptr());
+        next_link->schedule_arrival(packet);
     }
 }
 
@@ -98,16 +98,16 @@ void Host::send_packet() {
     Scheduler& sched = Scheduler::get_instance();
     TimeNs now = sched.get_current_time();
     {
-        Packet& data_packet = *m_nic_buffer.front();
+        PacketPtr data_packet = m_nic_buffer.front();
 
         // increase idle time
-        TimeNs idle_time_gain = now - data_packet.last_idle_start_time;
-        data_packet.idle_time += idle_time_gain;
+        TimeNs idle_time_gain = now - data_packet->last_idle_start_time;
+        data_packet->idle_time += idle_time_gain;
 
         utils::Defer defer{[this] { m_nic_buffer.pop(); }};
 
         LOG_INFO(fmt::format("Taken new data packet on host {}. Packet: {}",
-                             get_id(), data_packet.to_string()));
+                             get_id(), data_packet->to_string()));
 
         auto next_link = get_link_to_destination(data_packet);
         if (next_link == nullptr) {
@@ -116,14 +116,14 @@ void Host::send_packet() {
         }
 
         LOG_INFO(fmt::format("Sent new packet from host. Packet: {}", get_id(),
-                             data_packet.to_string()));
+                             data_packet->to_string()));
 
-        if (data_packet.ecn_capable_transport) {
+        if (data_packet->ecn_capable_transport) {
             float egress_queue_filling =
-                (next_link->get_from_egress_queue_size() + data_packet.size) /
+                (next_link->get_from_egress_queue_size() + data_packet->size) /
                 next_link->get_max_from_egress_buffer_size();
             if (m_ecn.get_congestion_mark(egress_queue_filling)) {
-                data_packet.congestion_experienced = true;
+                data_packet->congestion_experienced = true;
             }
         }
 

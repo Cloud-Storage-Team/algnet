@@ -21,7 +21,7 @@ std::shared_ptr<Link> Link::create_shared(
                  a_metrics_filters));
 }
 
-void Link::schedule_arrival(std::shared_ptr<Packet> packet) {
+void Link::schedule_arrival(PacketPtr packet) {
     bool empty_before_push = m_from_egress.empty();
     TimeNs now = Scheduler::get_instance().get_current_time();
     packet->last_idle_start_time = now;
@@ -42,24 +42,15 @@ void Link::schedule_arrival(std::shared_ptr<Packet> packet) {
 
 bool Link::has_packet() const { return !m_to_ingress.empty(); }
 
-Packet& Link::get_packet() {
+PacketPtr Link::get_packet() {
     if (m_to_ingress.empty()) {
-        throw std::runtime_error(fmt::format(
-            "Link {}: call get_packet when destination device queue is empty",
-            m_id));
+        throw std::runtime_error(
+            fmt::format("Link {}: call get_packet when destination device "
+                        "queue is empty",
+                        m_id));
     }
 
     return m_to_ingress.front();
-};
-
-std::shared_ptr<Packet> Link::get_packet_ptr() {
-    if (m_to_ingress.empty()) {
-        throw std::runtime_error(fmt::format(
-            "Link {}: call get_packet_ptr when destination device queue is empty",
-            m_id));
-    }
-
-    return m_to_ingress.front_ptr();
 }
 
 void Link::pop_packet() { m_to_ingress.pop(); }
@@ -139,12 +130,12 @@ Link::Link(Id a_id, std::weak_ptr<IDevice> a_from, std::weak_ptr<IDevice> a_to,
     }
 }
 
-TimeNs Link::get_transmission_delay(const Packet& packet) const {
+TimeNs Link::get_transmission_delay(PacketPtr packet) const {
     if (m_ctx.speed == SpeedGbps(0)) {
         LOG_WARN("Passed zero link speed");
         return TimeNs(0);
     }
-    return packet.size / m_ctx.speed;
+    return packet->size / m_ctx.speed;
 };
 
 void Link::transmit() {
@@ -158,13 +149,12 @@ void Link::transmit() {
 
     TimeNs current_time = Scheduler::get_instance().get_current_time();
 
-    auto packet_ptr = m_from_egress.front_ptr();
+    auto packet_ptr = m_from_egress.front();
     m_from_egress.pop();
 
     Scheduler::get_instance().add(
         current_time + m_ctx.latency,
-        [link = shared_from_this(),
-         packet_ptr = std::move(packet_ptr)]() {
+        [link = shared_from_this(), packet_ptr = std::move(packet_ptr)]() {
             link->arrive(packet_ptr);
         });
 
@@ -173,7 +163,7 @@ void Link::transmit() {
     }
 }
 
-void Link::arrive(std::shared_ptr<Packet> packet) {
+void Link::arrive(PacketPtr packet) {
     if (!m_to_ingress.push(packet)) {
         LOG_ERROR(
             fmt::format("Ingress buffer on link {} overflow; packet {} lost",
@@ -192,9 +182,9 @@ void Link::start_head_packet_sending() {
     TimeNs current_time = Scheduler::get_instance().get_current_time();
 
     // increase idle time
-    Packet& packet = m_from_egress.front();
-    TimeNs idle_time_gain = current_time - packet.last_idle_start_time;
-    packet.idle_time += idle_time_gain;
+    PacketPtr packet = m_from_egress.front();
+    TimeNs idle_time_gain = current_time - packet->last_idle_start_time;
+    packet->idle_time += idle_time_gain;
     TimeNs transmition_time = get_transmission_delay(packet);
 
     Scheduler::get_instance().add(

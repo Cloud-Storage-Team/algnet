@@ -4,7 +4,6 @@
 #include <memory>
 #include <vector>
 
-#include "../utils/fake_packet.hpp"
 #include "host_mock.hpp"
 #include "link_mock.hpp"
 #include "network/connection/flow/packet.hpp"
