@@ -30,7 +30,7 @@ std::set<std::shared_ptr<sim::ILink>> HostMock::get_outlinks() { return {}; }
 
 const Id& HostMock::get_id() const { return id; }
 
-void HostMock::enqueue_packet([[maybe_unused]] const sim::Packet& packet) {
+void HostMock::enqueue_packet([[maybe_unused]] std::shared_ptr<sim::Packet> packet) {
     return;
 }
 

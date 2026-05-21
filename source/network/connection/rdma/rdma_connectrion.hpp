@@ -1,5 +1,6 @@
 #pragma once
 #include <deque>
+#include <memory>
 #include <optional>
 
 #include "../i_connection.hpp"
@@ -50,7 +51,7 @@ private:
 
     void send_next_data_packet();
 
-    Packet create_data_packet(const Data& data);
+    std::shared_ptr<Packet> create_data_packet(const Data& data);
 
     void process_data_packet(const Packet& data);
 
@@ -88,7 +89,7 @@ private:
 
     // Invariant: packet_num of first packet in this queue is equal to
     // m_last_acked_pcn
-    std::deque<Packet> m_send_queue;
+    std::deque<std::shared_ptr<Packet>> m_send_queue;
 
     uint32_t m_send_window;
 

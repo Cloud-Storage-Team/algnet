@@ -15,7 +15,7 @@ TEST_F(LinkTest, ScheduledCorrectly) {
     int NUMBER_OF_PACKETS = 10;
     for (int i = 0; i < NUMBER_OF_PACKETS; i++) {
         sim::Packet packet(SizeByte(100ul));
-        link->schedule_arrival(packet);
+        link->schedule_arrival(std::make_shared<sim::Packet>(packet));
     }
 
     while (sim::Scheduler::get_instance().tick()) {

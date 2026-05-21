@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <queue>
 
 #include "i_packet_queue.hpp"
@@ -12,9 +13,10 @@ public:
     // Adds packet to queue
     // returns true on succseed (remaining space is enought), false
     // otherwice
-    virtual bool push(const Packet& packet) final;
+    virtual bool push(std::shared_ptr<Packet> packet) final;
     virtual const Packet& front() const final;
     virtual Packet& front() final;
+    virtual std::shared_ptr<Packet> front_ptr() final;
     virtual void pop() final;
 
     virtual SizeByte get_size() const final;
@@ -22,7 +24,7 @@ public:
     virtual SizeByte get_max_size() const final;
 
 private:
-    std::queue<Packet> m_queue;
+    std::queue<std::shared_ptr<Packet>> m_queue;
     SizeByte m_size;
     SizeByte m_max_size;
 };

@@ -21,15 +21,15 @@ std::shared_ptr<Link> Link::create_shared(
                  a_metrics_filters));
 }
 
-void Link::schedule_arrival(Packet& packet) {
+void Link::schedule_arrival(std::shared_ptr<Packet> packet) {
     bool empty_before_push = m_from_egress.empty();
     TimeNs now = Scheduler::get_instance().get_current_time();
-    packet.last_idle_start_time = now;
+    packet->last_idle_start_time = now;
 
     if (!m_from_egress.push(packet)) {
         LOG_ERROR(
             fmt::format("Link {}: from egress buffer overflow; packet {} lost",
-                        m_id, packet.to_string()));
+                        m_id, packet->to_string()));
         return;
     }
 
@@ -51,6 +51,16 @@ Packet& Link::get_packet() {
 
     return m_to_ingress.front();
 };
+
+std::shared_ptr<Packet> Link::get_packet_ptr() {
+    if (m_to_ingress.empty()) {
+        throw std::runtime_error(fmt::format(
+            "Link {}: call get_packet_ptr when destination device queue is empty",
+            m_id));
+    }
+
+    return m_to_ingress.front_ptr();
+}
 
 void Link::pop_packet() { m_to_ingress.pop(); }
 
@@ -148,32 +158,34 @@ void Link::transmit() {
 
     TimeNs current_time = Scheduler::get_instance().get_current_time();
 
+    auto packet_ptr = m_from_egress.front_ptr();
+    m_from_egress.pop();
+
     Scheduler::get_instance().add(
         current_time + m_ctx.latency,
         [link = shared_from_this(),
-         packet = std::move(m_from_egress.front())]() {
-            link->arrive(packet);
+         packet_ptr = std::move(packet_ptr)]() {
+            link->arrive(packet_ptr);
         });
 
-    m_from_egress.pop();
     if (!m_from_egress.empty()) {
         start_head_packet_sending();
     }
 }
 
-void Link::arrive(const Packet& packet) {
+void Link::arrive(std::shared_ptr<Packet> packet) {
     if (!m_to_ingress.push(packet)) {
         LOG_ERROR(
             fmt::format("Ingress buffer on link {} overflow; packet {} lost",
-                        m_id, packet.to_string()));
+                        m_id, packet->to_string()));
         return;
     }
-    m_ctx.total_data_transferred += packet.size;
+    m_ctx.total_data_transferred += packet->size;
     record_activity();
     m_to.lock()->notify_about_arrival();
 
     LOG_INFO("Packet arrived to the next device. Packet: " +
-             packet.to_string());
+             packet->to_string());
 };
 
 void Link::start_head_packet_sending() {

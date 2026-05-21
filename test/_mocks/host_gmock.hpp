@@ -8,7 +8,7 @@
 namespace test {
 class HostGMock : public sim::IHost {
 public:
-    MOCK_METHOD(void, enqueue_packet, (const sim::Packet& packet), (final));
+    MOCK_METHOD(void, enqueue_packet, (std::shared_ptr<sim::Packet> packet), (final));
     MOCK_METHOD(bool, notify_about_arrival, (), (final));
     MOCK_METHOD(bool, add_inlink, (std::shared_ptr<sim::ILink> link), (final));
     MOCK_METHOD(bool, add_outlink, (std::shared_ptr<sim::ILink> link), (final));

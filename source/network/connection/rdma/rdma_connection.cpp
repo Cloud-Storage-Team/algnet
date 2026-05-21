@@ -32,7 +32,7 @@ RdmaConnectionPtr RdmaConnection::create_shared(const RdmaParams& a_params) {
     }
     bool was_sending_queue_empty = m_send_queue.empty();
     while (total_size < data.size) {
-        m_send_queue.emplace_back(create_data_packet(data));
+        m_send_queue.push_back(create_data_packet(data));
         total_size += m_packet_size;
     }
     if (was_sending_queue_empty) {
@@ -150,32 +150,31 @@ void RdmaConnection::send_next_data_packet() {
         return;
     }
     m_pcn++;
-    const Packet& data = m_send_queue[i];
-    m_sender->enqueue_packet(data);
+    m_sender->enqueue_packet(m_send_queue[i]);
     schedule_data_send();
 }
 
-Packet RdmaConnection::create_data_packet(const Data& data) {
-    Packet packet;
-    packet.packet_num = m_next_packet_num++;
+std::shared_ptr<Packet> RdmaConnection::create_data_packet(const Data& data) {
+    auto packet = std::make_shared<Packet>();
+    packet->packet_num = m_next_packet_num++;
 
-    packet.data_id = std::move(data.id);
-    packet.sender_id = m_sender->get_id();
-    packet.sender_port = m_sender_port;
-    packet.receiver_port = m_receiver_port;
-    packet.receiver_id = m_receiver->get_id();
-    packet.size = m_packet_size;
+    packet->data_id = data.id;
+    packet->sender_id = m_sender->get_id();
+    packet->sender_port = m_sender_port;
+    packet->receiver_port = m_receiver_port;
+    packet->receiver_id = m_receiver->get_id();
+    packet->size = m_packet_size;
 
     RdmaConnectionPtr conn = shared_from_this();
 
-    packet.callback = [conn](const Packet& delivered_packet) {
+    packet->callback = [conn](const Packet& delivered_packet) {
         conn->process_data_packet(delivered_packet);
     };
     TimeNs now = Scheduler::get_instance().get_current_time();
-    packet.generated_time = now;
+    packet->generated_time = now;
 
-    packet.ecn_capable_transport = true;
-    packet.congestion_experienced = false;
+    packet->ecn_capable_transport = true;
+    packet->congestion_experienced = false;
     return packet;
 }
 
@@ -213,7 +212,6 @@ void RdmaConnection::process_expected_data_packet() {
 }
 
 void RdmaConnection::send_nak() {
-    Packet nak;
     if (m_next_expected_packet_num == 0) {
         LOG_ERROR(
             fmt::format("RDMA connection {}: cold not send nak: next expected "
@@ -221,25 +219,26 @@ void RdmaConnection::send_nak() {
                         m_id));
         return;
     }
-    nak.packet_num = m_next_expected_packet_num - 1;
+    auto nak = std::make_shared<Packet>();
+    nak->packet_num = m_next_expected_packet_num - 1;
 
-    nak.sender_id = m_receiver->get_id();
-    nak.sender_port = m_receiver_port;
-    nak.receiver_port = m_sender_port;
-    nak.receiver_id = m_sender->get_id();
-    nak.size = M_ACK_SIZE;
+    nak->sender_id = m_receiver->get_id();
+    nak->sender_port = m_receiver_port;
+    nak->receiver_port = m_sender_port;
+    nak->receiver_id = m_sender->get_id();
+    nak->size = M_ACK_SIZE;
 
     RdmaConnectionPtr conn = shared_from_this();
 
-    nak.callback = [conn](const Packet& nak) { conn->process_nak(nak); };
+    nak->callback = [conn](const Packet& nak) { conn->process_nak(nak); };
     TimeNs now = Scheduler::get_instance().get_current_time();
-    nak.generated_time = now;
-    nak.sent_time = now;
+    nak->generated_time = now;
+    nak->sent_time = now;
 
-    nak.ecn_capable_transport = true;
-    nak.congestion_experienced = false;
+    nak->ecn_capable_transport = true;
+    nak->congestion_experienced = false;
 
-    m_receiver->enqueue_packet(nak);
+    m_receiver->enqueue_packet(std::move(nak));
 }
 
 void RdmaConnection::process_nak(const Packet& nak) {
@@ -252,7 +251,6 @@ void RdmaConnection::process_nak(const Packet& nak) {
 
 void RdmaConnection::send_ack() {
     m_last_ack_send = Scheduler::get_instance().get_current_time();
-    Packet ack;
     if (m_next_expected_packet_num == 0) {
         LOG_ERROR(
             fmt::format("RDMA connection {}: cold not send ack: next expected "
@@ -260,27 +258,28 @@ void RdmaConnection::send_ack() {
                         m_id));
         return;
     }
-    ack.packet_num = m_next_expected_packet_num - 1;
+    auto ack = std::make_shared<Packet>();
+    ack->packet_num = m_next_expected_packet_num - 1;
 
-    ack.sender_id = m_receiver->get_id();
-    ack.sender_port = m_receiver_port;
-    ack.receiver_port = m_sender_port;
-    ack.receiver_id = m_sender->get_id();
-    ack.size = M_ACK_SIZE;
+    ack->sender_id = m_receiver->get_id();
+    ack->sender_port = m_receiver_port;
+    ack->receiver_port = m_sender_port;
+    ack->receiver_id = m_sender->get_id();
+    ack->size = M_ACK_SIZE;
 
     RdmaConnectionPtr conn = shared_from_this();
 
-    ack.callback = [conn](const Packet& delivered_packet) {
+    ack->callback = [conn](const Packet& delivered_packet) {
         conn->process_ack(delivered_packet);
     };
     TimeNs now = Scheduler::get_instance().get_current_time();
-    ack.generated_time = now;
-    ack.sent_time = now;
+    ack->generated_time = now;
+    ack->sent_time = now;
 
-    ack.ecn_capable_transport = true;
-    ack.congestion_experienced = false;
+    ack->ecn_capable_transport = true;
+    ack->congestion_experienced = false;
 
-    m_receiver->enqueue_packet(ack);
+    m_receiver->enqueue_packet(std::move(ack));
 }
 
 void RdmaConnection::process_ack(const Packet& ack) {
@@ -312,26 +311,26 @@ void RdmaConnection::process_ack(const Packet& ack) {
 }
 
 void RdmaConnection::send_cnp() {
-    Packet cnp;
-    cnp.packet_num = m_next_expected_packet_num - 1;
+    auto cnp = std::make_shared<Packet>();
+    cnp->packet_num = m_next_expected_packet_num - 1;
 
-    cnp.sender_id = m_receiver->get_id();
-    cnp.sender_port = m_receiver_port;
-    cnp.receiver_port = m_sender_port;
-    cnp.receiver_id = m_sender->get_id();
-    cnp.size = M_ACK_SIZE;
+    cnp->sender_id = m_receiver->get_id();
+    cnp->sender_port = m_receiver_port;
+    cnp->receiver_port = m_sender_port;
+    cnp->receiver_id = m_sender->get_id();
+    cnp->size = M_ACK_SIZE;
 
     RdmaConnectionPtr conn = shared_from_this();
 
-    cnp.callback = [conn](const Packet& cnp) { conn->process_cnp(cnp); };
+    cnp->callback = [conn](const Packet& cnp) { conn->process_cnp(cnp); };
     TimeNs now = Scheduler::get_instance().get_current_time();
-    cnp.generated_time = now;
-    cnp.sent_time = now;
+    cnp->generated_time = now;
+    cnp->sent_time = now;
 
-    cnp.ecn_capable_transport = true;
-    cnp.congestion_experienced = true;
+    cnp->ecn_capable_transport = true;
+    cnp->congestion_experienced = true;
 
-    m_receiver->enqueue_packet(cnp);
+    m_receiver->enqueue_packet(std::move(cnp));
 }
 
 void RdmaConnection::process_cnp([[maybe_unused]] const Packet& cnp) {
@@ -347,7 +346,7 @@ void RdmaConnection::confirm_first_unconfirmed_packet() {
                         m_id));
         return;
     }
-    const Packet& confirmed = m_send_queue.front();
+    const Packet& confirmed = *m_send_queue.front();
     utils::Defer defer([this]() {
         m_send_queue.pop_front();
         if (m_send_queue.empty()) {
@@ -375,28 +374,28 @@ void RdmaConnection::confirm_first_unconfirmed_packet() {
 }
 
 void RdmaConnection::send_ack_request() {
-    Packet ack_request;
-    ack_request.packet_num = m_next_packet_num++;
+    auto ack_request = std::make_shared<Packet>();
+    ack_request->packet_num = m_next_packet_num++;
 
-    ack_request.sender_id = m_sender->get_id();
-    ack_request.sender_port = m_sender_port;
-    ack_request.receiver_port = m_receiver_port;
-    ack_request.receiver_id = m_receiver->get_id();
-    ack_request.size = ACK_REQUEST_SIZE;
+    ack_request->sender_id = m_sender->get_id();
+    ack_request->sender_port = m_sender_port;
+    ack_request->receiver_port = m_receiver_port;
+    ack_request->receiver_id = m_receiver->get_id();
+    ack_request->size = ACK_REQUEST_SIZE;
 
     RdmaConnectionPtr conn = shared_from_this();
 
-    ack_request.callback =
+    ack_request->callback =
         [conn]([[maybe_unused]] const Packet& delivered_packet) {
             conn->process_ack_request();
         };
     TimeNs now = Scheduler::get_instance().get_current_time();
-    ack_request.generated_time = now;
-    ack_request.sent_time = now;
+    ack_request->generated_time = now;
+    ack_request->sent_time = now;
 
-    ack_request.ecn_capable_transport = true;
-    ack_request.congestion_experienced = false;
-    m_sender->enqueue_packet(ack_request);
+    ack_request->ecn_capable_transport = true;
+    ack_request->congestion_experienced = false;
+    m_sender->enqueue_packet(std::move(ack_request));
 }
 
 void RdmaConnection::process_ack_request() { send_ack(); }

@@ -83,7 +83,7 @@ void Switch::process() {
     packet.path_hash ^= std::hash<Id>{}(get_id());
 
     // TODO: increase total_processing_time correctly
-    next_link->schedule_arrival(packet);
+    next_link->schedule_arrival(link->get_packet_ptr());
 }
 
 }  // namespace sim

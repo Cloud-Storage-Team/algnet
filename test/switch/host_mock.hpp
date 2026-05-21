@@ -24,7 +24,7 @@ public:
 
     const Id& get_id() const final;
 
-    void enqueue_packet(const sim::Packet& packet) final;
+    void enqueue_packet(std::shared_ptr<sim::Packet> packet) final;
 
 private:
     Id id = "";

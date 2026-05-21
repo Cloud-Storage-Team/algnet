@@ -42,11 +42,15 @@ TEST_F(FlowTest, SendOnePacket) {
 
     EXPECT_CALL(*sender_mock, enqueue_packet(_))
         .Times(1)
-        .WillOnce(Invoke([](sim::Packet packet) { packet.callback(packet); }));
+        .WillOnce(Invoke([](std::shared_ptr<sim::Packet> packet) {
+            packet->callback(*packet);
+        }));
 
     EXPECT_CALL(*receiver_mock, enqueue_packet(_))
         .Times(1)
-        .WillOnce(Invoke([](sim::Packet packet) { packet.callback(packet); }));
+        .WillOnce(Invoke([](std::shared_ptr<sim::Packet> packet) {
+            packet->callback(*packet);
+        }));
 
     flow->send(packets_info);
 
@@ -63,12 +67,16 @@ TEST_F(FlowTest, RetransmitPacket) {
     EXPECT_CALL(*sender_mock, enqueue_packet(_))
         .Times(2)
         .WillOnce(
-            Invoke([](sim::Packet) {}))  // do not deliver packet on first call
-        .WillOnce(Invoke([](sim::Packet packet) { packet.callback(packet); }));
+            Invoke([](std::shared_ptr<sim::Packet>) {}))
+        .WillOnce(Invoke([](std::shared_ptr<sim::Packet> packet) {
+            packet->callback(*packet);
+        }));
 
     EXPECT_CALL(*receiver_mock, enqueue_packet(_))
         .Times(1)
-        .WillOnce(Invoke([](sim::Packet packet) { packet.callback(packet); }));
+        .WillOnce(Invoke([](std::shared_ptr<sim::Packet> packet) {
+            packet->callback(*packet);
+        }));
 
     Id sender_id = "sender";
     Id receiver_id = "receiver";

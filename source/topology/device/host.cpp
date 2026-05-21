@@ -19,13 +19,11 @@ bool Host::notify_about_arrival() {
     return false;
 };
 
-void Host::enqueue_packet(const Packet& packet) {
-    LOG_INFO(fmt::format("Packet {} arrived to host", packet.to_string()));
+void Host::enqueue_packet(std::shared_ptr<Packet> packet) {
+    LOG_INFO(fmt::format("Packet {} arrived to host", packet->to_string()));
     TimeNs now = Scheduler::get_instance().get_current_time();
-    m_nic_buffer.push(packet);
-
-    Packet& pckt = m_nic_buffer.back();
-    pckt.last_idle_start_time = now;
+    packet->last_idle_start_time = now;
+    m_nic_buffer.push(std::move(packet));
     if (m_nic_buffer.size() == 1) {
         // first packet in queue => start sending it
         send_packet();
@@ -86,7 +84,7 @@ void Host::process() {
         }
         packet.ttl--;
 
-        next_link->schedule_arrival(packet);
+        next_link->schedule_arrival(current_inlink->get_packet_ptr());
     }
 }
 
@@ -100,7 +98,7 @@ void Host::send_packet() {
     Scheduler& sched = Scheduler::get_instance();
     TimeNs now = sched.get_current_time();
     {
-        Packet& data_packet = m_nic_buffer.front();
+        Packet& data_packet = *m_nic_buffer.front();
 
         // increase idle time
         TimeNs idle_time_gain = now - data_packet.last_idle_start_time;
@@ -129,7 +127,7 @@ void Host::send_packet() {
             }
         }
 
-        next_link->schedule_arrival(data_packet);
+        next_link->schedule_arrival(m_nic_buffer.front());
     }
 
     if (!m_nic_buffer.empty()) {
