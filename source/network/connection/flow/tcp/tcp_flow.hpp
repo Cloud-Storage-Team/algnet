@@ -43,9 +43,8 @@ private:
     TcpFlow(Id a_id, FlowFourTuple a_four_tuple, bool a_ecn_capable, RTO a_rto,
             TcpFlowMetricsFilters a_metrics_flags);
 
-    PacketPtr create_data_packet(PacketInfo info,
-                                               std::shared_ptr<IHost> sender,
-                                               std::shared_ptr<IHost> receiver);
+    PacketPtr create_data_packet(PacketInfo info, std::shared_ptr<IHost> sender,
+                                 std::shared_ptr<IHost> receiver);
 
     void set_avg_rtt_if_present(PacketPtr packet);
 

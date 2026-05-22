@@ -72,9 +72,9 @@ TcpFlow::TcpFlow(Id a_id, FlowFourTuple a_four_tuple, bool a_ecn_capable,
     }
 }
 
-PacketPtr TcpFlow::create_data_packet(
-    PacketInfo info, std::shared_ptr<IHost> sender,
-    std::shared_ptr<IHost> receiver) {
+PacketPtr TcpFlow::create_data_packet(PacketInfo info,
+                                      std::shared_ptr<IHost> sender,
+                                      std::shared_ptr<IHost> receiver) {
     auto packet = std::make_shared<Packet>();
     packet->packet_num = m_next_packet_num++;
 
@@ -93,8 +93,8 @@ PacketPtr TcpFlow::create_data_packet(
 
     std::shared_ptr<TcpFlow> flow = shared_from_this();
 
-    packet->callback = [flow, delivery_callback = info.callback](
-                           PacketPtr delivered_packet) {
+    packet->callback = [flow, delivery_callback =
+                                  info.callback](PacketPtr delivered_packet) {
         flow->process_data_packet(delivered_packet, delivery_callback);
     };
     packet->generated_time = info.generated_time;
@@ -198,9 +198,10 @@ void TcpFlow::update_rto_on_ack() {
 
 void TcpFlow::on_timeout(PacketPtr data) {
     if (m_ack_monitor.is_confirmed(data->packet_num)) {
-        LOG_INFO(fmt::format(
-            "Flow {}: packet {} is confirmed when timeout reached; no retransmit",
-            m_id, data->packet_num));
+        LOG_INFO(
+            fmt::format("Flow {}: packet {} is confirmed when timeout reached; "
+                        "no retransmit",
+                        m_id, data->packet_num));
         return;
     }
     update_rto_on_timeout();

@@ -35,8 +35,8 @@ struct Packet : FourTuple {
 
     // Note: callback takes packet itself because it might be changed while
     // travelling along the net
-    OnPacketDeliveryCallback callback =
-        []([[maybe_unused]] PacketPtr packet) {};
+    OnPacketDeliveryCallback callback = []([[maybe_unused]] PacketPtr packet) {
+    };
     TimeNs generated_time;  // Note: ACK's generated time is the data packet
                             // generated time
     TimeNs sent_time;  // Note: ACK's sent time is the data packet sent time
