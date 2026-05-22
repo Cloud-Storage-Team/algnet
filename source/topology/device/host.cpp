@@ -127,7 +127,7 @@ void Host::send_packet() {
             }
         }
 
-        next_link->schedule_arrival(m_nic_buffer.front());
+        next_link->schedule_arrival(data_packet);
     }
 
     if (!m_nic_buffer.empty()) {
