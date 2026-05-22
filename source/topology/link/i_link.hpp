@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <optional>
 #include <utility>
 
@@ -36,14 +37,13 @@ public:
      * Update the source egress delay and schedule the arrival event
      * based on the egress queueing and transmission delays.
      */
-    virtual void schedule_arrival(Packet& packet) = 0;
+    virtual void schedule_arrival(PacketPtr packet) = 0;
 
     // Checks is there at least one packet on to ingress queue
     virtual bool has_packet() const = 0;
 
-    // Returns first packet from queue on destination device.
-    // If queue is empty, throws error
-    virtual Packet& get_packet() = 0;
+    // Returns shared_ptr to first packet from queue on destination device.
+    virtual PacketPtr get_packet() = 0;
 
     // Pops first packet from queue on destination device
     // If queue is empty, throws std::runtime_error

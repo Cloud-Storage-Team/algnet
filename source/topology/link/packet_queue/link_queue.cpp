@@ -26,8 +26,8 @@ LinkQueue::LinkQueue(SizeByte a_queue_size, Id a_device_id,
     m_ctx.device_id = a_device_id;
 }
 
-bool LinkQueue::push(const Packet& packet) {
-    bool result = m_queue.push(packet);
+bool LinkQueue::push(PacketPtr packet) {
+    bool result = m_queue.push(std::move(packet));
     if (result) {
         m_ctx.packets_transmitted++;
     } else {
@@ -37,9 +37,7 @@ bool LinkQueue::push(const Packet& packet) {
     return result;
 }
 
-const Packet& LinkQueue::front() const { return m_queue.front(); }
-
-Packet& LinkQueue::front() { return m_queue.front(); }
+PacketPtr LinkQueue::front() const { return m_queue.front(); }
 
 void LinkQueue::pop() {
     m_queue.pop();

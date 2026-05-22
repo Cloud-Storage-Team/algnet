@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <queue>
 
 #include "ecn.hpp"
@@ -16,13 +17,13 @@ public:
 
     bool notify_about_arrival() final;
 
-    void enqueue_packet(const Packet& packet) final;
+    void enqueue_packet(PacketPtr packet) final;
 
 private:
     void process();
     void send_packet();
 
-    std::queue<Packet> m_nic_buffer;
+    std::queue<PacketPtr> m_nic_buffer;
     ECN m_ecn;
 
     std::size_t m_packets_on_inlinks = 0;

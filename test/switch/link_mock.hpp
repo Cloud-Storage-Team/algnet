@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include "network/connection/flow/packet.hpp"
@@ -10,11 +11,10 @@ public:
     LinkMock(std::weak_ptr<sim::IDevice> a_from,
              std::weak_ptr<sim::IDevice> a_to, Id a_id = "");
     ~LinkMock() = default;
-    virtual void schedule_arrival(sim::Packet& a_packet) final;
-    virtual void process_arrival(sim::Packet packet) final;
+    virtual void schedule_arrival(sim::PacketPtr a_packet) final;
 
     virtual bool has_packet() const final;
-    virtual sim::Packet& get_packet() final;
+    virtual sim::PacketPtr get_packet() final;
     virtual void pop_packet() final;
 
     virtual std::shared_ptr<sim::IDevice> get_from() const final;
@@ -44,7 +44,7 @@ private:
     std::weak_ptr<sim::IDevice> m_from;
     std::weak_ptr<sim::IDevice> m_to;
     std::vector<sim::Packet> m_arrived_packets;
-    std::optional<sim::Packet> m_ingress_packet;
+    sim::PacketPtr m_ingress_packet;
     sim::LinkContext m_ctx;
     Id m_id;
 };

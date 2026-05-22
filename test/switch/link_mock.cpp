@@ -13,19 +13,17 @@ std::shared_ptr<sim::IDevice> LinkMock::get_from() const {
 }
 std::shared_ptr<sim::IDevice> LinkMock::get_to() const { return m_to.lock(); }
 
-void LinkMock::schedule_arrival(sim::Packet& a_packet) {
-    m_arrived_packets.push_back(a_packet);
+void LinkMock::schedule_arrival(sim::PacketPtr a_packet) {
+    m_arrived_packets.push_back(*a_packet);
 }
-
-void LinkMock::process_arrival([[maybe_unused]] sim::Packet a_packet) {}
 
 void LinkMock::set_ingress_packet(sim::Packet a_packet) {
-    m_ingress_packet.emplace(a_packet);
+    m_ingress_packet = std::make_shared<sim::Packet>(a_packet);
 }
 
-bool LinkMock::has_packet() const { return m_ingress_packet.has_value(); }
+bool LinkMock::has_packet() const { return m_ingress_packet != nullptr; }
 
-sim::Packet& LinkMock::get_packet() { return m_ingress_packet.value(); }
+sim::PacketPtr LinkMock::get_packet() { return m_ingress_packet; }
 
 void LinkMock::pop_packet() { m_ingress_packet.reset(); }
 

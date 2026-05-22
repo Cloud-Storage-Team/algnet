@@ -15,11 +15,14 @@ std::vector<std::shared_ptr<sim::IDevice>> createTestDevices(size_t count) {
 TestLink::TestLink(std::shared_ptr<sim::IDevice> a_src,
                    std::shared_ptr<sim::IDevice> a_dest,
                    sim::Packet packet_to_return, Id a_id)
-    : src(a_src), dst(a_dest), m_id(a_id), packet(packet_to_return) {}
+    : src(a_src),
+      dst(a_dest),
+      m_id(a_id),
+      m_packet(std::make_shared<sim::Packet>(packet_to_return)) {}
 
-void TestLink::schedule_arrival([[maybe_unused]] sim::Packet& packet) {};
+void TestLink::schedule_arrival([[maybe_unused]] sim::PacketPtr packet) {};
 
-sim::Packet& TestLink::get_packet() { return packet; };
+sim::PacketPtr TestLink::get_packet() { return m_packet; };
 
 std::shared_ptr<sim::IDevice> TestLink::get_from() const { return src.lock(); };
 std::shared_ptr<sim::IDevice> TestLink::get_to() const { return dst.lock(); };

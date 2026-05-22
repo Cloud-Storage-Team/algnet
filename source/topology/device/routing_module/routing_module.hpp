@@ -23,7 +23,7 @@ public:
     // returns next inlink and moves inlinks set iterator forward
     std::shared_ptr<ILink> next_inlink() final;
     std::shared_ptr<ILink> get_link_to_destination(
-        const Packet& packet) const final;
+        PacketPtr packet) const final;
     std::set<std::shared_ptr<ILink>> get_outlinks() final;
 
 private:

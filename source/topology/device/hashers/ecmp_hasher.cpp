@@ -18,11 +18,11 @@ static inline void hash_combine(std::size_t& seed, std::size_t value) {
             (seed >> 2);
 }
 
-std::uint32_t ECMPHasher::get_hash(const Packet& packet) {
-    std::size_t hash = packet.sender_id.hash;
-    hash_combine(hash, packet.receiver_id.hash);
-    hash_combine(hash, packet.sender_port);
-    hash_combine(hash, packet.receiver_port);
+std::uint32_t ECMPHasher::get_hash(PacketPtr packet) {
+    std::size_t hash = packet->sender_id.hash;
+    hash_combine(hash, packet->receiver_id.hash);
+    hash_combine(hash, packet->sender_port);
+    hash_combine(hash, packet->receiver_port);
     return hash;
 }
 

@@ -2,11 +2,11 @@
 
 #include <set>
 
+#include "network/connection/flow/packet.hpp"
 #include "utils/identifiable.hpp"
 
 namespace sim {
 
-struct Packet;
 class ILink;
 
 class IRoutingDevice : public Identifiable {
@@ -18,7 +18,7 @@ public:
     virtual bool update_routing_table(Id dest_id, std::shared_ptr<ILink> link,
                                       size_t paths_count = 1) = 0;
     virtual std::shared_ptr<ILink> get_link_to_destination(
-        const Packet& packet) const = 0;
+        PacketPtr packet) const = 0;
     virtual std::shared_ptr<ILink> next_inlink() = 0;
     virtual std::set<std::shared_ptr<ILink>> get_outlinks() = 0;
 };

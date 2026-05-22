@@ -42,9 +42,9 @@ void TestPushOnePacket(SizeByte packet_size, Args&&... args) {
 
     sim::Packet packet(packet_size);
 
-    ASSERT_TRUE(queue.push(packet));
+    ASSERT_TRUE(queue.push(std::make_shared<sim::Packet>(packet)));
 
-    ASSERT_EQ(queue.front(), packet);
+    ASSERT_EQ(*queue.front(), packet);
     ASSERT_FALSE(queue.empty());
     ASSERT_EQ(queue.get_size(), packet.size);
 
@@ -65,19 +65,19 @@ void TestOverflow(Args&&... args) {
     sim::Packet packet(packet_size);
 
     for (size_t i = 0; i < NUMBER_OF_PACKETS; i++) {
-        ASSERT_TRUE(queue.push(packet));
+        ASSERT_TRUE(queue.push(std::make_shared<sim::Packet>(packet)));
     }
 
     SizeByte expected_queue_size = packet_size * NUMBER_OF_PACKETS;
     ASSERT_EQ(queue.get_size(), expected_queue_size);
 
     sim::Packet overflow_packet(packet_size + SizeByte(1ul));
-    ASSERT_FALSE(queue.push(overflow_packet));
+    ASSERT_FALSE(queue.push(std::make_shared<sim::Packet>(overflow_packet)));
 
     ASSERT_EQ(queue.get_size(), expected_queue_size);
 
     for (size_t i = 0; i < NUMBER_OF_PACKETS; i++) {
-        ASSERT_EQ(queue.front(), packet);
+        ASSERT_EQ(*queue.front(), packet);
         queue.pop();
     }
 

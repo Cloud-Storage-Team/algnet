@@ -1,4 +1,6 @@
 #pragma once
+#include <memory>
+
 #include "../i_flow.hpp"
 #include "metrics/metrics_table/i_metricable.hpp"
 #include "metrics/packet_reordering/simple_packet_reordering.hpp"
@@ -41,24 +43,24 @@ private:
     TcpFlow(Id a_id, FlowFourTuple a_four_tuple, bool a_ecn_capable, RTO a_rto,
             TcpFlowMetricsFilters a_metrics_flags);
 
-    Packet create_data_packet(PacketInfo info, std::shared_ptr<IHost> sender,
-                              std::shared_ptr<IHost> receiver);
+    PacketPtr create_data_packet(PacketInfo info, std::shared_ptr<IHost> sender,
+                                 std::shared_ptr<IHost> receiver);
 
-    void set_avg_rtt_if_present(Packet& packet);
+    void set_avg_rtt_if_present(PacketPtr packet);
 
-    void send_data_packet(Packet data);
+    void send_data_packet(PacketPtr data);
 
-    void process_data_packet(const Packet& data_packet,
+    void process_data_packet(PacketPtr data_packet,
                              const PacketCallback& callback);
 
-    void process_ack(const Packet& ack, SizeByte data_packet_size,
+    void process_ack(PacketPtr ack, SizeByte data_packet_size,
                      PacketCallback callback);
 
     void update_rto_on_ack();
 
-    void on_timeout(const Packet& data);
+    void on_timeout(PacketPtr data);
     void update_rto_on_timeout();
-    void retransmit_packet(const Packet& data);
+    void retransmit_packet(PacketPtr data);
 
 private:
     // flag labels

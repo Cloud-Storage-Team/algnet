@@ -20,7 +20,7 @@ bool HostMock::update_routing_table(
 std::shared_ptr<sim::ILink> HostMock::next_inlink() { return nullptr; }
 
 std::shared_ptr<sim::ILink> HostMock::get_link_to_destination(
-    [[maybe_unused]] const sim::Packet& packet) const {
+    [[maybe_unused]] sim::PacketPtr packet) const {
     return nullptr;
 }
 
@@ -30,7 +30,7 @@ std::set<std::shared_ptr<sim::ILink>> HostMock::get_outlinks() { return {}; }
 
 const Id& HostMock::get_id() const { return id; }
 
-void HostMock::enqueue_packet([[maybe_unused]] const sim::Packet& packet) {
+void HostMock::enqueue_packet([[maybe_unused]] sim::PacketPtr packet) {
     return;
 }
 

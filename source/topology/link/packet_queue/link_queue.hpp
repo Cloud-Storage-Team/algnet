@@ -26,9 +26,8 @@ public:
     LinkQueue(SizeByte a_max_size, Id a_device_id, LinkQueueType a_type);
     ~LinkQueue() = default;
 
-    bool push(const Packet& packet);
-    const Packet& front() const;
-    Packet& front();
+    bool push(PacketPtr packet);
+    PacketPtr front() const;
     void pop();
 
     SizeByte get_max_size() const;

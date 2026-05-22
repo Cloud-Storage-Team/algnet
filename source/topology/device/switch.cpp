@@ -34,7 +34,7 @@ void Switch::process() {
         link = next_inlink();
     }
 
-    Packet& packet = link->get_packet();
+    PacketPtr packet = link->get_packet();
     utils::Defer defer{[link]() { link->pop_packet(); }};
 
     utils::Defer defer_reschedule{[this]() {
@@ -51,36 +51,36 @@ void Switch::process() {
         LOG_ERROR(fmt::format(
             "Switch {}: no link corresponds to destination device for packet "
             "{}",
-            get_id(), packet.to_string()));
+            get_id(), packet->to_string()));
         return;
     }
 
     LOG_INFO(fmt::format("Switch {}: processing packet {}", get_id(),
-                         packet.to_string()));
+                         packet->to_string()));
 
     // ECN mark for data packets
-    if (packet.ecn_capable_transport) {
+    if (packet->ecn_capable_transport) {
         // requests queue size here to consider processing packet
         float ingress_queue_filling = link->get_to_ingress_queue_size() /
                                       link->get_max_to_ingress_queue_size();
 
         float egress_queue_filling =
-            (next_link->get_from_egress_queue_size() + packet.size) /
+            (next_link->get_from_egress_queue_size() + packet->size) /
             next_link->get_max_from_egress_buffer_size();
 
         if (m_ecn.get_congestion_mark(ingress_queue_filling) ||
             m_ecn.get_congestion_mark(egress_queue_filling)) {
-            packet.congestion_experienced = true;
+            packet->congestion_experienced = true;
         }
     }
 
-    if (packet.ttl == 0) {
+    if (packet->ttl == 0) {
         LOG_ERROR(fmt::format("Packet ttl expired on switch {}; packet {} lost",
-                              get_id(), packet.to_string()));
+                              get_id(), packet->to_string()));
         return;
     }
-    packet.ttl--;
-    packet.path_hash ^= std::hash<Id>{}(get_id());
+    packet->ttl--;
+    packet->path_hash ^= std::hash<Id>{}(get_id());
 
     // TODO: increase total_processing_time correctly
     next_link->schedule_arrival(packet);
