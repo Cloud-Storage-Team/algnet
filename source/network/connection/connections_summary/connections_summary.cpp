@@ -1,5 +1,7 @@
 #include "connections_summary.hpp"
 
+#include <omp.h>
+
 #include "utils/filesystem.hpp"
 
 namespace sim {

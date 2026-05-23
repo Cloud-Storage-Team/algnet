@@ -1,5 +1,7 @@
 #include "network.hpp"
 
+#include <omp.h>
+
 #include "connection/connections_summary/connections_summary.hpp"
 #include "metrics/metrics_table/combine_metrics_tables.hpp"
 
