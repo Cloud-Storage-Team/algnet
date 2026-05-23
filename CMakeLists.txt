@@ -5,6 +5,8 @@ project(nons)
 
 # main part of project
 
+find_package(OpenMP REQUIRED)
+
 option(BUILD_PROJECT "Build project" ON)
 option(PROFILING "Add profiling flag" OFF)
 
@@ -32,7 +34,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/external/matplotplusplus/)
 if (BUILD_PROJECT)
     set(TARGET_NAME "${PROJECT_NAME}")
     add_executable(${TARGET_NAME} ${src} source/main.cpp)
-    target_link_libraries(${TARGET_NAME} yaml-cpp matplot)
+    target_link_libraries(${TARGET_NAME} yaml-cpp matplot OpenMP::OpenMP_CXX)
     target_compile_options(${TARGET_NAME} PRIVATE -Wall -Werror -Wextra)
 
     if (DEFINED LOG_LEVEL)
@@ -55,7 +57,7 @@ if(BUILD_TESTS)
     target_compile_definitions(${TEST_NAME} PRIVATE PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 
     target_compile_options(${TEST_NAME} PRIVATE -Wall -Werror -Wextra)
-    target_link_libraries(${TEST_NAME} gtest gmock gtest_main yaml-cpp matplot)
+    target_link_libraries(${TEST_NAME} gtest gmock gtest_main yaml-cpp matplot OpenMP::OpenMP_CXX)
 
     if (DEFINED LOG_LEVEL)
         target_compile_definitions(${TEST_NAME} PRIVATE LOG_LEVEL=${LOG_LEVEL})
