@@ -1,0 +1,2582 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" width="1200" height="662" onload="init(evt)" viewBox="0 0 1200 662" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- Flame graph stack visualization. See https://github.com/brendangregg/FlameGraph for latest version, and http://www.brendangregg.com/flamegraphs.html for examples. -->
+<!-- NOTES:  -->
+<defs>
+	<linearGradient id="background" y1="0" y2="1" x1="0" x2="0" >
+		<stop stop-color="#eeeeee" offset="5%" />
+		<stop stop-color="#eeeeb0" offset="95%" />
+	</linearGradient>
+</defs>
+<style type="text/css">
+	text { font-family:Verdana; font-size:12px; fill:rgb(0,0,0); }
+	#search, #ignorecase { opacity:0.1; cursor:pointer; }
+	#search:hover, #search.show, #ignorecase:hover, #ignorecase.show { opacity:1; }
+	#subtitle { text-anchor:middle; font-color:rgb(160,160,160); }
+	#title { text-anchor:middle; font-size:17px}
+	#unzoom { cursor:pointer; }
+	#frames > *:hover { stroke:black; stroke-width:0.5; cursor:pointer; }
+	.hide { display:none; }
+	.parent { opacity:0.5; }
+</style>
+<script type="text/ecmascript">
+<![CDATA[
+	"use strict";
+	var details, searchbtn, unzoombtn, matchedtxt, svg, searching, currentSearchTerm, ignorecase, ignorecaseBtn;
+	function init(evt) {
+		details = document.getElementById("details").firstChild;
+		searchbtn = document.getElementById("search");
+		ignorecaseBtn = document.getElementById("ignorecase");
+		unzoombtn = document.getElementById("unzoom");
+		matchedtxt = document.getElementById("matched");
+		svg = document.getElementsByTagName("svg")[0];
+		searching = 0;
+		currentSearchTerm = null;
+
+		// use GET parameters to restore a flamegraphs state.
+		var params = get_params();
+		if (params.x && params.y)
+			zoom(find_group(document.querySelector('[x="' + params.x + '"][y="' + params.y + '"]')));
+                if (params.s) search(params.s);
+	}
+
+	// event listeners
+	window.addEventListener("click", function(e) {
+		var target = find_group(e.target);
+		if (target) {
+			if (target.nodeName == "a") {
+				if (e.ctrlKey === false) return;
+				e.preventDefault();
+			}
+			if (target.classList.contains("parent")) unzoom(true);
+			zoom(target);
+			if (!document.querySelector('.parent')) {
+				// we have basically done a clearzoom so clear the url
+				var params = get_params();
+				if (params.x) delete params.x;
+				if (params.y) delete params.y;
+				history.replaceState(null, null, parse_params(params));
+				unzoombtn.classList.add("hide");
+				return;
+			}
+
+			// set parameters for zoom state
+			var el = target.querySelector("rect");
+			if (el && el.attributes && el.attributes.y && el.attributes._orig_x) {
+				var params = get_params()
+				params.x = el.attributes._orig_x.value;
+				params.y = el.attributes.y.value;
+				history.replaceState(null, null, parse_params(params));
+			}
+		}
+		else if (e.target.id == "unzoom") clearzoom();
+		else if (e.target.id == "search") search_prompt();
+		else if (e.target.id == "ignorecase") toggle_ignorecase();
+	}, false)
+
+	// mouse-over for info
+	// show
+	window.addEventListener("mouseover", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = "Function: " + g_to_text(target);
+	}, false)
+
+	// clear
+	window.addEventListener("mouseout", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = ' ';
+	}, false)
+
+	// ctrl-F for search
+	// ctrl-I to toggle case-sensitive search
+	window.addEventListener("keydown",function (e) {
+		if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
+			e.preventDefault();
+			search_prompt();
+		}
+		else if (e.ctrlKey && e.keyCode === 73) {
+			e.preventDefault();
+			toggle_ignorecase();
+		}
+	}, false)
+
+	// functions
+	function get_params() {
+		var params = {};
+		var paramsarr = window.location.search.substr(1).split('&');
+		for (var i = 0; i < paramsarr.length; ++i) {
+			var tmp = paramsarr[i].split("=");
+			if (!tmp[0] || !tmp[1]) continue;
+			params[tmp[0]]  = decodeURIComponent(tmp[1]);
+		}
+		return params;
+	}
+	function parse_params(params) {
+		var uri = "?";
+		for (var key in params) {
+			uri += key + '=' + encodeURIComponent(params[key]) + '&';
+		}
+		if (uri.slice(-1) == "&")
+			uri = uri.substring(0, uri.length - 1);
+		if (uri == '?')
+			uri = window.location.href.split('?')[0];
+		return uri;
+	}
+	function find_child(node, selector) {
+		var children = node.querySelectorAll(selector);
+		if (children.length) return children[0];
+	}
+	function find_group(node) {
+		var parent = node.parentElement;
+		if (!parent) return;
+		if (parent.id == "frames") return node;
+		return find_group(parent);
+	}
+	function orig_save(e, attr, val) {
+		if (e.attributes["_orig_" + attr] != undefined) return;
+		if (e.attributes[attr] == undefined) return;
+		if (val == undefined) val = e.attributes[attr].value;
+		e.setAttribute("_orig_" + attr, val);
+	}
+	function orig_load(e, attr) {
+		if (e.attributes["_orig_"+attr] == undefined) return;
+		e.attributes[attr].value = e.attributes["_orig_" + attr].value;
+		e.removeAttribute("_orig_"+attr);
+	}
+	function g_to_text(e) {
+		var text = find_child(e, "title").firstChild.nodeValue;
+		return (text)
+	}
+	function g_to_func(e) {
+		var func = g_to_text(e);
+		// if there's any manipulation we want to do to the function
+		// name before it's searched, do it here before returning.
+		return (func);
+	}
+	function update_text(e) {
+		var r = find_child(e, "rect");
+		var t = find_child(e, "text");
+		var w = parseFloat(r.attributes.width.value) -3;
+		var txt = find_child(e, "title").textContent.replace(/\([^(]*\)$/,"");
+		t.attributes.x.value = parseFloat(r.attributes.x.value) + 3;
+
+		// Smaller than this size won't fit anything
+		if (w < 2 * 12 * 0.59) {
+			t.textContent = "";
+			return;
+		}
+
+		t.textContent = txt;
+		var sl = t.getSubStringLength(0, txt.length);
+		// check if only whitespace or if we can fit the entire string into width w
+		if (/^ *$/.test(txt) || sl < w)
+			return;
+
+		// this isn't perfect, but gives a good starting point
+		// and avoids calling getSubStringLength too often
+		var start = Math.floor((w/sl) * txt.length);
+		for (var x = start; x > 0; x = x-2) {
+			if (t.getSubStringLength(0, x + 2) <= w) {
+				t.textContent = txt.substring(0, x) + "..";
+				return;
+			}
+		}
+		t.textContent = "";
+	}
+
+	// zoom
+	function zoom_reset(e) {
+		if (e.attributes != undefined) {
+			orig_load(e, "x");
+			orig_load(e, "width");
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_reset(c[i]);
+		}
+	}
+	function zoom_child(e, x, ratio) {
+		if (e.attributes != undefined) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = (parseFloat(e.attributes.x.value) - x - 10) * ratio + 10;
+				if (e.tagName == "text")
+					e.attributes.x.value = find_child(e.parentNode, "rect[x]").attributes.x.value + 3;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseFloat(e.attributes.width.value) * ratio;
+			}
+		}
+
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_child(c[i], x - 10, ratio);
+		}
+	}
+	function zoom_parent(e) {
+		if (e.attributes) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = 10;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseInt(svg.width.baseVal.value) - (10 * 2);
+			}
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_parent(c[i]);
+		}
+	}
+	function zoom(node) {
+		var attr = find_child(node, "rect").attributes;
+		var width = parseFloat(attr.width.value);
+		var xmin = parseFloat(attr.x.value);
+		var xmax = parseFloat(xmin + width);
+		var ymin = parseFloat(attr.y.value);
+		var ratio = (svg.width.baseVal.value - 2 * 10) / width;
+
+		// XXX: Workaround for JavaScript float issues (fix me)
+		var fudge = 0.0001;
+
+		unzoombtn.classList.remove("hide");
+
+		var el = document.getElementById("frames").children;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var a = find_child(e, "rect").attributes;
+			var ex = parseFloat(a.x.value);
+			var ew = parseFloat(a.width.value);
+			var upstack;
+			// Is it an ancestor
+			if (0 == 0) {
+				upstack = parseFloat(a.y.value) > ymin;
+			} else {
+				upstack = parseFloat(a.y.value) < ymin;
+			}
+			if (upstack) {
+				// Direct ancestor
+				if (ex <= xmin && (ex+ew+fudge) >= xmax) {
+					e.classList.add("parent");
+					zoom_parent(e);
+					update_text(e);
+				}
+				// not in current path
+				else
+					e.classList.add("hide");
+			}
+			// Children maybe
+			else {
+				// no common path
+				if (ex < xmin || ex + fudge >= xmax) {
+					e.classList.add("hide");
+				}
+				else {
+					zoom_child(e, xmin, ratio);
+					update_text(e);
+				}
+			}
+		}
+		search();
+	}
+	function unzoom(dont_update_text) {
+		unzoombtn.classList.add("hide");
+		var el = document.getElementById("frames").children;
+		for(var i = 0; i < el.length; i++) {
+			el[i].classList.remove("parent");
+			el[i].classList.remove("hide");
+			zoom_reset(el[i]);
+			if(!dont_update_text) update_text(el[i]);
+		}
+		search();
+	}
+	function clearzoom() {
+		unzoom();
+
+		// remove zoom state
+		var params = get_params();
+		if (params.x) delete params.x;
+		if (params.y) delete params.y;
+		history.replaceState(null, null, parse_params(params));
+	}
+
+	// search
+	function toggle_ignorecase() {
+		ignorecase = !ignorecase;
+		if (ignorecase) {
+			ignorecaseBtn.classList.add("show");
+		} else {
+			ignorecaseBtn.classList.remove("show");
+		}
+		reset_search();
+		search();
+	}
+	function reset_search() {
+		var el = document.querySelectorAll("#frames rect");
+		for (var i = 0; i < el.length; i++) {
+			orig_load(el[i], "fill")
+		}
+		var params = get_params();
+		delete params.s;
+		history.replaceState(null, null, parse_params(params));
+	}
+	function search_prompt() {
+		if (!searching) {
+			var term = prompt("Enter a search term (regexp " +
+			    "allowed, eg: ^ext4_)"
+			    + (ignorecase ? ", ignoring case" : "")
+			    + "\nPress Ctrl-i to toggle case sensitivity", "");
+			if (term != null) search(term);
+		} else {
+			reset_search();
+			searching = 0;
+			currentSearchTerm = null;
+			searchbtn.classList.remove("show");
+			searchbtn.firstChild.nodeValue = "Search"
+			matchedtxt.classList.add("hide");
+			matchedtxt.firstChild.nodeValue = ""
+		}
+	}
+	function search(term) {
+		if (term) currentSearchTerm = term;
+		if (currentSearchTerm === null) return;
+
+		var re = new RegExp(currentSearchTerm, ignorecase ? 'i' : '');
+		var el = document.getElementById("frames").children;
+		var matches = new Object();
+		var maxwidth = 0;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var func = g_to_func(e);
+			var rect = find_child(e, "rect");
+			if (func == null || rect == null)
+				continue;
+
+			// Save max width. Only works as we have a root frame
+			var w = parseFloat(rect.attributes.width.value);
+			if (w > maxwidth)
+				maxwidth = w;
+
+			if (func.match(re)) {
+				// highlight
+				var x = parseFloat(rect.attributes.x.value);
+				orig_save(rect, "fill");
+				rect.attributes.fill.value = "rgb(230,0,230)";
+
+				// remember matches
+				if (matches[x] == undefined) {
+					matches[x] = w;
+				} else {
+					if (w > matches[x]) {
+						// overwrite with parent
+						matches[x] = w;
+					}
+				}
+				searching = 1;
+			}
+		}
+		if (!searching)
+			return;
+		var params = get_params();
+		params.s = currentSearchTerm;
+		history.replaceState(null, null, parse_params(params));
+
+		searchbtn.classList.add("show");
+		searchbtn.firstChild.nodeValue = "Reset Search";
+
+		// calculate percent matched, excluding vertical overlap
+		var count = 0;
+		var lastx = -1;
+		var lastw = 0;
+		var keys = Array();
+		for (k in matches) {
+			if (matches.hasOwnProperty(k))
+				keys.push(k);
+		}
+		// sort the matched frames by their x location
+		// ascending, then width descending
+		keys.sort(function(a, b){
+			return a - b;
+		});
+		// Step through frames saving only the biggest bottom-up frames
+		// thanks to the sort order. This relies on the tree property
+		// where children are always smaller than their parents.
+		var fudge = 0.0001;	// JavaScript floating point
+		for (var k in keys) {
+			var x = parseFloat(keys[k]);
+			var w = matches[keys[k]];
+			if (x >= lastx + lastw - fudge) {
+				count += w;
+				lastx = x;
+				lastw = w;
+			}
+		}
+		// display matched percent
+		matchedtxt.classList.remove("hide");
+		var pct = 100 * count / maxwidth;
+		if (pct != 100) pct = pct.toFixed(1)
+		matchedtxt.firstChild.nodeValue = "Matched: " + pct + "%";
+	}
+]]>
+</script>
+<rect x="0.0" y="0" width="1200.0" height="662.0" fill="url(#background)"  />
+<text id="title" x="600.00" y="24" >Flame Graph</text>
+<text id="details" x="10.00" y="645" > </text>
+<text id="unzoom" x="10.00" y="24" class="hide">Reset Zoom</text>
+<text id="search" x="1090.00" y="24" >Search</text>
+<text id="ignorecase" x="1174.00" y="24" >ic</text>
+<text id="matched" x="1090.00" y="645" > </text>
+<g id="frames">
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="563.2" y="293" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="566.21" y="303.5" ></text>
+</g>
+<g >
+<title>all (9,070,706,980 samples, 100%)</title><rect x="10.0" y="613" width="1180.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="623.5" ></text>
+</g>
+<g >
+<title>std::_Hashtable&lt;IdWithHash, std::pair&lt;IdWithHash const, sim::EcmpNextHops&gt;, std::allocator&lt;std::pair&lt;IdWithHash const, sim::EcmpNextHops&gt; &gt;, std::__detail::_Select1st, std::equal_to&lt;IdWithHash&gt;, std::hash&lt;IdWithHash&gt;, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits&lt;false, false, true&gt; &gt;::_M_find_before_node (10,101,010 samples, 0.11%)</title><rect x="1036.3" y="421" width="1.3" height="15.0" fill="rgb(236,145,34)" rx="2" ry="2" />
+<text  x="1039.26" y="431.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (30,303,030 samples, 0.33%)</title><rect x="527.7" y="437" width="4.0" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="530.73" y="447.5" ></text>
+</g>
+<g >
+<title>std::filesystem::__cxx11::path::_List::_List (10,101,010 samples, 0.11%)</title><rect x="1187.4" y="293" width="1.3" height="15.0" fill="rgb(245,188,45)" rx="2" ry="2" />
+<text  x="1190.37" y="303.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="293" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="303.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="653.9" y="133" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="656.88" y="143.5" ></text>
+</g>
+<g >
+<title>malloc (10,101,010 samples, 0.11%)</title><rect x="762.9" y="389" width="1.4" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="765.94" y="399.5" ></text>
+</g>
+<g >
+<title>std::_Function_handler&lt;void  (30,303,030 samples, 0.33%)</title><rect x="710.4" y="405" width="3.9" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="713.38" y="415.5" ></text>
+</g>
+<g >
+<title>sim::Scenario::~Scenario (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="517" width="2.7" height="15.0" fill="rgb(231,121,29)" rx="2" ry="2" />
+<text  x="1187.74" y="527.5" ></text>
+</g>
+<g >
+<title>std::_Hash_bytes (20,202,020 samples, 0.22%)</title><rect x="1159.8" y="453" width="2.6" height="15.0" fill="rgb(232,127,30)" rx="2" ry="2" />
+<text  x="1162.78" y="463.5" ></text>
+</g>
+<g >
+<title>sim::RoundRobinPathChooser::choose_flow (10,101,010 samples, 0.11%)</title><rect x="598.7" y="341" width="1.3" height="15.0" fill="rgb(229,114,27)" rx="2" ry="2" />
+<text  x="601.69" y="351.5" ></text>
+</g>
+<g >
+<title>sim::SimplePacketQueue::empty (40,404,040 samples, 0.45%)</title><rect x="1031.0" y="421" width="5.3" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<text  x="1034.00" y="431.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (20,202,020 samples, 0.22%)</title><rect x="694.6" y="389" width="2.6" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="697.61" y="399.5" ></text>
+</g>
+<g >
+<title>sim::Scenario::simulate (8,141,414,060 samples, 89.76%)</title><rect x="125.6" y="517" width="1059.1" height="15.0" fill="rgb(235,139,33)" rx="2" ry="2" />
+<text  x="128.63" y="527.5" >sim::Scenario::simulate</text>
+</g>
+<g >
+<title>std::_Function_handler&lt;void  (80,808,080 samples, 0.89%)</title><rect x="684.1" y="357" width="10.5" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="687.10" y="367.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="760.3" y="277" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="763.31" y="287.5" ></text>
+</g>
+<g >
+<title>malloc (10,101,010 samples, 0.11%)</title><rect x="1126.9" y="405" width="1.3" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="1129.93" y="415.5" ></text>
+</g>
+<g >
+<title>[libgomp.so.1.0.0] (10,101,010 samples, 0.11%)</title><rect x="103.3" y="453" width="1.3" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<text  x="106.30" y="463.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (10,101,010 samples, 0.11%)</title><rect x="1157.1" y="437" width="1.4" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="1160.15" y="447.5" ></text>
+</g>
+<g >
+<title>std::filesystem::__cxx11::path::_List::_List (10,101,010 samples, 0.11%)</title><rect x="1187.4" y="261" width="1.3" height="15.0" fill="rgb(245,188,45)" rx="2" ry="2" />
+<text  x="1190.37" y="271.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="101" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="111.5" ></text>
+</g>
+<g >
+<title>void std::_Mofunc_base::_S_manage&lt;sim::Link::start_head_packet_sending (20,202,020 samples, 0.22%)</title><rect x="1170.3" y="501" width="2.6" height="15.0" fill="rgb(241,167,39)" rx="2" ry="2" />
+<text  x="1173.29" y="511.5" ></text>
+</g>
+<g >
+<title>sim::Link::start_head_packet_sending (191,919,190 samples, 2.12%)</title><rect x="878.6" y="421" width="24.9" height="15.0" fill="rgb(237,147,35)" rx="2" ry="2" />
+<text  x="881.57" y="431.5" >s..</text>
+</g>
+<g >
+<title>operator new (10,101,010 samples, 0.11%)</title><rect x="614.5" y="309" width="1.3" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="617.45" y="319.5" ></text>
+</g>
+<g >
+<title>operator new (10,101,010 samples, 0.11%)</title><rect x="1158.5" y="437" width="1.3" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="1161.46" y="447.5" ></text>
+</g>
+<g >
+<title>operator new (20,202,020 samples, 0.22%)</title><rect x="304.3" y="453" width="2.7" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="307.34" y="463.5" ></text>
+</g>
+<g >
+<title>sim::TcpFlow::send_data_packet (232,323,230 samples, 2.56%)</title><rect x="1128.2" y="453" width="30.3" height="15.0" fill="rgb(237,150,36)" rx="2" ry="2" />
+<text  x="1131.24" y="463.5" >si..</text>
+</g>
+<g >
+<title>[libc.so.6] (20,202,020 samples, 0.22%)</title><rect x="1111.2" y="405" width="2.6" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="1114.16" y="415.5" ></text>
+</g>
+<g >
+<title>sim::Host::enqueue_packet (10,101,010 samples, 0.11%)</title><rect x="1133.5" y="437" width="1.3" height="15.0" fill="rgb(209,19,4)" rx="2" ry="2" />
+<text  x="1136.50" y="447.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="357" width="2.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1187.74" y="367.5" ></text>
+</g>
+<g >
+<title>std::_Function_handler&lt;void  (70,707,070 samples, 0.78%)</title><rect x="467.3" y="421" width="9.2" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="470.28" y="431.5" ></text>
+</g>
+<g >
+<title>sim::SimplePacketQueue::front (40,404,040 samples, 0.45%)</title><rect x="376.6" y="469" width="5.3" height="15.0" fill="rgb(209,19,4)" rx="2" ry="2" />
+<text  x="379.61" y="479.5" ></text>
+</g>
+<g >
+<title>operator new (10,101,010 samples, 0.11%)</title><rect x="422.6" y="453" width="1.3" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="425.61" y="463.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="197" width="2.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1187.74" y="207.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="104.6" y="357" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="107.61" y="367.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (101,010,100 samples, 1.11%)</title><rect x="747.2" y="389" width="13.1" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="750.17" y="399.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (70,707,070 samples, 0.78%)</title><rect x="751.1" y="293" width="9.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="754.11" y="303.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="371.4" y="357" width="5.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="374.36" y="367.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="104.6" y="309" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="107.61" y="319.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (80,808,080 samples, 0.89%)</title><rect x="360.8" y="437" width="10.6" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="363.85" y="447.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="213" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="223.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (10,101,010 samples, 0.11%)</title><rect x="682.8" y="373" width="1.3" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="685.78" y="383.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="861.5" y="245" width="5.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="864.49" y="255.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="563.2" y="213" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="566.21" y="223.5" ></text>
+</g>
+<g >
+<title>sim::EventsStorage&lt;2000ul&gt;::add (10,101,010 samples, 0.11%)</title><rect x="1145.3" y="405" width="1.3" height="15.0" fill="rgb(229,112,26)" rx="2" ry="2" />
+<text  x="1148.32" y="415.5" ></text>
+</g>
+<g >
+<title>sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::set_flag (20,202,020 samples, 0.22%)</title><rect x="1111.2" y="421" width="2.6" height="15.0" fill="rgb(252,218,52)" rx="2" ry="2" />
+<text  x="1114.16" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (70,707,070 samples, 0.78%)</title><rect x="751.1" y="341" width="9.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="754.11" y="351.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (30,303,030 samples, 0.33%)</title><rect x="862.8" y="213" width="3.9" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="865.81" y="223.5" ></text>
+</g>
+<g >
+<title>sim::EcmpNextHops::operator[] (10,101,010 samples, 0.11%)</title><rect x="1148.0" y="405" width="1.3" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="1150.95" y="415.5" ></text>
+</g>
+<g >
+<title>sim::Scheduler::get_current_time (10,101,010 samples, 0.11%)</title><rect x="423.9" y="485" width="1.3" height="15.0" fill="rgb(241,169,40)" rx="2" ry="2" />
+<text  x="426.92" y="495.5" ></text>
+</g>
+<g >
+<title>sim::RoutingModule::next_inlink (232,323,230 samples, 2.56%)</title><rect x="999.5" y="421" width="30.2" height="15.0" fill="rgb(249,203,48)" rx="2" ry="2" />
+<text  x="1002.47" y="431.5" >si..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="669.6" y="229" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="672.64" y="239.5" ></text>
+</g>
+<g >
+<title>sim::MetricsStorage::add_record (10,101,010 samples, 0.11%)</title><rect x="868.1" y="389" width="1.3" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="871.06" y="399.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (30,303,030 samples, 0.33%)</title><rect x="644.7" y="357" width="3.9" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="647.68" y="367.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="539.6" y="325" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="542.55" y="335.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="653.9" y="277" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="656.88" y="287.5" ></text>
+</g>
+<g >
+<title>__munmap (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="405" width="2.7" height="15.0" fill="rgb(211,29,7)" rx="2" ry="2" />
+<text  x="1187.74" y="415.5" ></text>
+</g>
+<g >
+<title>std::_Function_handler&lt;void  (20,202,020 samples, 0.22%)</title><rect x="618.4" y="341" width="2.6" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="621.40" y="351.5" ></text>
+</g>
+<g >
+<title>sim::TcpFlow::send (606,060,600 samples, 6.68%)</title><rect x="1086.2" y="469" width="78.8" height="15.0" fill="rgb(246,190,45)" rx="2" ry="2" />
+<text  x="1089.19" y="479.5" >sim::TcpF..</text>
+</g>
+<g >
+<title>sim::MetricsStorage::add_record (30,303,030 samples, 0.33%)</title><rect x="667.0" y="389" width="4.0" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="670.02" y="399.5" ></text>
+</g>
+<g >
+<title>sim::Link::start_head_packet_sending (10,101,010 samples, 0.11%)</title><rect x="246.5" y="485" width="1.3" height="15.0" fill="rgb(237,147,35)" rx="2" ry="2" />
+<text  x="249.53" y="495.5" ></text>
+</g>
+<g >
+<title>sim::Scheduler::correctify_state (20,202,020 samples, 0.22%)</title><rect x="125.6" y="501" width="2.7" height="15.0" fill="rgb(227,102,24)" rx="2" ry="2" />
+<text  x="128.63" y="511.5" ></text>
+</g>
+<g >
+<title>main (8,424,242,340 samples, 92.87%)</title><rect x="94.1" y="533" width="1095.9" height="15.0" fill="rgb(243,179,42)" rx="2" ry="2" />
+<text  x="97.10" y="543.5" >main</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="669.6" y="293" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="672.64" y="303.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (60,606,060 samples, 0.67%)</title><rect x="363.5" y="325" width="7.9" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="366.47" y="335.5" ></text>
+</g>
+<g >
+<title>sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::set_flag (40,404,040 samples, 0.45%)</title><rect x="1104.6" y="437" width="5.2" height="15.0" fill="rgb(252,218,52)" rx="2" ry="2" />
+<text  x="1107.59" y="447.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="865.4" y="149" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="868.43" y="159.5" ></text>
+</g>
+<g >
+<title>sim::Scheduler::correctify_state (202,020,200 samples, 2.23%)</title><rect x="397.6" y="485" width="26.3" height="15.0" fill="rgb(227,102,24)" rx="2" ry="2" />
+<text  x="400.64" y="495.5" >s..</text>
+</g>
+<g >
+<title>[libgomp.so.1.0.0] (10,101,010 samples, 0.11%)</title><rect x="103.3" y="437" width="1.3" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<text  x="106.30" y="447.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="760.3" y="229" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="763.31" y="239.5" ></text>
+</g>
+<g >
+<title>sim::TcpFlow::process_data_packet (616,161,610 samples, 6.79%)</title><rect x="630.2" y="405" width="80.2" height="15.0" fill="rgb(234,137,32)" rx="2" ry="2" />
+<text  x="633.22" y="415.5" >sim::TcpF..</text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (10,101,010 samples, 0.11%)</title><rect x="1163.7" y="453" width="1.3" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="1166.72" y="463.5" ></text>
+</g>
+<g >
+<title>sim::LinkQueue::front (30,303,030 samples, 0.33%)</title><rect x="330.6" y="469" width="4.0" height="15.0" fill="rgb(206,6,1)" rx="2" ry="2" />
+<text  x="333.62" y="479.5" ></text>
+</g>
+<g >
+<title>sim::SimplePacketQueue::front (30,303,030 samples, 0.33%)</title><rect x="828.6" y="405" width="4.0" height="15.0" fill="rgb(209,19,4)" rx="2" ry="2" />
+<text  x="831.64" y="415.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="760.3" y="181" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="763.31" y="191.5" ></text>
+</g>
+<g >
+<title>sim::TcpSwiftCC::get_pacing_delay (10,101,010 samples, 0.11%)</title><rect x="617.1" y="341" width="1.3" height="15.0" fill="rgb(234,133,31)" rx="2" ry="2" />
+<text  x="620.08" y="351.5" ></text>
+</g>
+<g >
+<title>fmt::v11::basic_appender&lt;char&gt; fmt::v11::detail::copy_noinline&lt;char, char const*, fmt::v11::basic_appender&lt;char&gt; &gt; (10,101,010 samples, 0.11%)</title><rect x="586.9" y="357" width="1.3" height="15.0" fill="rgb(207,13,3)" rx="2" ry="2" />
+<text  x="589.86" y="367.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="453" width="2.7" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="1187.74" y="463.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="677.5" y="357" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="680.53" y="367.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="371.4" y="325" width="5.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="374.36" y="335.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (30,303,030 samples, 0.33%)</title><rect x="756.4" y="229" width="3.9" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="759.37" y="239.5" ></text>
+</g>
+<g >
+<title>cfree (20,202,020 samples, 0.22%)</title><rect x="676.2" y="373" width="2.6" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="679.21" y="383.5" ></text>
+</g>
+<g >
+<title>malloc (10,101,010 samples, 0.11%)</title><rect x="702.5" y="357" width="1.3" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="705.49" y="367.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (10,101,010 samples, 0.11%)</title><rect x="1050.7" y="421" width="1.3" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="1053.71" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="261" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="271.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (70,707,070 samples, 0.78%)</title><rect x="362.2" y="389" width="9.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="365.16" y="399.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="104.6" y="325" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="107.61" y="335.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="309" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="319.5" ></text>
+</g>
+<g >
+<title>sim::SimplePacketQueue::push (10,101,010 samples, 0.11%)</title><rect x="762.9" y="437" width="1.4" height="15.0" fill="rgb(237,150,35)" rx="2" ry="2" />
+<text  x="765.94" y="447.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (30,303,030 samples, 0.33%)</title><rect x="1100.6" y="405" width="4.0" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="1103.65" y="415.5" ></text>
+</g>
+<g >
+<title>sim::Link::start_head_packet_sending (20,202,020 samples, 0.22%)</title><rect x="1144.0" y="421" width="2.6" height="15.0" fill="rgb(237,147,35)" rx="2" ry="2" />
+<text  x="1147.01" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="371.4" y="229" width="5.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="374.36" y="239.5" ></text>
+</g>
+<g >
+<title>sim::MetricableCC::on_ack (30,303,030 samples, 0.33%)</title><rect x="575.0" y="373" width="4.0" height="15.0" fill="rgb(212,32,7)" rx="2" ry="2" />
+<text  x="578.03" y="383.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (80,808,080 samples, 0.89%)</title><rect x="749.8" y="357" width="10.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="752.80" y="367.5" ></text>
+</g>
+<g >
+<title>sim::Link::schedule_arrival (10,101,010 samples, 0.11%)</title><rect x="653.9" y="373" width="1.3" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="656.88" y="383.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (646,464,640 samples, 7.13%)</title><rect x="10.0" y="565" width="84.1" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="13.00" y="575.5" >[libc.so.6]</text>
+</g>
+<g >
+<title>sim::MetricsStorage::add_record (20,202,020 samples, 0.22%)</title><rect x="933.8" y="421" width="2.6" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="936.76" y="431.5" ></text>
+</g>
+<g >
+<title>sim::parse_i_mplb (20,202,020 samples, 0.22%)</title><rect x="1187.4" y="421" width="2.6" height="15.0" fill="rgb(242,174,41)" rx="2" ry="2" />
+<text  x="1190.37" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="373" width="2.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1187.74" y="383.5" ></text>
+</g>
+<g >
+<title>sim::SimplePacketQueue::pop (50,505,050 samples, 0.56%)</title><rect x="904.9" y="405" width="6.5" height="15.0" fill="rgb(217,57,13)" rx="2" ry="2" />
+<text  x="907.86" y="415.5" ></text>
+</g>
+<g >
+<title>sim::MetricsTable::draw_pictures (10,101,010 samples, 0.11%)</title><rect x="94.1" y="501" width="1.3" height="15.0" fill="rgb(221,74,17)" rx="2" ry="2" />
+<text  x="97.10" y="511.5" ></text>
+</g>
+<g >
+<title>sim::ECMPHasher::get_hash (20,202,020 samples, 0.22%)</title><rect x="819.4" y="421" width="2.7" height="15.0" fill="rgb(207,11,2)" rx="2" ry="2" />
+<text  x="822.44" y="431.5" ></text>
+</g>
+<g >
+<title>sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::set_flag (10,101,010 samples, 0.11%)</title><rect x="648.6" y="389" width="1.3" height="15.0" fill="rgb(252,218,52)" rx="2" ry="2" />
+<text  x="651.62" y="399.5" ></text>
+</g>
+<g >
+<title>sim::MetricsTable::draw_pictures (70,707,070 samples, 0.78%)</title><rect x="95.4" y="469" width="9.2" height="15.0" fill="rgb(221,74,17)" rx="2" ry="2" />
+<text  x="98.41" y="479.5" ></text>
+</g>
+<g >
+<title>sim::Connection::write_inner_metrics (232,323,230 samples, 2.56%)</title><rect x="95.4" y="485" width="30.2" height="15.0" fill="rgb(217,56,13)" rx="2" ry="2" />
+<text  x="98.41" y="495.5" >si..</text>
+</g>
+<g >
+<title>std::_Hashtable&lt;IdWithHash, std::pair&lt;IdWithHash const, sim::EcmpNextHops&gt;, std::allocator&lt;std::pair&lt;IdWithHash const, sim::EcmpNextHops&gt; &gt;, std::__detail::_Select1st, std::equal_to&lt;IdWithHash&gt;, std::hash&lt;IdWithHash&gt;, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits&lt;false, false, true&gt; &gt;::_M_find_before_node (242,424,240 samples, 2.67%)</title><rect x="967.9" y="405" width="31.6" height="15.0" fill="rgb(236,145,34)" rx="2" ry="2" />
+<text  x="970.93" y="415.5" >st..</text>
+</g>
+<g >
+<title>sim::SingleCCMplb::get_context (10,101,010 samples, 0.11%)</title><rect x="600.0" y="341" width="1.3" height="15.0" fill="rgb(207,11,2)" rx="2" ry="2" />
+<text  x="603.00" y="351.5" ></text>
+</g>
+<g >
+<title>malloc (10,101,010 samples, 0.11%)</title><rect x="325.4" y="421" width="1.3" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="328.37" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="69" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="79.5" ></text>
+</g>
+<g >
+<title>cfree (10,101,010 samples, 0.11%)</title><rect x="339.8" y="437" width="1.3" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="342.82" y="447.5" ></text>
+</g>
+<g >
+<title>malloc (20,202,020 samples, 0.22%)</title><rect x="1117.7" y="405" width="2.7" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="1120.73" y="415.5" ></text>
+</g>
+<g >
+<title>[libstdc++.so.6.0.33] (10,101,010 samples, 0.11%)</title><rect x="1187.4" y="277" width="1.3" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="1190.37" y="287.5" ></text>
+</g>
+<g >
+<title>sim::SingleCCMplb::write_inner_metrics (161,616,160 samples, 1.78%)</title><rect x="104.6" y="469" width="21.0" height="15.0" fill="rgb(227,104,25)" rx="2" ry="2" />
+<text  x="107.61" y="479.5" ></text>
+</g>
+<g >
+<title>sim::ECN::get_congestion_mark (10,101,010 samples, 0.11%)</title><rect x="769.5" y="437" width="1.3" height="15.0" fill="rgb(221,73,17)" rx="2" ry="2" />
+<text  x="772.51" y="447.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="389" width="2.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1187.74" y="399.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="653.9" y="309" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="656.88" y="319.5" ></text>
+</g>
+<g >
+<title>sim::MetricsStorage::add_record (10,101,010 samples, 0.11%)</title><rect x="653.9" y="325" width="1.3" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="656.88" y="335.5" ></text>
+</g>
+<g >
+<title>sim::LinkQueue::pop (60,606,060 samples, 0.67%)</title><rect x="903.5" y="421" width="7.9" height="15.0" fill="rgb(214,44,10)" rx="2" ry="2" />
+<text  x="906.54" y="431.5" ></text>
+</g>
+<g >
+<title>sim::PacketNumMonitor::correctify_state (10,101,010 samples, 0.11%)</title><rect x="571.1" y="389" width="1.3" height="15.0" fill="rgb(219,67,16)" rx="2" ry="2" />
+<text  x="574.09" y="399.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (50,505,050 samples, 0.56%)</title><rect x="860.2" y="277" width="6.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="863.18" y="287.5" ></text>
+</g>
+<g >
+<title>malloc (30,303,030 samples, 0.33%)</title><rect x="644.7" y="373" width="3.9" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="647.68" y="383.5" ></text>
+</g>
+<g >
+<title>utils::CallbackObserver::CallbackObserver (10,101,010 samples, 0.11%)</title><rect x="615.8" y="325" width="1.3" height="15.0" fill="rgb(247,197,47)" rx="2" ry="2" />
+<text  x="618.77" y="335.5" ></text>
+</g>
+<g >
+<title>GOMP_parallel (60,606,060 samples, 0.67%)</title><rect x="95.4" y="453" width="7.9" height="15.0" fill="rgb(208,14,3)" rx="2" ry="2" />
+<text  x="98.41" y="463.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="339.8" y="421" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="342.82" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="760.3" y="165" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="763.31" y="175.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="563.2" y="245" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="566.21" y="255.5" ></text>
+</g>
+<g >
+<title>sim::ECMPHasher::get_hash (10,101,010 samples, 0.11%)</title><rect x="1136.1" y="421" width="1.3" height="15.0" fill="rgb(207,11,2)" rx="2" ry="2" />
+<text  x="1139.12" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="181" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="191.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (60,606,060 samples, 0.67%)</title><rect x="925.9" y="245" width="7.9" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="928.88" y="255.5" ></text>
+</g>
+<g >
+<title>[libgomp.so.1.0.0] (60,606,060 samples, 0.67%)</title><rect x="95.4" y="437" width="7.9" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<text  x="98.41" y="447.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="92.8" y="469" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="95.78" y="479.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="552.7" y="389" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="555.69" y="399.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="539.6" y="341" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="542.55" y="351.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="197" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="207.5" ></text>
+</g>
+<g >
+<title>sim::Link::pop_packet (10,101,010 samples, 0.11%)</title><rect x="785.3" y="437" width="1.3" height="15.0" fill="rgb(208,14,3)" rx="2" ry="2" />
+<text  x="788.28" y="447.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (60,606,060 samples, 0.67%)</title><rect x="925.9" y="261" width="7.9" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="928.88" y="271.5" ></text>
+</g>
+<g >
+<title>operator new (10,101,010 samples, 0.11%)</title><rect x="894.3" y="389" width="1.4" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="897.34" y="399.5" ></text>
+</g>
+<g >
+<title>[libgomp.so.1.0.0] (444,444,440 samples, 4.90%)</title><rect x="36.3" y="533" width="57.8" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<text  x="39.28" y="543.5" >[libgo..</text>
+</g>
+<g >
+<title>sim::Link::schedule_arrival (353,535,350 samples, 3.90%)</title><rect x="832.6" y="421" width="46.0" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="835.58" y="431.5" >sim:..</text>
+</g>
+<g >
+<title>std::_Function_handler&lt;void  (10,101,010 samples, 0.11%)</title><rect x="1158.5" y="453" width="1.3" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="1161.46" y="463.5" ></text>
+</g>
+<g >
+<title>std::_Hash_bytes (50,505,050 samples, 0.56%)</title><rect x="723.5" y="437" width="6.6" height="15.0" fill="rgb(232,127,30)" rx="2" ry="2" />
+<text  x="726.52" y="447.5" ></text>
+</g>
+<g >
+<title>void std::move_only_function&lt;void  (60,606,060 samples, 0.67%)</title><rect x="1176.9" y="501" width="7.8" height="15.0" fill="rgb(227,103,24)" rx="2" ry="2" />
+<text  x="1179.86" y="511.5" ></text>
+</g>
+<g >
+<title>sim::RoutingModule::get_link_to_destination (484,848,480 samples, 5.35%)</title><rect x="936.4" y="421" width="63.1" height="15.0" fill="rgb(253,221,53)" rx="2" ry="2" />
+<text  x="939.39" y="431.5" >sim::R..</text>
+</g>
+<g >
+<title>std::filesystem::__cxx11::path::_List::_Impl_deleter::operator (10,101,010 samples, 0.11%)</title><rect x="1188.7" y="293" width="1.3" height="15.0" fill="rgb(251,215,51)" rx="2" ry="2" />
+<text  x="1191.69" y="303.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (20,202,020 samples, 0.22%)</title><rect x="443.6" y="421" width="2.7" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="446.63" y="431.5" ></text>
+</g>
+<g >
+<title>sim::MetricsStorage::add_record (161,616,160 samples, 1.78%)</title><rect x="740.6" y="421" width="21.0" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="743.60" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (80,808,080 samples, 0.89%)</title><rect x="360.8" y="421" width="10.6" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="363.85" y="431.5" ></text>
+</g>
+<g >
+<title>std::_Mofunc_base::_S_empty (10,101,010 samples, 0.11%)</title><rect x="1162.4" y="453" width="1.3" height="15.0" fill="rgb(240,162,38)" rx="2" ry="2" />
+<text  x="1165.41" y="463.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (70,707,070 samples, 0.78%)</title><rect x="362.2" y="373" width="9.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="365.16" y="383.5" ></text>
+</g>
+<g >
+<title>malloc (10,101,010 samples, 0.11%)</title><rect x="582.9" y="341" width="1.3" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="585.92" y="351.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="104.6" y="213" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="107.61" y="223.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="149" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="159.5" ></text>
+</g>
+<g >
+<title>std::_Function_handler&lt;void  (333,333,330 samples, 3.67%)</title><rect x="584.2" y="373" width="43.4" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="587.23" y="383.5" >std:..</text>
+</g>
+<g >
+<title>std::_Mofunc_base::_S_empty (20,202,020 samples, 0.22%)</title><rect x="1037.6" y="421" width="2.6" height="15.0" fill="rgb(240,162,38)" rx="2" ry="2" />
+<text  x="1040.57" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (70,707,070 samples, 0.78%)</title><rect x="751.1" y="277" width="9.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="754.11" y="287.5" ></text>
+</g>
+<g >
+<title>std::_Mofunc_base::_S_empty (10,101,010 samples, 0.11%)</title><rect x="1166.3" y="501" width="1.4" height="15.0" fill="rgb(240,162,38)" rx="2" ry="2" />
+<text  x="1169.35" y="511.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (646,464,640 samples, 7.13%)</title><rect x="10.0" y="581" width="84.1" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="13.00" y="591.5" >[libc.so.6]</text>
+</g>
+<g >
+<title>std::_Function_handler&lt;void  (10,101,010 samples, 0.11%)</title><rect x="615.8" y="309" width="1.3" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="618.77" y="319.5" ></text>
+</g>
+<g >
+<title>void std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;::_M_construct&lt;char*&gt; (10,101,010 samples, 0.11%)</title><rect x="1126.9" y="437" width="1.3" height="15.0" fill="rgb(220,70,16)" rx="2" ry="2" />
+<text  x="1129.93" y="447.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (202,020,200 samples, 2.23%)</title><rect x="454.1" y="469" width="26.3" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="457.14" y="479.5" >s..</text>
+</g>
+<g >
+<title>sim::Switch::notify_about_arrival (2,414,141,390 samples, 26.61%)</title><rect x="769.5" y="453" width="314.1" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="772.51" y="463.5" >sim::Switch::notify_about_arrival</text>
+</g>
+<g >
+<title>sim::LinkQueue::record_size (10,101,010 samples, 0.11%)</title><rect x="653.9" y="341" width="1.3" height="15.0" fill="rgb(225,94,22)" rx="2" ry="2" />
+<text  x="656.88" y="351.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="614.5" y="277" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="617.45" y="287.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (30,303,030 samples, 0.33%)</title><rect x="462.0" y="421" width="4.0" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="465.03" y="431.5" ></text>
+</g>
+<g >
+<title>sim::Link::get_packet (80,808,080 samples, 0.89%)</title><rect x="822.1" y="421" width="10.5" height="15.0" fill="rgb(205,0,0)" rx="2" ry="2" />
+<text  x="825.07" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="277" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="287.5" ></text>
+</g>
+<g >
+<title>void std::_Mofunc_base::_S_manage&lt;sim::Link::transmit (90,909,090 samples, 1.00%)</title><rect x="439.7" y="485" width="11.8" height="15.0" fill="rgb(225,92,22)" rx="2" ry="2" />
+<text  x="442.69" y="495.5" ></text>
+</g>
+<g >
+<title>cfree (20,202,020 samples, 0.22%)</title><rect x="618.4" y="325" width="2.6" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="621.40" y="335.5" ></text>
+</g>
+<g >
+<title>sim::ConfigNodeWithPreset::operator[] (10,101,010 samples, 0.11%)</title><rect x="1187.4" y="325" width="1.3" height="15.0" fill="rgb(247,197,47)" rx="2" ry="2" />
+<text  x="1190.37" y="335.5" ></text>
+</g>
+<g >
+<title>operator new (20,202,020 samples, 0.22%)</title><rect x="1124.3" y="389" width="2.6" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="1127.30" y="399.5" ></text>
+</g>
+<g >
+<title>sim::RoutingModule::next_inlink (10,101,010 samples, 0.11%)</title><rect x="540.9" y="421" width="1.3" height="15.0" fill="rgb(249,203,48)" rx="2" ry="2" />
+<text  x="543.87" y="431.5" ></text>
+</g>
+<g >
+<title>sim::Host::enqueue_packet (10,101,010 samples, 0.11%)</title><rect x="649.9" y="389" width="1.3" height="15.0" fill="rgb(209,19,4)" rx="2" ry="2" />
+<text  x="652.93" y="399.5" ></text>
+</g>
+<g >
+<title>sim::parse_metrics_flags (10,101,010 samples, 0.11%)</title><rect x="1188.7" y="325" width="1.3" height="15.0" fill="rgb(235,138,33)" rx="2" ry="2" />
+<text  x="1191.69" y="335.5" ></text>
+</g>
+<g >
+<title>sim::LinkQueue::pop (50,505,050 samples, 0.56%)</title><rect x="334.6" y="469" width="6.5" height="15.0" fill="rgb(214,44,10)" rx="2" ry="2" />
+<text  x="337.57" y="479.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="563.2" y="357" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="566.21" y="367.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (90,909,090 samples, 1.00%)</title><rect x="439.7" y="469" width="11.8" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="442.69" y="479.5" ></text>
+</g>
+<g >
+<title>std::_Function_handler&lt;void  (40,404,040 samples, 0.45%)</title><rect x="446.3" y="437" width="5.2" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="449.26" y="447.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="53" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="63.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="1165.0" y="437" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="1168.03" y="447.5" ></text>
+</g>
+<g >
+<title>sim::MetricsTable::draw_pictures (151,515,150 samples, 1.67%)</title><rect x="105.9" y="453" width="19.7" height="15.0" fill="rgb(221,74,17)" rx="2" ry="2" />
+<text  x="108.92" y="463.5" ></text>
+</g>
+<g >
+<title>sim::EcmpNextHops::operator[] (121,212,120 samples, 1.34%)</title><rect x="952.2" y="405" width="15.7" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="955.16" y="415.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="229" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="239.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="669.6" y="325" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="672.64" y="335.5" ></text>
+</g>
+<g >
+<title>utils::CallbackObserver::on_single_callback (10,101,010 samples, 0.11%)</title><rect x="628.9" y="389" width="1.3" height="15.0" fill="rgb(215,47,11)" rx="2" ry="2" />
+<text  x="631.91" y="399.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="653.9" y="181" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="656.88" y="191.5" ></text>
+</g>
+<g >
+<title>sim::Link::get_from_egress_queue_size (10,101,010 samples, 0.11%)</title><rect x="665.7" y="389" width="1.3" height="15.0" fill="rgb(229,112,26)" rx="2" ry="2" />
+<text  x="668.70" y="399.5" ></text>
+</g>
+<g >
+<title>std::filesystem::create_directories (10,101,010 samples, 0.11%)</title><rect x="104.6" y="421" width="1.3" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="107.61" y="431.5" ></text>
+</g>
+<g >
+<title>sim::TcpSwiftCC::on_ack (20,202,020 samples, 0.22%)</title><rect x="576.3" y="357" width="2.7" height="15.0" fill="rgb(228,106,25)" rx="2" ry="2" />
+<text  x="579.35" y="367.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="669.6" y="277" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="672.64" y="287.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="371.4" y="309" width="5.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="374.36" y="319.5" ></text>
+</g>
+<g >
+<title>std::_Hash_bytes (10,101,010 samples, 0.11%)</title><rect x="1113.8" y="437" width="1.3" height="15.0" fill="rgb(232,127,30)" rx="2" ry="2" />
+<text  x="1116.79" y="447.5" ></text>
+</g>
+<g >
+<title>sim::LinkQueue::record_size (212,121,210 samples, 2.34%)</title><rect x="734.0" y="437" width="27.6" height="15.0" fill="rgb(225,94,22)" rx="2" ry="2" />
+<text  x="737.03" y="447.5" >s..</text>
+</g>
+<g >
+<title>sim::SimplePacketQueue::push (20,202,020 samples, 0.22%)</title><rect x="869.4" y="389" width="2.6" height="15.0" fill="rgb(237,150,35)" rx="2" ry="2" />
+<text  x="872.38" y="399.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="760.3" y="309" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="763.31" y="319.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="213" width="2.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1187.74" y="223.5" ></text>
+</g>
+<g >
+<title>cfree (30,303,030 samples, 0.33%)</title><rect x="469.9" y="405" width="4.0" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="472.91" y="415.5" ></text>
+</g>
+<g >
+<title>std::_Function_handler&lt;void  (10,101,010 samples, 0.11%)</title><rect x="450.2" y="421" width="1.3" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="453.20" y="431.5" ></text>
+</g>
+<g >
+<title>sim::LinkQueue::empty (10,101,010 samples, 0.11%)</title><rect x="395.0" y="485" width="1.3" height="15.0" fill="rgb(217,58,13)" rx="2" ry="2" />
+<text  x="398.01" y="495.5" ></text>
+</g>
+<g >
+<title>sim::TcpFlow::create_data_packet (303,030,300 samples, 3.34%)</title><rect x="1088.8" y="453" width="39.4" height="15.0" fill="rgb(232,128,30)" rx="2" ry="2" />
+<text  x="1091.82" y="463.5" >sim..</text>
+</g>
+<g >
+<title>sim::parse_i_connection (20,202,020 samples, 0.22%)</title><rect x="1187.4" y="469" width="2.6" height="15.0" fill="rgb(226,98,23)" rx="2" ry="2" />
+<text  x="1190.37" y="479.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="653.9" y="197" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="656.88" y="207.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (30,303,030 samples, 0.33%)</title><rect x="536.9" y="373" width="4.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="539.93" y="383.5" ></text>
+</g>
+<g >
+<title>sim::Host::send_packet (161,616,160 samples, 1.78%)</title><rect x="1134.8" y="437" width="21.0" height="15.0" fill="rgb(216,54,13)" rx="2" ry="2" />
+<text  x="1137.81" y="447.5" ></text>
+</g>
+<g >
+<title>sim::Scheduler::get_instance (40,404,040 samples, 0.45%)</title><rect x="895.7" y="405" width="5.2" height="15.0" fill="rgb(210,23,5)" rx="2" ry="2" />
+<text  x="898.66" y="415.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="92.8" y="517" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="95.78" y="527.5" ></text>
+</g>
+<g >
+<title>std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;::_M_dispose (10,101,010 samples, 0.11%)</title><rect x="475.2" y="373" width="1.3" height="15.0" fill="rgb(251,215,51)" rx="2" ry="2" />
+<text  x="478.17" y="383.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="209.7" y="485" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="212.73" y="495.5" ></text>
+</g>
+<g >
+<title>sim::MetricsStorage::add_record (10,101,010 samples, 0.11%)</title><rect x="547.4" y="405" width="1.4" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="550.44" y="415.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="585.5" y="357" width="1.4" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="588.55" y="367.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="341" width="2.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1187.74" y="351.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="669.6" y="357" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="672.64" y="367.5" ></text>
+</g>
+<g >
+<title>sim::parse_round_robin_path_chooser (20,202,020 samples, 0.22%)</title><rect x="1187.4" y="373" width="2.6" height="15.0" fill="rgb(212,34,8)" rx="2" ry="2" />
+<text  x="1190.37" y="383.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (30,303,030 samples, 0.33%)</title><rect x="367.4" y="245" width="4.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="370.42" y="255.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (60,606,060 samples, 0.67%)</title><rect x="363.5" y="309" width="7.9" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="366.47" y="319.5" ></text>
+</g>
+<g >
+<title>operator new (30,303,030 samples, 0.33%)</title><rect x="678.8" y="373" width="4.0" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="681.84" y="383.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="669.6" y="197" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="672.64" y="207.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="1146.6" y="405" width="1.4" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="1149.64" y="415.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Hash_node&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::FlagInfo&gt;, true&gt;* std::__detail::_Hashtable_alloc&lt;std::allocator&lt;std::__detail::_Hash_node&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::FlagInfo&gt;, true&gt; &gt; &gt;::_M_allocate_node&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::FlagInfo&gt; const&amp;&gt; (50,505,050 samples, 0.56%)</title><rect x="697.2" y="389" width="6.6" height="15.0" fill="rgb(240,162,38)" rx="2" ry="2" />
+<text  x="700.24" y="399.5" ></text>
+</g>
+<g >
+<title>sim::LinkQueue::pop (20,202,020 samples, 0.22%)</title><rect x="534.3" y="421" width="2.6" height="15.0" fill="rgb(214,44,10)" rx="2" ry="2" />
+<text  x="537.30" y="431.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="648.6" y="373" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="651.62" y="383.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="1186.1" y="165" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1189.06" y="175.5" ></text>
+</g>
+<g >
+<title>sim::MetricsStorage::add_record (10,101,010 samples, 0.11%)</title><rect x="1142.7" y="373" width="1.3" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="1145.69" y="383.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="563.2" y="373" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="566.21" y="383.5" ></text>
+</g>
+<g >
+<title>std::_Rb_tree&lt;unsigned int, unsigned int, std::_Identity&lt;unsigned int&gt;, std::less&lt;unsigned int&gt;, std::allocator&lt;unsigned int&gt; &gt;::_M_erase (30,303,030 samples, 0.33%)</title><rect x="567.1" y="357" width="4.0" height="15.0" fill="rgb(243,176,42)" rx="2" ry="2" />
+<text  x="570.15" y="367.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="117" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="127.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="653.9" y="165" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="656.88" y="175.5" ></text>
+</g>
+<g >
+<title>sim::SimplePacketQueue::front (30,303,030 samples, 0.33%)</title><rect x="326.7" y="453" width="3.9" height="15.0" fill="rgb(209,19,4)" rx="2" ry="2" />
+<text  x="329.68" y="463.5" ></text>
+</g>
+<g >
+<title>sim::Switch::process (2,030,303,010 samples, 22.38%)</title><rect x="787.9" y="437" width="264.1" height="15.0" fill="rgb(240,165,39)" rx="2" ry="2" />
+<text  x="790.91" y="447.5" >sim::Switch::process</text>
+</g>
+<g >
+<title>sim::Link::get_packet (30,303,030 samples, 0.33%)</title><rect x="774.8" y="437" width="3.9" height="15.0" fill="rgb(205,0,0)" rx="2" ry="2" />
+<text  x="777.77" y="447.5" ></text>
+</g>
+<g >
+<title>sim::PacketNumMonitor::confirm_one (40,404,040 samples, 0.45%)</title><rect x="565.8" y="389" width="5.3" height="15.0" fill="rgb(254,229,54)" rx="2" ry="2" />
+<text  x="568.84" y="399.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="104.6" y="245" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="107.61" y="255.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="371.4" y="293" width="5.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="374.36" y="303.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="582.9" y="325" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="585.92" y="335.5" ></text>
+</g>
+<g >
+<title>cfree (20,202,020 samples, 0.22%)</title><rect x="443.6" y="437" width="2.7" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="446.63" y="447.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (202,020,200 samples, 2.23%)</title><rect x="1057.3" y="437" width="26.3" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="1060.28" y="447.5" >s..</text>
+</g>
+<g >
+<title>sim::SingleCCMplb::get_context (10,101,010 samples, 0.11%)</title><rect x="626.3" y="357" width="1.3" height="15.0" fill="rgb(207,11,2)" rx="2" ry="2" />
+<text  x="629.28" y="367.5" ></text>
+</g>
+<g >
+<title>std::_Mofunc_base::_S_empty (10,101,010 samples, 0.11%)</title><rect x="381.9" y="469" width="1.3" height="15.0" fill="rgb(240,162,38)" rx="2" ry="2" />
+<text  x="384.87" y="479.5" ></text>
+</g>
+<g >
+<title>operator new (10,101,010 samples, 0.11%)</title><rect x="702.5" y="373" width="1.3" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="705.49" y="383.5" ></text>
+</g>
+<g >
+<title>mkdir (10,101,010 samples, 0.11%)</title><rect x="104.6" y="405" width="1.3" height="15.0" fill="rgb(207,11,2)" rx="2" ry="2" />
+<text  x="107.61" y="415.5" ></text>
+</g>
+<g >
+<title>malloc (20,202,020 samples, 0.22%)</title><rect x="304.3" y="437" width="2.7" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="307.34" y="447.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="104.6" y="293" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="107.61" y="303.5" ></text>
+</g>
+<g >
+<title>cfree (30,303,030 samples, 0.33%)</title><rect x="567.1" y="341" width="4.0" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="570.15" y="351.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (101,010,100 samples, 1.11%)</title><rect x="747.2" y="405" width="13.1" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="750.17" y="415.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="245" width="2.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1187.74" y="255.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_ptr_inplace&lt;sim::Packet, std::allocator&lt;void&gt;,  (161,616,160 samples, 1.78%)</title><rect x="459.4" y="453" width="21.0" height="15.0" fill="rgb(245,186,44)" rx="2" ry="2" />
+<text  x="462.40" y="463.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="472.5" y="389" width="1.4" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="475.54" y="399.5" ></text>
+</g>
+<g >
+<title>cfree (10,101,010 samples, 0.11%)</title><rect x="1165.0" y="453" width="1.3" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="1168.03" y="463.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="865.4" y="165" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="868.43" y="175.5" ></text>
+</g>
+<g >
+<title>std::_Hashtable&lt;IdWithHash, std::pair&lt;IdWithHash const, sim::EcmpNextHops&gt;, std::allocator&lt;std::pair&lt;IdWithHash const, sim::EcmpNextHops&gt; &gt;, std::__detail::_Select1st, std::equal_to&lt;IdWithHash&gt;, std::hash&lt;IdWithHash&gt;, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits&lt;false, false, true&gt; &gt;::_M_find_before_node (40,404,040 samples, 0.45%)</title><rect x="1149.3" y="405" width="5.2" height="15.0" fill="rgb(236,145,34)" rx="2" ry="2" />
+<text  x="1152.27" y="415.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="563.2" y="309" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="566.21" y="319.5" ></text>
+</g>
+<g >
+<title>sim::MetricsStorage::add_record (202,020,200 samples, 2.23%)</title><rect x="350.3" y="453" width="26.3" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="353.33" y="463.5" >s..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="669.6" y="309" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="672.64" y="319.5" ></text>
+</g>
+<g >
+<title>operator new (10,101,010 samples, 0.11%)</title><rect x="1109.8" y="421" width="1.4" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="1112.84" y="431.5" ></text>
+</g>
+<g >
+<title>sim::PacketNumMonitor::correctify_state (40,404,040 samples, 0.45%)</title><rect x="565.8" y="373" width="5.3" height="15.0" fill="rgb(219,67,16)" rx="2" ry="2" />
+<text  x="568.84" y="383.5" ></text>
+</g>
+<g >
+<title>void std::deque&lt;std::shared_ptr&lt;sim::Packet&gt;, std::allocator&lt;std::shared_ptr&lt;sim::Packet&gt; &gt; &gt;::_M_push_back_aux&lt;std::shared_ptr&lt;sim::Packet&gt; &gt; (10,101,010 samples, 0.11%)</title><rect x="762.9" y="421" width="1.4" height="15.0" fill="rgb(238,153,36)" rx="2" ry="2" />
+<text  x="765.94" y="431.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (10,101,010 samples, 0.11%)</title><rect x="473.9" y="373" width="1.3" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="476.85" y="383.5" ></text>
+</g>
+<g >
+<title>sim::EventsStorage&lt;2000ul&gt;::add (101,010,100 samples, 1.11%)</title><rect x="313.5" y="453" width="13.2" height="15.0" fill="rgb(229,112,26)" rx="2" ry="2" />
+<text  x="316.54" y="463.5" ></text>
+</g>
+<g >
+<title>void sim::collect_and_save_all_metrics&lt;sim::IConnection&gt; (232,323,230 samples, 2.56%)</title><rect x="95.4" y="501" width="30.2" height="15.0" fill="rgb(235,140,33)" rx="2" ry="2" />
+<text  x="98.41" y="511.5" >vo..</text>
+</g>
+<g >
+<title>sim::LinkQueue::push (10,101,010 samples, 0.11%)</title><rect x="653.9" y="357" width="1.3" height="15.0" fill="rgb(234,136,32)" rx="2" ry="2" />
+<text  x="656.88" y="367.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (50,505,050 samples, 0.56%)</title><rect x="927.2" y="229" width="6.6" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="930.19" y="239.5" ></text>
+</g>
+<g >
+<title>std::_Hashtable&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::FlagInfo&gt;, std::allocator&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::FlagInfo&gt; &gt;, std::__detail::_Select1st, std::equal_to&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::hash&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits&lt;true, false, true&gt; &gt;::find (20,202,020 samples, 0.22%)</title><rect x="1107.2" y="421" width="2.6" height="15.0" fill="rgb(217,56,13)" rx="2" ry="2" />
+<text  x="1110.22" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="325" width="2.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1187.74" y="335.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="309" width="2.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1187.74" y="319.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="104.6" y="165" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="107.61" y="175.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="341" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="351.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="277" width="2.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1187.74" y="287.5" ></text>
+</g>
+<g >
+<title>[libgomp.so.1.0.0] (646,464,640 samples, 7.13%)</title><rect x="10.0" y="549" width="84.1" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<text  x="13.00" y="559.5" >[libgomp...</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="371.4" y="421" width="5.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="374.36" y="431.5" ></text>
+</g>
+<g >
+<title>operator new (10,101,010 samples, 0.11%)</title><rect x="582.9" y="357" width="1.3" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="585.92" y="367.5" ></text>
+</g>
+<g >
+<title>malloc (10,101,010 samples, 0.11%)</title><rect x="422.6" y="437" width="1.3" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="425.61" y="447.5" ></text>
+</g>
+<g >
+<title>sim::EventsStorage&lt;2000ul&gt;::add (242,424,240 samples, 2.67%)</title><rect x="275.4" y="469" width="31.6" height="15.0" fill="rgb(229,112,26)" rx="2" ry="2" />
+<text  x="278.43" y="479.5" >si..</text>
+</g>
+<g >
+<title>std::_Rb_tree_increment (80,808,080 samples, 0.89%)</title><rect x="1040.2" y="421" width="10.5" height="15.0" fill="rgb(247,196,46)" rx="2" ry="2" />
+<text  x="1043.20" y="431.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (131,313,130 samples, 1.45%)</title><rect x="228.1" y="469" width="17.1" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="231.13" y="479.5" ></text>
+</g>
+<g >
+<title>sim::RoundRobinPathChooser::choose_flow (40,404,040 samples, 0.45%)</title><rect x="606.6" y="325" width="5.2" height="15.0" fill="rgb(229,114,27)" rx="2" ry="2" />
+<text  x="609.57" y="335.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="366.1" y="277" width="5.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="369.10" y="287.5" ></text>
+</g>
+<g >
+<title>std::_Rb_tree&lt;sim::DataId, std::pair&lt;sim::DataId const, sim::Connection::DataContext&gt;, std::_Select1st&lt;std::pair&lt;sim::DataId const, sim::Connection::DataContext&gt; &gt;, std::less&lt;sim::DataId&gt;, std::allocator&lt;std::pair&lt;sim::DataId const, sim::Connection::DataContext&gt; &gt; &gt;::find (30,303,030 samples, 0.33%)</title><rect x="589.5" y="341" width="3.9" height="15.0" fill="rgb(233,130,31)" rx="2" ry="2" />
+<text  x="592.49" y="351.5" ></text>
+</g>
+<g >
+<title>operator new (20,202,020 samples, 0.22%)</title><rect x="1117.7" y="421" width="2.7" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="1120.73" y="431.5" ></text>
+</g>
+<g >
+<title>std::filesystem::create_directories (10,101,010 samples, 0.11%)</title><rect x="104.6" y="437" width="1.3" height="15.0" fill="rgb(216,52,12)" rx="2" ry="2" />
+<text  x="107.61" y="447.5" ></text>
+</g>
+<g >
+<title>sim::LinkQueue::push (232,323,230 samples, 2.56%)</title><rect x="841.8" y="405" width="30.2" height="15.0" fill="rgb(234,136,32)" rx="2" ry="2" />
+<text  x="844.78" y="415.5" >si..</text>
+</g>
+<g >
+<title>cfree (50,505,050 samples, 0.56%)</title><rect x="459.4" y="437" width="6.6" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="462.40" y="447.5" ></text>
+</g>
+<g >
+<title>sim::Scheduler::get_current_time (10,101,010 samples, 0.11%)</title><rect x="1029.7" y="421" width="1.3" height="15.0" fill="rgb(241,169,40)" rx="2" ry="2" />
+<text  x="1032.69" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="563.2" y="261" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="566.21" y="271.5" ></text>
+</g>
+<g >
+<title>std::_Hashtable&lt;IdWithHash, std::pair&lt;IdWithHash const, sim::EcmpNextHops&gt;, std::allocator&lt;std::pair&lt;IdWithHash const, sim::EcmpNextHops&gt; &gt;, std::__detail::_Select1st, std::equal_to&lt;IdWithHash&gt;, std::hash&lt;IdWithHash&gt;, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits&lt;false, false, true&gt; &gt;::_M_find_before_node (40,404,040 samples, 0.45%)</title><rect x="660.4" y="357" width="5.3" height="15.0" fill="rgb(236,145,34)" rx="2" ry="2" />
+<text  x="663.45" y="367.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="669.6" y="245" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="672.64" y="255.5" ></text>
+</g>
+<g >
+<title>GOMP_parallel (111,111,110 samples, 1.22%)</title><rect x="105.9" y="437" width="14.5" height="15.0" fill="rgb(208,14,3)" rx="2" ry="2" />
+<text  x="108.92" y="447.5" ></text>
+</g>
+<g >
+<title>sim::Host::send_packet (111,111,110 samples, 1.22%)</title><rect x="651.2" y="389" width="14.5" height="15.0" fill="rgb(216,54,13)" rx="2" ry="2" />
+<text  x="654.25" y="399.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="564.5" y="325" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="567.52" y="335.5" ></text>
+</g>
+<g >
+<title>cfree (10,101,010 samples, 0.11%)</title><rect x="455.5" y="453" width="1.3" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="458.46" y="463.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="104.6" y="341" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="107.61" y="351.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_ptr_inplace&lt;utils::CallbackObserver, std::allocator&lt;void&gt;,  (20,202,020 samples, 0.22%)</title><rect x="473.9" y="389" width="2.6" height="15.0" fill="rgb(251,213,50)" rx="2" ry="2" />
+<text  x="476.85" y="399.5" ></text>
+</g>
+<g >
+<title>std::_Mofunc_base::_S_empty (10,101,010 samples, 0.11%)</title><rect x="1154.5" y="421" width="1.3" height="15.0" fill="rgb(240,162,38)" rx="2" ry="2" />
+<text  x="1157.52" y="431.5" ></text>
+</g>
+<g >
+<title>sim::Link::get_from_egress_queue_size (20,202,020 samples, 0.22%)</title><rect x="770.8" y="437" width="2.7" height="15.0" fill="rgb(229,112,26)" rx="2" ry="2" />
+<text  x="773.82" y="447.5" ></text>
+</g>
+<g >
+<title>__libc_start_main (8,424,242,340 samples, 92.87%)</title><rect x="94.1" y="565" width="1095.9" height="15.0" fill="rgb(236,142,34)" rx="2" ry="2" />
+<text  x="97.10" y="575.5" >__libc_start_main</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="760.3" y="213" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="763.31" y="223.5" ></text>
+</g>
+<g >
+<title>sim::MetricsStorage::add_record (40,404,040 samples, 0.45%)</title><rect x="579.0" y="373" width="5.2" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="581.98" y="383.5" ></text>
+</g>
+<g >
+<title>sim::SimplePacketQueue::push (40,404,040 samples, 0.45%)</title><rect x="764.3" y="453" width="5.2" height="15.0" fill="rgb(237,150,35)" rx="2" ry="2" />
+<text  x="767.25" y="463.5" ></text>
+</g>
+<g >
+<title>std::_Function_handler&lt;void  (10,101,010 samples, 0.11%)</title><rect x="458.1" y="453" width="1.3" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="461.08" y="463.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (131,313,130 samples, 1.45%)</title><rect x="916.7" y="373" width="17.1" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="919.68" y="383.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="653.9" y="213" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="656.88" y="223.5" ></text>
+</g>
+<g >
+<title>malloc (10,101,010 samples, 0.11%)</title><rect x="1158.5" y="421" width="1.3" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="1161.46" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="865.4" y="181" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="868.43" y="191.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (20,202,020 samples, 0.22%)</title><rect x="473.9" y="405" width="2.6" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="476.85" y="415.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="659.1" y="357" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="662.13" y="367.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_ptr_inplace&lt;sim::Packet, std::allocator&lt;void&gt;,  (70,707,070 samples, 0.78%)</title><rect x="442.3" y="453" width="9.2" height="15.0" fill="rgb(245,186,44)" rx="2" ry="2" />
+<text  x="445.32" y="463.5" ></text>
+</g>
+<g >
+<title>sim::LinkQueue::record_size (171,717,170 samples, 1.89%)</title><rect x="911.4" y="421" width="22.4" height="15.0" fill="rgb(225,94,22)" rx="2" ry="2" />
+<text  x="914.43" y="431.5" >s..</text>
+</g>
+<g >
+<title>GOMP_parallel (10,101,010 samples, 0.11%)</title><rect x="94.1" y="485" width="1.3" height="15.0" fill="rgb(208,14,3)" rx="2" ry="2" />
+<text  x="97.10" y="495.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="563.2" y="325" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="566.21" y="335.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="653.9" y="117" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="656.88" y="127.5" ></text>
+</g>
+<g >
+<title>void std::move_only_function&lt;void  (5,272,727,220 samples, 58.13%)</title><rect x="480.4" y="485" width="685.9" height="15.0" fill="rgb(227,103,24)" rx="2" ry="2" />
+<text  x="483.42" y="495.5" >void std::move_only_function&lt;void </text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="760.3" y="197" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="763.31" y="207.5" ></text>
+</g>
+<g >
+<title>sim::parse_i_flow (20,202,020 samples, 0.22%)</title><rect x="1187.4" y="357" width="2.6" height="15.0" fill="rgb(208,18,4)" rx="2" ry="2" />
+<text  x="1190.37" y="367.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="371.4" y="341" width="5.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="374.36" y="351.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="261" width="2.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1187.74" y="271.5" ></text>
+</g>
+<g >
+<title>sim::Link::start_head_packet_sending (181,818,180 samples, 2.00%)</title><rect x="307.0" y="469" width="23.6" height="15.0" fill="rgb(237,147,35)" rx="2" ry="2" />
+<text  x="309.97" y="479.5" >s..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (80,808,080 samples, 0.89%)</title><rect x="856.2" y="325" width="10.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="859.24" y="335.5" ></text>
+</g>
+<g >
+<title>std::_Function_handler&lt;void  (1,343,434,330 samples, 14.81%)</title><rect x="542.2" y="421" width="174.7" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="545.18" y="431.5" >std::_Function_handler..</text>
+</g>
+<g >
+<title>sim::LinkQueue::push (232,323,230 samples, 2.56%)</title><rect x="734.0" y="453" width="30.3" height="15.0" fill="rgb(234,136,32)" rx="2" ry="2" />
+<text  x="737.03" y="463.5" >si..</text>
+</g>
+<g >
+<title>[libgomp.so.1.0.0] (10,101,010 samples, 0.11%)</title><rect x="94.1" y="469" width="1.3" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<text  x="97.10" y="479.5" ></text>
+</g>
+<g >
+<title>cfree (10,101,010 samples, 0.11%)</title><rect x="450.2" y="405" width="1.3" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="453.20" y="415.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="371.4" y="245" width="5.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="374.36" y="255.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (70,707,070 samples, 0.78%)</title><rect x="924.6" y="293" width="9.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="927.57" y="303.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="245" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="255.5" ></text>
+</g>
+<g >
+<title>malloc (10,101,010 samples, 0.11%)</title><rect x="614.5" y="293" width="1.3" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="617.45" y="303.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (30,303,030 samples, 0.33%)</title><rect x="372.7" y="213" width="3.9" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="375.67" y="223.5" ></text>
+</g>
+<g >
+<title>sim::SimplePacketQueue::front (20,202,020 samples, 0.22%)</title><rect x="900.9" y="405" width="2.6" height="15.0" fill="rgb(209,19,4)" rx="2" ry="2" />
+<text  x="903.91" y="415.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="513.3" y="469" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="516.27" y="479.5" ></text>
+</g>
+<g >
+<title>sim::Link::record_activity (10,101,010 samples, 0.11%)</title><rect x="245.2" y="485" width="1.3" height="15.0" fill="rgb(211,30,7)" rx="2" ry="2" />
+<text  x="248.21" y="495.5" ></text>
+</g>
+<g >
+<title>std::_Mofunc_base::_S_empty (20,202,020 samples, 0.22%)</title><rect x="427.9" y="485" width="2.6" height="15.0" fill="rgb(240,162,38)" rx="2" ry="2" />
+<text  x="430.86" y="495.5" ></text>
+</g>
+<g >
+<title>std::_Function_handler&lt;void  (30,303,030 samples, 0.33%)</title><rect x="611.8" y="325" width="4.0" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="614.83" y="335.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="104.6" y="277" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="107.61" y="287.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="454.1" y="453" width="1.4" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="457.14" y="463.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (80,808,080 samples, 0.89%)</title><rect x="360.8" y="405" width="10.6" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="363.85" y="415.5" ></text>
+</g>
+<g >
+<title>std::_Rb_tree&lt;std::shared_ptr&lt;sim::ILink&gt;, std::shared_ptr&lt;sim::ILink&gt;, std::_Identity&lt;std::shared_ptr&lt;sim::ILink&gt; &gt;, std::less&lt;std::shared_ptr&lt;sim::ILink&gt; &gt;, std::allocator&lt;std::shared_ptr&lt;sim::ILink&gt; &gt; &gt;::_M_erase (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="469" width="2.7" height="15.0" fill="rgb(247,194,46)" rx="2" ry="2" />
+<text  x="1187.74" y="479.5" ></text>
+</g>
+<g >
+<title>std::_Function_handler&lt;void  (111,111,110 samples, 1.22%)</title><rect x="466.0" y="437" width="14.4" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="468.97" y="447.5" ></text>
+</g>
+<g >
+<title>cfree (10,101,010 samples, 0.11%)</title><rect x="1095.4" y="437" width="1.3" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="1098.39" y="447.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="371.4" y="277" width="5.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="374.36" y="287.5" ></text>
+</g>
+<g >
+<title>sim::parse_single_cc_mplb (20,202,020 samples, 0.22%)</title><rect x="1187.4" y="405" width="2.6" height="15.0" fill="rgb(231,120,28)" rx="2" ry="2" />
+<text  x="1190.37" y="415.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="92.8" y="501" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="95.78" y="511.5" ></text>
+</g>
+<g >
+<title>sim::RoutingModule::get_link_to_destination (50,505,050 samples, 0.56%)</title><rect x="659.1" y="373" width="6.6" height="15.0" fill="rgb(253,221,53)" rx="2" ry="2" />
+<text  x="662.13" y="383.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (80,808,080 samples, 0.89%)</title><rect x="856.2" y="341" width="10.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="859.24" y="351.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="104.6" y="181" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="107.61" y="191.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="760.3" y="389" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="763.31" y="399.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="1186.1" y="181" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1189.06" y="191.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (20,202,020 samples, 0.22%)</title><rect x="1104.6" y="421" width="2.6" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="1107.59" y="431.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (8,424,242,340 samples, 92.87%)</title><rect x="94.1" y="549" width="1095.9" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="97.10" y="559.5" >[libc.so.6]</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (101,010,100 samples, 1.11%)</title><rect x="747.2" y="373" width="13.1" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="750.17" y="383.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="104.6" y="389" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="107.61" y="399.5" ></text>
+</g>
+<g >
+<title>malloc (10,101,010 samples, 0.11%)</title><rect x="1109.8" y="405" width="1.4" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="1112.84" y="415.5" ></text>
+</g>
+<g >
+<title>sim::Link::has_packet (50,505,050 samples, 0.56%)</title><rect x="778.7" y="437" width="6.6" height="15.0" fill="rgb(230,118,28)" rx="2" ry="2" />
+<text  x="781.71" y="447.5" ></text>
+</g>
+<g >
+<title>sim::RoutingModule::next_inlink (10,101,010 samples, 0.11%)</title><rect x="786.6" y="437" width="1.3" height="15.0" fill="rgb(249,203,48)" rx="2" ry="2" />
+<text  x="789.59" y="447.5" ></text>
+</g>
+<g >
+<title>sim::TcpFlow::process_ack (626,262,620 samples, 6.90%)</title><rect x="548.8" y="405" width="81.4" height="15.0" fill="rgb(222,80,19)" rx="2" ry="2" />
+<text  x="551.75" y="415.5" >sim::TcpF..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="653.9" y="293" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="656.88" y="303.5" ></text>
+</g>
+<g >
+<title>roundf32x (30,303,030 samples, 0.33%)</title><rect x="815.5" y="421" width="3.9" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="818.50" y="431.5" ></text>
+</g>
+<g >
+<title>[libgomp.so.1.0.0] (40,404,040 samples, 0.45%)</title><rect x="120.4" y="421" width="5.2" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<text  x="123.38" y="431.5" ></text>
+</g>
+<g >
+<title>cfree (10,101,010 samples, 0.11%)</title><rect x="1188.7" y="277" width="1.3" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="1191.69" y="287.5" ></text>
+</g>
+<g >
+<title>sim::LinkQueue::record_size (30,303,030 samples, 0.33%)</title><rect x="536.9" y="421" width="4.0" height="15.0" fill="rgb(225,94,22)" rx="2" ry="2" />
+<text  x="539.93" y="431.5" ></text>
+</g>
+<g >
+<title>sim::Host::process (1,474,747,460 samples, 16.26%)</title><rect x="531.7" y="437" width="191.8" height="15.0" fill="rgb(210,24,5)" rx="2" ry="2" />
+<text  x="534.67" y="447.5" >sim::Host::process</text>
+</g>
+<g >
+<title>sim::Link::transmit (1,131,313,120 samples, 12.47%)</title><rect x="247.8" y="485" width="147.2" height="15.0" fill="rgb(220,73,17)" rx="2" ry="2" />
+<text  x="250.84" y="495.5" >sim::Link::transmit</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (30,303,030 samples, 0.33%)</title><rect x="536.9" y="357" width="4.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="539.93" y="367.5" ></text>
+</g>
+<g >
+<title>sim::LinkQueue::record_size (191,919,190 samples, 2.12%)</title><rect x="843.1" y="389" width="25.0" height="15.0" fill="rgb(225,94,22)" rx="2" ry="2" />
+<text  x="846.10" y="399.5" >s..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (50,505,050 samples, 0.56%)</title><rect x="860.2" y="309" width="6.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="863.18" y="319.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="669.6" y="373" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="672.64" y="383.5" ></text>
+</g>
+<g >
+<title>sim::TcpFlow::set_avg_rtt_if_present (30,303,030 samples, 0.33%)</title><rect x="1109.8" y="437" width="4.0" height="15.0" fill="rgb(254,228,54)" rx="2" ry="2" />
+<text  x="1112.84" y="447.5" ></text>
+</g>
+<g >
+<title>malloc (70,707,070 samples, 0.78%)</title><rect x="262.3" y="453" width="9.2" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="265.29" y="463.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="653.9" y="261" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="656.88" y="271.5" ></text>
+</g>
+<g >
+<title>malloc (10,101,010 samples, 0.11%)</title><rect x="564.5" y="357" width="1.3" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="567.52" y="367.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (60,606,060 samples, 0.67%)</title><rect x="363.5" y="341" width="7.9" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="366.47" y="351.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.22%)</title><rect x="931.1" y="197" width="2.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="934.14" y="207.5" ></text>
+</g>
+<g >
+<title>std::_Hash_bytes (40,404,040 samples, 0.45%)</title><rect x="1052.0" y="437" width="5.3" height="15.0" fill="rgb(232,127,30)" rx="2" ry="2" />
+<text  x="1055.03" y="447.5" ></text>
+</g>
+<g >
+<title>sim::parse_network (20,202,020 samples, 0.22%)</title><rect x="1187.4" y="501" width="2.6" height="15.0" fill="rgb(217,57,13)" rx="2" ry="2" />
+<text  x="1190.37" y="511.5" ></text>
+</g>
+<g >
+<title>sim::Link::schedule_arrival (40,404,040 samples, 0.45%)</title><rect x="1138.8" y="421" width="5.2" height="15.0" fill="rgb(231,123,29)" rx="2" ry="2" />
+<text  x="1141.75" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="861.5" y="229" width="5.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="864.49" y="239.5" ></text>
+</g>
+<g >
+<title>sim::parse_mplb_connection (20,202,020 samples, 0.22%)</title><rect x="1187.4" y="437" width="2.6" height="15.0" fill="rgb(246,189,45)" rx="2" ry="2" />
+<text  x="1190.37" y="447.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="760.3" y="261" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="763.31" y="271.5" ></text>
+</g>
+<g >
+<title>sim::SimplePacketQueue::empty (20,202,020 samples, 0.22%)</title><rect x="425.2" y="485" width="2.7" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<text  x="428.23" y="495.5" ></text>
+</g>
+<g >
+<title>void std::deque&lt;std::shared_ptr&lt;sim::Packet&gt;, std::allocator&lt;std::shared_ptr&lt;sim::Packet&gt; &gt; &gt;::_M_push_back_aux&lt;std::shared_ptr&lt;sim::Packet&gt; &gt; (20,202,020 samples, 0.22%)</title><rect x="869.4" y="373" width="2.6" height="15.0" fill="rgb(238,153,36)" rx="2" ry="2" />
+<text  x="872.38" y="383.5" ></text>
+</g>
+<g >
+<title>malloc (10,101,010 samples, 0.11%)</title><rect x="894.3" y="373" width="1.4" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="897.34" y="383.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="104.6" y="373" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="107.61" y="383.5" ></text>
+</g>
+<g >
+<title>sim::SimplePacketQueue::pop (20,202,020 samples, 0.22%)</title><rect x="534.3" y="405" width="2.6" height="15.0" fill="rgb(217,57,13)" rx="2" ry="2" />
+<text  x="537.30" y="415.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="563.2" y="277" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="566.21" y="287.5" ></text>
+</g>
+<g >
+<title>sim::SimplePacketReordering::add_record (30,303,030 samples, 0.33%)</title><rect x="671.0" y="389" width="3.9" height="15.0" fill="rgb(236,145,34)" rx="2" ry="2" />
+<text  x="673.96" y="399.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="669.6" y="261" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="672.64" y="271.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="669.6" y="213" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="672.64" y="223.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="371.4" y="261" width="5.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="374.36" y="271.5" ></text>
+</g>
+<g >
+<title>sim::SimplePacketQueue::pop (50,505,050 samples, 0.56%)</title><rect x="334.6" y="453" width="6.5" height="15.0" fill="rgb(217,57,13)" rx="2" ry="2" />
+<text  x="337.57" y="463.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (70,707,070 samples, 0.78%)</title><rect x="751.1" y="309" width="9.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="754.11" y="319.5" ></text>
+</g>
+<g >
+<title>sim::Host::notify_about_arrival (1,585,858,570 samples, 17.48%)</title><rect x="527.7" y="453" width="206.3" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="530.73" y="463.5" >sim::Host::notify_about_arr..</text>
+</g>
+<g >
+<title>operator new (10,101,010 samples, 0.11%)</title><rect x="564.5" y="373" width="1.3" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="567.52" y="383.5" ></text>
+</g>
+<g >
+<title>sim::LinkQueue::record_size (272,727,270 samples, 3.01%)</title><rect x="341.1" y="469" width="35.5" height="15.0" fill="rgb(225,94,22)" rx="2" ry="2" />
+<text  x="344.14" y="479.5" >sim..</text>
+</g>
+<g >
+<title>operator new (10,101,010 samples, 0.11%)</title><rect x="762.9" y="405" width="1.4" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="765.94" y="415.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (131,313,130 samples, 1.45%)</title><rect x="916.7" y="357" width="17.1" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="919.68" y="367.5" ></text>
+</g>
+<g >
+<title>std::function&lt;void  (80,808,080 samples, 0.89%)</title><rect x="684.1" y="373" width="10.5" height="15.0" fill="rgb(207,13,3)" rx="2" ry="2" />
+<text  x="687.10" y="383.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (70,707,070 samples, 0.78%)</title><rect x="943.0" y="405" width="9.2" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="945.96" y="415.5" ></text>
+</g>
+<g >
+<title>sim::Link::arrive (4,373,737,330 samples, 48.22%)</title><rect x="514.6" y="469" width="569.0" height="15.0" fill="rgb(226,96,23)" rx="2" ry="2" />
+<text  x="517.59" y="479.5" >sim::Link::arrive</text>
+</g>
+<g >
+<title>cfree (10,101,010 samples, 0.11%)</title><rect x="613.1" y="309" width="1.4" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="616.14" y="319.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (30,303,030 samples, 0.33%)</title><rect x="567.1" y="325" width="4.0" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="570.15" y="335.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="760.3" y="293" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="763.31" y="303.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="760.3" y="373" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="763.31" y="383.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="371.4" y="373" width="5.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="374.36" y="383.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="669.6" y="341" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="672.64" y="351.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="422.6" y="421" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="425.61" y="431.5" ></text>
+</g>
+<g >
+<title>sim::parse_i_connection (20,202,020 samples, 0.22%)</title><rect x="1187.4" y="453" width="2.6" height="15.0" fill="rgb(226,98,23)" rx="2" ry="2" />
+<text  x="1190.37" y="463.5" ></text>
+</g>
+<g >
+<title>sim::Switch::~Switch (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="485" width="2.7" height="15.0" fill="rgb(237,150,36)" rx="2" ry="2" />
+<text  x="1187.74" y="495.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (70,707,070 samples, 0.78%)</title><rect x="751.1" y="325" width="9.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="754.11" y="335.5" ></text>
+</g>
+<g >
+<title>std::_Hash_bytes (20,202,020 samples, 0.22%)</title><rect x="714.3" y="405" width="2.6" height="15.0" fill="rgb(232,127,30)" rx="2" ry="2" />
+<text  x="717.32" y="415.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (70,707,070 samples, 0.78%)</title><rect x="430.5" y="485" width="9.2" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="433.49" y="495.5" ></text>
+</g>
+<g >
+<title>nons (9,070,706,980 samples, 100.00%)</title><rect x="10.0" y="597" width="1180.0" height="15.0" fill="rgb(232,126,30)" rx="2" ry="2" />
+<text  x="13.00" y="607.5" >nons</text>
+</g>
+<g >
+<title>void std::_Mofunc_base::_S_manage&lt;sim::SingleCCMplb::send_data (10,101,010 samples, 0.11%)</title><rect x="451.5" y="485" width="1.3" height="15.0" fill="rgb(221,77,18)" rx="2" ry="2" />
+<text  x="454.51" y="495.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="501" width="2.7" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="1187.74" y="511.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="305.7" y="421" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="308.66" y="431.5" ></text>
+</g>
+<g >
+<title>operator new (10,101,010 samples, 0.11%)</title><rect x="870.7" y="357" width="1.3" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="873.69" y="367.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="441.0" y="437" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="444.00" y="447.5" ></text>
+</g>
+<g >
+<title>__munmap (10,101,010 samples, 0.11%)</title><rect x="760.3" y="405" width="1.3" height="15.0" fill="rgb(211,29,7)" rx="2" ry="2" />
+<text  x="763.31" y="415.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (70,707,070 samples, 0.78%)</title><rect x="362.2" y="357" width="9.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="365.16" y="367.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="85" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="95.5" ></text>
+</g>
+<g >
+<title>sim::SingleCCMplb::send_data (121,212,120 samples, 1.34%)</title><rect x="601.3" y="341" width="15.8" height="15.0" fill="rgb(217,57,13)" rx="2" ry="2" />
+<text  x="604.31" y="351.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (30,303,030 samples, 0.33%)</title><rect x="719.6" y="421" width="3.9" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="722.58" y="431.5" ></text>
+</g>
+<g >
+<title>sim::MetricsStorage::add_record (90,909,090 samples, 1.00%)</title><rect x="554.0" y="389" width="11.8" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="557.01" y="399.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="371.4" y="389" width="5.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="374.36" y="399.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="104.6" y="197" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="107.61" y="207.5" ></text>
+</g>
+<g >
+<title>sim::Network::save_metrics (242,424,240 samples, 2.67%)</title><rect x="94.1" y="517" width="31.5" height="15.0" fill="rgb(219,66,15)" rx="2" ry="2" />
+<text  x="97.10" y="527.5" >si..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="760.3" y="357" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="763.31" y="367.5" ></text>
+</g>
+<g >
+<title>operator new (40,404,040 samples, 0.45%)</title><rect x="643.4" y="389" width="5.2" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="646.36" y="399.5" ></text>
+</g>
+<g >
+<title>operator new (70,707,070 samples, 0.78%)</title><rect x="262.3" y="469" width="9.2" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="265.29" y="479.5" ></text>
+</g>
+<g >
+<title>sim::parse_i_path_chooser (20,202,020 samples, 0.22%)</title><rect x="1187.4" y="389" width="2.6" height="15.0" fill="rgb(239,157,37)" rx="2" ry="2" />
+<text  x="1190.37" y="399.5" ></text>
+</g>
+<g >
+<title>sim::EventsStorage&lt;2000ul&gt;::add (50,505,050 samples, 0.56%)</title><rect x="417.3" y="469" width="6.6" height="15.0" fill="rgb(229,112,26)" rx="2" ry="2" />
+<text  x="420.35" y="479.5" ></text>
+</g>
+<g >
+<title>sim::Switch::notify_about_arrival (20,202,020 samples, 0.22%)</title><rect x="1083.6" y="469" width="2.6" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="1086.56" y="479.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="582.9" y="309" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="585.92" y="319.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="653.9" y="229" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="656.88" y="239.5" ></text>
+</g>
+<g >
+<title>sim::SimplePacketQueue::push (50,505,050 samples, 0.56%)</title><rect x="872.0" y="405" width="6.6" height="15.0" fill="rgb(237,150,35)" rx="2" ry="2" />
+<text  x="875.00" y="415.5" ></text>
+</g>
+<g >
+<title>sim::ConfigNodeWithPreset::operator[] (10,101,010 samples, 0.11%)</title><rect x="1188.7" y="309" width="1.3" height="15.0" fill="rgb(247,197,47)" rx="2" ry="2" />
+<text  x="1191.69" y="319.5" ></text>
+</g>
+<g >
+<title>sim::Link::start_head_packet_sending (30,303,030 samples, 0.33%)</title><rect x="655.2" y="373" width="3.9" height="15.0" fill="rgb(237,147,35)" rx="2" ry="2" />
+<text  x="658.19" y="383.5" ></text>
+</g>
+<g >
+<title>std::_Function_handler&lt;void  (151,515,150 samples, 1.67%)</title><rect x="674.9" y="389" width="19.7" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="677.90" y="399.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (80,808,080 samples, 0.89%)</title><rect x="923.3" y="309" width="10.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="926.25" y="319.5" ></text>
+</g>
+<g >
+<title>std::__detail::_Hash_node&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::FlagInfo&gt;, true&gt;* std::__detail::_Hashtable_alloc&lt;std::allocator&lt;std::__detail::_Hash_node&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::FlagInfo&gt;, true&gt; &gt; &gt;::_M_allocate_node&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::FlagInfo&gt; const&amp;&gt; (50,505,050 samples, 0.56%)</title><rect x="1120.4" y="405" width="6.5" height="15.0" fill="rgb(240,162,38)" rx="2" ry="2" />
+<text  x="1123.36" y="415.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (131,313,130 samples, 1.45%)</title><rect x="916.7" y="389" width="17.1" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="919.68" y="399.5" ></text>
+</g>
+<g >
+<title>sim::SimplePacketQueue::front (10,101,010 samples, 0.11%)</title><rect x="657.8" y="357" width="1.3" height="15.0" fill="rgb(209,19,4)" rx="2" ry="2" />
+<text  x="660.82" y="367.5" ></text>
+</g>
+<g >
+<title>sim::Connection::process_data_delivery (40,404,040 samples, 0.45%)</title><rect x="588.2" y="357" width="5.2" height="15.0" fill="rgb(233,130,31)" rx="2" ry="2" />
+<text  x="591.17" y="367.5" ></text>
+</g>
+<g >
+<title>sim::ConfigNodeWithPresetExpected::ConfigNodeWithPresetExpected (10,101,010 samples, 0.11%)</title><rect x="1187.4" y="309" width="1.3" height="15.0" fill="rgb(232,127,30)" rx="2" ry="2" />
+<text  x="1190.37" y="319.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="564.5" y="341" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="567.52" y="351.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="755.1" y="245" width="5.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="758.06" y="255.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (20,202,020 samples, 0.22%)</title><rect x="618.4" y="309" width="2.6" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="621.40" y="319.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (80,808,080 samples, 0.89%)</title><rect x="923.3" y="341" width="10.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="926.25" y="351.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="325" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="335.5" ></text>
+</g>
+<g >
+<title>sim::Link::get_from_egress_queue_size (10,101,010 samples, 0.11%)</title><rect x="1155.8" y="437" width="1.3" height="15.0" fill="rgb(229,112,26)" rx="2" ry="2" />
+<text  x="1158.84" y="447.5" ></text>
+</g>
+<g >
+<title>sim::Link::get_max_from_egress_buffer_size (10,101,010 samples, 0.11%)</title><rect x="773.5" y="437" width="1.3" height="15.0" fill="rgb(210,26,6)" rx="2" ry="2" />
+<text  x="776.45" y="447.5" ></text>
+</g>
+<g >
+<title>void fmt::v11::detail::parse_format_string&lt;char, fmt::v11::detail::format_handler&lt;char&gt; &gt; (30,303,030 samples, 0.33%)</title><rect x="622.3" y="341" width="4.0" height="15.0" fill="rgb(236,142,34)" rx="2" ry="2" />
+<text  x="625.34" y="351.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="653.9" y="245" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="656.88" y="255.5" ></text>
+</g>
+<g >
+<title>void std::_Mofunc_base::_S_manage&lt;sim::Link::transmit (30,303,030 samples, 0.33%)</title><rect x="1172.9" y="501" width="4.0" height="15.0" fill="rgb(225,92,22)" rx="2" ry="2" />
+<text  x="1175.92" y="511.5" ></text>
+</g>
+<g >
+<title>operator delete (10,101,010 samples, 0.11%)</title><rect x="456.8" y="453" width="1.3" height="15.0" fill="rgb(247,196,46)" rx="2" ry="2" />
+<text  x="459.77" y="463.5" ></text>
+</g>
+<g >
+<title>sim::LinkQueue::front (10,101,010 samples, 0.11%)</title><rect x="396.3" y="485" width="1.3" height="15.0" fill="rgb(206,6,1)" rx="2" ry="2" />
+<text  x="399.33" y="495.5" ></text>
+</g>
+<g >
+<title>malloc@plt (10,101,010 samples, 0.11%)</title><rect x="642.0" y="389" width="1.4" height="15.0" fill="rgb(246,192,46)" rx="2" ry="2" />
+<text  x="645.05" y="399.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (10,101,010 samples, 0.11%)</title><rect x="627.6" y="389" width="1.3" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="630.59" y="399.5" ></text>
+</g>
+<g >
+<title>malloc (40,404,040 samples, 0.45%)</title><rect x="1099.3" y="421" width="5.3" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="1102.33" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.22%)</title><rect x="864.1" y="197" width="2.6" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="867.12" y="207.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (30,303,030 samples, 0.33%)</title><rect x="536.9" y="389" width="4.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="539.93" y="399.5" ></text>
+</g>
+<g >
+<title>sim::LinkQueue::record_size (20,202,020 samples, 0.22%)</title><rect x="1141.4" y="389" width="2.6" height="15.0" fill="rgb(225,94,22)" rx="2" ry="2" />
+<text  x="1144.38" y="399.5" ></text>
+</g>
+<g >
+<title>sim::LinkQueue::push (20,202,020 samples, 0.22%)</title><rect x="1141.4" y="405" width="2.6" height="15.0" fill="rgb(234,136,32)" rx="2" ry="2" />
+<text  x="1144.38" y="415.5" ></text>
+</g>
+<g >
+<title>std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;::operator= (10,101,010 samples, 0.11%)</title><rect x="1115.1" y="437" width="1.3" height="15.0" fill="rgb(226,100,24)" rx="2" ry="2" />
+<text  x="1118.10" y="447.5" ></text>
+</g>
+<g >
+<title>_start (8,424,242,340 samples, 92.87%)</title><rect x="94.1" y="581" width="1095.9" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="97.10" y="591.5" >_start</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="133" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="143.5" ></text>
+</g>
+<g >
+<title>[libgomp.so.1.0.0] (40,404,040 samples, 0.45%)</title><rect x="120.4" y="437" width="5.2" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<text  x="123.38" y="447.5" ></text>
+</g>
+<g >
+<title>malloc (20,202,020 samples, 0.22%)</title><rect x="1124.3" y="373" width="2.6" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="1127.30" y="383.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (60,606,060 samples, 0.67%)</title><rect x="925.9" y="277" width="7.9" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="928.88" y="287.5" ></text>
+</g>
+<g >
+<title>sim::Link::get_from_egress_queue_size (10,101,010 samples, 0.11%)</title><rect x="1137.4" y="421" width="1.4" height="15.0" fill="rgb(229,112,26)" rx="2" ry="2" />
+<text  x="1140.44" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (30,303,030 samples, 0.33%)</title><rect x="372.7" y="197" width="3.9" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="375.67" y="207.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="563.2" y="341" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="566.21" y="351.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="104.6" y="229" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="107.61" y="239.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (10,101,010 samples, 0.11%)</title><rect x="621.0" y="341" width="1.3" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="624.02" y="351.5" ></text>
+</g>
+<g >
+<title>utils::Defer&lt;sim::Host::process (10,101,010 samples, 0.11%)</title><rect x="732.7" y="437" width="1.3" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
+<text  x="735.72" y="447.5" ></text>
+</g>
+<g >
+<title>cfree (20,202,020 samples, 0.22%)</title><rect x="447.6" y="421" width="2.6" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="450.57" y="431.5" ></text>
+</g>
+<g >
+<title>sim::MetricsStorage::add_record (30,303,030 samples, 0.33%)</title><rect x="536.9" y="405" width="4.0" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="539.93" y="415.5" ></text>
+</g>
+<g >
+<title>roundf32x (30,303,030 samples, 0.33%)</title><rect x="271.5" y="469" width="3.9" height="15.0" fill="rgb(211,28,6)" rx="2" ry="2" />
+<text  x="274.49" y="479.5" ></text>
+</g>
+<g >
+<title>sim::parse_all_to_all_network (20,202,020 samples, 0.22%)</title><rect x="1187.4" y="485" width="2.6" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="1190.37" y="495.5" ></text>
+</g>
+<g >
+<title>sim::parse_tcp_flow (20,202,020 samples, 0.22%)</title><rect x="1187.4" y="341" width="2.6" height="15.0" fill="rgb(224,91,21)" rx="2" ry="2" />
+<text  x="1190.37" y="351.5" ></text>
+</g>
+<g >
+<title>void std::_Hashtable&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::FlagInfo&gt;, std::allocator&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::FlagInfo&gt; &gt;, std::__detail::_Select1st, std::equal_to&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::hash&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits&lt;true, false, true&gt; &gt;::_M_assign_elements&lt;std::_Hashtable&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::FlagInfo&gt;, std::allocator&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::FlagInfo&gt; &gt;, std::__detail::_Select1st, std::equal_to&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::hash&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits&lt;true, false, true&gt; &gt; const&amp;&gt; (80,808,080 samples, 0.89%)</title><rect x="1116.4" y="437" width="10.5" height="15.0" fill="rgb(231,119,28)" rx="2" ry="2" />
+<text  x="1119.41" y="447.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="37" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="47.5" ></text>
+</g>
+<g >
+<title>sim::Link::~Link (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="437" width="2.7" height="15.0" fill="rgb(233,131,31)" rx="2" ry="2" />
+<text  x="1187.74" y="447.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (80,808,080 samples, 0.89%)</title><rect x="923.3" y="325" width="10.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="926.25" y="335.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="861.5" y="261" width="5.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="864.49" y="271.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="371.4" y="405" width="5.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="374.36" y="415.5" ></text>
+</g>
+<g >
+<title>std::_Function_handler&lt;void  (10,101,010 samples, 0.11%)</title><rect x="1165.0" y="469" width="1.3" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="1168.03" y="479.5" ></text>
+</g>
+<g >
+<title>operator new (60,606,060 samples, 0.67%)</title><rect x="1096.7" y="437" width="7.9" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="1099.70" y="447.5" ></text>
+</g>
+<g >
+<title>void std::_Hashtable&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::FlagInfo&gt;, std::allocator&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::FlagInfo&gt; &gt;, std::__detail::_Select1st, std::equal_to&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::hash&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits&lt;true, false, true&gt; &gt;::_M_assign&lt;std::_Hashtable&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::FlagInfo&gt;, std::allocator&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::FlagInfo&gt; &gt;, std::__detail::_Select1st, std::equal_to&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::hash&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt;, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits&lt;true, false, true&gt; &gt; const&amp;, std::__detail::_ReuseOrAllocNode&lt;std::allocator&lt;std::__detail::_Hash_node&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const, sim::FlagManager&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, unsigned long&gt;::FlagInfo&gt;, true&gt; &gt; &gt; &gt; (50,505,050 samples, 0.56%)</title><rect x="1120.4" y="421" width="6.5" height="15.0" fill="rgb(240,163,39)" rx="2" ry="2" />
+<text  x="1123.36" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (30,303,030 samples, 0.33%)</title><rect x="756.4" y="213" width="3.9" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="759.37" y="223.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="760.3" y="245" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="763.31" y="255.5" ></text>
+</g>
+<g >
+<title>sim::Connection::send_new_portion (252,525,250 samples, 2.78%)</title><rect x="593.4" y="357" width="32.9" height="15.0" fill="rgb(227,105,25)" rx="2" ry="2" />
+<text  x="596.43" y="367.5" >si..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="104.6" y="261" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="107.61" y="271.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (50,505,050 samples, 0.56%)</title><rect x="364.8" y="293" width="6.6" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="367.79" y="303.5" ></text>
+</g>
+<g >
+<title>sim::Host::enqueue_packet (10,101,010 samples, 0.11%)</title><rect x="546.1" y="405" width="1.3" height="15.0" fill="rgb(209,19,4)" rx="2" ry="2" />
+<text  x="549.12" y="415.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (20,202,020 samples, 0.22%)</title><rect x="730.1" y="437" width="2.6" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="733.09" y="447.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="702.5" y="341" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="705.49" y="351.5" ></text>
+</g>
+<g >
+<title>__munmap (40,404,040 samples, 0.45%)</title><rect x="371.4" y="437" width="5.2" height="15.0" fill="rgb(211,29,7)" rx="2" ry="2" />
+<text  x="374.36" y="447.5" ></text>
+</g>
+<g >
+<title>cfree (262,626,260 samples, 2.90%)</title><rect x="211.0" y="485" width="34.2" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="214.05" y="495.5" >cf..</text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (20,202,020 samples, 0.22%)</title><rect x="1167.7" y="501" width="2.6" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="1170.66" y="511.5" ></text>
+</g>
+<g >
+<title>sim::MetricsStorage::add_record (141,414,140 samples, 1.56%)</title><rect x="915.4" y="405" width="18.4" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="918.37" y="415.5" ></text>
+</g>
+<g >
+<title>sim::RoutingModule::get_link_to_destination (60,606,060 samples, 0.67%)</title><rect x="1146.6" y="421" width="7.9" height="15.0" fill="rgb(253,221,53)" rx="2" ry="2" />
+<text  x="1149.64" y="431.5" ></text>
+</g>
+<g >
+<title>std::_Function_handler&lt;void  (424,242,420 samples, 4.68%)</title><rect x="572.4" y="389" width="55.2" height="15.0" fill="rgb(245,187,44)" rx="2" ry="2" />
+<text  x="575.41" y="399.5" >std::..</text>
+</g>
+<g >
+<title>sim::Scheduler::tick (7,979,797,900 samples, 87.97%)</title><rect x="128.3" y="501" width="1038.0" height="15.0" fill="rgb(242,174,41)" rx="2" ry="2" />
+<text  x="131.26" y="511.5" >sim::Scheduler::tick</text>
+</g>
+<g >
+<title>sim::EventsStorage&lt;2000ul&gt;::add (10,101,010 samples, 0.11%)</title><rect x="605.3" y="325" width="1.3" height="15.0" fill="rgb(229,112,26)" rx="2" ry="2" />
+<text  x="608.26" y="335.5" ></text>
+</g>
+<g >
+<title>void std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;::_M_construct&lt;char*&gt; (50,505,050 samples, 0.56%)</title><rect x="703.8" y="389" width="6.6" height="15.0" fill="rgb(220,70,16)" rx="2" ry="2" />
+<text  x="706.81" y="399.5" ></text>
+</g>
+<g >
+<title>std::_Rb_tree_increment (20,202,020 samples, 0.22%)</title><rect x="716.9" y="421" width="2.7" height="15.0" fill="rgb(247,196,46)" rx="2" ry="2" />
+<text  x="719.95" y="431.5" ></text>
+</g>
+<g >
+<title>cfree (20,202,020 samples, 0.22%)</title><rect x="439.7" y="453" width="2.6" height="15.0" fill="rgb(223,86,20)" rx="2" ry="2" />
+<text  x="442.69" y="463.5" ></text>
+</g>
+<g >
+<title>sim::Data::Data (10,101,010 samples, 0.11%)</title><rect x="597.4" y="341" width="1.3" height="15.0" fill="rgb(205,4,0)" rx="2" ry="2" />
+<text  x="600.37" y="351.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="229" width="2.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1187.74" y="239.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="293" width="2.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="1187.74" y="303.5" ></text>
+</g>
+<g >
+<title>__munmap (10,101,010 samples, 0.11%)</title><rect x="866.7" y="357" width="1.4" height="15.0" fill="rgb(211,29,7)" rx="2" ry="2" />
+<text  x="869.75" y="367.5" ></text>
+</g>
+<g >
+<title>operator new (10,101,010 samples, 0.11%)</title><rect x="1126.9" y="421" width="1.3" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="1129.93" y="431.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (30,303,030 samples, 0.33%)</title><rect x="476.5" y="421" width="3.9" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="479.48" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="866.7" y="165" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="869.75" y="175.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="760.3" y="325" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="763.31" y="335.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (20,202,020 samples, 0.22%)</title><rect x="1184.7" y="421" width="2.7" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="1187.74" y="431.5" ></text>
+</g>
+<g >
+<title>sim::MetricsStorage::add_record (10,101,010 samples, 0.11%)</title><rect x="761.6" y="437" width="1.3" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="764.63" y="447.5" ></text>
+</g>
+<g >
+<title>operator new (10,101,010 samples, 0.11%)</title><rect x="325.4" y="437" width="1.3" height="15.0" fill="rgb(216,51,12)" rx="2" ry="2" />
+<text  x="328.37" y="447.5" ></text>
+</g>
+<g >
+<title>sim::MetricsStorage::add_record (131,313,130 samples, 1.45%)</title><rect x="851.0" y="373" width="17.1" height="15.0" fill="rgb(249,205,49)" rx="2" ry="2" />
+<text  x="853.98" y="383.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="92.8" y="485" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="95.78" y="495.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (30,303,030 samples, 0.33%)</title><rect x="929.8" y="213" width="4.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="932.82" y="223.5" ></text>
+</g>
+<g >
+<title>sim::FlowsSummary::write_to_csv (10,101,010 samples, 0.11%)</title><rect x="104.6" y="453" width="1.3" height="15.0" fill="rgb(242,172,41)" rx="2" ry="2" />
+<text  x="107.61" y="463.5" ></text>
+</g>
+<g >
+<title>malloc (10,101,010 samples, 0.11%)</title><rect x="870.7" y="341" width="1.3" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="873.69" y="351.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (40,404,040 samples, 0.45%)</title><rect x="266.2" y="437" width="5.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="269.24" y="447.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="1119.0" y="389" width="1.4" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="1122.04" y="399.5" ></text>
+</g>
+<g >
+<title>sim::EventsStorage&lt;2000ul&gt;::add (80,808,080 samples, 0.89%)</title><rect x="885.1" y="405" width="10.6" height="15.0" fill="rgb(229,112,26)" rx="2" ry="2" />
+<text  x="888.14" y="415.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="653.9" y="149" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="656.88" y="159.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (50,505,050 samples, 0.56%)</title><rect x="753.7" y="261" width="6.6" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="756.74" y="271.5" ></text>
+</g>
+<g >
+<title>malloc (30,303,030 samples, 0.33%)</title><rect x="678.8" y="357" width="4.0" height="15.0" fill="rgb(230,119,28)" rx="2" ry="2" />
+<text  x="681.84" y="367.5" ></text>
+</g>
+<g >
+<title>[libc.so.6] (10,101,010 samples, 0.11%)</title><rect x="533.0" y="421" width="1.3" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
+<text  x="535.98" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="563.2" y="229" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="566.21" y="239.5" ></text>
+</g>
+<g >
+<title>[libgomp.so.1.0.0] (111,111,110 samples, 1.22%)</title><rect x="105.9" y="421" width="14.5" height="15.0" fill="rgb(220,71,17)" rx="2" ry="2" />
+<text  x="108.92" y="431.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="760.3" y="341" width="1.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="763.31" y="351.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (40,404,040 samples, 0.45%)</title><rect x="366.1" y="261" width="5.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="369.10" y="271.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (50,505,050 samples, 0.56%)</title><rect x="860.2" y="293" width="6.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="863.18" y="303.5" ></text>
+</g>
+<g >
+<title>std::_Sp_counted_base&lt; (90,909,090 samples, 1.00%)</title><rect x="383.2" y="469" width="11.8" height="15.0" fill="rgb(211,31,7)" rx="2" ry="2" />
+<text  x="386.18" y="479.5" ></text>
+</g>
+<g >
+<title>void std::_Mofunc_base::_S_manage&lt;sim::TcpFlow::send_data_packet (212,121,210 samples, 2.34%)</title><rect x="452.8" y="485" width="27.6" height="15.0" fill="rgb(241,170,40)" rx="2" ry="2" />
+<text  x="455.83" y="495.5" >v..</text>
+</g>
+<g >
+<title>sim::parse_scenario (20,202,020 samples, 0.22%)</title><rect x="1187.4" y="517" width="2.6" height="15.0" fill="rgb(239,158,37)" rx="2" ry="2" />
+<text  x="1190.37" y="527.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (80,808,080 samples, 0.89%)</title><rect x="856.2" y="357" width="10.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="859.24" y="367.5" ></text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (10,101,010 samples, 0.11%)</title><rect x="669.6" y="181" width="1.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="672.64" y="191.5" ></text>
+</g>
+</g>
+</svg>
